@@ -58,6 +58,68 @@ STRATEGIC = [
     ("Olo Inc", "olo.com"), ("Duolingo", "duolingo.com"),
 ]
 
+#: THE 50-COMPANY QUALIFICATION COHORT, frozen before any of it was run.
+#:
+#: PREREGISTERED so the result cannot be improved after the fact by dropping
+#: whichever companies did badly. The rule this enforces is simple and it is
+#: the whole reason the list is in source control: a cohort chosen after
+#: seeing results measures the chooser, not the product.
+#:
+#: SELECTED AGAINST THE ENGINE, NOT FOR IT. TIER1 and STRATEGIC above are
+#: companies this codebase has already been developed against, so 40 of the
+#: 50 below are new to it. Sector spread is deliberate: the engine reads
+#: filings, and a bank, a miner and a software vendor do not write the same
+#: filing. Coverage spread is deliberate too -- a few of these are thinly
+#: covered on purpose, because a product that only works on mega-caps has not
+#: generalised, it has memorised.
+#:
+#: Domains are the registrant's own primary site. Where a holding company
+#: files under a different name than its consumer brand, the FILER is used,
+#: because that is who the evidence is about.
+QUALIFY_50 = [
+    # --- semiconductors / hardware -------------------------------------
+    ("NVIDIA", "nvidia.com"), ("Advanced Micro Devices", "amd.com"),
+    ("Intel", "intel.com"), ("Texas Instruments", "ti.com"),
+    ("Applied Materials", "appliedmaterials.com"),
+    # --- software / cloud ----------------------------------------------
+    ("Microsoft", "microsoft.com"), ("Oracle", "oracle.com"),
+    ("Salesforce", "salesforce.com"), ("Adobe", "adobe.com"),
+    ("ServiceNow", "servicenow.com"), ("Workday", "workday.com"),
+    ("Datadog", "datadoghq.com"), ("Snowflake", "snowflake.com"),
+    # --- platforms / consumer internet ---------------------------------
+    ("Apple Inc.", "apple.com"), ("Alphabet", "abc.xyz"),
+    ("Meta Platforms", "meta.com"), ("Amazon", "amazon.com"),
+    ("Netflix", "netflix.com"), ("Uber Technologies", "uber.com"),
+    ("Airbnb", "airbnb.com"),
+    # --- payments / financials -----------------------------------------
+    ("Visa", "visa.com"), ("Mastercard", "mastercard.com"),
+    ("JPMorgan Chase", "jpmorganchase.com"),
+    ("Bank of America", "bankofamerica.com"),
+    ("Goldman Sachs", "goldmansachs.com"),
+    ("American Express", "americanexpress.com"),
+    ("Charles Schwab", "schwab.com"),
+    # --- industrials / machinery / transport ----------------------------
+    ("Caterpillar", "caterpillar.com"), ("Deere & Company", "deere.com"),
+    ("Honeywell", "honeywell.com"), ("General Electric", "ge.com"),
+    ("Union Pacific", "up.com"), ("FedEx", "fedex.com"),
+    ("Boeing", "boeing.com"),
+    # --- automotive -----------------------------------------------------
+    ("Ford Motor", "ford.com"), ("General Motors", "gm.com"),
+    # --- healthcare / pharma --------------------------------------------
+    ("Johnson & Johnson", "jnj.com"), ("Pfizer", "pfizer.com"),
+    ("UnitedHealth Group", "unitedhealthgroup.com"),
+    ("Eli Lilly", "lilly.com"), ("Medtronic", "medtronic.com"),
+    # --- consumer / retail ----------------------------------------------
+    ("Walmart", "walmart.com"), ("Costco Wholesale", "costco.com"),
+    ("Procter & Gamble", "pg.com"), ("Nike", "nike.com"),
+    ("Starbucks", "starbucks.com"),
+    # --- energy / materials ---------------------------------------------
+    ("Exxon Mobil", "corporate.exxonmobil.com"),
+    ("Chevron", "chevron.com"), ("Newmont", "newmont.com"),
+    # --- thinner coverage, on purpose -----------------------------------
+    ("Olo Inc", "olo.com"),
+]
+
 
 def _opener():
     jar = http.cookiejar.CookieJar()
@@ -287,7 +349,7 @@ def summarise(rows) -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--cohort", choices=("tier1", "strategic"),
+    ap.add_argument("--cohort", choices=("tier1", "strategic", "qualify50"),
                     default="tier1")
     ap.add_argument("--only", default="")
     ap.add_argument("--slice", default="")
@@ -295,7 +357,8 @@ def main() -> int:
     ap.add_argument("--out", default="reports/perf/progressive_matrix.json")
     a = ap.parse_args()
 
-    cohort = TIER1 if a.cohort == "tier1" else STRATEGIC
+    cohort = {"tier1": TIER1, "strategic": STRATEGIC,
+              "qualify50": QUALIFY_50}[a.cohort]
     if a.only:
         cohort = [c for c in cohort if a.only.lower() in c[0].lower()]
     if a.slice:

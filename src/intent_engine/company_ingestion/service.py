@@ -721,6 +721,22 @@ class CompanyIngestionService:
             if snap is not None:
                 snap_plan = plan_refresh(snap)
             if snap_plan["mode"] == "WARM":
+                # IDENTITY IS A PRECONDITION, NOT DISCOVERY, and skipping it
+                # is what made the first warm run fast by losing the analysis.
+                #
+                # `readiness.may_synthesize` is `identity_ok and material in
+                # (...)`, and `_identity_for` runs near the END of the cold
+                # path -- so returning early skipped it, `identity_ok` was
+                # false, synthesis was refused, and the run produced no
+                # strategic report at all. Measured: Microsoft warm came back
+                # in 34.4s against 66.1s with `result_state: None` and no
+                # observations. A latency win that deletes the product.
+                #
+                # What this stage is allowed to skip is finding out WHERE the
+                # sources are. Establishing WHO the company is is a different
+                # question, it is cheap, and a report about nobody in
+                # particular has nothing to be right or wrong about.
+                self._identity_for(run_id, meta)
                 reused = self._candidates_from_snapshot(run_id, snap, domain)
                 if reused:
                     self._append(

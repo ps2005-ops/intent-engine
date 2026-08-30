@@ -193,3 +193,34 @@ def test_the_planner_is_actually_consumed_by_discover():
     assert "plan_refresh(" in code, (
         "discover() does not consult the refresh planner")
     assert "_candidates_from_snapshot(" in code
+
+
+def test_a_warm_run_still_establishes_who_the_company_is(svc, monkeypatch):
+    """The failure the first warm measurement actually produced.
+
+    MEASURED on 91e68bb6: Microsoft warm returned in 34.4s against 66.1s cold
+    -- and with `result_state: None`, no observations and no strategic report.
+    `readiness.may_synthesize` is `identity_ok and material in (...)`, and
+    `_identity_for` runs near the END of the cold discovery path, so returning
+    early skipped it. The run was fast because it had stopped producing the
+    product.
+
+    Every other test in this file passed. They assert that LESS WORK happens;
+    none of them asserted that the run still does its job, which is exactly
+    how a latency win deletes a feature.
+    """
+    _seed_snapshot(svc)
+    resolved = []
+    monkeypatch.setattr(SVC.CompanyIngestionService, "_identity_for",
+                        lambda self, r, m: resolved.append(r) or {})
+    meta = {"company_name": "Microsoft Corporation", "cik": "0000789019",
+            "domain": "microsoft.com", "website": "https://microsoft.com"}
+    monkeypatch.setattr(SVC.CompanyIngestionService, "run_meta",
+                        lambda self, r: dict(meta))
+    monkeypatch.setattr(SVC.CompanyIngestionService, "_transition",
+                        lambda self, *a, **k: None)
+    out = svc.discover("run-warm-identity")
+    assert out, "warm run produced no candidates"
+    assert resolved == ["run-warm-identity"], (
+        "the warm path never resolved the company's identity, so "
+        "`may_synthesize` is false and the run composes no report")
