@@ -5,6 +5,8 @@ restart-safe. No source is fetched before its explicit approval.
 from __future__ import annotations
 
 import hashlib
+import logging
+import pathlib
 import json
 import time
 from urllib.parse import urlparse
@@ -37,6 +39,9 @@ from intent_engine.company_ingestion.external_discovery import (
 )
 from intent_engine.company_ingestion.fetch import FetchResult, safe_fetch
 from intent_engine.company_ingestion.filing_cache import FilingCache
+from intent_engine.company_ingestion.snapshot import (
+    PublicCompanySnapshot, SnapshotStore, SourceRecord,
+    company_key as _company_key, plan_refresh)
 from intent_engine.company_ingestion.transient import RetryLedger
 from intent_engine.company_ingestion.filing_text import (
     is_filing_document, parse_filing_html,
@@ -64,6 +69,8 @@ CONSENT_VERSION = "v1.1-source-approval"
 
 
 from concurrent.futures import TimeoutError as FuturesTimeout
+
+_LOG = logging.getLogger(__name__)
 
 
 def _bounded_result(future, deadline, stage: str, detail: str = ""):
@@ -210,6 +217,18 @@ class CompanyIngestionService:
         # that content is recomputed per focal company. See filing_cache.
         self.filing_cache = (filing_cache if filing_cache is not None
                              else FilingCache())
+        # WHERE A COMPANY'S PUBLIC STATE IS REMEMBERED BETWEEN RUNS.
+        #
+        # `FilingCache` already reuses IMMUTABLE documents -- an accessioned
+        # 10-K cannot change, so re-requesting it is pure cost. What was
+        # re-derived on every run is everything ELSE: which sources exist at
+        # all. Measured on the preview, Microsoft spent 27.7s in discovery
+        # re-proposing a source list it had already built, before a single
+        # byte of evidence was fetched.
+        #
+        # Sibling of the store rather than inside it, so a snapshot that
+        # cannot be read costs a run its head start and never its evidence.
+        self.snapshots = SnapshotStore(pathlib.Path(path).parent)
         # RETRY ACCOUNTING IS PER RUN, AND THE DISTINCTION IS LOAD-BEARING.
         # The webapp builds exactly ONE of these services for the whole
         # process, so a ledger held on the service is shared by every
@@ -560,6 +579,94 @@ class CompanyIngestionService:
         return out
 
     # --- discovery ---------------------------------------------------------------
+    @staticmethod
+    def _snapshot_is_for(snap, meta) -> bool:
+        """Is this snapshot about the company this run is about?
+
+        CHECKED POSITIVELY, not assumed from the key. A key collision or a
+        reused domain would otherwise put one company's source list under
+        another's evidence -- the failure mode that makes a cache worse than
+        no cache. CIK decides when both sides have one; otherwise the domain
+        must match, and a snapshot with neither is refused.
+        """
+        cik = str(meta.get("cik") or "").lstrip("0")
+        if cik and str(snap.cik or "").lstrip("0"):
+            return cik == str(snap.cik).lstrip("0")
+        dom = str(meta.get("domain") or "").lower()
+        return bool(dom) and dom in {str(d).lower() for d in snap.domains}
+
+    def _candidates_from_snapshot(self, run_id, snap, domain) -> list:
+        """Re-propose the sources this company is already known to publish.
+
+        The candidates are written through the SAME append-only path a cold
+        discovery uses, so everything downstream -- selection, approval,
+        retrieval, provenance -- cannot tell the difference and does not need
+        to. What changes is only that nothing was searched for.
+        """
+        candidates = []
+        for rank, src in enumerate(snap.sources):
+            if not src.url:
+                continue
+            candidates.append({
+                "url": src.url,
+                "title": "",
+                "why_relevant": "known source for this company (snapshot)",
+                "discovery_method": "snapshot_reuse",
+                "source_type": src.source_class or "company_owned",
+                "source_class": src.source_class or "",
+                "availability": "PROPOSED",
+            })
+        if not candidates:
+            return []
+        for i, candidate in enumerate(candidates):
+            candidate_id = ("cand-" + hashlib.sha256(
+                candidate["url"].encode()).hexdigest()[:12])
+            payload = dict(candidate, candidate_id=candidate_id,
+                           company_id=domain, rank=i)
+            self._append("ci.candidate_discovered", run_id=run_id,
+                         domain=domain, payload=payload,
+                         idempotency_key=f"ci-cand:{run_id}:{candidate_id}")
+        return self.store.candidates(run_id)
+
+    def _write_snapshot(self, run_id, meta, candidates) -> bool:
+        """Record what this cold run learned about where the sources are.
+
+        STORES THE INDEX, NOT THE EVIDENCE. What goes in is the URL, its class
+        and -- where the run established one -- its filing identity. What the
+        document MEANT is recomputed every run from current evidence and the
+        current economic state, which is why nothing here is a conclusion.
+        """
+        try:
+            key = _company_key(meta.get("company_name", ""),
+                               cik=str(meta.get("cik") or ""),
+                               domain=meta.get("domain", ""))
+            now = time.time()
+            sources = tuple(
+                SourceRecord(
+                    url=c.get("url", ""),
+                    source_class=str(c.get("source_class")
+                                     or c.get("source_type") or ""),
+                    accession=str((c.get("filing") or {}).get("accession")
+                                  if isinstance(c.get("filing"), dict) else ""),
+                    form=str((c.get("filing") or {}).get("form")
+                             if isinstance(c.get("filing"), dict) else ""),
+                    fetched_at=now)
+                for c in candidates if c.get("url"))
+            existing = self.snapshots.get(key)
+            snap = PublicCompanySnapshot(
+                company_key=key,
+                canonical_name=str(meta.get("company_name") or ""),
+                ticker=str(meta.get("ticker") or ""),
+                cik=str(meta.get("cik") or ""),
+                domains=tuple(d for d in [str(meta.get("domain") or "")] if d),
+                sources=sources,
+                provenance={"run_id": run_id, "discovery": "cold"},
+                created_at=(existing.created_at if existing else now),
+                refreshed_at=now)
+            return self.snapshots.put(snap)
+        except Exception:                                 # noqa: BLE001
+            return False
+
     def discover(self, run_id: str, *, deadline=None) -> list:
         """One bounded homepage fetch → candidate list. Idempotent: stored
         candidates are returned on rerun without refetching.
@@ -580,6 +687,73 @@ class CompanyIngestionService:
             raise IngestionError(f"no such run {run_id!r}")
         domain = meta["domain"]
         self._transition(run_id, domain, "DISCOVERING_SOURCES")
+
+        # WHAT CHANGED, RATHER THAN WHAT IS TRUE.
+        #
+        # Everything below re-derives a company's source list from nothing:
+        # fetch the homepage, walk the sitemap, search EDGAR full text, search
+        # for third-party filings, apply the curated fallback. Measured on the
+        # preview, that is 27.7s for Microsoft and 25-32s for Apple, spent
+        # before one byte of evidence is retrieved -- and on a company already
+        # read, none of it is new information.
+        #
+        # A fresh snapshot answers the question this stage exists to ask, so
+        # the stage is skipped. It is skipped ENTIRELY or not at all: a
+        # half-warm discovery that still fetched the homepage "to be safe"
+        # would keep the cost and lose the clarity about what was reused.
+        #
+        # `plan_refresh` decides; this only carries the decision out. COLD and
+        # STALE both fall through to the full path below -- STALE has a source
+        # list but it is old enough that the LIST itself may be wrong, and a
+        # stale list cannot be repaired by revalidating the entries on it.
+        snap_plan = {"mode": "COLD", "reason": "snapshots not consulted"}
+        try:
+            key = _company_key(meta.get("company_name", ""),
+                               cik=str(meta.get("cik") or ""), domain=domain)
+            snap = self.snapshots.get(key)
+            if snap is not None and not self._snapshot_is_for(snap, meta):
+                # A snapshot for a DIFFERENT company is not a stale snapshot,
+                # it is a wrong one, and consuming it would put another
+                # company's sources under this run's evidence.
+                snap = None
+                snap_plan = {"mode": "INVALID",
+                             "reason": "snapshot identity does not match"}
+            if snap is not None:
+                snap_plan = plan_refresh(snap)
+            if snap_plan["mode"] == "WARM":
+                reused = self._candidates_from_snapshot(run_id, snap, domain)
+                if reused:
+                    self._append(
+                        "ci.snapshot_reused", run_id=run_id, domain=domain,
+                        payload={"mode": "WARM",
+                                 "snapshot_age_s": round(snap.age_s(), 1),
+                                 "sources_reused": len(reused),
+                                 "immutable": len(snap_plan.get("immutable")
+                                                  or ()),
+                                 "revalidate": len(snap_plan.get("revalidate")
+                                                   or ()),
+                                 "durability": snap.durability},
+                        idempotency_key=f"ci-snapreuse:{run_id}")
+                    return reused
+                snap_plan = {"mode": "COLD",
+                             "reason": "snapshot held no usable source"}
+        except Exception as exc:                          # noqa: BLE001
+            # A snapshot that cannot be read costs the head start, never the
+            # run. Falling through here is a full cold discovery, which is
+            # exactly today's behaviour.
+            #
+            # LOGGED, BECAUSE A SILENT FALLBACK LOOKS LIKE SUCCESS. This
+            # branch already swallowed a real coding defect once: the new
+            # event type was not in `INGESTION_EVENTS`, `_append` raised, and
+            # every "warm" run quietly performed a full cold discovery while
+            # reporting nothing wrong. A test that asserted the MODE would
+            # have passed; what caught it was asserting that the expensive
+            # calls did not happen.
+            _LOG.warning("snapshot reuse failed for %s, falling back to cold "
+                         "discovery: %s: %s", run_id, type(exc).__name__,
+                         str(exc)[:200])
+            snap_plan = {"mode": "COLD", "reason": f"{type(exc).__name__}"}
+
         candidates = []
         # A run with no website made no homepage request, so there is no
         # homepage outcome. `ok` rather than a failure: recording a homepage
@@ -785,7 +959,14 @@ class CompanyIngestionService:
                 for c in candidates) else INDEPENDENT_NONE),
         }
         self._transition(run_id, domain, "AWAITING_SOURCE_APPROVAL")
-        return self.store.candidates(run_id)
+        # REMEMBER WHERE THE SOURCES WERE, so the next run does not search for
+        # them again. Written after the full path has run, from the candidates
+        # it actually produced -- a snapshot built from an aborted or empty
+        # discovery would teach the next run that this company has no sources.
+        stored_candidates = self.store.candidates(run_id)
+        if stored_candidates:
+            self._write_snapshot(run_id, meta, stored_candidates)
+        return stored_candidates
 
     def retrieval_plan(self, run_id: str) -> dict:
         """What each retrieval avenue yielded for this run.

@@ -114,6 +114,13 @@ INGESTION_EVENTS = frozenset({
     "ci.candidate_discovered", "ci.approval_recorded",
     "ci.source_retrieved", "ci.retrieval_failed",
     "ci.pasted_evidence_added", "ci.claims_built",
+    # WHAT THE RUN DID NOT HAVE TO DO. A warm run skips discovery entirely,
+    # which is invisible in every other event: the candidates it stores look
+    # exactly like a cold run's, because they are written through the same
+    # path on purpose. Without this row a reader cannot tell a reused source
+    # list from a rediscovered one, and the whole point of the snapshot is
+    # the difference between them.
+    "ci.snapshot_reused",
     # report-quality diagnostics (operator observability)
     "ci.quality_assessed",
     # Operator-only: did the RICH path actually land? "The reasoning backend
