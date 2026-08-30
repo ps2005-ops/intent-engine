@@ -9286,7 +9286,7 @@ class WebApp:
             # retrieval are the two halves of the same wait; budgeting only
             # the second one leaves the customer exposed to the first.
             with trace.span("discovery", deadline=deadline) as sp:
-                self.ci.discover(run_id, deadline=(
+                self.ci.discover(run_id, trace=trace, deadline=(
                     deadline.reserving(self.COMPOSE_RESERVE_S)
                     if deadline is not None else None))
                 sp["item_count"] = len(self.ci.store.candidates(run_id))

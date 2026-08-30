@@ -667,7 +667,7 @@ class CompanyIngestionService:
         except Exception:                                 # noqa: BLE001
             return False
 
-    def discover(self, run_id: str, *, deadline=None) -> list:
+    def discover(self, run_id: str, *, deadline=None, trace=None) -> list:
         """One bounded homepage fetch → candidate list. Idempotent: stored
         candidates are returned on rerun without refetching.
 
@@ -863,6 +863,11 @@ class CompanyIngestionService:
             # THE BUDGET MOVES TO WHERE IT IS SERVED. A run whose own site gave us
             # nothing does not make more requests overall — it makes them at
             # EDGAR, which answers, instead of at a host that does not.
+            # TIMED SEPARATELY. Discovery is 23.2s of a 107s cohort median
+            # and is reported as one number, so which of its five stages costs
+            # what is currently unknown -- and the largest is the one to
+            # repair. This call reaches SEC.
+            _edg_w, _edg_c = time.monotonic(), time.thread_time()
             candidates = candidates + propose_edgar_candidates(
                 company_name=meta.get("company_name", ""),
                 cik=str(meta.get("cik") or ""),
@@ -870,6 +875,8 @@ class CompanyIngestionService:
                        if web_plan in (OFFICIAL_WEB_ABSENT, OFFICIAL_WEB_BLOCKED)
                        else MAX_EDGAR_CANDIDATES),
                 transport=self.transport, resolver=self.resolver)
+            if trace is not None:
+                trace.mark("edgar_propose", _edg_w, _edg_c)
             # THE ONLY INDEPENDENT VANTAGE POINT WE CAN ACTUALLY REACH.
             #
             # Ten companies produced ZERO independent sources: every one was the
@@ -902,11 +909,17 @@ class CompanyIngestionService:
         # homepage we could not read. Bounded, approval-gated, and classified by
         # authority + entity relationship, so a subsidiary page can never be
         # read as the parent speaking.
+        _idw, _idc = time.monotonic(), time.thread_time()
         identity = self._identity_for(run_id, meta)
+        if trace is not None:
+            trace.mark("identity_resolve", _idw, _idc)
+        _offw, _offc = time.monotonic(), time.thread_time()
         if identity.get("entity_resolved"):
             candidates = candidates + official_fallback_candidates(
                 identity["_profile"], exclude_urls=[c["url"]
                                                     for c in candidates])
+        if trace is not None:
+            trace.mark("official_fallback", _offw, _offc)
         # Deduplicate by URL. The same page is legitimately found by more than
         # one discovery path (a guessed known path AND the sitemap), and each
         # produces a different payload for the same candidate_id — which would

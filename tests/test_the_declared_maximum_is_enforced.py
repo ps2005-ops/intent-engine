@@ -111,3 +111,41 @@ def test_the_stage_stops_between_documents_not_inside_one():
     assert stop < first_read, (
         "the deadline is checked after the document has been read, so the "
         "loop can stop having half-processed one")
+
+
+def test_discovery_reports_which_of_its_stages_cost_what():
+    """23.2s reported as one number cannot be repaired.
+
+    Discovery is the second largest bucket in the cohort and it is five
+    stages: a homepage fetch, a sitemap walk, an EDGAR proposal, an identity
+    resolution and a curated fallback. Ranking them needs them named -- the
+    same reason `core_composition` had to be subdivided before the 18s of
+    discarded work inside it could be found.
+    """
+    import inspect
+
+    from intent_engine.company_ingestion import service as SVC
+    code = "\n".join(
+        l for l in inspect.getsource(SVC.CompanyIngestionService.discover
+                                     ).splitlines()
+        if not l.lstrip().startswith("#"))
+    for stage in ("edgar_propose", "identity_resolve", "official_fallback"):
+        assert f'trace.mark("{stage}"' in code, f"{stage} is not timed"
+
+
+def test_the_worker_passes_its_trace_into_discovery():
+    """A span the production path never reaches records nothing."""
+    import inspect
+
+    from intent_engine.webapp.app import WebApp
+    for name in dir(WebApp):
+        fn = getattr(WebApp, name, None)
+        try:
+            src = inspect.getsource(fn)
+        except (OSError, TypeError):
+            continue
+        if 'trace.span("discovery"' in src:
+            assert "self.ci.discover(run_id, trace=trace" in src, (
+                "discovery is timed but the worker does not hand it the trace")
+            return
+    raise AssertionError("no worker opens a discovery span")
