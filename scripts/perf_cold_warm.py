@@ -55,6 +55,24 @@ def summarise(label, row) -> dict:
         "documents": (sp.get("derive_observations") or {}).get("documents"),
         "text_chars": (sp.get("derive_observations") or {}).get("text_chars"),
         "observations": (sp.get("derive_observations") or {}).get("item_count"),
+        # THE QUESTION THE FIRST WARM RUN ANSWERED WRONGLY. `result_state` is
+        # set on every composed CORE payload, so its absence means no
+        # strategic report was composed at all -- which is what "fast" looked
+        # like when the warm path had skipped identity resolution. Named
+        # explicitly rather than left to be inferred from a column of Nones.
+        "has_report": t.get("result_state") is not None,
+        # EVERY SPAN, NOT THREE. Apple's warm run reported discovery 0.2s,
+        # retrieval 14.3s and composition 31.5s against an 80.2s CORE -- 34s
+        # in no column at all. A summary that keeps only the stages I expected
+        # to matter cannot show me the one that did, and re-running to find
+        # out costs a quota slot the raw trace would have saved.
+        "spans": {n: {"wall_ms": v.get("wall_ms"), "cpu_ms": v.get("cpu_ms"),
+                      "offset_s": v.get("offset_s"), "depth": v.get("depth")}
+                  for n, v in sp.items()},
+        "unaccounted_ms": round(
+            (t.get("core_latency_s") or 0) * 1000
+            - sum(v.get("wall_ms", 0.0) for v in sp.values()
+                  if v.get("depth") == 0 and not v.get("calibration")), 1),
     }
 
 
@@ -79,11 +97,37 @@ def table(cold, warm) -> bool:
         print(f"{name:<20}{str(cold.get(key)):>14}{str(warm.get(key)):>14}"
               f"{'SAME' if cold.get(key) == warm.get(key) else 'DIFFERENT':>14}")
 
+    print(f"{'unaccounted ms':<20}{cold.get('unaccounted_ms', 0):>14.0f}"
+          f"{warm.get('unaccounted_ms', 0):>14.0f}"
+          f"{'<<< LOOK HERE' if (warm.get('unaccounted_ms') or 0) > 5000 else '':>14}")
+    print(f"{'strategic report':<20}{str(cold.get('has_report')):>14}"
+          f"{str(warm.get('has_report')):>14}"
+          f"{'OK' if warm.get('has_report') else 'MISSING':>14}")
+
     # --- the verdict, stated as a rule rather than an impression ------------
     c_disc, w_disc = cold["discovery_ms"] or 0, warm["discovery_ms"] or 0
     real = c_disc > 0 and w_disc < c_disc * 0.5
-    parity = (cold.get("evidence_count") == warm.get("evidence_count")
-              and cold.get("observations") == warm.get("observations"))
+    # A run with no report is not a quality difference, it is a missing
+    # product, so it is checked first and separately.
+    produced = bool(warm.get("has_report")) and bool(cold.get("has_report"))
+
+    # DIRECTIONAL, NOT EXACT. The first version failed on ANY difference,
+    # which meant it failed when the warm run found MORE evidence -- and a
+    # gate that reports a regression when the product improves is not a
+    # quality gate, it is noise that will be ignored and then removed.
+    #
+    # These are live runs against real websites: a page that 200s on one run
+    # and times out on the next changes the document set without anything in
+    # this codebase changing. So the bar is DEGRADATION, with a tolerance of
+    # one document, and the numbers are printed either way so a reader can
+    # see drift the rule does not fail on.
+    def _worse(key, tol=1):
+        c, w = cold.get(key), warm.get(key)
+        return (c is not None and w is not None) and w < c - tol
+
+    degraded = [k for k in ("evidence_count", "documents", "observations")
+                if _worse(k)]
+    parity = produced and not degraded
     print(f"\n  WARM DID LESS WORK   {'YES' if real else 'NO'}"
           f"   (discovery {w_disc:.0f}ms vs {c_disc:.0f}ms)")
     print(f"  QUALITY PARITY       {'YES' if parity else 'NO'}"
@@ -93,9 +137,13 @@ def table(cold, warm) -> bool:
     if not real:
         print("  >>> SNAPSHOT INTEGRATION DID NOT REDUCE WORK. A status that "
               "says WARM while discovery costs the same is theatre.")
-    if not parity:
-        print("  >>> QUALITY CHANGED. Faster only counts if the truth "
-              "survives; investigate before accepting the latency.")
+    if not produced:
+        print("  >>> A RUN COMPOSED NO STRATEGIC REPORT. This is not a faster "
+              "analysis, it is a missing one -- the failure mode where a "
+              "latency win deletes the product.")
+    elif degraded:
+        print(f"  >>> QUALITY DEGRADED in {degraded}. Faster only counts if "
+              f"the truth survives; investigate before accepting the latency.")
     print("\n  durability: EPHEMERAL -- one deployment lifetime. This says "
           "nothing about restart survival.")
     return real and parity

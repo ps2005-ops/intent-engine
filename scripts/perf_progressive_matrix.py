@@ -271,6 +271,31 @@ def analyse(name, domain, *, budget_s, verbose=True) -> dict:
         row["deep_ready_seconds"] = canonical["deep_latency_s"]
     row["canonical_evidence_count"] = canonical.get("evidence_count")
     row["canonical_result_state"] = canonical.get("result_state")
+    # A REPORT, OR NOT. `result_state` is set on every composed CORE payload,
+    # so its absence means nothing was composed -- which is what a warm run
+    # looked like when it skipped identity resolution and came back 48%
+    # faster having produced no analysis at all. A cohort that reports only
+    # latency cannot see that; this column is why it now can.
+    row["has_report"] = canonical.get("result_state") is not None
+    # WHERE THE ACQUISITION TIME WENT, per company, so a cohort can be ranked
+    # by measured bucket instead of by impression.
+    _spans = {}
+    for _ph in (canonical.get("trace") or []):
+        for _sp in (_ph.get("spans") or []):
+            _spans[_sp["name"]] = _sp
+    for _name, _key in (("discovery", "discovery_ms"),
+                        ("retrieval", "retrieval_ms"),
+                        ("core_composition", "composition_ms")):
+        row[_key] = (_spans.get(_name) or {}).get("wall_ms")
+    _obs = _spans.get("derive_observations") or {}
+    row["documents"] = _obs.get("documents")
+    row["text_chars"] = _obs.get("text_chars")
+    row["observations"] = _obs.get("item_count")
+    # WARM or COLD, read from the run rather than assumed from ordering: a
+    # snapshot that failed to load silently would otherwise look like a cold
+    # run that happened to be slow.
+    row["snapshot_mode"] = ("WARM" if (row.get("discovery_ms") or 1e9) < 2000
+                            else "COLD")
 
     pages, citations = {}, 0
     for suffix in ("", "/brief"):

@@ -350,7 +350,14 @@ def main() -> int:
     table(row, local)
     out = pathlib.Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps({"deployed": row, "local": local}, indent=2))
+    # THE OPENER IS NOT DATA. `run()` returns its session so a caller can
+    # re-read `/runs/<id>/timing`, which is session-scoped -- but writing it
+    # out raises `TypeError: Object of type OpenerDirector is not JSON
+    # serializable` AFTER the analysis has been paid for. Second time this
+    # exact shape has cost a quota slot's worth of output.
+    out.write_text(json.dumps(
+        {"deployed": {k: v for k, v in row.items() if not k.startswith("_")},
+         "local": local}, indent=2))
     print(f"\n-> {out}")
     return 0
 
