@@ -137,7 +137,65 @@ def test_both_optional_discovery_branches_are_capped():
         if not l.lstrip().startswith("#"))
     sites = re.findall(r"_bounded_result\((?:[^()]|\([^()]*\))*\)", code, re.S)
     assert len(sites) >= 2, "join shape changed; this gate is not looking at it"
-    uncapped = [c for c in sites if "cap_s=" not in c]
+    # OPTIONAL ONLY. The EDGAR proposal is joined the same way and must NOT
+    # carry this cap: it is the authoritative source for a filer and the one
+    # branch a run cannot do without, so capping it at an optional branch's
+    # share would drop required evidence to save time. The cap is about what
+    # the product can live without, not about which calls happen to be joins.
+    optional = [c for c in sites
+                if "sitemap" in c or "third_party" in c or "third-party" in c]
+    assert len(optional) >= 2, (
+        "the optional branches are no longer identifiable in this gate")
+    uncapped = [c for c in optional if "cap_s=" not in c]
     assert not uncapped, (
         f"{len(uncapped)} optional discovery join(s) uncapped: "
         f"{[c[:50] for c in uncapped]}")
+    required = [c for c in sites if c not in optional]
+    assert all("cap_s=" not in c for c in required), (
+        "a REQUIRED join took the optional cap; that drops evidence the run "
+        "needs in order to save time an optional branch was spending")
+
+
+def test_edgar_asks_for_only_the_filings_the_run_is_entitled_to():
+    """The EDGAR proposal is NOT dispatched in parallel, on purpose.
+
+    MEASURED on NVIDIA at 6aefd58e: it did not start until t+11.2s, queued
+    behind a homepage fetch whose links it never reads. Reclaiming that six
+    seconds means dispatching before the homepage answers -- which means
+    requesting the LARGER limit (5 rather than 3) and truncating, because the
+    limit is the one thing it does take from the homepage.
+
+    Truncating gives an identical candidate list and a DIFFERENT request
+    count: every run with a working homepage would make two extra requests to
+    SEC. `test_the_blocked_budget_is_strictly_larger_and_is_the_one_used`
+    pins that property; this test states the trade at the call site so the
+    next reader does not re-derive it from scratch and re-break it.
+    """
+    import inspect
+
+    from intent_engine.company_ingestion import service as SVC
+    code = "\n".join(
+        l for l in inspect.getsource(SVC.CompanyIngestionService.discover
+                                     ).splitlines()
+        if not l.lstrip().startswith("#"))
+    assert "_pool.submit(\n                propose_edgar_candidates" not in code, (
+        "EDGAR is dispatched before the homepage answers, so its limit must "
+        "be the larger one -- which makes extra SEC requests on every healthy "
+        "run")
+    assert "MAX_EDGAR_CANDIDATES_WEB_BLOCKED" in code and \
+        "MAX_EDGAR_CANDIDATES" in code, (
+        "the two limits are no longer both reachable, so the blocked budget "
+        "cannot be the larger one")
+
+
+def test_the_pool_has_a_worker_for_each_independent_branch():
+    """Three branches through a pool of two queues one behind another and
+    gives back the wall time the dispatch change exists to remove."""
+    import inspect
+
+    from intent_engine.company_ingestion import service as SVC
+    code = inspect.getsource(SVC.CompanyIngestionService.discover)
+    submits = code.count("_pool.submit(")
+    workers = int(code.split("max_workers=")[1].split(",")[0].split(")")[0])
+    assert workers >= submits, (
+        f"{submits} branches dispatched into a pool of {workers}")

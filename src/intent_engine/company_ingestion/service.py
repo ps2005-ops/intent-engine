@@ -878,6 +878,30 @@ class CompanyIngestionService:
             # and is reported as one number, so which of its five stages costs
             # what is currently unknown -- and the largest is the one to
             # repair. This call reaches SEC.
+            # NOT DISPATCHED IN PARALLEL, AND HERE IS WHY IT LOOKS LIKE IT
+            # SHOULD BE.
+            #
+            # MEASURED on NVIDIA at 6aefd58e: this call did not START until
+            # t+11.2s, queued behind a homepage fetch whose links it never
+            # reads -- it needs the name and CIK, both already in `meta`. Six
+            # seconds of a sixty-five-second run, apparently free to reclaim.
+            #
+            # The attempt was made and reverted. Its LIMIT depends on the
+            # homepage -- 5 filings if our own site refused us, 3 if it
+            # answered -- so dispatching early means requesting the larger set
+            # and truncating. That is output-identical in the CANDIDATE LIST
+            # and is NOT identical in REQUEST COUNT: every run with a working
+            # homepage would make two extra requests to SEC, the one host this
+            # file is most careful about.
+            #
+            # `test_the_blocked_budget_is_strictly_larger_and_is_the_one_used`
+            # pins the property that broke: a run whose own site gave us
+            # nothing does not make MORE requests overall, it makes them
+            # somewhere that answers. Six seconds is not worth spending that.
+            #
+            # A version that reclaimed the time without the extra requests
+            # would need the proposal to accept an OFFSET, so a blocked run
+            # could top up from 3 to 5 rather than re-ask for 5.
             _edg_w, _edg_c = time.monotonic(), time.thread_time()
             candidates = candidates + propose_edgar_candidates(
                 company_name=meta.get("company_name", ""),
