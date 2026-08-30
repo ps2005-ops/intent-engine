@@ -206,3 +206,78 @@ def test_the_worker_actually_passes_the_probe_to_acquisition():
         "_acquire_deferred"), (
         "the core trace is recorded after the deferred acquisition, widening "
         "the window that already cost the two slowest rows their spans")
+
+
+def test_a_recompose_that_produced_no_report_may_not_replace_the_core():
+    """MEASURED LIVE on 5a27b2a7: five of ten cohort runs returned
+    `result_state: FAILED`, and they were exactly the five with deferred
+    evidence.
+
+    `compose` returns `{"status": "FAILED", ...}` — with no
+    `strategic_report` key at all — on its own failure paths, and the
+    continuation published that over a core the reader was already holding.
+    The core is not improved by a recompose that produced nothing.
+    """
+    ci = _FakeCI(arriving=[{"url": "https://x.example/b"}], deadline_sink=[])
+    app = _app_with(ci)
+    app._analysis_deadlines["r1"] = None
+    app._tier_for = lambda _run_id: "tier1"
+    app._compose = lambda run_id, deep=False, trace=None: {
+        "status": "FAILED", "reason": "no approved source could be retrieved"}
+
+    core = {"strategic_report": {"thesis": "the first answer",
+                                 "result_state": "DEEP_PENDING",
+                                 "status": "OK", "decision_implications": []}}
+    out = app._acquire_deferred("r1", core, ["cand-1"], trace=_Trace())
+    assert out is core, "a failed recompose replaced the published core"
+    assert out["strategic_report"]["result_state"] == "DEEP_PENDING"
+    assert not ci.updates, "a destroyed core was announced as an update"
+
+
+# ---------------------------------------------------------------------------
+# A READ MAY NOT DESTROY THE ANSWER IT WAS ASKED FOR.
+# ---------------------------------------------------------------------------
+def test_a_read_never_runs_the_deep_pass_on_the_request_thread():
+    """MEASURED LIVE on 5a27b2a7: five of ten cohort runs answered
+    `result_state: FAILED` with `deep_status: RUNNING`.
+
+    That pair is the signature of a `deep=True` payload whose analyst gave
+    up — `_strategic_report` sets RUNNING before the call and only
+    `enrich_deep` ever finishes it. `_compose` defaults to `deep=True`, and
+    `_real_result` called it on a cache miss, so a READER asking for a page
+    ran the whole deep pass synchronously and published its failure over a
+    core that was fine.
+    """
+    from intent_engine.webapp.app import WebApp
+
+    app = WebApp.__new__(WebApp)
+    app._results = {}
+    seen = {}
+
+    def _compose(run_id, *, deep=True, trace=None):
+        seen["deep"] = deep
+        return {"strategic_report": {"result_state": "DEEP_PENDING",
+                                     "thesis": "recomposed"}}
+
+    app._compose = _compose
+    out = app._recompose_for_reader("r1")
+    assert seen["deep"] is False, (
+        "a read triggered the deep pass; that is a model call on the request "
+        "thread and it can publish a failure over a good core")
+    assert out["strategic_report"]["result_state"] == "DEEP_PENDING"
+
+
+def test_a_failed_read_recompose_keeps_the_published_result():
+    from intent_engine.webapp.app import WebApp
+
+    app = WebApp.__new__(WebApp)
+    app._results = {}
+    app._compose = lambda run_id, deep=True, trace=None: {
+        "strategic_report": {"result_state": "FAILED"}}
+    good = {"strategic_report": {"result_state": "DEEP_PENDING",
+                                 "thesis": "the answer the reader has"}}
+    assert app._recompose_for_reader("r1", previous=good) is good
+
+    # And a recompose that produced no report at all is not an answer either.
+    app._compose = lambda run_id, deep=True, trace=None: {"status": "FAILED"}
+    assert app._recompose_for_reader("r1", previous=good) is good

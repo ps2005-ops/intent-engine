@@ -190,6 +190,30 @@ MUTATIONS = [
                "test_every_deferred_source_is_retrieved_or_recorded_as_failed"],
     ),
     dict(
+        name="M20 a read recomposes with the deep pass on the request thread",
+        path="src/intent_engine/webapp/app.py",
+        old="""        fresh = self._compose(run_id, deep=False)""",
+        new="""        fresh = self._compose(run_id)""",
+        tests=["tests/test_deferred_evidence_survives.py::"
+               "test_a_read_never_runs_the_deep_pass_on_the_request_thread"],
+    ),
+    dict(
+        name="M21 a failed read-recompose replaces the published result",
+        path="src/intent_engine/webapp/app.py",
+        old="""                fresh["strategic_report"].get("result_state") == "FAILED"):""",
+        new="""                False):""",
+        tests=["tests/test_deferred_evidence_survives.py::"
+               "test_a_failed_read_recompose_keeps_the_published_result"],
+    ),
+    dict(
+        name="M22 the deferred recompose may publish a report-less object",
+        path="src/intent_engine/webapp/app.py",
+        old="""        if not (widened or {}).get("strategic_report"):""",
+        new="""        if False:""",
+        tests=["tests/test_deferred_evidence_survives.py::"
+               "test_a_recompose_that_produced_no_report_may_not_replace_the_core"],
+    ),
+    dict(
         name="M12 a fresh connection is retried like a stale one",
         path="src/intent_engine/company_ingestion/httppool.py",
         old="""                if reused and attempt == 0:""",

@@ -9790,11 +9790,41 @@ class WebApp:
                 return self._html(body)
         return self._error_page(404, "no such source in this run")
 
+    #: What a READ may recompose. A reader asking for a page may not trigger
+    #: a model call on the request thread, and may not have the answer they
+    #: are already holding replaced by one that failed.
+    #:
+    #: MEASURED LIVE on 5a27b2a7: five of ten cohort runs answered
+    #: `result_state: FAILED` with `deep_status: RUNNING` -- the exact shape
+    #: of a `deep=True` payload whose analyst gave up, because
+    #: `_strategic_report` sets RUNNING before the call and only
+    #: `enrich_deep` ever finishes it. `_compose` defaults to `deep=True`,
+    #: so a read that found the cache stale ran the whole deep pass
+    #: SYNCHRONOUSLY and published its failure over a good core.
+    #:
+    #: The reader needs a CORE. The deep half belongs to the worker, which
+    #: already has a guard stopping a failed model from overwriting the
+    #: core's state; a read had no such guard because it was never supposed
+    #: to be doing this work.
+    def _recompose_for_reader(self, run_id, previous=None):
+        """A bounded recompose for a READ, which may only improve the page."""
+        fresh = self._compose(run_id, deep=False)
+        if not (fresh or {}).get("strategic_report"):
+            return previous
+        if previous and (previous.get("strategic_report") or {}).get(
+                "result_state") and (
+                fresh["strategic_report"].get("result_state") == "FAILED"):
+            # A recompose that failed is not a newer answer; it is no answer.
+            _LOG.warning("read-triggered recompose failed run=%s — keeping "
+                         "the published result", run_id)
+            return previous
+        return fresh
+
     def _real_result(self, run_id):
         if run_id not in self._results:
             if self.ci.store.approval(run_id) is None:
                 return None
-            self._results[run_id] = self._compose(run_id)
+            self._results[run_id] = self._recompose_for_reader(run_id)
         elif not self._cache_compatibility(run_id)["reusable"]:
             # A stored analysis is served again only while it still agrees with
             # the product that would produce it. Otherwise the fixes that
@@ -9802,7 +9832,8 @@ class WebApp:
             # that capped confidence without an outside source, never reach
             # anyone whose analysis predates them — they see the old answer
             # under today's date and cannot tell.
-            self._results[run_id] = self._compose(run_id)
+            self._results[run_id] = self._recompose_for_reader(
+                run_id, previous=self._results.get(run_id))
         return self._results.get(run_id)
 
     def _cache_compatibility(self, run_id) -> dict:
@@ -10145,6 +10176,23 @@ class WebApp:
                 # already on the run.
                 return core
             widened = self._compose(run_id, deep=False, trace=trace)
+        # A WIDER RECOMPOSE MAY ONLY REPLACE THE CORE IF IT IS STILL A REPORT.
+        #
+        # MEASURED LIVE on 5a27b2a7: five of ten cohort runs came back with
+        # `result_state: FAILED`, and they were EXACTLY the five with
+        # deferred evidence. `compose` returns `{"status": "FAILED", ...}`
+        # with NO `strategic_report` key on its own failure paths, and this
+        # function handed that object straight back to the worker, which
+        # published it over a core the reader was already holding.
+        #
+        # The core is not improved by a recompose that produced nothing. It
+        # is destroyed by it -- the same failure as the warm path that was
+        # fast because it had stopped producing the product, one layer over.
+        if not (widened or {}).get("strategic_report"):
+            _LOG.warning("deferred recompose produced no report run=%s "
+                         "status=%s — keeping the published core", run_id,
+                         (widened or {}).get("status"))
+            return core
         before = self._decision_fingerprint(core)
         after = self._decision_fingerprint(widened)
         changed = sorted(k for k in before if before[k] != after[k])
