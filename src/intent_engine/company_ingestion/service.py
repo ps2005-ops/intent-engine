@@ -1359,6 +1359,26 @@ class CompanyIngestionService:
     _OPTIONAL_DISCOVERY_CAP_S = 8.0
 
     _FETCH_CONCURRENCY = 6
+    #: NOT RAISED, AND THE ATTEMPT IS RECORDED HERE SO IT IS NOT REPEATED.
+    #:
+    #: Retrieval costs 24.6s for ~10 documents, most of them from one host, so
+    #: a cap of 2 serialises them into about five rounds where there could be
+    #: three. That is a real, measured cost and raising this looked correct.
+    #:
+    #: It was reverted because the justification did not survive checking.
+    #: `docs/INTERACTIVE_PERFORMANCE.md` records the premise as measured --
+    #: "SEC answers 429 to bursts, and a 429 costs more than the serialism it
+    #: replaced" -- and the counter-claim (that the 429s were company-
+    #: correlated rather than cadence-correlated) could not be cited from this
+    #: repository at all. A documented measurement outranks a recollection.
+    #:
+    #: `test_concurrency_is_bounded_per_host` asserts a LITERAL 3 rather than
+    #: `_FETCH_PER_HOST + 1`, precisely so raising this constant cannot raise
+    #: its own bound. That guard caught this change, which is what it is for.
+    #:
+    #: To revisit properly: instrument 429s per host against concurrency on
+    #: the live service, record the result in the docs, and change the guard
+    #: and the constant together with that evidence attached.
     _FETCH_PER_HOST = 2
 
     def _acquire(self, candidate, *, run_id, wants_pdf, timeout=None):

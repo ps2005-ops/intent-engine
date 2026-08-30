@@ -307,6 +307,13 @@ def analyse(name, domain, *, budget_s, verbose=True) -> dict:
     # run that happened to be slow.
     row["snapshot_mode"] = ("WARM" if (row.get("discovery_ms") or 1e9) < 2000
                             else "COLD")
+    # RETRIEVAL FAILURES, so a concurrency change cannot look like a win.
+    # Raising the per-host cap trades politeness for speed, and the way that
+    # goes wrong is 429s from SEC -- which arrive as failed sources, not as
+    # slower ones. A latency number without this column cannot tell an
+    # improvement from a run that simply fetched less.
+    row["retrieval_failures"] = canonical.get("retrieval_failures")
+    row["documents_retrieved"] = canonical.get("evidence_count")
 
     pages, citations = {}, 0
     for suffix in ("", "/brief"):
