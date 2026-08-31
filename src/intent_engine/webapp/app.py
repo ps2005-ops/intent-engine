@@ -9807,13 +9807,27 @@ class WebApp:
     #: core's state; a read had no such guard because it was never supposed
     #: to be doing this work.
     def _recompose_for_reader(self, run_id, previous=None):
-        """A bounded recompose for a READ, which may only improve the page."""
+        """A bounded recompose for a READ, which may only improve the page.
+
+        ALWAYS RETURNS WHAT IT COMPOSED WHEN THERE IS NOTHING TO PROTECT.
+        The first version returned `previous` on an unusable recompose, and
+        on a cache miss `previous` is None -- so the caller stored None and
+        every later read recomposed again. That is unbounded recomposition on
+        the request thread, measured at 98% CPU for 2h52m in one suite, and
+        for a reader it is a poisoned run that never opens.
+        """
         fresh = self._compose(run_id, deep=False)
+        if not previous:
+            # Nothing to protect: whatever compose produced IS the answer for
+            # this run, and it is a dict, so it can be cached and not redone.
+            return fresh
         if not (fresh or {}).get("strategic_report"):
+            _LOG.warning("read-triggered recompose produced no report run=%s "
+                         "— keeping the published result", run_id)
             return previous
-        if previous and (previous.get("strategic_report") or {}).get(
-                "result_state") and (
-                fresh["strategic_report"].get("result_state") == "FAILED"):
+        if (fresh["strategic_report"].get("result_state") == "FAILED"
+                and (previous.get("strategic_report") or {}).get(
+                    "result_state") not in (None, "FAILED")):
             # A recompose that failed is not a newer answer; it is no answer.
             _LOG.warning("read-triggered recompose failed run=%s — keeping "
                          "the published result", run_id)

@@ -200,8 +200,10 @@ MUTATIONS = [
     dict(
         name="M21 a failed read-recompose replaces the published result",
         path="src/intent_engine/webapp/app.py",
-        old="""                fresh["strategic_report"].get("result_state") == "FAILED"):""",
-        new="""                False):""",
+        old="""        if (fresh["strategic_report"].get("result_state") == "FAILED"
+                and (previous.get("strategic_report") or {}).get(
+                    "result_state") not in (None, "FAILED")):""",
+        new="""        if False:""",
         tests=["tests/test_deferred_evidence_survives.py::"
                "test_a_failed_read_recompose_keeps_the_published_result"],
     ),
@@ -212,6 +214,18 @@ MUTATIONS = [
         new="""        if False:""",
         tests=["tests/test_deferred_evidence_survives.py::"
                "test_a_recompose_that_produced_no_report_may_not_replace_the_core"],
+    ),
+    dict(
+        name="M23 a read recomposes on every poll instead of caching",
+        path="src/intent_engine/webapp/app.py",
+        old="""        if not previous:
+            # Nothing to protect: whatever compose produced IS the answer for
+            # this run, and it is a dict, so it can be cached and not redone.
+            return fresh""",
+        new="""        if not previous:
+            return previous""",
+        tests=["tests/test_deferred_evidence_survives.py::"
+               "test_a_read_caches_its_recompose_and_never_stores_none"],
     ),
     dict(
         name="M12 a fresh connection is retried like a stale one",

@@ -281,3 +281,62 @@ def test_a_failed_read_recompose_keeps_the_published_result():
     # And a recompose that produced no report at all is not an answer either.
     app._compose = lambda run_id, deep=True, trace=None: {"status": "FAILED"}
     assert app._recompose_for_reader("r1", previous=good) is good
+
+
+def test_a_read_caches_its_recompose_and_never_stores_none():
+    """Two properties, and the second cost 98% CPU for 2h52m to learn.
+
+    MEASURED LIVE on 13732a6b: Amazon marked `core_ready` at 58.3s and its
+    progress page never redirected inside 300s. `_recompose_for_reader`
+    returned `previous` when a recompose produced nothing usable, and on a
+    cache MISS `previous` is None — so None was stored under the run's key.
+    That is a poisoned entry, not a missing one: the key exists, so nothing
+    refills it.
+
+    The first repair returned early without storing anything, which fixed the
+    None and replaced it with something worse — EVERY read recomposed, an
+    unbounded model-free but CPU-bound rebuild on the request thread.
+
+    So: a read stores what it composed (a dict, always), and only refuses to
+    let a failed recompose REPLACE an answer that already exists.
+    """
+    from intent_engine.webapp.app import WebApp
+
+    app = WebApp.__new__(WebApp)
+    app._results = {}
+    composes = {"n": 0}
+
+    def _compose(run_id, *, deep=True, trace=None):
+        composes["n"] += 1
+        return {"status": "FAILED"}          # no strategic_report
+
+    app._compose = _compose
+    app._cache_compatibility = lambda run_id: {"reusable": True,
+                                               "changed": [], "reason": ""}
+
+    class _Store:
+        @staticmethod
+        def approval(_run_id):
+            return {"approved_candidate_ids": ["cand-1"]}
+
+    class _CI:
+        store = _Store()
+
+    app.ci = _CI()
+
+    first = app._real_result("r1")
+    assert first is not None
+    assert app._results.get("r1") is not None, "None was stored for the run"
+    for _ in range(5):
+        app._real_result("r1")
+    assert composes["n"] == 1, (
+        f"a read recomposed {composes['n']} times — every poll rebuilds the "
+        f"analysis on the request thread")
+
+    # And a good published answer is never replaced by a failed recompose.
+    app._cache_compatibility = lambda run_id: {"reusable": False,
+                                               "changed": [], "reason": ""}
+    good = {"strategic_report": {"result_state": "DEEP_PENDING"}}
+    app._results["r2"] = good
+    assert app._real_result("r2") is good
+    assert app._results["r2"] is good
