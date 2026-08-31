@@ -435,3 +435,138 @@ blocked run tops up 3 → 5 rather than re-asking for 5.
   evidence.
 - **Benchmark throughput:** 10 analyses per IP per rolling hour. A
   50-company qualification is ~5h of wall clock at that rate.
+
+---
+
+## 9. PRE-100 closure: minimum-evidence CORE
+
+### The measurement that redirected the work
+
+The previous section ends with "the remaining ~37s is network wait", and
+that framing was wrong in an instructive way: it named a CATEGORY. Measured
+with a complete request ledger (`scripts/perf_acquisition_ledger.py`), the
+category contained four separable causes, and the largest was not network at
+all.
+
+**The product's own evidence contract closed long before acquisition
+stopped.** `readiness.assess_readiness` decides whether evidence may become a
+full report, and it was consulted AFTER all fourteen approved sources had
+been paid for. Replaying each run's documents in retrieval order and asking
+the contract after every one:
+
+| company | fetched | `READY_FOR_FULL_REPORT` at |
+|---|---|---|
+| NVIDIA | 13 | **5** |
+| Microsoft | 8 | **5** |
+| JPMorgan Chase | 10 | **8** |
+
+The state never changed again. Two to eight documents per run were acquired
+after the contract was satisfied, with the customer waiting on every one.
+
+**Nine of NVIDIA's fourteen CORE slots were non-English locale pages**, one
+page took three of them in three languages, and `is_english` then discarded
+four. The cause was not ranking: `parse_sitemap` truncated an alphabetical
+sitemap index at eight children, so `en-us` was never queued. The English
+pages were not out-ranked, they were never discovered.
+
+**`company_tickers.json` — 795,179 identical bytes — was downloaded twice per
+analysis**, and every request built a new opener, so ~32 of one run's 36
+connections were avoidable handshakes.
+
+### What changed
+
+Acquisition runs in waves and consults the readiness contract after each.
+When it closes, CORE stops BLOCKING; the untouched sources are DEFERRED and
+acquired after `core_ready` on a FRESH budget (`Deadline.for_continuation`),
+because handing the continuation the spent interactive deadline would refuse
+every deferred source as `deadline_exceeded` — deferral becoming deletion
+wearing a retrieval failure.
+
+"Nothing is dropped" is enforced as an ACCOUNTING property inside one run:
+every deferred candidate is either retrieved or carries a recorded failure.
+It cannot be tested by comparing a CORE run against a separate FULL run —
+measured, one such comparison had the FULL path retrieve FEWER documents than
+the CORE path.
+
+Locale-partitioned sites are recognised only in the unambiguous `xx-yy` form
+and only when a site exposes two or more distinct ones, so a company that
+publishes in one language is unaffected. Registry metadata is cached per
+deployment (strictly a SMALLER ask of SEC), and connections are pooled with
+stdlib `http.client` — `requests`/`urllib3` are in requirements.txt but NOT
+in pyproject, and deployment builds with `pip install -e .`.
+
+### Measured on the deployed service
+
+| | `7948b3b8` | `13732a6b` |
+|---|---|---|
+| CORE p50 | 78.3s | **60.9s** |
+| CORE p90 | 87.4s | **73.0s** |
+| usable reports | 10/10 | 9/10 |
+
+Across the ten-company cohort, 92 → 62 documents block CORE. Companies with
+nothing to spare defer nothing: JPMorgan and Visa deferred zero, which is the
+mechanism behaving as specified — the stop is the contract, not a count.
+
+### Two defects this created, and how they were found
+
+**A read ran the deep pass on the request thread.** Five of ten cohort runs
+answered `result_state: FAILED` with `deep_status: RUNNING` — exactly the
+five with deferred evidence. `RUNNING` is set before the analyst call and
+finished only by `enrich_deep`, so that pair has one producer. `_compose`
+defaults to `deep=True` and `_real_result` called it on a stale-cache read,
+so a READER asking for a page ran the whole deep pass synchronously and
+published its failure over a good core. Code-reading first blamed the
+deferred recompose; a local reproduction disproved that. The `deep_status`
+field is what named the real path.
+
+**A read stored None and stranded the reader.** The repair returned the
+PREVIOUS result when a recompose produced nothing usable — and on a cache
+miss "previous" is None, so None was stored under the run's key. That is a
+poisoned entry, not a missing one: the key exists, so nothing refills it.
+Amazon marked `core_ready` at 58.3s and its page never opened inside 300s.
+The FIRST fix for that was worse again — returning early without storing
+anything meant every read recomposed, an unbounded rebuild on the request
+thread. A read now stores what it composed and only refuses to let a FAILED
+recompose replace an answer that already exists.
+
+### A note on diagnosis
+
+A guard was killed at 2h52m on the belief that one test was hung. The test
+passes in 100s on an idle machine; the guard was contending with a live
+cohort. Two revisions were bisected against a test that had already passed
+two full guards, which should have falsified the premise before the bisect
+began. Wall-clock on a shared machine is not evidence about code.
+
+### PRE-100 50-company qualification (`229c75eb`)
+
+Frozen cohort, one deployed SHA, paced across the demo quota
+(`scripts/pre100_qualify50.py`, resumable, never reordered or cherry-picked).
+
+| | |
+|---|---|
+| attempted / counted | 50 / 50 |
+| usable reports | 44 |
+| bounded abstentions | 5 |
+| no result | 1 |
+| terminal | 48 |
+| CORE p50 / p90 / p95 / max | **63.8s / 80.2s / 88.4s / 96.4s** |
+| ≤60s / ≤90s / ≤120s | 15 / 40 / 48 |
+| enum leaks | 0 |
+| Q&A sampled | 5 companies × 5 questions + follow-up, all answered |
+
+**The five abstentions are host-side, not application defects.** Goldman
+Sachs, Caterpillar, Ford, J&J and Eli Lilly each retrieved zero documents
+under sustained cohort load. Run locally through the same code, Goldman Sachs
+retrieves nine documents — its own domain refuses all three requests and SEC
+serves sixteen. The product's response is correct: a bounded, labelled
+refusal, terminal inside the contract.
+
+**Chevron's `NO_RESULT` was a submission-time capacity refusal**, not an
+endless spinner: `run_state` was None, so no run was ever created. Re-run
+with two controls it is terminal at 65.0s with five documents. The harness's
+abstention detector requires a terminal `run_state` and therefore cannot see
+a refusal that happens before a run exists — an instrument limit, recorded
+rather than repaired, because the product behaviour is correct.
+
+**Costco at 128.2s** is the only run past the 120s contract, at 96.4s
+`core_ready` plus page-open detection at 4s poll granularity.

@@ -90,7 +90,14 @@ def qualify(name, domain, *, budget_s=300.0, with_qa=False) -> dict:
     row["analyze_status"] = st
     if st == 429:
         row["status"] = "QUOTA_EXHAUSTED"
-        row["error"] = visible(body)[:160]
+        text = visible(body)
+        row["error"] = text[:160]
+        # THE SERVICE STATES ITS OWN WINDOW. Guessing a retry interval that is
+        # slightly too short spends an attempt AND keeps the window full:
+        # measured, a 7-minute retry against a stated 9-minute window waited
+        # sixteen times without landing once.
+        m = re.search(r"try again in about (\d+) minute", text)
+        row["retry_after_s"] = (int(m.group(1)) + 1) * 60.0 if m else None
         return row
     m = (re.search(r"/runs/([A-Za-z0-9_-]+)", url)
          or re.search(r"/runs/([A-Za-z0-9_-]+)", body))
@@ -100,33 +107,78 @@ def qualify(name, domain, *, budget_s=300.0, with_qa=False) -> dict:
         return row
     run_id = row["run_id"] = m.group(1)
 
-    # --- wait for a usable result, bounded by the declared contract -------
+    # --- wait for a TERMINAL outcome, which is not only a redirect --------
+    #
+    # A REDIRECT IS ONE OF TWO TERMINAL OUTCOMES, and treating it as the only
+    # one reports correct product behaviour as a failure. MEASURED: Netflix
+    # retrieved zero sources, reached `run_state: FAILED`, and rendered a
+    # 7,507-character bounded-abstention page -- and this harness recorded
+    # NO_RESULT because the progress page answered in place instead of
+    # redirecting away. A defensible refusal is a product outcome; only an
+    # endless spinner is a failure.
+    terminal_states = ("COMPLETE", "PARTIAL", "FAILED", "REJECTED",
+                       "INTERRUPTED")
+    polls = 0
     while time.monotonic() - began < budget_s:
         st, page, url, _d, _h = _req(op, f"/runs/{run_id}/progress",
                                      timeout=90)
         elapsed = time.monotonic() - began
+        polls += 1
         if "/progress" not in url and st == 200:
             row["usable_seconds"] = round(elapsed, 1)
+            row["outcome"] = "USABLE_REPORT"
             break
+        # Every few polls, ask the run itself whether it is still working.
+        if polls % 3 == 0:
+            st2, tb, _u, _d, _h = _req(op, f"/runs/{run_id}/timing",
+                                       timeout=60)
+            if st2 == 200:
+                try:
+                    snap = json.loads(tb)
+                except ValueError:
+                    snap = {}
+                if snap.get("run_state") in terminal_states \
+                        and snap.get("result_state") is None \
+                        and not snap.get("evidence_count"):
+                    row["usable_seconds"] = round(elapsed, 1)
+                    row["outcome"] = "BOUNDED_ABSTENTION"
+                    row["abstention_reason"] = snap.get("run_state")
+                    break
         time.sleep(POLL_S)
+    row.setdefault("outcome", "NO_RESULT")
     row["terminal_within_contract"] = bool(
         row["usable_seconds"] is not None
         and row["usable_seconds"] <= TERMINAL_CONTRACT_S)
 
     # --- canonical timing, retried until the trace lands ------------------
+    # PATIENCE, BECAUSE THE MISSING ROWS ARE THE SLOW ONES. The lifecycle
+    # marker and the trace are written by the worker AFTER the page opens, so
+    # a short poll drops exactly the runs whose latency is worth reading --
+    # and the resulting percentiles describe only the fast half. Measured: 3
+    # of 10 and then 3 of 5 rows came back with `core_latency_s: None`, every
+    # one of them a slower run.
+    #
+    # The loop now waits for the MARKER, not only for spans, and gives the
+    # worker a real chance to finish its continuation and deep pass before
+    # giving up. A row that still has no marker is reported as missing rather
+    # than silently excluded.
     canonical = {}
-    for attempt in range(12):
+    for attempt in range(40):
         st, tbody, _u, _d, _h = _req(op, f"/runs/{run_id}/timing", timeout=90)
         if st == 200:
             try:
                 canonical = json.loads(tbody)
             except ValueError:
                 canonical = {}
-        if any((ph.get("spans") or []) for ph in (canonical.get("trace") or [])):
+        has_marker = canonical.get("core_latency_s") is not None
+        has_spans = any((ph.get("spans") or [])
+                        for ph in (canonical.get("trace") or []))
+        if has_marker and has_spans:
             break
-        if canonical.get("core_latency_s") is None and attempt > 5:
-            break
-        time.sleep(3.0)
+        if has_marker and attempt > 12:
+            break                       # marker is what the gate is read from
+        time.sleep(4.0)
+    row["timing_polls"] = attempt + 1
     row["core_ready_seconds"] = canonical.get("core_latency_s")
     row["deep_ready_seconds"] = canonical.get("deep_latency_s")
     row["result_state"] = canonical.get("result_state")
@@ -197,8 +249,10 @@ def qualify(name, domain, *, budget_s=300.0, with_qa=False) -> dict:
                           "answer": visible(ans)[-1800:], "follow_up": True})
 
     row["status"] = ("COMPLETE" if row["has_report"]
-                     else ("NO_RESULT" if row["usable_seconds"] is None
-                           else "USABLE_NO_REPORT"))
+                     else ("ABSTAINED"
+                           if row.get("outcome") == "BOUNDED_ABSTENTION"
+                           else ("NO_RESULT" if row["usable_seconds"] is None
+                                 else "USABLE_NO_REPORT")))
     return row
 
 
@@ -213,6 +267,10 @@ def summarise(rows) -> dict:
         "attempted": len(rows), "counted": len(counted),
         "quota_exhausted": len(rows) - len(counted),
         "usable_reports": sum(1 for r in counted if r.get("has_report")),
+        "bounded_abstentions": sum(1 for r in counted
+                                   if r.get("outcome") == "BOUNDED_ABSTENTION"),
+        "no_result": sum(1 for r in counted
+                         if r.get("outcome") == "NO_RESULT"),
         "terminal": len(within),
         "core_p50": _pct(core, 50), "core_p90": _pct(core, 90),
         "core_p95": _pct(core, 95), "core_max": max(core) if core else None,

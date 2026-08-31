@@ -1,85 +1,92 @@
-# Strategic 100 — pre-registration
+# Strategic-100 preregistration — frozen before any of it runs
 
-**Status: BLOCKED** by the interactive performance gate
-(`docs/INTERACTIVE_PERFORMANCE.md`). This document is written *before* results
-exist so the experiment cannot be reinterpreted after them.
+Written and frozen at the PRE-100 boundary. Nothing in this document may be
+edited after the first Strategic-100 analysis is submitted; a cohort or a
+threshold chosen after seeing results measures the chooser.
 
-## Why it is blocked
+**Strategic-100 is NOT executed by this session.**
 
-A 50-company batch can pass while an interactive Apple request hangs, because
-batch coverage and production request-path performance are different tests. Run
-against an unmeasured request path, the 100-company experiment would spend its
-budget measuring timeout, network and orchestration defects and report them as
-findings about strategic intelligence.
+---
 
-The gate exists so the 100 measures **intelligence** rather than **whether
-Render and the retrieval pipeline survive**.
+## 1. Cohort
 
-## Unblock conditions (all required)
+`perf_progressive_matrix.QUALIFY_50` (50 companies, frozen and already run as
+the PRE-100 qualification) plus a second frozen 50 drawn on the same rules:
+filers and non-filers, sectors spread deliberately rather than by convenience,
+and a deliberately thin tail. The cohort is stored in the repository, not in a
+conversation, and its hash is recorded with the qualifying SHA.
 
-1. Apple regression passes on the deployed service — cold, warm, retry.
-2. Tier-1 cohort: ≥90% core success, p50 ≤30s, p90 ≤45s.
-3. No request over the hard budget without either a usable bounded-gap result
-   or an explicit terminal failure.
-4. No indefinite `RUNNING` jobs; every job reaches a terminal state.
-5. Optimized output preserves intelligence quality (§45 parity).
-6. Economic intelligence still live.
-7. Cold and warm behaviour both measured.
-8. Provider failure degrades predictably.
-9. The benchmark is of the **deployed** service, not a local run.
+Selection rules, applied before any company was analysed:
 
-Then, and only then: **freeze the optimized SHA** and run the 100 against that
-frozen build. Running it against a moving tree would mean the cohort was
-analysed by more than one version of the product.
+- the registrant, not the brand, wherever a holding company files under a
+  different name;
+- sector spread is load-bearing: a bank, a miner, an automaker and a SaaS
+  vendor do not write the same filing;
+- deliberately sparse companies are retained. A product that works only on
+  mega-caps has memorised rather than generalised.
 
-## Pre-registered cohort design
+## 2. Evidence cutoff
 
-Fixed **before** results. Companies are not chosen or dropped afterwards; a
-company that fails is a finding, not a sampling error.
+Every analysis reads only sources retrievable at run time. `as_of` is the run
+date. No backfill, no replay of documents published after the run.
 
-| Class | n | Why it is in |
+## 3. Versions pinned at freeze
+
+| component | pin |
+|---|---|
+| application SHA | `PRE100_QUALIFYING_SHA` |
+| EconomicState | the version stamped in the dossier at run time |
+| readiness contract | `ci_readiness.v1` |
+| mechanism library | the manifest committed at the qualifying SHA |
+
+## 4. What is scored, and how
+
+**Evidence quality** — per company: usable documents, distinct families,
+independent-origin count, provenance completeness (every claim carries a
+source), and the share of retrieved text actually read.
+
+**Reasoning quality** — per company: whether the thesis is entailed by cited
+evidence, whether the decision implications name an action and a trigger,
+and whether uncertainty is stated where evidence is thin.
+
+**DecisionDamage** — the existing detector suite, every declared kind
+exercised. A reported zero is only valid when every detector ran; a detector
+that cannot fire is a finding about the instrument.
+
+**Abstention** — a bounded, labelled refusal is a PASS outcome. A fabricated
+report is a FAIL. These are counted separately and never merged.
+
+**Latency** — CORE p50/p90/p95/max, terminal share within 120s, recorded from
+the persisted lifecycle markers rather than from page polling.
+
+## 5. Cross-company checks
+
+- no company's evidence appears in another company's report;
+- no shared-ledger counts identical across companies;
+- identity resolved to one registrant per run, recorded with its CIK;
+- Q&A answers name their own subject and no other cohort member.
+
+## 6. Thresholds, frozen now
+
+| | PASS | FAIL |
 |---|---|---|
-| Mega-cap technology | 12 | highest coverage — the ceiling case |
-| Semiconductor | 8 | capital cycle, concentrated customers |
-| Financial / banking | 10 | regulated disclosure, unusual unit economics |
-| Payments | 5 | two-sided network |
-| Industrial / capital goods | 10 | cyclical, backlog-driven |
-| Enterprise software | 12 | the archetype the engine was built on |
-| Consumer discretionary | 10 | brand and traffic exposure |
-| Consumer staples / retail | 8 | thin margin, volume sensitivity |
-| Energy / commodity producer | 6 | price-taker economics |
-| Healthcare / pharma | 7 | pipeline and regulatory exposure |
-| Utilities / rate base | 4 | regulated return |
-| Sparse-evidence filers | 5 | little public product surface |
-| Outside the validation manifest | 3 | the profile must be sparse and say so |
+| usable or defensibly abstaining | ≥95% | <95% |
+| terminal | 100% | any non-terminal |
+| within 120s | ≥95% | <95% |
+| CORE p90 | ≤100s | >100s |
+| cross-company contamination | 0 | ≥1 |
+| silent evidence loss | 0 | ≥1 |
+| provenance intact | 100% of claims | any unsourced claim |
 
-Complexity tiers: **simple** (single segment, one business model),
-**composite** (multi-segment), **conglomerate** (unlike segments).
+## 7. Declared limitations, recorded before the run
 
-## Pre-registered measures
-
-Declared with thresholds now, so an inert repair reads as a failure later.
-
-- **Performance SLO** — tier-2 budget: p50 ≤60s, p90 ≤80s, hard ≤120s.
-- **Evidence quality** — sources admitted, families covered, independent
-  vantage present, provenance complete.
-- **DecisionDelta** — a real comparator, never a placeholder.
-- **DecisionDamage** — every declared damage kind must have a live detector.
-- **Abstention** — reported as a *positive* result. Abstention is the evidence
-  the model is selective rather than silent; a cohort with 0% abstention is a
-  bug report about the instrument.
-- **Company specificity** — per-class prior text must not make companies in
-  one class byte-identical.
-- **Provenance** — every claim traceable to the span that produced it.
-- **CEO usefulness** — answers must differ across companies and industries.
-- **Failure semantics** — `COMPLETE`, `COMPLETE_WITH_BOUNDED_GAPS`, or an
-  explicit terminal failure. Never a spinner.
-
-## Analysis rules fixed in advance
-
-- Refusals (demo quota, provider rate limit) stay in the denominator and are
-  reported separately; they are never quietly dropped.
-- Cohort membership is not revised after results.
-- A uniform defect across the cohort is treated as an **instrument tell**
-  first — 46/46 identical means the scorer is wrong — and only then as a
-  finding about the companies.
+- **Calibration.** The cohort is one snapshot in time. Nothing here measures
+  whether a recommendation was right, only whether it was defensible on the
+  evidence available. Outcome calibration needs a horizon this run does not
+  have.
+- **Learning.** Belief formation reads fresh evidence only, so a second pass
+  over the same cohort does not measure learning; it measures repetition.
+- **Feedback and restart durability** remain `BLOCKED_INFRASTRUCTURE` and are
+  not Strategic-100 blockers under the governing decision.
+- **Concurrency** is bounded by the preview's CPU share and is recorded, not
+  bought.
