@@ -570,3 +570,50 @@ rather than repaired, because the product behaviour is correct.
 
 **Costco at 128.2s** is the only run past the 120s contract, at 96.4s
 `core_ready` plus page-open detection at 4s poll granularity.
+
+### PRE-100 requalification on `b5b4bd2a` (admission repair)
+
+Frozen cohort, one SHA, paced across the demo quota. The original `25409f14`
+cohort is preserved unchanged in
+`reports/perf/pre100_qualify50_25409f14_original.json`.
+
+| | `25409f14` | `b5b4bd2a` |
+|---|---|---|
+| usable reports | 44 | **26** |
+| bounded abstentions | 5 | **23** |
+| capacity refused | — | 0 |
+| analytical outcomes | 49/50 (98%) | **49/50 (98%)** |
+| terminal observed | 48/50 | **49/50** |
+| CORE p50 / p90 / p95 | 63.8 / 80.2 / 88.4 | **66.8 / 81.2 / 97.0** |
+| page-open ≤120s | 48/50 | **48/49 observed** |
+| enum leaks | 0 | **0** |
+| distinct briefs | 50/50 | **50/50** |
+
+**The usable/abstain split moved sharply and the reason is load, not code.**
+Twenty-three runs reached the evidence-insufficiency path, which renders a
+labelled page — verified live on Deere & Company: `run_state FAILED`,
+evidence 8, and a reader-facing page naming the refused hosts (g2, trustpilot
+answering 401/403) and saying "this run did not add enough independent
+evidence to strengthen it. Rather than show a briefing that looks complete
+and is not, here is exactly where it stands", with three retry actions. That
+is correct behaviour, and it is NOT a usable report; the two are counted
+separately here for that reason.
+
+**An abstention is not a capacity refusal and neither is a report.** The
+harness records three terminal classes. Only usable reports and abstentions
+count toward the usefulness gate; capacity refusal counts only toward
+terminal semantics, because "I could not start" is infrastructure behaviour
+and "I ran and could not conclude" is analytical behaviour.
+
+**Instrument corrections made during this cohort**, each of which would
+otherwise have misreported the product:
+
+- `USABLE_NO_REPORT` was not a product state. The harness read `result_state`
+  from `/timing`, which reflects `_results` and is empty for a run whose
+  worker took the insufficiency path — so twenty-three correct abstentions
+  were recorded as failures until the live page was read.
+- The abstention detector required ZERO evidence, so an abstention holding
+  four or eight documents fell through it.
+- `/timing` and the rendered page do not read the result through the same
+  accessor: the page recomposes through `_real_result`, `/timing` does not,
+  so a diagnostic surface can report "no result" for a run that renders.

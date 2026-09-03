@@ -99,6 +99,21 @@ def qualify(name, domain, *, budget_s=300.0, with_qa=False) -> dict:
         m = re.search(r"try again in about (\d+) minute", text)
         row["retry_after_s"] = (int(m.group(1)) + 1) * 60.0 if m else None
         return row
+    # ADMISSION REFUSED IS A TERMINAL CLASS OF ITS OWN.
+    #
+    # It is NOT a usable report and it is NOT an abstention. An abstention
+    # means the investigation ran and could not reach a defensible answer --
+    # legitimate analytical behaviour. This means the investigation never
+    # began, which is infrastructure behaviour. Counting them together would
+    # let a usefulness gate be passed by building prettier error pages.
+    if st == 503 and "did not start" in visible(body).lower():
+        row["status"] = "CAPACITY_REFUSED"
+        row["outcome"] = "CAPACITY_REFUSED"
+        row["usable_seconds"] = round(time.monotonic() - began, 1)
+        row["terminal_within_contract"] = \
+            row["usable_seconds"] <= TERMINAL_CONTRACT_S
+        row["error"] = visible(body)[:200]
+        return row
     m = (re.search(r"/runs/([A-Za-z0-9_-]+)", url)
          or re.search(r"/runs/([A-Za-z0-9_-]+)", body))
     if not m:
@@ -271,6 +286,14 @@ def summarise(rows) -> dict:
                                    if r.get("outcome") == "BOUNDED_ABSTENTION"),
         "no_result": sum(1 for r in counted
                          if r.get("outcome") == "NO_RESULT"),
+        # SEPARATE LINES ON PURPOSE. `analytical_outcomes` is the usefulness
+        # gate; `terminal` is the UX gate. Capacity refusal belongs only to
+        # the second.
+        "capacity_refused": sum(1 for r in counted
+                                if r.get("outcome") == "CAPACITY_REFUSED"),
+        "analytical_outcomes": sum(
+            1 for r in counted
+            if r.get("has_report") or r.get("outcome") == "BOUNDED_ABSTENTION"),
         "terminal": len(within),
         "core_p50": _pct(core, 50), "core_p90": _pct(core, 90),
         "core_p95": _pct(core, 95), "core_max": max(core) if core else None,
