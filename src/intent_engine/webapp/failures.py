@@ -54,6 +54,23 @@ RUN_RESTART_LOST = "RUN_RESTART_LOST"
 #: The reader left something out and can fix it themselves. Distinct from every
 #: other category here, all of which are faults on OUR side.
 INPUT_INCOMPLETE = "INPUT_INCOMPLETE"
+#: THE ANALYSIS NEVER STARTED. Admission was refused because every worker slot
+#: was taken, so no run was created, no company was resolved and no source was
+#: fetched.
+#:
+#: MEASURED LIVE on 25409f14 under deliberate admission pressure: this refusal
+#: classified as PROVIDER_CREDIT_EXHAUSTED, because the reassurance in its own
+#: message -- "NO ANALYSIS CREDIT WAS USED" -- contains the needle "credit".
+#: The reader was then told the company had been identified, its evidence
+#: retrieved, the reasoning step skipped, and that "what was retrieved remains
+#: available now". Four statements about work that never happened, which is
+#: precisely what this module exists to prevent.
+#:
+#: It is NOT an abstention. An abstention means the investigation ran and could
+#: not reach a defensible answer; this means the investigation never began, and
+#: conflating them would let infrastructure pressure be reported as analytical
+#: judgement.
+ADMISSION_REFUSED = "ADMISSION_REFUSED"
 INTERNAL_FAILURE = "INTERNAL_FAILURE"
 
 CATEGORIES = (
@@ -64,6 +81,7 @@ CATEGORIES = (
     DEPLOYMENT_VERSION_MISMATCH, AWAITING_SOURCE_APPROVAL,
     SHARE_LINK_UNAVAILABLE, NOT_FOUND, RUN_RESTART_LOST,
     INPUT_INCOMPLETE,
+    ADMISSION_REFUSED,
     INTERNAL_FAILURE,
 )
 
@@ -71,6 +89,17 @@ CATEGORIES = (
 #: `what_worked` is supplied per-call, because it is the only part that depends
 #: on the particular run rather than on the kind of failure.
 _COPY = {
+    ADMISSION_REFUSED: (
+        "The analysis did not start",
+        "No analysis was started, so nothing was fetched and nothing was "
+        "read.",
+        "Every analysis slot on this preview is busy right now. This is a "
+        "limit on how much work runs at once, not a finding about the "
+        "company and not a fault in what you entered.",
+        "Try again in a few minutes — the same company will run normally "
+        "once a slot frees up.",
+        True,
+    ),
     # MEASURED LIVE. Submitting the form without ticking consent produced
     # "Something went wrong on our side ... This is a fault in the product,
     # not in what you entered" -- which is the exact opposite of the truth,
@@ -236,6 +265,10 @@ _SIGNATURES = (
     ("unknown company", COMPANY_RESOLUTION_FAILED),
     ("no approved source could be retrieved", RETRIEVAL_INSUFFICIENT),
     ("run byte budget exhausted", RETRIEVAL_INSUFFICIENT),
+    # BEFORE "credit". The admission refusal says "NO ANALYSIS CREDIT WAS
+    # USED", and a bare substring test read that as the credit balance being
+    # exhausted -- our own reassurance classified as the opposite failure.
+    ("already running as many analyses", ADMISSION_REFUSED),
     ("rate limit", PROVIDER_RATE_LIMITED),
     ("credit", PROVIDER_CREDIT_EXHAUSTED),
     ("timed out", ANALYSIS_TIMEOUT),
@@ -261,6 +294,10 @@ _WHAT_WORKED = {
     NOT_FOUND: "Your session is active, and nothing you have already run was "
                "affected.",
     SHARE_LINK_UNAVAILABLE: "The link was received and checked.",
+    # The ONLY true thing here: the submission arrived. Every other line in
+    # this table would claim work that an unadmitted run never did.
+    ADMISSION_REFUSED: "Your request arrived and your session is intact. "
+                       "No analysis credit was used.",
     RUN_RESTART_LOST: "Your session is intact and the company you "
                       "entered is known, so the run can be started "
                       "again without retyping anything.",

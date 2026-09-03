@@ -28,6 +28,13 @@ from intent_engine.demo_dossier.dossier import CompanyDemoDossier
 from intent_engine.demo_dossier.store import DossierStore
 from intent_engine.demo_dossier.telemetry import DossierTelemetry
 
+#: THE SYNTHETIC CLOCK EVERY PAYLOAD IN THIS FILE IS BUILT WITH.
+#:
+#: It must be passed to every READER too. Several call sites omitted it and
+#: fell back to the wall clock, so a payload dated TODAY was declared STALE
+#: once real time moved past BOUNDED_WINDOW_DAYS -- seven assertions that
+#: passed for three weeks and then failed for everyone, blocking a commit on
+#: 2026-09-03 over nothing that had changed.
 TODAY = "2026-08-11"
 
 
@@ -162,7 +169,7 @@ def test_a_block_the_producer_omitted_entirely_is_not_a_zero():
     payload = market_payload()
     payload.pop("thesis_revision_refs")
     payload.pop("belief_refs")
-    snap = read_market_snapshot(payload)
+    snap = read_market_snapshot(payload, today=TODAY)
     assert snap.availability == V.AVAILABLE
     for name in ("thesis_revision_refs", "belief_refs"):
         block = snap.block(name)
@@ -268,7 +275,7 @@ def test_a_refused_snapshot_is_distinguishable_from_an_absent_one():
     """THE 22-DOSSIER INCIDENT, as a test. These two states looked identical
     and that is why nobody saw it for as long as both sides existed."""
     absent = market_unavailable("nothing was ever published here")
-    refused = read_market_snapshot(market_payload(tenant_id="tenant-a"))
+    refused = read_market_snapshot(market_payload(tenant_id="tenant-a"), today=TODAY)
     assert absent.availability == V.UNAVAILABLE
     assert refused.availability == V.REFUSED
     assert absent.availability != refused.availability
@@ -386,7 +393,7 @@ def test_an_undeclared_population_pair_is_unknown_not_allowed():
 # --- §10 / §29 / §30 security ---------------------------------------------
 
 def test_a_market_snapshot_may_not_name_a_tenant():
-    snap = read_market_snapshot(market_payload(tenant_id="tenant-a"))
+    snap = read_market_snapshot(market_payload(tenant_id="tenant-a"), today=TODAY)
     assert snap.availability == V.REFUSED
     assert "tenant_id" in snap.reason
     assert not hasattr(snap, "tenant_id")
@@ -427,7 +434,7 @@ def test_the_assembler_does_not_adopt_tenant_authority_from_market():
 
 
 def test_an_unknown_security_field_fails_closed():
-    snap = read_market_snapshot(market_payload(tenant_override="yes"))
+    snap = read_market_snapshot(market_payload(tenant_override="yes"), today=TODAY)
     assert snap.availability == V.REFUSED
 
 
@@ -435,7 +442,7 @@ def test_an_unknown_descriptive_field_is_recorded_not_fatal():
     """The 22-dossier fix. A producer that added a harmless field must not
     silently close the bridge — but the field must still be COUNTED, because
     silence was the actual defect."""
-    snap = read_market_snapshot(market_payload(company_display_name="Acme"))
+    snap = read_market_snapshot(market_payload(company_display_name="Acme"), today=TODAY)
     assert snap.availability == V.AVAILABLE
     assert "company_display_name" in snap.unknown_fields
 
@@ -487,7 +494,7 @@ def test_two_different_companies_do_not_join():
 
 
 def test_an_expected_company_mismatch_refuses_at_the_contract():
-    snap = read_market_snapshot(market_payload(), expected_company="not-acme")
+    snap = read_market_snapshot(market_payload(), expected_company="not-acme", today=TODAY)
     assert snap.availability == V.REFUSED
 
 
@@ -506,7 +513,7 @@ def test_an_older_producer_reads_field_unavailable_not_zero():
                  "evidence_independence_state", "reconciliation_refs",
                  "contradiction_refs"):
         payload.pop(name, None)
-    snap = read_market_snapshot(payload)
+    snap = read_market_snapshot(payload, today=TODAY)
     assert snap.contract_state == V.OLDER_SUPPORTED
     assert "learning_summary" in snap.missing_fields
     assert snap.evidence_independence_state == V.INDEPENDENCE_UNAVAILABLE
@@ -540,7 +547,7 @@ def test_a_merely_absent_market_does_not_quarantine():
     lambda p: {**p, "subject_names": []},
 ])
 def test_the_market_contract_survives_missing_null_and_empty(mutate):
-    snap = read_market_snapshot(mutate(market_payload()))
+    snap = read_market_snapshot(mutate(market_payload()), today=TODAY)
     assert snap.availability in (V.AVAILABLE, V.DEGRADED)
     assert snap.block("belief_refs").state in (
         "AVAILABLE", "UNAVAILABLE", "NOT_ATTEMPTED")
@@ -585,7 +592,7 @@ def test_an_omitted_internal_impact_reads_unavailable_not_no_impact():
     from intent_engine.external_intel import internal_impact as II
     payload = founder_payload()
     payload.pop("internal_impact_state")
-    snap = read_founder_snapshot(payload)
+    snap = read_founder_snapshot(payload, today=TODAY)
     assert snap.internal_impact_state == II.INTERNAL_DATA_UNAVAILABLE
     assert snap.internal_impact_state in II.NOT_A_NEGATIVE
 

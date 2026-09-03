@@ -1519,8 +1519,15 @@ class WebApp:
             ("Set-Cookie", _recovery.cookie_header(
                 token, secure=self.config.cookie_secure))], body
 
-    def _error_page(self, code, message):
+    def _error_page(self, code, message, *, category=None):
         """A reader-facing failure. Never a status line and an exception.
+
+        `category` is for a call site that KNOWS the cause rather than one
+        catching an exception. Classifying by substring is right for the
+        latter and wrong for the former: the admission refusal below says "NO
+        ANALYSIS CREDIT WAS USED", and the bare needle "credit" read that as
+        the credit balance being exhausted -- so a run that never started
+        told the reader its evidence had been retrieved.
 
         Measured live: `GET /runs/{id}` on a run that had not yet been
         approved answered "Bad request / approve at least one source" — a
@@ -1530,7 +1537,7 @@ class WebApp:
         The category decides what is said; `message` never reaches the page.
         It is hashed into a short reference an operator can correlate.
         """
-        category = _failures.classify(message)
+        category = category or _failures.classify(message)
         # Decided from the message's OWN classification, before any
         # code-specific substitution below replaces it: substituting first and
         # then reading `explained["category"]` made every unrecognised 404
@@ -2227,11 +2234,15 @@ class WebApp:
                             in self.TERMINAL_STATES):
                         self._release_demo_quota(session, remote,
                                                  _reserved)
+                        # THE CATEGORY IS DECIDED HERE, not inferred from
+                        # the words. This branch knows exactly what happened:
+                        # admission was refused, no run exists, nothing ran.
                         return self._error_page(
                             503, "This preview is already running as many "
                                  "analyses as it can at once. Nothing was "
                                  "fetched and NO ANALYSIS CREDIT WAS USED — "
-                                 "try again in a few minutes.")
+                                 "try again in a few minutes.",
+                            category=_failures.ADMISSION_REFUSED)
                     return self._with_run_claim(
                         self._redirect(f"/runs/{run_id}/progress"),
                         session, run_id, company_name)

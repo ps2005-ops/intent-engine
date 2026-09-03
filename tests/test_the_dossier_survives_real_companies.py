@@ -40,6 +40,39 @@ from intent_engine.product_eval.harness import _compose
 
 FIXTURES = pathlib.Path(__file__).parent / "fixtures"
 
+#: THE FIXTURE'S DATES MOVE WITH THE CLOCK; ITS CONTENT DOES NOT.
+#:
+#: `market_demo_snapshot_rich.json` was written with every date at
+#: 2026-08-11, and `read_market_snapshot` declares a snapshot STALE past
+#: BOUNDED_WINDOW_DAYS. So these assertions passed for a few weeks and then
+#: failed for everyone -- the guard blocked a commit on 2026-09-03 over a
+#: fixture written on 2026-08-11, with a diff that says nothing about the
+#: contract under test.
+#:
+#: Pinning the READER's clock instead is not the repair: the founder half is
+#: composed live and carries today's dates, so a past `now` makes the
+#: assembled dossier quarantine itself with TEMPORAL_LEAK. Both sides have to
+#: share one clock, and the only one that can move is the fixture's.
+_DATED_FIELDS = ("evidence_cutoff", "generated_at", "known_at", "as_of")
+
+
+def _as_of_today(payload, today):
+    """The same snapshot, re-dated to `today`. Content is untouched."""
+    if isinstance(payload, dict):
+        return {k: (today if k in _DATED_FIELDS and isinstance(v, str)
+                    else _as_of_today(v, today)) for k, v in payload.items()}
+    if isinstance(payload, list):
+        return [_as_of_today(v, today) for v in payload]
+    return payload
+
+
+def _rich_snapshot_payload():
+    import datetime as _dt
+    today = _dt.date.today().isoformat()
+    return _as_of_today(
+        payload_from_file(FIXTURES / "market_demo_snapshot_rich.json"),
+        today), today
+
 #: Three analysis SHAPES, not three companies from one template.
 #: A — a high-coverage public company with filings behind it.
 #: B — a private company with a different business and economic structure.
@@ -107,8 +140,8 @@ def test_every_real_shape_survives_assemble_persist_reload(shape, analyses,
     run_id, result = analyses[shape]
     company = company_key(SHAPES[shape])
     founder = _founder_snapshot(run_id, result, company)
-    market = read_market_snapshot(
-        payload_from_file(FIXTURES / "market_demo_snapshot_rich.json"))
+    payload, today = _rich_snapshot_payload()
+    market = read_market_snapshot(payload)
 
     # The market fixture is for another company, so this is the join the
     # 100-company runner will make constantly: a founder analysis with no
@@ -119,7 +152,7 @@ def test_every_real_shape_survives_assemble_persist_reload(shape, analyses,
             "no market snapshot has been published for this company",
             company_id=company)
 
-    dossier = assemble(market, founder, now="2026-08-11")
+    dossier = assemble(market, founder, now=today)
     store = DossierStore(tmp_path)
     saved = store.save(dossier)
     assert saved.dossier_version == 1
@@ -139,7 +172,7 @@ def test_every_real_shape_survives_assemble_persist_reload(shape, analyses,
 def test_the_real_market_producers_output_is_accepted_by_this_side():
     """THE CROSS-CONTRACT TEST. Bytes from the real market producer, read by
     the real founder consumer, with neither able to import the other."""
-    payload = payload_from_file(FIXTURES / "market_demo_snapshot_rich.json")
+    payload, _today = _rich_snapshot_payload()
     assert payload is not None
     snap = read_market_snapshot(payload)
     assert snap.availability == V.AVAILABLE, snap.reason
@@ -168,12 +201,11 @@ def test_a_real_crossing_assembles_when_both_sides_are_present(analyses,
     run_id, result = analyses["rich"]
     company = "palantir-technologies-inc"
     founder = _founder_snapshot(run_id, result, company)
-    market = read_market_snapshot(
-        payload_from_file(FIXTURES / "market_demo_snapshot_rich.json"),
-        expected_company=company)
+    payload, today = _rich_snapshot_payload()
+    market = read_market_snapshot(payload, expected_company=company)
     assert market.availability == V.AVAILABLE
 
-    dossier = assemble(market, founder, now="2026-08-11")
+    dossier = assemble(market, founder, now=today)
     assert dossier.crossing_state == CROSSING_BOTH
     assert dossier.market_block["blocks"]["beliefs"]["count"] == 3
     assert dossier.market_block["blocks"]["theses"]["ids"] == ["thx-1"]
