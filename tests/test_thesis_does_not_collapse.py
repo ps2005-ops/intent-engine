@@ -219,6 +219,28 @@ def test_a_failed_lookup_is_not_remembered_as_an_answer():
 # --- THE AUDIT TRAIL: four defects wear one symptom -----------------------
 
 
+def _sec(url, timeout, max_bytes=None):
+    """The two SEC reads this composition makes, served locally.
+
+    DETERMINISM IS THE POINT. Without a transport these tests reach the real
+    sec.gov: the ticker table to recover a subject, then the submissions
+    endpoint to classify it. A 429 -- which is the failure this host actually
+    produces under load -- would make `subject_cik` answer "" and turn a
+    correctness assertion into a network assertion. This file has already
+    been bitten once by a test whose outcome depended on what a remote
+    service felt like returning.
+    """
+    if "company_tickers" in url:
+        return (200, {"Content-Type": "application/json"},
+                b'{"0": {"cik_str": 19617, "ticker": "JPM", '
+                b'"title": "JPMORGAN CHASE & CO"}}', False)
+    if "submissions" in url:
+        return (200, {"Content-Type": "application/json"},
+                b'{"cik": 19617, "sic": "6021", '
+                b'"sicDescription": "National Commercial Banks"}', False)
+    return (404, {}, b"", False)
+
+
 def _composed_audit(tmp, *, cik="19617"):
     text = ("Our platform helps merchants sell online. Demand capture runs "
             "through the marketplace and the shop app, which set how "
@@ -230,8 +252,11 @@ def _composed_audit(tmp, *, cik="19617"):
            "title": "SEC 10-K", "text": text, "text_content": text,
            "content_hash": "jpm", "retrieved_at": "2026-02-24"}
     ci = CompanyIngestionService(pathlib.Path(tmp) / "ci.jsonl",
-                                 resolver=False)
-    run = ci.create_run(company_name="JPMorgan Chase & Co.", website="",
+                                 resolver=False, transport=_sec)
+    # A run needs a website OR a CIK. The un-picked customer flow supplies
+    # the website and no CIK, which is exactly the case worth composing.
+    run = ci.create_run(company_name="JPMorgan Chase & Co.",
+                        website="" if cik else "https://jpmorganchase.com",
                         user_id="u", as_of="2026-08-20T00:00:00+00:00",
                         cik=cik)
     payload = ci._strategic_report("JPMorgan Chase & Co.", [doc], [],
@@ -245,12 +270,85 @@ def test_a_run_records_which_classification_gated_its_reading():
     with tempfile.TemporaryDirectory() as tmp:
         audit = _composed_audit(tmp)
     assert audit, "the run published a reading and no account of it"
-    for key in ("business_model", "eligible_pattern_ids",
+    for key in ("meta_cik", "subject_cik", "registrant_sic",
+                "business_model", "eligible_pattern_ids",
                 "excluded_pattern_ids", "chosen_pattern", "chosen_thesis",
                 "company_specific_mechanism", "supporting_observation_ids",
                 "alternative", "reason_chosen", "fired_pattern_ids"):
         assert key in audit, f"the audit cannot answer '{key}'"
     assert audit["business_model"], "an empty classification is not UNKNOWN"
+    # THE RUN WAS TOLD, in this fixture: it was opened on a CIK. The proof
+    # that matters is the other one -- a run that was NOT told and recovered
+    # the subject anyway -- and it is asserted below.
+    assert audit["meta_cik"] == "19617"
+    assert audit["subject_cik"] == "19617"
+    # JPMorgan is IN the curated manifest, so `classification_inputs`
+    # short-circuits before any SEC read and the SIC is deliberately absent.
+    # That is why the repair proof below uses a company that is not.
+    assert audit["registrant_sic"] == ""
+
+
+def _retail_sec(url, timeout, max_bytes=None):
+    """Lowe's, as the SEC serves it. Same reason for the double as above."""
+    if "company_tickers" in url:
+        return (200, {"Content-Type": "application/json"},
+                b'{"0": {"cik_str": 60667, "ticker": "LOW", '
+                b'"title": "LOWES COMPANIES INC"}}', False)
+    if "submissions" in url:
+        return (200, {"Content-Type": "application/json"},
+                b'{"cik": 60667, "sic": "5211", '
+                b'"sicDescription": "Retail-Lumber & Other Building Materials"}',
+                False)
+    return (404, {}, b"", False)
+
+
+def test_a_run_never_told_its_cik_recovers_the_subject_anyway():
+    """THE REPAIRED PATH, END TO END, and the audit is what makes it visible.
+
+    A customer who types a name and a website without confirming a suggestion
+    posts no CIK. Before the repair that left `subject_cik` empty, no
+    registrant was fetched, `profile_for` answered UNKNOWN, and UNKNOWN takes
+    the whole library.
+
+    THE SUBJECT MUST BE OUTSIDE THE CURATED MANIFEST OR THIS PROVES NOTHING.
+    JPMorgan looks like the obvious choice -- it is the company of the
+    original ownership defect -- and it is the wrong one: it is IN the
+    manifest, so `classification_inputs` short-circuits before any SEC read
+    and `profile_for` classifies it by hand whether or not a CIK was ever
+    recovered. The collapse never touched it. Lowe's is outside the manifest
+    and is one of the three companies that actually received the identical
+    capacity thesis, so the whole chain has to work for this to pass.
+    """
+    text = ("We operate home improvement stores. We are committing capital "
+            "to capacity ahead of the demand for it, and our supply "
+            "commitments are long-dated.")
+    doc = {"final_url":
+           "https://www.sec.gov/Archives/edgar/data/60667/low.htm",
+           "source_class": "investor_material", "source_id": "low",
+           "title": "SEC 10-K", "text": text, "text_content": text,
+           "content_hash": "low", "retrieved_at": "2026-02-24"}
+    with tempfile.TemporaryDirectory() as tmp:
+        ci = CompanyIngestionService(pathlib.Path(tmp) / "ci.jsonl",
+                                     resolver=False, transport=_retail_sec)
+        run = ci.create_run(company_name="Lowes Companies Inc",
+                            website="https://lowes.com", user_id="u",
+                            as_of="2026-08-20T00:00:00+00:00")
+        payload = ci._strategic_report("Lowes Companies Inc", [doc], [],
+                                       run_id=run["run_id"], deep=False)
+    audit = payload["pattern_audit"]
+    assert audit["meta_cik"] == "", (
+        "the premise of this test is a run that carries no typed CIK")
+    assert audit["subject_cik"] == "60667", (
+        "the run was not told its subject and did not work it out, so the "
+        "pattern gate is being asked to classify nobody")
+    assert audit["registrant_sic"] == "5211", (
+        "the subject was recovered and then not used to fetch a registrant")
+    assert audit["business_model"] == "SCALE_RETAIL", (
+        f"reached the gate as {audit['business_model']}; UNKNOWN admits the "
+        "whole library, which is what produced the identical thesis")
+    assert CAPACITY in audit["excluded_pattern_ids"], (
+        "a home-improvement retailer was offered a semiconductor-style "
+        "capacity commitment")
 
 
 def test_the_audit_accounts_for_every_pattern_in_the_library():

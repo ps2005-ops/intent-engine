@@ -128,6 +128,14 @@ def main() -> int:
           and a.get("names_company")]
     out(f"- Q&A: {len(ok)}/{len(answered)} substantive-and-owned "
         f"({pct(len(ok), len(answered))})")
+    # A REPORT THAT NAMES NO COUNTER-ACCOUNT IS NOT THE SAME AS ONE THAT SAYS
+    # IT LOOKED AND FOUND NONE. Only the missing section is a defect.
+    counter: dict = {}
+    for r in rows:
+        counter[r.get("counterevidence") or "--"] = \
+            counter.get(r.get("counterevidence") or "--", 0) + 1
+    out(f"- counterevidence: " + ", ".join(
+        f"{k}={v}" for k, v in sorted(counter.items())))
     terminal = [r for r in rows if r.get("result") in
                 ("FULL_REPORT", "BOUNDED_ABSTENTION")]
     out(f"- terminal: {len(terminal)}/{len(rows)}")

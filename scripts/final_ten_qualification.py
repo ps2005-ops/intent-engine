@@ -49,6 +49,22 @@ TEN = [
     ("Sprouts Farmers Market", "sprouts.com", "small-cap / sparse"),
 ]
 
+#: THE NO-CIK REPAIR PROOF USES ONE OF THE TEN, AND JPMORGAN WOULD NOT DO.
+#:
+#: JPMorgan is the obvious candidate -- it is the company of the original
+#: ownership defect -- and it is the wrong one. It is IN the curated
+#: validation manifest, so `classification_inputs` short-circuits before any
+#: SEC read and `profile_for` classifies it by hand whether or not a CIK was
+#: ever recovered. The collapse could never touch it, so a green proof there
+#: would mean nothing.
+#:
+#: Lowe's is outside the manifest and is one of the three companies that
+#: actually received the byte-identical capacity thesis, so the whole chain
+#: -- recover subject, fetch registrant, classify, gate -- has to work:
+#:
+#:     --only lowe --no-pick
+PROOF_SUBJECTS: list = []
+
 QUESTIONS = [
     "What is the most important strategic implication?",
     "What is the strongest evidence supporting that?",
@@ -151,10 +167,18 @@ def _answer_excerpt(answer_text: str, brief_text: str) -> str:
     return " ".join(fresh)[:1400]
 
 
-def journey(name, domain, sector, *, budget_s=300.0) -> dict:
+def journey(name, domain, sector, *, budget_s=300.0, pick=True) -> dict:
+    """One customer journey. `pick=False` is the OTHER real customer flow.
+
+    A customer who types a name and a website WITHOUT choosing a suggestion
+    never reaches the confirmed-pick branch, so the run opens with no CIK.
+    That is the flow the business-model gate was broken on, and it is the one
+    a matrix driven entirely through the picker can never exercise. Both are
+    real; only one of them was ever defective.
+    """
     op, _ = _opener()
     row = {"company": name, "domain": domain, "sector": sector,
-           "defects": [], "error": ""}
+           "picked": pick, "defects": [], "error": ""}
     st, entry, _u, _d = _req(op, "/demo")
     csrf = re.search(r'name="csrf"\s+value="([^"]+)"', entry)
 
@@ -218,7 +242,13 @@ def journey(name, domain, sector, *, budget_s=300.0) -> dict:
     # is then unreadable: a wrong company looks exactly like a product
     # defect, and the quota is gone either way. A harness that cannot name
     # the entity it selected has failed, and says so instead.
-    if chosen is None:
+    if chosen is not None and not pick:
+        # The suggestion was fetched and scored -- the identity assertion
+        # still holds -- and then deliberately not confirmed, which is what a
+        # customer who types past the dropdown does.
+        chosen = None
+        row["autocomplete_found"] = True
+    if chosen is None and pick:
         row["result"] = "HARNESS_ERROR"
         row["error"] = (f"no suggestion covered {name!r}: best overlap "
                         f"{row['match_score']} across {row['suggestions']}")
@@ -362,6 +392,19 @@ def journey(name, domain, sector, *, budget_s=300.0) -> dict:
                if c.lower() in btext.lower() and c.lower() not in name.lower()]
     row["foreign_companies"] = foreign
     row["spinner_after_terminal"] = 'id="pg-timer"' in brief
+
+    # WHAT ARGUES AGAINST IT (§17). Three outcomes, and the harness used to
+    # record one blank for all of them: the section names competing accounts,
+    # the section truthfully says retrieval found none, or the section is
+    # missing entirely -- which is the only one of the three that is a defect.
+    _against = "what argues against it" in btext.lower()
+    _none_found = "nothing retrieved argues against this reading" in btext.lower()
+    row["counterevidence"] = ("SECTION_ABSENT" if not _against else
+                              "NONE_FOUND_STATED" if _none_found else
+                              "PRESENT")
+    if not _against:
+        row["defects"].append(
+            "the report does not say what argues against its own reading")
     if row["spinner_after_terminal"]:
         row["defects"].append("a running clock remains after the terminal state")
 
@@ -503,14 +546,18 @@ def main() -> int:
     ap.add_argument("--pace", type=float, default=400.0)
     ap.add_argument("--budget", type=float, default=300.0)
     ap.add_argument("--only", default="")
+    ap.add_argument("--no-pick", action="store_true",
+                    help="type the name and website without confirming a "
+                         "suggestion -- the flow that opens with no CIK")
     args = ap.parse_args()
 
     # `--only synopsys,emerson,blackrock,slb` runs the focused proof that
     # must pass BEFORE the ten are spent. One prefix could never express it,
     # and spending ten analyses to prove four is how an hourly quota is lost.
     wanted = [w.strip().lower() for w in args.only.split(",") if w.strip()]
-    cohort = [c for c in TEN if not wanted
+    cohort = [c for c in TEN + PROOF_SUBJECTS if not wanted
               or any(c[0].lower().startswith(w) for w in wanted)]
+    pick = not args.no_pick
     out = pathlib.Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     rows, began = [], time.monotonic()
@@ -525,7 +572,7 @@ def main() -> int:
         json.dumps(proofs, indent=2), "utf-8")
     for i, (name, domain, sector) in enumerate(cohort, 1):
         started = time.monotonic()
-        row = journey(name, domain, sector, budget_s=args.budget)
+        row = journey(name, domain, sector, budget_s=args.budget, pick=pick)
         row["index"] = i
         rows.append(row)
         out.write_text(json.dumps(rows, indent=2), "utf-8")

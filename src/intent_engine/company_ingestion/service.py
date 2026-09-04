@@ -2672,6 +2672,19 @@ class CompanyIngestionService:
         _support = list(_top.get("strongest_support_ids")
                         or _top.get("supporting_observation_ids") or ())
         payload["pattern_audit"] = {
+            # WAS THE RUN TOLD WHO IT WAS ABOUT, OR DID IT WORK IT OUT?
+            #
+            # These three separate the two, and nothing else can. A customer
+            # who confirms an autocomplete row posts `suggest_cik`, so
+            # `meta_cik` is set and the gate was never at risk. A customer
+            # who types a name and a website and submits posts nothing, so
+            # `meta_cik` is "" and `subject_cik` had to be recovered here --
+            # which is the path that produced UNKNOWN for every company, and
+            # the only path on which this repair is observable at all.
+            "meta_cik": str((self.run_meta(run_id) or {}).get("cik") or ""),
+            "subject_cik": subject_cik,
+            "registrant_sic": str(
+                (classification.get("registrant") or {}).get("sic") or ""),
             "business_model": _model or "UNKNOWN",
             "library_size": len(_LIB),
             "eligible_pattern_ids": [p.pattern_id for p in _eligible],
