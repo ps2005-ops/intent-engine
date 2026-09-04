@@ -349,8 +349,42 @@ def business_document(cik, accession_nodash, primary_doc, *, transport=None,
     return (best, True) if best else (primary_doc, False)
 
 
+#: Apostrophe forms a customer's keyboard or a copy-paste can produce.
+_APOSTROPHES = "\u0027\u2019\u02bc\u02be\u0060\u00b4"
+
+
 def _tokens(name: str) -> set:
-    words = re.sub(r"[^a-z0-9]+", " ", (name or "").lower()).split()
+    """Comparable name tokens for full-containment matching.
+
+    AN APOSTROPHE IS DELETED, NOT SPLIT ON, AND THAT ONE CHARACTER COST A
+    COMPANY ITS ENTIRE EVIDENCE SET.
+
+    MEASURED LIVE on dd1511f0. A customer typed "Lowe's Companies" with a
+    website and submitted without choosing a suggestion. Splitting on
+    non-alphanumerics gave {lowe, s, companies}; the SEC's own title is
+    "LOWES COMPANIES INC" -> {lowes, companies}; containment failed, so
+    `resolve_cik` answered None. With no CIK there were no EDGAR filing
+    candidates AT ALL, lowes.com refused the fetch, and the run reached
+    composition with ONE document and no `direction` or `market` evidence.
+    `may_synthesize` was False, so `strategic_report` was None and the
+    business-model gate never ran -- on a company with a 10-K sitting in
+    EDGAR.
+
+    The autocomplete surface already normalises this: typing `lowe's` returns
+    "Lowes Companies Inc". The SERVER-SIDE fallback did not get that repair,
+    so the defect survived exactly where nobody was looking -- the path a
+    customer takes when they type past the dropdown.
+
+    Deleting is symmetric: both sides of the comparison lose the character,
+    so a registrant whose own title carries one is unaffected. Splitting is
+    not, because it manufactures a one-letter token ("s") that no title
+    contains. Every possessive company name in EDGAR has this shape:
+    McDonald's, Macy's, Moody's, Kohl's, Dillard's, Wendy's, Domino's.
+    """
+    lowered = (name or "").lower()
+    for ch in _APOSTROPHES:
+        lowered = lowered.replace(ch, "")
+    words = re.sub(r"[^a-z0-9]+", " ", lowered).split()
     return {w for w in words if w and w not in _DROP_TOKENS}
 
 

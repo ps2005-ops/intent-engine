@@ -440,6 +440,12 @@ def journey(name, domain, sector, *, budget_s=300.0, pick=True) -> dict:
             row["reason_chosen"] = audit.get("reason_chosen")
             row["thesis_evidence"] = audit.get("supporting_evidence")
             row["reasoning_provenance"] = audit.get("reasoning_provenance")
+            # AN ABSENT AUDIT IS NOT AN UNKNOWN CLASSIFICATION. A run that
+            # never reached composition -- `may_synthesize` False, so
+            # `strategic_report` is None -- has no gate result to report, and
+            # recording that as a blank made a STARVED run look like a
+            # MIS-CLASSIFIED one. Two opposite repairs, one empty cell.
+            row["thesis_error"] = audit.get("error")
             if audit.get("business_model") == "UNKNOWN":
                 row["defects"].append(
                     "the pattern gate was never told what kind of business "
