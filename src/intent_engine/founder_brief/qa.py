@@ -631,6 +631,11 @@ class FounderAnswer:
     strongest_evidence: str = ""
     weakest_evidence: str = ""
     fact_or_interpretation: str = ""
+    #: The question this answer is a continuation of, when it is one. A
+    #: reader who asks "why does that matter?" is owed a visible statement of
+    #: what "that" was resolved to -- otherwise a contextual answer is
+    #: indistinguishable from a lucky one.
+    follows: str = ""
 
     def as_dict(self) -> dict:
         return {"question": self.question, "direct_answer": self.direct_answer,
@@ -643,7 +648,91 @@ class FounderAnswer:
                 "withheld": self.withheld,
                 "strongest_evidence": self.strongest_evidence,
                 "weakest_evidence": self.weakest_evidence,
-                "fact_or_interpretation": self.fact_or_interpretation}
+                "fact_or_interpretation": self.fact_or_interpretation,
+                "follows": self.follows}
+
+
+#: Words that make a question depend on the one before it. A question built
+#: only out of these has no topic of its own, and answering it without the
+#: previous turn can only produce a coincidence.
+_BACK_REFERENCE = ("that", "this", "it", "those", "these", "the above",
+                   "your answer", "you said", "the previous")
+
+
+def is_follow_up(question: str, previous) -> bool:
+    """Does this question need the previous turn to mean anything?
+
+    MEASURED LIVE on 4908ad99. Asked "Why does that matter most for this
+    company specifically?" after five prior questions, Synopsys returned
+    question one's refusal verbatim and Emerson returned question two's
+    answer verbatim. Neither referred to anything. The cause was not the
+    router: `answer()` had no way to know a previous turn existed.
+
+    `_conversation_context` had been declared on the webapp since the dead
+    second engine was removed, and nothing has ever written to it -- so the
+    ONE surface that resolved "Why?" against the last turn was the one that
+    could not run.
+
+    A question that names its own topic is NOT a follow-up, however many
+    pronouns it contains: "what evidence supports that" is an evidence
+    question and must keep going to the evidence router.
+    """
+    if not previous:
+        return False
+    low = (question or "").lower()
+    # EVERY ROUTER THIS MODULE HAS, NOT JUST ONE OF THEM.
+    #
+    # The first version asked `intent_of` alone, which reads INTENT_ROUTES.
+    # "What evidence supports that?" matches none of those markers -- it is
+    # matched by `_EVIDENCE_INTENT`, a separate tuple consulted further down
+    # -- so an evidence question was classified as a bare back-reference and
+    # would have stopped reaching the evidence router at all. Caught by the
+    # negative control, which is the only reason this is not a new defect
+    # shipped by the repair for the old one.
+    if intent_of(question) or _intent(question, _STRATEGIC_INTENT) \
+            or _intent(question, _EVIDENCE_INTENT):
+        return False
+    return any(re.search(rf"\b{re.escape(w)}\b", low)
+               for w in _BACK_REFERENCE)
+
+
+def _continue(question: str, previous) -> FounderAnswer:
+    """Answer a back-reference OUT OF THE TURN IT REFERS TO.
+
+    Every sentence here comes from the previous answer's own fields. Nothing
+    is composed about the company that the previous turn did not already
+    establish, which is what keeps this from becoming a second interpreter.
+    """
+    last = previous[-1]
+    said = str(last.get("direct_answer") or "").strip()
+    matters = str(last.get("so_what") or "").strip()
+    decision = str(last.get("decision_affected") or "").strip()
+    watch = str(last.get("what_could_change") or "").strip()
+    out = FounderAnswer(question=question, direct_answer="",
+                        follows=str(last.get("question") or ""))
+    lead = f"Taking \u201c{said}\u201d as the point in question: " if said else ""
+    if matters:
+        out.direct_answer = lead + matters
+    elif decision:
+        out.direct_answer = (
+            lead + f"it matters because of the decision it bears on \u2014 "
+            f"{decision[:1].lower()}{decision[1:]}")
+    elif said:
+        out.direct_answer = (
+            f"That was the whole of it: \u201c{said}\u201d. Nothing further "
+            f"about it is established by what this run retrieved, and the "
+            f"honest answer to why it matters most is that this run cannot "
+            f"rank it against the alternatives.")
+    else:
+        out.direct_answer = (
+            "The previous answer established nothing to follow up on, so "
+            "there is no basis here for saying why it matters.")
+    out.decision_affected = decision
+    out.what_could_change = watch
+    out.confidence = str(last.get("confidence") or "")
+    out.limitations = tuple(last.get("limitations") or ())
+    out.evidence_ids = tuple(last.get("evidence_ids") or ())
+    return out
 
 
 def _intent(question: str, markers) -> bool:
@@ -678,7 +767,8 @@ def answer(question: str, brief, *, engine_answer: str = "",
            observations: Optional[Sequence[dict]] = None,
            trust=None, contract=None, decision=None,
            read=None, econ=None,
-           deep_pending: bool = False) -> FounderAnswer:
+           deep_pending: bool = False,
+           previous=()) -> FounderAnswer:
     """Frame an answer using the shared object. Never invents a conclusion.
 
     `trust` is the CANONICAL standing produced by the market side, not a
@@ -686,6 +776,14 @@ def answer(question: str, brief, *, engine_answer: str = "",
     accounts exist — it may not say they confirm each other.
     """
     observations = list(observations or ())
+    # A BACK-REFERENCE IS RESOLVED BEFORE ROUTING, NOT AFTER.
+    #
+    # The router matches on the words in front of it, and a question whose
+    # only subject is "that" has none -- so it fell to whichever intent
+    # happened to share a word and returned that intent's answer again. The
+    # previous turn is what the question is about; ask it first.
+    if is_follow_up(question, previous):
+        return _continue(question, previous)
     trust = trust if trust is not None else _ET.UNRATED
     k = brief.key_insight
     # D25. WHETHER A READING EXISTS IS NOT DECIDED HERE.

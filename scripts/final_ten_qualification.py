@@ -402,9 +402,13 @@ def journey(name, domain, sector, *, budget_s=300.0, pick=True) -> dict:
     row["counterevidence"] = ("SECTION_ABSENT" if not _against else
                               "NONE_FOUND_STATED" if _none_found else
                               "PRESENT")
-    if not _against:
-        row["defects"].append(
-            "the report does not say what argues against its own reading")
+    # ONLY A RUN THAT REACHED A READING OWES ONE. A bounded result -- no
+    # pattern qualified, so the page says so instead of deciding -- has no
+    # conclusion to argue against, and demanding the section there reports a
+    # defect against a product that behaved correctly. Deferred until the
+    # thesis audit has been read, below, because that is what says whether a
+    # reading exists.
+    row["_counter_absent"] = not _against
     if row["spinner_after_terminal"]:
         row["defects"].append("a running clock remains after the terminal state")
 
@@ -430,6 +434,14 @@ def journey(name, domain, sector, *, budget_s=300.0, pick=True) -> dict:
             # run says which classification it was given and which readings
             # survived it.
             audit = data.get("thesis") or {}
+            # HOW THE RUN CAME TO KNOW WHO IT WAS ABOUT. These three are the
+            # only thing separating the repaired path from the path that was
+            # never broken, and the row was not copying them out of the audit
+            # it had already fetched -- so the no-pick proof reported blanks
+            # for the exact fields it existed to establish.
+            row["meta_cik"] = audit.get("meta_cik")
+            row["subject_cik"] = audit.get("subject_cik")
+            row["registrant_sic"] = audit.get("registrant_sic")
             row["business_model"] = audit.get("business_model")
             row["eligible_patterns"] = audit.get("eligible_pattern_ids")
             row["excluded_patterns"] = audit.get("excluded_pattern_ids")
@@ -446,6 +458,11 @@ def journey(name, domain, sector, *, budget_s=300.0, pick=True) -> dict:
             # recording that as a blank made a STARVED run look like a
             # MIS-CLASSIFIED one. Two opposite repairs, one empty cell.
             row["thesis_error"] = audit.get("error")
+            if row.pop("_counter_absent", False) and audit.get(
+                    "chosen_pattern"):
+                row["defects"].append(
+                    "the report reached a reading and does not say what "
+                    "argues against it")
             if audit.get("business_model") == "UNKNOWN":
                 row["defects"].append(
                     "the pattern gate was never told what kind of business "
@@ -487,6 +504,24 @@ def journey(name, domain, sector, *, budget_s=300.0, pick=True) -> dict:
             "answer_text": _answer_excerpt(atext, brief_text),
         })
     row["qa"] = answers
+    # DID THE LAST QUESTION KNOW WHAT IT WAS FOLLOWING?
+    #
+    # "6/6 answered" was true while the follow-up returned an EARLIER
+    # ANSWER VERBATIM -- measured on Synopsys (question one's refusal) and
+    # Emerson (question two's answer). A count cannot see that; comparing
+    # the text can.
+    _follow = answers[-1].get("answer_text") or ""
+    _earlier = [a.get("answer_text") or "" for a in answers[:-1]]
+    _norm = lambda t: " ".join((t or "").split()).lower()          # noqa: E731
+    row["context_retained"] = bool(
+        _norm(_follow)
+        and _norm(_follow) not in {_norm(e) for e in _earlier}
+        and not any(_norm(_follow) and _norm(_follow) == _norm(e)
+                    for e in _earlier))
+    if not row["context_retained"]:
+        row["defects"].append(
+            "the contextual follow-up repeated an earlier answer instead of "
+            "building on it")
     ok_qa = [a for a in answers
              if a["status"] == 200 and not a["leaks"] and a["names_company"]]
     row["qa_ok"] = f"{len(ok_qa)}/{len(answers)}"

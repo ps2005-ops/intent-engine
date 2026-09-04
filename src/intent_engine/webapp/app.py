@@ -7893,6 +7893,21 @@ class WebApp:
             _trust = _et.as_read_by(_intel, _ran)
         except Exception:  # noqa: BLE001 - a question must still be answerable
             _LOG.warning("trust standing unavailable for %s", run_id)
+        # THE TURNS THIS READER HAS ALREADY HAD, ON THIS RUN.
+        #
+        # `_conversation_context` has existed since the dead second engine
+        # was removed and NOTHING HAS EVER WRITTEN TO IT -- the only writer
+        # was inside the unreachable block below. So the one mechanism this
+        # product had for resolving "Why does that matter?" against the last
+        # answer lived in code that could not execute, and a structural test
+        # asserting the read-before-write order passed against it.
+        #
+        # KEYED BY RUN AND READER, NEVER BY RUN ALONE. A run is owned by one
+        # session, but a key that ignores the reader is one redeploy away
+        # from showing somebody else's questions -- the same reasoning the
+        # request-scoped memos at the top of `_route` are written under.
+        _hist_key = (run_id, str(session.get("user_id") or ""))
+        _history = tuple(self._conversation_context.get(_hist_key, ()))
         founder_answer = fqa.answer(question, brief,
                                     contract=self._executive_contract(run_id),
                                     decision=self._composed_decision(run_id),
@@ -7919,7 +7934,12 @@ class WebApp:
                                     deep_pending=(
                                         str((_report or {}).get(
                                             "deep_status") or "")
-                                        == "PENDING"))
+                                        == "PENDING"),
+                                    previous=_history)
+        # BOUNDED. Six turns is more than the executive question set and far
+        # short of anything that could grow without limit in a long session.
+        self._conversation_context[_hist_key] = (
+            _history + (founder_answer.as_dict(),))[-6:]
         return self._founder_answer_page(session, run_id, founder_answer)
         # WHAT USED TO BE HERE, AND WHY IT IS GONE.
         #
