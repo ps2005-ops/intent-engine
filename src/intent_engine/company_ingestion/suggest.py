@@ -205,10 +205,42 @@ def _registry_profiles(module) -> Sequence:
     return out
 
 
+#: The validation manifest, parsed once per file version.
+#:
+#: `manifest.load()` re-reads and re-parses the YAML on every call: measured
+#: 2026-09-04 at 118.9ms for 100 companies, which was 118.7ms of a 118.9ms
+#: suggestion. Autocomplete calls this on every keystroke, so the customer
+#: paid a full YAML parse per character -- and on the preview's ~15% CPU
+#: share that is over a second before anything can be shown.
+#:
+#: CACHED HERE RATHER THAN IN `manifest.load()`. Other callers legitimately
+#: want a fresh read of a file that a human edits; this is a read-only
+#: suggestion path where staleness within one process is harmless. Keyed on
+#: (path, mtime, size) so an edited manifest is still picked up rather than
+#: being served from a cache until the process restarts.
+_MANIFEST_CACHE: Dict[tuple, object] = {}
+
+
+def _cached_manifest():
+    from intent_engine.validation import manifest as M
+    import pathlib as _pl
+    path = _pl.Path(M.MANIFEST_PATH)
+    try:
+        stat = path.stat()
+        key = (str(path), stat.st_mtime_ns, stat.st_size)
+    except OSError:
+        key = (str(path), 0, 0)
+    held = _MANIFEST_CACHE.get(key)
+    if held is None:
+        held = M.load()
+        _MANIFEST_CACHE.clear()          # one version at a time, bounded
+        _MANIFEST_CACHE[key] = held
+    return held
+
+
 def _from_manifest(typed: str) -> List[Suggestion]:
     try:
-        from intent_engine.validation import manifest as M
-        man = M.load()
+        man = _cached_manifest()
     except Exception:                                       # noqa: BLE001
         return []
     out = []
@@ -261,10 +293,74 @@ def _ticker_table(transport=None, resolver=None
     return rows
 
 
+#: A 2-character prefix index over the registrant table, built once per
+#: process and keyed on every string `_match` can accept a query through.
+#:
+#: WHY. `_from_registrant` called `_match` on all 10,412 rows for EVERY
+#: KEYSTROKE. Measured 2026-09-04: 145ms per query locally once the table was
+#: cached, and 1.5-3.1s live -- the preview runs at a ~15% CPU share, which
+#: multiplies a CPU-bound scan by roughly ten. A suggestion list that arrives
+#: three seconds after the keystroke is not a suggestion list; the customer
+#: has finished typing and pressed submit.
+#:
+#: THE KEYS ARE DERIVED FROM `_match`, NOT GUESSED. Every branch that returns
+#: a rank requires one of three things to be true, so the index carries all
+#: three per row:
+#:   - some WORD of the name starts with the first typed word
+#:     (EXACT, LEADING, partial-last-word and CONTAINS all imply this);
+#:   - the TICKER equals what was typed;
+#:   - the INITIALISM equals what was typed (the one branch where no word
+#:     need share a prefix -- "ibm" against International Business Machines).
+#: A narrower index would silently stop finding companies, which is why the
+#: equivalence is asserted by a test rather than argued here.
+_PREFIX_INDEX: Dict[str, List[int]] = {}
+_INDEXED_TABLE: List = []
+
+
+def _index_keys(title: str, ticker: str) -> set:
+    keys = set()
+    for word in _words(title):
+        if word:
+            keys.add(word[:2])
+    handle = (ticker or "").strip().lower()
+    if handle:
+        keys.add(handle[:2])
+    initialism = _initialism(title) or ""
+    if initialism:
+        keys.add(initialism[:2])
+    return keys
+
+
+def _registrant_index(transport=None, resolver=None):
+    """(rows, prefix -> row indices). Built once, then pure lookup."""
+    global _INDEXED_TABLE, _PREFIX_INDEX
+    table = list(_ticker_table(transport, resolver))
+    if table and (not _PREFIX_INDEX or len(table) != len(_INDEXED_TABLE)):
+        index: Dict[str, List[int]] = {}
+        for position, (title, ticker, _cik) in enumerate(table):
+            for key in _index_keys(title, ticker):
+                index.setdefault(key, []).append(position)
+        _INDEXED_TABLE, _PREFIX_INDEX = table, index
+    return _INDEXED_TABLE, _PREFIX_INDEX
+
+
+def _candidate_rows(typed: str, transport=None, resolver=None):
+    """The rows worth testing for this query. A superset of the matches."""
+    table, index = _registrant_index(transport, resolver)
+    words = _words(typed)
+    key = words[0][:2] if words else ""
+    if len(key) < 2:
+        # A one-character first word cannot address a two-character bucket.
+        # Fall back to the whole table rather than return nothing: correctness
+        # first, and `suggest` already refuses queries under two characters.
+        return table
+    return (table[i] for i in index.get(key, ()))
+
+
 def _from_registrant(typed: str, *, limit: int, transport=None,
                      resolver=None) -> List[Suggestion]:
     out = []
-    for title, ticker, cik in _ticker_table(transport, resolver):
+    for title, ticker, cik in _candidate_rows(typed, transport, resolver):
         rank = _match(typed, title, ticker)
         if rank is None:
             continue

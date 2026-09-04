@@ -132,6 +132,15 @@ background:var(--panel,#f8fafc)}
 color:var(--muted,#4b5563);white-space:nowrap}
 .fineprint{font-size:.8rem;color:var(--muted,#4b5563);margin-top:1.6rem;
 border-top:1px solid var(--line,#d1d5db);padding-top:.6rem;max-width:34rem}
+/* THE CLOCK. Tabular figures so the digits do not shift the line every
+   second -- a timer that makes the layout twitch reads as a glitch. */
+.elapsed{font-size:1.05rem;color:var(--muted,#4b5563);margin:.5rem 0 .2rem}
+.elapsed #pg-timer{font-variant-numeric:tabular-nums;
+font-feature-settings:"tnum";font-weight:650;font-size:1.5rem;
+color:var(--fg,#111827);letter-spacing:.01em}
+.eta{font-size:.9rem;color:var(--muted,#4b5563);margin:.1rem 0 1rem;
+max-width:34rem}
+@media (prefers-reduced-motion:reduce){.elapsed #pg-timer{transition:none}}
 </style>
 """
 
@@ -2466,25 +2475,76 @@ class WebApp:
         return self.STAGE_COPY.get(
             state or "", "Still working through the available evidence")
 
+    def _elapsed_seconds(self, run_id: str):
+        """Seconds since the analysis was ACCEPTED, or None.
+
+        ANCHORED ON `accepted`, NOT ON THE FIRST EVENT. `mark_lifecycle(...,
+        "accepted")` is recorded at the instant the work was admitted -- the
+        instant the customer's wait starts -- and the comment at that call
+        site says so explicitly: "queue time is part of the wait". The first
+        stored event is `ci.run_created`, which is written slightly earlier
+        and, for a run that was created and then refused admission, is
+        written for a wait that never happened.
+
+        SERVER-DERIVED ON PURPOSE. The browser must not be the clock: a
+        reload, a second tab, or a machine with a skewed clock would each
+        invent a different duration for the same run.
+        """
+        import datetime as _dt
+        marks = {}
+        try:
+            marks = self.ci.lifecycle(run_id) or {}
+        except Exception:                                   # noqa: BLE001
+            marks = {}
+        raw = marks.get("accepted")
+        if not raw:
+            for row in self.ci.store.for_run(run_id):
+                raw = getattr(row, "recorded_at", None)
+                if raw:
+                    break
+        if not raw:
+            return None
+        try:
+            began = _dt.datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+        except ValueError:
+            return None
+        if began.tzinfo is None:
+            began = began.replace(tzinfo=_dt.timezone.utc)
+        return max(0, int((_dt.datetime.now(_dt.timezone.utc)
+                           - began).total_seconds()))
+
+    @staticmethod
+    def _clock(seconds) -> str:
+        """`00:47`, `1:12`. A clock a person reads without converting."""
+        if seconds is None:
+            return "00:00"
+        seconds = max(0, int(seconds))
+        if seconds < 60:
+            return f"00:{seconds:02d}"
+        return f"{seconds // 60}:{seconds % 60:02d}"
+
     def _elapsed_line(self, run_id: str) -> str:
         """Real elapsed time. Never a percentage, never a countdown."""
-        import datetime as _dt
-        first = None
-        for row in self.ci.store.for_run(run_id):
-            first = getattr(row, "recorded_at", None)
-            if first:
-                break
-        if not first:
+        seconds = self._elapsed_seconds(run_id)
+        if seconds is None:
             return "Just started."
-        try:
-            began = _dt.datetime.fromisoformat(str(first).replace("Z", "+00:00"))
-        except ValueError:
-            return "Just started."
-        seconds = int((_dt.datetime.now(_dt.timezone.utc) - began)
-                      .total_seconds())
         if seconds < 60:
             return f"Running for {max(seconds, 1)}s."
         return f"Running for {seconds // 60}m {seconds % 60}s."
+
+    def _waiting_expectation(self, seconds) -> str:
+        """What to tell the reader about the time, given how long it HAS run.
+
+        Two sentences, and which one is true depends on the clock. Promising
+        "within two minutes" to somebody who is already at 2:30 is the kind
+        of small lie that costs a demo its credibility, and a countdown would
+        be worse -- there is no validated ETA model behind one, so it would be
+        fabricated precision.
+        """
+        if seconds is not None and seconds >= self.INTERACTIVE_MAX_S:
+            return ("Taking longer than usual \u2014 additional evidence is "
+                    "still being checked.")
+        return self.ETA_COPY
 
     @contextlib.contextmanager
     def _segment(self, name):
@@ -2632,6 +2692,14 @@ class WebApp:
             "INTERRUPTED": "This analysis was interrupted",
             "REJECTED": "This analysis was not accepted",
         }.get(status, "Reading the public evidence…")
+        # NAME THE COMPANY WHILE THEY WAIT. A reader who submitted three
+        # analyses in a row cannot tell these pages apart otherwise, and the
+        # company they typed is the one fact they are certain of.
+        if status not in ("FAILED", "INTERRUPTED", "REJECTED"):
+            _company = ((self.ci.run_meta(run_id) or {}).get("company_name")
+                        if real else "")
+            if _company:
+                heading = f"Analysing {_company}"
         if recoverable:
             heading = "This analysis stopped early"
         head = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
@@ -2668,6 +2736,7 @@ class WebApp:
             # is the same sentence the tier table is derived from, so the
             # headline and the detail cannot disagree.
             hyd = self._hydration_state(run_id, terminal=terminal)
+            _elapsed_s = self._elapsed_seconds(run_id) if real else None
             step = (hyd.get("current_step") or "").strip() \
                 or self._stage_line(status)
             # THIS PAGE CARRIES THE CUSTOMER; IT DOES NOT PARK THEM.
@@ -2693,6 +2762,15 @@ class WebApp:
             poll = (
                 f'<script>(function(){{'
                 f'var u="/runs/{_e(run_id)}/progress.json",n=0;'
+                f'var base={int(_elapsed_s or 0)},t0=Date.now(),stop=false;'
+                f'function two(x){{return(x<10?"0":"")+x;}}'
+                f'function paint(){{'
+                f'if(stop)return;'
+                f'var s=base+Math.floor((Date.now()-t0)/1000);'
+                f'var e=document.getElementById("pg-timer");'
+                f'if(e)e.textContent=s<60?"00:"+two(s):'
+                f'(Math.floor(s/60)+":"+two(s%60));}}'
+                f'setInterval(paint,1000);'
                 f'function set(id,v){{var e=document.getElementById(id);'
                 f'if(e&&v!=null&&e.innerHTML!==v)e.innerHTML=v;}}'
                 f'function tick(){{'
@@ -2702,8 +2780,12 @@ class WebApp:
                 f'if(!d)return schedule();'
                 f'if(d.open_at){{location.replace(d.open_at);return;}}'
                 f'set("pg-step",d.step_html);set("pg-stages",d.stages_html);'
-                f'set("pg-elapsed",d.elapsed);'
-                f'if(d.terminal){{location.reload();return;}}'
+                f'set("pg-eta",d.eta);'
+                # THE SERVER IS THE CLOCK. Each poll re-seeds the offset, so
+                # the display can drift by at most one poll interval and can
+                # never invent time the run did not spend.
+                f'if(d.elapsed_s!=null){{base=d.elapsed_s;t0=Date.now();}}'
+                f'if(d.terminal){{stop=true;location.reload();return;}}'
                 f'schedule();}})'
                 f'.catch(schedule);}}'
                 # BACK OFF, do not hammer a starved instance. 2s while the
@@ -2723,13 +2805,23 @@ class WebApp:
                     # vocabularies for one state reads as a malfunction.
                     f'<div id="pg-stages">{self._stage_ladder(hyd, status)}'
                     f'</div>'
-                    f'<p id="pg-elapsed">{_e(self._elapsed_line(run_id))}</p>'
+                    # THE ELAPSED CLOCK, AND IT ACTUALLY TICKS.
+                    #
+                    # The server value is authoritative and is re-sent on
+                    # every poll; the script only advances the display in
+                    # between, so a reload, a second tab and a skewed client
+                    # clock all still show the run's real age. Rendered into
+                    # the HTML too, so a reader without scripting sees a
+                    # correct (if stepping) figure rather than "00:00".
+                    f'<p class="elapsed"><span id="pg-timer">'
+                    f'{_e(self._clock(_elapsed_s))}</span> elapsed</p>'
                     # THE EXPECTATION, WHERE THE WAITING HAPPENS. A reader who
                     # is told nothing assumes the worst at 40 seconds; the
                     # same wait is unremarkable when the range was stated up
                     # front. This is the same string the landing page shows,
                     # from one constant, so the two can never disagree.
-                    f'<p class="eta">{_e(self.ETA_COPY)}</p>'
+                    f'<p class="eta" id="pg-eta">'
+                    f'{_e(self._waiting_expectation(_elapsed_s))}</p>'
                     f'<p>We\'re building the analysis now. This page opens it '
                     f'by itself the moment it is ready.</p>'
                     # "YOUR ANALYSES" IS NOT A RECOVERY INSTRUCTION.
@@ -2804,6 +2896,14 @@ class WebApp:
                 payload["step_html"] = f"<strong>{_e(step)}.</strong>"
                 payload["stages_html"] = self._stage_ladder(hyd, status)
                 payload["elapsed"] = _e(self._elapsed_line(run_id))
+                # THE CLOCK, AS A NUMBER. The page's ticker re-seeds from
+                # this on every poll, so the server stays authoritative about
+                # how long the run has actually been going and the browser
+                # only fills the gaps between polls.
+                _secs = self._elapsed_seconds(run_id)
+                payload["elapsed_s"] = _secs
+                payload["elapsed_clock"] = self._clock(_secs)
+                payload["eta"] = _e(self._waiting_expectation(_secs))
             except Exception:                             # noqa: BLE001
                 # A projection failure costs the DETAIL, never the poll: the
                 # client keeps its current text and asks again, which is the
@@ -2823,8 +2923,12 @@ class WebApp:
     #: said -- the copy promises what the p90 can currently support, and gets
     #: tightened when the cohort earns it, never before.
     INTERACTIVE_MAX_S = 120
-    ETA_COPY = ("Analysis usually takes about a minute. Deeper or "
-                "less-covered companies can take up to two minutes.")
+    #: MEASURED, NOT ASPIRATIONAL. The live recovery matrix on d4ce3318 read
+    #: CORE p50 96.3s with 9 of 10 inside 120s, so "about a minute" was
+    #: optimistic for half of all readers. "Most analyses finish within two
+    #: minutes" is what the measurement supports, and `_waiting_expectation`
+    #: replaces it the moment a particular run outgrows it.
+    ETA_COPY = "Most analyses finish within two minutes."
 
     #: §11. What is being assembled, in the order a person would build it.
     #: Named for the WORK rather than for the lifecycle, because "VALIDATING

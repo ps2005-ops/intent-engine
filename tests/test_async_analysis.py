@@ -175,7 +175,20 @@ def test_no_fake_percentage_or_countdown_anywhere_on_progress(tmp_path):
     import re
     app = _async_app(tmp_path)
     _, _, body = _in_flight_progress(app)
-    assert "Running for" in body, "the page must show real elapsed time"
+    # REAL ELAPSED TIME, now shown as a clock rather than a sentence.
+    #
+    # This asserted the literal string "Running for", which was the old
+    # phrasing. The page now renders `<span id="pg-timer">00:47</span>
+    # elapsed` and ticks between polls, which is MORE elapsed time on the
+    # page, not less -- so the assertion follows the requirement rather than
+    # the wording. The anti-countdown checks below are untouched and are the
+    # part of this proof that actually constrains the product.
+    assert 'id="pg-timer"' in body, "the page must show real elapsed time"
+    assert "elapsed" in body
+    # AND IT MUST BE SEEDED BY THE SERVER. A clock the browser starts at zero
+    # would reset on every reload and would count a wait that did not happen.
+    assert "var base=" in body, \
+        "the elapsed clock is not seeded from the server"
     # VISIBLE text only: `max-width:100%` in the stylesheet is not a claim
     # about completion, and a gate that trips on CSS gets deleted by the next
     # person rather than believed.

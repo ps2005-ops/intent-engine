@@ -82,8 +82,40 @@ def test_the_expectation_is_stated_before_the_wait_and_during_it():
                 break
     assert landing, "could not locate the landing form -- the search broke"
     assert "ETA_COPY" in landing, "no time expectation before the reader commits"
-    assert "ETA_COPY" in inspect.getsource(WebApp._progress), \
+    # THE WAITING PAGE MAY REACH THE CONSTANT THROUGH ITS ACCESSOR.
+    #
+    # `_progress` now renders `_waiting_expectation(elapsed)`, which returns
+    # ETA_COPY under the promise and a truthful "taking longer than usual"
+    # sentence once a run passes INTERACTIVE_MAX_S. A page that kept
+    # promising "within two minutes" at 2:30 would be lying, so the
+    # indirection is the point rather than a way around this guard.
+    #
+    # So the assertion follows the indirection instead of forbidding it, and
+    # then PROVES it: the accessor must actually yield the one constant, or
+    # the two surfaces could still drift apart -- which is the only thing
+    # this test has ever cared about.
+    progress_src = inspect.getsource(WebApp._progress)
+    assert ("ETA_COPY" in progress_src
+            or "_waiting_expectation" in progress_src), \
         "no time expectation while the reader waits"
+    if "_waiting_expectation" in progress_src:
+        accessor = inspect.getsource(WebApp._waiting_expectation)
+        assert "ETA_COPY" in accessor, (
+            "the waiting page's expectation no longer comes from the one "
+            "constant the landing page uses; they can now drift apart")
+
+        class _Fake:
+            ETA_COPY = WebApp.ETA_COPY
+            INTERACTIVE_MAX_S = WebApp.INTERACTIVE_MAX_S
+            _waiting_expectation = WebApp._waiting_expectation
+
+        fake = _Fake()
+        assert fake._waiting_expectation(0) == WebApp.ETA_COPY
+        assert fake._waiting_expectation(None) == WebApp.ETA_COPY
+        late = fake._waiting_expectation(WebApp.INTERACTIVE_MAX_S + 1)
+        assert late != WebApp.ETA_COPY, (
+            "a run past the stated maximum still promises the maximum")
+        assert "longer" in late.lower(), late
 
 
 def test_the_disabled_feedback_notice_is_truthful_and_not_an_infra_report():
