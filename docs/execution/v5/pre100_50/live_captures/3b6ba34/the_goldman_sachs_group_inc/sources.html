@@ -1,0 +1,389 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The Goldman Sachs Group, Inc. — introduction</title><style>
+body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:820px;
+margin:0 auto;padding:2rem;color:#1a1a2e;line-height:1.55}
+h1{font-size:1.9rem}h3{margin-top:2.2rem;border-bottom:1px solid #e6e6ef;
+padding-bottom:.3rem}.card{border:1px solid #e6e6ef;border-radius:10px;
+padding:1rem 1.2rem;margin:.8rem 0;background:#fff}
+.state{font-size:.85rem;color:#555}.why{color:#333}.alt,.q{font-size:.9rem;
+color:#444}.limitation{font-size:.85rem;color:#666}
+.unavailable{color:#666;font-style:italic}
+details summary{cursor:pointer;font-size:.85rem;color:#3a3a8c}
+code{background:#f4f4fa;padding:.05rem .3rem;border-radius:4px;font-size:.8rem}
+.avail-conflicted{border-left:3px solid #b8860b}
+.avail-stale{border-left:3px solid #999}
+.trust-note{background:#f6f8ff;border-radius:10px;padding:1rem;font-size:.9rem}
+/* --- shared product shell (nav, forms, controls, lifecycle states) --------- */
+nav{display:flex;flex-wrap:wrap;gap:.55rem;align-items:center;font-size:.85rem;
+background:#f6f8ff;border:1px solid #e6e6ef;border-radius:10px;padding:.55rem .9rem;
+margin-bottom:1.6rem;color:#555}
+nav a{color:#3a3a8c;text-decoration:none}nav a:hover{text-decoration:underline}
+nav form{display:inline;margin:0}
+nav button{background:transparent;color:#3a3a8c;border:0;padding:.1rem .2rem;
+font:inherit;font-weight:500;cursor:pointer;text-decoration:underline}
+nav button:hover{color:#2d2d70}
+/* On a phone every nav item is a thumb target, and at the shell's 0.85rem
+   they were 18-20px tall -- under the 24px minimum, on the control a reader
+   uses to get out of a page. Desktop is unchanged: the extra height comes
+   from padding that only applies where pointing is imprecise. */
+@media (max-width:600px){
+nav{gap:.35rem .9rem;padding:.5rem .8rem}
+nav a,nav button{display:inline-flex;align-items:center;min-height:44px;
+padding:.1rem .15rem}}
+label{display:block;margin:.4rem 0 .3rem;font-weight:500}
+input[type=text],input[type=email],input[type=password],input[type=url],
+input:not([type]),textarea,select{width:100%;max-width:34rem;box-sizing:border-box;
+/* #cfd0dc was 1.53:1 on the white field — the same WCAG 1.4.11 defect the
+   landing sheet had at #d5d5e2, but in the SHARED shell, so it reached every
+   form outside the landing page: login, the follow-up question box on a
+   result, the add-a-source form. Found on the deployed Palantir result at
+   485ec4b, in light mode, after the landing fix had already shipped —
+   fixing one sheet says nothing about the other. #888aa4 is 3.38:1,
+   alongside the landing's 3.42:1. */
+padding:.55rem .7rem;border:1px solid #888aa4;border-radius:8px;font:inherit;
+background:#fff;color:inherit}
+textarea{min-height:6rem;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:2px solid #6b6be0;
+outline-offset:1px;border-color:#6b6be0}
+input[type=checkbox]{width:auto;margin-right:.5rem;vertical-align:baseline}
+button{background:#3a3a8c;color:#fff;border:0;border-radius:8px;padding:.6rem 1.15rem;
+font:inherit;font-weight:600;cursor:pointer}
+button:hover{background:#2d2d70}
+button:disabled{background:#b9b9d4;cursor:not-allowed}
+.btn-row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin:1.2rem 0}
+[role=alert]{background:#fff4f4;border:1px solid #f0c9c9;color:#8a1f1f;
+border-radius:8px;padding:.7rem .9rem;margin:1rem 0}
+[role=status]{background:#f0f6ff;border:1px solid #cfe0f5;border-radius:8px;
+padding:.7rem .9rem;margin:1rem 0}
+/* AN ANNOUNCEMENT WITH NOTHING TO ANNOUNCE DRAWS NOTHING.
+   The autocomplete's live region is a [role=status] and inherits this panel,
+   so on the company-entry screen an empty 38px tinted box sat directly under
+   the only input on the page — reading as a second, broken field. Measured
+   locally at 390px.
+   It stays in the DOM rather than being display:none'd, because a live region
+   removed from the box tree is one assistive technology may stop watching;
+   this only stops it PAINTING until it has something to say. */
+[role=status]:empty,[role=alert]:empty{background:none;border:0;padding:0;
+margin:0}
+.coverage{background:#fffaf0;border:1px solid #f0e0c0;border-radius:8px;
+padding:.7rem .9rem;margin:1rem 0}
+details{border:1px solid #e6e6ef;border-radius:10px;padding:.6rem .9rem;
+margin:1.2rem 0;background:#fafaff}
+details>summary{cursor:pointer;font-weight:600;color:#3a3a8c}
+ul.source-list{list-style:none;padding:0;margin:.3rem 0 1.2rem}
+ul.source-list li{margin:.35rem 0}
+ul.source-list li label{display:block;font-weight:400;border:1px solid #e6e6ef;
+border-radius:8px;padding:.55rem .7rem;background:#fff;cursor:pointer;line-height:1.4}
+ul.source-list li label:hover{border-color:#c3c3e6;background:#fbfbff}
+ul.source-list .tag{display:inline-block;font-size:.72rem;font-weight:600;
+border-radius:999px;padding:.05rem .5rem;margin-left:.35rem;vertical-align:middle}
+.tag-authoritative{background:#e7f6ec;color:#1c6b3a}
+.tag-external{background:#f3eefc;color:#5b3aa0}
+.tag-unverified{background:#f4f4f4;color:#666}
+.stage{font-size:1rem;margin:1rem 0}
+.step-badge{display:inline-block;background:#eeeefc;border-radius:999px;
+padding:.15rem .75rem;font-size:.85rem;font-weight:600;color:#2d2d70}
+.count-note{font-size:.85rem;color:#555}
+/* PANELS THAT SET A LIGHT BACKGROUND AND NO COLOUR. Under a dark scheme the
+   background stayed light while the text inherited the dark scheme's
+   near-white, so each of these rendered white-on-white. Measured live on
+   preview-v3 at 20ffb9c, on the PROGRESS page — the screen every visitor
+   watches for the whole analysis: the stage line "Writing the founder
+   briefing." inside [role=status] at 1.01:1, and the .coverage note "This
+   preview stores runs in memory..." at 1.06:1. Both invisible.
+
+   The generic floor in `webapp.app._A11Y_CSS` covers .card/.chip/details and
+   could not reach these: it has no rule for [role=status], [role=alert],
+   .coverage or a source-list label. Give each a dark counterpart here, beside
+   the light one it corrects, so the two cannot drift apart. */
+@media (prefers-color-scheme:dark){
+[role=alert]{background:#2a1717;border-color:#5b2b2b;color:#ffb4b4}
+[role=status]{background:#161c26;border-color:#3a4454;color:#f3f4f6}
+/* Restated inside the dark block: these two rules have the same specificity
+   as the :empty reset above and land after it, so without this the empty
+   announcement box comes back in dark only — exactly the asymmetry this
+   file's own dark audit was written to stop. */
+[role=status]:empty,[role=alert]:empty{background:none;border:0;padding:0;
+margin:0}
+.coverage{background:#1f1b12;border-color:#4a3f28;color:#f3f4f6}
+details{background:#161c26;border-color:#3a4454}
+ul.source-list li label{background:#1b2230;border-color:#3a4454;color:#f3f4f6}
+ul.source-list li label:hover{background:#222b3b;border-color:#4a5568}
+.tag-authoritative{background:#14351f;color:#8fe0ac}
+.tag-external{background:#241a3a;color:#c4a9f5}
+.tag-unverified{background:#22262e;color:#c3cad6}
+.step-badge{background:#1e2440;color:#c9cdff}
+.count-note{color:#c3cad6}}
+</style>
+<style>
+:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{
+outline:3px solid #1d4ed8;outline-offset:2px}
+img,svg,video,table{max-width:100%}
+pre,code{overflow-x:auto;max-width:100%}
+@media (max-width:600px){
+body{font-size:16px}
+main{padding-left:14px;padding-right:14px}
+table{display:block;overflow-x:auto}}
+@media (prefers-color-scheme:dark){
+:root{color-scheme:dark}
+body{background:#0f141c;color:#f3f4f6}
+a{color:#7aa2ff}
+/* The focus ring is set once above in the light accent (#1d4ed8), and that
+   colour carried into dark mode unchanged: measured on the deployed /login at
+   b66dbe3, 2.76:1 against #0f141c, under the 3:1 WCAG floor for a non-text UI
+   indicator. A keyboard user in dark mode could not reliably see where they
+   were. `.brief` and `.deck` were already correct because their ring reads
+   var(--accent), which IS re-pointed below; only the global floor hard-coded
+   the literal. Same specificity as the base rule, so it wins on order. */
+:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{
+outline-color:#7aa2ff}
+:where(h1,h2,h3,h4,h5,h6){color:#f3f4f6}
+/* NOT :where() — that zeroes specificity, so these lost to the very class
+   rules they correct and the panels stayed light under a dark scheme. */
+:root .card,:root .chip,:root .agenda,:root details,
+:root fieldset{background:#161c26;border-color:#3a4454}
+:root .muted,:root .state,:root .limitation,:root small{color:#c3cad6}
+/* Components that define their own palette as custom properties (.brief and
+   .deck) kept LIGHT values in dark mode: the body went near-black while
+   var(--panel) stayed #f8fafc and var(--ink) stayed near-white, so the layer
+   nav rendered near-white text on a near-white bar at 1.04:1 — the tab you
+   were on was invisible. Re-point the variables rather than restyle
+   everything that uses them.
+
+   Two things here are load-bearing and easy to undo by accident:
+
+   1. The :root prefix. .brief and .deck ship their CSS in the BODY, which
+      lands after this stylesheet, so a bare `.deck` selector loses the
+      cascade to the very rule it is correcting. :root outranks it.
+   2. The absence of :where(). :where() zeroes specificity, so those rules
+      would lose to any plain class selector — including all of these. */
+:root .brief,:root .deck{--ink:#f3f4f6;--muted:#c3cad6;--line:#3a4454;
+--ctl:#606e88;--bg:#0f141c;--panel:#161c26;--accent:#7aa2ff;--accent-ink:#0f141c}
+:root nav,:root .trust-note,:root .panel{background:#161c26;
+border-color:#3a4454;color:#c3cad6}
+:root nav a,:root nav a:visited,:root nav button,
+:root details summary{color:#7aa2ff}
+:root code,:root pre{background:#1b2230;color:#e5e7eb}
+/* Buttons keep a white background from the base sheet; inheriting the dark
+   scheme's near-white text on it renders them at 1.1:1 — unreadable. */
+/* A CONTROL'S EDGE IS NOT DECORATION. WCAG 1.4.11 asks 3:1 for the boundary
+   that tells a reader where a field IS, and #3a4454 renders at 1.88:1 on
+   #0f141c and 1.74:1 on a panel — measured live on the deployed landing form
+   at a5e1322, where the text and placeholders passed and the boxes around
+   them did not. #606e88 is 3.59:1 on the page, 3.32:1 on a panel and 3.10:1
+   inside the field. Panel and separator borders stay #3a4454: those are
+   decorative, and this rule is only for things you click into. */
+:root button,:root input,:root select,:root textarea{background:#1b2230;
+color:#f3f4f6;border-color:#606e88}
+/* A BORDER-COLOUR WITH NO WIDTH DRAWS NOTHING. The rule above names #606e88
+   and stops there, but the base sheet ships a global `button{border:0}`
+   (presentation._BASE_CSS) that zeroes the WIDTH, so on every <button> that
+   colour had nothing to paint. Measured live on preview-v3 at 81ac65d, in
+   dark mode: the landing page's anonymous-entry CTA rendered #1b2230 on
+   #0f141c — 1.16:1 — a control a reader can read the label of and cannot see
+   the edges of. The inputs passed only because the landing sheet happens to
+   set its own 1px width.
+
+   (Phrased without quoting that button's copy on purpose: this stylesheet is
+   inlined into every page, comments included, so a label quoted here would
+   appear on pages the control itself is switched off for.)
+
+   Checkboxes and radios are excluded on purpose: `:root{color-scheme:dark}`
+   above already hands them a native dark boundary, and giving them an author
+   border makes the engine drop that native rendering — trading a boundary
+   that works for one that also loses the tick. */
+:root button,:root input:not([type=checkbox]):not([type=radio]),
+:root select,:root textarea{border-style:solid;border-width:1px}
+/* ...but a text-styled control is not a box. `nav button` (Log out, Leave
+   demo) and `button.linkish` (the example runs) set a transparent background
+   deliberately so they read as links beside their real <a> siblings. The
+   blanket fill above outranks them, so in dark each one became a flat
+   #1b2230 rectangle at 1.16:1 — no longer a link, not yet a visible button.
+   Give the transparency back and keep the edge off. Both selectors outrank
+   the two rules above, so this holds wherever it lands in the cascade. */
+:root nav button,:root button.linkish{background:transparent;border-width:0}
+/* ...and a PRIMARY action is not a box either. The blanket fill above outranks
+   the landing sheet's accent (both are one class + one element, and this sheet
+   is injected second), so in dark every primary submit rendered #1b2230 — the
+   same flat panel as a text input. Measured locally at 390px in dark: the
+   first screen's dominant control and an inert field were the same colour,
+   which is the whole hierarchy of that screen erased.
+   Two selectors' worth of specificity, so it holds regardless of order, and it
+   re-points to the same accent pair the dark palette already defines rather
+   than inventing a third blue. */
+:root button.primary,:root form.analyze button[type=submit]{
+background:#7aa2ff;color:#0f141c;border-width:0}
+:root .why,:root .alt,:root .q,:root .unavailable,:root .state,
+:root .limitation,:root .muted,:root .when{color:#c3cad6}
+/* Deck surfaces that hard-code a light literal rather than var(--panel), and
+   so survived the variable re-pointing above: the citations drawer (#fafaff)
+   and the slide action buttons (white). Both need a selector at least as
+   specific as the deck's own. */
+:root .deck .cites,:root details.cites{background:#161c26;
+border-color:#3a4454}
+:root .deck .act button,:root .deck .act a,:root .deck .nav a,
+:root .deck button{background:#1b2230;color:#f3f4f6;border-color:#3a4454}
+/* The full-analysis document (.si) carries its OWN dark palette, defined
+   beside its own stylesheet in the strategic-intelligence renderer. Do not
+   add .si rules here: overriding that palette from outside fights it instead
+   of completing it, and measurably makes contrast worse. */}
+@media print{
+nav,form,.actions,.b-act,.layers{display:none!important}
+body{background:#fff;color:#000}}
+</style>
+<style>
+.step{max-width:52rem;margin:0 auto;padding:0 1rem}
+.step .kicker{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;
+color:var(--muted);font-weight:700;margin:0 0 .3rem}
+.step h1{font-size:clamp(1.6rem,4vw,2.3rem);line-height:1.15;margin:0 0 .6rem}
+.step .lede{font-size:clamp(1.02rem,2.2vw,1.18rem);line-height:1.55;
+margin:0 0 1rem}
+.step .subject{font-size:.86rem;color:var(--muted);margin:-.3rem 0 .9rem;
+letter-spacing:.01em}
+.readbox{border:1px solid var(--line);border-left:4px solid var(--accent);
+border-radius:12px;background:var(--card);padding:1.1rem 1.2rem;margin:1.4rem 0}
+.readbox h2{margin:0 0 .5rem;font-size:.74rem;text-transform:uppercase;
+letter-spacing:.09em;color:var(--muted)}
+.readbox p{margin:.45rem 0}
+.readbox .q{font-size:1.06rem;font-weight:600}
+.readbox.rec{border-left-color:var(--ok,#1a6b47)}
+.readbox.rec .n{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;
+color:var(--muted);font-weight:700;margin-right:.35rem}
+.stand{display:inline-block;font-size:.68rem;text-transform:uppercase;
+letter-spacing:.06em;border:1px solid var(--line);border-radius:999px;
+padding:.08rem .5rem;color:var(--muted);margin-left:.4rem;white-space:nowrap}
+.stand.obs{border-color:var(--accent);color:var(--accent)}
+.matters{list-style:none;margin:1.1rem 0;padding:0;display:grid;gap:.6rem}
+.matters li{border:1px solid var(--line);border-radius:10px;
+padding:.75rem .9rem;background:var(--card)}
+.matters .n{font-size:.7rem;color:var(--muted);font-weight:700;
+letter-spacing:.08em}
+.quote{border-left:3px solid var(--line);padding:.3rem 0 .3rem .9rem;
+margin:1.2rem 0;color:var(--muted);font-style:italic}
+.quote cite{display:block;font-style:normal;font-size:.8rem;margin-top:.3rem}
+.chapters section{padding:1.1rem 0;border-top:1px solid var(--line)}
+.chapters h3{margin:0 0 .35rem;font-size:1.02rem}
+.chapters p{margin:0}
+/* --- step 6 feedback ---------------------------------------------------- */
+.fbx{border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.2rem;
+margin:1.6rem 0;background:var(--card)}
+.fbx h2{margin:0 0 .6rem;font-size:1.05rem;text-transform:none;
+letter-spacing:0;color:var(--fg)}
+.fbx fieldset{border:0;padding:0;margin:0 0 .9rem}
+.fbx legend{font-size:.8rem;color:var(--muted);font-weight:700;padding:0;
+margin-bottom:.35rem}
+.fbx .scale{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;
+margin:0;font-size:.8rem;color:var(--muted)}
+.fbx .sc{display:inline-flex;align-items:center;gap:.25rem;
+border:1px solid var(--line);border-radius:8px;padding:.3rem .6rem;
+cursor:pointer;font-size:.95rem;color:var(--fg)}
+.fbx .tags{display:flex;flex-wrap:wrap;gap:.4rem}
+.fbx .tag{display:inline-flex;align-items:center;gap:.3rem;
+border:1px solid var(--line);border-radius:999px;padding:.24rem .7rem;
+font-size:.83rem;cursor:pointer}
+.fbx label[for]{display:block;font-size:.83rem;color:var(--muted);
+margin-bottom:.2rem}
+.fbx input[type=text],.fbx input:not([type]){width:100%;box-sizing:border-box;
+padding:.5rem .6rem;border:1px solid var(--line);border-radius:8px;
+font:inherit;background:var(--bg,#fff);color:var(--fg)}
+.fbx button{padding:.55rem 1.1rem;border-radius:9px;border:0;
+background:var(--accent);color:#fff;font-weight:650;cursor:pointer;
+font-size:.95rem}
+.fbx .fb-priv{font-size:.78rem;color:var(--muted);margin:.7rem 0 0}
+.fbx .fb-ok{border-left:3px solid var(--accent);padding-left:.7rem;
+margin:0 0 .9rem}
+/* --- history slider, JS-free ------------------------------------------- */
+.rewind input[type=radio]{position:absolute;opacity:0;pointer-events:none}
+.rail{display:flex;gap:.25rem;align-items:flex-end;margin:1.1rem 0 .3rem;
+overflow-x:auto;padding-bottom:.4rem;-webkit-overflow-scrolling:touch}
+.rail label{flex:1 1 0;min-width:5.2rem;cursor:pointer;text-align:center;
+border:1px solid var(--line);border-bottom-width:3px;border-radius:8px 8px 0 0;
+padding:.5rem .35rem;background:var(--card);font-size:.78rem;color:var(--muted)}
+.rail label b{display:block;font-size:.86rem;color:var(--fg);font-weight:650}
+.vint{display:none;border:1px solid var(--line);border-radius:0 12px 12px 12px;
+padding:1.1rem 1.2rem;background:var(--card)}
+.vint h2{margin:0 0 .2rem;font-size:1.15rem}
+.vwall{font-size:.85rem;color:var(--muted);margin:.1rem 0 1rem}
+.panels{display:grid;gap:.8rem;grid-template-columns:1fr 1fr;margin:0}
+@media(max-width:720px){.panels{grid-template-columns:1fr}}
+.panels div{border:1px solid var(--line);border-radius:10px;padding:.75rem .9rem}
+.panels div.after{border-color:var(--accent);border-style:dashed;
+grid-column:1/-1}
+.panels h3{margin:0 0 .3rem;font-size:.72rem;text-transform:uppercase;
+letter-spacing:.07em;color:var(--muted);font-weight:700}
+.panels p{margin:0;font-size:.93rem}
+.cfact{margin:1rem 0 0;border-top:1px solid var(--line);padding-top:.9rem}
+.cfact dt{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;
+color:var(--muted);font-weight:700;margin-top:.55rem}
+.cfact dd{margin:.15rem 0 0}
+/* --- connect ------------------------------------------------------------ */
+.conn{display:grid;gap:.7rem;grid-template-columns:1fr 1fr;margin:1.1rem 0}
+@media(max-width:720px){.conn{grid-template-columns:1fr}}
+.conn div{border:1px solid var(--line);border-radius:10px;padding:.8rem .95rem;
+background:var(--card)}
+.conn h3{margin:0 0 .2rem;font-size:.95rem}
+.conn p{margin:0;font-size:.9rem;color:var(--muted)}
+.tag{display:inline-block;font-size:.66rem;text-transform:uppercase;
+letter-spacing:.07em;border-radius:999px;padding:.1rem .5rem;font-weight:700;
+border:1px solid var(--line);color:var(--muted);margin-bottom:.4rem}
+.tag.on{border-color:var(--accent);color:var(--accent)}
+.chain{list-style:none;margin:1rem 0;padding:0;display:grid;gap:.5rem}
+.chain li{border:1px solid var(--line);border-radius:10px;padding:.7rem .9rem;
+background:var(--card)}
+.chain .st{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
+color:var(--muted);font-weight:700}
+.cta{display:inline-block;margin:1.2rem 0 0;border:1px solid var(--accent);
+background:var(--soft);border-radius:10px;padding:.75rem 1.2rem;
+font-weight:650;text-decoration:none;color:inherit}
+</style><style>
+.flownav{display:flex;align-items:center;justify-content:space-between;
+gap:1rem;margin:2.6rem 0 .6rem;padding:1.1rem 0 0;
+border-top:1px solid var(--line);flex-wrap:wrap}
+.flownav .side{flex:1 1 12rem;min-width:0}
+.flownav .side.next{text-align:right}
+.flownav a{display:inline-block;max-width:100%;text-decoration:none;
+color:inherit;border:1px solid var(--line);border-radius:10px;
+padding:.6rem .9rem;background:var(--card)}
+.flownav a:hover{border-color:var(--accent)}
+.flownav .lab{display:block;font-size:.7rem;text-transform:uppercase;
+letter-spacing:.08em;color:var(--muted);font-weight:700}
+.flownav .ttl{display:block;font-weight:650;margin-top:.1rem}
+.flownav .pro{display:block;font-size:.82rem;color:var(--muted);
+margin-top:.15rem}
+.flownav a.primary{border-color:var(--accent);background:var(--soft)}
+.flownav .count{flex:0 0 auto;font-size:.8rem;color:var(--muted);
+text-align:center;padding:0 .4rem}
+.flownav .count b{display:block;font-size:.95rem;color:var(--fg);
+font-weight:650}
+.steps{display:flex;gap:.3rem;justify-content:center;margin:.5rem 0 0;
+padding:0;list-style:none;flex-wrap:wrap}
+.steps li{width:1.9rem;height:.28rem;border-radius:2px;background:var(--line)}
+/* The per-step name is for assistive technology only. Without this rule the
+   six titles printed as a run-on line under the progress bar -- "Introduction
+   Presentation Full analysis The full story History rewind Connect your
+   company" -- which is the tab grid, reborn as text. */
+.steps .sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;
+overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;
+border:0}
+.steps li.done{background:var(--muted)}
+.steps li.here{background:var(--accent)}
+.aside{border:1px solid var(--line);border-left:3px solid var(--accent);
+border-radius:8px;padding:.7rem .95rem;margin:1.1rem 0;background:var(--card);
+font-size:.92rem}
+/* A LABEL, NOT A HEADING. This was an <h4> under pages whose last heading is
+   an <h2>, which is a two-level jump and a real accessibility defect -- the
+   heading outline is how a screen-reader user navigates, and a skipped level
+   reads as a missing section. It is styling, so it is now a <p>. */
+.aside .lab{margin:0 0 .25rem;font-size:.72rem;text-transform:uppercase;
+letter-spacing:.07em;color:var(--muted);font-weight:700}
+.aside a{margin-right:.9rem}
+@media(max-width:640px){
+  .flownav{flex-direction:column;align-items:stretch}
+  .flownav .side.next{text-align:left}
+  .flownav .count{order:-1;text-align:left}
+}
+@media print{.flownav,.steps{display:none}}
+</style></head><body><nav aria-label="Session"><a href="/">Home</a> · <a href="/analyses">Your analyses</a> · <span>Guest demo session</span> <form action="/logout" method="post" style="display:inline"><input type="hidden" name="csrf" value="UKpUgWKgPmHFH6u05OI0vlZU4t4SlyS1xQBfIy62X8c"><button type="submit">Leave demo</button></form></nav>
+
+<main class="step"><p class="kicker">Introduction</p><h1>The Goldman Sachs Group, Inc.</h1><p class="subject">GS · USA · goldmansachs.com · SEC CIK 886982</p><p class="lede">The Goldman Sachs Group, Inc. is a financial regulated business that runs on prices to clients globally across thousands of products in all major asset classes and markets; revenue from our participation in large transactions, a decline in the number of large transactions has in the past and would in the future adversely affect our investment banking business.</p><p>Its position is contested directly by brokers and dealers, and customers can substitute non-bank providers reaching the customer directly.</p><div class="readbox"><h2>The strategic read</h2><p class="q">The question worth arguing about is what to charge, and for what, without losing more spread on assets and liabilities than the price gains?</p><p>the second buyer arrives with requirements the first never had. That is what puts what to charge, and for what, without losing more spread on assets and liabilities than the price gains in front of management now.<span class="stand " title="follows from how this business works; the record neither confirms nor contradicts it">bounded</span></p><p><strong>Our read:</strong> Bounded — the reading follows from an established classification of this business and from what the company publishes about itself; no source outside the company&#x27;s control was read in this run, so it is held in direction only.</p></div><div class="readbox rec"><h2>What we recommend</h2><p class="q">One check separates them: evidence that one named segment contributes negligible revenue.</p><p><span class="n">Guardrail</span> Commit no more than can be withdrawn inside one planning cycle until the check below returns.</p><p><span class="n">Stopping rule</span> If the direction is not visible by the next review, the assumption under the decision has failed.</p><p><span class="n">How to test it</span> Run the change on one segment or one cohort, hold the rest constant, and read spread on assets and liabilities against the unchanged group for one full cycle — that isolates the effect without committing the whole book.</p><p><span class="n">What would change this view</span> Evidence that one named segment contributes negligible revenue.</p></div><h2>What matters now</h2><ul class="matters"><li><span class="n">01</span> Growth here has to come from spread on assets and liabilities, transaction and fee volume and balance or asset growth — there is no fourth source, so a plan that does not name one of those is not a growth plan.<span class="stand " title="follows from how this business works, and the record agrees">strongly inferred</span></li><li><span class="n">02</span> One check separates them: evidence that one named segment contributes negligible revenue.<span class="stand " title="follows from how this business works; the record neither confirms nor contradicts it">bounded</span></li></ul><h2>The choice this bears on</h2><ul class="matters"><li><span class="n">Option 1</span> <strong>Commit to the reading now</strong><br><span class="n">What it means</span> Management plans, resources and prices as though this is already true, without waiting for an outside source to confirm it.<br><span class="n">Upside</span> If this reading holds, the second buyer arrives with requirements the first never had.</li><li><span class="n">Option 2</span> <strong>Hold and verify first</strong><br><span class="n">What it means</span> Plan as though the plainer account is right: one segment is aspirational marketing rather than real revenue.<br><span class="n">Upside</span> If one segment is aspirational marketing rather than real revenue, nothing has been committed against it.</li></ul><div class="chapters"><section><h3>Where the money actually comes from</h3><p>Revenue is decided by spread on assets and liabilities, transaction and fee volume and balance or asset growth, and whether that revenue becomes margin is decided by cost of funds and credit and fraud losses. There is no other lever on the top line.</p></section><section><h3>Why growth and profitability are one question</h3><p>HIGH on volume and LEVERED on the balance sheet: the same movement reaches earnings through both margin and credit. So a decision that moves volume moves margin with it, and the two cannot be planned separately here.</p></section><section><h3>What the market rewards</h3><p>It sells into regulated, scale-driven, and competitive on price of funds, distribution and trust, where the contest is most direct with brokers, dealers and The customer&#x27;s own treasury and banking desk.</p></section><section><h3>Where the strategy is exposed</h3><p>the second buyer arrives with requirements the first never had. The lever management holds against that is pricing of assets and liabilities.</p></section></div><blockquote class="quote">or parent company), a Delaware corporation, together with its consolidated subsidiaries, is a leading global financial institution that delivers a broad range of financial services to a large and diversified client base that includes corporations, financial institutions, governments and individuals.<cite>The Goldman Sachs Group, Inc., in its own words — SEC 10-K (2026-02-25)</cite></blockquote><h2>What the system learned since last time</h2><p>Learning is <strong>accelerating</strong> — a large share of what arrived was new information. Reading more is not the same as knowing more, so this counts what changed rather than what arrived.</p><ul class="chain"><li><span class="st">Changed the model — 25</span><br>beliefs this system revised because of what it read</li><li><span class="st">Genuinely new — 41</span><br>arrivals that were not already in the record</li><li><span class="st">Already known — 223</span><br>arrivals that confirmed what was already held</li><li><span class="st">Tested and held — 92</span><br>beliefs checked against new evidence and left standing</li></ul><p>25 evidence row(s) changed the model</p><p>12 contradicted effect(s)</p><p><strong>What is holding it back:</strong> 223 of 264 arrivals were re-observations (84% already known)</p><p><strong>What to learn next:</strong> seek a source family off the companies&#x27; own domains.</p><aside class="aside" aria-label="Where this comes from"><p class="lab">Where this comes from</p><a href="/runs/01M0KMHJ5Y6N4XBMYQD7Q0TBFY/answer">The answer — the sixty-second version, in one scroll</a><a href="/runs/01M0KMHJ5Y6N4XBMYQD7Q0TBFY/xray">Executive X-Ray — the decision, on one screen</a><a href="/runs/01M0KMHJ5Y6N4XBMYQD7Q0TBFY/evidence">Evidence — why this reading exists — every source, its author, and why it counted</a></aside>
+
+<nav class="flownav" aria-label="Where you are in this analysis"><div class="side back"><a href="/analyses"><span class="lab">← Leave</span><span class="ttl">Your analyses</span></a></div><div class="count"><b>Step 1 of 6</b><ul class="steps"><li class="here"><span class="sr">Introduction</span></li><li class=""><span class="sr">Presentation</span></li><li class=""><span class="sr">Full analysis</span></li><li class=""><span class="sr">The full story</span></li><li class=""><span class="sr">History rewind</span></li><li class=""><span class="sr">Connect your company</span></li></ul></div><div class="side next"><a class="primary" href="/runs/01M0KMHJ5Y6N4XBMYQD7Q0TBFY/slides" rel="next"><span class="lab">Next →</span><span class="ttl">Presentation</span><span class="pro">the case, in slides</span></a></div></nav></main></body></html>

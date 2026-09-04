@@ -1,0 +1,71 @@
+{
+ "contract": "dependency.v1",
+ "as_of": "2026-08-08",
+ "evidence_rows_scanned": 295,
+ "summary": {
+  "contract": "dependency.v1",
+  "claims": 4,
+  "by_kind": {
+   "USES": 4
+  },
+  "dependencies": 0,
+  "distinct_counterparties": 1,
+  "note": "DEPENDS_ON requires a materiality marker the DOCUMENT supplies \u2014 single-source, no available substitute, material adverse effect. Everyone uses cloud infrastructure; a graph recording that as dependency has learned that everyone depends on everyone."
+ },
+ "refusals": {},
+ "claims": [
+  {
+   "contract": "dependency.v1",
+   "claim_id": "dep_ca6cf6304beb",
+   "subject_actor_id": "olo",
+   "object_actor_id": "Fast-growing",
+   "predicate": "USES",
+   "relationship_object": "USES",
+   "evidence_span": "Fast-growing stir-fry concept leverages Olo Pay to simplify payment management and keep more revenue.",
+   "source": "company_owned",
+   "materiality_span": "",
+   "observed_at": "2026-08-05",
+   "provenance": {}
+  },
+  {
+   "contract": "dependency.v1",
+   "claim_id": "dep_ca6cf6304beb",
+   "subject_actor_id": "olo",
+   "object_actor_id": "Fast-growing",
+   "predicate": "USES",
+   "relationship_object": "USES",
+   "evidence_span": "Fast-growing stir-fry concept leverages Olo Pay to simplify payment management and keep more revenue.",
+   "source": "company_owned",
+   "materiality_span": "",
+   "observed_at": "2026-08-06",
+   "provenance": {}
+  },
+  {
+   "contract": "dependency.v1",
+   "claim_id": "dep_ca6cf6304beb",
+   "subject_actor_id": "olo",
+   "object_actor_id": "Fast-growing",
+   "predicate": "USES",
+   "relationship_object": "USES",
+   "evidence_span": "Fast-growing stir-fry concept leverages Olo Pay to simplify payment management and keep more revenue.",
+   "source": "company_owned",
+   "materiality_span": "",
+   "observed_at": "2026-08-07",
+   "provenance": {}
+  },
+  {
+   "contract": "dependency.v1",
+   "claim_id": "dep_ca6cf6304beb",
+   "subject_actor_id": "olo",
+   "object_actor_id": "Fast-growing",
+   "predicate": "USES",
+   "relationship_object": "USES",
+   "evidence_span": "Fast-growing stir-fry concept leverages Olo Pay to simplify payment management and keep more revenue.",
+   "source": "company_owned",
+   "materiality_span": "",
+   "observed_at": "2026-08-08",
+   "provenance": {}
+  }
+ ],
+ "verdict": "the learning ledger is built from earnings and award evidence, not from risk-factor sections, so it carries almost no supplier language. SUPPLIES/DEPENDS_ON needs 10-K risk factors as a source family \u2014 that is an acquisition gap, not an extractor gap."
+}

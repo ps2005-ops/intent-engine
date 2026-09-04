@@ -1,0 +1,44 @@
+[
+  {
+    "company": "Meta Platforms, Inc.",
+    "deployed_sha": "517e7ae",
+    "status": "READY",
+    "run_id": "01M0HEPPFB7X6GV1NDPRQ53G70",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/517e7ae/meta_platforms_inc",
+    "process_before": {
+      "boot_id": "3ccb24afe5f84b46",
+      "started_at": 1787292210.1996582,
+      "uptime_seconds": 31.1
+    },
+    "entry_domain": "",
+    "seconds": 182,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HEPPFB7X6GV1NDPRQ53G70/intro",
+    "routes": 11,
+    "errors": [],
+    "qa_capture_valid": true,
+    "answers": 10,
+    "rejected": []
+  },
+  {
+    "company": "Cloudflare, Inc.",
+    "deployed_sha": "517e7ae",
+    "status": "READY",
+    "run_id": "01M0HF1RQNED5BAV9QW2DTA1Y6",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/517e7ae/cloudflare_inc",
+    "process_before": {
+      "boot_id": "3ccb24afe5f84b46",
+      "started_at": 1787292210.1996582,
+      "uptime_seconds": 396.1
+    },
+    "entry_domain": "cloudflare.com",
+    "seconds": 89,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HF1RQNED5BAV9QW2DTA1Y6/intro",
+    "routes": 11,
+    "errors": [],
+    "qa_capture_valid": true,
+    "answers": 10,
+    "rejected": []
+  }
+]

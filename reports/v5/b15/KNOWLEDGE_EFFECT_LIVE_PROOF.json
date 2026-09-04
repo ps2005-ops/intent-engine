@@ -1,0 +1,77 @@
+{
+  "cases": {
+    "conversion": {
+      "attribution_state": "MEASURED",
+      "effect_producing_evidence_rows": 1,
+      "effects_by_type": {
+        "CONTRADICTED": 1,
+        "FIRST_OBSERVATION": 1,
+        "NO_CHANGE": 2,
+        "REFUSED": 1,
+        "UNMEASURABLE": 1
+      },
+      "knowledge_effects": 6,
+      "learning_conversion": 0.1429
+    },
+    "cross_company_refusal": {
+      "effects": [
+        "REFUSED"
+      ]
+    },
+    "duplicate_replay": {
+      "ledger_after": 4,
+      "ledger_before": 4,
+      "new_rows": 0
+    },
+    "first_observation": {
+      "effects": [
+        "FIRST_OBSERVATION"
+      ],
+      "materiality": "FIRST_OBSERVATION",
+      "new_rows": 1
+    },
+    "incomparable_window": {
+      "effects": [
+        "REFUSED"
+      ],
+      "materiality": "DECISION_CHANGING",
+      "new_rows": 1
+    },
+    "material_change": {
+      "effects": [
+        "CONTRADICTED"
+      ],
+      "materiality": "DECISION_CHANGING",
+      "new_rows": 1
+    },
+    "no_change": {
+      "effects": [
+        "NO_CHANGE"
+      ],
+      "materiality": "NONE",
+      "new_rows": 1
+    },
+    "non_testable_reread": {
+      "effects": [
+        "UNMEASURABLE"
+      ],
+      "materiality": "NONE",
+      "new_rows": 1
+    },
+    "process_restart": {
+      "ledger_rows": 6,
+      "new_rows": "0"
+    },
+    "wording_only": {
+      "effects": [
+        "NO_CHANGE"
+      ],
+      "materiality": "NONE",
+      "new_rows": 1
+    }
+  },
+  "contract": "knowledge_effect_live_proof.v1",
+  "evidence": "SYNTHETIC \u2014 drives the production seam, never stands in for a live analysis",
+  "intelligence_baseline": "BLOCKED_EXTERNAL_CREDITS \u2014 this proof cannot show that a real analysis produces a real effect",
+  "mocked": "none: producer, comparison, persistence, reload, eligibility and consumer are production objects"
+}

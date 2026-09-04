@@ -1,0 +1,35 @@
+{
+  "company": "Microsoft",
+  "cold": {
+    "label": "COLD",
+    "run_id": "01M18ZV1WQ50DKA9AR7FAC6DQ0",
+    "core_latency_s": 66.11,
+    "usable_s": 70.5,
+    "evidence_count": 4,
+    "run_state": "PARTIAL",
+    "result_state": "DEEP_PENDING",
+    "discovery_ms": 34833.9,
+    "retrieval_ms": 17183.1,
+    "composition_ms": 13893.8,
+    "documents": 4,
+    "text_chars": 233695,
+    "observations": 4
+  },
+  "warm": {
+    "label": "WARM",
+    "run_id": "01M18ZXC52SKDS3XAGK07J56BQ",
+    "core_latency_s": 34.41,
+    "usable_s": 37.4,
+    "evidence_count": 6,
+    "run_state": "PARTIAL",
+    "result_state": null,
+    "discovery_ms": 139.6,
+    "retrieval_ms": 17164.4,
+    "composition_ms": 4601.0,
+    "documents": null,
+    "text_chars": null,
+    "observations": null
+  },
+  "durability": "EPHEMERAL",
+  "at": 1788082086.5732238
+}

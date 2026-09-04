@@ -1,0 +1,60 @@
+{
+  "company": "Amazon.com, Inc.",
+  "deployed_sha": "8397d67",
+  "run_id": "01M0H983N63Q3V1SWHVSJ6RP2Z",
+  "analysis_seconds": 297,
+  "stage_transitions": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Amazon.com, Inc. AMZN \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecti",
+      "status": 200,
+      "html_bytes": 16999
+    },
+    {
+      "t": 33.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Amazon.com, Inc. AMZN \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Connecting",
+      "status": 200,
+      "html_bytes": 16995
+    },
+    {
+      "t": 41.6,
+      "text": "",
+      "status": 303,
+      "html_bytes": 16995,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H983N63Q3V1SWHVSJ6RP2Z/progress",
+      "head": ""
+    },
+    {
+      "t": 296.7,
+      "text": "Amazon.com, Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Amazon.com, Inc. AMZN \u00b7 SEC CIK 0001018724 Amazon.com, Inc. is a retail business that runs on several distinct businesses under one owner, where the engine that carries the profit is not the one that ca",
+      "status": 200,
+      "html_bytes": 30903
+    }
+  ],
+  "route_seconds": {
+    "run": 6.14,
+    "intro": 5.94,
+    "slides": 9.68,
+    "full": 14.73,
+    "story": 7.62,
+    "history": 0.27,
+    "connect": 4.74
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "777e281ac5714ef8",
+    "started_at": 1787285577.8327832,
+    "uptime_seconds": 944.8
+  },
+  "process_after": {
+    "boot_id": "777e281ac5714ef8",
+    "started_at": 1787285577.8327832,
+    "uptime_seconds": 1440.6
+  },
+  "errors": []
+}

@@ -1,0 +1,82 @@
+{
+  "companies": [
+    "JPMorgan Chase & Co.",
+    "NVIDIA Corporation",
+    "Walmart Inc."
+  ],
+  "questions": 10,
+  "identical_across_all_companies": 1,
+  "identical_rate": 0.1,
+  "per_question": [
+    {
+      "question": "What does the market believe?",
+      "distinct_answers": 3,
+      "companies": 3,
+      "identical_pair_rate": 0.0,
+      "example": "<CO> What does the market believe? A supported reading of <CO> exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen the exis"
+    },
+    {
+      "question": "What impossible hypothesis should we test?",
+      "distinct_answers": 3,
+      "companies": 3,
+      "identical_pair_rate": 0.0,
+      "example": "<CO> What impossible hypothesis should we test? A supported reading of <CO> exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to streng"
+    },
+    {
+      "question": "What should management do?",
+      "distinct_answers": 3,
+      "companies": 3,
+      "identical_pair_rate": 0.0,
+      "example": "<CO> What should management do? A supported reading of <CO> exists and is set out on the Executive X-Ray."
+    },
+    {
+      "question": "What should we measure next?",
+      "distinct_answers": 3,
+      "companies": 3,
+      "identical_pair_rate": 0.0,
+      "example": "<CO> What should we measure next? A supported reading of <CO> exists and is set out on the Executive X-Ray."
+    },
+    {
+      "question": "What would prove this wrong?",
+      "distinct_answers": 3,
+      "companies": 3,
+      "identical_pair_rate": 0.0,
+      "example": "<CO> What would prove this wrong? A supported reading of <CO> exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen the exist"
+    },
+    {
+      "question": "What would you tell the board?",
+      "distinct_answers": 3,
+      "companies": 3,
+      "identical_pair_rate": 0.0,
+      "example": "<CO> What would you tell the board? A supported reading of <CO> exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen the exi"
+    },
+    {
+      "question": "What's the biggest risk?",
+      "distinct_answers": 3,
+      "companies": 3,
+      "identical_pair_rate": 0.0,
+      "example": "<CO> What's the biggest risk? net interest margin or take rate is not disclosed at the granularity the decision needs."
+    },
+    {
+      "question": "What's the weakest assumption?",
+      "distinct_answers": 3,
+      "companies": 3,
+      "identical_pair_rate": 0.0,
+      "example": "<CO> What's the weakest assumption? A supported reading of <CO> exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen the exi"
+    },
+    {
+      "question": "Who's the real competitor?",
+      "distinct_answers": 1,
+      "companies": 3,
+      "identical_pair_rate": 1.0,
+      "example": "<CO> Who's the real competitor? No competitor has been selected for this company from the evidence."
+    },
+    {
+      "question": "Why now?",
+      "distinct_answers": 3,
+      "companies": 3,
+      "identical_pair_rate": 0.0,
+      "example": "<CO> Why now? A supported reading of <CO> exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen the existing reading; it neit"
+    }
+  ]
+}

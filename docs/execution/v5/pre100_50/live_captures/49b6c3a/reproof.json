@@ -1,0 +1,86 @@
+[
+  {
+    "company": "Cloudflare, Inc.",
+    "deployed_sha": "49b6c3a",
+    "status": "READY",
+    "run_id": "01M0HCGCFZDJF7RE61J2YTGNHR",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/49b6c3a/cloudflare_inc",
+    "process_before": {
+      "boot_id": "4ef1abc720dd4d9e",
+      "started_at": 1787289915.6651065,
+      "uptime_seconds": 23.7
+    },
+    "entry_domain": "cloudflare.com",
+    "seconds": 103,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCGCFZDJF7RE61J2YTGNHR/intro",
+    "routes": 11,
+    "errors": [],
+    "qa_capture_valid": true,
+    "answers": 10,
+    "rejected": []
+  },
+  {
+    "company": "ServiceNow, Inc.",
+    "deployed_sha": "49b6c3a",
+    "status": "READY",
+    "run_id": "01M0HCVC9SW39Y7F4BQG776S12",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/49b6c3a/servicenow_inc",
+    "process_before": {
+      "boot_id": "4ef1abc720dd4d9e",
+      "started_at": 1787289915.6651065,
+      "uptime_seconds": 383.9
+    },
+    "entry_domain": "servicenow.com",
+    "seconds": 164,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCVC9SW39Y7F4BQG776S12/intro",
+    "routes": 11,
+    "errors": [],
+    "qa_capture_valid": true,
+    "answers": 10,
+    "rejected": []
+  },
+  {
+    "company": "Meta Platforms, Inc.",
+    "deployed_sha": "49b6c3a",
+    "status": "READY",
+    "run_id": "01M0HD6D3RJ9EYA6589NG538TJ",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/49b6c3a/meta_platforms_inc",
+    "process_before": {
+      "boot_id": "4ef1abc720dd4d9e",
+      "started_at": 1787289915.6651065,
+      "uptime_seconds": 743.6
+    },
+    "entry_domain": "",
+    "seconds": 175,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HD6D3RJ9EYA6589NG538TJ/intro",
+    "routes": 11,
+    "errors": [],
+    "qa_capture_valid": true,
+    "answers": 10,
+    "rejected": []
+  },
+  {
+    "company": "Stripe, Inc.",
+    "deployed_sha": "49b6c3a",
+    "status": "READY",
+    "run_id": "01M0HDHD0WM2WZVJ5RY0E7FMXB",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/49b6c3a/stripe_inc",
+    "process_before": {
+      "boot_id": "4ef1abc720dd4d9e",
+      "started_at": 1787289915.6651065,
+      "uptime_seconds": 1104.7
+    },
+    "entry_domain": "stripe.com",
+    "seconds": 244,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HDHD0WM2WZVJ5RY0E7FMXB/intro",
+    "routes": 11,
+    "errors": [],
+    "qa_capture_valid": true,
+    "answers": 10,
+    "rejected": []
+  }
+]

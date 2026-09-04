@@ -1,0 +1,15 @@
+{
+ "company": "Adobe Inc.",
+ "deployed_sha": "02f4644",
+ "captured_at": "2026-08-22T07:05:02Z",
+ "run_id": "",
+ "outcome": "",
+ "routes": {},
+ "seconds": null,
+ "reliability": {
+  "connection_reset": 0,
+  "quota_block": false,
+  "retry_required": 0,
+  "manual_recovery": 0
+ }
+}

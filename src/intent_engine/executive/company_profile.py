@@ -1,0 +1,1791 @@
+"""What kind of business this is, and therefore which analysis applies.
+
+WHY THIS EXISTS
+---------------
+The executive read for Cloudflare, Shopify and Johnson & Johnson came back
+0.94-0.96 similar. That was never a writing problem. `decision_synthesis`
+asked every company the SAME question --
+
+    "What should be concluded about {company} from the published market
+     record, and what would change it?"
+
+-- ranked no signals, named no competitors, chose no economic channel and
+selected no causal question. Identical analytical inputs produce identical
+prose no matter how the prose is written, so varying the wording would have
+hidden the defect rather than fixed it.
+
+This module is the layer underneath. It answers "what kind of business is
+this" so the layers above can answer "therefore what is worth asking".
+
+WHAT IT MAY AND MAY NOT CLAIM
+-----------------------------
+Everything here is derived from the company's CLASSIFICATION in the
+validation manifest -- sector, business model class, capital intensity,
+cyclicality, regulatory class, public/private, segment count. Those are
+authored, reviewed, version-controlled facts about which KIND of business a
+company is.
+
+So the claims this module makes are definitional, not empirical:
+
+    "a commodity producer sells an undifferentiated product at a price it
+     does not set"
+
+is true of commodity producers by construction. It is not a claim that this
+company's realised price moved, and nothing here may become one. Concretely:
+
+  * no numbers, ever -- not a margin, not a growth rate, not a share;
+  * no claim about what this company DID, only about the economics of the
+    model it operates under;
+  * a company outside the manifest gets UNKNOWN across the board rather
+    than the average company's profile, because "we do not know what this
+    business is" is the honest state and it is the one that must degrade
+    the analysis above it.
+
+THE MANIFEST IS THE ONLY SOURCE
+-------------------------------
+`industry` is UNKNOWN for all 100 manifest rows, so nothing here reads it --
+a table keyed on a field that is always UNKNOWN yields one bucket, which is
+the collapse this module exists to end.
+"""
+from __future__ import annotations
+
+import dataclasses
+import re
+from typing import Optional, Tuple
+
+CONTRACT = "company_intelligence_profile.v1"
+
+UNKNOWN = "UNKNOWN"
+
+#: The nine business model classes the manifest actually uses. Every table
+#: below is keyed on these and nothing else, so a new class added to the
+#: manifest surfaces as a missing key rather than silently taking a default.
+#: THE REGISTRY OF BUSINESS-MODEL CLASSES. Every table keyed on a model class
+#: must be complete against this tuple, and `test_a_model_class_registry.py`
+#: fails the suite when one is not.
+#:
+#: WHY THIS IS ENFORCED AND WAS NOT. Three classes were added one cycle ago —
+#: ADVERTISING_PLATFORM, MULTI_ENGINE_PLATFORM, SCALE_RETAIL — and this tuple
+#: was not updated. Nothing read it, so nothing noticed. Measured consequences,
+#: all three found live:
+#:
+#:   * `patterns_for` filters by an EXCLUSION list, so a class absent from
+#:     every pattern's exclusions qualifies for every pattern. The three new
+#:     classes qualified for 12 of 12 patterns while every older class was
+#:     filtered to 5-11 — which is why Meta, Caterpillar and Exxon all
+#:     answered ten board questions with "committing capital to capacity
+#:     ahead of uncertain demand", a semiconductor capacity thesis, and were
+#:     all offered "Memory and sensor fabrication cycles" as the analogy.
+#:   * `strategic_read._METRICS` had no entry for any of the three, so three
+#:     companies got no model-specific metrics at all.
+#:   * `competitive_ground._MODEL_ALTERNATIVES` had no entry either, which
+#:     left Meta's whole competitive ground at one row until it was repaired.
+#:
+#: A denylist cannot exclude a class that did not exist when it was written.
+#: The registry plus a completeness guard is what makes the next added class
+#: impossible to forget.
+MODEL_CLASSES = (
+    "SUBSCRIPTION_SOFTWARE",
+    "DESIGN_AND_MANUFACTURE",
+    "COMMODITY_PRODUCER",
+    "BRANDED_CONSUMER",
+    "CONTRACTED_OR_RATE_BASE_ASSETS",
+    "BALANCE_SHEET_OR_NETWORK",
+    "MANUFACTURE_AND_AFTERMARKET",
+    "PEOPLE_OR_ROUTE_BASED_SERVICES",
+    "REGULATED_PRODUCT_OR_PROVIDER",
+    "ADVERTISING_PLATFORM",
+    "MULTI_ENGINE_PLATFORM",
+    "SCALE_RETAIL",
+)
+
+
+def missing_model_classes(keys, registry=None) -> list:
+    """Registry classes a model-keyed table does not cover, in registry order.
+
+    The one helper every completeness guard uses, so "which classes exist" is
+    answered in exactly one place.
+
+    `registry` overrides which classes are asked about. It exists so a guard
+    can simulate the class that will be added tomorrow and prove every
+    model-keyed system fails closed until a human has decided about it —
+    because today's tables already cover today's classes, and a guard that
+    can only see today cannot catch the next silent inheritance.
+    """
+    have = set(keys or ())
+    return [c for c in (registry or MODEL_CLASSES) if c not in have]
+
+# --- how well this company is classified, stated rather than implied --------
+#
+# The manifest is a VALIDATION universe, not a knowledge base. Treating
+# membership in it as the precondition for knowing what kind of business a
+# company is meant that 16 of 26 companies with live market snapshots --
+# Toyota, Vale, ASML among them -- read as UNKNOWN. Not "sparsely covered":
+# unknown, as though the company had never been identified. It had been.
+#
+# So profile quality is now a stated three-value fact with a named source,
+# and there is no fourth state reached by a failed join.
+
+#: Classified by the validation manifest: authored, reviewed, per-company.
+PROFILE_AVAILABLE = "PROFILE_AVAILABLE"
+#: Classified by the registrant's own regulator-assigned SIC code. Correct
+#: but coarser -- one code covers a major group, so the model class is right
+#: and the within-class detail the manifest would have added is absent.
+PROFILE_PARTIAL = "PROFILE_PARTIAL"
+#: Not classified by either source. An explicit state that names what is
+#: missing and what would resolve it -- never a silent fallback.
+PROFILE_SPARSE = "PROFILE_SPARSE"
+
+PROFILE_STATES = (PROFILE_AVAILABLE, PROFILE_PARTIAL, PROFILE_SPARSE)
+
+
+#: SIC major group -> (business model class, sector). Keyed on the first two
+#: digits, which is the division the SEC actually assigns; four-digit
+#: overrides below handle the groups that genuinely contain two different
+#: businesses (pharmaceutical preparations inside chemicals, construction
+#: machinery inside industrial machinery).
+#:
+#: Codes whose definition is a residual -- "not elsewhere classified" -- are
+#: deliberately ABSENT rather than guessed. 7389 covers Etsy, a marketplace,
+#: and a payroll bureau equally well; inferring a business model from a
+#: category defined by what it is not is the inference this whole module
+#: exists to refuse. Those companies land on PROFILE_SPARSE and say so.
+_SIC_MAJOR_GROUP = {
+    "01": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "02": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "08": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "09": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "10": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "12": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "13": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "14": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "15": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "16": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "17": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "20": ("BRANDED_CONSUMER", "CONSUMER"),
+    "21": ("BRANDED_CONSUMER", "CONSUMER"),
+    "22": ("BRANDED_CONSUMER", "CONSUMER"),
+    "23": ("BRANDED_CONSUMER", "CONSUMER"),
+    "24": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "25": ("DESIGN_AND_MANUFACTURE", "INDUSTRIAL"),
+    "26": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "27": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "28": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "29": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "30": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "31": ("BRANDED_CONSUMER", "CONSUMER"),
+    "32": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "33": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "34": ("DESIGN_AND_MANUFACTURE", "INDUSTRIAL"),
+    "35": ("DESIGN_AND_MANUFACTURE", "INDUSTRIAL"),
+    "36": ("DESIGN_AND_MANUFACTURE", "SEMICONDUCTOR"),
+    "37": ("MANUFACTURE_AND_AFTERMARKET", "INDUSTRIAL"),
+    "38": ("DESIGN_AND_MANUFACTURE", "INDUSTRIAL"),
+    "39": ("DESIGN_AND_MANUFACTURE", "INDUSTRIAL"),
+    "40": ("CONTRACTED_OR_RATE_BASE_ASSETS", "INFRASTRUCTURE"),
+    "41": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "42": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "44": ("CONTRACTED_OR_RATE_BASE_ASSETS", "INFRASTRUCTURE"),
+    "45": ("CONTRACTED_OR_RATE_BASE_ASSETS", "INFRASTRUCTURE"),
+    "46": ("CONTRACTED_OR_RATE_BASE_ASSETS", "INFRASTRUCTURE"),
+    "47": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "48": ("CONTRACTED_OR_RATE_BASE_ASSETS", "INFRASTRUCTURE"),
+    "49": ("CONTRACTED_OR_RATE_BASE_ASSETS", "INFRASTRUCTURE"),
+    "50": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "51": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "52": ("SCALE_RETAIL", "RETAIL"),
+    "53": ("SCALE_RETAIL", "RETAIL"),
+    "54": ("SCALE_RETAIL", "RETAIL"),
+    "55": ("SCALE_RETAIL", "RETAIL"),
+    "56": ("SCALE_RETAIL", "RETAIL"),
+    "57": ("SCALE_RETAIL", "RETAIL"),
+    "58": ("SCALE_RETAIL", "RETAIL"),
+    "59": ("SCALE_RETAIL", "RETAIL"),
+    "60": ("BALANCE_SHEET_OR_NETWORK", "FINANCIAL_REGULATED"),
+    "61": ("BALANCE_SHEET_OR_NETWORK", "FINANCIAL_REGULATED"),
+    "62": ("BALANCE_SHEET_OR_NETWORK", "FINANCIAL_REGULATED"),
+    "63": ("BALANCE_SHEET_OR_NETWORK", "FINANCIAL_REGULATED"),
+    "64": ("BALANCE_SHEET_OR_NETWORK", "FINANCIAL_REGULATED"),
+    "65": ("CONTRACTED_OR_RATE_BASE_ASSETS", "INFRASTRUCTURE"),
+    "67": ("BALANCE_SHEET_OR_NETWORK", "FINANCIAL_REGULATED"),
+    "70": ("BRANDED_CONSUMER", "CONSUMER"),
+    "72": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "73": ("SUBSCRIPTION_SOFTWARE", "SOFTWARE_PLATFORM"),
+    "75": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "76": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "78": ("BRANDED_CONSUMER", "CONSUMER"),
+    "79": ("BRANDED_CONSUMER", "CONSUMER"),
+    "80": ("REGULATED_PRODUCT_OR_PROVIDER", "HEALTHCARE"),
+    "81": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "82": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "83": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "87": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+}
+
+#: Four-digit codes whose major group would classify them wrongly. Each is
+#: here because the group contains two economically different businesses,
+#: not to tune one company's answer.
+_SIC_EXACT = {
+    # Pharmaceuticals and biologics sit inside "chemicals", but they sell an
+    # approved product under a regulator's licence, not a commodity.
+    "2833": ("REGULATED_PRODUCT_OR_PROVIDER", "HEALTHCARE"),
+    "2834": ("REGULATED_PRODUCT_OR_PROVIDER", "HEALTHCARE"),
+    "2835": ("REGULATED_PRODUCT_OR_PROVIDER", "HEALTHCARE"),
+    "2836": ("REGULATED_PRODUCT_OR_PROVIDER", "HEALTHCARE"),
+    # Medical devices sit inside "instruments" and are licensed the same way.
+    "3841": ("REGULATED_PRODUCT_OR_PROVIDER", "HEALTHCARE"),
+    "3842": ("REGULATED_PRODUCT_OR_PROVIDER", "HEALTHCARE"),
+    "3845": ("REGULATED_PRODUCT_OR_PROVIDER", "HEALTHCARE"),
+    # Heavy machinery is sold once and serviced for decades; the aftermarket
+    # is the business, which is not true of industrial machinery generally.
+    "3531": ("MANUFACTURE_AND_AFTERMARKET", "INDUSTRIAL"),
+    "3532": ("MANUFACTURE_AND_AFTERMARKET", "INDUSTRIAL"),
+    "3533": ("MANUFACTURE_AND_AFTERMARKET", "INDUSTRIAL"),
+    "3537": ("MANUFACTURE_AND_AFTERMARKET", "INDUSTRIAL"),
+    # Semiconductors and their equipment are design-led, not aftermarket-led.
+    "3674": ("DESIGN_AND_MANUFACTURE", "SEMICONDUCTOR"),
+    "3559": ("DESIGN_AND_MANUFACTURE", "SEMICONDUCTOR"),
+    # Custom programming and systems integration is a people business: it
+    # bills for delivered hours, and has none of the renewal economics that
+    # make packaged software a subscription.
+    "7371": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "7373": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "7374": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "7363": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+}
+
+#: Residual SIC codes -- the ones whose official name ends "not elsewhere
+#: classified" or "miscellaneous". Named explicitly so the refusal to
+#: classify is a decision on the record rather than a table lookup that
+#: happened to miss.
+_SIC_RESIDUAL = frozenset({
+    "7389",     # Services-Business Services, NEC
+    "7380",     # Services-Miscellaneous Business Services
+    "3990",     # Manufacturing Industries, NEC
+    "5990",     # Retail Stores, NEC
+    "8888",     # Foreign governments / unclassifiable filers
+    "6770",     # Blank Checks
+    "9995",     # Non-operating establishments
+})
+
+
+#: A filer stating, about ITSELF, that advertising is where its revenue comes
+#: from. Two shapes only, both requiring "revenue" and "advertis-" inside one
+#: clause:
+#:
+#:   1. a dominance claim   "substantially all of our revenue ... advertising"
+#:   2. a derivation claim  "we generate revenue ... from advertising"
+#:
+#: DELIBERATELY NARROW. "Advertising expense" is a COST line that appears in
+#: almost every filing, and a rule that matched it would reclassify every
+#: consumer brand on earth as an ad platform. Requiring the word "revenue" on
+#: the same clause is what separates "we sell ads" from "we buy ads".
+#: DOMINANCE IS REQUIRED, NOT PRESENCE.
+#:
+#: A first version also accepted a bare "revenue ... from ... advertising",
+#: and that reclassified MICROSOFT as an advertising platform — its filing
+#: reports "search and news advertising revenue" as one line among many.
+#: Almost every large platform earns SOME advertising revenue; the question
+#: this rule exists to answer is whether advertising is WHERE THE MONEY COMES
+#: FROM. So the sentence must carry a dominance claim ("substantially all",
+#: "majority", a percentage) in the same clause.
+_ADVERTISING_REVENUE = re.compile(
+    r"(?:substantially all|the majority|a majority|most|nearly all|"
+    r"[5-9]\d(?:\.\d+)?\s*%)"
+    r"[^.;]{0,140}?revenue[^.;]{0,140}?advertis"
+    r"|advertising[^.;]{0,60}?(?:represent(?:ed|s)?|account(?:ed|s)?|"
+    r"comprise[sd]?)[^.;]{0,40}?"
+    r"(?:substantially all|the majority|a majority|most|[5-9]\d)",
+    re.I)
+
+
+#: A filer that reports a CLOUD/INFRASTRUCTURE segment alongside a
+#: retail/marketplace one is not one business with a side line — the two have
+#: different customers, different capital intensity and different margins, and
+#: the smaller one routinely carries the profit.
+#:
+#: Both halves are required, and both must be stated as SEGMENTS. "We use
+#: cloud services" appears in every filing on earth; "our reportable segments
+#: are North America, International and AWS" does not.
+# MEASURED WHILE WRITING THIS. A first attempt matched "marketplace" and
+# "merchandise", and promptly reclassified META as multi-engine — because
+# Facebook Marketplace is a PRODUCT name, and a 10-K that mentions it says
+# nothing about segment structure. The terms below are segment and
+# revenue-category names a filer uses about its own reporting, not product
+# nouns that appear in any consumer filing.
+_CLOUD_SEGMENT = re.compile(
+    r"\b(AWS|Amazon Web Services|intelligent cloud|"
+    r"cloud (?:services|segment) (?:revenue|segment|net sales))\b", re.I)
+_COMMERCE_SEGMENT = re.compile(
+    r"\b(online stores?|third-?party seller services|physical stores?|"
+    r"retail segment|subscription services segment)\b", re.I)
+_SEGMENT_LANGUAGE = re.compile(
+    r"\breportable segments?\b|\boperating segments?\b", re.I)
+
+
+def multi_engine_hint(text: str) -> Optional[str]:
+    """Does this filer report materially different businesses as segments?
+
+    Narrow on purpose. It requires the filing to use SEGMENT language and to
+    name both a cloud/infrastructure engine and a commerce engine — the
+    combination that makes a single business-model class describe neither.
+    Anything less returns None and the industry code's answer stands.
+    """
+    if not text:
+        return None
+    head = text[:400_000]
+    if not _SEGMENT_LANGUAGE.search(head):
+        return None
+    if _CLOUD_SEGMENT.search(head) and _COMMERCE_SEGMENT.search(head):
+        return "MULTI_ENGINE_PLATFORM"
+    return None
+
+
+def revenue_model_hint(text: str) -> Optional[str]:
+    """The model class a filer's OWN revenue sentence implies, or None.
+
+    WHY THIS EXISTS AND WHY IT IS NOT A SIC LOOKUP. SIC 7370 contains both
+    halves of a split with opposite economics — Salesforce and Meta are the
+    same code — so the regulator's classification cannot separate them and
+    must not be asked to. What CAN separate them is the sentence the filer
+    writes about where its money comes from, which is a first-party statement
+    of fact in a statutory document rather than an inference.
+
+    Returns None on anything it is not sure about. None means "the SIC code's
+    answer stands", never "unclassified" — a hint that fires only on an
+    explicit revenue statement can lose nothing that was already working.
+    """
+    if not text:
+        return None
+    return ("ADVERTISING_PLATFORM"
+            if _ADVERTISING_REVENUE.search(text[:400_000]) else None)
+
+
+def classify_sic(sic: str) -> Optional[Tuple[str, str]]:
+    """(business model class, sector) for a SIC code, or None.
+
+    None means "this code does not determine a business model", which is a
+    real answer for a residual category and is reported as PROFILE_SPARSE
+    rather than filled in.
+    """
+    code = str(sic or "").strip()
+    if not code:
+        return None
+    code = code.zfill(4) if code.isdigit() and len(code) < 4 else code
+    if code in _SIC_RESIDUAL:
+        return None
+    if code in _SIC_EXACT:
+        return _SIC_EXACT[code]
+    return _SIC_MAJOR_GROUP.get(code[:2])
+
+
+# --- the structural economics of each model class ---------------------------
+#
+# Read each row as: "for a business of this KIND, revenue moves with these,
+# cost moves with these, demand arrives like this". None of it is a claim
+# about a particular company's results.
+
+_ECONOMICS = {
+    "SUBSCRIPTION_SOFTWARE": {
+        "business_model": (
+            "recurring software subscription: revenue is contracted and "
+            "renews, so the installed base carries next period's revenue "
+            "before any new sale"),
+        "industry_structure": (
+            "many differentiated vendors competing on capability and "
+            "switching cost rather than on price alone"),
+        "revenue_drivers": ("customer count", "seats or usage per customer",
+                            "list and realised price", "renewal rate",
+                            "expansion within existing accounts"),
+        "cost_drivers": ("sales and marketing to acquire an account",
+                         "engineering headcount",
+                         "infrastructure and delivery cost per unit served",
+                         "support cost per account"),
+        "demand_model": (
+            "budgeted and recurring; new bookings are discretionary, the "
+            "renewal base is not"),
+        "customer_structure": (
+            "many accounts of uneven size; concentration risk sits in the "
+            "largest contracts, not in the count"),
+        "supplier_structure": (
+            "compute and bandwidth from a small number of providers"),
+        "pricing_model": (
+            "list price with negotiated discount, per seat or per unit of "
+            "usage"),
+        "operating_leverage": (
+            "HIGH: delivery cost rises far more slowly than contracted "
+            "revenue, so incremental revenue is unusually valuable"),
+        "levers": ("pricing and packaging", "sales motion and coverage",
+                   "retention and expansion programmes", "productization",
+                   "infrastructure cost per unit served"),
+        "archetypes": ("PRICING", "RETENTION", "SALES_MOTION",
+                       "PRODUCTIZATION", "CUSTOMER_SEGMENT"),
+        "evidence": ("pricing and packaging changes", "product launches",
+                     "customer wins and losses", "partnership announcements",
+                     "platform or infrastructure changes"),
+        "macro": ("MARKET_RATE", "LABOR", "CURRENCY"),
+    },
+    # THE MODEL THE TAXONOMY HAD NO ROW FOR.
+    #
+    # MEASURED: an external tester typed "Meta" and got an empty analysis. The
+    # cause was not retrieval — five sources including Meta's own 10-K were
+    # read — it was that this table has nine rows and none of them is the
+    # business Meta runs. The regulator files it under SIC 73, which this
+    # module maps to SUBSCRIPTION_SOFTWARE, so the only two outcomes available
+    # were "unclassified" (what shipped) and "a subscription-software reading
+    # of an advertising company" (worse: every mechanism, metric and
+    # competitor downstream is selected by this class, so a wrong row is
+    # confidently wrong rather than incomplete).
+    #
+    # It is not a niche row. SIC 7370 covers Alphabet, Meta, Snap, Pinterest,
+    # Reddit and Trade Desk alongside Salesforce and Adobe, and the two halves
+    # have opposite economics: one sells a contracted seat that renews, the
+    # other sells an auction-priced impression that must be re-won every time
+    # a user returns. Which half a filer is in is not derivable from the SIC
+    # code — it IS derivable from the revenue sentence the filer writes about
+    # itself, which is what `revenue_model_hint` reads.
+    "ADVERTISING_PLATFORM": {
+        "business_model": (
+            "attention resold to advertisers: revenue is an auction price "
+            "per impression, so nothing is contracted forward and each "
+            "period's revenue has to be re-earned by engagement"),
+        "industry_structure": (
+            "a few platforms holding most of the inventory, competing for "
+            "advertiser budget against every other channel that can prove "
+            "return"),
+        "revenue_drivers": ("users and their engagement",
+                            "impressions or ad load per user",
+                            "price per impression",
+                            "advertiser count and budget share",
+                            "measurable return per advertiser"),
+        "cost_drivers": ("infrastructure and compute per user served",
+                         "content moderation and trust operations",
+                         "engineering headcount",
+                         "traffic acquisition or distribution payments"),
+        "demand_model": (
+            "discretionary and cyclical: advertising budget is among the "
+            "first spending cut in a downturn and among the first restored"),
+        "customer_structure": (
+            "two-sided and asymmetric -- many small advertisers with a long "
+            "tail, and a user base that pays nothing and can leave freely"),
+        "supplier_structure": (
+            "the distribution channel is the binding supplier: the operating "
+            "systems, browsers and devices that decide what can be measured"),
+        "pricing_model": (
+            "real-time auction per impression, so price is set by competing "
+            "advertisers rather than by the platform"),
+        "operating_leverage": (
+            "HIGH: serving one more impression costs almost nothing, so "
+            "incremental revenue is unusually valuable -- and the same "
+            "fixed base makes an engagement decline expensive quickly"),
+        "levers": ("engagement and time spent", "ad load and format mix",
+                   "targeting and measurement quality",
+                   "advertiser tooling", "content and creator supply"),
+        "archetypes": ("ENGAGEMENT", "MONETISATION_RATE", "PRICING",
+                       "CUSTOMER_SEGMENT", "PRODUCTIZATION"),
+        "evidence": ("engagement and user disclosures",
+                     "ad load and format changes",
+                     "targeting or measurement policy changes",
+                     "platform and privacy rule changes",
+                     "advertiser demand commentary"),
+        "macro": ("CONSUMER_DEMAND", "MARKET_RATE", "CURRENCY"),
+    },
+    # ADDED BY BATCH A. SIC 53 and 59 both mapped to BRANDED_CONSUMER, so
+    # Walmart was described as a business "where the brand carries pricing
+    # power the product alone would not command" — the exact inverse of what
+    # Walmart is. A scale retailer's whole model is that price is LOW and the
+    # rent comes from turns, sourcing power and traffic. Selling the reader a
+    # brand-premium story about the world's largest discounter is not a coarse
+    # class, it is a wrong one.
+    "SCALE_RETAIL": {
+        "business_model": (
+            "sale of other people's products at deliberately thin margin, "
+            "where the return comes from scale in buying and from how fast "
+            "inventory turns rather than from price premium"),
+        "industry_structure": (
+            "few operators of national scale; advantage compounds with "
+            "purchasing volume and distribution density"),
+        "revenue_drivers": ("store and site traffic", "average ticket",
+                            "comparable sales", "unit volume",
+                            "selling space and channel mix"),
+        "cost_drivers": ("cost of goods and supplier terms",
+                         "distribution and fulfilment cost per unit",
+                         "store labour", "shrink and markdowns"),
+        "demand_model": (
+            "staple and non-discretionary at the base, with trade-down INTO "
+            "the format when household budgets tighten — a recession is not "
+            "uniformly bad for it"),
+        "customer_structure": (
+            "very many small baskets; no customer concentration, and the "
+            "risk sits in traffic rather than in any account"),
+        "supplier_structure": (
+            "many suppliers facing one very large buyer, which is where the "
+            "margin is actually won"),
+        "pricing_model": (
+            "everyday low price held as a promise, with margin taken in "
+            "sourcing and mix rather than on the shelf"),
+        "operating_leverage": (
+            "MODERATE: a largely fixed store and distribution base against "
+            "thin unit margin, so small comparable-sales moves swing profit"),
+        "levers": ("sourcing and private label", "inventory and turns",
+                   "distribution density", "price investment",
+                   "traffic and format mix"),
+        "archetypes": ("PRICING", "SUPPLY_CHAIN", "INVENTORY",
+                       "CUSTOMER_SEGMENT", "PRODUCTIZATION"),
+        "evidence": ("comparable sales and traffic disclosures",
+                     "inventory and markdown commentary",
+                     "supplier and sourcing changes",
+                     "format and footprint decisions",
+                     "price investment announcements"),
+        "macro": ("CONSUMER_DEMAND", "LABOR", "MARKET_RATE"),
+    },
+    # ADDED BY BATCH A. SIC 5961 (catalog and mail-order) sent Amazon to
+    # BRANDED_CONSUMER. Amazon's profit is not a branded product: it is a
+    # marketplace take rate, a cloud utility and an ad auction, each with
+    # different economics, and the segment that carries the earnings is not
+    # the one the SIC code names. A single-engine class cannot describe it,
+    # and forcing one picks the wrong engine.
+    "MULTI_ENGINE_PLATFORM": {
+        "business_model": (
+            "several distinct businesses under one owner, where the engine "
+            "that carries the profit is not the one that carries the "
+            "revenue — so a consolidated margin describes none of them"),
+        "industry_structure": (
+            "each engine competes against a different set of firms, and few "
+            "rivals contest more than one of them at once"),
+        "revenue_drivers": ("segment mix", "take rate or attach per engine",
+                            "volume through the largest engine",
+                            "cross-engine reinforcement"),
+        "cost_drivers": ("capital committed per engine",
+                         "shared infrastructure and its allocation",
+                         "fulfilment or delivery cost in the volume engine",
+                         "engineering across engines"),
+        "demand_model": (
+            "uncorrelated by design: a downturn in one engine need not move "
+            "another, which is the point of holding them together"),
+        "customer_structure": (
+            "different customers per engine — consumers, developers and "
+            "advertisers are not one base and do not behave alike"),
+        "supplier_structure": (
+            "engine-specific, with the shared infrastructure acting as an "
+            "internal supplier to the rest"),
+        "pricing_model": (
+            "set independently per engine; a single pricing story across "
+            "them is a description of the owner, not of a market"),
+        "operating_leverage": (
+            "HIGH but uneven: the infrastructure engine carries most of the "
+            "fixed cost and most of the incremental margin"),
+        "levers": ("capital allocation between engines",
+                   "cross-engine bundling", "pricing per engine",
+                   "infrastructure investment", "segment disclosure"),
+        "archetypes": ("CAPITAL_ALLOCATION", "PRICING", "CUSTOMER_SEGMENT",
+                       "PRODUCTIZATION", "SUPPLY_CHAIN"),
+        "evidence": ("segment disclosures and their changes",
+                     "capital expenditure by engine",
+                     "pricing changes within one engine",
+                     "bundling and cross-engine launches",
+                     "reporting-structure changes"),
+        "macro": ("CONSUMER_DEMAND", "MARKET_RATE", "LABOR"),
+    },
+    "DESIGN_AND_MANUFACTURE": {
+        "business_model": (
+            "design and manufacture of a physical product sold into a "
+            "capacity-constrained supply chain"),
+        "industry_structure": (
+            "few credible suppliers; position turns on process capability "
+            "and on access to manufacturing capacity"),
+        "revenue_drivers": ("unit volume", "product and node mix",
+                            "average selling price", "design wins",
+                            "customer concentration"),
+        "cost_drivers": ("manufacturing and foundry cost", "yield",
+                         "capacity utilisation", "input and energy cost",
+                         "R&D to hold the process roadmap"),
+        "demand_model": (
+            "cyclical and inventory-amplified: end demand is smoothed by "
+            "channel inventory, so orders overshoot in both directions"),
+        "customer_structure": (
+            "concentrated -- a small number of large buyers can move a "
+            "quarter on their own ordering decisions"),
+        "supplier_structure": (
+            "few qualified suppliers with long lead times; substitution is "
+            "slow and expensive"),
+        "pricing_model": (
+            "negotiated contract price by product generation, with volume "
+            "and long-term supply commitments"),
+        "operating_leverage": (
+            "HIGH and two-sided: fixed manufacturing cost rewards "
+            "utilisation and punishes an idle line"),
+        "levers": ("capacity commitment", "product roadmap and mix",
+                   "pricing and supply agreements", "inventory position",
+                   "customer diversification"),
+        "archetypes": ("CAPACITY", "R&D_ROADMAP", "INVENTORY", "PRICING",
+                       "SUPPLY_CHAIN"),
+        "evidence": ("capacity and capital expenditure announcements",
+                     "product and process generation launches",
+                     "supply agreements", "export and trade restrictions",
+                     "customer and design-win announcements"),
+        "macro": ("INDUSTRIAL_DEMAND", "MARKET_RATE", "CURRENCY"),
+    },
+    "COMMODITY_PRODUCER": {
+        "business_model": (
+            "production of an undifferentiated output sold at a price the "
+            "producer does not set"),
+        "industry_structure": (
+            "price-taking producers differentiated by cost position and by "
+            "the quality and life of the resource base"),
+        "revenue_drivers": ("produced volume", "realised commodity price",
+                            "grade or quality of output", "sales mix"),
+        "cost_drivers": ("energy and fuel", "labour",
+                         "sustaining capital", "haulage and logistics",
+                         "input and reagent cost"),
+        "demand_model": (
+            "externally set: the marginal buyer is the market, so volume "
+            "sells and price is the variable"),
+        "customer_structure": (
+            "sold into a market or under offtake agreements rather than to "
+            "a named customer base"),
+        "supplier_structure": (
+            "energy, equipment and specialised contractors"),
+        "pricing_model": (
+            "benchmark or spot price, sometimes hedged; the producer sets "
+            "volume, not price"),
+        "operating_leverage": (
+            "HIGH: cost per unit is largely fixed against a price that is "
+            "not, so margin swings by more than price does"),
+        "levers": ("production plan", "capital allocation and project "
+                   "sequencing", "hedging policy", "cost programme",
+                   "jurisdictional exposure"),
+        "archetypes": ("CAPITAL_ALLOCATION", "CAPACITY", "COST_STRUCTURE",
+                       "M&A"),
+        "evidence": ("production and operating results",
+                     "reserve and resource statements",
+                     "project and capital decisions",
+                     "permitting and jurisdiction changes",
+                     "offtake and hedging arrangements"),
+        "macro": ("COMMODITY", "CURRENCY", "MARKET_RATE", "INDUSTRIAL_DEMAND"),
+    },
+    "BRANDED_CONSUMER": {
+        "business_model": (
+            "branded product sold through retail and direct channels, where "
+            "the brand carries pricing power the product alone would not"),
+        "industry_structure": (
+            "brand-led competition for shelf and attention against private "
+            "label and against other branded entrants"),
+        "revenue_drivers": ("volume", "price and promotional depth",
+                            "product and channel mix",
+                            "distribution and shelf presence"),
+        "cost_drivers": ("input and commodity cost", "freight and logistics",
+                         "marketing and trade spend", "manufacturing cost"),
+        "demand_model": (
+            "household consumption: broad, repeat, and sensitive to price "
+            "and to real income"),
+        "customer_structure": (
+            "concentrated retail buyers standing between the brand and many "
+            "end consumers"),
+        "supplier_structure": (
+            "agricultural or industrial inputs exposed to commodity prices"),
+        "pricing_model": (
+            "list price net of trade promotion; realised price is a "
+            "negotiation with the channel"),
+        "operating_leverage": (
+            "MODERATE: input cost is largely variable, brand investment is "
+            "largely discretionary"),
+        "levers": ("pricing and promotion", "product mix and innovation",
+                   "channel and distribution strategy", "marketing spend",
+                   "cost and productivity programmes"),
+        "archetypes": ("PRICING", "COST_STRUCTURE", "CUSTOMER_SEGMENT",
+                       "MARKET_ENTRY", "PRODUCTIZATION"),
+        "evidence": ("pricing and promotional actions", "product launches",
+                     "channel and retailer announcements",
+                     "input cost commentary", "marketing investment changes"),
+        "macro": ("INFLATION", "COMMODITY", "LABOR", "CURRENCY"),
+    },
+    "CONTRACTED_OR_RATE_BASE_ASSETS": {
+        "business_model": (
+            "long-lived physical assets earning under contracts or a "
+            "regulated rate base, where the asset is the franchise"),
+        "industry_structure": (
+            "few operators, high barriers, and returns set as much by "
+            "contract and regulation as by competition"),
+        "revenue_drivers": ("contracted or regulated volume",
+                            "tariff or rate", "asset base in service",
+                            "contract renewals and escalators"),
+        "cost_drivers": ("financing cost", "depreciation",
+                         "operations and maintenance", "energy",
+                         "construction and connection cost"),
+        "demand_model": (
+            "contracted or regulated: near-term volume is largely committed "
+            "and the decision variable is what to build next"),
+        "customer_structure": (
+            "few large counterparties under long contracts, or a regulated "
+            "customer base"),
+        "supplier_structure": (
+            "engineering, construction and equipment under multi-year "
+            "programmes"),
+        "pricing_model": (
+            "tariff, regulated return, or long-term contract price -- rarely "
+            "a price the operator sets alone"),
+        "operating_leverage": (
+            "HIGH and financed: the cost base is capital and interest, so "
+            "the cost of money is an operating variable"),
+        "levers": ("capital programme and sequencing", "financing structure",
+                   "contract and tariff negotiation",
+                   "operations and reliability", "asset acquisition"),
+        "archetypes": ("CAPITAL_ALLOCATION", "CAPACITY",
+                       "REGULATORY_RESPONSE", "M&A"),
+        "evidence": ("capital projects and commissioning",
+                     "contract awards and renewals",
+                     "regulatory and tariff decisions", "financing actions",
+                     "outage and reliability events"),
+        "macro": ("MARKET_RATE", "INFLATION", "COMMODITY",
+                  "INDUSTRIAL_DEMAND"),
+    },
+    "BALANCE_SHEET_OR_NETWORK": {
+        "business_model": (
+            "earnings from a balance sheet or from a transaction network -- "
+            "spread and fees on volume the firm intermediates"),
+        "industry_structure": (
+            "regulated, scale-driven, and competitive on price of funds, "
+            "distribution and trust"),
+        "revenue_drivers": ("spread on assets and liabilities",
+                            "transaction and fee volume",
+                            "balance or asset growth", "take rate"),
+        "cost_drivers": ("cost of funds", "credit and fraud losses",
+                         "regulatory and compliance cost",
+                         "technology and operations"),
+        "demand_model": (
+            "derived from credit and payments activity in the wider economy "
+            "rather than from a product cycle"),
+        "customer_structure": (
+            "a broad base plus concentrated institutional relationships"),
+        "supplier_structure": (
+            "depositors, funding markets and network participants"),
+        "pricing_model": (
+            "rate, spread or take rate, bounded by competition and by "
+            "regulation"),
+        "operating_leverage": (
+            "HIGH on volume and LEVERED on the balance sheet: the same "
+            "movement reaches earnings through both margin and credit"),
+        "levers": ("pricing of assets and liabilities",
+                   "credit and underwriting policy", "funding mix",
+                   "capital allocation and distribution",
+                   "network and partnership expansion"),
+        "archetypes": ("PRICING", "CAPITAL_ALLOCATION", "CUSTOMER_SEGMENT",
+                       "REGULATORY_RESPONSE", "COMPETITIVE_RESPONSE"),
+        "evidence": ("rate and pricing changes",
+                     "credit quality and provisioning commentary",
+                     "regulatory actions and capital requirements",
+                     "partnership and network announcements",
+                     "funding and capital markets activity"),
+        "macro": ("MARKET_RATE", "UNEMPLOYMENT", "INFLATION",
+                  "INDUSTRIAL_DEMAND"),
+    },
+    "MANUFACTURE_AND_AFTERMARKET": {
+        "business_model": (
+            "sale of a long-lived manufactured product followed by a "
+            "higher-margin service and parts stream over its life"),
+        "industry_structure": (
+            "duopoly or oligopoly with certification and installed-base "
+            "barriers that make entry slow and displacement rare"),
+        "revenue_drivers": ("orders and backlog", "delivery or production "
+                            "rate", "aftermarket and services on the "
+                            "installed base", "product mix"),
+        "cost_drivers": ("supply chain and component availability",
+                         "labour and skills", "rework and quality cost",
+                         "working capital tied up in production",
+                         "development programmes"),
+        "demand_model": (
+            "long-cycle and order-driven: today's revenue was decided years "
+            "ago and today's orders decide revenue years out"),
+        "customer_structure": (
+            "few large buyers -- operators, fleets or governments -- "
+            "purchasing under multi-year agreements"),
+        "supplier_structure": (
+            "deep multi-tier supply chain where a single qualified supplier "
+            "can constrain the whole rate"),
+        "pricing_model": (
+            "negotiated programme pricing, with aftermarket economics "
+            "carrying the return"),
+        "operating_leverage": (
+            "HIGH against production rate: fixed cost is absorbed by rate, "
+            "so a rate change moves margin more than revenue"),
+        "levers": ("production rate", "supply chain qualification",
+                   "programme and certification management",
+                   "aftermarket and services strategy", "working capital"),
+        "archetypes": ("CAPACITY", "SUPPLY_CHAIN", "R&D_ROADMAP",
+                       "REGULATORY_RESPONSE", "CAPITAL_ALLOCATION"),
+        "evidence": ("orders, backlog and deliveries",
+                     "production rate decisions",
+                     "certification and regulatory milestones",
+                     "supplier and quality events",
+                     "service and aftermarket agreements"),
+        "macro": ("INDUSTRIAL_DEMAND", "MARKET_RATE", "LABOR", "CURRENCY"),
+    },
+    "PEOPLE_OR_ROUTE_BASED_SERVICES": {
+        "business_model": (
+            "service delivered by people or over a route network, where "
+            "sold capacity is the product and unsold capacity expires"),
+        "industry_structure": (
+            "competition on capability, reputation and coverage; capacity "
+            "is added by hiring or by adding routes"),
+        "revenue_drivers": ("billable headcount or capacity",
+                            "utilisation", "rate or yield", "engagement mix"),
+        "cost_drivers": ("compensation", "recruiting and training",
+                         "bench or idle capacity", "delivery and travel"),
+        "demand_model": (
+            "project or trip-driven and discretionary; demand can be "
+            "deferred by the customer at short notice"),
+        "customer_structure": (
+            "concentrated in large clients or accounts whose own budgets "
+            "set the cycle"),
+        "supplier_structure": (
+            "the labour market itself, plus subcontractors"),
+        "pricing_model": (
+            "rate per hour, per engagement or per unit of capacity sold"),
+        "operating_leverage": (
+            "LOW to MODERATE: cost scales with the people delivering, so "
+            "margin comes from utilisation and rate, not from volume"),
+        "levers": ("hiring and capacity plan", "utilisation management",
+                   "pricing and rate card", "engagement and route mix",
+                   "client concentration"),
+        "archetypes": ("PRICING", "CAPACITY", "CUSTOMER_SEGMENT",
+                       "COST_STRUCTURE", "MARKET_ENTRY"),
+        "evidence": ("hiring and headcount actions",
+                     "client and engagement announcements",
+                     "capacity, route or office changes",
+                     "pricing and rate commentary",
+                     "leadership and practice changes"),
+        "macro": ("LABOR", "UNEMPLOYMENT", "INFLATION", "MARKET_RATE"),
+    },
+    "REGULATED_PRODUCT_OR_PROVIDER": {
+        "business_model": (
+            "a product or service that may only be sold once a regulator "
+            "permits it and a payer agrees to pay for it"),
+        "industry_structure": (
+            "protected positions of limited life: approval and exclusivity "
+            "confer pricing power until they expire"),
+        "revenue_drivers": ("approved products and indications",
+                            "volume and prescriptions or procedures",
+                            "net price after rebates", "exclusivity runway",
+                            "geographic and product mix"),
+        "cost_drivers": ("research and development",
+                         "clinical and trial cost", "manufacturing and "
+                         "quality", "commercial and market access",
+                         "litigation and settlements"),
+        "demand_model": (
+            "clinically indicated and payer-mediated: the prescriber "
+            "chooses, the payer funds, and the patient consumes"),
+        "customer_structure": (
+            "payers, systems and distributors rather than end patients"),
+        "supplier_structure": (
+            "qualified manufacturing and clinical supply under regulatory "
+            "control"),
+        "pricing_model": (
+            "list price net of rebates and negotiated reimbursement; the "
+            "net price is rarely the published one"),
+        "operating_leverage": (
+            "HIGH per approved product: development cost is sunk before the "
+            "first sale and marginal supply cost is comparatively small"),
+        "levers": ("pipeline and development priorities",
+                   "regulatory and approval strategy",
+                   "pricing and market access", "portfolio and geographic "
+                   "mix", "litigation and settlement posture"),
+        "archetypes": ("R&D_ROADMAP", "REGULATORY_RESPONSE", "PRICING",
+                       "CAPITAL_ALLOCATION", "MARKET_ENTRY"),
+        "evidence": ("regulatory decisions and submissions",
+                     "clinical and trial results",
+                     "reimbursement and pricing decisions",
+                     "litigation and settlement developments",
+                     "product launches and withdrawals"),
+        "macro": ("INFLATION", "CURRENCY", "LABOR"),
+    },
+}
+
+#: How each macro channel reaches a business of a given model class. The
+#: mechanism is the point: §6 refuses a channel that cannot name one.
+_TRANSMISSION = {
+    ("MARKET_RATE", "SUBSCRIPTION_SOFTWARE"):
+        "rates set the discount rate on customers' own investment cases, so "
+        "higher rates lengthen procurement and slow new bookings without "
+        "touching the contracted base",
+    ("MARKET_RATE", "BALANCE_SHEET_OR_NETWORK"):
+        "rates move the cost of funds and the yield on assets at different "
+        "speeds, so the spread -- the primary revenue driver -- reprices "
+        "directly",
+    ("MARKET_RATE", "CONTRACTED_OR_RATE_BASE_ASSETS"):
+        "the capital programme is debt-financed, so rates set the cost of "
+        "the next asset and the hurdle every project must clear",
+    ("MARKET_RATE", "COMMODITY_PRODUCER"):
+        "rates set the hurdle for sustaining and expansion capital, and the "
+        "carry on inventory and working capital",
+    ("MARKET_RATE", "MANUFACTURE_AND_AFTERMARKET"):
+        "rates raise the financing cost of customers' fleet purchases and "
+        "the carry on the working capital tied up in production",
+    ("MARKET_RATE", "DESIGN_AND_MANUFACTURE"):
+        "rates set the hurdle on capacity commitments made years before the "
+        "revenue they carry",
+    ("MARKET_RATE", "PEOPLE_OR_ROUTE_BASED_SERVICES"):
+        "rates compress clients' discretionary budgets, which is where "
+        "project demand is funded from",
+    ("MARKET_RATE", "BRANDED_CONSUMER"):
+        "rates reach household discretionary spending and the cost of "
+        "carrying inventory through the channel",
+    ("CURRENCY", "COMMODITY_PRODUCER"):
+        "output is priced in the global currency while cost is incurred in "
+        "the local one, so the exchange rate moves realised margin without "
+        "any operational change",
+    ("CURRENCY", "DESIGN_AND_MANUFACTURE"):
+        "manufacturing and sales sit in different currencies, so the rate "
+        "moves both landed cost and competitiveness against local rivals",
+    ("CURRENCY", "BRANDED_CONSUMER"):
+        "overseas revenue translates back at the prevailing rate and "
+        "imported inputs are paid at it",
+    ("CURRENCY", "MANUFACTURE_AND_AFTERMARKET"):
+        "programmes are priced in one currency and sourced across several, "
+        "so the rate moves programme margin",
+    ("CURRENCY", "SUBSCRIPTION_SOFTWARE"):
+        "international contracts translate at the prevailing rate; the "
+        "underlying subscription is unaffected",
+    ("CURRENCY", "REGULATED_PRODUCT_OR_PROVIDER"):
+        "product sold across jurisdictions translates back at the "
+        "prevailing rate",
+    ("COMMODITY", "COMMODITY_PRODUCER"):
+        "the commodity price IS the realised price of output -- this is the "
+        "revenue line, not an input to it",
+    ("COMMODITY", "BRANDED_CONSUMER"):
+        "commodity inputs are the largest variable cost, and passing them "
+        "through requires a pricing action the channel must accept",
+    ("COMMODITY", "CONTRACTED_OR_RATE_BASE_ASSETS"):
+        "fuel and energy are a pass-through in some contracts and a "
+        "margin exposure in others",
+    ("COMMODITY", "DESIGN_AND_MANUFACTURE"):
+        "energy and materials enter manufacturing cost at high utilisation",
+    ("INFLATION", "BRANDED_CONSUMER"):
+        "inflation raises input and wage cost and simultaneously tests how "
+        "much price the brand can carry before volume responds",
+    ("INFLATION", "CONTRACTED_OR_RATE_BASE_ASSETS"):
+        "many contracts and tariffs escalate with inflation, so it reaches "
+        "revenue as well as cost",
+    ("INFLATION", "BALANCE_SHEET_OR_NETWORK"):
+        "inflation drives the rate policy that sets the spread, and raises "
+        "operating cost",
+    ("INFLATION", "PEOPLE_OR_ROUTE_BASED_SERVICES"):
+        "wages are the cost base, so inflation reaches cost immediately and "
+        "reaches price only at the next rate negotiation",
+    ("INFLATION", "REGULATED_PRODUCT_OR_PROVIDER"):
+        "cost inflates while net price is constrained by payers, so the "
+        "squeeze lands on margin",
+    ("LABOR", "PEOPLE_OR_ROUTE_BASED_SERVICES"):
+        "billable people ARE the capacity, so the labour market sets both "
+        "what can be delivered and what it costs",
+    ("LABOR", "SUBSCRIPTION_SOFTWARE"):
+        "engineering and sales headcount is the dominant cost, so the "
+        "labour market sets the cost of the roadmap",
+    ("LABOR", "MANUFACTURE_AND_AFTERMARKET"):
+        "skilled assembly labour constrains production rate directly",
+    ("LABOR", "BRANDED_CONSUMER"):
+        "manufacturing and distribution wages enter cost of goods",
+    ("UNEMPLOYMENT", "BALANCE_SHEET_OR_NETWORK"):
+        "employment is the strongest available proxy for household ability "
+        "to repay, so it leads credit losses",
+    ("UNEMPLOYMENT", "BRANDED_CONSUMER"):
+        "employment sets household income and therefore volume",
+    ("UNEMPLOYMENT", "PEOPLE_OR_ROUTE_BASED_SERVICES"):
+        "a loose labour market lowers hiring cost and a tight one raises it",
+    ("INDUSTRIAL_DEMAND", "DESIGN_AND_MANUFACTURE"):
+        "industrial and end-market demand sets order rates, and channel "
+        "inventory amplifies the swing on the way through",
+    ("INDUSTRIAL_DEMAND", "MANUFACTURE_AND_AFTERMARKET"):
+        "end-market activity sets orders now and therefore the production "
+        "rate that carries revenue later",
+    ("INDUSTRIAL_DEMAND", "COMMODITY_PRODUCER"):
+        "industrial activity is the demand side of the price this producer "
+        "receives",
+    ("INDUSTRIAL_DEMAND", "CONTRACTED_OR_RATE_BASE_ASSETS"):
+        "activity sets throughput on the assets and the case for the next "
+        "one",
+    ("INDUSTRIAL_DEMAND", "BALANCE_SHEET_OR_NETWORK"):
+        "activity drives credit demand and transaction volume",
+    # --- SCALE_RETAIL. A model class the manifest carries and this table did
+    # not, so a scale retailer received no economic reading at all -- measured
+    # at 1 of the 100 manifest companies, and one of the ten in the live
+    # matrix. A class with no mechanism is silent, not unexposed.
+    ("MARKET_RATE", "SCALE_RETAIL"):
+        "rates set the carry on the inventory in the stores and the hurdle on "
+        "the store and distribution capital programme",
+    ("LABOR", "SCALE_RETAIL"):
+        "store and distribution wages are the dominant controllable cost, so "
+        "the labour market sets the operating margin before any pricing "
+        "action",
+    ("COMMODITY", "SCALE_RETAIL"):
+        "fuel and agricultural inputs enter the landed cost of goods and the "
+        "cost of moving them to the store",
+    ("UNEMPLOYMENT", "SCALE_RETAIL"):
+        "weaker employment moves households toward lower-margin staples and "
+        "private label, so traffic can RISE while mix deteriorates",
+    ("INFLATION", "SCALE_RETAIL"):
+        "grocery inflation raises the cost of goods and simultaneously widens "
+        "the everyday-low-price gap against higher-priced grocers",
+    # --- CURVE_SLOPE and CREDIT_SPREAD. Neither is the LEVEL of rates, and
+    # folding them into MARKET_RATE was why a bank could never receive an
+    # economic reading: the level's effect on a balance sheet is genuinely
+    # two-sided and therefore unsigned, while the slope's is not. Measured on
+    # the 60-case parity harness -- JPMorgan was silent in every regime the
+    # research arm spoke in.
+    ("CURVE_SLOPE", "BALANCE_SHEET_OR_NETWORK"):
+        "the spread between what assets yield and what funding costs IS the "
+        "primary revenue driver, and the slope of the curve is that spread "
+        "before any deposit-beta lag",
+    ("CREDIT_SPREAD", "BALANCE_SHEET_OR_NETWORK"):
+        "a wider spread is the market pricing in the charge-offs that drive "
+        "reserve builds, and it reaches the income statement through "
+        "provisioning before it reaches the book",
+    ("CREDIT_SPREAD", "MANUFACTURE_AND_AFTERMARKET"):
+        "equipment is bought on credit, so the customer's financing cost "
+        "gates the order before the end market itself weakens",
+    ("CREDIT_SPREAD", "DESIGN_AND_MANUFACTURE"):
+        "customers' capacity buildouts are financed, so a wider spread "
+        "lengthens the ordering cycle before it cuts it",
+    ("CREDIT_SPREAD", "CONTRACTED_OR_RATE_BASE_ASSETS"):
+        "the capital programme is debt-financed, so the spread sets the cost "
+        "of the next asset on top of the risk-free rate",
+    ("CREDIT_SPREAD", "COMMODITY_PRODUCER"):
+        "sustaining and expansion capital is financed against a volatile "
+        "revenue line, so the spread widens fastest exactly when the price "
+        "falls",
+
+}
+
+#: Which way each channel has to move to hurt each kind of business. Same key
+#: as `_TRANSMISSION`, and every entry is the sign the mechanism there already
+#: states. A pair ABSENT from this table has no established sign, and
+#: `adverse_direction_for` returns "" for it — see that method for why the
+#: absence is deliberate rather than an omission to be filled in later.
+_ADVERSE_DIRECTION = {
+    # --- rates: expensive money hurts, except where the spread is the
+    # product and the mechanism itself says the two legs move at different
+    # speeds. That pair is absent.
+    ("MARKET_RATE", "BRANDED_CONSUMER"): "UP",
+    ("MARKET_RATE", "COMMODITY_PRODUCER"): "UP",
+    ("MARKET_RATE", "CONTRACTED_OR_RATE_BASE_ASSETS"): "UP",
+    ("MARKET_RATE", "DESIGN_AND_MANUFACTURE"): "UP",
+    ("MARKET_RATE", "MANUFACTURE_AND_AFTERMARKET"): "UP",
+    ("MARKET_RATE", "PEOPLE_OR_ROUTE_BASED_SERVICES"): "UP",
+    ("MARKET_RATE", "SUBSCRIPTION_SOFTWARE"): "UP",
+    ("POLICY_RATE", "BRANDED_CONSUMER"): "UP",
+    ("POLICY_RATE", "CONTRACTED_OR_RATE_BASE_ASSETS"): "UP",
+    ("POLICY_RATE", "DESIGN_AND_MANUFACTURE"): "UP",
+    ("POLICY_RATE", "MANUFACTURE_AND_AFTERMARKET"): "UP",
+    ("POLICY_RATE", "PEOPLE_OR_ROUTE_BASED_SERVICES"): "UP",
+    ("POLICY_RATE", "SUBSCRIPTION_SOFTWARE"): "UP",
+    # --- inflation: a cost squeeze, except for a brand whose relative price
+    # position improves with it and a rate-base owner whose tariffs escalate.
+    # Both of those pairs are two-sided in the mechanism and are absent.
+    ("INFLATION", "PEOPLE_OR_ROUTE_BASED_SERVICES"): "UP",
+    ("INFLATION", "REGULATED_PRODUCT_OR_PROVIDER"): "UP",
+    ("INFLATION", "BALANCE_SHEET_OR_NETWORK"): "UP",
+    # --- labour cost: a tighter market costs more.
+    ("LABOR", "BRANDED_CONSUMER"): "UP",
+    ("LABOR", "MANUFACTURE_AND_AFTERMARKET"): "UP",
+    ("LABOR", "PEOPLE_OR_ROUTE_BASED_SERVICES"): "UP",
+    ("LABOR", "SUBSCRIPTION_SOFTWARE"): "UP",
+    # --- unemployment: households stop spending and stop repaying. For a
+    # people-based services firm the mechanism states the OPPOSITE sign --
+    # "a loose labour market lowers hiring cost" -- so rising unemployment is
+    # not the adverse direction there and the pair carries DOWN.
+    ("UNEMPLOYMENT", "BRANDED_CONSUMER"): "UP",
+    ("UNEMPLOYMENT", "BALANCE_SHEET_OR_NETWORK"): "UP",
+    ("UNEMPLOYMENT", "PEOPLE_OR_ROUTE_BASED_SERVICES"): "DOWN",
+    # --- activity: falling activity is the adverse direction everywhere it
+    # is the demand side, including for the producer whose price it sets.
+    ("INDUSTRIAL_DEMAND", "BALANCE_SHEET_OR_NETWORK"): "DOWN",
+    ("INDUSTRIAL_DEMAND", "COMMODITY_PRODUCER"): "DOWN",
+    ("INDUSTRIAL_DEMAND", "CONTRACTED_OR_RATE_BASE_ASSETS"): "DOWN",
+    ("INDUSTRIAL_DEMAND", "DESIGN_AND_MANUFACTURE"): "DOWN",
+    ("INDUSTRIAL_DEMAND", "MANUFACTURE_AND_AFTERMARKET"): "DOWN",
+    # --- commodities: an input cost for everyone who buys them, and the
+    # revenue line for the one who sells them.
+    ("COMMODITY", "BRANDED_CONSUMER"): "UP",
+    ("COMMODITY", "DESIGN_AND_MANUFACTURE"): "UP",
+    ("COMMODITY", "COMMODITY_PRODUCER"): "DOWN",
+    # --- currency: a stronger home currency translates overseas revenue back
+    # at less. The subscription pair is absent because its own mechanism says
+    # "the underlying subscription is unaffected".
+    ("CURRENCY", "BRANDED_CONSUMER"): "UP",
+    ("CURRENCY", "COMMODITY_PRODUCER"): "UP",
+    ("CURRENCY", "DESIGN_AND_MANUFACTURE"): "UP",
+    ("CURRENCY", "MANUFACTURE_AND_AFTERMARKET"): "UP",
+    ("CURRENCY", "REGULATED_PRODUCT_OR_PROVIDER"): "UP",
+    # --- SCALE_RETAIL. Rates, labour and commodities are unambiguous costs.
+    # Unemployment and inflation are ABSENT and that is the whole point: the
+    # mechanisms above state both directions for a scale retailer -- traffic
+    # rises while mix deteriorates, the price gap widens while the cost of
+    # goods rises -- so neither has a net sign and neither may move a
+    # recommendation. This is the pair the parity harness caught being
+    # asserted in four of six regimes.
+    ("MARKET_RATE", "SCALE_RETAIL"): "UP",
+    ("POLICY_RATE", "SCALE_RETAIL"): "UP",
+    ("LABOR", "SCALE_RETAIL"): "UP",
+    ("COMMODITY", "SCALE_RETAIL"): "UP",
+    # --- the curve and the spread, where the level of rates is two-sided.
+    ("CURVE_SLOPE", "BALANCE_SHEET_OR_NETWORK"): "DOWN",
+    ("CREDIT_SPREAD", "BALANCE_SHEET_OR_NETWORK"): "UP",
+    ("CREDIT_SPREAD", "MANUFACTURE_AND_AFTERMARKET"): "UP",
+    ("CREDIT_SPREAD", "DESIGN_AND_MANUFACTURE"): "UP",
+    ("CREDIT_SPREAD", "CONTRACTED_OR_RATE_BASE_ASSETS"): "UP",
+    ("CREDIT_SPREAD", "COMMODITY_PRODUCER"): "UP",
+}
+
+
+
+# --- one normalisation, at the source --------------------------------------
+#
+# The tables above are written in this repository's comment style, which uses
+# `--` for an aside. That is right in a source file and wrong everywhere the
+# strings actually go: they are copied verbatim into `current_read`, into the
+# JSON at /demo-dossiers/<c>, into the CEO answers and into the decks, where
+# they render as two hyphens mid-sentence.
+#
+# Fixing it in the HTML renderers was the first attempt and it was the wrong
+# layer -- it left the stored decision and the JSON API carrying the raw
+# form, so an integrator reading the same field got different text from the
+# page. Converted here, once, at import, so every consumer sees one thing.
+
+def _dash(value):
+    if isinstance(value, str):
+        return value.replace(" -- ", " — ")
+    if isinstance(value, tuple):
+        return tuple(_dash(v) for v in value)
+    if isinstance(value, list):
+        return [_dash(v) for v in value]
+    if isinstance(value, dict):
+        return {k: _dash(v) for k, v in value.items()}
+    return value
+
+
+_ECONOMICS = _dash(_ECONOMICS)
+_TRANSMISSION = _dash(_TRANSMISSION)
+
+
+@dataclasses.dataclass(frozen=True)
+class Competitor:
+    """One competitor, and why THIS company competes with it."""
+    name: str
+    why: str
+    basis: str          #: the classification that selected it
+
+    def as_dict(self) -> dict:
+        return dataclasses.asdict(self)
+
+
+@dataclasses.dataclass(frozen=True)
+class CompanyIntelligenceProfile:
+    """What kind of business this is. Derived, never observed.
+
+    `known` is False when the company is not in the validation manifest. A
+    profile is then all-UNKNOWN, and the selection layer above degrades to
+    the generic reading rather than borrowing another company's economics.
+    """
+    company_id: str
+    company_name: str
+    known: bool = False
+    basis: str = ""                     #: what this was derived from
+    #: PROFILE_AVAILABLE | PROFILE_PARTIAL | PROFILE_SPARSE. Always one of
+    #: the three -- there is no state reached by a join quietly failing.
+    profile_state: str = PROFILE_SPARSE
+    #: Which classifier supplied it: VALIDATION_MANIFEST, SEC_SIC, or NONE.
+    profile_source: str = "NONE"
+    #: What is missing and what would resolve it. Non-empty whenever the
+    #: state is not PROFILE_AVAILABLE, so no surface has to invent the
+    #: caveat for itself.
+    profile_limitation: str = ""
+    sector: str = UNKNOWN
+    business_model_class: str = UNKNOWN
+    business_model: str = UNKNOWN
+    industry_structure: str = UNKNOWN
+    primary_revenue_drivers: Tuple[str, ...] = ()
+    primary_cost_drivers: Tuple[str, ...] = ()
+    capital_intensity: str = UNKNOWN
+    demand_model: str = UNKNOWN
+    customer_structure: str = UNKNOWN
+    supplier_structure: str = UNKNOWN
+    pricing_model: str = UNKNOWN
+    operating_leverage: str = UNKNOWN
+    regulatory_exposure: str = UNKNOWN
+    cyclical_exposure: str = UNKNOWN
+    relevant_macro_channels: Tuple[str, ...] = ()
+    strategic_competitors: Tuple[Competitor, ...] = ()
+    primary_management_levers: Tuple[str, ...] = ()
+    decision_archetypes: Tuple[str, ...] = ()
+    relevant_evidence_types: Tuple[str, ...] = ()
+    relevant_causal_questions: Tuple[str, ...] = ()
+    relevant_historical_dimensions: Tuple[str, ...] = ()
+    public_private: str = UNKNOWN
+    multi_segment: bool = False
+    contract: str = CONTRACT
+
+    def adverse_direction_for(self, channel: str) -> str:
+        """Which way `channel` has to move to HURT this kind of business.
+
+        "UP", "DOWN", or "" when the sign is not established — and the empty
+        answer is the important one. A single sign per channel would say that
+        rising inflation is bad for everybody, and it is not: it widens an
+        everyday-low-price grocer's advantage over higher-priced rivals while
+        it squeezes a regulated provider whose net price is set by payers.
+        Reading one sign for both is how two companies get the same
+        paragraph, which is the failure this whole profile exists to prevent.
+
+        WHERE THE SIGNS COME FROM. Each one is the direction the mechanism
+        beside it already states. `_TRANSMISSION[(COMMODITY,
+        COMMODITY_PRODUCER)]` says "the commodity price IS the realised price
+        of output", so a rising commodity price helps and the adverse
+        direction is DOWN.
+
+        AMBIGUOUS IS A REAL ANSWER AND IT FAILS CLOSED. Several mechanisms are
+        explicitly two-sided — "many contracts and tariffs escalate with
+        inflation, so it reaches revenue as well as cost" states no net sign,
+        and neither does "a pass-through in some contracts and a margin
+        exposure in others". Those pairs are absent from the table, so the
+        condition is READ and reported and can never be the thing that moves a
+        recommendation. Guessing a sign for them would be asserting a net
+        effect the evidence does not carry.
+        """
+        return _ADVERSE_DIRECTION.get((str(channel).upper(),
+                                       self.business_model_class), "")
+
+    def transmission_for(self, channel: str) -> str:
+        """The mechanism by which `channel` reaches THIS kind of business.
+
+        Empty when no mechanism is established -- §6's NO_RELEVANT_EXPOSURE.
+        A channel with no mechanism is never shown as an exposure.
+        """
+        return _TRANSMISSION.get((str(channel).upper(),
+                                  self.business_model_class), "")
+
+    def as_dict(self) -> dict:
+        out = dataclasses.asdict(self)
+        out["strategic_competitors"] = [c.as_dict()
+                                        for c in self.strategic_competitors]
+        return out
+
+
+# --- causal questions, chosen by what this business actually turns on -------
+#
+# One question per (model class, decision archetype). The pair matters: a
+# pricing decision at a bank and a pricing decision at a consumer brand are
+# not the same question, and asking both "did the price change work" is the
+# collapse in miniature.
+
+_CAUSAL = {
+    ("SUBSCRIPTION_SOFTWARE", "PRICING"):
+        "Did the pricing or packaging change alter conversion and expansion, "
+        "or did it only move realised price on the customers who renewed "
+        "anyway?",
+    ("SUBSCRIPTION_SOFTWARE", "RETENTION"):
+        "Did the retention programme change renewal behaviour, or did it "
+        "coincide with a cohort that was always going to renew?",
+    ("SUBSCRIPTION_SOFTWARE", "SALES_MOTION"):
+        "Did the change in sales motion improve acquisition efficiency "
+        "relative to comparable vendors over the same window?",
+    ("SUBSCRIPTION_SOFTWARE", "PRODUCTIZATION"):
+        "Did the new product reach adoption in the installed base, and did "
+        "adopting accounts expand more than comparable accounts that did "
+        "not adopt?",
+    ("SUBSCRIPTION_SOFTWARE", "CUSTOMER_SEGMENT"):
+        "Did the shift toward this customer segment raise contract value "
+        "without a matching rise in acquisition cost?",
+    ("DESIGN_AND_MANUFACTURE", "CAPACITY"):
+        "Did the capacity commitment convert into shipped volume, or into "
+        "inventory that the channel had already stocked?",
+    ("DESIGN_AND_MANUFACTURE", "R&D_ROADMAP"):
+        "Did the new product generation win share at its introduction, "
+        "relative to the prior generation's introduction?",
+    ("DESIGN_AND_MANUFACTURE", "INVENTORY"):
+        "Is the inventory movement a demand signal, or the channel "
+        "correcting a position it built ahead of demand?",
+    ("DESIGN_AND_MANUFACTURE", "PRICING"):
+        "Did the price change hold through the cycle, or was it recovered "
+        "by customers at the next contract negotiation?",
+    ("DESIGN_AND_MANUFACTURE", "SUPPLY_CHAIN"):
+        "Did the supply constraint bind output, or was demand the binding "
+        "constraint over the same window?",
+    ("COMMODITY_PRODUCER", "CAPITAL_ALLOCATION"):
+        "Did the capital committed to this project earn a return "
+        "distinguishable from what the commodity price alone delivered?",
+    ("COMMODITY_PRODUCER", "CAPACITY"):
+        "Did the production increase raise realised revenue, or did it "
+        "arrive into a price that fell by as much?",
+    ("COMMODITY_PRODUCER", "COST_STRUCTURE"):
+        "Did the cost programme lower unit cost relative to comparable "
+        "producers facing the same input prices?",
+    ("COMMODITY_PRODUCER", "M&A"):
+        "Did the acquired asset add production and reserve life at a cost "
+        "below building or buying the equivalent elsewhere?",
+    ("BRANDED_CONSUMER", "PRICING"):
+        "Did the price increase stick in the channel, and how much volume "
+        "did it cost relative to categories that did not price?",
+    ("BRANDED_CONSUMER", "COST_STRUCTURE"):
+        "Did the productivity programme reach gross margin, or was it "
+        "absorbed by input cost moving the other way?",
+    ("BRANDED_CONSUMER", "PRODUCTIZATION"):
+        "Did the launch add incremental volume, or did it move volume from "
+        "the company's own existing products?",
+    ("BRANDED_CONSUMER", "CUSTOMER_SEGMENT"):
+        "Did the segment or channel shift raise realised price per unit "
+        "after trade spend?",
+    ("BRANDED_CONSUMER", "MARKET_ENTRY"):
+        "Did entering this market add volume at a contribution margin "
+        "comparable to the established ones?",
+    ("CONTRACTED_OR_RATE_BASE_ASSETS", "CAPITAL_ALLOCATION"):
+        "Did the asset placed in service earn its contracted return, and "
+        "did the financing cost assumed at sanction hold?",
+    ("CONTRACTED_OR_RATE_BASE_ASSETS", "CAPACITY"):
+        "Did the added capacity get contracted, or is it earning merchant "
+        "rates it was not sanctioned against?",
+    ("CONTRACTED_OR_RATE_BASE_ASSETS", "REGULATORY_RESPONSE"):
+        "Did the regulatory decision change the allowed return in a way "
+        "that reaches earnings, or only the timing of recovery?",
+    ("CONTRACTED_OR_RATE_BASE_ASSETS", "M&A"):
+        "Did the acquired asset add contracted cash flow at a price below "
+        "the cost of building it?",
+    ("BALANCE_SHEET_OR_NETWORK", "PRICING"):
+        "Did the repricing widen the spread, or did the cost of funds "
+        "follow it up within the same window?",
+    ("BALANCE_SHEET_OR_NETWORK", "CAPITAL_ALLOCATION"):
+        "Did the capital deployed into this book earn a return above its "
+        "cost once credit losses are recognised?",
+    ("BALANCE_SHEET_OR_NETWORK", "CUSTOMER_SEGMENT"):
+        "Did growth in this segment come with credit performance "
+        "comparable to the existing book?",
+    ("BALANCE_SHEET_OR_NETWORK", "REGULATORY_RESPONSE"):
+        "Did the regulatory change bind capital allocation, or was the "
+        "constraint already slack?",
+    ("BALANCE_SHEET_OR_NETWORK", "COMPETITIVE_RESPONSE"):
+        "Did the competitor's pricing move take balances, or did the market "
+        "reprice as a whole?",
+    ("MANUFACTURE_AND_AFTERMARKET", "CAPACITY"):
+        "Did the production rate increase convert backlog into deliveries, "
+        "or did it accumulate work in progress the supply chain cannot "
+        "finish?",
+    ("MANUFACTURE_AND_AFTERMARKET", "SUPPLY_CHAIN"):
+        "Was the supplier constraint the binding limit on deliveries, or "
+        "was internal quality rework the limit over the same window?",
+    ("MANUFACTURE_AND_AFTERMARKET", "R&D_ROADMAP"):
+        "Did the programme investment convert into orders, and at what lag "
+        "relative to comparable programmes?",
+    ("MANUFACTURE_AND_AFTERMARKET", "REGULATORY_RESPONSE"):
+        "Did the certification milestone change the delivery rate, or only "
+        "the permission to deliver?",
+    ("MANUFACTURE_AND_AFTERMARKET", "CAPITAL_ALLOCATION"):
+        "Did capital committed to the programme earn a return once the "
+        "aftermarket stream is counted over the product's life?",
+    ("PEOPLE_OR_ROUTE_BASED_SERVICES", "PRICING"):
+        "Did the rate increase hold on renewal, or was it conceded back "
+        "through scope?",
+    ("PEOPLE_OR_ROUTE_BASED_SERVICES", "CAPACITY"):
+        "Did the hiring convert into billable utilisation, or into bench?",
+    ("PEOPLE_OR_ROUTE_BASED_SERVICES", "CUSTOMER_SEGMENT"):
+        "Did the shift in engagement mix raise realised rate per delivered "
+        "hour?",
+    ("PEOPLE_OR_ROUTE_BASED_SERVICES", "COST_STRUCTURE"):
+        "Did the cost action lower delivery cost without lowering "
+        "utilisation?",
+    ("PEOPLE_OR_ROUTE_BASED_SERVICES", "MARKET_ENTRY"):
+        "Did the new market or route reach utilisation comparable to the "
+        "established ones, and how long did it take?",
+    ("REGULATED_PRODUCT_OR_PROVIDER", "R&D_ROADMAP"):
+        "Did the development decision change the probability-weighted value "
+        "of the pipeline, or only its timing?",
+    ("REGULATED_PRODUCT_OR_PROVIDER", "REGULATORY_RESPONSE"):
+        "Did the regulatory decision change the addressable population, or "
+        "only the label under which it is reached?",
+    ("REGULATED_PRODUCT_OR_PROVIDER", "PRICING"):
+        "Did the price action reach NET price after rebates, or was it "
+        "absorbed by payers?",
+    ("REGULATED_PRODUCT_OR_PROVIDER", "CAPITAL_ALLOCATION"):
+        "Did capital moved into this therapeutic area earn a return "
+        "distinguishable from the base rate for programmes at that stage?",
+    ("REGULATED_PRODUCT_OR_PROVIDER", "MARKET_ENTRY"):
+        "Did entering this geography add volume at the net price assumed "
+        "when the launch was approved?",
+}
+
+#: Which historical regimes are worth replaying for this kind of business.
+_HISTORY = {
+    "ADVERTISING_PLATFORM": (
+        "periods when a platform or a regulator removed an advertising "
+        "signal and attribution had to be rebuilt",
+        "advertising recessions, where budgets were cut before the audience "
+        "was",
+        "attention shifts to a new format, where inventory had to be rebuilt "
+        "somewhere the auction had not yet formed"),
+    "MULTI_ENGINE_PLATFORM": (
+        "periods when one engine's capital programme was funded out of "
+        "another engine's cash flow",
+        "episodes when consolidated growth held while the profitable engine "
+        "decelerated",
+        "regulatory or structural pressure to separate engines that had been "
+        "run together"),
+    "SCALE_RETAIL": (
+        "periods of consumer trade-down, where traffic rose and basket "
+        "margin fell",
+        "cost inflation episodes and how much price the format could pass "
+        "through without losing trips",
+        "channel shifts, where the fixed base built for one way of shopping "
+        "had to serve another"),
+    "SUBSCRIPTION_SOFTWARE": (
+        "periods when the cost of capital rose and enterprise software "
+        "budgets were re-approved rather than renewed automatically",
+        "periods when a platform shift changed what customers bought"),
+    "DESIGN_AND_MANUFACTURE": (
+        "inventory correction cycles, where channel stock rather than end "
+        "demand set orders",
+        "capacity build-outs and the price behaviour when they completed",
+        "periods when trade restrictions redrew the addressable market"),
+    "COMMODITY_PRODUCER": (
+        "commodity price regimes and the producer margin behaviour through "
+        "them",
+        "currency regimes where cost and revenue currencies diverged",
+        "capital cycles when the industry sanctioned supply into strength"),
+    "BRANDED_CONSUMER": (
+        "input-cost inflation episodes and how much price the category "
+        "carried",
+        "periods of consumer trade-down toward private label"),
+    "CONTRACTED_OR_RATE_BASE_ASSETS": (
+        "rate regimes and their effect on the cost of the capital programme",
+        "regulatory reset periods and the returns allowed through them"),
+    "BALANCE_SHEET_OR_NETWORK": (
+        "rate-change regimes and how quickly deposits repriced against "
+        "assets",
+        "credit cycles and the relationship between employment and losses"),
+    "MANUFACTURE_AND_AFTERMARKET": (
+        "demand shocks that turned backlog into deferral rather than "
+        "cancellation",
+        "production rate ramps and where the supply chain broke",
+        "certification and grounding episodes and their delivery effect"),
+    "PEOPLE_OR_ROUTE_BASED_SERVICES": (
+        "periods when client budgets contracted and utilisation fell before "
+        "headcount did",
+        "tight labour markets and their effect on delivery cost"),
+    "REGULATED_PRODUCT_OR_PROVIDER": (
+        "exclusivity expiry episodes and the revenue path after them",
+        "reimbursement and pricing reform periods",
+        "litigation and settlement episodes and their cash effect"),
+}
+
+
+_CAUSAL = _dash(_CAUSAL)
+_HISTORY = _dash(_HISTORY)
+
+
+def _regulatory_exposure(regulatory_class: str, model: str) -> str:
+    if regulatory_class == "HEAVILY_REGULATED":
+        return ("HEAVY: a regulator can change what this business may sell, "
+                "at what price, or how much capital it must hold -- so "
+                "regulatory action is a first-order commercial variable, "
+                "not a compliance cost")
+    if regulatory_class == "REGULATED":
+        return ("MATERIAL: licensed and supervised, so regulatory change "
+                "reaches operations and cost before it reaches strategy")
+    if regulatory_class == "LIGHTLY_REGULATED":
+        return ("LIGHT: general commercial regulation applies; no regulator "
+                "sets this company's price or permission to sell")
+    return UNKNOWN
+
+
+def _cyclical_exposure(cyclicality: str, model: str) -> str:
+    if cyclicality == "CYCLICAL":
+        return ("CYCLICAL: demand follows the wider economic cycle, so the "
+                "same operating decision produces different outcomes at "
+                "different points in it")
+    if cyclicality == "DEFENSIVE":
+        return ("DEFENSIVE: demand is comparatively insensitive to the "
+                "cycle, so a demand change is more likely company-specific "
+                "than macro")
+    if cyclicality == "SECULAR":
+        return ("SECULAR: demand is driven by adoption of the category "
+                "rather than by the cycle, so cycle-based reasoning "
+                "explains less here than category adoption does")
+    return UNKNOWN
+
+
+def _capital_intensity(level: str, model: str) -> str:
+    if level == "HIGH":
+        return ("HIGH: growth consumes capital before it produces revenue, "
+                "so the cost of capital is an operating variable")
+    if level == "MODERATE":
+        return "MODERATE: growth requires capital but does not lead it"
+    if level == "LOW":
+        return ("LOW: growth is funded largely out of operating cost, so "
+                "the binding constraint is people and time rather than "
+                "capital")
+    return UNKNOWN
+
+
+def _competitors(company, manifest) -> Tuple[Competitor, ...]:
+    """Peers selected by business model and sector, never by fame.
+
+    WHY THE MANIFEST AND NOT A LIST OF LARGE COMPANIES. §5 refuses
+    "arbitrary famous-company competitors", and a hand-written list is
+    exactly that -- it would name the same four or five firms for every
+    software company on the list. The manifest already classifies 100
+    companies by the two things that decide whether two firms actually
+    compete: what they sell and how they make money.
+
+    Every row states its own basis, so a reader can reject one. The
+    strongest tie is a shared business model AND sector; a shared sector
+    alone is a weaker claim and says so.
+    """
+    if company is None or manifest is None:
+        return ()
+    strong, weak = [], []
+    for other in manifest.companies:
+        if other.company_id == company.company_id:
+            continue
+        if other.parent_company_id == company.company_id or \
+                company.parent_company_id == other.company_id:
+            continue
+        same_model = other.business_model_class == company.business_model_class
+        same_sector = other.sector == company.sector
+        if same_model and same_sector:
+            row = Competitor(
+                name=other.canonical_name,
+                why=(f"operates the same business model "
+                     f"({_pretty(company.business_model_class)}) in the same "
+                     f"sector ({_pretty(company.sector)}), so it competes "
+                     f"for the same customers and is exposed to the same "
+                     f"cost and demand drivers"),
+                basis="SAME_MODEL_AND_SECTOR")
+            # Same geography and size make the overlap tighter; used to
+            # order, never to invent a claim.
+            rank = (0 if other.primary_geography == company.primary_geography
+                    else 1,
+                    0 if other.company_size_class == company.company_size_class
+                    else 1, other.canonical_name)
+            strong.append((rank, row))
+        elif same_sector:
+            # ALPHABETICAL ORDER IS NOT ECONOMIC RELEVANCE. This key was
+            # (0, 0, name), so the sector's membership was presented to the
+            # reader in dictionary order: Meta's three closest rivals came
+            # back as 37signals, Adobe and AgileBits, and on the deployed
+            # page AT&T Inc led the list. Rank on the same two economic
+            # facts the strong branch uses — a peer of the same size in the
+            # same geography overlaps more than one that merely shares a
+            # sector — and keep the name only as a deterministic tie-break.
+            weak.append(((
+                0 if other.primary_geography == company.primary_geography
+                else 1,
+                0 if other.company_size_class == company.company_size_class
+                else 1, other.canonical_name), Competitor(
+                name=other.canonical_name,
+                why=(f"same sector ({_pretty(company.sector)}) but a "
+                     f"different business model "
+                     f"({_pretty(other.business_model_class)}): it competes "
+                     f"for the same end demand without the same economics"),
+                basis="SAME_SECTOR_DIFFERENT_MODEL")))
+    strong.sort(key=lambda r: r[0])
+    weak.sort(key=lambda r: r[0])
+    rows = [r for _, r in strong][:5]
+    if len(rows) < 3:
+        rows += [r for _, r in weak][:3 - len(rows)]
+    return tuple(rows)
+
+
+def _pretty(token: str) -> str:
+    """An enum, as English. §17 forbids a raw enum reaching a reader."""
+    return str(token or "").replace("_", " ").lower()
+
+
+def _causal_questions(model: str, archetypes) -> Tuple[str, ...]:
+    out = []
+    for archetype in archetypes:
+        question = _CAUSAL.get((model, archetype))
+        if question and question not in out:
+            out.append(question)
+    return tuple(out)
+
+
+@dataclasses.dataclass(frozen=True)
+class _Classified:
+    """A company classified by the regulator rather than by the manifest.
+
+    Carries exactly the fields the tables below key on, so the SIC-derived
+    path runs the SAME selection code as a manifest company instead of a
+    parallel one that could drift. The fields the manifest would have added
+    per company -- capital intensity, cyclicality, regulatory class -- stay
+    UNKNOWN, which is why the state is PARTIAL.
+    """
+    company_id: str
+    canonical_name: str
+    sector: str
+    business_model_class: str
+    parent_company_id: Optional[str] = None
+    primary_geography: str = UNKNOWN
+    company_size_class: str = UNKNOWN
+    capital_intensity_class: str = UNKNOWN
+    cyclicality_class: str = UNKNOWN
+    regulatory_class: str = UNKNOWN
+    public_private: str = UNKNOWN
+    multi_segment: bool = False
+
+
+def profile_for(company_id: str = "", *, name: str = "", domain: str = "",
+                manifest=None, registrant=None,
+                evidence_text: str = "") -> CompanyIntelligenceProfile:
+    """The profile for one company, with its quality stated.
+
+    Three outcomes, always one of them explicitly:
+
+      * in the validation manifest -> PROFILE_AVAILABLE;
+      * not in it, but the SEC has classified the registrant -> the model
+        class the regulator's SIC code implies, PROFILE_PARTIAL;
+      * neither -> PROFILE_SPARSE, naming what is missing.
+
+    `registrant` is `edgar.registrant_classification()`'s result, passed in
+    rather than fetched here so this module makes no network call.
+
+    `evidence_text` is the subject's own retrieved filing text, used ONLY to
+    correct a SIC code that is known to contain two different businesses --
+    see `revenue_model_hint`. It never promotes an unclassified company and
+    never overrides the hand-written manifest.
+
+    Never raises: a manifest that cannot be loaded produces a sparse
+    profile. Failing the analysis because a classification file is missing
+    would be worse than analysing without it.
+    """
+    company = None
+    if manifest is None:
+        try:
+            from intent_engine.validation import load
+            manifest = load()
+        except Exception:                                   # noqa: BLE001
+            manifest = None
+    if manifest is not None:
+        try:
+            company = manifest.resolve(domain=domain, name=name,
+                                       company_id=company_id)
+        except Exception:                                   # noqa: BLE001
+            company = None
+    display = name or company_id
+    state = PROFILE_AVAILABLE
+    source = "VALIDATION_MANIFEST"
+    limitation = ""
+    if company is None:
+        # The manifest does not contain this company. That is a statement
+        # about the manifest -- a curated 100-company validation universe --
+        # and not about whether the company is known.
+        sic = str((registrant or {}).get("sic") or "").strip()
+        sic_text = str((registrant or {}).get("sic_description") or "").strip()
+        derived = classify_sic(sic)
+        if derived is None:
+            why = (f"the regulator's industry code for this filer "
+                   f"({sic} {sic_text}) is a residual category that does not "
+                   f"determine a business model"
+                   if sic else
+                   "this company is not in the validation manifest and no "
+                   "regulator industry classification was found for it")
+            return CompanyIntelligenceProfile(
+                company_id=company_id, company_name=display, known=False,
+                profile_state=PROFILE_SPARSE, profile_source="NONE",
+                profile_limitation=(
+                    f"What kind of business this is has not been "
+                    f"established: {why}. The analysis below is selected "
+                    f"from the published record alone, so it does not use "
+                    f"this company's business model to decide what is worth "
+                    f"asking. Adding this company to the validation manifest "
+                    f"would resolve it."),
+                basis=(f"business model not classified -- {why}"))
+        model, sector = derived
+        source = "SEC_SIC"
+        cited = f"{sic} {sic_text}".strip()
+        # THE FILER'S OWN SENTENCE OUTRANKS THE INDUSTRY CODE.
+        #
+        # Only where the code is known to hold two different businesses, and
+        # only on an explicit first-party revenue statement. Meta and
+        # Salesforce are both SIC 7370 and their economics are opposite, so
+        # taking the code's word for it makes one of them wrong every time.
+        # Multi-engine is tested FIRST: a company that reports a cloud engine
+        # beside a commerce engine is mis-described by either single class,
+        # including the advertising one it would otherwise qualify for.
+        hinted = multi_engine_hint(evidence_text) \
+            or revenue_model_hint(evidence_text)
+        if hinted and hinted != model and hinted in _ECONOMICS:
+            model = hinted
+            source = "SEC_SIC+FILING_REVENUE"
+            cited = (f"{cited}, corrected by this company's own statement of "
+                     f"where its revenue comes from")
+        company = _Classified(
+            company_id=company_id or display, canonical_name=display,
+            sector=sector, business_model_class=model)
+        state = PROFILE_PARTIAL
+        limitation = (
+            f"Classified from the regulator's own industry code for this "
+            f"filer ({cited}) rather than from the validation "
+            f"manifest. The business model is therefore established and the "
+            f"analysis is selected for it; what is not established is the "
+            f"within-industry detail the manifest records per company -- "
+            f"capital intensity, demand cyclicality and regulatory regime "
+            f"are not used below, and are shown as not established.")
+    econ = _ECONOMICS.get(company.business_model_class)
+    if econ is None:
+        return CompanyIntelligenceProfile(
+            company_id=company.company_id, company_name=company.canonical_name,
+            known=False, sector=company.sector,
+            profile_state=PROFILE_SPARSE, profile_source="NONE",
+            profile_limitation=(
+                f"This company is classified as "
+                f"{_pretty(company.business_model_class)}, which this build "
+                f"has no economic profile for, so the analysis below does "
+                f"not use its business model."),
+            business_model_class=company.business_model_class,
+            basis=(f"business model class {company.business_model_class!r} "
+                   f"has no economic profile in this build"))
+    archetypes = tuple(econ["archetypes"])
+    channels = tuple(c for c in econ["macro"]
+                     if (c, company.business_model_class) in _TRANSMISSION)
+    return CompanyIntelligenceProfile(
+        company_id=company.company_id,
+        company_name=company.canonical_name,
+        known=True,
+        profile_state=state,
+        profile_source=source,
+        profile_limitation=limitation,
+        basis=(f"derived from the validation manifest classification: "
+               f"{_pretty(company.sector)} sector, "
+               f"{_pretty(company.business_model_class)} business model, "
+               f"{_pretty(company.capital_intensity_class)} capital "
+               f"intensity, {_pretty(company.cyclicality_class)} demand, "
+               f"{_pretty(company.regulatory_class)}"
+               if state == PROFILE_AVAILABLE else
+               f"derived from the industry classification the regulator "
+               f"assigns this filer: {_pretty(company.sector)} sector, "
+               f"{_pretty(company.business_model_class)} business model"),
+        sector=company.sector,
+        business_model_class=company.business_model_class,
+        business_model=econ["business_model"],
+        industry_structure=econ["industry_structure"],
+        primary_revenue_drivers=tuple(econ["revenue_drivers"]),
+        primary_cost_drivers=tuple(econ["cost_drivers"]),
+        capital_intensity=_capital_intensity(company.capital_intensity_class,
+                                             company.business_model_class),
+        demand_model=econ["demand_model"],
+        customer_structure=econ["customer_structure"],
+        supplier_structure=econ["supplier_structure"],
+        pricing_model=econ["pricing_model"],
+        operating_leverage=econ["operating_leverage"],
+        regulatory_exposure=_regulatory_exposure(company.regulatory_class,
+                                                 company.business_model_class),
+        cyclical_exposure=_cyclical_exposure(company.cyclicality_class,
+                                             company.business_model_class),
+        relevant_macro_channels=channels,
+        strategic_competitors=_competitors(company, manifest),
+        primary_management_levers=tuple(econ["levers"]),
+        decision_archetypes=archetypes,
+        relevant_evidence_types=tuple(econ["evidence"]),
+        relevant_causal_questions=_causal_questions(
+            company.business_model_class, archetypes),
+        relevant_historical_dimensions=tuple(
+            _HISTORY.get(company.business_model_class, ())),
+        public_private=company.public_private,
+        multi_segment=company.multi_segment,
+    )

@@ -1,0 +1,437 @@
+{
+  "artifact": "BATCH_A_FINAL_UI",
+  "status": "IN_PROGRESS",
+  "as_of": "2026-08-20",
+  "rule": "A dimension is scored only from a rendered customer surface that was actually read. Everything else is NOT_MEASURED. No score is inferred from a backend object.",
+  "sessions": {
+    "53905f6a": "drove the deployed guest journeys; owns every rendered-page measurement",
+    "d8a05a86": "owns the repairs and the offline classification probe"
+  },
+  "deployed_shas": {
+    "58ac7ef": "frequent-filer index repair; the BEFORE baseline",
+    "0420fb0": "bounded SEC retry, filing cache, class gate, eight model-keyed tables",
+    "98a7a17": "per-run retry ledger and operator telemetry",
+    "975321c": "claim ownership in the mental model",
+    "188da7c": "structured rows rendered, one competitive state (current)"
+  },
+  "template_collapse": {
+    "instrument": "ten board questions from the live /conversation route; company name and page chrome removed, longest-variant-first, truncated at the first chrome marker",
+    "before": {
+      "sha": "58ac7ef",
+      "companies": [
+        "Meta",
+        "Caterpillar"
+      ],
+      "identical_answers": 10,
+      "of": 10
+    },
+    "after": {
+      "sha": "0420fb0",
+      "companies": [
+        "JPMorgan",
+        "NVIDIA",
+        "Walmart"
+      ],
+      "identical_answers": 1,
+      "of": 10,
+      "remaining": "Who's the real competitor? \u2014 fixed in 188da7c, awaiting re-measurement"
+    },
+    "rejected_instruments": [
+      {
+        "method": "naive similarity",
+        "result": 0.915,
+        "why_wrong": "inflated by shared page chrome"
+      },
+      {
+        "method": "mask company name, byte-equality",
+        "result": "0/10",
+        "why_wrong": "chrome AFTER the answer differs per company"
+      },
+      {
+        "method": "mask name variants from a set",
+        "result": "0/10",
+        "why_wrong": "arbitrary iteration order left a stray ' Inc.'"
+      },
+      {
+        "method": "no boilerplate-tail truncation",
+        "result": "0/10",
+        "why_wrong": "run-varying tails made identical answers look distinct"
+      }
+    ]
+  },
+  "exit_bar": {
+    "eight_full_deployed_journeys": "NOT_MEASURED",
+    "false_failures": "NOT_MEASURED",
+    "manual_recoveries": "NOT_MEASURED",
+    "wrong_identities": "NOT_MEASURED",
+    "hidden_results": "NOT_MEASURED",
+    "empty_executive_sections": "NOT_MEASURED",
+    "known_wrong_competitors": "NOT_MEASURED",
+    "contradictory_competitor_surfaces": "NOT_MEASURED",
+    "qa_template_collapse": "NOT_MEASURED",
+    "history_missing": "NOT_MEASURED",
+    "step6_generic": "NOT_MEASURED",
+    "company_specificity": "NOT_MEASURED",
+    "competitive_specificity": "NOT_MEASURED",
+    "core_score": "NOT_MEASURED",
+    "sev1": "NOT_MEASURED",
+    "demo_blocking_sev2": "NOT_MEASURED"
+  },
+  "known_and_bounded": [
+    {
+      "finding": "two pattern sets are byte-identical across different model classes: Meta = Amazon, NVIDIA = Caterpillar",
+      "why_not_closed": "window 1 showed three companies that do NOT share a menu differing 9/10, so the class tables carry differentiation downstream of the menu",
+      "risk_to": [
+        "\u00a744 Alphabet must differ from Meta",
+        "\u00a745 five semiconductors must not share an engine"
+      ]
+    },
+    {
+      "finding": "some differing answers differ by WITHHOLDING, not content",
+      "why_not_closed": "distinct is necessary but not sufficient for \u00a722; recorded as measured, not counted toward a pass"
+    }
+  ],
+  "companies": [
+    {
+      "company": "Meta Platforms, Inc.",
+      "cik": "1326801",
+      "model_class": "ADVERTISING_PLATFORM",
+      "profile_state": "PROFILE_PARTIAL",
+      "n_patterns": 8,
+      "capacity_ahead_of_demand_offered": false,
+      "live_ui": {
+        "read_on_sha": null,
+        "status": "NOT_MEASURED"
+      },
+      "scorecard": {
+        "identity": "NOT_MEASURED",
+        "business_model_accuracy": "NOT_MEASURED",
+        "metric_selection": "NOT_MEASURED",
+        "economic_reasoning": "NOT_MEASURED",
+        "macro_relevance": "NOT_MEASURED",
+        "micro_reasoning": "NOT_MEASURED",
+        "competitive_specificity": "NOT_MEASURED",
+        "market_belief_quality": "NOT_MEASURED",
+        "belief_challenge": "NOT_MEASURED",
+        "impossible_hypothesis": "NOT_MEASURED",
+        "recommendation": "NOT_MEASURED",
+        "falsifier": "NOT_MEASURED",
+        "mve_information_priority": "NOT_MEASURED",
+        "presentation": "NOT_MEASURED",
+        "full_analysis": "NOT_MEASURED",
+        "full_story": "NOT_MEASURED",
+        "history_rewind": "NOT_MEASURED",
+        "qa": "NOT_MEASURED",
+        "step_6": "NOT_MEASURED",
+        "customer_flow_reliability": "NOT_MEASURED"
+      },
+      "company_specificity": "NOT_MEASURED",
+      "core_mean": "NOT_MEASURED",
+      "core_min": "NOT_MEASURED",
+      "final_status": "NOT_MEASURED"
+    },
+    {
+      "company": "Amazon.com, Inc.",
+      "cik": "1018724",
+      "model_class": "MULTI_ENGINE_PLATFORM",
+      "profile_state": "PROFILE_PARTIAL",
+      "n_patterns": 8,
+      "capacity_ahead_of_demand_offered": false,
+      "live_ui": {
+        "read_on_sha": null,
+        "status": "NOT_MEASURED"
+      },
+      "scorecard": {
+        "identity": "NOT_MEASURED",
+        "business_model_accuracy": "NOT_MEASURED",
+        "metric_selection": "NOT_MEASURED",
+        "economic_reasoning": "NOT_MEASURED",
+        "macro_relevance": "NOT_MEASURED",
+        "micro_reasoning": "NOT_MEASURED",
+        "competitive_specificity": "NOT_MEASURED",
+        "market_belief_quality": "NOT_MEASURED",
+        "belief_challenge": "NOT_MEASURED",
+        "impossible_hypothesis": "NOT_MEASURED",
+        "recommendation": "NOT_MEASURED",
+        "falsifier": "NOT_MEASURED",
+        "mve_information_priority": "NOT_MEASURED",
+        "presentation": "NOT_MEASURED",
+        "full_analysis": "NOT_MEASURED",
+        "full_story": "NOT_MEASURED",
+        "history_rewind": "NOT_MEASURED",
+        "qa": "NOT_MEASURED",
+        "step_6": "NOT_MEASURED",
+        "customer_flow_reliability": "NOT_MEASURED"
+      },
+      "company_specificity": "NOT_MEASURED",
+      "core_mean": "NOT_MEASURED",
+      "core_min": "NOT_MEASURED",
+      "final_status": "NOT_MEASURED"
+    },
+    {
+      "company": "NVIDIA Corporation",
+      "cik": "1045810",
+      "model_class": "DESIGN_AND_MANUFACTURE",
+      "profile_state": "PROFILE_AVAILABLE",
+      "n_patterns": 10,
+      "capacity_ahead_of_demand_offered": true,
+      "live_ui": {
+        "read_on_sha": "0420fb0",
+        "seconds": 249,
+        "auto_advanced": true,
+        "false_failure": false,
+        "manual_recovery": false,
+        "wrong_identity": false,
+        "progress_stuck": false,
+        "result_hidden": false,
+        "board_questions_answered": 10,
+        "transient_retry_count": "NOT_MEASURED",
+        "cache_hits": "NOT_MEASURED"
+      },
+      "scorecard": {
+        "identity": "NOT_MEASURED",
+        "business_model_accuracy": "NOT_MEASURED",
+        "metric_selection": "NOT_MEASURED",
+        "economic_reasoning": "NOT_MEASURED",
+        "macro_relevance": "NOT_MEASURED",
+        "micro_reasoning": "NOT_MEASURED",
+        "competitive_specificity": "NOT_MEASURED",
+        "market_belief_quality": "NOT_MEASURED",
+        "belief_challenge": "NOT_MEASURED",
+        "impossible_hypothesis": "NOT_MEASURED",
+        "recommendation": "NOT_MEASURED",
+        "falsifier": "NOT_MEASURED",
+        "mve_information_priority": "NOT_MEASURED",
+        "presentation": "NOT_MEASURED",
+        "full_analysis": "NOT_MEASURED",
+        "full_story": "NOT_MEASURED",
+        "history_rewind": "NOT_MEASURED",
+        "qa": "NOT_MEASURED",
+        "step_6": "NOT_MEASURED",
+        "customer_flow_reliability": "NOT_MEASURED"
+      },
+      "company_specificity": "NOT_MEASURED",
+      "core_mean": "NOT_MEASURED",
+      "core_min": "NOT_MEASURED",
+      "final_status": "READ_NOT_SCORED"
+    },
+    {
+      "company": "JPMorgan Chase & Co.",
+      "cik": "19617",
+      "model_class": "BALANCE_SHEET_OR_NETWORK",
+      "profile_state": "PROFILE_AVAILABLE",
+      "n_patterns": 11,
+      "capacity_ahead_of_demand_offered": false,
+      "live_ui": {
+        "read_on_sha": "0420fb0",
+        "seconds": 159,
+        "auto_advanced": true,
+        "false_failure": false,
+        "manual_recovery": false,
+        "wrong_identity": false,
+        "progress_stuck": false,
+        "result_hidden": false,
+        "board_questions_answered": 10,
+        "transient_retry_count": "NOT_MEASURED",
+        "cache_hits": "NOT_MEASURED"
+      },
+      "scorecard": {
+        "identity": "NOT_MEASURED",
+        "business_model_accuracy": "NOT_MEASURED",
+        "metric_selection": "NOT_MEASURED",
+        "economic_reasoning": "NOT_MEASURED",
+        "macro_relevance": "NOT_MEASURED",
+        "micro_reasoning": "NOT_MEASURED",
+        "competitive_specificity": "NOT_MEASURED",
+        "market_belief_quality": "NOT_MEASURED",
+        "belief_challenge": "NOT_MEASURED",
+        "impossible_hypothesis": "NOT_MEASURED",
+        "recommendation": "NOT_MEASURED",
+        "falsifier": "NOT_MEASURED",
+        "mve_information_priority": "NOT_MEASURED",
+        "presentation": "NOT_MEASURED",
+        "full_analysis": "NOT_MEASURED",
+        "full_story": "NOT_MEASURED",
+        "history_rewind": "NOT_MEASURED",
+        "qa": "NOT_MEASURED",
+        "step_6": "NOT_MEASURED",
+        "customer_flow_reliability": "NOT_MEASURED"
+      },
+      "company_specificity": "NOT_MEASURED",
+      "core_mean": "NOT_MEASURED",
+      "core_min": "NOT_MEASURED",
+      "final_status": "READ_NOT_SCORED"
+    },
+    {
+      "company": "Walmart Inc.",
+      "cik": "104169",
+      "model_class": "SCALE_RETAIL",
+      "profile_state": "PROFILE_AVAILABLE",
+      "n_patterns": 7,
+      "capacity_ahead_of_demand_offered": false,
+      "live_ui": {
+        "read_on_sha": "0420fb0",
+        "seconds": 70,
+        "auto_advanced": true,
+        "false_failure": false,
+        "manual_recovery": false,
+        "wrong_identity": false,
+        "progress_stuck": false,
+        "result_hidden": false,
+        "board_questions_answered": 10,
+        "transient_retry_count": "NOT_MEASURED",
+        "cache_hits": "NOT_MEASURED"
+      },
+      "scorecard": {
+        "identity": "NOT_MEASURED",
+        "business_model_accuracy": "NOT_MEASURED",
+        "metric_selection": "NOT_MEASURED",
+        "economic_reasoning": "NOT_MEASURED",
+        "macro_relevance": "NOT_MEASURED",
+        "micro_reasoning": "NOT_MEASURED",
+        "competitive_specificity": "NOT_MEASURED",
+        "market_belief_quality": "NOT_MEASURED",
+        "belief_challenge": "NOT_MEASURED",
+        "impossible_hypothesis": "NOT_MEASURED",
+        "recommendation": "NOT_MEASURED",
+        "falsifier": "NOT_MEASURED",
+        "mve_information_priority": "NOT_MEASURED",
+        "presentation": "NOT_MEASURED",
+        "full_analysis": "NOT_MEASURED",
+        "full_story": "NOT_MEASURED",
+        "history_rewind": "NOT_MEASURED",
+        "qa": "NOT_MEASURED",
+        "step_6": "NOT_MEASURED",
+        "customer_flow_reliability": "NOT_MEASURED"
+      },
+      "company_specificity": "NOT_MEASURED",
+      "core_mean": "NOT_MEASURED",
+      "core_min": "NOT_MEASURED",
+      "final_status": "READ_NOT_SCORED"
+    },
+    {
+      "company": "Eli Lilly and Company",
+      "cik": "59478",
+      "model_class": "REGULATED_PRODUCT_OR_PROVIDER",
+      "profile_state": "PROFILE_AVAILABLE",
+      "n_patterns": 9,
+      "capacity_ahead_of_demand_offered": false,
+      "live_ui": {
+        "read_on_sha": null,
+        "status": "NOT_MEASURED"
+      },
+      "scorecard": {
+        "identity": "NOT_MEASURED",
+        "business_model_accuracy": "NOT_MEASURED",
+        "metric_selection": "NOT_MEASURED",
+        "economic_reasoning": "NOT_MEASURED",
+        "macro_relevance": "NOT_MEASURED",
+        "micro_reasoning": "NOT_MEASURED",
+        "competitive_specificity": "NOT_MEASURED",
+        "market_belief_quality": "NOT_MEASURED",
+        "belief_challenge": "NOT_MEASURED",
+        "impossible_hypothesis": "NOT_MEASURED",
+        "recommendation": "NOT_MEASURED",
+        "falsifier": "NOT_MEASURED",
+        "mve_information_priority": "NOT_MEASURED",
+        "presentation": "NOT_MEASURED",
+        "full_analysis": "NOT_MEASURED",
+        "full_story": "NOT_MEASURED",
+        "history_rewind": "NOT_MEASURED",
+        "qa": "NOT_MEASURED",
+        "step_6": "NOT_MEASURED",
+        "customer_flow_reliability": "NOT_MEASURED"
+      },
+      "company_specificity": "NOT_MEASURED",
+      "core_mean": "NOT_MEASURED",
+      "core_min": "NOT_MEASURED",
+      "final_status": "NOT_MEASURED"
+    },
+    {
+      "company": "Caterpillar Inc.",
+      "cik": "18230",
+      "model_class": "MANUFACTURE_AND_AFTERMARKET",
+      "profile_state": "PROFILE_AVAILABLE",
+      "n_patterns": 10,
+      "capacity_ahead_of_demand_offered": true,
+      "live_ui": {
+        "read_on_sha": null,
+        "status": "NOT_MEASURED"
+      },
+      "scorecard": {
+        "identity": "NOT_MEASURED",
+        "business_model_accuracy": "NOT_MEASURED",
+        "metric_selection": "NOT_MEASURED",
+        "economic_reasoning": "NOT_MEASURED",
+        "macro_relevance": "NOT_MEASURED",
+        "micro_reasoning": "NOT_MEASURED",
+        "competitive_specificity": "NOT_MEASURED",
+        "market_belief_quality": "NOT_MEASURED",
+        "belief_challenge": "NOT_MEASURED",
+        "impossible_hypothesis": "NOT_MEASURED",
+        "recommendation": "NOT_MEASURED",
+        "falsifier": "NOT_MEASURED",
+        "mve_information_priority": "NOT_MEASURED",
+        "presentation": "NOT_MEASURED",
+        "full_analysis": "NOT_MEASURED",
+        "full_story": "NOT_MEASURED",
+        "history_rewind": "NOT_MEASURED",
+        "qa": "NOT_MEASURED",
+        "step_6": "NOT_MEASURED",
+        "customer_flow_reliability": "NOT_MEASURED"
+      },
+      "company_specificity": "NOT_MEASURED",
+      "core_mean": "NOT_MEASURED",
+      "core_min": "NOT_MEASURED",
+      "final_status": "NOT_MEASURED"
+    },
+    {
+      "company": "Exxon Mobil Corporation",
+      "cik": "34088",
+      "model_class": "COMMODITY_PRODUCER",
+      "profile_state": "PROFILE_AVAILABLE",
+      "n_patterns": 5,
+      "capacity_ahead_of_demand_offered": true,
+      "live_ui": {
+        "read_on_sha": null,
+        "status": "NOT_MEASURED"
+      },
+      "scorecard": {
+        "identity": "NOT_MEASURED",
+        "business_model_accuracy": "NOT_MEASURED",
+        "metric_selection": "NOT_MEASURED",
+        "economic_reasoning": "NOT_MEASURED",
+        "macro_relevance": "NOT_MEASURED",
+        "micro_reasoning": "NOT_MEASURED",
+        "competitive_specificity": "NOT_MEASURED",
+        "market_belief_quality": "NOT_MEASURED",
+        "belief_challenge": "NOT_MEASURED",
+        "impossible_hypothesis": "NOT_MEASURED",
+        "recommendation": "NOT_MEASURED",
+        "falsifier": "NOT_MEASURED",
+        "mve_information_priority": "NOT_MEASURED",
+        "presentation": "NOT_MEASURED",
+        "full_analysis": "NOT_MEASURED",
+        "full_story": "NOT_MEASURED",
+        "history_rewind": "NOT_MEASURED",
+        "qa": "NOT_MEASURED",
+        "step_6": "NOT_MEASURED",
+        "customer_flow_reliability": "NOT_MEASURED"
+      },
+      "company_specificity": "NOT_MEASURED",
+      "core_mean": "NOT_MEASURED",
+      "core_min": "NOT_MEASURED",
+      "final_status": "NOT_MEASURED"
+    }
+  ],
+  "cohort_warning": "The eight companies were NOT read on one build. Window 1 (JPMorgan, NVIDIA, Walmart) ran on 0420fb0; window 2 (Meta, Amazon, Caterpillar, Exxon, Eli Lilly) runs on 188da7c, which carries three further repairs. Cross-window comparisons are confounded by the build; within-window comparisons are sound.",
+  "proofs_not_yet_captured": [
+    {
+      "repair": "claim ownership in the mental model (975321c)",
+      "test_status": "GREEN \u2014 unit tests and 7/7 break proofs",
+      "capture_status": "NOT_CAPTURED",
+      "what_is_needed": "a JPMorgan re-run on 188da7c, grepped for 'committing capital to capacity'. JPMorgan is not in window 2, so window 2 cannot supply it.",
+      "why_it_matters": "this codebase has shipped green-and-inert repairs before; a test proves the router, not the composed decision's shape in production"
+    }
+  ]
+}

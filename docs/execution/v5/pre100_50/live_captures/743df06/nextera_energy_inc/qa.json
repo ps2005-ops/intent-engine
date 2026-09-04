@@ -1,0 +1,62 @@
+[
+  {
+    "question": "What should management do?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What should management do? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NextEra Energy, Inc. What should management do? Hold this decision \u2014 where the next increment of capital goes \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "Why now?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "Why now? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NextEra Energy, Inc. Why now? where the next increment of capital goes is a standing decision for this business model. It was ranked above capacity on the same evidence. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What's the biggest risk?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What's the biggest risk? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NextEra Energy, Inc. What's the biggest risk? the company's filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What would prove this wrong?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What would prove this wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NextEra Energy, Inc. What would prove this wrong? The expected movement failing to appear in capital projects and commissioning by the next review. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "Who's the real competitor?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "Who's the real competitor? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NextEra Energy, Inc. Who's the real competitor? American Tower Corporation: operates the same business model (contracted or rate base assets) in the same sector (infrastructure), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR; Am\u00e9rica M\u00f3vil, S.A.B. de C.V.: operates the same business model (contracted or rate base assets) in the same sector (infrastructure), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR; BCE Inc.: operates the same business model (contracted or rate base assets) in the same sector (infrastructure), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What does the market believe?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What does the market believe? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NextEra Energy, Inc. What does the market believe? That NextEra Energy, Inc.'s growth and margin can improve together for another year, because they just did.: NextEra Energy, Inc.'s own filed results show growth accelerating and margin widening. This is what a reader of that record carries into next year; nobody published it in these words and it is not a consensus estimate.; That the contest NextEra Energy, Inc. has to win is against the counterparty self-supplying behind the meter, and that holding that ground is what protects the economics.: read from the business model, not retrieved. Read from how this business model competes. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What's the weakest assumption?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What's the weakest assumption? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NextEra Energy, Inc. What's the weakest assumption? NextEra Energy, Inc.'s filed results: The filed series is what this reading is computed from. Contracted cash flows on assets with long lives is what the economics rest on Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What impossible hypothesis should we investigate?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What impossible hypothesis should we investigate? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NextEra Energy, Inc. What impossible hypothesis should we investigate? A holder of this view is reading the record correctly as far as it goes: what it implies is the incremental margin on the next block of revenue, which is what separates operating leverage from a favourable mix, and nothing in what this run retrieved contradicts that.; A holder of this view is reading the record correctly as far as it goes: what it implies is wins and losses are decided against the counterparty self-supplying behind the meter rather than somewhere else, and nothing in what this run retrieved contradicts that. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What should we measure next?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What should we measure next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NextEra Energy, Inc. What should we measure next? 5 preregistered expectation(s) are open for this company; each carries its own falsifier and evaluation window.; The operating-posture distribution is uniform. The first observation that moves it is the cheapest signal available here. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What would you tell the board?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What would you tell the board? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NextEra Energy, Inc. What would you tell the board? Hold this decision \u2014 where the next increment of capital goes \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  }
+]

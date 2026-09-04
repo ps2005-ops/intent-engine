@@ -1,0 +1,116 @@
+{
+ "corroboration": {
+  "contract": "event_corroboration.v1",
+  "events": 155,
+  "multi_account_events": 49,
+  "genuinely_corroborated": 2,
+  "dependent_only": 44,
+  "conflicted": 3,
+  "by_standing": {
+   "SINGLE_ACCOUNT": 106,
+   "DEPENDENT_ACCOUNTS": 44,
+   "CORROBORATED": 2,
+   "CONFLICTED": 3
+  },
+  "dependency_classes": {
+   "INDEPENDENT": 6,
+   "PARTIALLY_INDEPENDENT": 9,
+   "SAME_ORIGIN": 133
+  },
+  "accounts_claimed": 143,
+  "accounts_effective": 55.5,
+  "note": "accounts_effective is what accounts_claimed becomes once syndication is discounted; the gap between them is the corpus's redundancy, and neither number tests a belief"
+ },
+ "normalized_health": {
+  "contract": "normalized_learning_health.v1",
+  "raw_evidence_rows": 249,
+  "normalized_events": 155,
+  "redundancy": 0.3775,
+  "multi_account_events": 49,
+  "informative_reconciliations": 5,
+  "outcomes": {
+   "CONTRADICTED": 2,
+   "CONFIRMED": 3
+  },
+  "self_tests_on_the_opening_event": 0,
+  "pairs": [
+   {
+    "metric": "evidence_identity",
+    "raw": "249/249",
+    "raw_rate": 1.0,
+    "normalized": "155/249",
+    "normalized_rate": 0.6225,
+    "note": "rows describing one occurrence are one occurrence; no row is deleted and none is merged away"
+   },
+   {
+    "metric": "self_test_contamination",
+    "raw": "0/5",
+    "raw_rate": 0.0,
+    "normalized": "0/5",
+    "normalized_rate": 0.0,
+    "note": "of the reconciliations that LANDED, this many rest on the event that opened the belief"
+   }
+  ],
+  "note": "the append-only history is not rewritten; the normalized column is a derived view over the same rows, and the gap between the columns is the archive's redundancy"
+ },
+ "corroborated_events": [
+  {
+   "contract": "event_corroboration.v1",
+   "event_id": "evt_b337be84d63e9f",
+   "subject": "shopify",
+   "accounts": 5,
+   "independent_accounts": 3,
+   "effective_accounts": 4.0,
+   "source_roles": [
+    "regulatory_filing",
+    "analyst_coverage",
+    "independent_reporting"
+   ],
+   "publishers": [
+    "seeking alpha",
+    "yahoo finance"
+   ],
+   "source_diversity": "INDEPENDENT_ROLES",
+   "dependency_classes": {
+    "INDEPENDENT": 6,
+    "PARTIALLY_INDEPENDENT": 1,
+    "SAME_ORIGIN": 3
+   },
+   "corroborated_fields": [
+    "30%"
+   ],
+   "conflicting_fields": [],
+   "standing": "CORROBORATED",
+   "caution": "corroboration raises how much this event is believed to have happened; it never counts as a later test of a belief the event opened"
+  },
+  {
+   "contract": "event_corroboration.v1",
+   "event_id": "evt_981f2be587d72b",
+   "subject": "etsy",
+   "accounts": 3,
+   "independent_accounts": 2,
+   "effective_accounts": 2.0,
+   "source_roles": [
+    "independent_reporting",
+    "analyst_coverage"
+   ],
+   "publishers": [
+    "reuters",
+    "cnbc",
+    "tradingview"
+   ],
+   "source_diversity": "INDEPENDENT_ROLES",
+   "dependency_classes": {
+    "PARTIALLY_INDEPENDENT": 3
+   },
+   "corroborated_fields": [
+    "12%"
+   ],
+   "conflicting_fields": [
+    "2"
+   ],
+   "standing": "CORROBORATED",
+   "caution": "corroboration raises how much this event is believed to have happened; it never counts as a later test of a belief the event opened"
+  }
+ ]
+}

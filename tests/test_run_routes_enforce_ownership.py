@@ -26,7 +26,15 @@ from tests.test_strategic_intelligence import _live_transport
 
 # Every GET route under /runs/{id} that renders analysis content.
 LAYERS = ["", "/brief", "/dashboard", "/story", "/slides", "/full",
-          "/sources", "/report"]
+          "/sources", "/report", "/xray",
+          # The three steps the six-step story added. Every one of them
+          # reaches a run by id, so every one of them is an ownership
+          # question.
+          "/intro", "/history", "/connect",
+          # Measurement is not exempt: /timing states when a run happened,
+          # how much evidence it holds and what state it reached, which is
+          # this account's business and nobody else's.
+          "/timing"]
 
 
 class _Client:
@@ -121,12 +129,34 @@ def test_every_run_layer_route_calls_the_ownership_guard():
         r'\("GET", "runs", \d+\)[^\n]*\n\s*return self\.(_[a-z_]+)\('
         r'session, parts\[1\]', source))
     assert handlers, "route table shape changed; this gate is not looking at it"
+    # A SHARED GUARD IS STILL A GUARD, AND IT HAS TO BE PROVEN TO BE ONE.
+    #
+    # The six-step story added three routes that call `_step_guard`, which
+    # does the ownership check and the in-flight redirect together. A gate
+    # that only accepts a literal `_owned(session` call would push every new
+    # route to copy those four lines, which is how the fifth one comes to
+    # copy three of them.
+    #
+    # So delegation is accepted -- to a named helper that is ITSELF verified
+    # to call `_owned(session` in this same pass. If `_step_guard` ever stops
+    # checking ownership, every route that delegates to it fails here.
+    delegates = {}
+    for helper in ("_step_guard",):
+        fn = getattr(WebApp, helper, None)
+        assert fn is not None, f"{helper} named as a guard and does not exist"
+        delegates[helper] = "_owned(session" in inspect.getsource(fn)
+    assert all(delegates.values()), (
+        f"a named guard helper no longer checks ownership: {delegates}")
+
     unguarded = []
     for name in sorted(handlers):
         fn = getattr(WebApp, name, None)
         if fn is None:
             continue
         body = inspect.getsource(fn)
-        if "_owned(session" not in body:
-            unguarded.append(name)
+        if "_owned(session" in body:
+            continue
+        if any(f"self.{helper}(" in body for helper in delegates):
+            continue
+        unguarded.append(name)
     assert not unguarded, f"run routes with no ownership guard: {unguarded}"

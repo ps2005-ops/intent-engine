@@ -1,0 +1,138 @@
+{
+  "company": "UnitedHealth Group Incorporated",
+  "deployed_sha": "743df06",
+  "captured_at": "2026-08-21T16:26:58Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JJB9CR742F3F01MMSFYE8J/intro",
+      "chars": 5307,
+      "html_chars": 30842,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JJB9CR742F3F01MMSFYE8J/intro",
+      "chars": 5307,
+      "html_chars": 30842,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JJB9CR742F3F01MMSFYE8J/slides",
+      "chars": 6096,
+      "html_chars": 52644,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JJB9CR742F3F01MMSFYE8J/full",
+      "chars": 5808,
+      "html_chars": 32481,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JJB9CR742F3F01MMSFYE8J/story",
+      "chars": 4366,
+      "html_chars": 33891,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JJB9CR742F3F01MMSFYE8J/history",
+      "chars": 27733,
+      "html_chars": 107396,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JJB9CR742F3F01MMSFYE8J/connect",
+      "chars": 3869,
+      "html_chars": 28754,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JJB9CR742F3F01MMSFYE8J",
+      "chars": 5808,
+      "html_chars": 32481,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JJB9CR742F3F01MMSFYE8J/evidence",
+      "chars": 9623,
+      "html_chars": 29189,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JJB9CR742F3F01MMSFYE8J/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JJB9CR742F3F01MMSFYE8J/brief",
+      "chars": 18350,
+      "html_chars": 52728,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing UnitedHealth Group Incorporated UNH \u00b7 unitedhealthgroup.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading cur",
+      "status": 200,
+      "html_bytes": 17038
+    },
+    {
+      "t": 46.4,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing UnitedHealth Group Incorporated UNH \u00b7 unitedhealthgroup.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading cu",
+      "status": 200,
+      "html_bytes": 17034
+    },
+    {
+      "t": 111.4,
+      "text": "UnitedHealth Group Incorporated \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction UnitedHealth Group Incorporated UNH \u00b7 USA \u00b7 unitedhealthgroup.com \u00b7 SEC CIK 0000731766 UnitedHealth Group Incorporated is a healthcare business that runs on a product or service that may ",
+      "status": 200,
+      "html_bytes": 30911
+    }
+  ],
+  "process_before": {
+    "boot_id": "d7df6481c13e43c7",
+    "started_at": 1787326618.1855707,
+    "uptime_seconds": 3000.3
+  },
+  "run_id": "01M0JJB9CR742F3F01MMSFYE8J",
+  "status": "READY",
+  "seconds": 111,
+  "first_useful": 111,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 8.89,
+    "intro": 5.73,
+    "slides": 8.16,
+    "full": 2.48,
+    "story": 6.14,
+    "history": 0.19,
+    "connect": 4.2
+  },
+  "evidence_gate": "compose=13 usable=9 families=customers|identity|investor|product|strategy|talent stored=16 attempt=2 failed=1/0 dropped=0/0/2/0",
+  "outcome": "FULL_ANALYSIS",
+  "outcome_by_route": {
+    "run": "FULL_ANALYSIS",
+    "intro": "FULL_ANALYSIS",
+    "slides": "FULL_ANALYSIS",
+    "full": "FULL_ANALYSIS",
+    "story": "FULL_ANALYSIS",
+    "history": "FULL_ANALYSIS",
+    "connect": "FULL_ANALYSIS"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": []
+}

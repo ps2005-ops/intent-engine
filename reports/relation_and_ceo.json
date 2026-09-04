@@ -1,0 +1,637 @@
+{
+  "as_of": "2026-08-27",
+  "blocked_ranked": [
+    "commodities",
+    "fx",
+    "liquidity",
+    "real_rates",
+    "volatility",
+    "positioning"
+  ],
+  "blocked_unblocked_this_run": [],
+  "ceo_output": {
+    "caterpillar": {
+      "1_what_changed": "BAA10Y moved +0.1200 year-on-year to 2.31 as of 2022-07-14",
+      "2_why_it_matters_to_us": "equipment is bought on credit; the dealer's financing cost gates the order before the end market weakens",
+      "3_decision_affected": "MONITOR -> INVESTIGATE on customer financing cost",
+      "4_evidence": [
+        "company_profile:caterpillar",
+        "panel:BAA10Y@2022-07-14",
+        "panel:INDPRO@2022-06-01",
+        "panel:PERMIT@2022-05-01"
+      ],
+      "5_uncertain_about": [
+        "what is already contracted"
+      ],
+      "6_would_change_the_recommendation": [
+        "customer financing cost holds while BAA10Y continues UP"
+      ],
+      "7_learn_next": [
+        "how much of customer financing cost is already contracted"
+      ],
+      "abstained": false,
+      "company": "Caterpillar",
+      "provenance_coverage": 1.0,
+      "standing_of_top_risk": "OBSERVED"
+    },
+    "jpmorgan": {
+      "1_what_changed": "T10Y3M moved -0.8500 year-on-year to 0.56 as of 2022-07-14",
+      "2_why_it_matters_to_us": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast",
+      "3_decision_affected": "MONITOR -> PREPARE on net interest margin",
+      "4_evidence": [
+        "company_profile:jpmorgan",
+        "panel:BAA10Y@2022-07-14",
+        "panel:DFF@2022-07-14",
+        "panel:T10Y3M@2022-07-14"
+      ],
+      "5_uncertain_about": [
+        "what is already contracted"
+      ],
+      "6_would_change_the_recommendation": [
+        "net interest margin holds while T10Y3M continues DOWN",
+        "credit provisioning holds while BAA10Y continues UP"
+      ],
+      "7_learn_next": [
+        "how much of net interest margin is already contracted",
+        "how much of credit provisioning is already contracted"
+      ],
+      "abstained": false,
+      "company": "JPMorgan",
+      "provenance_coverage": 1.0,
+      "standing_of_top_risk": "INFERRED"
+    },
+    "meta": {
+      "1_what_changed": "nothing in the economic state moved enough to bear on this decision",
+      "2_why_it_matters_to_us": "Meta's exposure runs through advertiser budget and conversion, and nothing read this period moves it",
+      "3_decision_affected": "none; the standing decision on advertiser budget and conversion holds",
+      "4_evidence": [
+        "company_profile:meta",
+        "panel:DFF@2022-07-14",
+        "panel:PCEC96@2022-05-01"
+      ],
+      "5_uncertain_about": [
+        "the current economic environment"
+      ],
+      "6_would_change_the_recommendation": [
+        "Meta reports advertiser budget and conversion moving against expectation"
+      ],
+      "7_learn_next": [
+        "current reading of advertiser budget and conversion"
+      ],
+      "abstained": true,
+      "company": "Meta",
+      "provenance_coverage": 1.0,
+      "standing_of_top_risk": "INFERRED"
+    },
+    "nike": {
+      "1_what_changed": "nothing in the economic state moved enough to bear on this decision",
+      "2_why_it_matters_to_us": "Nike's exposure runs through discretionary unit demand, and nothing read this period moves it",
+      "3_decision_affected": "none; the standing decision on discretionary unit demand holds",
+      "4_evidence": [
+        "company_profile:nike",
+        "panel:PCEC96@2022-05-01",
+        "panel:UNRATE@2022-06-01"
+      ],
+      "5_uncertain_about": [
+        "the current economic environment"
+      ],
+      "6_would_change_the_recommendation": [
+        "Nike reports discretionary unit demand moving against expectation"
+      ],
+      "7_learn_next": [
+        "current reading of discretionary unit demand"
+      ],
+      "abstained": true,
+      "company": "Nike",
+      "provenance_coverage": 1.0,
+      "standing_of_top_risk": "INFERRED"
+    },
+    "nvidia": {
+      "1_what_changed": "BAA10Y moved +0.1200 year-on-year to 2.31 as of 2022-07-14",
+      "2_why_it_matters_to_us": "data-centre buildout is financed; a wider spread lengthens the ordering cycle before it cuts it",
+      "3_decision_affected": "MONITOR -> INVESTIGATE on customer capex financing",
+      "4_evidence": [
+        "company_profile:nvidia",
+        "panel:BAA10Y@2022-07-14",
+        "panel:INDPRO@2022-06-01"
+      ],
+      "5_uncertain_about": [
+        "what is already contracted"
+      ],
+      "6_would_change_the_recommendation": [
+        "customer capex financing holds while BAA10Y continues UP"
+      ],
+      "7_learn_next": [
+        "how much of customer capex financing is already contracted"
+      ],
+      "abstained": false,
+      "company": "NVIDIA",
+      "provenance_coverage": 1.0,
+      "standing_of_top_risk": "INFERRED"
+    },
+    "regional_private": {
+      "1_what_changed": "MORTGAGE30US moved +0.4000 year-on-year to 5.51 as of 2022-07-14",
+      "2_why_it_matters_to_us": "a small builder's constraint is how many buyers clear underwriting at the prevailing rate, not its own cost of capital",
+      "3_decision_affected": "MONITOR -> INVESTIGATE on buyer qualification rate",
+      "4_evidence": [
+        "company_profile:regional_private",
+        "panel:MORTGAGE30US@2022-07-14"
+      ],
+      "5_uncertain_about": [
+        "what is already contracted"
+      ],
+      "6_would_change_the_recommendation": [
+        "buyer qualification rate holds while MORTGAGE30US continues UP"
+      ],
+      "7_learn_next": [
+        "how much of buyer qualification rate is already contracted"
+      ],
+      "abstained": false,
+      "company": "A private regional builder",
+      "provenance_coverage": 1.0,
+      "standing_of_top_risk": "INFERRED"
+    },
+    "salesforce": {
+      "1_what_changed": "nothing in the economic state moved enough to bear on this decision",
+      "2_why_it_matters_to_us": "Salesforce's exposure runs through seat count, and nothing read this period moves it",
+      "3_decision_affected": "none; the standing decision on seat count holds",
+      "4_evidence": [
+        "company_profile:salesforce",
+        "panel:DFF@2022-07-14",
+        "panel:UNRATE@2022-06-01"
+      ],
+      "5_uncertain_about": [
+        "the current economic environment"
+      ],
+      "6_would_change_the_recommendation": [
+        "Salesforce reports seat count moving against expectation"
+      ],
+      "7_learn_next": [
+        "current reading of seat count"
+      ],
+      "abstained": true,
+      "company": "Salesforce",
+      "provenance_coverage": 1.0,
+      "standing_of_top_risk": "INFERRED"
+    },
+    "unionpacific": {
+      "1_what_changed": "nothing in the economic state moved enough to bear on this decision",
+      "2_why_it_matters_to_us": "Union Pacific's exposure runs through carload volume, and nothing read this period moves it",
+      "3_decision_affected": "none; the standing decision on carload volume holds",
+      "4_evidence": [
+        "company_profile:unionpacific",
+        "panel:INDPRO@2022-06-01",
+        "panel:PERMIT@2022-05-01"
+      ],
+      "5_uncertain_about": [
+        "the current economic environment"
+      ],
+      "6_would_change_the_recommendation": [
+        "Union Pacific reports carload volume moving against expectation"
+      ],
+      "7_learn_next": [
+        "current reading of carload volume"
+      ],
+      "abstained": true,
+      "company": "Union Pacific",
+      "provenance_coverage": 1.0,
+      "standing_of_top_risk": "INFERRED"
+    },
+    "visa": {
+      "1_what_changed": "nothing in the economic state moved enough to bear on this decision",
+      "2_why_it_matters_to_us": "Visa's exposure runs through ticket value and spend mix, and nothing read this period moves it",
+      "3_decision_affected": "none; the standing decision on ticket value and spend mix holds",
+      "4_evidence": [
+        "company_profile:visa",
+        "panel:PCEC96@2022-05-01",
+        "panel:UNRATE@2022-06-01"
+      ],
+      "5_uncertain_about": [
+        "the current economic environment"
+      ],
+      "6_would_change_the_recommendation": [
+        "Visa reports ticket value and spend mix moving against expectation"
+      ],
+      "7_learn_next": [
+        "current reading of ticket value and spend mix"
+      ],
+      "abstained": true,
+      "company": "Visa",
+      "provenance_coverage": 1.0,
+      "standing_of_top_risk": "INFERRED"
+    },
+    "walmart": {
+      "1_what_changed": "nothing in the economic state moved enough to bear on this decision",
+      "2_why_it_matters_to_us": "Walmart's exposure runs through basket mix and trade-down, and nothing read this period moves it",
+      "3_decision_affected": "none; the standing decision on basket mix and trade-down holds",
+      "4_evidence": [
+        "company_profile:walmart",
+        "panel:CPIAUCSL@2022-05-01",
+        "panel:UNRATE@2022-06-01"
+      ],
+      "5_uncertain_about": [
+        "the current economic environment"
+      ],
+      "6_would_change_the_recommendation": [
+        "Walmart reports basket mix and trade-down moving against expectation"
+      ],
+      "7_learn_next": [
+        "current reading of basket mix and trade-down"
+      ],
+      "abstained": true,
+      "company": "Walmart",
+      "provenance_coverage": 1.0,
+      "standing_of_top_risk": "INFERRED"
+    }
+  },
+  "ceo_qa": [
+    {
+      "answer": "every claim traces to a panel reading: company_profile:caterpillar, panel:BAA10Y@2022-07-14, panel:INDPRO@2022-06-01. Provenance coverage 1.0.",
+      "grounded_in": [
+        "company_profile:caterpillar",
+        "panel:BAA10Y@2022-07-14",
+        "panel:INDPRO@2022-06-01",
+        "panel:PERMIT@2022-05-01"
+      ],
+      "question": "why should I believe this"
+    },
+    {
+      "answer": "it is obvious that the driver moved; what is not is which of this company's channels absorbs it \u2014 equipment is bought on credit; the dealer's financing cost gates the order before the end ",
+      "grounded_in": [
+        "company_profile:caterpillar",
+        "panel:BAA10Y@2022-07-14",
+        "panel:INDPRO@2022-06-01",
+        "panel:PERMIT@2022-05-01"
+      ],
+      "question": "isn't this already obvious"
+    },
+    {
+      "answer": "that is the stated falsifier: customer financing cost holds while BAA10Y continues UP",
+      "grounded_in": [
+        "company_profile:caterpillar",
+        "panel:BAA10Y@2022-07-14",
+        "panel:INDPRO@2022-06-01",
+        "panel:PERMIT@2022-05-01"
+      ],
+      "question": "what if the driver reverses"
+    },
+    {
+      "answer": "the channel is MONITOR -> INVESTIGATE on customer financing cost; a competitor with a different financing or mix posture absorbs the same driver elsewhere",
+      "grounded_in": [
+        "company_profile:caterpillar",
+        "panel:BAA10Y@2022-07-14",
+        "panel:INDPRO@2022-06-01",
+        "panel:PERMIT@2022-05-01"
+      ],
+      "question": "why is this different for us than a competitor"
+    },
+    {
+      "answer": "what is already contracted",
+      "grounded_in": [
+        "company_profile:caterpillar",
+        "panel:BAA10Y@2022-07-14",
+        "panel:INDPRO@2022-06-01",
+        "panel:PERMIT@2022-05-01"
+      ],
+      "question": "what are you least certain about"
+    },
+    {
+      "answer": "MONITOR -> INVESTIGATE on customer financing cost",
+      "grounded_in": [
+        "company_profile:caterpillar",
+        "panel:BAA10Y@2022-07-14",
+        "panel:INDPRO@2022-06-01",
+        "panel:PERMIT@2022-05-01"
+      ],
+      "question": "what would you do differently"
+    }
+  ],
+  "ceo_qa_same_universe": true,
+  "dimension_quality": {
+    "commodities": {
+      "company_consumers": 0,
+      "deltas_produced": 0,
+      "freshness_days": null,
+      "quality": "BLOCKED",
+      "relations_supported": 0,
+      "status": "BLOCKED"
+    },
+    "credit": {
+      "company_consumers": 1,
+      "deltas_produced": 1,
+      "freshness_days": 1,
+      "quality": "LIVE_DECISION_RELEVANT",
+      "relations_supported": 0,
+      "status": "LIVE"
+    },
+    "funding": {
+      "company_consumers": 1,
+      "deltas_produced": 1,
+      "freshness_days": 1,
+      "quality": "LIVE_DECISION_RELEVANT",
+      "relations_supported": 0,
+      "status": "LIVE"
+    },
+    "fx": {
+      "company_consumers": 0,
+      "deltas_produced": 0,
+      "freshness_days": null,
+      "quality": "BLOCKED",
+      "relations_supported": 0,
+      "status": "BLOCKED"
+    },
+    "growth": {
+      "company_consumers": 2,
+      "deltas_produced": 1,
+      "freshness_days": 87,
+      "quality": "LIVE_DECISION_RELEVANT",
+      "relations_supported": 0,
+      "status": "LIVE"
+    },
+    "household_balance_sheet": {
+      "company_consumers": 0,
+      "deltas_produced": 0,
+      "freshness_days": 87,
+      "quality": "LIVE_UNPROVEN_VALUE",
+      "relations_supported": 0,
+      "status": "LIVE"
+    },
+    "housing": {
+      "company_consumers": 2,
+      "deltas_produced": 2,
+      "freshness_days": 7,
+      "quality": "LIVE_DECISION_RELEVANT",
+      "relations_supported": 2,
+      "status": "LIVE"
+    },
+    "inflation": {
+      "company_consumers": 1,
+      "deltas_produced": 0,
+      "freshness_days": 57,
+      "quality": "LIVE_CONTEXT_ONLY",
+      "relations_supported": 0,
+      "status": "LIVE"
+    },
+    "labour": {
+      "company_consumers": 1,
+      "deltas_produced": 1,
+      "freshness_days": 57,
+      "quality": "LIVE_DECISION_RELEVANT",
+      "relations_supported": 0,
+      "status": "LIVE"
+    },
+    "liquidity": {
+      "company_consumers": 0,
+      "deltas_produced": 0,
+      "freshness_days": null,
+      "quality": "BLOCKED",
+      "relations_supported": 0,
+      "status": "BLOCKED"
+    },
+    "policy_rates": {
+      "company_consumers": 1,
+      "deltas_produced": 1,
+      "freshness_days": 2,
+      "quality": "LIVE_DECISION_RELEVANT",
+      "relations_supported": 0,
+      "status": "LIVE"
+    },
+    "positioning": {
+      "company_consumers": 0,
+      "deltas_produced": 0,
+      "freshness_days": null,
+      "quality": "BLOCKED",
+      "relations_supported": 0,
+      "status": "BLOCKED"
+    },
+    "real_rates": {
+      "company_consumers": 0,
+      "deltas_produced": 0,
+      "freshness_days": null,
+      "quality": "BLOCKED",
+      "relations_supported": 0,
+      "status": "BLOCKED"
+    },
+    "risk_appetite": {
+      "company_consumers": 1,
+      "deltas_produced": 1,
+      "freshness_days": 1,
+      "quality": "LIVE_DECISION_RELEVANT",
+      "relations_supported": 0,
+      "status": "LIVE"
+    },
+    "sentiment": {
+      "company_consumers": 0,
+      "deltas_produced": 0,
+      "freshness_days": 87,
+      "quality": "LIVE_UNPROVEN_VALUE",
+      "relations_supported": 0,
+      "status": "LIVE"
+    },
+    "volatility": {
+      "company_consumers": 0,
+      "deltas_produced": 0,
+      "freshness_days": null,
+      "quality": "BLOCKED",
+      "relations_supported": 0,
+      "status": "BLOCKED"
+    },
+    "yield_curve": {
+      "company_consumers": 1,
+      "deltas_produced": 1,
+      "freshness_days": 1,
+      "quality": "LIVE_DECISION_RELEVANT",
+      "relations_supported": 0,
+      "status": "LIVE"
+    }
+  },
+  "dimension_quality_counts": {
+    "BLOCKED": 6,
+    "LIVE_CONTEXT_ONLY": 1,
+    "LIVE_DECISION_RELEVANT": 8,
+    "LIVE_UNPROVEN_VALUE": 2
+  },
+  "history_rewind_economic": [
+    {
+      "as_of": "2022-07-15",
+      "company": "Caterpillar",
+      "counterfactual_label": "SCENARIO_ASSUMPTION",
+      "economic_state_at_T": {
+        "BAA10Y": "UP",
+        "CPIAUCSL": "UP",
+        "DFF": "DOWN",
+        "HOUST": "DOWN",
+        "INDPRO": "UP",
+        "MORTGAGE30US": "UP",
+        "PCEC96": "UP",
+        "PERMIT": "UP",
+        "T10Y3M": "DOWN",
+        "UNRATE": "DOWN"
+      },
+      "founder_A": {
+        "action": "MONITOR",
+        "confidence": "LOW",
+        "priority": "order backlog conversion"
+      },
+      "founder_B": {
+        "action": "INVESTIGATE",
+        "confidence": "MEDIUM",
+        "priority": "customer financing cost"
+      },
+      "information_available_at_T": [
+        "company_profile:caterpillar",
+        "panel:BAA10Y@2022-07-14",
+        "panel:INDPRO@2022-06-01",
+        "panel:PERMIT@2022-05-01"
+      ],
+      "regime": "inflation_stress",
+      "what_B_changed": [
+        "top_priority",
+        "action",
+        "top_risks",
+        "confidence",
+        "information_priority"
+      ],
+      "would_it_have_helped": "NOT ESTABLISHED. This shows what B would have said with the information available then. Whether that was better needs a resolved outcome, and the forward ledger is where that evidence will come from."
+    },
+    {
+      "as_of": "2023-06-15",
+      "company": "Caterpillar",
+      "counterfactual_label": "SCENARIO_ASSUMPTION",
+      "economic_state_at_T": {
+        "BAA10Y": "DOWN",
+        "CPIAUCSL": "UP",
+        "DFF": "DOWN",
+        "HOUST": "DOWN",
+        "INDPRO": "UP",
+        "MORTGAGE30US": "UP",
+        "PCEC96": "UP",
+        "PERMIT": "DOWN",
+        "T10Y3M": "UP",
+        "UNRATE": "UP"
+      },
+      "founder_A": {
+        "action": "MONITOR",
+        "confidence": "LOW",
+        "priority": "order backlog conversion"
+      },
+      "founder_B": {
+        "action": "INVESTIGATE",
+        "confidence": "MEDIUM",
+        "priority": "construction end-market"
+      },
+      "information_available_at_T": [
+        "company_profile:caterpillar",
+        "panel:BAA10Y@2023-06-14",
+        "panel:INDPRO@2023-05-01",
+        "panel:PERMIT@2023-04-01"
+      ],
+      "regime": "credit_stress",
+      "what_B_changed": [
+        "top_priority",
+        "action",
+        "top_risks",
+        "confidence",
+        "information_priority"
+      ],
+      "would_it_have_helped": "NOT ESTABLISHED. This shows what B would have said with the information available then. Whether that was better needs a resolved outcome, and the forward ledger is where that evidence will come from."
+    }
+  ],
+  "history_rewind_human": "REFUSED",
+  "relation_states": {
+    "CANDIDATE": 5,
+    "SUPPORTED_PREDICTIVE": 1
+  },
+  "relations": [
+    {
+      "days_since_source_move": 2,
+      "direction_correct": false,
+      "lag_days": 30,
+      "lag_elapsed": false,
+      "magnitude_plausible": null,
+      "note": "driver +0.0000 over 365d; target +0.1700 over the 335d response window",
+      "regime_applicable": true,
+      "relation": "DFF->MORTGAGE30US",
+      "source_move": 0.0,
+      "source_moved": false,
+      "state": "CANDIDATE",
+      "target_move": 0.17,
+      "target_moved": true
+    },
+    {
+      "days_since_source_move": 7,
+      "direction_correct": true,
+      "lag_days": 120,
+      "lag_elapsed": true,
+      "magnitude_plausible": true,
+      "note": "driver +0.1200 over 365d; target -0.0310 over the 245d response window",
+      "regime_applicable": true,
+      "relation": "MORTGAGE30US->PERMIT",
+      "source_move": 0.12,
+      "source_moved": true,
+      "state": "SUPPORTED_PREDICTIVE",
+      "target_move": -0.03103,
+      "target_moved": true
+    },
+    {
+      "days_since_source_move": 87,
+      "direction_correct": false,
+      "lag_days": 60,
+      "lag_elapsed": false,
+      "magnitude_plausible": false,
+      "note": "driver -0.0179 over 365d; target +0.1053 over the 305d response window",
+      "regime_applicable": true,
+      "relation": "PERMIT->HOUST",
+      "source_move": -0.01787,
+      "source_moved": false,
+      "state": "CANDIDATE",
+      "target_move": 0.10534,
+      "target_moved": true
+    },
+    {
+      "days_since_source_move": 1,
+      "direction_correct": true,
+      "lag_days": 180,
+      "lag_elapsed": false,
+      "magnitude_plausible": true,
+      "note": "driver -0.0100 over 365d; target +0.0113 over the 185d response window",
+      "regime_applicable": true,
+      "relation": "BAA10Y->INDPRO",
+      "source_move": -0.01,
+      "source_moved": false,
+      "state": "CANDIDATE",
+      "target_move": 0.01129,
+      "target_moved": false
+    },
+    {
+      "days_since_source_move": 1,
+      "direction_correct": false,
+      "lag_days": 180,
+      "lag_elapsed": false,
+      "magnitude_plausible": true,
+      "note": "driver -0.0200 over 365d; target -0.0700 over the 185d response window",
+      "regime_applicable": true,
+      "relation": "T10Y3M->BAA10Y",
+      "source_move": -0.02,
+      "source_moved": false,
+      "state": "CANDIDATE",
+      "target_move": -0.07,
+      "target_moved": true
+    },
+    {
+      "days_since_source_move": 57,
+      "direction_correct": false,
+      "lag_days": 90,
+      "lag_elapsed": false,
+      "magnitude_plausible": null,
+      "note": "driver +0.0000 over 365d; target +0.0163 over the 275d response window",
+      "regime_applicable": true,
+      "relation": "UNRATE->PCEC96",
+      "source_move": 0.0,
+      "source_moved": false,
+      "state": "CANDIDATE",
+      "target_move": 0.01631,
+      "target_moved": false
+    }
+  ]
+}

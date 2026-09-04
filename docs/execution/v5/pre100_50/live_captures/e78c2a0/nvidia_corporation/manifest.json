@@ -1,0 +1,101 @@
+{
+  "company": "NVIDIA Corporation",
+  "deployed_sha": "e78c2a0",
+  "captured_at": "2026-08-21T11:42:05Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J220VR4N4DQFJF5MJS02W8",
+      "chars": 3224,
+      "html_chars": 20444,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J220VR4N4DQFJF5MJS02W8/intro",
+      "chars": 4502,
+      "html_chars": 29754,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J220VR4N4DQFJF5MJS02W8",
+      "chars": 3133,
+      "html_chars": 20345,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J220VR4N4DQFJF5MJS02W8/full",
+      "chars": 3133,
+      "html_chars": 20345,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J220VR4N4DQFJF5MJS02W8/story",
+      "chars": 5064,
+      "html_chars": 34717,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J220VR4N4DQFJF5MJS02W8/history",
+      "chars": 28327,
+      "html_chars": 107926,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J220VR4N4DQFJF5MJS02W8/connect",
+      "chars": 3857,
+      "html_chars": 28768,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    }
+  },
+  "progress": [
+    {
+      "t": 6.1,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing NVIDIA Corporation NVDA \u00b7 nvidia.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence w",
+      "status": 200,
+      "html_bytes": 17018
+    },
+    {
+      "t": 291.9,
+      "text": "Limited analysis of NVIDIA Corporation Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of NVIDIA Corporation Some kinds of evidence are missing, and there are places left to look. Rather than show a briefing that looks complete and is not, here is exactly where it stands. What ",
+      "status": 200,
+      "html_bytes": 19978
+    }
+  ],
+  "process_before": {
+    "boot_id": "b511e8cc18ab4e22",
+    "started_at": 1787311623.6873696,
+    "uptime_seconds": 903.3
+  },
+  "run_id": "01M0J220VR4N4DQFJF5MJS02W8",
+  "status": "READY",
+  "seconds": 292,
+  "first_useful": 292,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 4.6,
+    "intro": 18.22,
+    "slides": 3.38,
+    "full": 3.09,
+    "story": 8.09,
+    "history": 0.27,
+    "connect": 5.96
+  },
+  "evidence_gate": "compose=14 usable=5 families=customers|investor stored=14 attempt=1",
+  "outcome": "TRUE_EVIDENCE_SCARCITY",
+  "outcome_by_route": {
+    "run": "TRUE_EVIDENCE_SCARCITY",
+    "intro": "TRUE_EVIDENCE_SCARCITY",
+    "slides": "TRUE_EVIDENCE_SCARCITY",
+    "full": "TRUE_EVIDENCE_SCARCITY",
+    "story": "TRUE_EVIDENCE_SCARCITY",
+    "history": "TRUE_EVIDENCE_SCARCITY",
+    "connect": "TRUE_EVIDENCE_SCARCITY"
+  },
+  "outcome_disagreement": []
+}

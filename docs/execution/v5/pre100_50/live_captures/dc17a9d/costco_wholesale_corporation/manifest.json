@@ -1,0 +1,138 @@
+{
+  "company": "Costco Wholesale Corporation",
+  "deployed_sha": "dc17a9d",
+  "captured_at": "2026-08-21T14:10:17Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAH154VE2VHAHHNCSK94NR",
+      "chars": 2216,
+      "html_chars": 18073,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAH154VE2VHAHHNCSK94NR/intro",
+      "chars": 4489,
+      "html_chars": 29741,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAH154VE2VHAHHNCSK94NR",
+      "chars": 2216,
+      "html_chars": 18073,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAH154VE2VHAHHNCSK94NR/full",
+      "chars": 2216,
+      "html_chars": 18073,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAH154VE2VHAHHNCSK94NR/story",
+      "chars": 5053,
+      "html_chars": 34706,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAH154VE2VHAHHNCSK94NR/history",
+      "chars": 28025,
+      "html_chars": 107191,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAH154VE2VHAHHNCSK94NR/connect",
+      "chars": 3884,
+      "html_chars": 28765,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAH154VE2VHAHHNCSK94NR",
+      "chars": 2216,
+      "html_chars": 18073,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAH154VE2VHAHHNCSK94NR/evidence",
+      "chars": 3312,
+      "html_chars": 19062,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAH154VE2VHAHHNCSK94NR/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAH154VE2VHAHHNCSK94NR/brief",
+      "chars": 15621,
+      "html_chars": 48044,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Costco Wholesale Corporation COST \u00b7 costco.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company ",
+      "status": 200,
+      "html_bytes": 17025
+    },
+    {
+      "t": 58.4,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Costco Wholesale Corporation COST \u00b7 costco.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company",
+      "status": 200,
+      "html_bytes": 17021
+    },
+    {
+      "t": 96.4,
+      "text": "Limited analysis of Costco Wholesale Corporation Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of Costco Wholesale Corporation There is not enough public evidence to build a briefing on this company. Rather than show a briefing that looks complete and is not, here is exactly ",
+      "status": 200,
+      "html_bytes": 18111
+    }
+  ],
+  "process_before": {
+    "boot_id": "9890b2f49d944a8a",
+    "started_at": 1787319148.8228748,
+    "uptime_seconds": 2269.1
+  },
+  "run_id": "01M0JAH154VE2VHAHHNCSK94NR",
+  "status": "READY",
+  "seconds": 96,
+  "first_useful": 96,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 3.12,
+    "intro": 10.55,
+    "slides": 2.84,
+    "full": 4.12,
+    "story": 6.14,
+    "history": 0.27,
+    "connect": 3.86
+  },
+  "evidence_gate": "compose=3 usable=3 families=investor stored=3 attempt=3 dropped=0/0/0/0",
+  "outcome": "TRUE_EVIDENCE_SCARCITY",
+  "outcome_by_route": {
+    "run": "TRUE_EVIDENCE_SCARCITY",
+    "intro": "TRUE_EVIDENCE_SCARCITY",
+    "slides": "TRUE_EVIDENCE_SCARCITY",
+    "full": "TRUE_EVIDENCE_SCARCITY",
+    "story": "TRUE_EVIDENCE_SCARCITY",
+    "history": "TRUE_EVIDENCE_SCARCITY",
+    "connect": "TRUE_EVIDENCE_SCARCITY"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": []
+}

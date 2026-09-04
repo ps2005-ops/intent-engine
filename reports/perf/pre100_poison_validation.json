@@ -1,0 +1,358 @@
+{
+ "version": "{\"app_version\": \"1.5.0-executive-intelligence\", \"commit\": \"229c75eba5dc545c6ea5f8c482d503d968f2286a\", \"process\": {\"boot_id\": \"6703a7efbc89479c\", \"started_at\": 1788139091.5671659, \"uptime_seconds\": 27.7}}",
+ "summary": {
+  "attempted": 4,
+  "counted": 4,
+  "quota_exhausted": 0,
+  "usable_reports": 4,
+  "terminal": 4,
+  "core_p50": 62.3,
+  "core_p90": 73.3,
+  "core_p95": 74.6,
+  "core_max": 76.0,
+  "usable_p50": 79.4,
+  "usable_p90": 95.8,
+  "within_60": 1,
+  "within_90": 3,
+  "within_120": 4,
+  "deep_success": 0,
+  "enum_leaks": 0,
+  "qa_mounted": 4,
+  "analysis_updated": 0,
+  "performance_tier": "C_CONDITIONAL"
+ },
+ "rows": [
+  {
+   "company": "Amazon",
+   "domain": "amazon.com",
+   "status": "COMPLETE",
+   "error": "",
+   "core_ready_seconds": 76.0,
+   "usable_seconds": 102.6,
+   "qa": [
+    {
+     "question": "Why does this matter for this company?",
+     "status": 200,
+     "seconds": 32.0,
+     "chars": 736,
+     "answer": "Why does this matter for this company? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon Why does this matter for this company? Yes \u2014 on balance the evidence supports that running separately-reported businesses as a single portfolio (moderate confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    {
+     "question": "What evidence most supports this recommendation?",
+     "status": 200,
+     "seconds": 30.7,
+     "chars": 785,
+     "answer": "What evidence most supports this recommendation? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon What evidence most supports this recommendation? Hold this decision \u2014 what to charge, and for what \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    {
+     "question": "What would have to be true for this recommendation to be wrong?",
+     "status": 200,
+     "seconds": 14.4,
+     "chars": 812,
+     "answer": "What would have to be true for this recommendation to be wro Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon What would have to be true for this recommendation to be wrong? Hold this decision \u2014 what to charge, and for what \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    {
+     "question": "What should management monitor next?",
+     "status": 200,
+     "seconds": 12.3,
+     "chars": 666,
+     "answer": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon What should management monitor next? Nothing is currently preregistered to watch for this company. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    {
+     "question": "What is the biggest uncertainty?",
+     "status": 200,
+     "seconds": 12.2,
+     "chars": 667,
+     "answer": "What is the biggest uncertainty? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon What is the biggest uncertainty? Inter-segment transfers and shared cost allocations are not disclosed. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    {
+     "question": "Which of those would you watch first, and why that one?",
+     "status": 200,
+     "seconds": 12.9,
+     "chars": 770,
+     "answer": "Which of those would you watch first, and why that one? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon Which of those would you watch first, and why that one? Yes \u2014 on balance the evidence supports that running separately-reported businesses as a single portfolio (moderate confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief",
+     "follow_up": true
+    }
+   ],
+   "questions_ok": 5,
+   "analyze_status": 200,
+   "run_id": "01M1APB92XS1K46GS39BJEDG22",
+   "terminal_within_contract": true,
+   "deep_ready_seconds": null,
+   "result_state": "DEEP_PENDING",
+   "run_state": "PARTIAL",
+   "final_documents": 10,
+   "deep_status": "PENDING",
+   "has_report": true,
+   "discovery_ms": 17381.1,
+   "discovery_cpu_ms": 255.9,
+   "retrieval_ms": 14505.5,
+   "retrieval_cpu_ms": 1853.8,
+   "core_composition_ms": 43895.0,
+   "core_composition_cpu_ms": 3314.3,
+   "source_selection_ms": 4.5,
+   "source_selection_cpu_ms": 1.5,
+   "deferred_acquisition_ms": null,
+   "deferred_acquisition_cpu_ms": null,
+   "blocking_documents": 7,
+   "deferred_documents": 6,
+   "stopped_on": "the readiness contract is satisfied",
+   "brief_status": 200,
+   "brief_chars": 16499,
+   "identity_named": true,
+   "qa_mounted": true,
+   "provenance_present": true,
+   "analysis_updated": false,
+   "enum_leak": []
+  },
+  {
+   "company": "Caterpillar",
+   "domain": "caterpillar.com",
+   "status": "COMPLETE",
+   "error": "",
+   "core_ready_seconds": null,
+   "usable_seconds": 79.1,
+   "qa": [
+    {
+     "question": "Why does this matter for this company?",
+     "status": 200,
+     "seconds": 14.0,
+     "chars": 727,
+     "answer": "Why does this matter for this company? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Caterpillar Why does this matter for this company? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    {
+     "question": "What evidence most supports this recommendation?",
+     "status": 200,
+     "seconds": 14.9,
+     "chars": 717,
+     "answer": "What evidence most supports this recommendation? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Caterpillar What evidence most supports this recommendation? One check separates them: disclosed long-term purchase commitments covering the new capacity. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    {
+     "question": "What would have to be true for this recommendation to be wrong?",
+     "status": 200,
+     "seconds": 13.1,
+     "chars": 744,
+     "answer": "What would have to be true for this recommendation to be wro Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Caterpillar What would have to be true for this recommendation to be wrong? One check separates them: disclosed long-term purchase commitments covering the new capacity. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    {
+     "question": "What should management monitor next?",
+     "status": 200,
+     "seconds": 13.3,
+     "chars": 936,
+     "answer": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Caterpillar What should management monitor next? orders and backlog \u2014 revenue at a business of this kind moves with orders and backlog.; delivery or production rate \u2014 revenue at a business of this kind moves with delivery or production rate.; aftermarket and services on the installed base \u2014 revenue at a business of this kind moves with aftermarket and services on the installed base. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    {
+     "question": "What is the biggest uncertainty?",
+     "status": 200,
+     "seconds": 14.9,
+     "chars": 654,
+     "answer": "What is the biggest uncertainty? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Caterpillar What is the biggest uncertainty? Utilisation, order books and take-or-pay terms are not public. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    {
+     "question": "Which of those would you watch first, and why that one?",
+     "status": 200,
+     "seconds": 14.3,
+     "chars": 761,
+     "answer": "Which of those would you watch first, and why that one? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Caterpillar Which of those would you watch first, and why that one? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief",
+     "follow_up": true
+    }
+   ],
+   "questions_ok": 5,
+   "analyze_status": 200,
+   "run_id": "01M1APKVPEHN2FHN00G51V28X9",
+   "terminal_within_contract": true,
+   "deep_ready_seconds": null,
+   "result_state": "DEEP_PENDING",
+   "run_state": "PARTIAL",
+   "final_documents": 6,
+   "deep_status": "PENDING",
+   "has_report": true,
+   "discovery_ms": null,
+   "discovery_cpu_ms": null,
+   "retrieval_ms": null,
+   "retrieval_cpu_ms": null,
+   "core_composition_ms": null,
+   "core_composition_cpu_ms": null,
+   "source_selection_ms": null,
+   "source_selection_cpu_ms": null,
+   "deferred_acquisition_ms": null,
+   "deferred_acquisition_cpu_ms": null,
+   "blocking_documents": null,
+   "deferred_documents": null,
+   "stopped_on": null,
+   "brief_status": 200,
+   "brief_chars": 21572,
+   "identity_named": true,
+   "qa_mounted": true,
+   "provenance_present": true,
+   "analysis_updated": false,
+   "enum_leak": []
+  },
+  {
+   "company": "NVIDIA",
+   "domain": "nvidia.com",
+   "status": "COMPLETE",
+   "error": "",
+   "core_ready_seconds": 51.98,
+   "usable_seconds": 71.7,
+   "qa": [
+    {
+     "question": "Why does this matter for this company?",
+     "status": 200,
+     "seconds": 45.9,
+     "chars": 731,
+     "answer": "Why does this matter for this company? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NVIDIA Why does this matter for this company? Yes \u2014 on balance the evidence supports that running separately-reported businesses as a single portfolio (low confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    {
+     "question": "What evidence most supports this recommendation?",
+     "status": 200,
+     "seconds": 19.6,
+     "chars": 794,
+     "answer": "What evidence most supports this recommendation? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NVIDIA What evidence most supports this recommendation? Hold this decision \u2014 how much capacity to commit, and when \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    {
+     "question": "What would have to be true for this recommendation to be wrong?",
+     "status": 200,
+     "seconds": 17.0,
+     "chars": 821,
+     "answer": "What would have to be true for this recommendation to be wro Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NVIDIA What would have to be true for this recommendation to be wrong? Hold this decision \u2014 how much capacity to commit, and when \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    {
+     "question": "What should management monitor next?",
+     "status": 200,
+     "seconds": 18.2,
+     "chars": 863,
+     "answer": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NVIDIA What should management monitor next? unit volume \u2014 revenue at a business of this kind moves with unit volume.; product and node mix \u2014 revenue at a business of this kind moves with product and node mix.; average selling price \u2014 revenue at a business of this kind moves with average selling price. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    {
+     "question": "What is the biggest uncertainty?",
+     "status": 200,
+     "seconds": 19.0,
+     "chars": 758,
+     "answer": "What is the biggest uncertainty? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NVIDIA What is the biggest uncertainty? the company&#x27;s filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    {
+     "question": "Which of those would you watch first, and why that one?",
+     "status": 200,
+     "seconds": 19.8,
+     "chars": 765,
+     "answer": "Which of those would you watch first, and why that one? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NVIDIA Which of those would you watch first, and why that one? Yes \u2014 on balance the evidence supports that running separately-reported businesses as a single portfolio (low confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief",
+     "follow_up": true
+    }
+   ],
+   "questions_ok": 5,
+   "analyze_status": 200,
+   "run_id": "01M1APT1412R5CTQ21PPXGC8K1",
+   "terminal_within_contract": true,
+   "deep_ready_seconds": null,
+   "result_state": "DEEP_PENDING",
+   "run_state": "PARTIAL",
+   "final_documents": 10,
+   "deep_status": "PENDING",
+   "has_report": true,
+   "discovery_ms": 14936.7,
+   "discovery_cpu_ms": 344.5,
+   "retrieval_ms": 11196.8,
+   "retrieval_cpu_ms": 628.9,
+   "core_composition_ms": 25590.8,
+   "core_composition_cpu_ms": 1467.5,
+   "source_selection_ms": 70.0,
+   "source_selection_cpu_ms": 3.9,
+   "deferred_acquisition_ms": null,
+   "deferred_acquisition_cpu_ms": null,
+   "blocking_documents": 6,
+   "deferred_documents": 8,
+   "stopped_on": "the readiness contract is satisfied",
+   "brief_status": 200,
+   "brief_chars": 19332,
+   "identity_named": true,
+   "qa_mounted": true,
+   "provenance_present": true,
+   "analysis_updated": false,
+   "enum_leak": []
+  },
+  {
+   "company": "Microsoft",
+   "domain": "microsoft.com",
+   "status": "COMPLETE",
+   "error": "",
+   "core_ready_seconds": 62.27,
+   "usable_seconds": 79.8,
+   "qa": [
+    {
+     "question": "Why does this matter for this company?",
+     "status": 200,
+     "seconds": 15.9,
+     "chars": 941,
+     "answer": "Why does this matter for this company? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Microsoft Why does this matter for this company? Yes \u2014 on balance the evidence supports that running separately-reported businesses as a single portfolio (low confidence). Evidence Strongest. \u201cXBOX content and services revenue decreased 5% on a prior year comparable that benefited from strong first-party content performance, offset in part by growth in XBOX Game Pass.\u201d \u2014 10-K Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    {
+     "question": "What evidence most supports this recommendation?",
+     "status": 200,
+     "seconds": 16.3,
+     "chars": 995,
+     "answer": "What evidence most supports this recommendation? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Microsoft What evidence most supports this recommendation? Hold this decision \u2014 what to charge, and for what \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Evidence Strongest. \u201cXBOX content and services revenue decreased 5% on a prior year comparable that benefited from strong first-party content performance, offset in part by growth in XBOX Game Pass.\u201d \u2014 10-K Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    {
+     "question": "What would have to be true for this recommendation to be wrong?",
+     "status": 200,
+     "seconds": 14.5,
+     "chars": 1022,
+     "answer": "What would have to be true for this recommendation to be wro Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Microsoft What would have to be true for this recommendation to be wrong? Hold this decision \u2014 what to charge, and for what \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Evidence Strongest. \u201cXBOX content and services revenue decreased 5% on a prior year comparable that benefited from strong first-party content performance, offset in part by growth in XBOX Game Pass.\u201d \u2014 10-K Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    {
+     "question": "What should management monitor next?",
+     "status": 200,
+     "seconds": 15.0,
+     "chars": 1097,
+     "answer": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Microsoft What should management monitor next? customer count \u2014 revenue at a business of this kind moves with customer count.; seats or usage per customer \u2014 revenue at a business of this kind moves with seats or usage per customer.; list and realised price \u2014 revenue at a business of this kind moves with list and realised price. Evidence Strongest. \u201cXBOX content and services revenue decreased 5% on a prior year comparable that benefited from strong first-party content performance, offset in part by growth in XBOX Game Pass.\u201d \u2014 10-K Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    {
+     "question": "What is the biggest uncertainty?",
+     "status": 200,
+     "seconds": 14.8,
+     "chars": 968,
+     "answer": "What is the biggest uncertainty? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Microsoft What is the biggest uncertainty? the company&#x27;s filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. Evidence Strongest. \u201cXBOX content and services revenue decreased 5% on a prior year comparable that benefited from strong first-party content performance, offset in part by growth in XBOX Game Pass.\u201d \u2014 10-K Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    {
+     "question": "Which of those would you watch first, and why that one?",
+     "status": 200,
+     "seconds": 14.0,
+     "chars": 975,
+     "answer": "Which of those would you watch first, and why that one? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Microsoft Which of those would you watch first, and why that one? Yes \u2014 on balance the evidence supports that running separately-reported businesses as a single portfolio (low confidence). Evidence Strongest. \u201cXBOX content and services revenue decreased 5% on a prior year comparable that benefited from strong first-party content performance, offset in part by growth in XBOX Game Pass.\u201d \u2014 10-K Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief",
+     "follow_up": true
+    }
+   ],
+   "questions_ok": 5,
+   "analyze_status": 200,
+   "run_id": "01M1AQ1R0H0AS3X3WTZ1AFCBTB",
+   "terminal_within_contract": true,
+   "deep_ready_seconds": null,
+   "result_state": "DEEP_PENDING",
+   "run_state": "PARTIAL",
+   "final_documents": 8,
+   "deep_status": "PENDING",
+   "has_report": true,
+   "discovery_ms": 21234.3,
+   "discovery_cpu_ms": 285.1,
+   "retrieval_ms": 23553.6,
+   "retrieval_cpu_ms": 1029.1,
+   "core_composition_ms": 17308.1,
+   "core_composition_cpu_ms": 1249.8,
+   "source_selection_ms": 5.0,
+   "source_selection_cpu_ms": 1.9,
+   "deferred_acquisition_ms": null,
+   "deferred_acquisition_cpu_ms": null,
+   "blocking_documents": 3,
+   "deferred_documents": 0,
+   "stopped_on": null,
+   "brief_status": 200,
+   "brief_chars": 19566,
+   "identity_named": true,
+   "qa_mounted": true,
+   "provenance_present": true,
+   "analysis_updated": false,
+   "enum_leak": []
+  }
+ ]
+}

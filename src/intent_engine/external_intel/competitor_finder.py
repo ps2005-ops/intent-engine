@@ -31,6 +31,10 @@ from __future__ import annotations
 import re
 from typing import Dict, Iterable, List, Optional, Sequence
 
+from intent_engine.executive.competitive_qualification import (
+    ADJACENT_THREAT_STATE, DIRECT_COMPETITOR, SUBSTITUTE_STATE, qualify,
+)
+
 from .competitor_contract import (
     ADJACENT_SUBSTITUTE, BARE_MENTION, CLAIM_RELEVANT, COMPETITIVE_CONTEXT,
     CONSULTING_ALTERNATIVE, DIRECT_COMPETITOR, INTERNAL_BUILD,
@@ -76,10 +80,57 @@ _CLAUSE_WORDS = {
 }
 
 #: Suffixes that confirm a span is an organisation rather than a phrase.
-_CORPORATE = ("inc", "inc.", "corp", "corp.", "corporation", "company",
-              "co.", "ltd", "ltd.", "llc", "plc", "sa", "ag", "nv",
-              "technologies", "systems", "software", "labs", "group",
-              "holdings", "solutions", "networks", "platforms")
+#: A LEGAL FORM IS PROOF. Nothing else in a filing wears one.
+_LEGAL_FORM = ("inc", "inc.", "corp", "corp.", "corporation", "company",
+               "co.", "ltd", "ltd.", "llc", "plc", "sa", "ag", "nv", "gmbh",
+               "ab", "oyj", "pte", "bv", "spa", "a/s", "kk", "lp", "llp",
+               "s.a.", "n.v.", "s.p.a.", "pty")
+
+#: A TRADE WORD IS EVIDENCE, NOT PROOF. "Akamai Technologies" is a company;
+#: "Online Platforms" is a category, and it reached a live introduction as
+#: one of Cloudflare's three named competitors because "platforms" was in
+#: this list and nothing asked what came before it.
+_TRADE_WORD = ("technologies", "systems", "software", "labs", "group",
+               "holdings", "solutions", "networks", "platforms", "partners",
+               "industries", "enterprises", "communications", "services")
+
+_CORPORATE = _LEGAL_FORM + _TRADE_WORD
+
+#: Strongest competitive claim first. An adjacent threat is real and is not
+#: what contests the company most directly, so it sorts behind both.
+_STATE_RANK = {DIRECT_COMPETITOR: 0, SUBSTITUTE_STATE: 1,
+               ADJACENT_THREAT_STATE: 2}
+
+#: Ordinary English that starts a noun phrase. A trade word behind one of
+#: these is a category, not a firm. Measured live: "Federal Risk",
+#: "Intuitive User Experience" and "Online Platforms" were all presented as
+#: companies contesting Cloudflare's market.
+_COMMON_ENGLISH = frozenset({
+    "online", "federal", "national", "international", "global", "digital",
+    "intuitive", "modern", "leading", "major", "large", "small", "public",
+    "private", "certain", "other", "various", "multiple", "several", "many",
+    "new", "existing", "traditional", "legacy", "open", "closed", "free",
+    "paid", "enterprise", "consumer", "commercial", "financial", "general",
+    "regional", "local", "primary", "secondary", "third", "cloud", "data",
+    "security", "network", "internet", "web", "mobile", "social", "smart",
+    "advanced", "integrated", "managed", "professional", "technical", "user",
+    # ...and the ordinary nouns and verbs that turn a capitalised span into a
+    # phrase. Every entry here was measured producing a false competitor or
+    # is the kind of word that would.
+    "experience", "risk", "risks", "platform", "product", "products",
+    "service", "solution", "customer", "customers", "market", "markets",
+    "business", "businesses", "company", "companies", "industry", "vendor",
+    "vendors", "provider", "providers", "competitor", "competitors",
+    "alternative", "alternatives", "offering", "offerings", "capability",
+    "capabilities", "technology", "tools", "tool", "software", "hardware",
+    "management", "program", "programme", "quality", "value", "cost",
+    "price", "pricing", "growth", "revenue", "demand", "supply", "support",
+    "development", "research", "operations", "performance", "innovation",
+    "experiences", "access", "content", "design", "delivery", "scale",
+    "trust", "safety", "privacy", "compliance", "governance", "strategy",
+    "team", "teams", "people", "region", "regions", "state", "states",
+    "government", "agency", "agencies", "authorization", "certification",
+})
 
 _NAME = re.compile(
     r"\b([A-Z][A-Za-z0-9&.\-]*(?:\s+[A-Z][A-Za-z0-9&.\-]*){0,3})\b")
@@ -152,18 +203,97 @@ def competition_passages(text: str, *, window: int = 3) -> List[str]:
     return out
 
 
+#: Head nouns that make a capitalised span an institution, a standard or a
+#: programme rather than a company you could buy from instead. Measured live
+#: on Cloudflare, whose competitors came back as "FedRAMP" and "Authorization
+#: Management Program" -- both fragments of "Federal Risk and Authorization
+#: Management Program", a US government certification scheme, presented to a
+#: chief executive as firms contesting their market.
+_NOT_A_VENDOR = frozenset({
+    "program", "programme", "act", "framework", "standard", "standards",
+    "regulation", "regulations", "directive", "initiative", "alliance",
+    "association", "foundation", "institute", "consortium", "committee",
+    "authority", "commission", "agency", "department", "ministry",
+    "administration", "bureau", "council", "board", "office", "treaty",
+    "convention", "protocol", "certification", "accreditation", "scheme",
+    "guidelines", "rule", "rules", "law", "code",
+})
+
+#: Standard and programme acronyms that are single tokens and therefore slip
+#: past the head-noun test above.
+_NOT_A_VENDOR_EXACT = frozenset({
+    # standards, regulations and certification schemes
+    "fedramp", "gdpr", "hipaa", "soc", "pci", "pci-dss", "iso", "nist",
+    "ccpa", "sox", "dora", "mifid", "basel", "ifrs", "gaap", "esg",
+    # CATEGORY ACRONYMS. Structurally identical to the schemes above: a
+    # capitalised token, mixed case, in a sentence that genuinely says
+    # "compete" -- "we compete with other SaaS providers" -- and not a
+    # company anyone can buy from. "SaaS" survived the grammatical rule and
+    # reached the deployed introduction as one of Cloudflare's three named
+    # competitors.
+    "saas", "paas", "iaas", "api", "apis", "cdn", "vpn", "sase", "ai", "ml",
+    "llm", "crm", "erp", "sdk", "cms", "b2b", "b2c", "sme", "smb", "it",
+    "iot", "saas/paas", "devops", "mlops", "byod", "sso", "mfa",
+})
+
+
+def _is_the_subject(name: str, subject: str) -> bool:
+    """Is this candidate the subject, or something the subject owns?
+
+    "Cloudflare Workers" is Cloudflare's own product and was returned as
+    Cloudflare's competitor and rendered on the introduction, one line under
+    the company's name. The old test asked whether the CANDIDATE was inside
+    the SUBJECT, which is the wrong direction for a product name.
+
+    Word boundaries throughout: a substring test refuses "Alphabet Inc." for
+    containing "alpha", which is the opposite mistake and has been made here
+    before.
+    """
+    subject_tokens = [w.lower() for w in re.split(r"\W+", subject or "") if w]
+    generic = {"inc", "corp", "corporation", "company", "co", "ltd",
+               "limited", "plc", "holdings", "group", "the", "and", "sa",
+               "nv", "ag", "llc", "lp"}
+    distinctive = [t for t in subject_tokens
+                   if t not in generic and len(t) > 2]
+    candidate = {w.lower() for w in re.split(r"\W+", name) if w}
+    return any(token in candidate for token in distinctive)
+
+
 def candidate_names(passage: str, *, subject: str = "") -> List[str]:
     """Capitalised spans that plausibly name an organisation."""
     subject_words = {w.lower() for w in re.split(r"\W+", subject or "") if w}
     found: List[str] = []
     for raw in _NAME.findall(passage or ""):
+        # A NAME MAY NOT SPAN A SENTENCE. `_NAME` allows "." inside a token so
+        # that "Inc." and "Co." survive, and the cost is that "…Alphabet Inc.
+        # The Federal…" matched as ONE span and reached the page as a company
+        # called "Alphabet Inc. The Federal". A token ending in a full stop is
+        # where the span ends -- that is true both when the stop closes an
+        # abbreviation and when it closes a sentence.
+        pieces = raw.split()
+        for index, piece in enumerate(pieces):
+            if piece.endswith(".") and index < len(pieces) - 1:
+                pieces = pieces[:index + 1]
+                break
+        raw = " ".join(pieces)
         name = raw.strip(" .,;:")
         lowered = name.lower()
         if len(name) < 3 or lowered in _STOPLIST:
             continue
-        # The subject is not its own competitor.
+        # The subject is not its own competitor, and neither is anything the
+        # subject makes.
         if subject and (lowered in (subject or "").lower()
-                        or lowered in subject_words):
+                        or lowered in subject_words
+                        or _is_the_subject(name, subject)):
+            continue
+        # A programme, a standard or a regulator is not an alternative a
+        # buyer weighs. It cannot be sold to, bought from, or competed with.
+        tokens = [w.lower().strip(".") for w in name.split()]
+        if lowered.replace(" ", "").strip(".") in _NOT_A_VENDOR_EXACT:
+            continue
+        if tokens and tokens[-1] in _NOT_A_VENDOR:
+            continue
+        if any(t in _NOT_A_VENDOR for t in tokens):
             continue
         words = lowered.split()
         if len(words) == 1:
@@ -172,7 +302,35 @@ def candidate_names(passage: str, *, subject: str = "") -> List[str]:
             # word, a digit, or an ampersand.
             if not re.search(r"[a-z][A-Z]|[0-9&]", name):
                 continue
-        elif not any(w.strip(".") in _CORPORATE for w in words):
+        # A MULTI-WORD SPAN NEEDS POSITIVE EVIDENCE THAT IT IS AN
+        # ORGANISATION. Three consecutive live runs put a certification
+        # scheme, a marketing noun phrase and a product category on the
+        # introduction as named competitors. A missed rival is a quiet
+        # omission and the read still shows classified peers; a fabricated
+        # one tells a chief executive to worry about a company that does not
+        # exist in their market.
+        elif len(words) > 1:
+            tokens_clean = [w.strip(".") for w in words]
+            has_legal = any(t in _LEGAL_FORM for t in tokens_clean)
+            has_trade = any(t in _TRADE_WORD for t in tokens_clean)
+            if has_legal:
+                pass                        # a legal form is proof
+            elif has_trade:
+                # "Akamai Technologies" is a company; "Online Platforms" is a
+                # category. What separates them is the word in front.
+                if tokens_clean[0] in _COMMON_ENGLISH:
+                    continue
+            else:
+                # NO CORPORATE MARKER AT ALL. "Booz Allen Hamilton" is three
+                # surnames and is a real firm; "Intuitive User Experience" is
+                # three ordinary English words and is a marketing phrase.
+                # Requiring that NONE of the tokens is ordinary vocabulary
+                # keeps the first and refuses the second, which is exactly
+                # the line the live fabrications fell on.
+                if any(t in _COMMON_ENGLISH for t in tokens_clean):
+                    continue
+        if len(words) > 1 and not any(
+                w.strip(".") in _CORPORATE for w in words):
             # A multi-word span with no corporate suffix has to look like a
             # name rather than a clause: every word capitalised and none of
             # them ordinary vocabulary. This is what lets "Booz Allen
@@ -204,6 +362,52 @@ def _relationship(sentence: str) -> str:
     return DIRECT_COMPETITOR
 
 
+#: A sentence that is doing something, rather than labelling a section. Every
+#: filing heading is a capitalised noun phrase with no verb in it, which is
+#: exactly why three rounds of word-level stoplists could not stop them:
+#: "Competitive Landscape", "Human Capital Resources" and "Item 1A. Risk
+#: Factors" are not made of unusual words, they are made of no verbs.
+_HAS_A_VERB = re.compile(
+    r"\b(?:is|are|was|were|be|been|has|have|had|do|does|did|include|"
+    r"includes|included|compete|competes|competing|competed|offer|offers|"
+    r"provide|provides|sell|sells|serve|serves|face|faces|may|can|could|"
+    r"would|will|expect|expects|believe|believes|consider|considers|"
+    r"remain|remains|continue|continues)\b", re.I)
+
+#: An explicit statement that this is a market contest, in the candidate's own
+#: sentence. A heading three lines above one of these is not covered by it.
+_COMPETITION_IN_SENTENCE = re.compile(
+    r"\bcompet(?:e|es|ing|ed|itor|itors|itive)\b"
+    r"|\balternatives?\s+(?:to|include)\b"
+    r"|\brivals?\b|\bin[- ]house\b|\bsubstitutes?\b", re.I)
+
+
+def names_a_contest(sentence: str) -> bool:
+    """Is this a SENTENCE ABOUT COMPETING, rather than a heading?
+
+    THE THIRD LIVE FABRICATION IS WHAT FORCED THIS. Two rounds of word-level
+    filtering were each defeated within one deploy:
+
+        run 1: "Authorization Management Program, Cloudflare Workers, FedRAMP"
+        run 2: "Federal Risk, Intuitive User Experience, Online Platforms"
+        run 3: "Competitive Landscape, Human Capital Resources, SaaS"
+
+    Every entry in round three is a heading out of a 10-K. No stoplist of
+    words can separate a heading from a name, because headings are built from
+    ordinary business vocabulary -- which is what a stoplist is made of too.
+    What separates them is GRAMMAR: a heading has no verb, and it does not
+    itself say that anyone is competing.
+
+    So a candidate is kept only when its own sentence both says that a
+    contest exists and is a sentence at all. This is narrower than the
+    stoplists it replaces and it cannot be defeated by a heading nobody has
+    seen yet.
+    """
+    flat = " ".join(str(sentence or "").split())
+    return bool(_COMPETITION_IN_SENTENCE.search(flat)
+                and _HAS_A_VERB.search(flat))
+
+
 def _overlap_sentence(passage: str, name: str) -> str:
     """The sentence that actually makes the claim, so a reader can check it."""
     for sentence in _sentences(passage):
@@ -213,13 +417,27 @@ def _overlap_sentence(passage: str, name: str) -> str:
 
 
 def find_competitors(documents, *, subject: str = "", today: str = "",
-                     limit: int = 5) -> List[Competitor]:
+                     limit: int = 5, refusals: Optional[List] = None,
+                     business_model: str = "") -> List[Competitor]:
     """Competitors this run's own evidence supports, best first.
 
     `documents` are mappings with `text`, `observation_id`, `source_title`,
     `source_class` and `date` — the shape the ingestion store already emits.
+
+    Pass a list as `refusals` to receive every candidate that was NOT a
+    competitive alternative, each carrying the section it belongs under. §6:
+    the system should become smarter, not quieter.
     """
     ranked: Dict[str, Competitor] = {}
+    #: §6. WHAT WAS NOT A RIVAL, KEPT. An index, a payer programme and a
+    #: captive lender's competitors are real facts about the company. The
+    #: answer to publishing them in the wrong section is the right section,
+    #: not silence — `qualified_candidates` is how a surface reaches them.
+    refused: List = []
+    #: The order the SUBJECT names them in, which is the subject's own
+    #: ranking of its markets. Recorded at first sight because the ranking
+    #: below needs it and a dict of results has already lost it.
+    first_seen: Dict[str, int] = {}
     for document in documents or ():
         if not isinstance(document, dict):
             continue
@@ -230,6 +448,7 @@ def find_competitors(documents, *, subject: str = "", today: str = "",
             continue
         for passage in competition_passages(text):
             for name in candidate_names(passage, subject=subject):
+                first_seen.setdefault(name.lower(), len(first_seen))
                 mention = Mention(
                     name=name, passage=passage,
                     source_title=str(document.get("source_title") or ""),
@@ -242,7 +461,32 @@ def find_competitors(documents, *, subject: str = "", today: str = "",
                 overlap = _overlap_sentence(passage, name)
                 if not overlap:
                     continue
-                relationship = _relationship(overlap)
+                # §3. THE CLAUSE THAT NAMES IT MUST BE THE CLAUSE THAT MAKES
+                # THE CLAIM, AND THE NAME MUST BE AN ECONOMIC ALTERNATIVE.
+                #
+                # `names_a_contest` reads the whole retrieved span, and a
+                # filing "sentence" is routinely a list: Meta's was 2,262
+                # characters and fifteen bullets, with "S&P" in the bullet
+                # about stock indices and "competitors" five bullets away.
+                # Asking the span whether a contest exists answered yes and
+                # said nothing about S&P. The qualification reads the clause
+                # the name is actually in.
+                qualification = qualify(
+                    candidate=name, evidence=overlap, subject=subject,
+                    business_model=business_model)
+                clause = qualification.evidence_basis or overlap
+                # BOTH TESTS, AND BOTH MUST PASS. The clause has to be a
+                # sentence that says a contest exists (`names_a_contest`,
+                # which is what keeps filing headings out), and the entity
+                # has to be something a customer could choose (the
+                # qualification, which is what keeps an index and a payer
+                # programme out). Each catches what the other cannot.
+                if not qualification.may_contest:
+                    refused.append(qualification)
+                    continue
+                if not names_a_contest(clause):
+                    continue
+                relationship = _relationship(clause)
                 existing = ranked.get(name.lower())
                 if existing and existing.relevance == CLAIM_RELEVANT \
                         and verdict.relevance != CLAIM_RELEVANT:
@@ -250,7 +494,19 @@ def find_competitors(documents, *, subject: str = "", today: str = "",
                 try:
                     ranked[name.lower()] = Competitor(
                         name=name, relationship=relationship,
-                        overlap=overlap[:400],
+                        # THE EXCERPT IS THE CLAUSE, NOT THE BLOB. Quoting
+                        # the first 400 characters of a fifteen-bullet list
+                        # put a sentence about income tax under a competitor
+                        # called S&P — an excerpt that establishes nothing
+                        # for the reader who tries to check it.
+                        overlap=clause[:400],
+                        qualification_state=qualification.qualification_state,
+                        entity_type=qualification.entity_type,
+                        contest_owner=qualification.contest_owner,
+                        focal_need=qualification.focal_need,
+                        substitution_mechanism=(
+                            qualification.substitution_mechanism),
+                        routed_section=qualification.section,
                         evidence_ids=(str(evidence_id),),
                         source_titles=(str(document.get("source_title")
                                            or ""),),
@@ -269,11 +525,25 @@ def find_competitors(documents, *, subject: str = "", today: str = "",
                             else "Based on a single retrieved source."))
                 except CompetitorRejected:
                     continue
+    if refusals is not None:
+        refusals.extend(refused)
     internal = _internal_build(documents, today=today)
     if internal is not None:
         ranked.setdefault("__internal_build__", internal)
+    # §3 OF THE MEASURED CAUSES: SELECTION WAS ALPHABETICAL.
+    #
+    # Caterpillar's filing names forty-three firms — Komatsu, Deere, Cummins,
+    # Liebherr, Sandvik, Volvo CE — and this returned Alstom, America
+    # Leasing, BNP Paribas and Baker Hughes, because it sorted by name and
+    # took four. A company's own order of mention is its own ranking of its
+    # markets, and it was being thrown away.
+    order = {name: i for i, name in enumerate(first_seen)}
     out = sorted(ranked.values(),
-                 key=lambda c: (c.relevance != CLAIM_RELEVANT, c.name))
+                 key=lambda c: (not c.may_contest,
+                                _STATE_RANK.get(c.qualification_state, 1),
+                                c.relevance != CLAIM_RELEVANT,
+                                order.get(c.name.lower(), 10_000),
+                                c.name.lower()))
     return out[:limit]
 
 

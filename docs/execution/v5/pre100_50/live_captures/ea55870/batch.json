@@ -1,0 +1,86 @@
+[
+  {
+    "company": "NVIDIA Corporation",
+    "deployed_sha": "ea55870",
+    "status": "READY",
+    "run_id": "01M0K9RVTG00FD1VZAKYP905MD",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/ea55870/nvidia_corporation",
+    "process_before": {
+      "boot_id": "2f3bc74d6e2d4970",
+      "started_at": 1787354140.8714237,
+      "uptime_seconds": 37.4
+    },
+    "entry_domain": "nvidia.com",
+    "seconds": 227,
+    "first_useful": 227,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K9RVTG00FD1VZAKYP905MD/intro",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS_REFRESHING",
+      "intro": "FULL_ANALYSIS_REFRESHING",
+      "slides": "FULL_ANALYSIS_REFRESHING",
+      "full": "FULL_ANALYSIS_REFRESHING",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [
+      "FULL_ANALYSIS",
+      "FULL_ANALYSIS_REFRESHING"
+    ],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0K9RVTG00FD1VZAKYP905MD/progress: timeout",
+      "GET /runs/01M0K9RVTG00FD1VZAKYP905MD/progress: timeout",
+      "GET /runs/01M0K9RVTG00FD1VZAKYP905MD/progress: timeout"
+    ]
+  },
+  {
+    "company": "The Goldman Sachs Group, Inc.",
+    "deployed_sha": "ea55870",
+    "status": "FAILED",
+    "run_id": "01M0KABBKEA88DTWW3VXTX8P9X",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/ea55870/the_goldman_sachs_group_inc",
+    "process_before": {
+      "boot_id": "2f3bc74d6e2d4970",
+      "started_at": 1787354140.8714237,
+      "uptime_seconds": 644.3
+    },
+    "entry_domain": "goldmansachs.com",
+    "seconds": 57,
+    "first_useful": null,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KABBKEA88DTWW3VXTX8P9X/progress"
+  },
+  {
+    "company": "NIKE, Inc.",
+    "deployed_sha": "ea55870",
+    "status": "FAILED",
+    "run_id": "",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/ea55870/nike_inc",
+    "process_before": {
+      "boot_id": "2f3bc74d6e2d4970",
+      "started_at": 1787354140.8714237,
+      "uptime_seconds": 944.6
+    },
+    "entry_domain": "nike.com",
+    "failure": "analyze did not open a run (HTTP 500)",
+    "entry_text": "Something went wrong on our side Something went wrong on our side What did work. Your request was received and the company you entered was recorded. What did not. The analysis did not complete. Why. This is a fault in the product, not in what you entered or in the company. What to do next. Run it again. If it keeps happening, the reference below identifies this run in our logs. Run a new analysis "
+  },
+  {
+    "company": "Advanced Micro Devices, Inc.",
+    "deployed_sha": "ea55870",
+    "status": "FAILED",
+    "run_id": "",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/ea55870/advanced_micro_devices_inc",
+    "process_before": {
+      "boot_id": "2f3bc74d6e2d4970",
+      "started_at": 1787354140.8714237,
+      "uptime_seconds": 1244.4
+    },
+    "entry_domain": "amd.com",
+    "failure": "analyze did not open a run (HTTP 500)",
+    "entry_text": "Something went wrong on our side Something went wrong on our side What did work. Your request was received and the company you entered was recorded. What did not. The analysis did not complete. Why. This is a fault in the product, not in what you entered or in the company. What to do next. Run it again. If it keeps happening, the reference below identifies this run in our logs. Run a new analysis "
+  }
+]

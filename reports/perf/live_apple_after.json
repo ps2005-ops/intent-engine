@@ -1,0 +1,98 @@
+{
+  "base": "https://intent-engine-preview-bridge.onrender.com",
+  "cohort": "tier1",
+  "cache_state": "cold",
+  "instance": {
+    "status": 200,
+    "seconds": 0.1,
+    "cold_start": false
+  },
+  "summary": {
+    "attempted": 1,
+    "counted": 1,
+    "refused": 0,
+    "succeeded": 0,
+    "success_rate": 0.0,
+    "p50": null,
+    "p90": null,
+    "p95": null,
+    "max": null,
+    "over_60s": [],
+    "no_result": [
+      "Apple Inc."
+    ]
+  },
+  "rows": [
+    {
+      "company": "Apple Inc.",
+      "domain": "apple.com",
+      "requests": [
+        {
+          "path": "/demo",
+          "status": 200,
+          "seconds": 0.38
+        },
+        {
+          "path": "/analyze",
+          "status": 200,
+          "seconds": 6.7,
+          "landed": "https://intent-engine-preview-bridge.onrender.com/runs/01M15C634JPKE7QKSR0AS5WA5M/progress"
+        },
+        {
+          "path": "/runs/01M15C634JPKE7QKSR0AS5WA5M",
+          "status": 0,
+          "seconds": 90.04,
+          "chars": 37
+        },
+        {
+          "path": "/runs/01M15C634JPKE7QKSR0AS5WA5M/brief",
+          "status": 0,
+          "seconds": 90.04,
+          "chars": 37
+        }
+      ],
+      "bounded_gaps": [],
+      "error": "progress 0: timeout: The read operation timed out",
+      "run_id": "01M15C634JPKE7QKSR0AS5WA5M",
+      "core_ready_seconds": null,
+      "complete_seconds": null,
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 6.9
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 29.5
+        }
+      ],
+      "polls": 28,
+      "poll_timings": [],
+      "slowest_stage": {
+        "stage": "Mapping competitors",
+        "seconds": 204.2
+      },
+      "evidence_count": 0,
+      "economic_context": false,
+      "pages": {
+        "": {
+          "status": 0,
+          "chars": 37,
+          "seconds": 90.04,
+          "outcome": ""
+        },
+        "/brief": {
+          "status": 0,
+          "chars": 37,
+          "seconds": 90.04,
+          "outcome": ""
+        }
+      },
+      "outcome_header": "",
+      "status": "NO_RESULT",
+      "total_seconds": 233.7,
+      "cache_state": "cold",
+      "_warm": false
+    }
+  ]
+}

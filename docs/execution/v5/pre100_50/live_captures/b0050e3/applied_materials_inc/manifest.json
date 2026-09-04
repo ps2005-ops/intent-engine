@@ -1,0 +1,138 @@
+{
+  "company": "Applied Materials, Inc.",
+  "deployed_sha": "b0050e3",
+  "captured_at": "2026-08-21T12:56:08Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J697R3A92CMMQYMAM7MFV0",
+      "chars": 2073,
+      "html_chars": 17826,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J697R3A92CMMQYMAM7MFV0/intro",
+      "chars": 4551,
+      "html_chars": 29811,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J697R3A92CMMQYMAM7MFV0",
+      "chars": 2075,
+      "html_chars": 17828,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J697R3A92CMMQYMAM7MFV0/full",
+      "chars": 2075,
+      "html_chars": 17828,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J697R3A92CMMQYMAM7MFV0/story",
+      "chars": 5038,
+      "html_chars": 34703,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J697R3A92CMMQYMAM7MFV0/history",
+      "chars": 28442,
+      "html_chars": 108149,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J697R3A92CMMQYMAM7MFV0/connect",
+      "chars": 3867,
+      "html_chars": 28778,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J697R3A92CMMQYMAM7MFV0",
+      "chars": 2075,
+      "html_chars": 17828,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J697R3A92CMMQYMAM7MFV0/evidence",
+      "chars": 3269,
+      "html_chars": 19067,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J697R3A92CMMQYMAM7MFV0/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J697R3A92CMMQYMAM7MFV0/brief",
+      "chars": 18020,
+      "html_chars": 52078,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Applied Materials, Inc. AMAT \u00b7 appliedmaterials.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current com",
+      "status": 200,
+      "html_bytes": 17030
+    },
+    {
+      "t": 40.3,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Applied Materials, Inc. AMAT \u00b7 appliedmaterials.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current co",
+      "status": 200,
+      "html_bytes": 17026
+    },
+    {
+      "t": 78.5,
+      "text": "Limited analysis of Applied Materials, Inc. Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of Applied Materials, Inc. Some kinds of evidence are missing, and there are places left to look. Rather than show a briefing that looks complete and is not, here is exactly where it sta",
+      "status": 200,
+      "html_bytes": 17862
+    }
+  ],
+  "process_before": {
+    "boot_id": "a66b8bb687154bfa",
+    "started_at": 1787314134.5251167,
+    "uptime_seconds": 2833.8
+  },
+  "run_id": "01M0J697R3A92CMMQYMAM7MFV0",
+  "status": "READY",
+  "seconds": 79,
+  "first_useful": 79,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 6.73,
+    "intro": 15.66,
+    "slides": 3.51,
+    "full": 2.87,
+    "story": 6.87,
+    "history": 0.31,
+    "connect": 5.77
+  },
+  "evidence_gate": "compose=3 usable=3 families=investor stored=3 attempt=3",
+  "outcome": "TRUE_EVIDENCE_SCARCITY",
+  "outcome_by_route": {
+    "run": "TRUE_EVIDENCE_SCARCITY",
+    "intro": "TRUE_EVIDENCE_SCARCITY",
+    "slides": "TRUE_EVIDENCE_SCARCITY",
+    "full": "TRUE_EVIDENCE_SCARCITY",
+    "story": "TRUE_EVIDENCE_SCARCITY",
+    "history": "TRUE_EVIDENCE_SCARCITY",
+    "connect": "TRUE_EVIDENCE_SCARCITY"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": []
+}

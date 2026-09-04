@@ -1,0 +1,132 @@
+{
+  "company": "Meta Platforms, Inc.",
+  "deployed_sha": "8fd6c82",
+  "captured_at": "2026-08-21T20:55:05Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K1P9A6E5EWX22AFFQYG515",
+      "chars": 2049,
+      "html_chars": 17897,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K1P9A6E5EWX22AFFQYG515/intro",
+      "chars": 5212,
+      "html_chars": 30484,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K1P9A6E5EWX22AFFQYG515",
+      "chars": 2471,
+      "html_chars": 18956,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K1P9A6E5EWX22AFFQYG515/full",
+      "chars": 2433,
+      "html_chars": 18853,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K1P9A6E5EWX22AFFQYG515/story",
+      "chars": 5588,
+      "html_chars": 35266,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K1P9A6E5EWX22AFFQYG515/history",
+      "chars": 29234,
+      "html_chars": 104830,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K1P9A6E5EWX22AFFQYG515/connect",
+      "chars": 4080,
+      "html_chars": 28991,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K1P9A6E5EWX22AFFQYG515/intro",
+      "chars": 6045,
+      "html_chars": 31615,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K1P9A6E5EWX22AFFQYG515/evidence",
+      "chars": 8004,
+      "html_chars": 26045,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K1P9A6E5EWX22AFFQYG515/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K1P9A6E5EWX22AFFQYG515/brief",
+      "chars": 17080,
+      "html_chars": 50398,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Meta Platforms, Inc. META \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Conn",
+      "status": 200,
+      "html_bytes": 17003
+    },
+    {
+      "t": 46.8,
+      "text": "Limited analysis of Meta Platforms, Inc. Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of Meta Platforms, Inc. Some kinds of evidence are missing, and there are places left to look. Rather than show a briefing that looks complete and is not, here is exactly where it stands. W",
+      "status": 200,
+      "html_bytes": 17412
+    }
+  ],
+  "process_before": {
+    "boot_id": "9faee695704b434b",
+    "started_at": 1787344896.8719635,
+    "uptime_seconds": 808.8
+  },
+  "run_id": "01M0K1P9A6E5EWX22AFFQYG515",
+  "status": "READY",
+  "seconds": 47,
+  "first_useful": 47,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 6.02,
+    "intro": 22.85,
+    "slides": 8.66,
+    "full": 4.71,
+    "story": 20.48,
+    "history": 0.38,
+    "connect": 13.18
+  },
+  "evidence_gate": "compose=1 usable=1 families=identity stored=9 attempt=1 failed=0/0 dropped=0/0/0/0 unexplained=0",
+  "outcome": "TRUE_EVIDENCE_SCARCITY",
+  "outcome_by_route": {
+    "run": "TRUE_EVIDENCE_SCARCITY",
+    "intro": "TRUE_EVIDENCE_SCARCITY",
+    "slides": "TRUE_EVIDENCE_SCARCITY",
+    "full": "TRUE_EVIDENCE_SCARCITY",
+    "story": "TRUE_EVIDENCE_SCARCITY",
+    "history": "TRUE_EVIDENCE_SCARCITY",
+    "connect": "TRUE_EVIDENCE_SCARCITY"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": []
+}

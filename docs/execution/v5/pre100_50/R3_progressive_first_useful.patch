@@ -1,0 +1,97 @@
+diff --git a/src/intent_engine/webapp/app.py b/src/intent_engine/webapp/app.py
+index 0d1e1fa..e6fec9b 100644
+--- a/src/intent_engine/webapp/app.py
++++ b/src/intent_engine/webapp/app.py
+@@ -8296,6 +8296,66 @@ class WebApp:
+             return False
+         return True
+ 
++    #: How many sources the first wave may fetch. Small on purpose: this is
++    #: the set that decides how long a reader waits, and every document added
++    #: here is added to that wait for every company.
++    FIRST_USEFUL_SOURCES = 3
++
++    @staticmethod
++    def _first_useful_candidates(approved, candidates):
++        """The smallest approved set that can carry a defensible reading.
++
++        The subject's OWN primary filing and its OWN front page: identity,
++        what it sells, how it earns and what it says about its own position
++        all come from those two. Third-party corroboration deepens a reading
++        and cannot establish one, so it belongs in the second wave.
++
++        Returns () when the split would not help -- there is nothing to gain
++        from a first wave that is the whole approved set.
++        """
++        by_id = {c["candidate_id"]: c for c in candidates or ()}
++
++        def _is_filing(c):
++            # The regulator's copy of the subject's own annual report. Matched
++            # on the HOST rather than on `source_type`, whose vocabulary
++            # (homepage/product/pricing/about/...) has no name for a filing.
++            return "sec.gov" in str(c.get("url") or c.get("canonical_url")
++                                    or "").lower()
++
++        def _is_front_page(c):
++            return str(c.get("source_type") or "") in ("homepage", "about")
++
++        chosen = []
++        for test in (_is_filing, _is_front_page):
++            for cid in approved or ():
++                candidate = by_id.get(cid) or {}
++                if cid not in chosen and test(candidate):
++                    chosen.append(cid)
++                    break
++        if not chosen:
++            chosen = list(approved or ())[:1]
++        return tuple(chosen[:WebApp.FIRST_USEFUL_SOURCES])
++
++    def _compose_first_useful(self, run_id: str) -> bool:
++        """Publish an early bounded reading. Never fails the run.
++
++        A failure here means the first wave was not enough to compose from,
++        which is not an error: the second wave is already on its way and the
++        final composition is unchanged. Swallowing it is correct precisely
++        because this is an OPTIMISATION of when the reader is let in, not a
++        step the analysis depends on.
++        """
++        try:
++            early = self._compose(run_id)
++        except Exception as exc:                # noqa: BLE001 - see docstring
++            _LOG.info("first-useful composition skipped run=%s %s: %s",
++                      run_id, type(exc).__name__, str(exc)[:120])
++            return False
++        if not early:
++            return False
++        self._results[run_id] = early
++        return True
++
+     def _run_analysis(self, user_id: str, run_id: str) -> None:
+         """The whole pipeline, off the request thread.
+ 
+@@ -8318,6 +8378,25 @@ class WebApp:
+                             if c["candidate_id"] not in approved]
+                 self.ci.approve(run_id, user_id=user_id,
+                                 approved_ids=approved, rejected_ids=rejected)
++                # A READER WAITS FOR THE FIRST DEFENSIBLE READING, NOT FOR
++                # THE LAST DOCUMENT.
++                #
++                # MEASURED over 49 live companies: first-useful p50 165s, p90
++                # 336s, p95 475s, fastest 88s, and NOT ONE under 30 seconds --
++                # because `opens_result` waits for a composition that waits
++                # for every approved source to be fetched. Most of that wall
++                # clock is retrieval of sources that deepen a reading the
++                # subject's own filing already supports.
++                #
++                # So retrieval runs in two waves. The first is the smallest
++                # set that can carry identity, an economic model and a
++                # defensible implication -- the subject's own primary filing
++                # and its own front page. It composes, the customer is let
++                # in, and the rest is fetched underneath them.
++                first = self._first_useful_candidates(approved, candidates)
++                if first and len(first) < len(approved):
++                    self.ci.fetch_approved(run_id, candidate_ids=first)
++                    self._compose_first_useful(run_id)
+                 self.ci.fetch_approved(run_id)
+             self._results[run_id] = self._compose(run_id)
+             with self._analysis_lock:

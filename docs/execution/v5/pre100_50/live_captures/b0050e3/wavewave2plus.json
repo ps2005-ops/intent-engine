@@ -1,0 +1,68 @@
+[
+  {
+    "company": "Meta Platforms, Inc.",
+    "deployed_sha": "b0050e3",
+    "status": "READY",
+    "run_id": "01M0J2REJPX54FJBBE85B22A5K",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/b0050e3/meta_platforms_inc",
+    "process_before": {
+      "boot_id": "4dfba762a3d64a55",
+      "started_at": 1787313249.7337387,
+      "uptime_seconds": 19.8
+    },
+    "entry_domain": "",
+    "seconds": 335,
+    "first_useful": 335,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J2REJPX54FJBBE85B22A5K",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0J2REJPX54FJBBE85B22A5K/progress: timeout",
+      "GET /runs/01M0J2REJPX54FJBBE85B22A5K/progress: timeout",
+      "GET /runs/01M0J2REJPX54FJBBE85B22A5K/progress: timeout",
+      "GET /runs/01M0J2REJPX54FJBBE85B22A5K/progress: timeout",
+      "GET /runs/01M0J2REJPX54FJBBE85B22A5K/progress: timeout"
+    ]
+  },
+  {
+    "company": "Adobe Inc.",
+    "deployed_sha": "b0050e3",
+    "status": "UNREADABLE",
+    "run_id": "01M0J398CK344KTPY7KGK4H88J",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/b0050e3/adobe_inc",
+    "process_before": {
+      "boot_id": "4dfba762a3d64a55",
+      "started_at": 1787313249.7337387,
+      "uptime_seconds": 573.5
+    },
+    "entry_domain": "adobe.com",
+    "seconds": 156,
+    "first_useful": 156,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J398CK344KTPY7KGK4H88J",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "unreadable_because": "HTTP_502",
+    "answers_captured": 6
+  }
+]

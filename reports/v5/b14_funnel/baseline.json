@@ -1,0 +1,801 @@
+{
+  "cohort_chain": [
+    {
+      "cause": "HEALTHY",
+      "n": 140,
+      "population": "documents",
+      "stage": "DISCOVERED"
+    },
+    {
+      "cause": "HEALTHY",
+      "n": 68,
+      "population": "documents",
+      "stage": "FETCHED"
+    },
+    {
+      "cause": "HEALTHY",
+      "n": 71,
+      "population": "documents",
+      "stage": "CANONICALIZED"
+    },
+    {
+      "cause": "HEALTHY",
+      "n": 22,
+      "population": "documents",
+      "stage": "INDEPENDENT"
+    },
+    {
+      "cause": "HEALTHY",
+      "n": 10,
+      "population": "companies",
+      "stage": "ELIGIBLE_COMPANIES"
+    },
+    {
+      "cause": "BLOCKED_EXTERNAL",
+      "n": 1,
+      "population": "companies",
+      "stage": "ANALYZED"
+    },
+    {
+      "cause": "BLOCKED_EXTERNAL",
+      "n": 0,
+      "population": "evidence_rows",
+      "stage": "BELIEF_ELIGIBLE"
+    },
+    {
+      "cause": "NO_PRODUCER",
+      "n": 0,
+      "population": "evidence_rows",
+      "stage": "BELIEF_CHANGED"
+    },
+    {
+      "cause": "NO_PRODUCER",
+      "n": 0,
+      "population": "evidence_rows",
+      "stage": "THESIS_OR_EXPECTATION_CHANGED"
+    },
+    {
+      "cause": "HEALTHY",
+      "n": 10,
+      "population": "companies",
+      "stage": "EXECUTIVE_CONSUMED"
+    }
+  ],
+  "cohort_first_starved": {
+    "cause": "BLOCKED_EXTERNAL",
+    "from": 10,
+    "survived": 0.1,
+    "to": 1,
+    "transition": "ELIGIBLE_COMPANIES \u2192 ANALYZED"
+  },
+  "contract": "learning_funnel.v1",
+  "first_starved_histogram": {
+    "ANALYZED \u2192 BELIEF_ELIGIBLE [NO_PRODUCER]": 1,
+    "CANONICALIZED \u2192 INDEPENDENT [HEALTHY]": 2,
+    "DISCOVERED \u2192 FETCHED [HEALTHY]": 1,
+    "ELIGIBLE_COMPANIES \u2192 ANALYZED [BLOCKED_EXTERNAL]": 6
+  },
+  "per_company": [
+    {
+      "chain": [
+        {
+          "cause": "HEALTHY",
+          "n": 14,
+          "population": "documents",
+          "stage": "DISCOVERED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 10,
+          "population": "documents",
+          "stage": "FETCHED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 10,
+          "population": "documents",
+          "stage": "CANONICALIZED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "documents",
+          "stage": "INDEPENDENT"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "ELIGIBLE_COMPANIES"
+        },
+        {
+          "cause": "BLOCKED_EXTERNAL",
+          "n": 0,
+          "population": "companies",
+          "stage": "ANALYZED"
+        },
+        {
+          "cause": "BLOCKED_EXTERNAL",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "BELIEF_ELIGIBLE"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "BELIEF_CHANGED"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "THESIS_OR_EXPECTATION_CHANGED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "EXECUTIVE_CONSUMED"
+        }
+      ],
+      "company_id": "cloudflare",
+      "first_starved": {
+        "cause": "HEALTHY",
+        "from": 10,
+        "survived": 0.1,
+        "to": 1,
+        "transition": "CANONICALIZED \u2192 INDEPENDENT"
+      }
+    },
+    {
+      "chain": [
+        {
+          "cause": "HEALTHY",
+          "n": 14,
+          "population": "documents",
+          "stage": "DISCOVERED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 4,
+          "population": "documents",
+          "stage": "FETCHED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 4,
+          "population": "documents",
+          "stage": "CANONICALIZED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 3,
+          "population": "documents",
+          "stage": "INDEPENDENT"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "ELIGIBLE_COMPANIES"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "ANALYZED"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "BELIEF_ELIGIBLE"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "BELIEF_CHANGED"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "THESIS_OR_EXPECTATION_CHANGED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "EXECUTIVE_CONSUMED"
+        }
+      ],
+      "company_id": "advanced-micro-devices",
+      "first_starved": {
+        "cause": "NO_PRODUCER",
+        "from": 1,
+        "survived": "UNAVAILABLE",
+        "to": 0,
+        "transition": "ANALYZED \u2192 BELIEF_ELIGIBLE"
+      }
+    },
+    {
+      "chain": [
+        {
+          "cause": "HEALTHY",
+          "n": 14,
+          "population": "documents",
+          "stage": "DISCOVERED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 7,
+          "population": "documents",
+          "stage": "FETCHED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 7,
+          "population": "documents",
+          "stage": "CANONICALIZED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 2,
+          "population": "documents",
+          "stage": "INDEPENDENT"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "ELIGIBLE_COMPANIES"
+        },
+        {
+          "cause": "BLOCKED_EXTERNAL",
+          "n": 0,
+          "population": "companies",
+          "stage": "ANALYZED"
+        },
+        {
+          "cause": "BLOCKED_EXTERNAL",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "BELIEF_ELIGIBLE"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "BELIEF_CHANGED"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "THESIS_OR_EXPECTATION_CHANGED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "EXECUTIVE_CONSUMED"
+        }
+      ],
+      "company_id": "boeing",
+      "first_starved": {
+        "cause": "BLOCKED_EXTERNAL",
+        "from": 1,
+        "survived": 0.0,
+        "to": 0,
+        "transition": "ELIGIBLE_COMPANIES \u2192 ANALYZED"
+      }
+    },
+    {
+      "chain": [
+        {
+          "cause": "HEALTHY",
+          "n": 14,
+          "population": "documents",
+          "stage": "DISCOVERED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 9,
+          "population": "documents",
+          "stage": "FETCHED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 10,
+          "population": "documents",
+          "stage": "CANONICALIZED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 3,
+          "population": "documents",
+          "stage": "INDEPENDENT"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "ELIGIBLE_COMPANIES"
+        },
+        {
+          "cause": "BLOCKED_EXTERNAL",
+          "n": 0,
+          "population": "companies",
+          "stage": "ANALYZED"
+        },
+        {
+          "cause": "BLOCKED_EXTERNAL",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "BELIEF_ELIGIBLE"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "BELIEF_CHANGED"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "THESIS_OR_EXPECTATION_CHANGED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "EXECUTIVE_CONSUMED"
+        }
+      ],
+      "company_id": "bank-of-america",
+      "first_starved": {
+        "cause": "BLOCKED_EXTERNAL",
+        "from": 1,
+        "survived": 0.0,
+        "to": 0,
+        "transition": "ELIGIBLE_COMPANIES \u2192 ANALYZED"
+      }
+    },
+    {
+      "chain": [
+        {
+          "cause": "HEALTHY",
+          "n": 14,
+          "population": "documents",
+          "stage": "DISCOVERED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 8,
+          "population": "documents",
+          "stage": "FETCHED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 8,
+          "population": "documents",
+          "stage": "CANONICALIZED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "documents",
+          "stage": "INDEPENDENT"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "ELIGIBLE_COMPANIES"
+        },
+        {
+          "cause": "BLOCKED_EXTERNAL",
+          "n": 0,
+          "population": "companies",
+          "stage": "ANALYZED"
+        },
+        {
+          "cause": "BLOCKED_EXTERNAL",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "BELIEF_ELIGIBLE"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "BELIEF_CHANGED"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "THESIS_OR_EXPECTATION_CHANGED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "EXECUTIVE_CONSUMED"
+        }
+      ],
+      "company_id": "alimentation-couche-tard",
+      "first_starved": {
+        "cause": "HEALTHY",
+        "from": 8,
+        "survived": 0.125,
+        "to": 1,
+        "transition": "CANONICALIZED \u2192 INDEPENDENT"
+      }
+    },
+    {
+      "chain": [
+        {
+          "cause": "HEALTHY",
+          "n": 14,
+          "population": "documents",
+          "stage": "DISCOVERED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "documents",
+          "stage": "FETCHED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "documents",
+          "stage": "CANONICALIZED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "documents",
+          "stage": "INDEPENDENT"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "ELIGIBLE_COMPANIES"
+        },
+        {
+          "cause": "BLOCKED_EXTERNAL",
+          "n": 0,
+          "population": "companies",
+          "stage": "ANALYZED"
+        },
+        {
+          "cause": "BLOCKED_EXTERNAL",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "BELIEF_ELIGIBLE"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "BELIEF_CHANGED"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "THESIS_OR_EXPECTATION_CHANGED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "EXECUTIVE_CONSUMED"
+        }
+      ],
+      "company_id": "agnico-eagle-mines",
+      "first_starved": {
+        "cause": "HEALTHY",
+        "from": 14,
+        "survived": 0.0714,
+        "to": 1,
+        "transition": "DISCOVERED \u2192 FETCHED"
+      }
+    },
+    {
+      "chain": [
+        {
+          "cause": "HEALTHY",
+          "n": 14,
+          "population": "documents",
+          "stage": "DISCOVERED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 10,
+          "population": "documents",
+          "stage": "FETCHED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 11,
+          "population": "documents",
+          "stage": "CANONICALIZED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 3,
+          "population": "documents",
+          "stage": "INDEPENDENT"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "ELIGIBLE_COMPANIES"
+        },
+        {
+          "cause": "BLOCKED_EXTERNAL",
+          "n": 0,
+          "population": "companies",
+          "stage": "ANALYZED"
+        },
+        {
+          "cause": "BLOCKED_EXTERNAL",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "BELIEF_ELIGIBLE"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "BELIEF_CHANGED"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "THESIS_OR_EXPECTATION_CHANGED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "EXECUTIVE_CONSUMED"
+        }
+      ],
+      "company_id": "bce",
+      "first_starved": {
+        "cause": "BLOCKED_EXTERNAL",
+        "from": 1,
+        "survived": 0.0,
+        "to": 0,
+        "transition": "ELIGIBLE_COMPANIES \u2192 ANALYZED"
+      }
+    },
+    {
+      "chain": [
+        {
+          "cause": "HEALTHY",
+          "n": 14,
+          "population": "documents",
+          "stage": "DISCOVERED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 12,
+          "population": "documents",
+          "stage": "FETCHED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 12,
+          "population": "documents",
+          "stage": "CANONICALIZED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 4,
+          "population": "documents",
+          "stage": "INDEPENDENT"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "ELIGIBLE_COMPANIES"
+        },
+        {
+          "cause": "BLOCKED_EXTERNAL",
+          "n": 0,
+          "population": "companies",
+          "stage": "ANALYZED"
+        },
+        {
+          "cause": "BLOCKED_EXTERNAL",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "BELIEF_ELIGIBLE"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "BELIEF_CHANGED"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "THESIS_OR_EXPECTATION_CHANGED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "EXECUTIVE_CONSUMED"
+        }
+      ],
+      "company_id": "stripe",
+      "first_starved": {
+        "cause": "BLOCKED_EXTERNAL",
+        "from": 1,
+        "survived": 0.0,
+        "to": 0,
+        "transition": "ELIGIBLE_COMPANIES \u2192 ANALYZED"
+      }
+    },
+    {
+      "chain": [
+        {
+          "cause": "HEALTHY",
+          "n": 14,
+          "population": "documents",
+          "stage": "DISCOVERED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 4,
+          "population": "documents",
+          "stage": "FETCHED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 4,
+          "population": "documents",
+          "stage": "CANONICALIZED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 3,
+          "population": "documents",
+          "stage": "INDEPENDENT"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "ELIGIBLE_COMPANIES"
+        },
+        {
+          "cause": "BLOCKED_EXTERNAL",
+          "n": 0,
+          "population": "companies",
+          "stage": "ANALYZED"
+        },
+        {
+          "cause": "BLOCKED_EXTERNAL",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "BELIEF_ELIGIBLE"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "BELIEF_CHANGED"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "THESIS_OR_EXPECTATION_CHANGED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "EXECUTIVE_CONSUMED"
+        }
+      ],
+      "company_id": "mckinsey",
+      "first_starved": {
+        "cause": "BLOCKED_EXTERNAL",
+        "from": 1,
+        "survived": 0.0,
+        "to": 0,
+        "transition": "ELIGIBLE_COMPANIES \u2192 ANALYZED"
+      }
+    },
+    {
+      "chain": [
+        {
+          "cause": "HEALTHY",
+          "n": 14,
+          "population": "documents",
+          "stage": "DISCOVERED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 3,
+          "population": "documents",
+          "stage": "FETCHED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 4,
+          "population": "documents",
+          "stage": "CANONICALIZED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "documents",
+          "stage": "INDEPENDENT"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "ELIGIBLE_COMPANIES"
+        },
+        {
+          "cause": "BLOCKED_EXTERNAL",
+          "n": 0,
+          "population": "companies",
+          "stage": "ANALYZED"
+        },
+        {
+          "cause": "BLOCKED_EXTERNAL",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "BELIEF_ELIGIBLE"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "BELIEF_CHANGED"
+        },
+        {
+          "cause": "NO_PRODUCER",
+          "n": 0,
+          "population": "evidence_rows",
+          "stage": "THESIS_OR_EXPECTATION_CHANGED"
+        },
+        {
+          "cause": "HEALTHY",
+          "n": 1,
+          "population": "companies",
+          "stage": "EXECUTIVE_CONSUMED"
+        }
+      ],
+      "company_id": "johnson-and-johnson",
+      "first_starved": {
+        "cause": "BLOCKED_EXTERNAL",
+        "from": 1,
+        "survived": 0.0,
+        "to": 0,
+        "transition": "ELIGIBLE_COMPANIES \u2192 ANALYZED"
+      }
+    }
+  ],
+  "runtime_sha": "e6347e9d6053378b18cd8e90cb1ff2df37000321"
+}

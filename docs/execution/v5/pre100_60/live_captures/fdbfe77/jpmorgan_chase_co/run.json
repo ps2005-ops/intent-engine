@@ -1,0 +1,291 @@
+{
+  "company": "JPMorgan Chase & Co.",
+  "cik": "19617",
+  "ticker": "JPM",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GCZE49MCYSYQ731V45ANZ6/intro",
+      "chars": 4703,
+      "title": "JPMorgan Chase & Co. \u2014 introduction",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 0,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GCZE49MCYSYQ731V45ANZ6/intro",
+      "chars": 4703,
+      "title": "JPMorgan Chase & Co. \u2014 introduction",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 0,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GCZE49MCYSYQ731V45ANZ6/slides",
+      "chars": 4638,
+      "title": "JPMorgan Chase & Co. \u2014 presentation",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 0,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GCZE49MCYSYQ731V45ANZ6/full",
+      "chars": 20705,
+      "title": "Strategic Intelligence \u2014 JPMorgan Chase & Co.",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [
+          "no competitor"
+        ],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 4,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GCZE49MCYSYQ731V45ANZ6/story",
+      "chars": 3713,
+      "title": "JPMorgan Chase & Co. \u2014 the full story",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": []
+      },
+      "charts": 0,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GCZE49MCYSYQ731V45ANZ6/history",
+      "chars": 28217,
+      "title": "JPMorgan Chase & Co. \u2014 history rewind",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 24,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GCZE49MCYSYQ731V45ANZ6/connect",
+      "chars": 3974,
+      "title": "JPMorgan Chase & Co. \u2014 connect your company",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 0,
+      "nav_next": false,
+      "nav_back": false
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GCZE49MCYSYQ731V45ANZ6/intro",
+      "chars": 4703,
+      "title": "JPMorgan Chase & Co. \u2014 introduction",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 0,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GCZE49MCYSYQ731V45ANZ6/report",
+      "chars": 307,
+      "title": "Executive report preview",
+      "names_company": false,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": []
+      },
+      "charts": 0,
+      "nav_next": false,
+      "nav_back": true
+    },
+    "answer": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GCZE49MCYSYQ731V45ANZ6/answer",
+      "chars": 2859,
+      "title": "JPMorgan Chase & Co. \u2014 the decision",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": []
+      },
+      "charts": 0,
+      "nav_next": false,
+      "nav_back": false
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GCZE49MCYSYQ731V45ANZ6/evidence",
+      "chars": 6935,
+      "title": "JPMorgan Chase & Co.",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": []
+      },
+      "charts": 0,
+      "nav_next": false,
+      "nav_back": false
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GCZE49MCYSYQ731V45ANZ6/brief",
+      "chars": 18438,
+      "title": "JPMorgan Chase & Co. \u2014 executive brief",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [
+          "no competitor"
+        ],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 4,
+      "nav_next": false,
+      "nav_back": false
+    },
+    "dashboard": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GCZE49MCYSYQ731V45ANZ6/dashboard",
+      "chars": 11087,
+      "title": "JPMorgan Chase & Co. \u2014 intelligence",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": []
+      },
+      "charts": 4,
+      "nav_next": false,
+      "nav_back": false
+    }
+  },
+  "progress": [
+    {
+      "poll": 0,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing JPMorgan Chase & Co. JPM \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecting macro and industry conditions to come Mapping competitors to come Stress-testing the strategic"
+    },
+    {
+      "poll": 1,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing JPMorgan Chase & Co. JPM \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecting macro and industry conditions to come Mapping competitors to come Stress-testing the strategic"
+    },
+    {
+      "poll": 2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing JPMorgan Chase & Co. JPM \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecting macro and industry conditions to come Mapping competitors to come Stress-testing the strategic"
+    },
+    {
+      "poll": 3,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing JPMorgan Chase & Co. JPM \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Connecting macro and industry conditions done Mapping competitors working Stress-testing the strategic read"
+    },
+    {
+      "poll": 12,
+      "text": ""
+    }
+  ],
+  "run_id": "01M0GCZE49MCYSYQ731V45ANZ6",
+  "seconds": 164,
+  "auto_advanced": true,
+  "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GCZE49MCYSYQ731V45ANZ6/intro",
+  "qa": {
+    "What should management do?": {
+      "status": 200,
+      "text": "What should management do? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What should management do? A supported reading of JPMorgan Chase & Co. exists and is set out on the Executive X-Ray. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "Why now?": {
+      "status": 200,
+      "text": "Why now? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. Why now? A supported reading of JPMorgan Chase & Co. exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. This particular question is not answerable from what this run retrieved. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What's the biggest risk?": {
+      "status": 200,
+      "text": "What's the biggest risk? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What's the biggest risk? net interest margin or take rate is not disclosed at the granularity the decision needs. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What would prove this wrong?": {
+      "status": 200,
+      "text": "What would prove this wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What would prove this wrong? A supported reading of JPMorgan Chase & Co. exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. This particular question is not answerable from what this run retrieved. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "Who's the real competitor?": {
+      "status": 200,
+      "text": "Who's the real competitor? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. Who's the real competitor? Bank of America Corporation: operates the same business model (balance sheet or network) in the same sector (financial regulated), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR; Bank of Montreal: operates the same business model (balance sheet or network) in the same sector (financial regulated), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR; Blackstone Inc.: operates the same business model (balance sheet or network) in the same sector (financial regulated), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What does the market believe?": {
+      "status": 200,
+      "text": "What does the market believe? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What does the market believe? A supported reading of JPMorgan Chase & Co. exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. This particular question is not answerable from what this run retrieved. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What's the weakest assumption?": {
+      "status": 200,
+      "text": "What's the weakest assumption? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What's the weakest assumption? A supported reading of JPMorgan Chase & Co. exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. This particular question is not answerable from what this run retrieved. Evidence Strongest. 2026-08-20: JPMorgan Chase & Co. is committing capital to capacity ahead of the demand for it, so the cost lands now while the payoff depends on demand that has not arrived yet. Weakest. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What impossible hypothesis should we test?": {
+      "status": 200,
+      "text": "What impossible hypothesis should we test? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What impossible hypothesis should we test? A supported reading of JPMorgan Chase & Co. exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. This particular question is not answerable from what this run retrieved. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What should we measure next?": {
+      "status": 200,
+      "text": "What should we measure next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What should we measure next? A supported reading of JPMorgan Chase & Co. exists and is set out on the Executive X-Ray. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What would you tell the board?": {
+      "status": 200,
+      "text": "What would you tell the board? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What would you tell the board? A supported reading of JPMorgan Chase & Co. exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. This particular question is not answerable from what this run retrieved. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    }
+  },
+  "transport_errors": []
+}

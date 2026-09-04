@@ -1,0 +1,143 @@
+{
+  "company": "Apple Inc.",
+  "run_id": "01M1834HSG3NDH28X32E5P62M4",
+  "wall_s": 14.0,
+  "documents": 10,
+  "lifecycle": {
+    "created": "2026-08-30T01:04:27.440270+00:00",
+    "accepted": "2026-08-30T01:04:27.848486+00:00",
+    "core_ready": "2026-08-30T01:04:40.274474+00:00",
+    "deep_started": "2026-08-30T01:04:40.275072+00:00",
+    "deep_ready": "2026-08-30T01:04:41.798836+00:00"
+  },
+  "waterfall": {
+    "covered_wall_ms": 12425.1,
+    "phase": "core",
+    "spans": [
+      {
+        "cpu_ms": 93.1,
+        "deadline_remaining_end_s": 53.93,
+        "deadline_remaining_start_s": 60.0,
+        "depth": 0,
+        "item_count": 47,
+        "name": "discovery",
+        "offset_s": 0.0,
+        "status": "ok",
+        "wall_ms": 6064.4
+      },
+      {
+        "candidates": 47,
+        "cpu_ms": 1.3,
+        "deadline_remaining_end_s": 53.93,
+        "deadline_remaining_start_s": 53.93,
+        "depth": 0,
+        "item_count": 14,
+        "name": "source_selection",
+        "offset_s": 6.064,
+        "status": "ok",
+        "wall_ms": 1.3
+      },
+      {
+        "cpu_ms": 312.2,
+        "deadline_remaining_end_s": 51.63,
+        "deadline_remaining_start_s": 53.93,
+        "depth": 0,
+        "item_count": 10,
+        "name": "retrieval",
+        "offset_s": 6.066,
+        "status": "ok",
+        "wall_ms": 2298.9
+      },
+      {
+        "cpu_ms": 7.9,
+        "depth": 2,
+        "item_count": 10,
+        "name": "fi_run",
+        "offset_s": 8.436,
+        "status": "ok",
+        "wall_ms": 8.9
+      },
+      {
+        "cpu_ms": 0.1,
+        "depth": 2,
+        "name": "evidence_library",
+        "offset_s": 8.444,
+        "status": "ok",
+        "wall_ms": 0.1
+      },
+      {
+        "cpu_ms": 1620.4,
+        "depth": 2,
+        "name": "strategic_report",
+        "offset_s": 8.469,
+        "status": "ok",
+        "wall_ms": 1993.5
+      },
+      {
+        "cpu_ms": 1728.8,
+        "deadline_remaining_end_s": 49.53,
+        "deadline_remaining_start_s": 51.63,
+        "depth": 1,
+        "name": "compose_proper",
+        "offset_s": 8.365,
+        "status": "ok",
+        "wall_ms": 2104.3
+      },
+      {
+        "cpu_ms": 0.3,
+        "depth": 1,
+        "name": "memory_snapshot",
+        "offset_s": 10.47,
+        "status": "ok",
+        "wall_ms": 0.3
+      },
+      {
+        "cpu_ms": 0.8,
+        "depth": 1,
+        "item_count": 14,
+        "name": "memory_publish",
+        "offset_s": 10.47,
+        "status": "ok",
+        "wall_ms": 0.8
+      },
+      {
+        "cpu_ms": 0.1,
+        "depth": 1,
+        "name": "critic",
+        "offset_s": 10.471,
+        "status": "ok",
+        "wall_ms": 0.1
+      },
+      {
+        "cpu_ms": 239.4,
+        "depth": 1,
+        "name": "external_context",
+        "offset_s": 10.472,
+        "status": "ok",
+        "wall_ms": 1817.4
+      },
+      {
+        "cpu_ms": 133.2,
+        "depth": 1,
+        "name": "demo_dossier",
+        "offset_s": 12.289,
+        "status": "ok",
+        "wall_ms": 136.1
+      },
+      {
+        "cpu_ms": 2103.5,
+        "deadline_remaining_end_s": 47.57,
+        "deadline_remaining_start_s": 51.63,
+        "depth": 0,
+        "item_count": 10,
+        "name": "core_composition",
+        "offset_s": 8.365,
+        "status": "ok",
+        "wall_ms": 4060.5
+      }
+    ],
+    "total_cpu_ms": 2510.1,
+    "total_wall_ms": 12425.4,
+    "unaccounted_wall_ms": 0.3
+  }
+}

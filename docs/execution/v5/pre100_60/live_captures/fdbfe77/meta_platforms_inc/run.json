@@ -1,0 +1,295 @@
+{
+  "company": "Meta Platforms, Inc.",
+  "cik": "1326801",
+  "ticker": "META",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GBP4ZWF8TFFPD9N6W9ME7N/intro",
+      "chars": 6045,
+      "title": "Meta Platforms, Inc. \u2014 introduction",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 0,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GBP4ZWF8TFFPD9N6W9ME7N/intro",
+      "chars": 6045,
+      "title": "Meta Platforms, Inc. \u2014 introduction",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 0,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GBP4ZWF8TFFPD9N6W9ME7N/slides",
+      "chars": 6333,
+      "title": "Meta Platforms, Inc. \u2014 presentation",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 0,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GBP4ZWF8TFFPD9N6W9ME7N/full",
+      "chars": 21565,
+      "title": "Strategic Intelligence \u2014 Meta Platforms, Inc.",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [
+          "no competitor"
+        ],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 4,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GBP4ZWF8TFFPD9N6W9ME7N/story",
+      "chars": 4530,
+      "title": "Meta Platforms, Inc. \u2014 the full story",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": []
+      },
+      "charts": 0,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GBP4ZWF8TFFPD9N6W9ME7N/history",
+      "chars": 29234,
+      "title": "Meta Platforms, Inc. \u2014 history rewind",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 24,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GBP4ZWF8TFFPD9N6W9ME7N/connect",
+      "chars": 4074,
+      "title": "Meta Platforms, Inc. \u2014 connect your company",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 0,
+      "nav_next": false,
+      "nav_back": false
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GBP4ZWF8TFFPD9N6W9ME7N/intro",
+      "chars": 6045,
+      "title": "Meta Platforms, Inc. \u2014 introduction",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 0,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GBP4ZWF8TFFPD9N6W9ME7N/report",
+      "chars": 307,
+      "title": "Executive report preview",
+      "names_company": false,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": []
+      },
+      "charts": 0,
+      "nav_next": false,
+      "nav_back": true
+    },
+    "answer": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GBP4ZWF8TFFPD9N6W9ME7N/answer",
+      "chars": 6879,
+      "title": "Meta Platforms, Inc. \u2014 the decision",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": []
+      },
+      "charts": 0,
+      "nav_next": false,
+      "nav_back": false
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GBP4ZWF8TFFPD9N6W9ME7N/evidence",
+      "chars": 6364,
+      "title": "Meta Platforms, Inc.",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": []
+      },
+      "charts": 0,
+      "nav_next": false,
+      "nav_back": false
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GBP4ZWF8TFFPD9N6W9ME7N/brief",
+      "chars": 16904,
+      "title": "Meta Platforms, Inc. \u2014 executive brief",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [
+          "no competitor"
+        ],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 4,
+      "nav_next": false,
+      "nav_back": false
+    },
+    "dashboard": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GBP4ZWF8TFFPD9N6W9ME7N/dashboard",
+      "chars": 9658,
+      "title": "Meta Platforms, Inc. \u2014 intelligence",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": []
+      },
+      "charts": 4,
+      "nav_next": false,
+      "nav_back": false
+    }
+  },
+  "progress": [
+    {
+      "poll": 0,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Meta Platforms, Inc. META \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecting macro and industry conditions to come Mapping competitors to come Stress-testing the strategi"
+    },
+    {
+      "poll": 1,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Meta Platforms, Inc. META \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecting macro and industry conditions to come Mapping competitors to come Stress-testing the strategi"
+    },
+    {
+      "poll": 2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Meta Platforms, Inc. META \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecting macro and industry conditions to come Mapping competitors to come Stress-testing the strategi"
+    },
+    {
+      "poll": 3,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Meta Platforms, Inc. META \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecting macro and industry conditions to come Mapping competitors to come Stress-testing the strategi"
+    },
+    {
+      "poll": 12,
+      "text": ""
+    },
+    {
+      "poll": 24,
+      "text": ""
+    }
+  ],
+  "run_id": "01M0GBP4ZWF8TFFPD9N6W9ME7N",
+  "seconds": 263,
+  "auto_advanced": true,
+  "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GBP4ZWF8TFFPD9N6W9ME7N/intro",
+  "qa": {
+    "What should management do?": {
+      "status": 200,
+      "text": "What should management do? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. What should management do? Yes \u2014 on balance the evidence supports that running separately-reported businesses as a single portfolio (moderate confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "Why now?": {
+      "status": 200,
+      "text": "Why now? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. Why now? Yes \u2014 on balance the evidence supports that running separately-reported businesses as a single portfolio (moderate confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What's the biggest risk?": {
+      "status": 200,
+      "text": "What's the biggest risk? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. What's the biggest risk? Inter-segment transfers and shared cost allocations are not disclosed. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What would prove this wrong?": {
+      "status": 200,
+      "text": "What would prove this wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. What would prove this wrong? The strongest case against it: mainly the open evidence gaps below. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "Who's the real competitor?": {
+      "status": 200,
+      "text": "Who's the real competitor? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. Who's the real competitor? 37signals LLC: operates the same business model (subscription software) in the same sector (software platform), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR; Adobe Inc.: operates the same business model (subscription software) in the same sector (software platform), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR; AgileBits Inc.: operates the same business model (subscription software) in the same sector (software platform), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What does the market believe?": {
+      "status": 200,
+      "text": "What does the market believe? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. What does the market believe? Yes \u2014 on balance the evidence supports that running separately-reported businesses as a single portfolio (moderate confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What's the weakest assumption?": {
+      "status": 200,
+      "text": "What's the weakest assumption? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. What's the weakest assumption? Yes \u2014 on balance the evidence supports that running separately-reported businesses as a single portfolio (moderate confidence). Evidence Strongest. 2026-08-20: Meta Platforms, Inc. sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. Weakest. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What impossible hypothesis should we test?": {
+      "status": 200,
+      "text": "What impossible hypothesis should we test? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. What impossible hypothesis should we test? The decision this most affects: Which business a partnership or supply agreement actually depends on. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What should we measure next?": {
+      "status": 200,
+      "text": "What should we measure next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. What should we measure next? The decision this most affects: Which business a partnership or supply agreement actually depends on. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What would you tell the board?": {
+      "status": 200,
+      "text": "What would you tell the board? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. What would you tell the board? Yes \u2014 on balance the evidence supports that running separately-reported businesses as a single portfolio (moderate confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    }
+  },
+  "transport_errors": []
+}

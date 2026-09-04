@@ -1,0 +1,82 @@
+# Reusable hosted-job runner. Every scheduled workflow calls this with a job
+# name; the job connects to the durable DB, does bounded idempotent work, and
+# exits. Nothing here depends on Render being awake.
+#
+# PAPER TRADING — SIMULATED — NO REAL MONEY. ALPACA_PAPER_BASE_URL is validated
+# paper-only in code (a live host aborts the job).
+name: hosted-job
+
+on:
+  workflow_call:
+    inputs:
+      job:
+        required: true
+        type: string
+      as_of:
+        required: false
+        type: string
+        default: ""
+      timeout_minutes:
+        required: false
+        type: number
+        default: 20
+
+permissions:
+  contents: read          # minimal: read the repo, nothing else
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install
+        run: pip install -e .
+      - name: Run ${{ inputs.job }} (idempotent + catch-up; bounded retries)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ALPACA_PAPER_API_KEY: ${{ secrets.ALPACA_PAPER_API_KEY }}
+          ALPACA_PAPER_SECRET_KEY: ${{ secrets.ALPACA_PAPER_SECRET_KEY }}
+          ALPACA_PAPER_BASE_URL: ${{ secrets.ALPACA_PAPER_BASE_URL }}
+          TIINGO_API_KEY: ${{ secrets.TIINGO_API_KEY }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # cost controls (unset -> safe code defaults)
+          PREDICTION_GENERATION_ENABLED: ${{ vars.PREDICTION_GENERATION_ENABLED }}
+          DAILY_LLM_BUDGET_CAD: ${{ vars.DAILY_LLM_BUDGET_CAD }}
+          MAX_DAILY_LLM_CALLS: ${{ vars.MAX_DAILY_LLM_CALLS }}
+          MAX_COMPANIES_PER_DAILY_REFRESH: ${{ vars.MAX_COMPANIES_PER_DAILY_REFRESH }}
+          MAX_SOURCES_PER_COMPANY: ${{ vars.MAX_SOURCES_PER_COMPANY }}
+          SYNTHETIC_DAILY_BUDGET_CAD: ${{ vars.SYNTHETIC_DAILY_BUDGET_CAD }}
+          SYNTHETIC_WEEKLY_BUDGET_CAD: ${{ vars.SYNTHETIC_WEEKLY_BUDGET_CAD }}
+          AS_OF: ${{ inputs.as_of }}
+          JOB: ${{ inputs.job }}
+        run: |
+          set -o pipefail
+          ARGS=""
+          if [ -n "$AS_OF" ]; then ARGS="--as-of $AS_OF"; fi
+          # The job is idempotent + catch-up, so a retry can never double-order
+          # or lose a record; a missed run is recovered by the next schedule.
+          n=0
+          until [ "$n" -ge 3 ]; do
+            if python -m intent_engine.hosted "$JOB" $ARGS | tee result.json; then
+              exit 0
+            fi
+            n=$((n + 1))
+            echo "attempt $n failed; backing off"
+            sleep $((20 * n))
+          done
+          echo "job failed after retries"
+          exit 1
+      - name: Upload result (diagnostics)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.job }}-result
+          path: result.json
+          retention-days: 14
+          if-no-files-found: ignore

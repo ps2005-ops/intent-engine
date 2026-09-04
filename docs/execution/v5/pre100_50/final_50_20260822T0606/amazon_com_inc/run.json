@@ -1,0 +1,155 @@
+{
+  "company": "Amazon.com, Inc.",
+  "cik": "0001018724",
+  "ticker": "AMZN",
+  "reliability": {
+    "connection_reset": 0,
+    "quota_block": false,
+    "retry_required": 0,
+    "manual_recovery": 0
+  },
+  "blocked_external": false,
+  "blocked_sources": [],
+  "run_id": "01M0M3HE62DCMX2CW57FP6B03G",
+  "seconds": 170,
+  "auto_advanced": true,
+  "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0M3HE62DCMX2CW57FP6B03G/intro",
+  "claimed_failure": false,
+  "failure_text": "",
+  "steps": {
+    "intro": {
+      "status": 200,
+      "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0M3HE62DCMX2CW57FP6B03G/intro",
+      "chars": 5432,
+      "absence": []
+    },
+    "slides": {
+      "status": 200,
+      "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0M3HE62DCMX2CW57FP6B03G/intro",
+      "chars": 5432,
+      "absence": []
+    },
+    "full": {
+      "status": 200,
+      "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0M3HE62DCMX2CW57FP6B03G/full",
+      "chars": 26983,
+      "absence": []
+    },
+    "story": {
+      "status": 200,
+      "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0M3HE62DCMX2CW57FP6B03G/story",
+      "chars": 4035,
+      "absence": []
+    },
+    "history": {
+      "status": 200,
+      "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0M3HE62DCMX2CW57FP6B03G/history",
+      "chars": 28612,
+      "absence": []
+    },
+    "connect": {
+      "status": 200,
+      "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0M3HE62DCMX2CW57FP6B03G/connect",
+      "chars": 3928,
+      "absence": []
+    },
+    "brief": {
+      "status": 200,
+      "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0M3HE62DCMX2CW57FP6B03G/brief",
+      "chars": 17135,
+      "absence": []
+    },
+    "evidence": {
+      "status": 200,
+      "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0M3HE62DCMX2CW57FP6B03G/evidence",
+      "chars": 8264,
+      "absence": []
+    },
+    "sources": {
+      "status": 200,
+      "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0M3HE62DCMX2CW57FP6B03G/intro",
+      "chars": 5432,
+      "absence": []
+    },
+    "report": {
+      "status": 200,
+      "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0M3HE62DCMX2CW57FP6B03G/report",
+      "chars": 307,
+      "absence": []
+    }
+  },
+  "intro_head": "Amazon.com, Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Amazon.com, Inc. AMZN \u00b7 SEC CIK 0001018724 Amazon.com, Inc. is a retail business that runs on our stores to enable hundreds of millions of unique products to be sold by us and by third parties across dozens of product categories. Its position is contested less by a named firm than by the alternatives its customers already have: customers can substitute publishers, distributors and the shopper buying the same basket somewhere cheaper, and the economics that decide the contest are moderate operating leverage \u2014 a largely fixed store and distribution base against thin unit margin, so small comparable-sales moves swing profit. The strategic read The question worth arguing about is what to charge, and for what, without losing more store and site traffic than the price gains? businesses that subsid",
+  "position_sentence": "customers can substitute publishers, distributors and the shopper buying the same basket somewhere cheaper, and the economics that decide the contest are moderate operating leverage \u2014 a largely fixed store and distribution base against thin unit margin, so small c",
+  "model_sentence": "retail | our stores to enable hundreds of millions of unique products to be sold by us and by third parties across dozens of product categories",
+  "competition": {
+    "basis_note": "",
+    "rows": []
+  },
+  "belief": "",
+  "history_paths": [
+    "Actual",
+    "Better strategy",
+    "Market expectation",
+    "What the market expected"
+  ],
+  "history_vintages": [
+    "1900",
+    "1905",
+    "1926",
+    "1997",
+    "2000",
+    "2007",
+    "2008",
+    "2009",
+    "2010",
+    "2011",
+    "2012",
+    "2013",
+    "2014",
+    "2015"
+  ],
+  "connect_text": "Amazon.com, Inc. \u2014 connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone. That is deliberate \u2014 it is what makes it checkable. It is also what puts a boundary on it, and the boundary is visible in the analysis itself. Public intelligence \u2014 what it could establish Amazon.com, Inc. is a retail business that runs on our stores to enable hundreds of millions of unique products to be sold by us and by third parties across dozens of product categories. The reading follows from how this kind of business works; 1 source(s) outside the company's control were read, which is not enough to size the effect, so it is held in direction only. 1 of the passages read came from a source the company does not control. Internal intelligence \u2014 what is still bounded These are the measures a business of this kind is judged on that the public record did not supply. Each one is a magnitude the analysis above had to leave in direction only. comparable sales, split into traffic and basket \u2014 thin margin means small comparable moves swing profit. gross margin and markdown rate \u2014 buying scale and inventory discipline show up here first. inventory turns \u2014 the return in this model comes from turns, not from price premium. cost of goods and sourcing terms \u2014 the buying side is where a discounter's advantage is made. membership, advertising and other high-margin income \u2014 the part of profit that does not come from selling goods. What can be connected Connected now Public filings and disclosures Regulatory filings, the company's own pages, and independent sources \u2014 everything the analysis you just read was built from. Connected now Published market intelligence The economy, the competitive record and the learning ledger this system maintains between runs. Available next Your documents Board packs, strategy decks and plans. The system reads what management actually decided rather than inferring it from the outside. Available next Financial plan and internal metrics The numbers the public record does not contain \u2014 the ones that turn every bounded magnitude above into a measured one. On the roadmap CRM and pipeline Which deals moved, which stalled, and why. This is what separates a pricing hypothesis from a pricing answer. On the roadmap Customer feedback What buyers say when they are not filling in a renewal form. On the roadmap Decision log What leadership considered, chose, and rejected \u2014 with the reasons, so the next decision starts from the last one. What a private company intelligence keeps A recommendation is not a decision, and a decision is not an act. The system keeps them separate and remembers each one as its own kind of thing. Recommendation What the analysis put forward, and the evidence standing behind it at the time. Human decision What leadership actually chose \u2014 including choosing not to act, which is a decision and is usuall",
+  "qa": {
+    "What should management do?": {
+      "status": 200,
+      "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. What should management do? Hold this decision \u2014 what to charge, and for what \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Evidence Strongest. \u201c\u2026of the customer experience, including lowering prices, improving availability, offering faster delivery and performance times, increasing selection, producing original content, increasing product categories and service offerings, expanding product information, improving ease of use, improving reliability, and earning\u2026.\u201d \u2014 SEC 10-K (2026-02-06) Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "Why now?": {
+      "status": 200,
+      "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. Why now? what to charge, and for what is a standing decision for this business model. It was ranked above supply chain on the same evidence. Evidence Strongest. \u201c\u2026of the customer experience, including lowering prices, improving availability, offering faster delivery and performance times, increasing selection, producing original content, increasing product categories and service offerings, expanding product information, improving ease of use, improving reliability, and earning\u2026.\u201d \u2014 SEC 10-K (2026-02-06) Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What would prove this wrong?": {
+      "status": 200,
+      "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. What would prove this wrong? The expected movement failing to appear in comparable sales and traffic disclosures by the next review. Evidence Strongest. \u201c\u2026of the customer experience, including lowering prices, improving availability, offering faster delivery and performance times, increasing selection, producing original content, increasing product categories and service offerings, expanding product information, improving ease of use, improving reliability, and earning\u2026.\u201d \u2014 SEC 10-K (2026-02-06) Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What's the biggest risk?": {
+      "status": 200,
+      "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. What's the biggest risk? Inter-segment transfers and shared cost allocations are not disclosed. Evidence Strongest. \u201c\u2026of the customer experience, including lowering prices, improving availability, offering faster delivery and performance times, increasing selection, producing original content, increasing product categories and service offerings, expanding product information, improving ease of use, improving reliability, and earning\u2026.\u201d \u2014 SEC 10-K (2026-02-06) Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "Who's the real competitor?": {
+      "status": 200,
+      "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. Who's the real competitor? publishers: Amazon.com, Inc. names this as a category it competes with, in its own words. Automates the task the product exists to support, so the budget moves before the contract lapses.; distributors: Amazon.com, Inc. names this as a category it competes with, in its own words. Automates the task the product exists to support, so the budget moves before the contract lapses.; The shopper buying the same basket somewhere cheaper: Not a company \u2014 a substitute, read from how this business model works rather than from a retrieved source. Changes what the customer is buying, so a feature comparison never happens. Evidence Strongest. \u201c\u2026of the customer experience, including lowering prices, improving availability, offering faster delivery and performance times, increasing selection, producing original content, increasing product categories and service offerings, expanding product information, improving ease of use, improving reliability, and earning\u2026.\u201d \u2014 SEC 10-K (2026-02-06) Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the com"
+    },
+    "What does the market believe?": {
+      "status": 200,
+      "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. What does the market believe? That Amazon.com, Inc.'s margin improvement continues and carries the equity while growth recovers on its own.: Amazon.com, Inc.'s own filed results show growth slowing and margin widening. This is what a reader of that record carries into next year; nobody published it in these words and it is not a consensus estimate.; That the contest Amazon.com, Inc. has to win is against publishers, and that holding that ground is what protects the economics.: Amazon.com, Inc.'s own words \u2014 not independent, and it is the company's account of its market. Amazon.com, Inc. names it directly. Evidence Strongest. \u201c\u2026of the customer experience, including lowering prices, improving availability, offering faster delivery and performance times, increasing selection, producing original content, increasing product categories and service offerings, expanding product information, improving ease of use, improving reliability, and earning\u2026.\u201d \u2014 SEC 10-K (2026-02-06) Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views"
+    },
+    "What's the weakest assumption?": {
+      "status": 200,
+      "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. What's the weakest assumption? Amazon.com, Inc.'s filed results: The filed series is what this reading is computed from. Buying scale converted into price, and price into traffic is what the economics rest on Evidence Strongest. \u201c\u2026of the customer experience, including lowering prices, improving availability, offering faster delivery and performance times, increasing selection, producing original content, increasing product categories and service offerings, expanding product information, improving ease of use, improving reliability, and earning\u2026.\u201d \u2014 SEC 10-K (2026-02-06) Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What impossible hypothesis should we test?": {
+      "status": 200,
+      "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. What impossible hypothesis should we test? The workflow that Amazon.com, Inc.'s product sits inside may stop existing rather than be improved.: It sells its stores to enable hundreds of millions of unique products to be sold by us and by third parties across dozens of product categories. A product priced against a human process captures a share of that process's cost; when the process is performed by a machine end to end, the customer is no longer buying a better way to do it, and there is nothing left for the price to be a share of.; Amazon.com, Inc.'s most important competitor may be its own customers deciding to do this themselves.: It charges on interchange and other fees, which may increase over time and raise its operating costs and lower profitability. A charge that scales with the customer's own volume grows into a line item large enough to justify a build, and the largest customers reach that threshold first \u2014 which are the same accounts the revenue depends on most.; publishers may be structurally unable to answer a move here, which would make the contested position far cheaper to take than a symmetric reading implies.: publishers was established as a competitor from disclosure rather than assumed. A rival with an existing business to protect faces a cost in answering that a firm without one does no"
+    },
+    "What should we measure next?": {
+      "status": 200,
+      "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. What should we measure next? store and site traffic \u2014 revenue at a business of this kind moves with store and site traffic.; average ticket \u2014 revenue at a business of this kind moves with average ticket.; comparable sales \u2014 revenue at a business of this kind moves with comparable sales. Evidence Strongest. \u201c\u2026of the customer experience, including lowering prices, improving availability, offering faster delivery and performance times, increasing selection, producing original content, increasing product categories and service offerings, expanding product information, improving ease of use, improving reliability, and earning\u2026.\u201d \u2014 SEC 10-K (2026-02-06) Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What would you tell the board?": {
+      "status": 200,
+      "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. What would you tell the board? Hold this decision \u2014 what to charge, and for what \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Evidence Strongest. \u201c\u2026of the customer experience, including lowering prices, improving availability, offering faster delivery and performance times, increasing selection, producing original content, increasing product categories and service offerings, expanding product information, improving ease of use, improving reliability, and earning\u2026.\u201d \u2014 SEC 10-K (2026-02-06) Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    }
+  },
+  "transport_errors": []
+}

@@ -1,0 +1,89 @@
+contract: demo_capability_matrix.v1
+measured_at: "2026-08-14"
+method: >-
+  One real company (cloudflare) through the production path with
+  ANTHROPIC_API_KEY unset, plus a census of the 26 demo snapshots the LIVE
+  market runtime published on 2026-08-13 -- a date on which the Anthropic
+  account was already exhausted, so everything in them is zero-Anthropic
+  output by construction.
+founder_sha: 20291b5
+market_sha: fbcbacc
+runtime_sha: fbcbacc
+production_sha: cfd4c3b
+
+headline: >-
+  The zero-Anthropic demo does not fail because intelligence needs a language
+  model. Every intelligence producer measured here is LLM-free. It fails
+  because the publish cycle passes None for all of them, and because the
+  headline executive read is sourced from the Anthropic analyst.
+
+# --- proven live, with no Anthropic key present ---------------------------
+LIVE_PROVEN:
+  identity: {producer: company_ingestion, live_proof: "resolved Cloudflare, Inc.; domain matches manifest"}
+  discovery: {producer: ci.discover, live_proof: "52 candidates"}
+  source_acquisition: {producer: ci.fetch_approved, live_proof: "14 attempted, 10 ok"}
+  source_health: {producer: coverage, live_proof: "7 families, missing_core=[], 3x403, 1x too_large"}
+  canonical_evidence: {producer: evidence library, live_proof: "10 documents; 474 evidence refs in market snapshot"}
+  evidence_independence: {producer: company_ingestion.independence, live_proof: "state=MEASURED"}
+  learning_attribution: {producer: learning_attribution, live_proof: "state=MEASURED, 10 eligible rows"}
+  knowledge_effect: {producer: external_intel.effect_producer, live_proof: "1 effect, FIRST_OBSERVATION"}
+  decision_impact: {producer: demo_dossier, live_proof: "IMPACT_UNMEASURABLE_FIRST_OBSERVATION (honest)"}
+  dossier_assembly: {producer: demo_dossier.assembler, live_proof: "built, persisted, version 1"}
+
+# --- the governing defect: built, LLM-free, and never invoked -------------
+# strategic_publish.py:293-300 passes None for every one of these, with a
+# comment explaining that the cycle does not compute them. The comment is
+# honest; the consequence is that every CEO-facing intelligence block in the
+# dossier reads UNAVAILABLE. Producers exist and none of them needs an LLM.
+BUILT_NOT_SURFACED:
+  causal_questions: {producer: market/causal_question.py, needs_llm: false, published_in: 0/26}
+  causal_results: {producer: market/causal.py, needs_llm: false, published_in: 0/26}
+  synthetic_control: {producer: market/synthetic_control.py, needs_llm: false, published_in: 0/26}
+  adversary: {producer: market/adversary_case.py, needs_llm: false, published_in: 0/26}
+  demand_state: {producer: market/demand_tension.py, needs_llm: false, published_in: 0/26}
+  replay: {producer: market/replay.py, needs_llm: false, published_in: 0/26}
+  economic_state: {producer: market/macro_state.py, needs_llm: false, published_in: 0/26}
+  voi: {producer: market/competitor_voi.py, needs_llm: false, published_in: not_a_snapshot_block}
+
+PARTIAL:
+  beliefs:
+    producer: market belief engine
+    published_in: 25/26 snapshots (cloudflare = 5 beliefs)
+    why_partial: >-
+      Published by the market runtime, but absent from the founder demo: the
+      bridge is a file under <root>/reports/market/demo_snapshots, and the
+      wave/demo runtime root has no such file. Persisted, not consumed.
+  thesis: {published_in: 4/26}
+  thesis_revision: {published_in: 4/26}
+  expectations: {state: AVAILABLE, count: 0/26}
+  reconciliations: {state: AVAILABLE, count: 0/26}
+
+BLOCKED_EXTERNAL_ANTHROPIC:
+  # Per section 1 these must NOT stay Anthropic-owned.
+  strategic_analysis: {state: ABSENT, result_state: EVIDENCE_LIMITED}
+  hypotheses: {count: 0, note: "analyse() raises AnalystUnavailable by design rather than templating"}
+  executive_read: {note: "the headline recommendation is sourced from the analyst; this is the gate blocker"}
+
+UNVERIFIED:
+  contradictions: {note: "no market module by that name; may live inside the belief/evidence path"}
+  personal_ai: {note: "not exercised this run"}
+  ceo_qa: {note: "not exercised this run"}
+  progressive_hydration: {note: "wall time measured (20.1s single company); tiers not instrumented"}
+
+PRESERVED_INVARIANTS:
+  mve_rejects_zero_risk:
+    where: external_intel/minimum_data_request.py:618
+    denials: ["zero risk", "zero-risk", "no risk", "risk free"]
+    status: present and must remain -- bounded downside, guardrail, kill
+      switch and residual risk are the only permitted framings.
+  analyst_refuses_to_template:
+    note: >-
+      analyse() raises rather than fabricating hypotheses when no backend
+      exists. Any zero-Anthropic executive read must be genuinely computed,
+      never a template wearing the analyst's voice.
+
+FIRST_NEXT_TASK: >-
+  Wire the LLM-free producers into strategic_publish's call site one at a
+  time, each with a live proof that it produces for a real company, then make
+  the demo runtime root read the published snapshot so beliefs reach the
+  founder surface. Connect, do not rebuild.

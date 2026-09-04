@@ -1,0 +1,127 @@
+wall=14.29s run=01M156JN21TS34NQAF2Y7T85SG state=PARTIAL
+
+=== CUMULATIVE (all) ===
+         10128599 function calls (10082599 primitive calls) in 14.290 seconds
+
+   Ordered by: cumulative time
+   List reduced from 2395 to 60 due to restriction <60>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000   14.293   14.293 /Users/prathamsharma/intent-engine-econ/src/intent_engine/webapp/app.py:8935(_run_analysis)
+        1    0.000    0.000    8.232    8.232 /Users/prathamsharma/intent-engine-econ/src/intent_engine/webapp/app.py:9293(_compose)
+        1    0.000    0.000    4.625    4.625 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/service.py:1351(compose_with_quality)
+        1    0.000    0.000    4.624    4.624 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/service.py:1194(compose)
+      100    4.302    0.043    4.302    0.043 {method 'acquire' of '_thread.lock' objects}
+       26    0.000    0.000    4.302    0.165 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/threading.py:280(wait)
+       12    0.000    0.000    4.302    0.359 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/concurrent/futures/_base.py:417(result)
+        1    0.000    0.000    4.099    4.099 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/service.py:504(discover)
+       30    0.000    0.000    3.544    0.118 /Users/prathamsharma/intent-engine-econ/src/intent_engine/strategic_intelligence/observations.py:972(_detect_signals)
+     1700    2.849    0.002    3.214    0.002 /Users/prathamsharma/intent-engine-econ/src/intent_engine/strategic_intelligence/observations.py:165(owned_match)
+        1    0.000    0.000    3.162    3.162 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/service.py:1606(_strategic_report)
+       14    0.000    0.000    2.969    0.212 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/urllib/request.py:498(open)
+       14    0.000    0.000    2.969    0.212 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/urllib/request.py:527(_open)
+       28    0.000    0.000    2.969    0.106 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/urllib/request.py:487(_call_chain)
+       14    0.000    0.000    2.969    0.212 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/urllib/request.py:1388(https_open)
+       14    0.000    0.000    2.969    0.212 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/urllib/request.py:1305(do_open)
+        1    0.000    0.000    2.578    2.578 /Users/prathamsharma/intent-engine-econ/src/intent_engine/webapp/app.py:4347(_external_context)
+        2    0.000    0.000    2.542    1.271 /Users/prathamsharma/intent-engine-econ/src/intent_engine/strategic_intelligence/observations.py:1142(derive_analyst_evidence)
+      465    0.001    0.000    2.381    0.005 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socket.py:690(readinto)
+      465    0.001    0.000    2.380    0.005 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/ssl.py:1230(recv_into)
+      465    0.000    0.000    2.379    0.005 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/ssl.py:1090(read)
+      465    2.378    0.005    2.378    0.005 {method 'read' of '_ssl._SSLSocket' objects}
+        1    0.001    0.001    1.960    1.960 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/service.py:807(fetch_approved)
+        9    0.000    0.000    1.871    0.208 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/transient.py:229(call_with_retry)
+      318    0.000    0.000    1.854    0.006 {method 'readline' of '_io.BufferedReader' objects}
+        8    0.000    0.000    1.786    0.223 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/edgar.py:222(_fetch_bytes)
+        8    0.000    0.000    1.770    0.221 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/edgar.py:240(_attempt)
+        8    0.001    0.000    1.770    0.221 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/edgar.py:200(_sec_transport)
+        5    0.000    0.000    1.762    0.352 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/urllib/request.py:139(urlopen)
+       18    0.000    0.000    1.696    0.094 /Users/prathamsharma/intent-engine-econ/src/intent_engine/strategic_intelligence/observations.py:987(<listcomp>)
+       14    0.000    0.000    1.662    0.119 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/client.py:1305(getresponse)
+       14    0.000    0.000    1.661    0.119 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/client.py:309(begin)
+       14    0.000    0.000    1.657    0.118 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/client.py:276(_read_status)
+       30    0.000    0.000    1.456    0.049 /Users/prathamsharma/intent-engine-econ/src/intent_engine/strategic_intelligence/observations.py:954(_detect_neutral_signals)
+       30    0.000    0.000    1.456    0.049 /Users/prathamsharma/intent-engine-econ/src/intent_engine/strategic_intelligence/observations.py:968(<listcomp>)
+        1    0.000    0.000    1.403    1.403 /Users/prathamsharma/intent-engine-econ/src/intent_engine/external_intel/macro_provider.py:286(build_factors)
+        3    0.000    0.000    1.340    0.447 /Users/prathamsharma/intent-engine-econ/src/intent_engine/external_intel/macro_provider.py:274(observe)
+        3    0.000    0.000    1.340    0.447 /Users/prathamsharma/intent-engine-econ/src/intent_engine/external_intel/macro_provider.py:76(_cached_get)
+        3    0.000    0.000    1.335    0.445 /Users/prathamsharma/intent-engine-econ/src/intent_engine/external_intel/macro_provider.py:108(_http_get)
+        1    0.000    0.000    1.271    1.271 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/service.py:1500(_record_reasoning)
+        1    0.000    0.000    1.267    1.267 /Users/prathamsharma/intent-engine-econ/src/intent_engine/strategic_intelligence/observations.py:1253(derive_observations)
+       14    0.000    0.000    1.256    0.090 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/client.py:1254(request)
+       14    0.000    0.000    1.255    0.090 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/client.py:1259(_send_request)
+       14    0.000    0.000    1.255    0.090 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/client.py:1241(endheaders)
+       14    0.000    0.000    1.255    0.090 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/client.py:1003(_send_output)
+       14    0.000    0.000    1.255    0.090 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/client.py:944(send)
+       14    0.000    0.000    1.254    0.090 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/client.py:1416(connect)
+        1    0.000    0.000    1.083    1.083 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/service.py:1038(_prefetch)
+       11    0.000    0.000    1.077    0.098 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/concurrent/futures/_base.py:601(result_iterator)
+        1    0.000    0.000    1.027    1.027 /Users/prathamsharma/intent-engine-econ/src/intent_engine/webapp/app.py:9462(_publish_demo_dossier)
+        3    0.022    0.007    0.990    0.330 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/edgar.py:305(resolve_cik)
+       14    0.000    0.000    0.910    0.065 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/ssl.py:494(wrap_socket)
+       14    0.000    0.000    0.910    0.065 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/ssl.py:983(_create)
+       14    0.000    0.000    0.909    0.065 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/ssl.py:1302(do_handshake)
+       14    0.908    0.065    0.908    0.065 {method 'do_handshake' of '_ssl._SSLSocket' objects}
+        1    0.000    0.000    0.796    0.796 /Users/prathamsharma/intent-engine-econ/src/intent_engine/external_intel/macro_provider.py:225(_treasury_rates)
+        4    0.000    0.000    0.795    0.199 /Users/prathamsharma/intent-engine-econ/src/intent_engine/validation/manifest.py:251(load)
+        2    0.001    0.000    0.786    0.393 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/service.py:1853(subject_cik)
+        4    0.000    0.000    0.771    0.193 /Users/prathamsharma/intent-engine-econ/.venv/lib/python3.9/site-packages/yaml/__init__.py:117(safe_load)
+        4    0.002    0.001    0.771    0.193 /Users/prathamsharma/intent-engine-econ/.venv/lib/python3.9/site-packages/yaml/__init__.py:74(load)
+
+
+
+=== TOTTIME (intent_engine only) ===
+         10128599 function calls (10082599 primitive calls) in 14.290 seconds
+
+   Ordered by: internal time
+   List reduced from 2395 to 1404 due to restriction <'intent_engine'>
+   List reduced from 1404 to 45 due to restriction <45>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+     1700    2.849    0.002    3.214    0.002 /Users/prathamsharma/intent-engine-econ/src/intent_engine/strategic_intelligence/observations.py:165(owned_match)
+    36299    0.320    0.000    0.320    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/strategic_intelligence/observations.py:88(<genexpr>)
+       10    0.094    0.009    0.098    0.010 /Users/prathamsharma/intent-engine-econ/src/intent_engine/strategic_intelligence/filing_sections.py:154(section_spans)
+       60    0.044    0.001    0.044    0.001 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/readiness.py:190(<genexpr>)
+        2    0.043    0.021    0.043    0.021 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/filing_text.py:597(_topic_spans)
+    42137    0.028    0.000    0.074    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/filing_text.py:151(handle_starttag)
+    14832    0.027    0.000    0.350    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/strategic_intelligence/observations.py:82(_cannot_contain)
+    42133    0.026    0.000    0.056    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/filing_text.py:211(handle_endtag)
+     3538    0.024    0.000    0.105    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/strategic_intelligence/evidence_text.py:346(furniture_reason)
+    42109    0.022    0.000    0.034    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/filing_text.py:91(_hidden_style)
+        3    0.022    0.007    0.990    0.330 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/edgar.py:305(resolve_cik)
+       48    0.021    0.000    0.021    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/readiness.py:191(<genexpr>)
+       18    0.019    0.001    0.019    0.001 /Users/prathamsharma/intent-engine-econ/src/intent_engine/external_intel/annual_filing.py:237(<listcomp>)
+    31176    0.016    0.000    0.067    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/edgar.py:300(_tokens)
+    41504    0.014    0.000    0.028    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/filing_text.py:144(_flush)
+     2248    0.014    0.000    0.021    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/strategic_intelligence/evidence_text.py:389(<listcomp>)
+        1    0.014    0.014    0.044    0.044 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/listings.py:134(__init__)
+       22    0.010    0.000    0.017    0.001 /Users/prathamsharma/intent-engine-econ/src/intent_engine/strategic_intelligence/evidence_text.py:149(_split_block)
+        1    0.010    0.010    0.070    0.070 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/listings.py:152(from_json_bytes)
+    12105    0.010    0.000    0.014    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/strategic_intelligence/evidence_text.py:390(<genexpr>)
+       12    0.009    0.001    0.286    0.024 /Users/prathamsharma/intent-engine-econ/src/intent_engine/strategic_intelligence/filing_detectors.py:210(detect)
+    31176    0.008    0.000    0.008    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/edgar.py:302(<setcomp>)
+     9563    0.007    0.000    0.010    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/parsing.py:106(handle_starttag)
+       14    0.007    0.000    0.007    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/research_modes.py:103(<genexpr>)
+    10392    0.006    0.000    0.025    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/listings.py:81(normalize_company_name)
+    42129    0.006    0.000    0.027    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/filing_text.py:196(_close)
+     9141    0.004    0.000    0.009    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/parsing.py:163(handle_endtag)
+     6849    0.004    0.000    0.006    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/parsing.py:187(_emit)
+    10391    0.003    0.000    0.003    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/listings.py:174(<dictcomp>)
+     2190    0.003    0.000    0.011    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/strategic_intelligence/evidence_text.py:285(has_finite_verb)
+       22    0.003    0.000    0.134    0.006 /Users/prathamsharma/intent-engine-econ/src/intent_engine/strategic_intelligence/evidence_text.py:448(candidates)
+    12692    0.003    0.000    0.004    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/filing_text.py:135(_emit)
+    21207    0.003    0.000    0.004    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/filing_text.py:228(handle_data)
+     8560    0.003    0.000    0.005    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/independence.py:172(<genexpr>)
+    54000    0.003    0.000    0.005    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/validation/manifest.py:243(<genexpr>)
+       22    0.002    0.000    0.188    0.009 /Users/prathamsharma/intent-engine-econ/src/intent_engine/strategic_intelligence/evidence_text.py:508(evidence_excerpt)
+      400    0.002    0.000    0.010    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/validation/manifest.py:239(_no_answer_key)
+     1302    0.002    0.000    0.003    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/external_intel/pack.py:169(add)
+    14711    0.002    0.000    0.003    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/filing_text.py:187(handle_startendtag)
+    21826    0.002    0.000    0.002    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/external_intel/competitor_finder.py:191(<genexpr>)
+    11423    0.002    0.000    0.003    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/parsing.py:210(handle_data)
+      169    0.002    0.000    0.002    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/strategic_intelligence/subject.py:84(_last_start)
+    28894    0.002    0.000    0.002    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/company_ingestion/claims.py:217(<genexpr>)
+      400    0.002    0.000    0.013    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/validation/manifest.py:229(_company)
+       25    0.002    0.000    0.002    0.000 /Users/prathamsharma/intent-engine-econ/src/intent_engine/founder_intelligence/records.py:193(_looks_like_card_number)
+
+

@@ -98,6 +98,20 @@ class StrategicObservation:
     relevance: str = ""             # why this matters to the analysis
     entity: str = ""                # linked product/project/entity
     weak: bool = False              # title-only / generic marketing → weak
+    #: Whether the document this came from SPEAKS FOR the subject.
+    #:
+    #: MEASURED LIVE, twice. `source_class` cannot answer this: it encodes HOW
+    #: a document was retrieved, not WHOSE it is, and `edgar.filing_candidates`
+    #: stamps every filing it proposes `investor_material` whoever filed it.
+    #: So a class filter passed Wells Fargo's 10-K as JPMorgan's own and the
+    #: rendered page said JPMorgan "is committing capital to capacity ahead of
+    #: the demand for it", sourced to Wells Fargo.
+    #:
+    #: The EDGAR path names the filer, so ownership is decided where the URL
+    #: still exists -- in `observations.derive_observations` -- and carried
+    #: here, because `build_mental_model` sees observations and never a URL.
+    #: Defaults True so a hand-built observation behaves as it always has.
+    subject_owned: bool = True
     evidence_quality: str = "strong"  # strong | weak
     #: signal -> the sentence IN THIS DOCUMENT that evidenced it.
     #:
@@ -172,7 +186,63 @@ class ComparablePattern:
     #: `disconfirming_signals`, so a pattern cannot be blocked by
     #: something it never declared as arguing against it.
     blocking_signals: tuple = ()
+    #: BUSINESS MODEL CLASSES THIS READING CANNOT BE TRUE OF.
+    #:
+    #: Signals say what a company's pages TALK ABOUT. They cannot say what
+    #: kind of business it is, and that is the gap `capacity_ahead_of_demand`
+    #: walked through: Cloudflare's 10-K discusses network capacity investment
+    #: and names large customers, so `capacity_investment` and
+    #: `customer_concentration` both fired, and the primary screen told a CEO
+    #: that a global anycast network commits "fixed cost in large increments"
+    #: against "take-or-pay terms" and is "replacing ageing lines". Its own
+    #: X-Ray, two clicks away, read the same company correctly as recurring
+    #: software with HIGH operating leverage.
+    #:
+    #: No threshold fixes that, because the signals were genuinely present.
+    #: What was missing is that the reading is ABOUT a business whose capacity
+    #: is bought in indivisible physical increments, and this one's is rented
+    #: and elastic -- which `when_it_does_not_apply` already said in prose and
+    #: nothing enforced.
+    #:
+    #: Empty for every pattern that is genuinely model-neutral. A pattern
+    #: excluded from every class would be a pattern that never fires, so
+    #: `validate` refuses that.
+    excluded_model_classes: tuple = ()
+    #: THE CLASSES THIS PATTERN'S AUTHOR HAS ACTUALLY RULED ON.
+    #:
+    #: `excluded_model_classes` is a DENYLIST, and a denylist cannot exclude a
+    #: class that did not exist when it was written. Three classes were added
+    #: one cycle ago and every pattern in the library silently accepted all
+    #: three: they qualified for 12 of 12 patterns while older classes were
+    #: filtered to 5-11. Meta — an advertising auction whose buyers are
+    #: millions of independent advertisers — qualified for
+    #: `capacity_ahead_of_demand`, whose own `when_it_does_not_apply` says
+    #: "demand is spread across many independent buyers", and answered ten
+    #: board questions with a semiconductor capacity thesis.
+    #:
+    #: So applicability is now POSITIVE. A class absent from this tuple has
+    #: not been considered and the pattern is not offered for it, which fails
+    #: safe: an undecided class loses one reading instead of gaining twelve
+    #: wrong ones. `test_a_model_class_registry.py` requires every pattern to
+    #: consider every registered class, so "undecided" cannot survive a
+    #: commit.
+    considered_model_classes: tuple = ()
     limitations: str = ""
+
+    def applies_to_model(self, model_class: str) -> bool:
+        """May this pattern be offered for this kind of business?
+
+        Both gates, and both must pass: the class has to have been considered
+        AND not excluded. A legacy pattern that names no considered classes
+        keeps the old denylist behaviour, so this is additive.
+        """
+        model = str(model_class or "").strip().upper()
+        if not model or model == "UNKNOWN":
+            return True
+        if model in tuple(self.excluded_model_classes or ()):
+            return False
+        considered = tuple(self.considered_model_classes or ())
+        return model in considered if considered else True
 
     def validate(self) -> None:
         _require(bool(self.pattern_id), "pattern_id required")
@@ -190,6 +260,9 @@ class ComparablePattern:
                      f"pattern {self.pattern_id} requires one of "
                      f"{signal!r}, which is not one of its qualifying "
                      "signals")
+        _require(len(set(self.excluded_model_classes)) < 9,
+                 f"pattern {self.pattern_id} excludes every business model "
+                 "class, so it can never fire")
         for signal in self.blocking_signals:
             _require(signal in self.disconfirming_signals,
                      f"pattern {self.pattern_id} is blocked by {signal!r}, "
@@ -339,6 +412,12 @@ class BlindSpot:
     evidence_needed: list
     decision_affected: str
     supporting_observation_ids: list = field(default_factory=list)
+    #: Why this blind spot exists, from `patterns.BLIND_SPOT_KINDS`. A gap has
+    #: to say what kind of gap it is: evidence we know is missing, an
+    #: information gap we inferred, a source we could not reach, and a
+    #: business model this engine has no tension for are four different
+    #: findings and four different next actions.
+    kind: str = "INFERRED_INFORMATION_GAP"
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -359,6 +438,19 @@ class StrategicReport:
     decision_implications: list        # [{decision, options, evidence, watch}]
     observations: list                 # [StrategicObservation]
     source_class_coverage: dict = field(default_factory=dict)
+    #: HOW HARD THE INDEPENDENT-CHANNEL SEARCH WORKED, beside what it found.
+    #: Empty means no discovery producer ran, which every surface must read as
+    #: DISCOVERY_NOT_RUN -- never as "this company has no outside coverage".
+    discovery_coverage: dict = field(default_factory=dict)
+    #: WHY a source family is empty, when the reason is that retrieval failed
+    #: rather than that nothing was attempted. Counts by failure type only --
+    #: never URLs, which are already carried by the evidence library.
+    retrieval_failures: dict = field(default_factory=dict)
+    #: The TYPED account of what each evidence family did (source_coverage.v2).
+    #: `source_class_coverage` above counts observations only, so it cannot
+    #: distinguish "we read a filing and got nothing from it" from "there is
+    #: no filing" -- which is how one page came to contradict itself.
+    source_coverage: dict = field(default_factory=dict)
     quality_findings: list = field(default_factory=list)
     limited_scope_accepted: bool = False
     evidence_graph: dict = field(default_factory=dict)
@@ -378,6 +470,12 @@ class StrategicReport:
     underexamined_questions: list = field(default_factory=list)
     what_changed: list = field(default_factory=list)    # vs previous model
     feed: list = field(default_factory=list)            # intelligence feed
+
+    #: Tensions whose two sides WERE both observed and which this company's
+    #: business model rules out, each with its reason. Returned rather than
+    #: dropped: a section that showed nothing would be indistinguishable from
+    #: a company with no tensions, and the two call for opposite next steps.
+    blind_spots_refused: list = field(default_factory=list)
 
     def observation(self, obs_id: str):
         for o in self.observations:
@@ -407,6 +505,9 @@ class StrategicReport:
             "decision_implications": list(self.decision_implications),
             "observations": [o.as_dict() for o in self.observations],
             "source_class_coverage": self.source_class_coverage,
+            "discovery_coverage": self.discovery_coverage,
+            "retrieval_failures": self.retrieval_failures,
+            "source_coverage": self.source_coverage,
             "quality_findings": list(self.quality_findings),
             "limited_scope_accepted": self.limited_scope_accepted,
             "evidence_graph": self.evidence_graph,

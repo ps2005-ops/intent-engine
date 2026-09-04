@@ -1,0 +1,1642 @@
+{
+  "as_of": "2026-08-27",
+  "bleeds": [
+    {
+      "actual_direction": "UP",
+      "candidate_explanation": "the DFF -> MORTGAGE30US link did not fire over the last year. Candidates: a longer lag than 30d, a regime in which this link is suspended, or an offsetting driver not in this model.",
+      "controllability": "LOW",
+      "decision_impact": 5,
+      "evidence": "panel:DFF,MORTGAGE30US year-on-year at 2026-08-27",
+      "expected_direction": "DOWN",
+      "expected_target": "MORTGAGE30US",
+      "expected_timing_days": 30,
+      "occurred": true,
+      "priority": 0.45,
+      "source": "DFF",
+      "statement": "DFF -> MORTGAGE30US: expected DOWN within 30d, observed UP. Gap +0.120. CANDIDATE explanation: the DFF -> MORTGAGE30US link did not fire over the last year. Candidates: a longer lag than 30d, a regime in which this link is suspended, or an offsetting driver not in this model.. This is a measured non-response, NOT a demonstrated cause.",
+      "status": "CANDIDATE_NOT_PROVEN",
+      "transmission_gap": 0.12,
+      "uncertainty": "HIGH"
+    },
+    {
+      "actual_direction": "UP",
+      "candidate_explanation": "the PERMIT -> HOUST link did not fire over the last year. Candidates: a longer lag than 60d, a regime in which this link is suspended, or an offsetting driver not in this model.",
+      "controllability": "LOW",
+      "decision_impact": 5,
+      "evidence": "panel:PERMIT,HOUST year-on-year at 2026-08-27",
+      "expected_direction": "DOWN",
+      "expected_target": "HOUST",
+      "expected_timing_days": 60,
+      "occurred": true,
+      "priority": 0.45,
+      "source": "PERMIT",
+      "statement": "PERMIT -> HOUST: expected DOWN within 60d, observed UP. Gap +0.053. CANDIDATE explanation: the PERMIT -> HOUST link did not fire over the last year. Candidates: a longer lag than 60d, a regime in which this link is suspended, or an offsetting driver not in this model.. This is a measured non-response, NOT a demonstrated cause.",
+      "status": "CANDIDATE_NOT_PROVEN",
+      "transmission_gap": 0.05268,
+      "uncertainty": "HIGH"
+    },
+    {
+      "actual_direction": "DOWN",
+      "candidate_explanation": "the T10Y3M -> BAA10Y link did not fire over the last year. Candidates: a longer lag than 180d, a regime in which this link is suspended, or an offsetting driver not in this model.",
+      "controllability": "LOW",
+      "decision_impact": 5,
+      "evidence": "panel:T10Y3M,BAA10Y year-on-year at 2026-08-27",
+      "expected_direction": "UP",
+      "expected_target": "BAA10Y",
+      "expected_timing_days": 180,
+      "occurred": true,
+      "priority": 0.45,
+      "source": "T10Y3M",
+      "statement": "T10Y3M -> BAA10Y: expected UP within 180d, observed DOWN. Gap -0.030. CANDIDATE explanation: the T10Y3M -> BAA10Y link did not fire over the last year. Candidates: a longer lag than 180d, a regime in which this link is suspended, or an offsetting driver not in this model.. This is a measured non-response, NOT a demonstrated cause.",
+      "status": "CANDIDATE_NOT_PROVEN",
+      "transmission_gap": -0.03,
+      "uncertainty": "HIGH"
+    },
+    {
+      "actual_direction": "UP",
+      "candidate_explanation": "the UNRATE -> PCEC96 link did not fire over the last year. Candidates: a longer lag than 90d, a regime in which this link is suspended, or an offsetting driver not in this model.",
+      "controllability": "LOW",
+      "decision_impact": 5,
+      "evidence": "panel:UNRATE,PCEC96 year-on-year at 2026-08-27",
+      "expected_direction": "DOWN",
+      "expected_target": "PCEC96",
+      "expected_timing_days": 90,
+      "occurred": true,
+      "priority": 0.45,
+      "source": "UNRATE",
+      "statement": "UNRATE -> PCEC96: expected DOWN within 90d, observed UP. Gap +0.025. CANDIDATE explanation: the UNRATE -> PCEC96 link did not fire over the last year. Candidates: a longer lag than 90d, a regime in which this link is suspended, or an offsetting driver not in this model.. This is a measured non-response, NOT a demonstrated cause.",
+      "status": "CANDIDATE_NOT_PROVEN",
+      "transmission_gap": 0.02544,
+      "uncertainty": "HIGH"
+    }
+  ],
+  "caveats": {
+    "channel_specificity": "measures that the AUTHORED channels are distinct, not that the system derived them. It is a floor against a template, not evidence of reasoning.",
+    "decision_delta": "the 'without' arm is a constant placeholder, so 10/10 at 6/6 fields measures the placeholder. state_vs_state is the load-bearing measurement."
+  },
+  "company_specificity": {
+    "channel_specificity": 1.0,
+    "channels_by_company": {
+      "caterpillar": [
+        "construction end-market",
+        "customer financing cost",
+        "order backlog conversion"
+      ],
+      "jpmorgan": [
+        "credit provisioning",
+        "loan demand",
+        "net interest margin"
+      ],
+      "meta": [
+        "advertiser budget and conversion",
+        "advertiser cost of capital"
+      ],
+      "nike": [
+        "discretionary unit demand",
+        "promotional intensity and inventory"
+      ],
+      "nvidia": [
+        "customer capex financing",
+        "supply-chain utilisation"
+      ],
+      "regional_private": [
+        "buyer qualification rate"
+      ],
+      "salesforce": [
+        "deal cycle length",
+        "seat count"
+      ],
+      "unionpacific": [
+        "carload volume",
+        "construction materials volume"
+      ],
+      "visa": [
+        "cross-border travel volume",
+        "ticket value and spend mix"
+      ],
+      "walmart": [
+        "basket mix and trade-down",
+        "price gap versus competitors"
+      ]
+    },
+    "companies": 10,
+    "distinct_channels": 21,
+    "implications": 21
+  },
+  "coverage": {
+    "commodities": {
+      "as_of": "",
+      "consumer": [
+        "EconomicState"
+      ],
+      "dimension": "commodities",
+      "frequency": "",
+      "freshness_days": null,
+      "note": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+      "persisted": false,
+      "producer": "",
+      "source": "",
+      "standing": "UNKNOWN",
+      "status": "BLOCKED",
+      "uncertainty": ""
+    },
+    "credit": {
+      "as_of": "2026-08-26",
+      "consumer": [
+        "EconomicState",
+        "CompanyEconomicState",
+        "founder_view"
+      ],
+      "dimension": "credit",
+      "frequency": "mixed",
+      "freshness_days": 1,
+      "note": "from ['BAA10Y', 'AAA10Y', 'BAA', 'DRCCLACBS', 'CORCACBS']",
+      "persisted": true,
+      "producer": "econ.panel",
+      "source": "ALFRED/FRED",
+      "standing": "OBSERVED",
+      "status": "LIVE",
+      "uncertainty": "5 of 5 series readable"
+    },
+    "funding": {
+      "as_of": "2026-08-26",
+      "consumer": [
+        "EconomicState",
+        "CompanyEconomicState",
+        "founder_view"
+      ],
+      "dimension": "funding",
+      "frequency": "mixed",
+      "freshness_days": 1,
+      "note": "from ['T10Y3M']",
+      "persisted": true,
+      "producer": "econ.panel",
+      "source": "ALFRED/FRED",
+      "standing": "OBSERVED",
+      "status": "LIVE",
+      "uncertainty": "1 of 1 series readable"
+    },
+    "fx": {
+      "as_of": "",
+      "consumer": [
+        "EconomicState"
+      ],
+      "dimension": "fx",
+      "frequency": "",
+      "freshness_days": null,
+      "note": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+      "persisted": false,
+      "producer": "",
+      "source": "",
+      "standing": "UNKNOWN",
+      "status": "BLOCKED",
+      "uncertainty": ""
+    },
+    "growth": {
+      "as_of": "2026-06-01",
+      "consumer": [
+        "EconomicState",
+        "CompanyEconomicState",
+        "founder_view"
+      ],
+      "dimension": "growth",
+      "frequency": "mixed",
+      "freshness_days": 87,
+      "note": "from ['INDPRO', 'PCEC96']",
+      "persisted": true,
+      "producer": "econ.panel",
+      "source": "ALFRED/FRED",
+      "standing": "OBSERVED",
+      "status": "LIVE",
+      "uncertainty": "2 of 2 series readable"
+    },
+    "household_balance_sheet": {
+      "as_of": "2026-06-01",
+      "consumer": [
+        "EconomicState",
+        "CompanyEconomicState",
+        "founder_view"
+      ],
+      "dimension": "household_balance_sheet",
+      "frequency": "mixed",
+      "freshness_days": 87,
+      "note": "from ['PSAVERT', 'REVOLSL', 'TDSP']",
+      "persisted": true,
+      "producer": "econ.panel",
+      "source": "ALFRED/FRED",
+      "standing": "OBSERVED",
+      "status": "LIVE",
+      "uncertainty": "3 of 3 series readable"
+    },
+    "housing": {
+      "as_of": "2026-08-20",
+      "consumer": [
+        "EconomicState",
+        "CompanyEconomicState",
+        "founder_view"
+      ],
+      "dimension": "housing",
+      "frequency": "mixed",
+      "freshness_days": 7,
+      "note": "from ['HOUST', 'PERMIT', 'MORTGAGE30US', 'HSN1F']",
+      "persisted": true,
+      "producer": "econ.panel",
+      "source": "ALFRED/FRED",
+      "standing": "OBSERVED",
+      "status": "LIVE",
+      "uncertainty": "4 of 4 series readable"
+    },
+    "inflation": {
+      "as_of": "2026-07-01",
+      "consumer": [
+        "EconomicState",
+        "CompanyEconomicState",
+        "founder_view"
+      ],
+      "dimension": "inflation",
+      "frequency": "mixed",
+      "freshness_days": 57,
+      "note": "from ['CPIAUCSL']",
+      "persisted": true,
+      "producer": "econ.panel",
+      "source": "ALFRED/FRED",
+      "standing": "OBSERVED",
+      "status": "LIVE",
+      "uncertainty": "1 of 1 series readable"
+    },
+    "labour": {
+      "as_of": "2026-07-01",
+      "consumer": [
+        "EconomicState",
+        "CompanyEconomicState",
+        "founder_view"
+      ],
+      "dimension": "labour",
+      "frequency": "mixed",
+      "freshness_days": 57,
+      "note": "from ['UNRATE', 'U6RATE', 'EMRATIO', 'CIVPART', 'UEMP15OV']",
+      "persisted": true,
+      "producer": "econ.panel",
+      "source": "ALFRED/FRED",
+      "standing": "OBSERVED",
+      "status": "LIVE",
+      "uncertainty": "5 of 5 series readable"
+    },
+    "liquidity": {
+      "as_of": "",
+      "consumer": [
+        "EconomicState"
+      ],
+      "dimension": "liquidity",
+      "frequency": "",
+      "freshness_days": null,
+      "note": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+      "persisted": false,
+      "producer": "",
+      "source": "",
+      "standing": "UNKNOWN",
+      "status": "BLOCKED",
+      "uncertainty": ""
+    },
+    "policy_rates": {
+      "as_of": "2026-08-25",
+      "consumer": [
+        "EconomicState",
+        "CompanyEconomicState",
+        "founder_view"
+      ],
+      "dimension": "policy_rates",
+      "frequency": "mixed",
+      "freshness_days": 2,
+      "note": "from ['DFF']",
+      "persisted": true,
+      "producer": "econ.panel",
+      "source": "ALFRED/FRED",
+      "standing": "OBSERVED",
+      "status": "LIVE",
+      "uncertainty": "1 of 1 series readable"
+    },
+    "positioning": {
+      "as_of": "",
+      "consumer": [
+        "EconomicState"
+      ],
+      "dimension": "positioning",
+      "frequency": "",
+      "freshness_days": null,
+      "note": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+      "persisted": false,
+      "producer": "",
+      "source": "",
+      "standing": "UNKNOWN",
+      "status": "BLOCKED",
+      "uncertainty": ""
+    },
+    "real_rates": {
+      "as_of": "",
+      "consumer": [
+        "EconomicState"
+      ],
+      "dimension": "real_rates",
+      "frequency": "",
+      "freshness_days": null,
+      "note": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+      "persisted": false,
+      "producer": "",
+      "source": "",
+      "standing": "UNKNOWN",
+      "status": "BLOCKED",
+      "uncertainty": ""
+    },
+    "risk_appetite": {
+      "as_of": "2026-08-26",
+      "consumer": [
+        "EconomicState",
+        "CompanyEconomicState",
+        "founder_view"
+      ],
+      "dimension": "risk_appetite",
+      "frequency": "mixed",
+      "freshness_days": 1,
+      "note": "from ['BAA10Y']",
+      "persisted": true,
+      "producer": "econ.panel",
+      "source": "ALFRED/FRED",
+      "standing": "OBSERVED",
+      "status": "LIVE",
+      "uncertainty": "1 of 1 series readable"
+    },
+    "sentiment": {
+      "as_of": "2026-06-01",
+      "consumer": [
+        "EconomicState",
+        "CompanyEconomicState",
+        "founder_view"
+      ],
+      "dimension": "sentiment",
+      "frequency": "mixed",
+      "freshness_days": 87,
+      "note": "from ['UMCSENT', 'MICH']",
+      "persisted": true,
+      "producer": "econ.panel",
+      "source": "ALFRED/FRED",
+      "standing": "OBSERVED",
+      "status": "LIVE",
+      "uncertainty": "2 of 2 series readable"
+    },
+    "volatility": {
+      "as_of": "",
+      "consumer": [
+        "EconomicState"
+      ],
+      "dimension": "volatility",
+      "frequency": "",
+      "freshness_days": null,
+      "note": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+      "persisted": false,
+      "producer": "",
+      "source": "",
+      "standing": "UNKNOWN",
+      "status": "BLOCKED",
+      "uncertainty": ""
+    },
+    "yield_curve": {
+      "as_of": "2026-08-26",
+      "consumer": [
+        "EconomicState",
+        "CompanyEconomicState",
+        "founder_view"
+      ],
+      "dimension": "yield_curve",
+      "frequency": "mixed",
+      "freshness_days": 1,
+      "note": "from ['DGS2', 'DGS10', 'T10Y3M']",
+      "persisted": true,
+      "producer": "econ.panel",
+      "source": "ALFRED/FRED",
+      "standing": "OBSERVED",
+      "status": "LIVE",
+      "uncertainty": "3 of 3 series readable"
+    }
+  },
+  "coverage_summary": {
+    "blocked": 6,
+    "live": 11,
+    "partial": 0,
+    "total": 17
+  },
+  "decision_deltas": [
+    {
+      "changed_fields": [
+        "priority",
+        "recommendation",
+        "risk",
+        "scenario",
+        "information_request",
+        "confidence"
+      ],
+      "company_id": "caterpillar",
+      "company_name": "Caterpillar",
+      "implications": [
+        {
+          "channel": "customer financing cost",
+          "company_id": "caterpillar",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:BAA10Y"
+          ],
+          "direction": "UP",
+          "driver": "BAA10Y",
+          "evidence": [
+            "panel:BAA10Y@2026-08-26"
+          ],
+          "falsifier": "Caterpillar reports this channel moving the other way while BAA10Y continues DOWN",
+          "magnitude": "LOW",
+          "mechanism": "equipment is bought on credit; the dealer's financing cost gates the order before the end market weakens"
+        },
+        {
+          "channel": "order backlog conversion",
+          "company_id": "caterpillar",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:INDPRO"
+          ],
+          "direction": "DOWN",
+          "driver": "INDPRO",
+          "evidence": [
+            "panel:INDPRO@2026-06-01"
+          ],
+          "falsifier": "Caterpillar reports this channel moving the other way while INDPRO continues UP",
+          "magnitude": "LOW",
+          "mechanism": "backlog converts to revenue only if the customer's own capex survives"
+        },
+        {
+          "channel": "construction end-market",
+          "company_id": "caterpillar",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:PERMIT"
+          ],
+          "direction": "UP",
+          "driver": "PERMIT",
+          "evidence": [
+            "panel:PERMIT@2026-06-01"
+          ],
+          "falsifier": "Caterpillar reports this channel moving the other way while PERMIT continues DOWN",
+          "magnitude": "LOW",
+          "mechanism": "residential and non-residential permits lead machine utilisation by two to three quarters"
+        }
+      ],
+      "nonzero": true,
+      "reading": "the economic state changed 6 of 6 decision fields",
+      "with_world_model": {
+        "confidence": "medium",
+        "information_request": "Caterpillar reports this channel moving the other way while INDPRO continues UP",
+        "priority": "order backlog conversion",
+        "recommendation": "stress-test order backlog conversion against a continued move in INDPRO",
+        "risk": "1 of 3 channels adverse",
+        "scenario": "INDPRO continues; order backlog conversion absorbs it"
+      },
+      "without_world_model": {
+        "confidence": "low",
+        "information_request": "more company detail",
+        "priority": "none",
+        "recommendation": "monitor",
+        "risk": "unspecified",
+        "scenario": "none"
+      }
+    },
+    {
+      "changed_fields": [
+        "priority",
+        "recommendation",
+        "risk",
+        "scenario",
+        "information_request",
+        "confidence"
+      ],
+      "company_id": "jpmorgan",
+      "company_name": "JPMorgan",
+      "implications": [
+        {
+          "channel": "net interest margin",
+          "company_id": "jpmorgan",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:T10Y3M"
+          ],
+          "direction": "UP",
+          "driver": "T10Y3M",
+          "evidence": [
+            "panel:T10Y3M@2026-08-26"
+          ],
+          "falsifier": "JPMorgan reports this channel moving the other way while T10Y3M continues DOWN",
+          "magnitude": "LOW",
+          "mechanism": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast"
+        },
+        {
+          "channel": "credit provisioning",
+          "company_id": "jpmorgan",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:BAA10Y"
+          ],
+          "direction": "UP",
+          "driver": "BAA10Y",
+          "evidence": [
+            "panel:BAA10Y@2026-08-26"
+          ],
+          "falsifier": "JPMorgan reports this channel moving the other way while BAA10Y continues DOWN",
+          "magnitude": "LOW",
+          "mechanism": "a wider spread anticipates the charge-offs that drive reserve builds"
+        },
+        {
+          "channel": "loan demand",
+          "company_id": "jpmorgan",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:DFF"
+          ],
+          "direction": "UP",
+          "driver": "DFF",
+          "evidence": [
+            "panel:DFF@2026-08-25"
+          ],
+          "falsifier": "JPMorgan reports this channel moving the other way while DFF continues DOWN",
+          "magnitude": "LOW",
+          "mechanism": "a higher policy rate suppresses new origination volume even where credit quality holds"
+        }
+      ],
+      "nonzero": true,
+      "reading": "the economic state changed 6 of 6 decision fields",
+      "with_world_model": {
+        "confidence": "medium",
+        "information_request": "JPMorgan reports this channel moving the other way while T10Y3M continues DOWN",
+        "priority": "net interest margin",
+        "recommendation": "the current reading of T10Y3M is not adverse through net interest margin; hold",
+        "risk": "0 of 3 channels adverse",
+        "scenario": "T10Y3M continues; net interest margin absorbs it"
+      },
+      "without_world_model": {
+        "confidence": "low",
+        "information_request": "more company detail",
+        "priority": "none",
+        "recommendation": "monitor",
+        "risk": "unspecified",
+        "scenario": "none"
+      }
+    },
+    {
+      "changed_fields": [
+        "priority",
+        "recommendation",
+        "risk",
+        "scenario",
+        "information_request",
+        "confidence"
+      ],
+      "company_id": "meta",
+      "company_name": "Meta",
+      "implications": [
+        {
+          "channel": "advertiser budget and conversion",
+          "company_id": "meta",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:PCEC96"
+          ],
+          "direction": "DOWN",
+          "driver": "PCEC96",
+          "evidence": [
+            "panel:PCEC96@2026-06-01"
+          ],
+          "falsifier": "Meta reports this channel moving the other way while PCEC96 continues UP",
+          "magnitude": "MEDIUM",
+          "mechanism": "ad spend is a lagging derivative of expected consumer spending; performance advertising falls last because it is measurable"
+        },
+        {
+          "channel": "advertiser cost of capital",
+          "company_id": "meta",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:DFF"
+          ],
+          "direction": "UP",
+          "driver": "DFF",
+          "evidence": [
+            "panel:DFF@2026-08-25"
+          ],
+          "falsifier": "Meta reports this channel moving the other way while DFF continues DOWN",
+          "magnitude": "LOW",
+          "mechanism": "venture and growth-stage advertisers cut first when financing is expensive"
+        }
+      ],
+      "nonzero": true,
+      "reading": "the economic state changed 6 of 6 decision fields",
+      "with_world_model": {
+        "confidence": "medium",
+        "information_request": "Meta reports this channel moving the other way while PCEC96 continues UP",
+        "priority": "advertiser budget and conversion",
+        "recommendation": "stress-test advertiser budget and conversion against a continued move in PCEC96",
+        "risk": "1 of 2 channels adverse",
+        "scenario": "PCEC96 continues; advertiser budget and conversion absorbs it"
+      },
+      "without_world_model": {
+        "confidence": "low",
+        "information_request": "more company detail",
+        "priority": "none",
+        "recommendation": "monitor",
+        "risk": "unspecified",
+        "scenario": "none"
+      }
+    },
+    {
+      "changed_fields": [
+        "priority",
+        "recommendation",
+        "risk",
+        "scenario",
+        "information_request",
+        "confidence"
+      ],
+      "company_id": "nike",
+      "company_name": "Nike",
+      "implications": [
+        {
+          "channel": "discretionary unit demand",
+          "company_id": "nike",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:PCEC96"
+          ],
+          "direction": "DOWN",
+          "driver": "PCEC96",
+          "evidence": [
+            "panel:PCEC96@2026-06-01"
+          ],
+          "falsifier": "Nike reports this channel moving the other way while PCEC96 continues UP",
+          "magnitude": "MEDIUM",
+          "mechanism": "footwear and apparel are deferrable; weaker real consumption hits units before price"
+        },
+        {
+          "channel": "promotional intensity and inventory",
+          "company_id": "nike",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:UNRATE"
+          ],
+          "direction": "UP",
+          "driver": "UNRATE",
+          "evidence": [
+            "panel:UNRATE@2026-07-01"
+          ],
+          "falsifier": "Nike reports this channel moving the other way while UNRATE continues DOWN",
+          "magnitude": "LOW",
+          "mechanism": "soft demand meets ordered inventory, so the adjustment shows up as markdowns before it shows up as revenue"
+        }
+      ],
+      "nonzero": true,
+      "reading": "the economic state changed 6 of 6 decision fields",
+      "with_world_model": {
+        "confidence": "medium",
+        "information_request": "Nike reports this channel moving the other way while PCEC96 continues UP",
+        "priority": "discretionary unit demand",
+        "recommendation": "stress-test discretionary unit demand against a continued move in PCEC96",
+        "risk": "1 of 2 channels adverse",
+        "scenario": "PCEC96 continues; discretionary unit demand absorbs it"
+      },
+      "without_world_model": {
+        "confidence": "low",
+        "information_request": "more company detail",
+        "priority": "none",
+        "recommendation": "monitor",
+        "risk": "unspecified",
+        "scenario": "none"
+      }
+    },
+    {
+      "changed_fields": [
+        "priority",
+        "recommendation",
+        "risk",
+        "scenario",
+        "information_request",
+        "confidence"
+      ],
+      "company_id": "nvidia",
+      "company_name": "NVIDIA",
+      "implications": [
+        {
+          "channel": "customer capex financing",
+          "company_id": "nvidia",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:BAA10Y"
+          ],
+          "direction": "UP",
+          "driver": "BAA10Y",
+          "evidence": [
+            "panel:BAA10Y@2026-08-26"
+          ],
+          "falsifier": "NVIDIA reports this channel moving the other way while BAA10Y continues DOWN",
+          "magnitude": "LOW",
+          "mechanism": "data-centre buildout is financed; a wider spread lengthens the ordering cycle before it cuts it"
+        },
+        {
+          "channel": "supply-chain utilisation",
+          "company_id": "nvidia",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:INDPRO"
+          ],
+          "direction": "MIXED",
+          "driver": "INDPRO",
+          "evidence": [
+            "panel:INDPRO@2026-06-01"
+          ],
+          "falsifier": "NVIDIA reports this channel moving the other way while INDPRO continues UP",
+          "magnitude": "LOW",
+          "mechanism": "substrate and packaging capacity tracks industrial output rather than end demand"
+        }
+      ],
+      "nonzero": true,
+      "reading": "the economic state changed 6 of 6 decision fields",
+      "with_world_model": {
+        "confidence": "medium",
+        "information_request": "NVIDIA reports this channel moving the other way while BAA10Y continues DOWN",
+        "priority": "customer capex financing",
+        "recommendation": "the current reading of BAA10Y is not adverse through customer capex financing; hold",
+        "risk": "0 of 2 channels adverse",
+        "scenario": "BAA10Y continues; customer capex financing absorbs it"
+      },
+      "without_world_model": {
+        "confidence": "low",
+        "information_request": "more company detail",
+        "priority": "none",
+        "recommendation": "monitor",
+        "risk": "unspecified",
+        "scenario": "none"
+      }
+    },
+    {
+      "changed_fields": [
+        "priority",
+        "recommendation",
+        "risk",
+        "scenario",
+        "information_request"
+      ],
+      "company_id": "regional_private",
+      "company_name": "A private regional builder",
+      "implications": [
+        {
+          "channel": "buyer qualification rate",
+          "company_id": "regional_private",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:MORTGAGE30US"
+          ],
+          "direction": "DOWN",
+          "driver": "MORTGAGE30US",
+          "evidence": [
+            "panel:MORTGAGE30US@2026-08-20"
+          ],
+          "falsifier": "A private regional builder reports this channel moving the other way while MORTGAGE30US continues UP",
+          "magnitude": "HIGH",
+          "mechanism": "a small builder's constraint is how many buyers clear underwriting at the prevailing rate, not its own cost of capital"
+        }
+      ],
+      "nonzero": true,
+      "reading": "the economic state changed 5 of 6 decision fields",
+      "with_world_model": {
+        "confidence": "low",
+        "information_request": "A private regional builder reports this channel moving the other way while MORTGAGE30US continues UP",
+        "priority": "buyer qualification rate",
+        "recommendation": "stress-test buyer qualification rate against a continued move in MORTGAGE30US",
+        "risk": "1 of 1 channels adverse",
+        "scenario": "MORTGAGE30US continues; buyer qualification rate absorbs it"
+      },
+      "without_world_model": {
+        "confidence": "low",
+        "information_request": "more company detail",
+        "priority": "none",
+        "recommendation": "monitor",
+        "risk": "unspecified",
+        "scenario": "none"
+      }
+    },
+    {
+      "changed_fields": [
+        "priority",
+        "recommendation",
+        "risk",
+        "scenario",
+        "information_request",
+        "confidence"
+      ],
+      "company_id": "salesforce",
+      "company_name": "Salesforce",
+      "implications": [
+        {
+          "channel": "seat count",
+          "company_id": "salesforce",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:UNRATE"
+          ],
+          "direction": "UP",
+          "driver": "UNRATE",
+          "evidence": [
+            "panel:UNRATE@2026-07-01"
+          ],
+          "falsifier": "Salesforce reports this channel moving the other way while UNRATE continues DOWN",
+          "magnitude": "LOW",
+          "mechanism": "subscription revenue is priced per seat, so hiring freezes hit renewals before they hit new logos"
+        },
+        {
+          "channel": "deal cycle length",
+          "company_id": "salesforce",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:DFF"
+          ],
+          "direction": "UP",
+          "driver": "DFF",
+          "evidence": [
+            "panel:DFF@2026-08-25"
+          ],
+          "falsifier": "Salesforce reports this channel moving the other way while DFF continues DOWN",
+          "magnitude": "LOW",
+          "mechanism": "a higher discount rate lengthens procurement approval for multi-year commitments"
+        }
+      ],
+      "nonzero": true,
+      "reading": "the economic state changed 6 of 6 decision fields",
+      "with_world_model": {
+        "confidence": "medium",
+        "information_request": "Salesforce reports this channel moving the other way while UNRATE continues DOWN",
+        "priority": "seat count",
+        "recommendation": "the current reading of UNRATE is not adverse through seat count; hold",
+        "risk": "0 of 2 channels adverse",
+        "scenario": "UNRATE continues; seat count absorbs it"
+      },
+      "without_world_model": {
+        "confidence": "low",
+        "information_request": "more company detail",
+        "priority": "none",
+        "recommendation": "monitor",
+        "risk": "unspecified",
+        "scenario": "none"
+      }
+    },
+    {
+      "changed_fields": [
+        "priority",
+        "recommendation",
+        "risk",
+        "scenario",
+        "information_request",
+        "confidence"
+      ],
+      "company_id": "unionpacific",
+      "company_name": "Union Pacific",
+      "implications": [
+        {
+          "channel": "carload volume",
+          "company_id": "unionpacific",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:INDPRO"
+          ],
+          "direction": "DOWN",
+          "driver": "INDPRO",
+          "evidence": [
+            "panel:INDPRO@2026-06-01"
+          ],
+          "falsifier": "Union Pacific reports this channel moving the other way while INDPRO continues UP",
+          "magnitude": "LOW",
+          "mechanism": "rail volume is close to a direct read on industrial output; the mix between intermodal and bulk decides yield"
+        },
+        {
+          "channel": "construction materials volume",
+          "company_id": "unionpacific",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:PERMIT"
+          ],
+          "direction": "UP",
+          "driver": "PERMIT",
+          "evidence": [
+            "panel:PERMIT@2026-06-01"
+          ],
+          "falsifier": "Union Pacific reports this channel moving the other way while PERMIT continues DOWN",
+          "magnitude": "LOW",
+          "mechanism": "aggregates and lumber carloads follow permits with a two-quarter lag"
+        }
+      ],
+      "nonzero": true,
+      "reading": "the economic state changed 6 of 6 decision fields",
+      "with_world_model": {
+        "confidence": "medium",
+        "information_request": "Union Pacific reports this channel moving the other way while INDPRO continues UP",
+        "priority": "carload volume",
+        "recommendation": "stress-test carload volume against a continued move in INDPRO",
+        "risk": "1 of 2 channels adverse",
+        "scenario": "INDPRO continues; carload volume absorbs it"
+      },
+      "without_world_model": {
+        "confidence": "low",
+        "information_request": "more company detail",
+        "priority": "none",
+        "recommendation": "monitor",
+        "risk": "unspecified",
+        "scenario": "none"
+      }
+    },
+    {
+      "changed_fields": [
+        "priority",
+        "recommendation",
+        "risk",
+        "scenario",
+        "information_request",
+        "confidence"
+      ],
+      "company_id": "visa",
+      "company_name": "Visa",
+      "implications": [
+        {
+          "channel": "ticket value and spend mix",
+          "company_id": "visa",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:PCEC96"
+          ],
+          "direction": "DOWN",
+          "driver": "PCEC96",
+          "evidence": [
+            "panel:PCEC96@2026-06-01"
+          ],
+          "falsifier": "Visa reports this channel moving the other way while PCEC96 continues UP",
+          "magnitude": "MEDIUM",
+          "mechanism": "volume is resilient because payments are non-deferrable; the damage is in average ticket and cross-border mix"
+        },
+        {
+          "channel": "cross-border travel volume",
+          "company_id": "visa",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:UNRATE"
+          ],
+          "direction": "UP",
+          "driver": "UNRATE",
+          "evidence": [
+            "panel:UNRATE@2026-07-01"
+          ],
+          "falsifier": "Visa reports this channel moving the other way while UNRATE continues DOWN",
+          "magnitude": "LOW",
+          "mechanism": "the highest-yield transactions are discretionary travel, which is the first to go"
+        }
+      ],
+      "nonzero": true,
+      "reading": "the economic state changed 6 of 6 decision fields",
+      "with_world_model": {
+        "confidence": "medium",
+        "information_request": "Visa reports this channel moving the other way while PCEC96 continues UP",
+        "priority": "ticket value and spend mix",
+        "recommendation": "stress-test ticket value and spend mix against a continued move in PCEC96",
+        "risk": "1 of 2 channels adverse",
+        "scenario": "PCEC96 continues; ticket value and spend mix absorbs it"
+      },
+      "without_world_model": {
+        "confidence": "low",
+        "information_request": "more company detail",
+        "priority": "none",
+        "recommendation": "monitor",
+        "risk": "unspecified",
+        "scenario": "none"
+      }
+    },
+    {
+      "changed_fields": [
+        "priority",
+        "recommendation",
+        "risk",
+        "scenario",
+        "information_request",
+        "confidence"
+      ],
+      "company_id": "walmart",
+      "company_name": "Walmart",
+      "implications": [
+        {
+          "channel": "basket mix and trade-down",
+          "company_id": "walmart",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:UNRATE"
+          ],
+          "direction": "MIXED",
+          "driver": "UNRATE",
+          "evidence": [
+            "panel:UNRATE@2026-07-01"
+          ],
+          "falsifier": "Walmart reports this channel moving the other way while UNRATE continues DOWN",
+          "magnitude": "LOW",
+          "mechanism": "weaker employment pushes households toward lower-margin staples and private label; traffic can RISE while mix deteriorates"
+        },
+        {
+          "channel": "price gap versus competitors",
+          "company_id": "walmart",
+          "confidence": 0.5,
+          "depends_on": [
+            "panel:CPIAUCSL"
+          ],
+          "direction": "UP",
+          "driver": "CPIAUCSL",
+          "evidence": [
+            "panel:CPIAUCSL@2026-07-01"
+          ],
+          "falsifier": "Walmart reports this channel moving the other way while CPIAUCSL continues UP",
+          "magnitude": "MEDIUM",
+          "mechanism": "grocery inflation widens the everyday-low-price advantage against higher-priced grocers"
+        }
+      ],
+      "nonzero": true,
+      "reading": "the economic state changed 6 of 6 decision fields",
+      "with_world_model": {
+        "confidence": "medium",
+        "information_request": "Walmart reports this channel moving the other way while CPIAUCSL continues UP",
+        "priority": "price gap versus competitors",
+        "recommendation": "the current reading of CPIAUCSL is not adverse through price gap versus competitors; hold",
+        "risk": "0 of 2 channels adverse",
+        "scenario": "CPIAUCSL continues; price gap versus competitors absorbs it"
+      },
+      "without_world_model": {
+        "confidence": "low",
+        "information_request": "more company detail",
+        "priority": "none",
+        "recommendation": "monitor",
+        "risk": "unspecified",
+        "scenario": "none"
+      }
+    }
+  ],
+  "double_counting_wall": "CAUGHT",
+  "gaps_by_decision_impact": [
+    {
+      "decision_impact": 3,
+      "dimension": "commodities",
+      "status": "BLOCKED",
+      "why": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator."
+    },
+    {
+      "decision_impact": 3,
+      "dimension": "fx",
+      "status": "BLOCKED",
+      "why": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator."
+    },
+    {
+      "decision_impact": 2,
+      "dimension": "liquidity",
+      "status": "BLOCKED",
+      "why": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator."
+    },
+    {
+      "decision_impact": 2,
+      "dimension": "real_rates",
+      "status": "BLOCKED",
+      "why": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator."
+    },
+    {
+      "decision_impact": 2,
+      "dimension": "volatility",
+      "status": "BLOCKED",
+      "why": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator."
+    },
+    {
+      "decision_impact": 1,
+      "dimension": "positioning",
+      "status": "BLOCKED",
+      "why": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator."
+    }
+  ],
+  "paths": [
+    {
+      "name": "policy_to_housing",
+      "net_sign": -1,
+      "orders": 3,
+      "shock": "policy tightening",
+      "steps": [
+        {
+          "driver": "DFF",
+          "effect": "MORTGAGE30US",
+          "evidence": "both series in the panel, daily, never revised",
+          "falsifier": "the mortgage rate moves opposite to the policy rate over two consecutive quarters",
+          "lag_days": 30,
+          "mechanism": "the policy rate sets the front of the curve and mortgage pricing follows the long end with a spread that widens under funding stress",
+          "order": 1,
+          "regime": "ALL",
+          "sign": 1,
+          "uncertainty": "LOW"
+        },
+        {
+          "driver": "MORTGAGE30US",
+          "effect": "PERMIT",
+          "evidence": "panel, 1971-2026",
+          "falsifier": "permits rise through a 200bp mortgage-rate increase",
+          "lag_days": 120,
+          "mechanism": "a higher mortgage rate raises the monthly payment on a given price, and builders pull permits before they pull starts",
+          "order": 1,
+          "regime": "ALL",
+          "sign": -1,
+          "uncertainty": "MEDIUM"
+        },
+        {
+          "driver": "PERMIT",
+          "effect": "HOUST",
+          "evidence": "panel, 1960-2026",
+          "falsifier": "starts and permits diverge for a year",
+          "lag_days": 60,
+          "mechanism": "a permit is a committed intention to start; the gap between them is the builder's own timing",
+          "order": 2,
+          "regime": "ALL",
+          "sign": 1,
+          "uncertainty": "LOW"
+        }
+      ],
+      "total_lag_days": 210,
+      "weakest_step": {
+        "driver": "DFF",
+        "effect": "MORTGAGE30US",
+        "evidence": "both series in the panel, daily, never revised",
+        "falsifier": "the mortgage rate moves opposite to the policy rate over two consecutive quarters",
+        "lag_days": 30,
+        "mechanism": "the policy rate sets the front of the curve and mortgage pricing follows the long end with a spread that widens under funding stress",
+        "order": 1,
+        "regime": "ALL",
+        "sign": 1,
+        "uncertainty": "LOW"
+      }
+    },
+    {
+      "name": "curve_to_output",
+      "net_sign": 1,
+      "orders": 2,
+      "shock": "curve inversion",
+      "steps": [
+        {
+          "driver": "T10Y3M",
+          "effect": "BAA10Y",
+          "evidence": "panel, 1982-2026",
+          "falsifier": "spreads narrow through a sustained inversion",
+          "lag_days": 180,
+          "mechanism": "an inverted curve compresses bank net interest margin, lending standards tighten, and the credit spread widens",
+          "order": 1,
+          "regime": "ALL",
+          "sign": -1,
+          "uncertainty": "MEDIUM"
+        },
+        {
+          "driver": "BAA10Y",
+          "effect": "INDPRO",
+          "evidence": "panel, 1986-2026",
+          "falsifier": "industrial production accelerates through a 200bp spread widening",
+          "lag_days": 180,
+          "mechanism": "a wider credit spread raises the marginal cost of corporate financing, which shows up first in inventory and capex and then in output",
+          "order": 2,
+          "regime": "ALL",
+          "sign": -1,
+          "uncertainty": "MEDIUM"
+        }
+      ],
+      "total_lag_days": 360,
+      "weakest_step": {
+        "driver": "T10Y3M",
+        "effect": "BAA10Y",
+        "evidence": "panel, 1982-2026",
+        "falsifier": "spreads narrow through a sustained inversion",
+        "lag_days": 180,
+        "mechanism": "an inverted curve compresses bank net interest margin, lending standards tighten, and the credit spread widens",
+        "order": 1,
+        "regime": "ALL",
+        "sign": -1,
+        "uncertainty": "MEDIUM"
+      }
+    }
+  ],
+  "readings": {
+    "BAA10Y": {
+      "as_of": "2026-08-26",
+      "direction": "DOWN",
+      "level": 1.61,
+      "yoy_change": -0.01
+    },
+    "CPIAUCSL": {
+      "as_of": "2026-07-01",
+      "direction": "UP",
+      "level": 332.813,
+      "yoy_change": 0.0354
+    },
+    "DFF": {
+      "as_of": "2026-08-25",
+      "direction": "DOWN",
+      "level": 3.63,
+      "yoy_change": 0.0
+    },
+    "HOUST": {
+      "as_of": "2026-06-01",
+      "direction": "UP",
+      "level": 1427.0,
+      "yoy_change": 0.03481
+    },
+    "INDPRO": {
+      "as_of": "2026-06-01",
+      "direction": "UP",
+      "level": 102.6395,
+      "yoy_change": 0.01144
+    },
+    "MORTGAGE30US": {
+      "as_of": "2026-08-20",
+      "direction": "UP",
+      "level": 6.65,
+      "yoy_change": 0.12
+    },
+    "PCEC96": {
+      "as_of": "2026-06-01",
+      "direction": "UP",
+      "level": 16885.2,
+      "yoy_change": 0.02544
+    },
+    "PERMIT": {
+      "as_of": "2026-06-01",
+      "direction": "DOWN",
+      "level": 1374.0,
+      "yoy_change": -0.01787
+    },
+    "T10Y3M": {
+      "as_of": "2026-08-26",
+      "direction": "DOWN",
+      "level": 0.81,
+      "yoy_change": -0.02
+    },
+    "UNRATE": {
+      "as_of": "2026-07-01",
+      "direction": "DOWN",
+      "level": 4.1,
+      "yoy_change": 0.0
+    }
+  },
+  "relations": [
+    {
+      "driver": "DFF",
+      "effect": "MORTGAGE30US",
+      "evidence": "both series in the panel, daily, never revised",
+      "falsifier": "the mortgage rate moves opposite to the policy rate over two consecutive quarters",
+      "lag_days": 30,
+      "mechanism": "the policy rate sets the front of the curve and mortgage pricing follows the long end with a spread that widens under funding stress",
+      "order": 1,
+      "regime": "ALL",
+      "sign": 1,
+      "uncertainty": "LOW"
+    },
+    {
+      "driver": "MORTGAGE30US",
+      "effect": "PERMIT",
+      "evidence": "panel, 1971-2026",
+      "falsifier": "permits rise through a 200bp mortgage-rate increase",
+      "lag_days": 120,
+      "mechanism": "a higher mortgage rate raises the monthly payment on a given price, and builders pull permits before they pull starts",
+      "order": 1,
+      "regime": "ALL",
+      "sign": -1,
+      "uncertainty": "MEDIUM"
+    },
+    {
+      "driver": "PERMIT",
+      "effect": "HOUST",
+      "evidence": "panel, 1960-2026",
+      "falsifier": "starts and permits diverge for a year",
+      "lag_days": 60,
+      "mechanism": "a permit is a committed intention to start; the gap between them is the builder's own timing",
+      "order": 2,
+      "regime": "ALL",
+      "sign": 1,
+      "uncertainty": "LOW"
+    },
+    {
+      "driver": "BAA10Y",
+      "effect": "INDPRO",
+      "evidence": "panel, 1986-2026",
+      "falsifier": "industrial production accelerates through a 200bp spread widening",
+      "lag_days": 180,
+      "mechanism": "a wider credit spread raises the marginal cost of corporate financing, which shows up first in inventory and capex and then in output",
+      "order": 2,
+      "regime": "ALL",
+      "sign": -1,
+      "uncertainty": "MEDIUM"
+    },
+    {
+      "driver": "T10Y3M",
+      "effect": "BAA10Y",
+      "evidence": "panel, 1982-2026",
+      "falsifier": "spreads narrow through a sustained inversion",
+      "lag_days": 180,
+      "mechanism": "an inverted curve compresses bank net interest margin, lending standards tighten, and the credit spread widens",
+      "order": 1,
+      "regime": "ALL",
+      "sign": -1,
+      "uncertainty": "MEDIUM"
+    },
+    {
+      "driver": "UNRATE",
+      "effect": "PCEC96",
+      "evidence": "panel, 1959-2026",
+      "falsifier": "real consumption rises through a 1pp unemployment increase",
+      "lag_days": 90,
+      "mechanism": "employment is the household income channel; spending follows with a lag set by savings buffers",
+      "order": 3,
+      "regime": "ALL",
+      "sign": -1,
+      "uncertainty": "MEDIUM"
+    }
+  ],
+  "stagnation": {
+    "alerts": [],
+    "compared": [
+      "2025-08-27",
+      "2026-08-27"
+    ],
+    "reading": "drivers move, company analyses move with them, and expected links are checked and sometimes fail. Stability here is legitimate rather than broken.",
+    "state": "STABLE"
+  },
+  "state_vs_state": {
+    "as_of_a": "2025-08-27",
+    "as_of_b": "2026-08-27",
+    "companies": 10,
+    "companies_changed": 5,
+    "drivers_compared": 10,
+    "drivers_moved": [
+      "BAA10Y",
+      "CPIAUCSL",
+      "HOUST",
+      "MORTGAGE30US",
+      "PERMIT",
+      "T10Y3M"
+    ],
+    "rows": [
+      {
+        "changed_fields": [
+          "priority",
+          "recommendation",
+          "risk",
+          "scenario",
+          "information_request"
+        ],
+        "company_id": "caterpillar",
+        "from": {
+          "confidence": "medium",
+          "information_request": "Caterpillar reports this channel moving the other way while PERMIT continues DOWN",
+          "priority": "construction end-market",
+          "recommendation": "stress-test construction end-market against a continued move in PERMIT",
+          "risk": "2 of 3 channels adverse",
+          "scenario": "PERMIT continues; construction end-market absorbs it"
+        },
+        "implication_directions_flipped": [
+          "BAA10Y"
+        ],
+        "nonzero": true,
+        "to": {
+          "confidence": "medium",
+          "information_request": "Caterpillar reports this channel moving the other way while INDPRO continues UP",
+          "priority": "order backlog conversion",
+          "recommendation": "stress-test order backlog conversion against a continued move in INDPRO",
+          "risk": "1 of 3 channels adverse",
+          "scenario": "INDPRO continues; order backlog conversion absorbs it"
+        }
+      },
+      {
+        "changed_fields": [
+          "recommendation",
+          "risk",
+          "information_request"
+        ],
+        "company_id": "jpmorgan",
+        "from": {
+          "confidence": "medium",
+          "information_request": "JPMorgan reports this channel moving the other way while T10Y3M continues UP",
+          "priority": "net interest margin",
+          "recommendation": "stress-test net interest margin against a continued move in T10Y3M",
+          "risk": "2 of 3 channels adverse",
+          "scenario": "T10Y3M continues; net interest margin absorbs it"
+        },
+        "implication_directions_flipped": [
+          "BAA10Y",
+          "T10Y3M"
+        ],
+        "nonzero": true,
+        "to": {
+          "confidence": "medium",
+          "information_request": "JPMorgan reports this channel moving the other way while T10Y3M continues DOWN",
+          "priority": "net interest margin",
+          "recommendation": "the current reading of T10Y3M is not adverse through net interest margin; hold",
+          "risk": "0 of 3 channels adverse",
+          "scenario": "T10Y3M continues; net interest margin absorbs it"
+        }
+      },
+      {
+        "changed_fields": [],
+        "company_id": "meta",
+        "from": {
+          "confidence": "medium",
+          "information_request": "Meta reports this channel moving the other way while PCEC96 continues UP",
+          "priority": "advertiser budget and conversion",
+          "recommendation": "stress-test advertiser budget and conversion against a continued move in PCEC96",
+          "risk": "1 of 2 channels adverse",
+          "scenario": "PCEC96 continues; advertiser budget and conversion absorbs it"
+        },
+        "implication_directions_flipped": [],
+        "nonzero": false,
+        "to": {
+          "confidence": "medium",
+          "information_request": "Meta reports this channel moving the other way while PCEC96 continues UP",
+          "priority": "advertiser budget and conversion",
+          "recommendation": "stress-test advertiser budget and conversion against a continued move in PCEC96",
+          "risk": "1 of 2 channels adverse",
+          "scenario": "PCEC96 continues; advertiser budget and conversion absorbs it"
+        }
+      },
+      {
+        "changed_fields": [],
+        "company_id": "nike",
+        "from": {
+          "confidence": "medium",
+          "information_request": "Nike reports this channel moving the other way while PCEC96 continues UP",
+          "priority": "discretionary unit demand",
+          "recommendation": "stress-test discretionary unit demand against a continued move in PCEC96",
+          "risk": "1 of 2 channels adverse",
+          "scenario": "PCEC96 continues; discretionary unit demand absorbs it"
+        },
+        "implication_directions_flipped": [],
+        "nonzero": false,
+        "to": {
+          "confidence": "medium",
+          "information_request": "Nike reports this channel moving the other way while PCEC96 continues UP",
+          "priority": "discretionary unit demand",
+          "recommendation": "stress-test discretionary unit demand against a continued move in PCEC96",
+          "risk": "1 of 2 channels adverse",
+          "scenario": "PCEC96 continues; discretionary unit demand absorbs it"
+        }
+      },
+      {
+        "changed_fields": [
+          "recommendation",
+          "risk",
+          "information_request"
+        ],
+        "company_id": "nvidia",
+        "from": {
+          "confidence": "medium",
+          "information_request": "NVIDIA reports this channel moving the other way while BAA10Y continues UP",
+          "priority": "customer capex financing",
+          "recommendation": "stress-test customer capex financing against a continued move in BAA10Y",
+          "risk": "1 of 2 channels adverse",
+          "scenario": "BAA10Y continues; customer capex financing absorbs it"
+        },
+        "implication_directions_flipped": [
+          "BAA10Y"
+        ],
+        "nonzero": true,
+        "to": {
+          "confidence": "medium",
+          "information_request": "NVIDIA reports this channel moving the other way while BAA10Y continues DOWN",
+          "priority": "customer capex financing",
+          "recommendation": "the current reading of BAA10Y is not adverse through customer capex financing; hold",
+          "risk": "0 of 2 channels adverse",
+          "scenario": "BAA10Y continues; customer capex financing absorbs it"
+        }
+      },
+      {
+        "changed_fields": [
+          "recommendation",
+          "risk",
+          "information_request"
+        ],
+        "company_id": "regional_private",
+        "from": {
+          "confidence": "low",
+          "information_request": "A private regional builder reports this channel moving the other way while MORTGAGE30US continues DOWN",
+          "priority": "buyer qualification rate",
+          "recommendation": "the current reading of MORTGAGE30US is not adverse through buyer qualification rate; hold",
+          "risk": "0 of 1 channels adverse",
+          "scenario": "MORTGAGE30US continues; buyer qualification rate absorbs it"
+        },
+        "implication_directions_flipped": [
+          "MORTGAGE30US"
+        ],
+        "nonzero": true,
+        "to": {
+          "confidence": "low",
+          "information_request": "A private regional builder reports this channel moving the other way while MORTGAGE30US continues UP",
+          "priority": "buyer qualification rate",
+          "recommendation": "stress-test buyer qualification rate against a continued move in MORTGAGE30US",
+          "risk": "1 of 1 channels adverse",
+          "scenario": "MORTGAGE30US continues; buyer qualification rate absorbs it"
+        }
+      },
+      {
+        "changed_fields": [],
+        "company_id": "salesforce",
+        "from": {
+          "confidence": "medium",
+          "information_request": "Salesforce reports this channel moving the other way while UNRATE continues DOWN",
+          "priority": "seat count",
+          "recommendation": "the current reading of UNRATE is not adverse through seat count; hold",
+          "risk": "0 of 2 channels adverse",
+          "scenario": "UNRATE continues; seat count absorbs it"
+        },
+        "implication_directions_flipped": [],
+        "nonzero": false,
+        "to": {
+          "confidence": "medium",
+          "information_request": "Salesforce reports this channel moving the other way while UNRATE continues DOWN",
+          "priority": "seat count",
+          "recommendation": "the current reading of UNRATE is not adverse through seat count; hold",
+          "risk": "0 of 2 channels adverse",
+          "scenario": "UNRATE continues; seat count absorbs it"
+        }
+      },
+      {
+        "changed_fields": [
+          "priority",
+          "recommendation",
+          "scenario",
+          "information_request"
+        ],
+        "company_id": "unionpacific",
+        "from": {
+          "confidence": "medium",
+          "information_request": "Union Pacific reports this channel moving the other way while PERMIT continues DOWN",
+          "priority": "construction materials volume",
+          "recommendation": "stress-test construction materials volume against a continued move in PERMIT",
+          "risk": "1 of 2 channels adverse",
+          "scenario": "PERMIT continues; construction materials volume absorbs it"
+        },
+        "implication_directions_flipped": [],
+        "nonzero": true,
+        "to": {
+          "confidence": "medium",
+          "information_request": "Union Pacific reports this channel moving the other way while INDPRO continues UP",
+          "priority": "carload volume",
+          "recommendation": "stress-test carload volume against a continued move in INDPRO",
+          "risk": "1 of 2 channels adverse",
+          "scenario": "INDPRO continues; carload volume absorbs it"
+        }
+      },
+      {
+        "changed_fields": [],
+        "company_id": "visa",
+        "from": {
+          "confidence": "medium",
+          "information_request": "Visa reports this channel moving the other way while PCEC96 continues UP",
+          "priority": "ticket value and spend mix",
+          "recommendation": "stress-test ticket value and spend mix against a continued move in PCEC96",
+          "risk": "1 of 2 channels adverse",
+          "scenario": "PCEC96 continues; ticket value and spend mix absorbs it"
+        },
+        "implication_directions_flipped": [],
+        "nonzero": false,
+        "to": {
+          "confidence": "medium",
+          "information_request": "Visa reports this channel moving the other way while PCEC96 continues UP",
+          "priority": "ticket value and spend mix",
+          "recommendation": "stress-test ticket value and spend mix against a continued move in PCEC96",
+          "risk": "1 of 2 channels adverse",
+          "scenario": "PCEC96 continues; ticket value and spend mix absorbs it"
+        }
+      },
+      {
+        "changed_fields": [],
+        "company_id": "walmart",
+        "from": {
+          "confidence": "medium",
+          "information_request": "Walmart reports this channel moving the other way while CPIAUCSL continues UP",
+          "priority": "price gap versus competitors",
+          "recommendation": "the current reading of CPIAUCSL is not adverse through price gap versus competitors; hold",
+          "risk": "0 of 2 channels adverse",
+          "scenario": "CPIAUCSL continues; price gap versus competitors absorbs it"
+        },
+        "implication_directions_flipped": [],
+        "nonzero": false,
+        "to": {
+          "confidence": "medium",
+          "information_request": "Walmart reports this channel moving the other way while CPIAUCSL continues UP",
+          "priority": "price gap versus competitors",
+          "recommendation": "the current reading of CPIAUCSL is not adverse through price gap versus competitors; hold",
+          "risk": "0 of 2 channels adverse",
+          "scenario": "CPIAUCSL continues; price gap versus competitors absorbs it"
+        }
+      }
+    ]
+  }
+}

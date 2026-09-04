@@ -1,0 +1,3895 @@
+{
+  "absences": {},
+  "absent": 0,
+  "already_cached": 6151,
+  "concurrency": 3,
+  "contract": "alfred_cache.v1",
+  "elapsed_seconds": 71.9,
+  "entries": [
+    {
+      "content_hash": "eaf887c4091bc449",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2000-03-15"
+    },
+    {
+      "content_hash": "16abb7f05abe4873",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2000-04-15"
+    },
+    {
+      "content_hash": "5c65fc8a311a0c0d",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2000-05-15"
+    },
+    {
+      "content_hash": "dd3a192c8430e9c3",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2000-06-15"
+    },
+    {
+      "content_hash": "5f37cb2934cbdf85",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2000-07-15"
+    },
+    {
+      "content_hash": "bb72957af9fd8b9b",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2000-08-15"
+    },
+    {
+      "content_hash": "1e55b0967ded1a8f",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2000-09-15"
+    },
+    {
+      "content_hash": "941c3fbd7be00933",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2000-10-15"
+    },
+    {
+      "content_hash": "2d5afe7cde94173a",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2000-11-15"
+    },
+    {
+      "content_hash": "3e1a1b05e033fe1f",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2000-12-15"
+    },
+    {
+      "content_hash": "39d8ff5a07b7814a",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2001-01-15"
+    },
+    {
+      "content_hash": "17815d1fd180a29d",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2001-03-15"
+    },
+    {
+      "content_hash": "86cfad0257d1ac02",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2001-04-15"
+    },
+    {
+      "content_hash": "f69b57b69c358ed0",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2001-05-15"
+    },
+    {
+      "content_hash": "39a4592b1fc82ab4",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2001-06-15"
+    },
+    {
+      "content_hash": "88ad14c102a0c611",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2001-07-15"
+    },
+    {
+      "content_hash": "c64be0e095d6e64d",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2001-08-15"
+    },
+    {
+      "content_hash": "87ebd2f2db74bc38",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2001-09-15"
+    },
+    {
+      "content_hash": "8267f8df33bb7e4b",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2001-10-15"
+    },
+    {
+      "content_hash": "953a7bcc8c646301",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2001-11-15"
+    },
+    {
+      "content_hash": "02eda67fdae181a9",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2001-12-15"
+    },
+    {
+      "content_hash": "99bad5c4d6b19487",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2002-01-15"
+    },
+    {
+      "content_hash": "386c857a2007d85a",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2002-02-15"
+    },
+    {
+      "content_hash": "a82b2c1872a106a9",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2002-03-15"
+    },
+    {
+      "content_hash": "23e973ef7d302d4c",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2002-04-15"
+    },
+    {
+      "content_hash": "19a34f80578fdd4a",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2002-05-15"
+    },
+    {
+      "content_hash": "a8542b84776ad66b",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2002-06-15"
+    },
+    {
+      "content_hash": "90e444df12f884a8",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2002-07-15"
+    },
+    {
+      "content_hash": "9c83d59eb3fa7136",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2002-08-15"
+    },
+    {
+      "content_hash": "be4480faea9fdeca",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2002-09-15"
+    },
+    {
+      "content_hash": "88d05084a53dcf0b",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2002-10-15"
+    },
+    {
+      "content_hash": "0cfd2d3bb3246589",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2002-11-15"
+    },
+    {
+      "content_hash": "289e8e5bfcbee2d4",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2002-12-15"
+    },
+    {
+      "content_hash": "e03d98b71031c088",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2003-01-15"
+    },
+    {
+      "content_hash": "9bae1dbba049e4ac",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2003-02-15"
+    },
+    {
+      "content_hash": "82014fc5e68e71ea",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2003-03-15"
+    },
+    {
+      "content_hash": "7273c40bd8713831",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2003-04-15"
+    },
+    {
+      "content_hash": "3d0fdc3b18ca2876",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2003-05-15"
+    },
+    {
+      "content_hash": "b7fd80d76edf41f3",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2003-06-15"
+    },
+    {
+      "content_hash": "b51a0204fe6f0227",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2003-07-15"
+    },
+    {
+      "content_hash": "43c6d43bc5da29e1",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2003-08-15"
+    },
+    {
+      "content_hash": "695108c36acfee97",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2003-09-15"
+    },
+    {
+      "content_hash": "c951d6aa4f99f157",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2003-10-15"
+    },
+    {
+      "content_hash": "52b6f6df559e3f01",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2003-11-15"
+    },
+    {
+      "content_hash": "b4d49aba37f34a77",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2003-12-15"
+    },
+    {
+      "content_hash": "dd109a4c1e7ebfb8",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2004-01-15"
+    },
+    {
+      "content_hash": "f5558664f2d82fa1",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2004-02-15"
+    },
+    {
+      "content_hash": "ad6ba12839e7add8",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2004-03-15"
+    },
+    {
+      "content_hash": "73fdb35054f7ef9a",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2004-04-15"
+    },
+    {
+      "content_hash": "e4d8febecd1762e0",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2004-05-15"
+    },
+    {
+      "content_hash": "89df56f5d605e5bd",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2004-06-15"
+    },
+    {
+      "content_hash": "e928cf392190ae7e",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2004-07-15"
+    },
+    {
+      "content_hash": "571c5fdaa4763678",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2004-08-15"
+    },
+    {
+      "content_hash": "6b6461116974dc08",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2004-09-15"
+    },
+    {
+      "content_hash": "36318b204737bc88",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2004-10-15"
+    },
+    {
+      "content_hash": "5cf125a1efaa70af",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2004-11-15"
+    },
+    {
+      "content_hash": "34a64f3b662ff672",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2004-12-15"
+    },
+    {
+      "content_hash": "beafa01432638232",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2005-01-15"
+    },
+    {
+      "content_hash": "646300841352e066",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2005-02-15"
+    },
+    {
+      "content_hash": "1159d727d71075b0",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2005-03-15"
+    },
+    {
+      "content_hash": "00747671ee4ed981",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2005-04-15"
+    },
+    {
+      "content_hash": "7495eedf45b19772",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2005-05-15"
+    },
+    {
+      "content_hash": "5a2fd1d0d4ef5d68",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2005-06-15"
+    },
+    {
+      "content_hash": "8efd6f66186b02fe",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2005-07-15"
+    },
+    {
+      "content_hash": "5740aee970c9118e",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2005-08-15"
+    },
+    {
+      "content_hash": "cb7a3356d6250b53",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2005-09-15"
+    },
+    {
+      "content_hash": "d60d9dd46301fb56",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2005-10-15"
+    },
+    {
+      "content_hash": "ee9476d0076875b3",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2005-11-15"
+    },
+    {
+      "content_hash": "5c8493bc1b849fb1",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2005-12-15"
+    },
+    {
+      "content_hash": "7eba73ca12b2f5fb",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2006-01-15"
+    },
+    {
+      "content_hash": "76135bc0c152c89b",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2006-02-15"
+    },
+    {
+      "content_hash": "1707d6ba33d262aa",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2006-03-15"
+    },
+    {
+      "content_hash": "e34eacbccc7187d5",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2006-04-15"
+    },
+    {
+      "content_hash": "aa33490ce4f50a9a",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2006-05-15"
+    },
+    {
+      "content_hash": "37e0b2d82067d97e",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2006-06-15"
+    },
+    {
+      "content_hash": "cf743961cefe571b",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2006-07-15"
+    },
+    {
+      "content_hash": "88e9d316ad244990",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2006-08-15"
+    },
+    {
+      "content_hash": "537659f960f9daba",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2006-09-15"
+    },
+    {
+      "content_hash": "3bf6fbab7c565954",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2006-10-15"
+    },
+    {
+      "content_hash": "d5cc397f0ee55f40",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2006-11-15"
+    },
+    {
+      "content_hash": "63e3e37979a0cd65",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2006-12-15"
+    },
+    {
+      "content_hash": "8de7cdcdf3cc2d04",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2007-01-15"
+    },
+    {
+      "content_hash": "299b9f96930167b0",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2007-02-15"
+    },
+    {
+      "content_hash": "f215ba1eadb27f62",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2007-03-15"
+    },
+    {
+      "content_hash": "0f7fe8bcbe715b7a",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2007-04-15"
+    },
+    {
+      "content_hash": "3963547305864837",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2007-05-15"
+    },
+    {
+      "content_hash": "7db68907304acf05",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2007-06-15"
+    },
+    {
+      "content_hash": "bb93fcfa4e243740",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2007-07-15"
+    },
+    {
+      "content_hash": "ced576531d565d93",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2007-08-15"
+    },
+    {
+      "content_hash": "3625850901b83225",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2007-09-15"
+    },
+    {
+      "content_hash": "0874dfccbbca14f3",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2007-10-15"
+    },
+    {
+      "content_hash": "715bc2955e94719c",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2007-11-15"
+    },
+    {
+      "content_hash": "aeb58f8b0710a76d",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2007-12-15"
+    },
+    {
+      "content_hash": "bdc4689efe122bad",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2008-01-15"
+    },
+    {
+      "content_hash": "997aebf9bcba5350",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2008-02-15"
+    },
+    {
+      "content_hash": "8c2f8e8436c5b668",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2008-03-15"
+    },
+    {
+      "content_hash": "8e7530dcc8798e7f",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2008-04-15"
+    },
+    {
+      "content_hash": "a0cf27d91e4dbcfc",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2008-05-15"
+    },
+    {
+      "content_hash": "0806d4505c44a236",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2008-06-15"
+    },
+    {
+      "content_hash": "9cbe92ecce8b12f2",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2008-07-15"
+    },
+    {
+      "content_hash": "72e67a3b821d0349",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2008-08-15"
+    },
+    {
+      "content_hash": "01e361a428475539",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2008-09-15"
+    },
+    {
+      "content_hash": "834019952618912e",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2008-10-15"
+    },
+    {
+      "content_hash": "367eb0b6e03910e5",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2008-11-15"
+    },
+    {
+      "content_hash": "92b6cc4d4a10536c",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2008-12-15"
+    },
+    {
+      "content_hash": "5f1fdeb41e4ce2ff",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2009-01-15"
+    },
+    {
+      "content_hash": "b90c97d39f3e3b8b",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2009-03-15"
+    },
+    {
+      "content_hash": "60c52e198c9ced01",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2009-04-15"
+    },
+    {
+      "content_hash": "38007e54e99371cf",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2009-05-15"
+    },
+    {
+      "content_hash": "0374263d9b8cdabb",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2009-06-15"
+    },
+    {
+      "content_hash": "ab031819823b653a",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2009-07-15"
+    },
+    {
+      "content_hash": "4dc600dfdca4e80e",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2009-08-15"
+    },
+    {
+      "content_hash": "9bb66f8af0ab3aaf",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2009-09-15"
+    },
+    {
+      "content_hash": "a65cece869233904",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2009-10-15"
+    },
+    {
+      "content_hash": "ce8849e8f2d23376",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2009-11-15"
+    },
+    {
+      "content_hash": "020d1ca29e1c44c1",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2009-12-15"
+    },
+    {
+      "content_hash": "9493313e0329fb81",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2010-01-15"
+    },
+    {
+      "content_hash": "d96df095921060b9",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2010-02-15"
+    },
+    {
+      "content_hash": "764fda938dc1c8ae",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2010-03-15"
+    },
+    {
+      "content_hash": "fa51729370eb937c",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2010-04-15"
+    },
+    {
+      "content_hash": "73e872b20c078fbc",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2010-05-15"
+    },
+    {
+      "content_hash": "44161f360197207c",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2010-06-15"
+    },
+    {
+      "content_hash": "982b89c99a01abee",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2010-07-15"
+    },
+    {
+      "content_hash": "add6ee315e080eec",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2010-08-15"
+    },
+    {
+      "content_hash": "fbf69e5dce98d433",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2010-09-15"
+    },
+    {
+      "content_hash": "901efbe26772723e",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2010-10-15"
+    },
+    {
+      "content_hash": "9a52083aa44222cf",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2010-11-15"
+    },
+    {
+      "content_hash": "aafaec114514ee28",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2010-12-15"
+    },
+    {
+      "content_hash": "cf4238a88826cd03",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2011-01-15"
+    },
+    {
+      "content_hash": "daf22f766625e132",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2011-02-15"
+    },
+    {
+      "content_hash": "c612803d669cafa9",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2011-03-15"
+    },
+    {
+      "content_hash": "f57de573a91d2690",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2011-04-15"
+    },
+    {
+      "content_hash": "50df549bd677faaa",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2011-05-15"
+    },
+    {
+      "content_hash": "f4f54ddede9d5355",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2011-06-15"
+    },
+    {
+      "content_hash": "2e4960efcfe3c6c5",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2011-07-15"
+    },
+    {
+      "content_hash": "9ecfc53313d9d918",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2011-08-15"
+    },
+    {
+      "content_hash": "bdd3bd6ba7d95bc1",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2011-09-15"
+    },
+    {
+      "content_hash": "fdac209f3231adb9",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2011-10-15"
+    },
+    {
+      "content_hash": "9144218dd83955b4",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2011-11-15"
+    },
+    {
+      "content_hash": "8d8896a3040ea261",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2011-12-15"
+    },
+    {
+      "content_hash": "5f43cf5971e56e31",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2012-01-15"
+    },
+    {
+      "content_hash": "427e64e8df775406",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2012-02-15"
+    },
+    {
+      "content_hash": "cf945029fe225230",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2012-03-15"
+    },
+    {
+      "content_hash": "d82af3509d86a8c5",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2012-04-15"
+    },
+    {
+      "content_hash": "eece62fa29018e0f",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2012-05-15"
+    },
+    {
+      "content_hash": "8feda0d46e7938cd",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2012-06-15"
+    },
+    {
+      "content_hash": "6b8cb23bb0d679b4",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2012-07-15"
+    },
+    {
+      "content_hash": "3a59d32c8d6685a3",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2012-08-15"
+    },
+    {
+      "content_hash": "f732fe5bc437315e",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2012-09-15"
+    },
+    {
+      "content_hash": "0517642da4667d00",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2012-10-15"
+    },
+    {
+      "content_hash": "f97c83f9988ef4a2",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2012-11-15"
+    },
+    {
+      "content_hash": "d7b51b465ba4ec2b",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2012-12-15"
+    },
+    {
+      "content_hash": "6111a1aea43f9e39",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2013-01-15"
+    },
+    {
+      "content_hash": "232dffad71b499c0",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2013-02-15"
+    },
+    {
+      "content_hash": "34ee701de7497593",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2013-03-15"
+    },
+    {
+      "content_hash": "60d914c4eaee3342",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2013-04-15"
+    },
+    {
+      "content_hash": "0dd0a45dfb7600b0",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2013-05-15"
+    },
+    {
+      "content_hash": "bc96bc73d539628a",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2013-06-15"
+    },
+    {
+      "content_hash": "73886afb57f69d64",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2013-07-15"
+    },
+    {
+      "content_hash": "1366d1a8a1707058",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2013-08-15"
+    },
+    {
+      "content_hash": "999c7ab722326be9",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2013-09-15"
+    },
+    {
+      "content_hash": "3889c22ec1a37e27",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2013-10-15"
+    },
+    {
+      "content_hash": "5bce118b7e0ce80f",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2013-11-15"
+    },
+    {
+      "content_hash": "1b52ffe7aff1c5e2",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2013-12-15"
+    },
+    {
+      "content_hash": "397672692a58dd0d",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2014-01-15"
+    },
+    {
+      "content_hash": "beb1e0af9f4e3c61",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2014-02-15"
+    },
+    {
+      "content_hash": "1f4295faca87b918",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2014-03-15"
+    },
+    {
+      "content_hash": "0b08e02344e43290",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2014-04-15"
+    },
+    {
+      "content_hash": "5651553638c22735",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2014-05-15"
+    },
+    {
+      "content_hash": "aad989b43d901185",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2014-06-15"
+    },
+    {
+      "content_hash": "7f535892825c97ad",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2014-07-15"
+    },
+    {
+      "content_hash": "b3c2cf391408435d",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2014-08-15"
+    },
+    {
+      "content_hash": "ddc2f817c21ef806",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2014-09-15"
+    },
+    {
+      "content_hash": "80d959d82ecf704c",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2014-10-15"
+    },
+    {
+      "content_hash": "c50ebba1cebbd5c7",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2014-11-15"
+    },
+    {
+      "content_hash": "40dca36b06be7e5e",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2014-12-15"
+    },
+    {
+      "content_hash": "f800c1ccce010ecd",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2015-01-15"
+    },
+    {
+      "content_hash": "dace4a239f563e65",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2015-02-15"
+    },
+    {
+      "content_hash": "99e980c18d8a8663",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2015-03-15"
+    },
+    {
+      "content_hash": "c0a7841e0d33d065",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2015-04-15"
+    },
+    {
+      "content_hash": "5d53a283f66212c4",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2015-06-15"
+    },
+    {
+      "content_hash": "fa8bca023bca2bb0",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2015-07-15"
+    },
+    {
+      "content_hash": "eef58ce132fb3b82",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2015-08-15"
+    },
+    {
+      "content_hash": "956564b5b2c74e06",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2015-09-15"
+    },
+    {
+      "content_hash": "e63037bd40b92963",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2015-10-15"
+    },
+    {
+      "content_hash": "a9132317ef3484fa",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2015-11-15"
+    },
+    {
+      "content_hash": "1e4a40d459e05d23",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2015-12-15"
+    },
+    {
+      "content_hash": "188028937cff8231",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2016-01-15"
+    },
+    {
+      "content_hash": "36fb83acb8b915f2",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2016-02-15"
+    },
+    {
+      "content_hash": "ec113fd35d5500b3",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2016-03-15"
+    },
+    {
+      "content_hash": "48404be2a5a6d78d",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2016-04-15"
+    },
+    {
+      "content_hash": "10147953272c3944",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2016-05-15"
+    },
+    {
+      "content_hash": "da9ab55199e22860",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2016-06-15"
+    },
+    {
+      "content_hash": "0dcfa02b4b77cd98",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2016-07-15"
+    },
+    {
+      "content_hash": "acc6bd94fbf5cb77",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2016-08-15"
+    },
+    {
+      "content_hash": "d77df17191b126eb",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2016-09-15"
+    },
+    {
+      "content_hash": "a90ba33ef5c768dd",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2016-10-15"
+    },
+    {
+      "content_hash": "12a0edf4c877c6f6",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2016-11-15"
+    },
+    {
+      "content_hash": "01b922b0c45e2405",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2016-12-15"
+    },
+    {
+      "content_hash": "a57d7d767f92dc42",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2017-01-15"
+    },
+    {
+      "content_hash": "55c3a3931c307f0b",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2017-02-15"
+    },
+    {
+      "content_hash": "2377b17cf78ace8d",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2017-03-15"
+    },
+    {
+      "content_hash": "59b900c71b3018d9",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2017-04-15"
+    },
+    {
+      "content_hash": "a97af4356a4da0d7",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2017-05-15"
+    },
+    {
+      "content_hash": "25e9b7ac9c140404",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2017-06-15"
+    },
+    {
+      "content_hash": "d9c1379b531c7324",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2017-07-15"
+    },
+    {
+      "content_hash": "20a9490e583e61d3",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2017-08-15"
+    },
+    {
+      "content_hash": "aeacc1d30f0f766c",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2017-09-15"
+    },
+    {
+      "content_hash": "aaf8014bce081f2b",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2017-10-15"
+    },
+    {
+      "content_hash": "defe44b9bde42034",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2017-11-15"
+    },
+    {
+      "content_hash": "a1b64ddf36ff7db1",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2017-12-15"
+    },
+    {
+      "content_hash": "4573b0486c708302",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2018-01-15"
+    },
+    {
+      "content_hash": "9a79c5e70f5e3971",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2018-02-15"
+    },
+    {
+      "content_hash": "89bdad7e169d7b5a",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2018-03-15"
+    },
+    {
+      "content_hash": "8967c1ba98a20af1",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2018-04-15"
+    },
+    {
+      "content_hash": "236b42e58cc67256",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2018-05-15"
+    },
+    {
+      "content_hash": "0b3497c5861890eb",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2018-06-15"
+    },
+    {
+      "content_hash": "095f522515b2fc26",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2018-07-15"
+    },
+    {
+      "content_hash": "1a95487847e64256",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2018-08-15"
+    },
+    {
+      "content_hash": "d9a13ad2fe3bd7e4",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2018-09-15"
+    },
+    {
+      "content_hash": "6c756127cd12aa77",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2018-10-15"
+    },
+    {
+      "content_hash": "fb576d6acc4bc865",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2018-11-15"
+    },
+    {
+      "content_hash": "908fc6f01b76950b",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2018-12-15"
+    },
+    {
+      "content_hash": "8faac728d0eb7b33",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2019-01-15"
+    },
+    {
+      "content_hash": "cb14234b5d9dfc0b",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2019-02-15"
+    },
+    {
+      "content_hash": "cb4d9c259408bfe5",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2019-03-15"
+    },
+    {
+      "content_hash": "14c85d22520a5663",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2019-04-15"
+    },
+    {
+      "content_hash": "67e4c7920d2c66e5",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2019-05-15"
+    },
+    {
+      "content_hash": "2c69a98513ac917b",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2019-06-15"
+    },
+    {
+      "content_hash": "19d6b0bab290ab8d",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2019-07-15"
+    },
+    {
+      "content_hash": "089621c09266d7eb",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2019-08-15"
+    },
+    {
+      "content_hash": "6095b32b8bb70917",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2019-09-15"
+    },
+    {
+      "content_hash": "6a450a0e064443a7",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2019-10-15"
+    },
+    {
+      "content_hash": "935d76b8c93a8f1d",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2019-11-15"
+    },
+    {
+      "content_hash": "b6ef8996ddddbd2b",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2019-12-15"
+    },
+    {
+      "content_hash": "700bea6519f66610",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2020-01-15"
+    },
+    {
+      "content_hash": "f91f3e78ba7626d2",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2020-02-15"
+    },
+    {
+      "content_hash": "fb107f08b86078f0",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2020-03-15"
+    },
+    {
+      "content_hash": "78f9a35f7bed029f",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2020-04-15"
+    },
+    {
+      "content_hash": "7cbbd093c09c9c51",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2020-05-15"
+    },
+    {
+      "content_hash": "b9b03403f92fbc22",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2020-06-15"
+    },
+    {
+      "content_hash": "7afa2799d14c88f9",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2020-07-15"
+    },
+    {
+      "content_hash": "a22db958b4ffa799",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2020-08-15"
+    },
+    {
+      "content_hash": "f5522d8da2696aa6",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2020-09-15"
+    },
+    {
+      "content_hash": "0aa028720408f2ae",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2020-10-15"
+    },
+    {
+      "content_hash": "ea04cd231c6bc822",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2020-11-15"
+    },
+    {
+      "content_hash": "74e25cdbd83fa62b",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2020-12-15"
+    },
+    {
+      "content_hash": "4fbdc770386bfcf2",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2021-01-15"
+    },
+    {
+      "content_hash": "f1b129da98f4939a",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2021-02-15"
+    },
+    {
+      "content_hash": "01f50433cc304e1b",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2021-03-15"
+    },
+    {
+      "content_hash": "7741f244d27f8568",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2021-04-15"
+    },
+    {
+      "content_hash": "ce237b045ea4d8d0",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2021-05-15"
+    },
+    {
+      "content_hash": "b5e3bf45b192faff",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2021-06-15"
+    },
+    {
+      "content_hash": "bf78fcf85dac75be",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2021-07-15"
+    },
+    {
+      "content_hash": "a5304b6aaf631caa",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2021-08-15"
+    },
+    {
+      "content_hash": "8998902ec231c4ba",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2021-09-15"
+    },
+    {
+      "content_hash": "bcf322fb3f6513fa",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2021-10-15"
+    },
+    {
+      "content_hash": "a2e5b9288a748e13",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2021-11-15"
+    },
+    {
+      "content_hash": "fbde85016d30e3f6",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2021-12-15"
+    },
+    {
+      "content_hash": "0347ef8ff2c2e8d2",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2022-01-15"
+    },
+    {
+      "content_hash": "2ff9ad3aa6b5c7aa",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2022-02-15"
+    },
+    {
+      "content_hash": "9763d1737ba0a7ea",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2022-03-15"
+    },
+    {
+      "content_hash": "03b04e41bac951b2",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2022-04-15"
+    },
+    {
+      "content_hash": "3fc91fb5497ea8ef",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2022-05-15"
+    },
+    {
+      "content_hash": "754cc3b2637af09a",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2022-06-15"
+    },
+    {
+      "content_hash": "473dbd28b3ccdb7d",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2022-07-15"
+    },
+    {
+      "content_hash": "b4d7c3b00c17115a",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2022-08-15"
+    },
+    {
+      "content_hash": "cbc93d04c536c607",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2022-09-15"
+    },
+    {
+      "content_hash": "58d155460d9b6cbd",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2022-10-15"
+    },
+    {
+      "content_hash": "adb93b03fc18f790",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2022-11-15"
+    },
+    {
+      "content_hash": "f30e7d8c25110512",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2022-12-15"
+    },
+    {
+      "content_hash": "e99e604bcbb5359d",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2023-01-15"
+    },
+    {
+      "content_hash": "3a5bbdf42125a2a7",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2023-02-15"
+    },
+    {
+      "content_hash": "c60f4e8748a62cea",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2023-03-15"
+    },
+    {
+      "content_hash": "0397f9293f18c061",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2023-04-15"
+    },
+    {
+      "content_hash": "09fa5c28dc93ff1f",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2023-05-15"
+    },
+    {
+      "content_hash": "e433d9325d6b0d59",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2023-06-15"
+    },
+    {
+      "content_hash": "b1a2e48c702ddaed",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2023-07-15"
+    },
+    {
+      "content_hash": "914e5b17a41a12af",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2023-08-15"
+    },
+    {
+      "content_hash": "3e16a9683476b3d7",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2023-09-15"
+    },
+    {
+      "content_hash": "e78aa2f78575837b",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2023-10-15"
+    },
+    {
+      "content_hash": "95acb9c99fdb86f5",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2023-11-15"
+    },
+    {
+      "content_hash": "fab5f9e144c30ffc",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2023-12-15"
+    },
+    {
+      "content_hash": "bfa66df7df8821e0",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2024-01-15"
+    },
+    {
+      "content_hash": "d581911963fe5d38",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2024-02-15"
+    },
+    {
+      "content_hash": "00b5b2003ca10adb",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2024-03-15"
+    },
+    {
+      "content_hash": "9d9bf084c4c2311e",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2024-04-15"
+    },
+    {
+      "content_hash": "2e929b34ebec24b4",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2024-06-15"
+    },
+    {
+      "content_hash": "f9052625e598d21a",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2024-07-15"
+    },
+    {
+      "content_hash": "20983ad54832ae1b",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2024-08-15"
+    },
+    {
+      "content_hash": "4fa35b3c7c0763fc",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2024-09-15"
+    },
+    {
+      "content_hash": "97c969ee9c8b0f7e",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2024-10-15"
+    },
+    {
+      "content_hash": "1b17a353e383f0bb",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2024-11-15"
+    },
+    {
+      "content_hash": "20ce3b6e6ce6f46a",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2024-12-15"
+    },
+    {
+      "content_hash": "8882314270587ce3",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2025-01-15"
+    },
+    {
+      "content_hash": "ee446146a1654cc1",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2025-02-15"
+    },
+    {
+      "content_hash": "a442f5dffe6af721",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2025-03-15"
+    },
+    {
+      "content_hash": "7de846537897af87",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2025-04-15"
+    },
+    {
+      "content_hash": "b203f38fad5ae7db",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2025-05-15"
+    },
+    {
+      "content_hash": "f02ba1955f610487",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2025-06-15"
+    },
+    {
+      "content_hash": "6f5d0b9a752e6c48",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2025-07-15"
+    },
+    {
+      "content_hash": "0aa544eaeec0c2ae",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2025-08-15"
+    },
+    {
+      "content_hash": "ee39245a788ecd81",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2025-09-15"
+    },
+    {
+      "content_hash": "9d0b69e1afba19db",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2025-10-15"
+    },
+    {
+      "content_hash": "b347c5af2f5f303b",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2025-11-15"
+    },
+    {
+      "content_hash": "dc5baef420ba16df",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2025-12-15"
+    },
+    {
+      "content_hash": "a1d79717fe4d2d81",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2026-01-15"
+    },
+    {
+      "content_hash": "4edb944f7386ba9e",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2026-03-15"
+    },
+    {
+      "content_hash": "fbc6aee716243c36",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2026-04-15"
+    },
+    {
+      "content_hash": "efc529cd733d5953",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2026-05-15"
+    },
+    {
+      "content_hash": "ef98b33378da559d",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2026-06-15"
+    },
+    {
+      "content_hash": "44b773ea8da52d90",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2026-07-15"
+    },
+    {
+      "content_hash": "8b0b46c03f551a43",
+      "reason": "vintages required: revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-",
+      "series_id": "PERMIT",
+      "source": "network",
+      "vintage": "2026-08-15"
+    }
+  ],
+  "failed": 0,
+  "failures": {},
+  "fetched": 313,
+  "origins": [
+    "1978-01-15",
+    "1978-02-15",
+    "1978-03-15",
+    "1978-04-15",
+    "1978-05-15",
+    "1978-06-15",
+    "1978-07-15",
+    "1978-08-15",
+    "1978-09-15",
+    "1978-10-15",
+    "1978-11-15",
+    "1978-12-15",
+    "1979-01-15",
+    "1979-02-15",
+    "1979-03-15",
+    "1979-04-15",
+    "1979-05-15",
+    "1979-06-15",
+    "1979-07-15",
+    "1979-08-15",
+    "1979-09-15",
+    "1979-10-15",
+    "1979-11-15",
+    "1979-12-15",
+    "1980-01-15",
+    "1980-02-15",
+    "1980-03-15",
+    "1980-04-15",
+    "1980-05-15",
+    "1980-06-15",
+    "1980-07-15",
+    "1980-08-15",
+    "1980-09-15",
+    "1980-10-15",
+    "1980-11-15",
+    "1980-12-15",
+    "1981-01-15",
+    "1981-02-15",
+    "1981-03-15",
+    "1981-04-15",
+    "1981-05-15",
+    "1981-06-15",
+    "1981-07-15",
+    "1981-08-15",
+    "1981-09-15",
+    "1981-10-15",
+    "1981-11-15",
+    "1981-12-15",
+    "1982-01-15",
+    "1982-02-15",
+    "1982-03-15",
+    "1982-04-15",
+    "1982-05-15",
+    "1982-06-15",
+    "1982-07-15",
+    "1982-08-15",
+    "1982-09-15",
+    "1982-10-15",
+    "1982-11-15",
+    "1982-12-15",
+    "1983-01-15",
+    "1983-02-15",
+    "1983-03-15",
+    "1983-04-15",
+    "1983-05-15",
+    "1983-06-15",
+    "1983-07-15",
+    "1983-08-15",
+    "1983-09-15",
+    "1983-10-15",
+    "1983-11-15",
+    "1983-12-15",
+    "1984-01-15",
+    "1984-02-15",
+    "1984-03-15",
+    "1984-04-15",
+    "1984-05-15",
+    "1984-06-15",
+    "1984-07-15",
+    "1984-08-15",
+    "1984-09-15",
+    "1984-10-15",
+    "1984-11-15",
+    "1984-12-15",
+    "1985-01-15",
+    "1985-02-15",
+    "1985-03-15",
+    "1985-04-15",
+    "1985-05-15",
+    "1985-06-15",
+    "1985-07-15",
+    "1985-08-15",
+    "1985-09-15",
+    "1985-10-15",
+    "1985-11-15",
+    "1985-12-15",
+    "1986-01-15",
+    "1986-02-15",
+    "1986-03-15",
+    "1986-04-15",
+    "1986-05-15",
+    "1986-06-15",
+    "1986-07-15",
+    "1986-08-15",
+    "1986-09-15",
+    "1986-10-15",
+    "1986-11-15",
+    "1986-12-15",
+    "1987-01-15",
+    "1987-02-15",
+    "1987-03-15",
+    "1987-04-15",
+    "1987-05-15",
+    "1987-06-15",
+    "1987-07-15",
+    "1987-08-15",
+    "1987-09-15",
+    "1987-10-15",
+    "1987-11-15",
+    "1987-12-15",
+    "1988-01-15",
+    "1988-02-15",
+    "1988-03-15",
+    "1988-04-15",
+    "1988-05-15",
+    "1988-06-15",
+    "1988-07-15",
+    "1988-08-15",
+    "1988-09-15",
+    "1988-10-15",
+    "1988-11-15",
+    "1988-12-15",
+    "1989-01-15",
+    "1989-02-15",
+    "1989-03-15",
+    "1989-04-15",
+    "1989-05-15",
+    "1989-06-15",
+    "1989-07-15",
+    "1989-08-15",
+    "1989-09-15",
+    "1989-10-15",
+    "1989-11-15",
+    "1989-12-15",
+    "1990-01-15",
+    "1990-02-15",
+    "1990-03-15",
+    "1990-04-15",
+    "1990-05-15",
+    "1990-06-15",
+    "1990-07-15",
+    "1990-08-15",
+    "1990-09-15",
+    "1990-10-15",
+    "1990-11-15",
+    "1990-12-15",
+    "1991-01-15",
+    "1991-02-15",
+    "1991-03-15",
+    "1991-04-15",
+    "1991-05-15",
+    "1991-06-15",
+    "1991-07-15",
+    "1991-08-15",
+    "1991-09-15",
+    "1991-10-15",
+    "1991-11-15",
+    "1991-12-15",
+    "1992-01-15",
+    "1992-02-15",
+    "1992-03-15",
+    "1992-04-15",
+    "1992-05-15",
+    "1992-06-15",
+    "1992-07-15",
+    "1992-08-15",
+    "1992-09-15",
+    "1992-10-15",
+    "1992-11-15",
+    "1992-12-15",
+    "1993-01-15",
+    "1993-02-15",
+    "1993-03-15",
+    "1993-04-15",
+    "1993-05-15",
+    "1993-06-15",
+    "1993-07-15",
+    "1993-08-15",
+    "1993-09-15",
+    "1993-10-15",
+    "1993-11-15",
+    "1993-12-15",
+    "1994-01-15",
+    "1994-02-15",
+    "1994-03-15",
+    "1994-04-15",
+    "1994-05-15",
+    "1994-06-15",
+    "1994-07-15",
+    "1994-08-15",
+    "1994-09-15",
+    "1994-10-15",
+    "1994-11-15",
+    "1994-12-15",
+    "1995-01-15",
+    "1995-02-15",
+    "1995-03-15",
+    "1995-04-15",
+    "1995-05-15",
+    "1995-06-15",
+    "1995-07-15",
+    "1995-08-15",
+    "1995-09-15",
+    "1995-10-15",
+    "1995-11-15",
+    "1995-12-15",
+    "1996-01-15",
+    "1996-02-15",
+    "1996-03-15",
+    "1996-04-15",
+    "1996-05-15",
+    "1996-06-15",
+    "1996-07-15",
+    "1996-08-15",
+    "1996-09-15",
+    "1996-10-15",
+    "1996-11-15",
+    "1996-12-15",
+    "1997-01-15",
+    "1997-02-15",
+    "1997-03-15",
+    "1997-04-15",
+    "1997-05-15",
+    "1997-06-15",
+    "1997-07-15",
+    "1997-08-15",
+    "1997-09-15",
+    "1997-10-15",
+    "1997-11-15",
+    "1997-12-15",
+    "1998-01-15",
+    "1998-02-15",
+    "1998-03-15",
+    "1998-04-15",
+    "1998-05-15",
+    "1998-06-15",
+    "1998-07-15",
+    "1998-08-15",
+    "1998-09-15",
+    "1998-10-15",
+    "1998-11-15",
+    "1998-12-15",
+    "1999-01-15",
+    "1999-02-15",
+    "1999-03-15",
+    "1999-04-15",
+    "1999-05-15",
+    "1999-06-15",
+    "1999-07-15",
+    "1999-08-15",
+    "1999-09-15",
+    "1999-10-15",
+    "1999-11-15",
+    "1999-12-15",
+    "2000-01-15",
+    "2000-02-15",
+    "2000-03-15",
+    "2000-04-15",
+    "2000-05-15",
+    "2000-06-15",
+    "2000-07-15",
+    "2000-08-15",
+    "2000-09-15",
+    "2000-10-15",
+    "2000-11-15",
+    "2000-12-15",
+    "2001-01-15",
+    "2001-02-15",
+    "2001-03-15",
+    "2001-04-15",
+    "2001-05-15",
+    "2001-06-15",
+    "2001-07-15",
+    "2001-08-15",
+    "2001-09-15",
+    "2001-10-15",
+    "2001-11-15",
+    "2001-12-15",
+    "2002-01-15",
+    "2002-02-15",
+    "2002-03-15",
+    "2002-04-15",
+    "2002-05-15",
+    "2002-06-15",
+    "2002-07-15",
+    "2002-08-15",
+    "2002-09-15",
+    "2002-10-15",
+    "2002-11-15",
+    "2002-12-15",
+    "2003-01-15",
+    "2003-02-15",
+    "2003-03-15",
+    "2003-04-15",
+    "2003-05-15",
+    "2003-06-15",
+    "2003-07-15",
+    "2003-08-15",
+    "2003-09-15",
+    "2003-10-15",
+    "2003-11-15",
+    "2003-12-15",
+    "2004-01-15",
+    "2004-02-15",
+    "2004-03-15",
+    "2004-04-15",
+    "2004-05-15",
+    "2004-06-15",
+    "2004-07-15",
+    "2004-08-15",
+    "2004-09-15",
+    "2004-10-15",
+    "2004-11-15",
+    "2004-12-15",
+    "2005-01-15",
+    "2005-02-15",
+    "2005-03-15",
+    "2005-04-15",
+    "2005-05-15",
+    "2005-06-15",
+    "2005-07-15",
+    "2005-08-15",
+    "2005-09-15",
+    "2005-10-15",
+    "2005-11-15",
+    "2005-12-15",
+    "2006-01-15",
+    "2006-02-15",
+    "2006-03-15",
+    "2006-04-15",
+    "2006-05-15",
+    "2006-06-15",
+    "2006-07-15",
+    "2006-08-15",
+    "2006-09-15",
+    "2006-10-15",
+    "2006-11-15",
+    "2006-12-15",
+    "2007-01-15",
+    "2007-02-15",
+    "2007-03-15",
+    "2007-04-15",
+    "2007-05-15",
+    "2007-06-15",
+    "2007-07-15",
+    "2007-08-15",
+    "2007-09-15",
+    "2007-10-15",
+    "2007-11-15",
+    "2007-12-15",
+    "2008-01-15",
+    "2008-02-15",
+    "2008-03-15",
+    "2008-04-15",
+    "2008-05-15",
+    "2008-06-15",
+    "2008-07-15",
+    "2008-08-15",
+    "2008-09-15",
+    "2008-10-15",
+    "2008-11-15",
+    "2008-12-15",
+    "2009-01-15",
+    "2009-02-15",
+    "2009-03-15",
+    "2009-04-15",
+    "2009-05-15",
+    "2009-06-15",
+    "2009-07-15",
+    "2009-08-15",
+    "2009-09-15",
+    "2009-10-15",
+    "2009-11-15",
+    "2009-12-15",
+    "2010-01-15",
+    "2010-02-15",
+    "2010-03-15",
+    "2010-04-15",
+    "2010-05-15",
+    "2010-06-15",
+    "2010-07-15",
+    "2010-08-15",
+    "2010-09-15",
+    "2010-10-15",
+    "2010-11-15",
+    "2010-12-15",
+    "2011-01-15",
+    "2011-02-15",
+    "2011-03-15",
+    "2011-04-15",
+    "2011-05-15",
+    "2011-06-15",
+    "2011-07-15",
+    "2011-08-15",
+    "2011-09-15",
+    "2011-10-15",
+    "2011-11-15",
+    "2011-12-15",
+    "2012-01-15",
+    "2012-02-15",
+    "2012-03-15",
+    "2012-04-15",
+    "2012-05-15",
+    "2012-06-15",
+    "2012-07-15",
+    "2012-08-15",
+    "2012-09-15",
+    "2012-10-15",
+    "2012-11-15",
+    "2012-12-15",
+    "2013-01-15",
+    "2013-02-15",
+    "2013-03-15",
+    "2013-04-15",
+    "2013-05-15",
+    "2013-06-15",
+    "2013-07-15",
+    "2013-08-15",
+    "2013-09-15",
+    "2013-10-15",
+    "2013-11-15",
+    "2013-12-15",
+    "2014-01-15",
+    "2014-02-15",
+    "2014-03-15",
+    "2014-04-15",
+    "2014-05-15",
+    "2014-06-15",
+    "2014-07-15",
+    "2014-08-15",
+    "2014-09-15",
+    "2014-10-15",
+    "2014-11-15",
+    "2014-12-15",
+    "2015-01-15",
+    "2015-02-15",
+    "2015-03-15",
+    "2015-04-15",
+    "2015-05-15",
+    "2015-06-15",
+    "2015-07-15",
+    "2015-08-15",
+    "2015-09-15",
+    "2015-10-15",
+    "2015-11-15",
+    "2015-12-15",
+    "2016-01-15",
+    "2016-02-15",
+    "2016-03-15",
+    "2016-04-15",
+    "2016-05-15",
+    "2016-06-15",
+    "2016-07-15",
+    "2016-08-15",
+    "2016-09-15",
+    "2016-10-15",
+    "2016-11-15",
+    "2016-12-15",
+    "2017-01-15",
+    "2017-02-15",
+    "2017-03-15",
+    "2017-04-15",
+    "2017-05-15",
+    "2017-06-15",
+    "2017-07-15",
+    "2017-08-15",
+    "2017-09-15",
+    "2017-10-15",
+    "2017-11-15",
+    "2017-12-15",
+    "2018-01-15",
+    "2018-02-15",
+    "2018-03-15",
+    "2018-04-15",
+    "2018-05-15",
+    "2018-06-15",
+    "2018-07-15",
+    "2018-08-15",
+    "2018-09-15",
+    "2018-10-15",
+    "2018-11-15",
+    "2018-12-15",
+    "2019-01-15",
+    "2019-02-15",
+    "2019-03-15",
+    "2019-04-15",
+    "2019-05-15",
+    "2019-06-15",
+    "2019-07-15",
+    "2019-08-15",
+    "2019-09-15",
+    "2019-10-15",
+    "2019-11-15",
+    "2019-12-15",
+    "2020-01-15",
+    "2020-02-15",
+    "2020-03-15",
+    "2020-04-15",
+    "2020-05-15",
+    "2020-06-15",
+    "2020-07-15",
+    "2020-08-15",
+    "2020-09-15",
+    "2020-10-15",
+    "2020-11-15",
+    "2020-12-15",
+    "2021-01-15",
+    "2021-02-15",
+    "2021-03-15",
+    "2021-04-15",
+    "2021-05-15",
+    "2021-06-15",
+    "2021-07-15",
+    "2021-08-15",
+    "2021-09-15",
+    "2021-10-15",
+    "2021-11-15",
+    "2021-12-15",
+    "2022-01-15",
+    "2022-02-15",
+    "2022-03-15",
+    "2022-04-15",
+    "2022-05-15",
+    "2022-06-15",
+    "2022-07-15",
+    "2022-08-15",
+    "2022-09-15",
+    "2022-10-15",
+    "2022-11-15",
+    "2022-12-15",
+    "2023-01-15",
+    "2023-02-15",
+    "2023-03-15",
+    "2023-04-15",
+    "2023-05-15",
+    "2023-06-15",
+    "2023-07-15",
+    "2023-08-15",
+    "2023-09-15",
+    "2023-10-15",
+    "2023-11-15",
+    "2023-12-15",
+    "2024-01-15",
+    "2024-02-15",
+    "2024-03-15",
+    "2024-04-15",
+    "2024-05-15",
+    "2024-06-15",
+    "2024-07-15",
+    "2024-08-15",
+    "2024-09-15",
+    "2024-10-15",
+    "2024-11-15",
+    "2024-12-15",
+    "2025-01-15",
+    "2025-02-15",
+    "2025-03-15",
+    "2025-04-15",
+    "2025-05-15",
+    "2025-06-15",
+    "2025-07-15",
+    "2025-08-15",
+    "2025-09-15",
+    "2025-10-15",
+    "2025-11-15",
+    "2025-12-15",
+    "2026-01-15",
+    "2026-02-15",
+    "2026-03-15",
+    "2026-04-15",
+    "2026-05-15",
+    "2026-06-15",
+    "2026-07-15",
+    "2026-08-15"
+  ],
+  "origins_deep": [
+    "1978-01-15",
+    "1978-02-15",
+    "1978-03-15",
+    "1978-04-15",
+    "1978-05-15",
+    "1978-06-15",
+    "1978-07-15",
+    "1978-08-15",
+    "1978-09-15",
+    "1978-10-15",
+    "1978-11-15",
+    "1978-12-15",
+    "1979-01-15",
+    "1979-02-15",
+    "1979-03-15",
+    "1979-04-15",
+    "1979-05-15",
+    "1979-06-15",
+    "1979-07-15",
+    "1979-08-15",
+    "1979-09-15",
+    "1979-10-15",
+    "1979-11-15",
+    "1979-12-15",
+    "1980-01-15",
+    "1980-02-15",
+    "1980-03-15",
+    "1980-04-15",
+    "1980-05-15",
+    "1980-06-15",
+    "1980-07-15",
+    "1980-08-15",
+    "1980-09-15",
+    "1980-10-15",
+    "1980-11-15",
+    "1980-12-15",
+    "1981-01-15",
+    "1981-02-15",
+    "1981-03-15",
+    "1981-04-15",
+    "1981-05-15",
+    "1981-06-15",
+    "1981-07-15",
+    "1981-08-15",
+    "1981-09-15",
+    "1981-10-15",
+    "1981-11-15",
+    "1981-12-15",
+    "1982-01-15",
+    "1982-02-15",
+    "1982-03-15",
+    "1982-04-15",
+    "1982-05-15",
+    "1982-06-15",
+    "1982-07-15",
+    "1982-08-15",
+    "1982-09-15",
+    "1982-10-15",
+    "1982-11-15",
+    "1982-12-15",
+    "1983-01-15",
+    "1983-02-15",
+    "1983-03-15",
+    "1983-04-15",
+    "1983-05-15",
+    "1983-06-15",
+    "1983-07-15",
+    "1983-08-15",
+    "1983-09-15",
+    "1983-10-15",
+    "1983-11-15",
+    "1983-12-15",
+    "1984-01-15",
+    "1984-02-15",
+    "1984-03-15",
+    "1984-04-15",
+    "1984-05-15",
+    "1984-06-15",
+    "1984-07-15",
+    "1984-08-15",
+    "1984-09-15",
+    "1984-10-15",
+    "1984-11-15",
+    "1984-12-15",
+    "1985-01-15",
+    "1985-02-15",
+    "1985-03-15",
+    "1985-04-15",
+    "1985-05-15",
+    "1985-06-15",
+    "1985-07-15",
+    "1985-08-15",
+    "1985-09-15",
+    "1985-10-15",
+    "1985-11-15",
+    "1985-12-15",
+    "1986-01-15",
+    "1986-02-15",
+    "1986-03-15",
+    "1986-04-15",
+    "1986-05-15",
+    "1986-06-15",
+    "1986-07-15",
+    "1986-08-15",
+    "1986-09-15",
+    "1986-10-15",
+    "1986-11-15",
+    "1986-12-15",
+    "1987-01-15",
+    "1987-02-15",
+    "1987-03-15",
+    "1987-04-15",
+    "1987-05-15",
+    "1987-06-15",
+    "1987-07-15",
+    "1987-08-15",
+    "1987-09-15",
+    "1987-10-15",
+    "1987-11-15",
+    "1987-12-15",
+    "1988-01-15",
+    "1988-02-15",
+    "1988-03-15",
+    "1988-04-15",
+    "1988-05-15",
+    "1988-06-15",
+    "1988-07-15",
+    "1988-08-15",
+    "1988-09-15",
+    "1988-10-15",
+    "1988-11-15",
+    "1988-12-15",
+    "1989-01-15",
+    "1989-02-15",
+    "1989-03-15",
+    "1989-04-15",
+    "1989-05-15",
+    "1989-06-15",
+    "1989-07-15",
+    "1989-08-15",
+    "1989-09-15",
+    "1989-10-15",
+    "1989-11-15",
+    "1989-12-15",
+    "1990-01-15",
+    "1990-02-15",
+    "1990-03-15",
+    "1990-04-15",
+    "1990-05-15",
+    "1990-06-15",
+    "1990-07-15",
+    "1990-08-15",
+    "1990-09-15",
+    "1990-10-15",
+    "1990-11-15",
+    "1990-12-15",
+    "1991-01-15",
+    "1991-02-15",
+    "1991-03-15",
+    "1991-04-15",
+    "1991-05-15",
+    "1991-06-15",
+    "1991-07-15",
+    "1991-08-15",
+    "1991-09-15",
+    "1991-10-15",
+    "1991-11-15",
+    "1991-12-15",
+    "1992-01-15",
+    "1992-02-15",
+    "1992-03-15",
+    "1992-04-15",
+    "1992-05-15",
+    "1992-06-15",
+    "1992-07-15",
+    "1992-08-15",
+    "1992-09-15",
+    "1992-10-15",
+    "1992-11-15",
+    "1992-12-15",
+    "1993-01-15",
+    "1993-02-15",
+    "1993-03-15",
+    "1993-04-15",
+    "1993-05-15",
+    "1993-06-15",
+    "1993-07-15",
+    "1993-08-15",
+    "1993-09-15",
+    "1993-10-15",
+    "1993-11-15",
+    "1993-12-15",
+    "1994-01-15",
+    "1994-02-15",
+    "1994-03-15",
+    "1994-04-15",
+    "1994-05-15",
+    "1994-06-15",
+    "1994-07-15",
+    "1994-08-15",
+    "1994-09-15",
+    "1994-10-15",
+    "1994-11-15",
+    "1994-12-15",
+    "1995-01-15",
+    "1995-02-15",
+    "1995-03-15",
+    "1995-04-15",
+    "1995-05-15",
+    "1995-06-15",
+    "1995-07-15",
+    "1995-08-15",
+    "1995-09-15",
+    "1995-10-15",
+    "1995-11-15",
+    "1995-12-15",
+    "1996-01-15",
+    "1996-02-15",
+    "1996-03-15",
+    "1996-04-15",
+    "1996-05-15",
+    "1996-06-15",
+    "1996-07-15",
+    "1996-08-15",
+    "1996-09-15",
+    "1996-10-15",
+    "1996-11-15",
+    "1996-12-15",
+    "1997-01-15",
+    "1997-02-15",
+    "1997-03-15",
+    "1997-04-15",
+    "1997-05-15",
+    "1997-06-15",
+    "1997-07-15",
+    "1997-08-15",
+    "1997-09-15",
+    "1997-10-15",
+    "1997-11-15",
+    "1997-12-15",
+    "1998-01-15"
+  ],
+  "origins_modern": [
+    "1998-02-15",
+    "1998-03-15",
+    "1998-04-15",
+    "1998-05-15",
+    "1998-06-15",
+    "1998-07-15",
+    "1998-08-15",
+    "1998-09-15",
+    "1998-10-15",
+    "1998-11-15",
+    "1998-12-15",
+    "1999-01-15",
+    "1999-02-15",
+    "1999-03-15",
+    "1999-04-15",
+    "1999-05-15",
+    "1999-06-15",
+    "1999-07-15",
+    "1999-08-15",
+    "1999-09-15",
+    "1999-10-15",
+    "1999-11-15",
+    "1999-12-15",
+    "2000-01-15",
+    "2000-02-15",
+    "2000-03-15",
+    "2000-04-15",
+    "2000-05-15",
+    "2000-06-15",
+    "2000-07-15",
+    "2000-08-15",
+    "2000-09-15",
+    "2000-10-15",
+    "2000-11-15",
+    "2000-12-15",
+    "2001-01-15",
+    "2001-02-15",
+    "2001-03-15",
+    "2001-04-15",
+    "2001-05-15",
+    "2001-06-15",
+    "2001-07-15",
+    "2001-08-15",
+    "2001-09-15",
+    "2001-10-15",
+    "2001-11-15",
+    "2001-12-15",
+    "2002-01-15",
+    "2002-02-15",
+    "2002-03-15",
+    "2002-04-15",
+    "2002-05-15",
+    "2002-06-15",
+    "2002-07-15",
+    "2002-08-15",
+    "2002-09-15",
+    "2002-10-15",
+    "2002-11-15",
+    "2002-12-15",
+    "2003-01-15",
+    "2003-02-15",
+    "2003-03-15",
+    "2003-04-15",
+    "2003-05-15",
+    "2003-06-15",
+    "2003-07-15",
+    "2003-08-15",
+    "2003-09-15",
+    "2003-10-15",
+    "2003-11-15",
+    "2003-12-15",
+    "2004-01-15",
+    "2004-02-15",
+    "2004-03-15",
+    "2004-04-15",
+    "2004-05-15",
+    "2004-06-15",
+    "2004-07-15",
+    "2004-08-15",
+    "2004-09-15",
+    "2004-10-15",
+    "2004-11-15",
+    "2004-12-15",
+    "2005-01-15",
+    "2005-02-15",
+    "2005-03-15",
+    "2005-04-15",
+    "2005-05-15",
+    "2005-06-15",
+    "2005-07-15",
+    "2005-08-15",
+    "2005-09-15",
+    "2005-10-15",
+    "2005-11-15",
+    "2005-12-15",
+    "2006-01-15",
+    "2006-02-15",
+    "2006-03-15",
+    "2006-04-15",
+    "2006-05-15",
+    "2006-06-15",
+    "2006-07-15",
+    "2006-08-15",
+    "2006-09-15",
+    "2006-10-15",
+    "2006-11-15",
+    "2006-12-15",
+    "2007-01-15",
+    "2007-02-15",
+    "2007-03-15",
+    "2007-04-15",
+    "2007-05-15",
+    "2007-06-15",
+    "2007-07-15",
+    "2007-08-15",
+    "2007-09-15",
+    "2007-10-15",
+    "2007-11-15",
+    "2007-12-15",
+    "2008-01-15",
+    "2008-02-15",
+    "2008-03-15",
+    "2008-04-15",
+    "2008-05-15",
+    "2008-06-15",
+    "2008-07-15",
+    "2008-08-15",
+    "2008-09-15",
+    "2008-10-15",
+    "2008-11-15",
+    "2008-12-15",
+    "2009-01-15",
+    "2009-02-15",
+    "2009-03-15",
+    "2009-04-15",
+    "2009-05-15",
+    "2009-06-15",
+    "2009-07-15",
+    "2009-08-15",
+    "2009-09-15",
+    "2009-10-15",
+    "2009-11-15",
+    "2009-12-15",
+    "2010-01-15",
+    "2010-02-15",
+    "2010-03-15",
+    "2010-04-15",
+    "2010-05-15",
+    "2010-06-15",
+    "2010-07-15",
+    "2010-08-15",
+    "2010-09-15",
+    "2010-10-15",
+    "2010-11-15",
+    "2010-12-15",
+    "2011-01-15",
+    "2011-02-15",
+    "2011-03-15",
+    "2011-04-15",
+    "2011-05-15",
+    "2011-06-15",
+    "2011-07-15",
+    "2011-08-15",
+    "2011-09-15",
+    "2011-10-15",
+    "2011-11-15",
+    "2011-12-15",
+    "2012-01-15",
+    "2012-02-15",
+    "2012-03-15",
+    "2012-04-15",
+    "2012-05-15",
+    "2012-06-15",
+    "2012-07-15",
+    "2012-08-15",
+    "2012-09-15",
+    "2012-10-15",
+    "2012-11-15",
+    "2012-12-15",
+    "2013-01-15",
+    "2013-02-15",
+    "2013-03-15",
+    "2013-04-15",
+    "2013-05-15",
+    "2013-06-15",
+    "2013-07-15",
+    "2013-08-15",
+    "2013-09-15",
+    "2013-10-15",
+    "2013-11-15",
+    "2013-12-15",
+    "2014-01-15",
+    "2014-02-15",
+    "2014-03-15",
+    "2014-04-15",
+    "2014-05-15",
+    "2014-06-15",
+    "2014-07-15",
+    "2014-08-15",
+    "2014-09-15",
+    "2014-10-15",
+    "2014-11-15",
+    "2014-12-15",
+    "2015-01-15",
+    "2015-02-15",
+    "2015-03-15",
+    "2015-04-15",
+    "2015-05-15",
+    "2015-06-15",
+    "2015-07-15",
+    "2015-08-15",
+    "2015-09-15",
+    "2015-10-15",
+    "2015-11-15",
+    "2015-12-15",
+    "2016-01-15",
+    "2016-02-15",
+    "2016-03-15",
+    "2016-04-15",
+    "2016-05-15",
+    "2016-06-15",
+    "2016-07-15",
+    "2016-08-15",
+    "2016-09-15",
+    "2016-10-15",
+    "2016-11-15",
+    "2016-12-15",
+    "2017-01-15",
+    "2017-02-15",
+    "2017-03-15",
+    "2017-04-15",
+    "2017-05-15",
+    "2017-06-15",
+    "2017-07-15",
+    "2017-08-15",
+    "2017-09-15",
+    "2017-10-15",
+    "2017-11-15",
+    "2017-12-15",
+    "2018-01-15",
+    "2018-02-15",
+    "2018-03-15",
+    "2018-04-15",
+    "2018-05-15",
+    "2018-06-15",
+    "2018-07-15",
+    "2018-08-15",
+    "2018-09-15",
+    "2018-10-15",
+    "2018-11-15",
+    "2018-12-15",
+    "2019-01-15",
+    "2019-02-15",
+    "2019-03-15",
+    "2019-04-15",
+    "2019-05-15",
+    "2019-06-15",
+    "2019-07-15",
+    "2019-08-15",
+    "2019-09-15",
+    "2019-10-15",
+    "2019-11-15",
+    "2019-12-15",
+    "2020-01-15",
+    "2020-02-15",
+    "2020-03-15",
+    "2020-04-15",
+    "2020-05-15",
+    "2020-06-15",
+    "2020-07-15",
+    "2020-08-15",
+    "2020-09-15",
+    "2020-10-15",
+    "2020-11-15",
+    "2020-12-15",
+    "2021-01-15",
+    "2021-02-15",
+    "2021-03-15",
+    "2021-04-15",
+    "2021-05-15",
+    "2021-06-15",
+    "2021-07-15",
+    "2021-08-15",
+    "2021-09-15",
+    "2021-10-15",
+    "2021-11-15",
+    "2021-12-15",
+    "2022-01-15",
+    "2022-02-15",
+    "2022-03-15",
+    "2022-04-15",
+    "2022-05-15",
+    "2022-06-15",
+    "2022-07-15",
+    "2022-08-15",
+    "2022-09-15",
+    "2022-10-15",
+    "2022-11-15",
+    "2022-12-15",
+    "2023-01-15",
+    "2023-02-15",
+    "2023-03-15",
+    "2023-04-15",
+    "2023-05-15",
+    "2023-06-15",
+    "2023-07-15",
+    "2023-08-15",
+    "2023-09-15",
+    "2023-10-15",
+    "2023-11-15",
+    "2023-12-15",
+    "2024-01-15",
+    "2024-02-15",
+    "2024-03-15",
+    "2024-04-15",
+    "2024-05-15",
+    "2024-06-15",
+    "2024-07-15",
+    "2024-08-15",
+    "2024-09-15",
+    "2024-10-15",
+    "2024-11-15",
+    "2024-12-15",
+    "2025-01-15",
+    "2025-02-15",
+    "2025-03-15",
+    "2025-04-15",
+    "2025-05-15",
+    "2025-06-15",
+    "2025-07-15",
+    "2025-08-15",
+    "2025-09-15",
+    "2025-10-15",
+    "2025-11-15",
+    "2025-12-15",
+    "2026-01-15",
+    "2026-02-15",
+    "2026-03-15",
+    "2026-04-15",
+    "2026-05-15",
+    "2026-06-15",
+    "2026-07-15",
+    "2026-08-15"
+  ],
+  "policy": {
+    "AAA10Y": {
+      "earliest_vintage": "2014-02-15",
+      "mode": "SHORTCUT",
+      "reason": "never revised: 0 of 8094 overlapping observations differ across the probe span"
+    },
+    "BAA": {
+      "earliest_vintage": "1997-02-15",
+      "mode": "SHORTCUT",
+      "reason": "never revised: 0 of 1156 overlapping observations differ across the probe span"
+    },
+    "BAA10Y": {
+      "earliest_vintage": "2014-02-15",
+      "mode": "SHORTCUT",
+      "reason": "never revised: 0 of 7347 overlapping observations differ across the probe span"
+    },
+    "BABATOTALSAUS": {
+      "earliest_vintage": "2021-02-15",
+      "mode": "VINTAGES",
+      "reason": "no vintage history; cannot be a walled input at all"
+    },
+    "BAMLH0A0HYM2": {
+      "earliest_vintage": "2024-02-15",
+      "mode": "VINTAGES",
+      "reason": "no vintage history; cannot be a walled input at all"
+    },
+    "BOGZ1FL153064486Q": {
+      "earliest_vintage": "2020-02-15",
+      "mode": "VINTAGES",
+      "reason": "no vintage history; cannot be a walled input at all"
+    },
+    "CIVPART": {
+      "earliest_vintage": "1997-02-15",
+      "mode": "SHORTCUT",
+      "reason": "verified against the 1998-02-15 vintage, which precedes the earliest origin 1998-02-15; largest change 0.2990%"
+    },
+    "CORCACBS": {
+      "earliest_vintage": "2012-02-15",
+      "mode": "VINTAGES",
+      "reason": "revision behaviour was only measured over the probe span (107/120 differ, up to 10.8696%); the earliest origin is 1998-02-15 and no vintage at or before it was compared, so the shortcut would be an assumption"
+    },
+    "CPIAUCSL": {
+      "earliest_vintage": "1973-02-15",
+      "mode": "SHORTCUT",
+      "reason": "verified against the 1998-02-15 vintage, which precedes the earliest origin 1998-02-15; largest change 0.1394%"
+    },
+    "DFF": {
+      "earliest_vintage": "2006-02-15",
+      "mode": "SHORTCUT",
+      "reason": "never revised: 0 of 22233 overlapping observations differ across the probe span"
+    },
+    "DGORDER": {
+      "earliest_vintage": "2000-02-15",
+      "mode": "VINTAGES",
+      "reason": "revision behaviour was only measured over the probe span (219/278 differ, up to 5.6881%); the earliest origin is 1998-02-15 and no vintage at or before it was compared, so the shortcut would be an assumption"
+    },
+    "DGS10": {
+      "earliest_vintage": "2006-02-15",
+      "mode": "SHORTCUT",
+      "reason": "immaterial where measurable: 1 of 13327 observations differ, by at most 0.2484%. EXTRAPOLATED -- no vintage at or before 1998-02-15 exists to verify the window"
+    },
+    "DGS2": {
+      "earliest_vintage": "2006-02-15",
+      "mode": "SHORTCUT",
+      "reason": "immaterial where measurable: 2 of 9735 observations differ, by at most 0.2656%. EXTRAPOLATED -- no vintage at or before 1998-02-15 exists to verify the window"
+    },
+    "DRCCLACBS": {
+      "earliest_vintage": "2012-02-15",
+      "mode": "VINTAGES",
+      "reason": "revision behaviour was only measured over the probe span (69/96 differ, up to 2.4609%); the earliest origin is 1998-02-15 and no vintage at or before it was compared, so the shortcut would be an assumption"
+    },
+    "DRSFRMACBS": {
+      "earliest_vintage": "2012-02-15",
+      "mode": "VINTAGES",
+      "reason": "revision behaviour was only measured over the probe span (85/96 differ, up to 4.6358%); the earliest origin is 1998-02-15 and no vintage at or before it was compared, so the shortcut would be an assumption"
+    },
+    "EMRATIO": {
+      "earliest_vintage": "1997-02-15",
+      "mode": "SHORTCUT",
+      "reason": "verified against the 1998-02-15 vintage, which precedes the earliest origin 1998-02-15; largest change 0.3140%"
+    },
+    "GDPC1": {
+      "earliest_vintage": "1992-02-15",
+      "mode": "VINTAGES",
+      "reason": "revision behaviour was only measured over the probe span (273/273 differ, up to 14.4854%); the earliest origin is 1998-02-15 and no vintage at or before it was compared, so the shortcut would be an assumption"
+    },
+    "HOUST": {
+      "earliest_vintage": "1961-02-15",
+      "mode": "VINTAGES",
+      "reason": "verified against 1998-02-15 and FAILED: largest change 4.3758% exceeds 1.00%"
+    },
+    "HSN1F": {
+      "earliest_vintage": "2000-02-15",
+      "mode": "VINTAGES",
+      "reason": "revision behaviour was only measured over the probe span (28/627 differ, up to 3.0702%); the earliest origin is 1998-02-15 and no vintage at or before it was compared, so the shortcut would be an assumption"
+    },
+    "INDPRO": {
+      "earliest_vintage": "1960-02-15",
+      "mode": "VINTAGES",
+      "reason": "revision behaviour was only measured over the probe span (1156/1156 differ, up to 3.7409%); the earliest origin is 1998-02-15 and no vintage at or before it was compared, so the shortcut would be an assumption"
+    },
+    "JTSQUR": {
+      "earliest_vintage": "2011-02-15",
+      "mode": "VINTAGES",
+      "reason": "revision behaviour was only measured over the probe span (60/172 differ, up to 9.5238%); the earliest origin is 1998-02-15 and no vintage at or before it was compared, so the shortcut would be an assumption"
+    },
+    "MICH": {
+      "earliest_vintage": "2000-02-15",
+      "mode": "SHORTCUT",
+      "reason": "never revised: 0 of 448 overlapping observations differ across the probe span"
+    },
+    "MORTGAGE30US": {
+      "earliest_vintage": "2011-02-15",
+      "mode": "SHORTCUT",
+      "reason": "never revised: 0 of 2303 overlapping observations differ across the probe span"
+    },
+    "PCEC96": {
+      "earliest_vintage": "1980-02-15",
+      "mode": "VINTAGES",
+      "reason": "revision behaviour was only measured over the probe span (99/99 differ, up to 13.3065%); the earliest origin is 1998-02-15 and no vintage at or before it was compared, so the shortcut would be an assumption"
+    },
+    "PERMIT": {
+      "earliest_vintage": "2000-02-15",
+      "mode": "VINTAGES",
+      "reason": "revision behaviour was only measured over the probe span (39/663 differ, up to 5.6436%); the earliest origin is 1998-02-15 and no vintage at or before it was compared, so the shortcut would be an assumption"
+    },
+    "PSAVERT": {
+      "earliest_vintage": "1997-02-15",
+      "mode": "VINTAGES",
+      "reason": "revision behaviour was only measured over the probe span (627/675 differ, up to 31.4286%); the earliest origin is 1998-02-15 and no vintage at or before it was compared, so the shortcut would be an assumption"
+    },
+    "REVOLSL": {
+      "earliest_vintage": "1997-02-15",
+      "mode": "VINTAGES",
+      "reason": "verified against 1998-02-15 and FAILED: largest change 105016.3158% exceeds 1.00%"
+    },
+    "T10Y3M": {
+      "earliest_vintage": "2014-02-15",
+      "mode": "SHORTCUT",
+      "reason": "never revised: 0 of 8344 overlapping observations differ across the probe span"
+    },
+    "TDSP": {
+      "earliest_vintage": "2000-02-15",
+      "mode": "VINTAGES",
+      "reason": "revision behaviour was only measured over the probe span (140/140 differ, up to 1.6399%); the earliest origin is 1998-02-15 and no vintage at or before it was compared, so the shortcut would be an assumption"
+    },
+    "U6RATE": {
+      "earliest_vintage": "2012-02-15",
+      "mode": "VINTAGES",
+      "reason": "revision behaviour was only measured over the probe span (100/256 differ, up to 1.6529%); the earliest origin is 1998-02-15 and no vintage at or before it was compared, so the shortcut would be an assumption"
+    },
+    "UEMP15OV": {
+      "earliest_vintage": "1964-02-15",
+      "mode": "VINTAGES",
+      "reason": "revision behaviour was only measured over the probe span (52/808 differ, up to 1.6785%); the earliest origin is 1998-02-15 and no vintage at or before it was compared, so the shortcut would be an assumption"
+    },
+    "UMCSENT": {
+      "earliest_vintage": "1999-02-15",
+      "mode": "SHORTCUT",
+      "reason": "never revised: 0 of 448 overlapping observations differ across the probe span"
+    },
+    "UNRATE": {
+      "earliest_vintage": "1961-02-15",
+      "mode": "VINTAGES",
+      "reason": "verified against 1998-02-15 and FAILED: largest change 2.1277% exceeds 1.00%"
+    },
+    "USACSCICP02STSAM": {
+      "earliest_vintage": "2019-02-15",
+      "mode": "VINTAGES",
+      "reason": "no vintage history; cannot be a walled input at all"
+    }
+  },
+  "profiles": [
+    {
+      "behaviour": "STABLE",
+      "differing": 0,
+      "max_relative_change": 0.0,
+      "needs_vintages": false,
+      "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+      "overlap": 448,
+      "series_id": "UMCSENT"
+    },
+    {
+      "behaviour": "STABLE",
+      "differing": 0,
+      "max_relative_change": 0.0,
+      "needs_vintages": false,
+      "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+      "overlap": 448,
+      "series_id": "MICH"
+    },
+    {
+      "behaviour": "REVISED",
+      "differing": 627,
+      "max_relative_change": 0.314286,
+      "needs_vintages": true,
+      "note": "",
+      "overlap": 675,
+      "series_id": "PSAVERT"
+    },
+    {
+      "behaviour": "REVISED",
+      "differing": 69,
+      "max_relative_change": 0.024609,
+      "needs_vintages": true,
+      "note": "",
+      "overlap": 96,
+      "series_id": "DRCCLACBS"
+    },
+    {
+      "behaviour": "STABLE",
+      "differing": 522,
+      "max_relative_change": 0.009089,
+      "needs_vintages": false,
+      "note": "92.1% of overlapping observations changed, by at most 0.91%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+      "overlap": 567,
+      "series_id": "REVOLSL"
+    },
+    {
+      "behaviour": "NO_VINTAGE_HISTORY",
+      "differing": 0,
+      "max_relative_change": 0.0,
+      "needs_vintages": false,
+      "note": "BABATOTALSAUS@2015-05-15: HTTP 404 \u2014 this series has no vintage at that date, which for a series that begins later is a fact about the data rather than a failure. A series with no vintage history cannot be a walled model INPUT: using its current values at a historical origin would leak revisions published later.",
+      "overlap": 0,
+      "series_id": "BABATOTALSAUS"
+    },
+    {
+      "behaviour": "REVISED",
+      "differing": 60,
+      "max_relative_change": 0.095238,
+      "needs_vintages": true,
+      "note": "",
+      "overlap": 172,
+      "series_id": "JTSQUR"
+    },
+    {
+      "behaviour": "STABLE",
+      "differing": 15,
+      "max_relative_change": 0.001595,
+      "needs_vintages": false,
+      "note": "1.9% of overlapping observations changed, by at most 0.16%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+      "overlap": 808,
+      "series_id": "CIVPART"
+    },
+    {
+      "behaviour": "REVISED",
+      "differing": 107,
+      "max_relative_change": 0.108696,
+      "needs_vintages": true,
+      "note": "",
+      "overlap": 120,
+      "series_id": "CORCACBS"
+    },
+    {
+      "behaviour": "REVISED",
+      "differing": 85,
+      "max_relative_change": 0.046358,
+      "needs_vintages": true,
+      "note": "",
+      "overlap": 96,
+      "series_id": "DRSFRMACBS"
+    },
+    {
+      "behaviour": "REVISED",
+      "differing": 140,
+      "max_relative_change": 0.016399,
+      "needs_vintages": true,
+      "note": "",
+      "overlap": 140,
+      "series_id": "TDSP"
+    },
+    {
+      "behaviour": "REVISED",
+      "differing": 100,
+      "max_relative_change": 0.016529,
+      "needs_vintages": true,
+      "note": "",
+      "overlap": 256,
+      "series_id": "U6RATE"
+    },
+    {
+      "behaviour": "STABLE",
+      "differing": 17,
+      "max_relative_change": 0.001718,
+      "needs_vintages": false,
+      "note": "2.1% of overlapping observations changed, by at most 0.17%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+      "overlap": 808,
+      "series_id": "EMRATIO"
+    },
+    {
+      "behaviour": "NO_VINTAGE_HISTORY",
+      "differing": 0,
+      "max_relative_change": 0.0,
+      "needs_vintages": false,
+      "note": "BOGZ1FL153064486Q@2015-05-15: HTTP 404 \u2014 this series has no vintage at that date, which for a series that begins later is a fact about the data rather than a failure. A series with no vintage history cannot be a walled model INPUT: using its current values at a historical origin would leak revisions published later.",
+      "overlap": 0,
+      "series_id": "BOGZ1FL153064486Q"
+    },
+    {
+      "behaviour": "REVISED",
+      "differing": 219,
+      "max_relative_change": 0.056881,
+      "needs_vintages": true,
+      "note": "",
+      "overlap": 278,
+      "series_id": "DGORDER"
+    },
+    {
+      "behaviour": "STABLE",
+      "differing": 28,
+      "max_relative_change": 0.030702,
+      "needs_vintages": false,
+      "note": "4.5% of overlapping observations changed, by at most 3.07%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+      "overlap": 627,
+      "series_id": "HSN1F"
+    },
+    {
+      "behaviour": "NO_VINTAGE_HISTORY",
+      "differing": 0,
+      "max_relative_change": 0.0,
+      "needs_vintages": false,
+      "note": "USACSCICP02STSAM@2015-05-15: HTTP 404 \u2014 this series has no vintage at that date, which for a series that begins later is a fact about the data rather than a failure. A series with no vintage history cannot be a walled model INPUT: using its current values at a historical origin would leak revisions published later.",
+      "overlap": 0,
+      "series_id": "USACSCICP02STSAM"
+    },
+    {
+      "behaviour": "STABLE",
+      "differing": 5,
+      "max_relative_change": 0.018182,
+      "needs_vintages": false,
+      "note": "0.6% of overlapping observations changed, by at most 1.82%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+      "overlap": 808,
+      "series_id": "UNRATE"
+    },
+    {
+      "behaviour": "STABLE",
+      "differing": 51,
+      "max_relative_change": 0.001359,
+      "needs_vintages": false,
+      "note": "6.2% of overlapping observations changed, by at most 0.14%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+      "overlap": 819,
+      "series_id": "CPIAUCSL"
+    },
+    {
+      "behaviour": "STABLE",
+      "differing": 0,
+      "max_relative_change": 0.0,
+      "needs_vintages": false,
+      "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+      "overlap": 22233,
+      "series_id": "DFF"
+    },
+    {
+      "behaviour": "STABLE",
+      "differing": 2,
+      "max_relative_change": 0.002656,
+      "needs_vintages": false,
+      "note": "0.0% of overlapping observations changed, by at most 0.27%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+      "overlap": 9735,
+      "series_id": "DGS2"
+    },
+    {
+      "behaviour": "STABLE",
+      "differing": 1,
+      "max_relative_change": 0.002484,
+      "needs_vintages": false,
+      "note": "0.0% of overlapping observations changed, by at most 0.25%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+      "overlap": 13327,
+      "series_id": "DGS10"
+    },
+    {
+      "behaviour": "NO_VINTAGE_HISTORY",
+      "differing": 0,
+      "max_relative_change": 0.0,
+      "needs_vintages": false,
+      "note": "BAMLH0A0HYM2@2015-05-15: HTTP 404 \u2014 this series has no vintage at that date, which for a series that begins later is a fact about the data rather than a failure. A series with no vintage history cannot be a walled model INPUT: using its current values at a historical origin would leak revisions published later.",
+      "overlap": 0,
+      "series_id": "BAMLH0A0HYM2"
+    },
+    {
+      "behaviour": "STABLE",
+      "differing": 27,
+      "max_relative_change": 0.036717,
+      "needs_vintages": false,
+      "note": "4.0% of overlapping observations changed, by at most 3.67%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+      "overlap": 675,
+      "series_id": "HOUST"
+    },
+    {
+      "behaviour": "REVISED",
+      "differing": 1156,
+      "max_relative_change": 0.037409,
+      "needs_vintages": true,
+      "note": "",
+      "overlap": 1156,
+      "series_id": "INDPRO"
+    },
+    {
+      "behaviour": "REVISED",
+      "differing": 99,
+      "max_relative_change": 0.133065,
+      "needs_vintages": true,
+      "note": "",
+      "overlap": 99,
+      "series_id": "PCEC96"
+    },
+    {
+      "behaviour": "REVISED",
+      "differing": 273,
+      "max_relative_change": 0.144854,
+      "needs_vintages": true,
+      "note": "",
+      "overlap": 273,
+      "series_id": "GDPC1"
+    },
+    {
+      "behaviour": "STABLE",
+      "differing": 0,
+      "max_relative_change": 0.0,
+      "needs_vintages": false,
+      "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+      "overlap": 7347,
+      "series_id": "BAA10Y"
+    },
+    {
+      "behaviour": "STABLE",
+      "differing": 0,
+      "max_relative_change": 0.0,
+      "needs_vintages": false,
+      "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+      "overlap": 8094,
+      "series_id": "AAA10Y"
+    },
+    {
+      "behaviour": "STABLE",
+      "differing": 0,
+      "max_relative_change": 0.0,
+      "needs_vintages": false,
+      "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+      "overlap": 1156,
+      "series_id": "BAA"
+    },
+    {
+      "behaviour": "STABLE",
+      "differing": 0,
+      "max_relative_change": 0.0,
+      "needs_vintages": false,
+      "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+      "overlap": 8344,
+      "series_id": "T10Y3M"
+    },
+    {
+      "behaviour": "STABLE",
+      "differing": 0,
+      "max_relative_change": 0.0,
+      "needs_vintages": false,
+      "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+      "overlap": 2303,
+      "series_id": "MORTGAGE30US"
+    },
+    {
+      "behaviour": "REVISED",
+      "differing": 39,
+      "max_relative_change": 0.056436,
+      "needs_vintages": true,
+      "note": "",
+      "overlap": 663,
+      "series_id": "PERMIT"
+    },
+    {
+      "behaviour": "REVISED",
+      "differing": 52,
+      "max_relative_change": 0.016785,
+      "needs_vintages": true,
+      "note": "",
+      "overlap": 808,
+      "series_id": "UEMP15OV"
+    }
+  ],
+  "requested": 6464,
+  "requests_per_series": {
+    "AAA10Y": 1,
+    "BAA": 1,
+    "BAA10Y": 1,
+    "BABATOTALSAUS": 67,
+    "BAMLH0A0HYM2": 31,
+    "BOGZ1FL153064486Q": 79,
+    "CIVPART": 1,
+    "CORCACBS": 175,
+    "CPIAUCSL": 1,
+    "DFF": 1,
+    "DGORDER": 319,
+    "DGS10": 1,
+    "DGS2": 1,
+    "DRCCLACBS": 175,
+    "DRSFRMACBS": 175,
+    "EMRATIO": 1,
+    "GDPC1": 415,
+    "HOUST": 584,
+    "HSN1F": 319,
+    "INDPRO": 584,
+    "JTSQUR": 187,
+    "MICH": 1,
+    "MORTGAGE30US": 1,
+    "PCEC96": 559,
+    "PERMIT": 319,
+    "PSAVERT": 355,
+    "REVOLSL": 355,
+    "T10Y3M": 1,
+    "TDSP": 319,
+    "U6RATE": 175,
+    "UEMP15OV": 584,
+    "UMCSENT": 1,
+    "UNRATE": 584,
+    "USACSCICP02STSAM": 91
+  }
+}

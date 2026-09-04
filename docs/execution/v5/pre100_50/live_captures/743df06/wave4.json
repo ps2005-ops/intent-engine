@@ -1,0 +1,301 @@
+[
+  {
+    "company": "PepsiCo, Inc.",
+    "deployed_sha": "743df06",
+    "status": "FAILED",
+    "run_id": "01M0JGXJVMT707FA8PKC70QCQQ",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/743df06/pepsico_inc",
+    "process_before": {
+      "boot_id": "d7df6481c13e43c7",
+      "started_at": 1787326618.1855707,
+      "uptime_seconds": 1500.1
+    },
+    "entry_domain": "",
+    "seconds": 349,
+    "first_useful": null,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JGXJVMT707FA8PKC70QCQQ/progress"
+  },
+  {
+    "company": "McDonald's Corporation",
+    "deployed_sha": "743df06",
+    "status": "READY",
+    "run_id": "01M0JH91APP9Y7D7CNSYSHBF18",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/743df06/mcdonald_s_corporation",
+    "process_before": {
+      "boot_id": "d7df6481c13e43c7",
+      "started_at": 1787326618.1855707,
+      "uptime_seconds": 1875.4
+    },
+    "entry_domain": "mcdonalds.com",
+    "seconds": 83,
+    "first_useful": 83,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JH91APP9Y7D7CNSYSHBF18",
+    "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "outcome_by_route": {
+      "run": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "intro": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "slides": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "full": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "story": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "history": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "connect": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "Eli Lilly and Company",
+    "deployed_sha": "743df06",
+    "status": "READY",
+    "run_id": "01M0JHMD053A7DCTHWHR1HXJ8F",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/743df06/eli_lilly_and_company",
+    "process_before": {
+      "boot_id": "d7df6481c13e43c7",
+      "started_at": 1787326618.1855707,
+      "uptime_seconds": 2250.3
+    },
+    "entry_domain": "lilly.com",
+    "seconds": 52,
+    "first_useful": 52,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JHMD053A7DCTHWHR1HXJ8F",
+    "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "outcome_by_route": {
+      "run": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "intro": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "slides": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "full": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "story": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "history": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "connect": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "Johnson & Johnson",
+    "deployed_sha": "743df06",
+    "status": "READY",
+    "run_id": "01M0JHZV6X5AC0RYV4TT83XE6E",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/743df06/johnson_johnson",
+    "process_before": {
+      "boot_id": "d7df6481c13e43c7",
+      "started_at": 1787326618.1855707,
+      "uptime_seconds": 2625.2
+    },
+    "entry_domain": "jnj.com",
+    "seconds": 126,
+    "first_useful": 126,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JHZV6X5AC0RYV4TT83XE6E/intro",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0JHZV6X5AC0RYV4TT83XE6E/progress: timeout"
+    ]
+  },
+  {
+    "company": "UnitedHealth Group Incorporated",
+    "deployed_sha": "743df06",
+    "status": "READY",
+    "run_id": "01M0JJB9CR742F3F01MMSFYE8J",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/743df06/unitedhealth_group_incorporated",
+    "process_before": {
+      "boot_id": "d7df6481c13e43c7",
+      "started_at": 1787326618.1855707,
+      "uptime_seconds": 3000.3
+    },
+    "entry_domain": "unitedhealthgroup.com",
+    "seconds": 111,
+    "first_useful": 111,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JJB9CR742F3F01MMSFYE8J/intro",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "Pfizer Inc.",
+    "deployed_sha": "743df06",
+    "status": "READY",
+    "run_id": "01M0JJPQNR7VVZPQEJQXTEC7NK",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/743df06/pfizer_inc",
+    "process_before": {
+      "boot_id": "d7df6481c13e43c7",
+      "started_at": 1787326618.1855707,
+      "uptime_seconds": 3375.3
+    },
+    "entry_domain": "pfizer.com",
+    "seconds": 223,
+    "first_useful": 223,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JJPQNR7VVZPQEJQXTEC7NK",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0JJPQNR7VVZPQEJQXTEC7NK/progress: timeout",
+      "GET /runs/01M0JJPQNR7VVZPQEJQXTEC7NK/progress: timeout",
+      "GET /runs/01M0JJPQNR7VVZPQEJQXTEC7NK/progress: timeout"
+    ]
+  },
+  {
+    "company": "Merck & Co., Inc.",
+    "deployed_sha": "743df06",
+    "status": "READY",
+    "run_id": "01M0JK5M91E18Q99HR18QBT5CH",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/743df06/merck_co_inc",
+    "process_before": {
+      "boot_id": "d7df6481c13e43c7",
+      "started_at": 1787326618.1855707,
+      "uptime_seconds": 3861.9
+    },
+    "entry_domain": "",
+    "seconds": 188,
+    "first_useful": 188,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JK5M91E18Q99HR18QBT5CH",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0JK5M91E18Q99HR18QBT5CH/progress: timeout",
+      "GET /runs/01M0JK5M91E18Q99HR18QBT5CH/progress: timeout",
+      "GET /runs/01M0JK5M91E18Q99HR18QBT5CH/progress: timeout"
+    ]
+  },
+  {
+    "company": "Caterpillar Inc.",
+    "deployed_sha": "743df06",
+    "status": "READY",
+    "run_id": "01M0JKH117QB53H47ZMNAE3BQE",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/743df06/caterpillar_inc",
+    "process_before": {
+      "boot_id": "d7df6481c13e43c7",
+      "started_at": 1787326618.1855707,
+      "uptime_seconds": 4236.9
+    },
+    "entry_domain": "caterpillar.com",
+    "seconds": 121,
+    "first_useful": 121,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JKH117QB53H47ZMNAE3BQE",
+    "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "outcome_by_route": {
+      "run": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "intro": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "slides": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "full": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "story": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "history": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "connect": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "Deere & Company",
+    "deployed_sha": "743df06",
+    "status": "READY",
+    "run_id": "01M0JKWFCXNY9GPNQV25Q5RT61",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/743df06/deere_company",
+    "process_before": {
+      "boot_id": "d7df6481c13e43c7",
+      "started_at": 1787326618.1855707,
+      "uptime_seconds": 4612.1
+    },
+    "entry_domain": "deere.com",
+    "seconds": 108,
+    "first_useful": 108,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JKWFCXNY9GPNQV25Q5RT61/intro",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0JKWFCXNY9GPNQV25Q5RT61/progress: timeout"
+    ]
+  },
+  {
+    "company": "Union Pacific Corporation",
+    "deployed_sha": "743df06",
+    "status": "READY",
+    "run_id": "01M0JM87XK7WJNSV53RYH9ZM65",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/743df06/union_pacific_corporation",
+    "process_before": {
+      "boot_id": "d7df6481c13e43c7",
+      "started_at": 1787326618.1855707,
+      "uptime_seconds": 4997.5
+    },
+    "entry_domain": "up.com",
+    "seconds": 62,
+    "first_useful": 62,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JM87XK7WJNSV53RYH9ZM65",
+    "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "outcome_by_route": {
+      "run": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "intro": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "slides": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "full": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "story": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "history": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "connect": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  }
+]

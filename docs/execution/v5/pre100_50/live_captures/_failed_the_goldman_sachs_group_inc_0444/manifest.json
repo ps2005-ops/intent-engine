@@ -1,0 +1,15 @@
+{
+ "company": "The Goldman Sachs Group, Inc.",
+ "deployed_sha": "f8c183f",
+ "captured_at": "2026-08-22T04:36:30Z",
+ "run_id": "",
+ "outcome": "",
+ "routes": {},
+ "seconds": null,
+ "reliability": {
+  "connection_reset": 0,
+  "quota_block": false,
+  "retry_required": 0,
+  "manual_recovery": 0
+ }
+}

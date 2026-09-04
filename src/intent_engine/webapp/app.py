@@ -16,8 +16,10 @@ import html as _html
 import json
 import pathlib
 import logging
+import os
 import re
 from dataclasses import asdict
+import contextlib
 import time
 import traceback
 import uuid
@@ -33,7 +35,8 @@ from intent_engine.founder_intelligence.fixtures import (
 )
 from intent_engine.founder_intelligence.presentation import (
     _BASE_CSS as _APP_CSS,
-    render_landing_html, render_report_preview, render_result_html,
+    render_company_entry_html, render_landing_html, render_report_preview,
+    render_result_html,
 )
 from intent_engine.company_ingestion.entities import (
     AMBIGUOUS, name_from_domain, resolve_choice, resolve_entity,
@@ -46,7 +49,10 @@ from intent_engine.company_ingestion.service import CompanyIngestionService
 from intent_engine.founder_intelligence.service import FounderIntelligenceService
 from intent_engine.strategic_intelligence import evidence_classes as _EC
 from intent_engine.webapp import acceptance as _acc
+from intent_engine.webapp import outcome as OUTCOME
+from intent_engine.webapp import autocomplete as _AC
 from intent_engine.webapp import failures as _failures
+from intent_engine.webapp import run_recovery as _recovery
 from intent_engine.webapp.auth import AuthService, PASSWORD_RESET_STATUS
 from intent_engine.webapp.records import WebAppError, WebEvent
 from intent_engine.webapp.sharing import SharingService
@@ -100,6 +106,43 @@ def central_view_after_headline(thesis: str, headline_view: str) -> str:
         return thesis[len(lead):].strip()
     return thesis
 
+
+#: The progress page's own furniture: who is being analysed, what is being
+#: assembled, and the preview note demoted to a footnote. Kept beside the
+#: page it styles rather than in the shared sheet, because none of it appears
+#: anywhere else and a shared rule nobody can find is how stylesheets rot.
+_PROGRESS_CSS = """
+<style>
+.analysing{border:1px solid var(--line,#d1d5db);border-left:3px solid
+var(--accent,#1d4ed8);border-radius:8px;padding:.6rem .8rem;margin:.8rem 0;
+background:var(--panel,#f8fafc);font-size:.95rem}
+.analysing b{font-size:1.02rem}
+.analysing .idbits{color:var(--muted,#4b5563);font-size:.85rem;
+margin-left:.5rem}
+.stages{list-style:none;counter-reset:s;margin:1rem 0;padding:0;
+display:grid;gap:.28rem;max-width:34rem}
+.stages li{display:flex;justify-content:space-between;gap:1rem;
+align-items:baseline;padding:.32rem .6rem;border-radius:7px;
+border:1px solid transparent;font-size:.93rem}
+.stages li.done{color:var(--muted,#4b5563)}
+.stages li.now{border-color:var(--accent,#1d4ed8);font-weight:650;
+background:var(--panel,#f8fafc)}
+.stages li.wait{color:var(--muted,#4b5563);opacity:.62}
+.stages .st{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;
+color:var(--muted,#4b5563);white-space:nowrap}
+.fineprint{font-size:.8rem;color:var(--muted,#4b5563);margin-top:1.6rem;
+border-top:1px solid var(--line,#d1d5db);padding-top:.6rem;max-width:34rem}
+/* THE CLOCK. Tabular figures so the digits do not shift the line every
+   second -- a timer that makes the layout twitch reads as a glitch. */
+.elapsed{font-size:1.05rem;color:var(--muted,#4b5563);margin:.5rem 0 .2rem}
+.elapsed #pg-timer{font-variant-numeric:tabular-nums;
+font-feature-settings:"tnum";font-weight:650;font-size:1.5rem;
+color:var(--fg,#111827);letter-spacing:.01em}
+.eta{font-size:.9rem;color:var(--muted,#4b5563);margin:.1rem 0 1rem;
+max-width:34rem}
+@media (prefers-reduced-motion:reduce){.elapsed #pg-timer{transition:none}}
+</style>
+"""
 
 _BRIEF_CSS = """
 <style>
@@ -251,6 +294,17 @@ color:#f3f4f6;border-color:#606e88}
    Give the transparency back and keep the edge off. Both selectors outrank
    the two rules above, so this holds wherever it lands in the cascade. */
 :root nav button,:root button.linkish{background:transparent;border-width:0}
+/* ...and a PRIMARY action is not a box either. The blanket fill above outranks
+   the landing sheet's accent (both are one class + one element, and this sheet
+   is injected second), so in dark every primary submit rendered #1b2230 — the
+   same flat panel as a text input. Measured locally at 390px in dark: the
+   first screen's dominant control and an inert field were the same colour,
+   which is the whole hierarchy of that screen erased.
+   Two selectors' worth of specificity, so it holds regardless of order, and it
+   re-points to the same accent pair the dark palette already defines rather
+   than inventing a third blue. */
+:root button.primary,:root form.analyze button[type=submit]{
+background:#7aa2ff;color:#0f141c;border-width:0}
 :root .why,:root .alt,:root .q,:root .unavailable,:root .state,
 :root .limitation,:root .muted,:root .when{color:#c3cad6}
 /* Deck surfaces that hard-code a light literal rather than var(--panel), and
@@ -438,6 +492,20 @@ _SOURCE_FAMILY = {
 }
 
 
+def _language_note(inputs: dict) -> str:
+    """The language-rejected documents, compactly, for the gate header."""
+    rows = inputs.get("language_rejected") or []
+    if not rows:
+        return "-"
+    return ";".join(
+        f"{(r.get('url') or '').split('/')[-1][:28] or r.get('source_id')}"
+        f"@m{r.get('marker_density')}/a{r.get('accent_density')}"
+        f"/{r.get('chars')}c" for r in rows[:6])
+
+
+_CONSTANT_SHAPED = re.compile(r"^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+$")
+
+
 class WebApp:
     """The WSGI callable. All state-changing routes require login + CSRF."""
 
@@ -446,6 +514,36 @@ class WebApp:
         config.validate()
         self.config = config
         self.web_store = WebStore(config.web_store_path)
+        # THE TENANCY SEAM. Sited beside the other stores rather than built
+        # per request: the directory must be reload-stable, because the private
+        # graph partition is keyed on the tenant id and a re-minted id would
+        # silently show a founder an empty business instead of an error.
+        from intent_engine.core.tenant import ScopeAuditLog
+        from intent_engine.business_graph.private_store import PrivateGraphStore
+        from intent_engine.webapp.tenancy import TenantDirectory, TenantReceiptLog
+
+        _state = config.web_store_path.parent
+        self._tenant_directory = TenantDirectory(_state / "tenant_directory.jsonl")
+        self._private_graph = PrivateGraphStore(_state)
+        self._scope_audit = ScopeAuditLog(_state / "tenant_scope_audit.jsonl")
+        self._tenant_receipts = TenantReceiptLog(_state / "tenant_receipts.jsonl")
+        # Bounded counters for D-MDR-001. Deliberately in memory and
+        # deliberately nameless: a stream recording WHICH private columns a
+        # tenant was asked for is itself a private dataset, so this one counts
+        # and never names.
+        from intent_engine.external_intel.minimum_data_request import (
+            MDRTelemetry as _MDRTelemetry,
+        )
+        self._mdr_telemetry = _MDRTelemetry()
+        # The 100-company program's first telemetry substrate. Counts what the
+        # Market/Founder join actually did, and keeps "the producer never
+        # published" separate from "this side refused it" -- the two numbers
+        # whose conflation hid 22 silently refused dossiers.
+        from intent_engine.demo_dossier.telemetry import DossierTelemetry
+        self._demo_telemetry = DossierTelemetry()
+        #: The last per-company bridge reading, for the operator surface. Not
+        #: a cache: the dossier build always re-assesses.
+        self._market_bridge_last: dict = {}
         self.fi = FounderIntelligenceService(config.fi_store_path)
         # THE REASONING BACKEND WAS NEVER WIRED IN.
         #
@@ -571,7 +669,24 @@ class WebApp:
         self._analysis_pool = _Pool(max_workers=1,
                                     thread_name_prefix="analysis")
         self._analysis_lock = _threading.Lock()
+        # Per-request state that must not leak between concurrent
+        # requests. `claim` is this browser's signed last-run claim;
+        # a plain attribute on `self` would let one visitor's cookie
+        # decide what another visitor is told.
+        self._request = _threading.local()
         self._analysis_inflight: dict = {}   # run_id -> started monotonic
+        # §21. ONE BUDGET PER ANALYSIS, created when the work is queued and
+        # read by every stage that spends it. Before this, each stage was
+        # separately bounded and the SUM was bounded by nothing: fourteen
+        # sources x an 8s timeout x three attempts is the 4m54s a real
+        # customer waited on Apple while every individual component stayed
+        # inside its own limit.
+        self._analysis_deadlines: dict = {}  # run_id -> Deadline
+        self._analysis_gaps: dict = {}       # run_id -> spent budget + gaps
+        # §40. When the CORE became readable, which is the number the
+        # interactive SLO is written against -- distinct from when the whole
+        # analysis finished, which is what every previous measurement recorded.
+        self._core_ready_at: dict = {}       # run_id -> monotonic
         self._analysis_attempts: dict = {}   # run_id -> executions started
         # Instrumented so duplicate execution is measurable rather than
         # inferred from output: a second worker on one attempt can produce an
@@ -604,6 +719,7 @@ class WebApp:
 
     # --- plumbing -------------------------------------------------------------
     def __call__(self, environ, start_response):
+        _began = time.monotonic()
         try:
             status, headers, body = self._route(environ)
         except WebAppError as exc:
@@ -629,18 +745,121 @@ class WebApp:
                             f"reference if you report it."))
             status, headers, body = self._error_page(500, detail)
         headers = headers + _SECURITY_HEADERS
+        # THE OUTCOME IS STATED, NOT INFERRED FROM PROSE.
+        #
+        # Meta Platforms rendered "Analysis could not be completed" on two
+        # deployed builds and was scored a PASS, because the acceptance
+        # instrument searched for the literal string "Limited analysis" and
+        # that page says something else. Every surface, and every instrument,
+        # was separately guessing a customer outcome from the words on a page.
+        #
+        # So the run's outcome travels with the response. A harness reads a
+        # named state; it no longer has to know every sentence the product can
+        # write. `_route` already ran, so this costs one read of state the
+        # request just used.
+        run_id = self._run_id_of(environ.get("PATH_INFO", ""))
+        if run_id:
+            try:
+                stated = self.analysis_outcome(run_id)
+                # A PAGE THAT FAILED MAY NOT REPORT THE RUN'S HAPPY OUTCOME.
+                #
+                # MEASURED on 743df06: Pfizer's `/runs/<id>` returned HTTP 500
+                # -- "Something went wrong on our side", 513 characters --
+                # while carrying `X-Analysis-Outcome: FULL_ANALYSIS`, because
+                # this header was attached after the error page was built and
+                # never looked at the status it was travelling on. Every other
+                # route rendered (full=21,718 chars), so the ANALYSIS was
+                # fine; the customer's landing screen was not, and the header
+                # said otherwise to anything reading it.
+                #
+                # The run's own outcome is unchanged and still readable
+                # elsewhere. What this states is what happened to THIS
+                # response, which is what a header on this response means.
+                if status[:1] == "5":
+                    stated = OUTCOME.ANALYSIS_FAILED
+                headers = headers + [("X-Analysis-Outcome", stated),
+                                     ("X-Evidence-Gate",
+                                      self.evidence_gate_summary(run_id))]
+                timing = self.request_timing(
+                    (time.monotonic() - _began) * 1000.0)
+                if timing:
+                    headers = headers + [("X-Request-Timing", timing)]
+            except Exception:                               # noqa: BLE001
+                # Reporting an outcome must never be able to break the page
+                # whose outcome it reports.
+                _LOG.exception("outcome header failed for %s", run_id)
         payload = body.encode()
         headers.append(("Content-Length", str(len(payload))))
         start_response(status, headers)
         return [payload]
 
     def _route(self, environ):
+        # CLEARED FIRST, POPULATED LATER. Worker threads are reused, so a
+        # claim left behind by the previous request is the previous BROWSER's
+        # claim. Two routes below return before the cookie is read (the
+        # untrusted-host refusal and the machine dossier route), and neither
+        # reads it today.
+        #
+        # DEFENCE IN DEPTH, AND SAID SO PLAINLY. Deleting this line is a
+        # mutation that runs GREEN, because every path that reads the claim
+        # assigns it a few lines further down; it is not a guard and is not
+        # counted as one in `break_proofs_run_durability.py`. It exists so
+        # that a future early return which reads the claim inherits None
+        # rather than another visitor's.
+        self._request.claim = None
+        # ONE READINESS READ PER REQUEST, NOT THREE.
+        #
+        # `_progress` asks `result_readiness` up to three times, and each
+        # answer costs several reads of the ingestion log -- the same log the
+        # running analysis is appending to, so nothing upstream can cache it
+        # for us. `result_readiness` is documented READ-ONLY and composes,
+        # approves and fetches nothing, so two calls inside one request can
+        # only differ by a race the page has no way to act on.
+        #
+        # Per-REQUEST and on the thread-local, never on `self`: a memo shared
+        # between requests would show one visitor a state belonging to
+        # another, which is the defect the line above exists to prevent.
+        self._request.readiness = {}
+        self._request.spans = []
+        self._request.reads = {}
+        # THE ECONOMIC CONTEXT MEMO, CLEARED FOR THE SAME REASON THE OTHERS
+        # ARE. Worker threads are reused; a memo left behind is the previous
+        # visitor's company, and this one carries their run's economic
+        # exposures and decision delta.
+        self._request.econ = {}
         if (self.config.env == "production"
                 and environ.get("HTTP_HOST", "").split(":")[0]
                 not in self.config.trusted_hosts):
             return self._error_page(400, "untrusted host")
         method = environ["REQUEST_METHOD"]
         path = environ.get("PATH_INFO", "/")
+
+        # MACHINE ROUTE, HANDLED BEFORE ANYTHING READS THE BODY.
+        #
+        # Deliberately above the session lookup and above `self._form`, which
+        # consumes `wsgi.input` and would leave nothing to read. It carries no
+        # cookie and cannot: the caller is the market publisher on another
+        # machine, authenticated by a shared token rather than by a session,
+        # so the CSRF gate below has nothing to protect here and no session to
+        # protect it with.
+        #
+        # It does not exist unless configured, and never in production. See
+        # `external_intel/dossier_ingest`.
+        if path == "/internal/strategic-dossier" and method == "POST":
+            return self._ingest_strategic_dossier(environ)
+
+        # THE CLAIM THIS BROWSER CARRIES ABOUT ITS OWN LAST RUN.
+        #
+        # Read once, here, and kept on a thread-local rather than on `self` or
+        # on the shared session dict: two requests can be in flight at the
+        # same time and they do not necessarily come from the same browser.
+        # It is only ever consulted AFTER an ownership check has already
+        # failed (`_no_such_run`), so it can widen what a reader is TOLD about
+        # a run that is already gone and can never widen access to one that
+        # still exists. See `webapp.run_recovery`.
+        self._request.claim = _recovery.verify(
+            self.config.secret, self._cookie(environ, _recovery.COOKIE_NAME))
+
         sid = self._cookie(environ, "sid")
         session = self.auth.session(sid) if sid else None
         if session is None and sid and self.config.demo_mode:
@@ -700,9 +919,58 @@ class WebApp:
             return self._ready()
         if path == "/version":
             from intent_engine._version import version_info
-            return self._ok_json(version_info())
+            from intent_engine.webapp import storage_state as _ss
+            # THE COMMIT AND THE PROCESS, in one cheap call. `/readyz` folds
+            # every append-only store to answer, so it is the wrong place to
+            # poll while an analysis is running; this route touches nothing.
+            # A caller that sees `process.boot_id` change has watched a
+            # restart, which is the difference between "the product lost my
+            # run" and "the instance was replaced under me".
+            return self._ok_json(dict(version_info(),
+                                      process=_ss.process_identity()))
         if path == "/internal/acceptance" and method == "POST":
             return self._acceptance(environ)
+        if path == "/internal-impact" and method == "GET":
+            return self._internal_impact(session, environ)
+        if path == "/decisions" and method == "GET":
+            return self._decisions(session, environ)
+        # The write path. POST-only and NOT in `post_exempt`, so it carries
+        # the ordinary session + CSRF gate above: recording what a person
+        # chose is the most forgeable thing in the product.
+        if path == "/decisions/record" and method == "POST":
+            return self._record_decision(session, form, environ)
+        # NOT "/learning": that path is the operations dashboard and is
+        # login-gated. Mounting an unauthenticated page there shadowed it and
+        # let a demo guest read the operations view -- caught by
+        # test_a_demo_guest_cannot_read_the_operations_dashboard.
+        if path == "/learning-acceleration" and method == "GET":
+            return self._learning_acceleration(environ)
+        # THE SUGGESTION ENDPOINT. Public registries only (§82) — it reaches
+        # the curated entity registry, the validation manifest and the SEC's
+        # public ticker table, and nothing that holds tenant state. Session-
+        # free by design: a visitor typing a company name has not logged in
+        # yet, and requiring a session to spell a company would put the login
+        # wall back in front of the first useful thing the product does.
+        if path == "/api/companies" and method == "GET":
+            return self._company_suggestions(environ)
+        if path == "/demo-dossiers/telemetry" and method == "GET":
+            return self._ok_json(self._demo_telemetry.as_dict())
+        if path == "/demo-dossiers" and method == "GET":
+            return self._demo_dossier_index()
+        # THE RENDERED SCREENS, BEFORE THE JSON PREFIX MATCH.
+        #
+        # `/demo-dossiers/<c>` is a prefix match, so it would swallow
+        # `/demo-dossiers/<c>/xray` and hand "cloudflare/xray" to the store
+        # as a company id -- a 404 that reads like the company is missing.
+        if route == ("GET", "demo-dossiers", 3) and parts[2] in (
+                "xray", "full", "deck"):
+            return self._decision_screen(parts[1], parts[2])
+        if route == ("GET", "demo-dossiers", 3) and parts[2] == "memory":
+            return self._memory_screen(parts[1])
+        if route == ("GET", "demo-dossiers", 3) and parts[2] == "evidence":
+            return self._evidence_screen(parts[1])
+        if path.startswith("/demo-dossiers/") and method == "GET":
+            return self._demo_dossier_detail(path[len("/demo-dossiers/"):])
         if path == "/onboarding" and method == "GET":
             return self._onboarding(session)
         if path == "/onboarding/dismiss" and method == "POST":
@@ -715,10 +983,25 @@ class WebApp:
         if path == "/signup":
             return (self._signup_page() if method == "GET"
                     else self._signup_post(form))
+        # TRY THE DEMO -> THE COMPANY QUESTION. This used to mint a session and
+        # send the visitor back to "/", which was the form; now that "/" is the
+        # pitch, returning there would loop them past the button they just
+        # pressed.
         if (path == "/demo" and method == "POST"
                 and self.config.demo_mode):
             new_sid = self.auth.create_anonymous_session()
-            return self._redirect("/", set_sid=new_sid)
+            return self._redirect("/demo", set_sid=new_sid)
+        if path == "/demo" and method == "GET":
+            # A visitor may arrive here directly (a shared link, a back
+            # button, a bookmark). Mint the guest session rather than
+            # bouncing them to a page whose only button lands right back
+            # here.
+            if session is None and self.config.demo_mode:
+                new_sid = self.auth.create_anonymous_session()
+                return self._redirect("/demo", set_sid=new_sid)
+            if session is None:
+                return self._redirect("/login")
+            return self._demo_entry(session)
         if path == "/logout" and method == "POST":
             self.auth.logout(sid)
             return self._redirect("/", clear_cookie=True)
@@ -751,20 +1034,56 @@ class WebApp:
             return self._sources_approve(session, parts[1], form)
         if route == ("GET", "runs", 4) and parts[2] == "sources":
             return self._source_detail(session, parts[1], parts[3])
+        if route == ("GET", "runs", 3) and parts[2] == "timing":
+            return self._timing_json(session, parts[1])
+        if route == ("GET", "runs", 3) and parts[2] == "telemetry":
+            return self._telemetry_json(session, parts[1])
+        if route == ("GET", "runs", 3) and parts[2] == "progress.json":
+            return self._progress_json(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "progress":
             return self._progress(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "report":
             return self._report(session, parts[1])
+        # THE SIX-STEP STORY (§17). `founder_brief.flow` owns the order;
+        # these three routes are the steps the product did not have.
+        if route == ("GET", "runs", 3) and parts[2] == "intro":
+            return self._with_ask(session, parts[1],
+                                  self._intro_page(session, parts[1]))
+        # THE SCROLLABLE DECISION NARRATIVE. It was the default route until
+        # step 1 took that place, and a designed 900-word surface with no
+        # route into it is exactly the defect the verdict register exists to
+        # catch. It is now a secondary surface, reached from the step that
+        # raises the question it answers.
+        if route == ("GET", "runs", 3) and parts[2] == "answer":
+            return self._with_ask(session, parts[1],
+                                  self._answer_page(session, parts[1]))
+        if route == ("GET", "runs", 3) and parts[2] == "history":
+            return self._history_page(session, parts[1])
+        if route == ("GET", "runs", 3) and parts[2] == "connect":
+            return self._connect_page(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "story":
-            return self._story_page(session, parts[1])
+            return self._with_ask(session, parts[1],
+                                  self._story_page(session, parts[1]))
         if route == ("GET", "runs", 3) and parts[2] == "dashboard":
-            return self._intelligence_page(session, parts[1])
+            return self._with_ask(session, parts[1],
+                                  self._intelligence_page(session, parts[1]))
         if route == ("GET", "runs", 3) and parts[2] == "brief":
-            return self._executive_brief_page(session, parts[1])
+            return self._with_ask(
+                session, parts[1],
+                self._executive_brief_page(session, parts[1]))
+        if route == ("GET", "runs", 3) and parts[2] == "xray":
+            return self._with_ask(session, parts[1],
+                                  self._run_xray(session, parts[1]))
+        if route == ("GET", "runs", 3) and parts[2] == "evidence":
+            return self._with_ask(session, parts[1],
+                                  self._run_evidence(session, parts[1]))
         if route == ("GET", "runs", 3) and parts[2] == "slides":
-            return self._slides_page(session, parts[1])
+            return self._with_ask(session, parts[1],
+                                  self._slides_page(session, parts[1]))
         if route == ("GET", "runs", 3) and parts[2] == "full":
-            return self._run_page(session, parts[1], layer="full")
+            return self._with_ask(
+                session, parts[1],
+                self._run_page(session, parts[1], layer="full"))
         if route == ("GET", "runs", 4) and parts[2] == "evidence":
             return self._evidence(session, parts[1], parts[3])
         if route == ("POST", "runs", 3) and parts[2] == "conversation":
@@ -786,7 +1105,29 @@ class WebApp:
         # deployed commit, scheduler job state and status.json. None of that is
         # a product surface, and a visitor evaluating the product should never
         # be looking at its plumbing.
-        if parts and parts[0] in ("learning", "dashboard", "assistant"):
+        # D29. `/status.json` and `/feedback` were left out of this list.
+        #
+        # Measured live on 2cce6d9 as an anonymous demo guest: /dashboard,
+        # /learning and /assistant all answered 404, and /status.json answered
+        # 200 with the deployed commit, the market engine's portfolio value
+        # and paper P&L, prediction counts and scheduler job state. The
+        # comment below describes exactly this defect being closed for the
+        # console; the JSON behind the console kept serving it.
+        #
+        # The gate is a list, so the fix is to the list -- guarding
+        # /status.json alone would leave /feedback, which exports the same
+        # operator material one route over.
+        # SCOPED TO WHAT WAS PROVEN. The first version added /feedback and
+        # /feedback.jsonl too, on the reasoning that they export the same
+        # operator material. They do -- but the operator sessions that read
+        # them are themselves anonymous-flagged in this build, so the wider
+        # gate 404'd legitimate operator access and turned an information
+        # leak into a lockout. /feedback's exposure is recorded as unverified
+        # rather than guessed at; /status.json is what was measured leaking.
+        # `hosted` joins the list from the market lineage: the hosted-runtime
+        # console is the same class of surface as /dashboard.
+        if parts and parts[0] in ("learning", "dashboard", "assistant",
+                                  "status.json", "hosted"):
             if session is None:
                 return self._redirect("/login")
             if session.get("anonymous"):
@@ -805,6 +1146,10 @@ class WebApp:
             return self._my_analyses(session)
         if route == ("GET", "dashboard", 1):
             return self._dashboard_page(session)
+        if route == ("GET", "hosted", 1):
+            return self._hosted_dashboard(session)
+        if path == "/hosted.json" and method == "GET":
+            return self._ok_json(self._hosted_data())
         if path in ("/feedback", "/feedback.jsonl") and method == "GET":
             if session is None:
                 return self._redirect("/login")
@@ -814,6 +1159,10 @@ class WebApp:
             if session is None:
                 return self._redirect("/login")
             return self._ok_json(self._platform_status())
+        if route == ("GET", "runs", 3) and parts[2] == "provenance.json":
+            if session is None:
+                return self._redirect("/login")
+            return self._ok_json(self._run_provenance(parts[1]))
         if route == ("GET", "assistant", 1):
             return self._assistant_page(session)
         return self._error_page(404, "page not found")
@@ -834,7 +1183,14 @@ class WebApp:
         except ValueError:
             size = 0
         body = environ["wsgi.input"].read(min(size, 1_000_000)).decode()
-        return {k: (",".join(v) if k == "cand" else v[0])
+        # A REPEATED FIELD IS A LIST, AND TWO FIELDS ARE REPEATED.
+        #
+        # `cand` (source approval) and `tag` (feedback) both post one value
+        # per checked box. Taking `v[0]` kept the first and silently dropped
+        # every other selection, so a reader who ticked four feedback tags had
+        # three of them discarded with no error anywhere.
+        multi = ("cand", "tag")
+        return {k: (",".join(v) if k in multi else v[0])
                 for k, v in parse_qs(body).items()}
 
     def _client_ip(self, environ) -> str:
@@ -916,11 +1272,44 @@ class WebApp:
                      f"{_retry_phrase(min(session_hits) + 86400 - now)} "
                      "Analyses already running are unaffected, and finished "
                      "ones stay under your analyses.")
+        # RESERVED, NOT SPENT. §4: quota is committed only once a run has
+        # actually been accepted and scheduled.
+        #
+        # MEASURED on the deployed preview, six times: /analyze answered 500
+        # in under a second and each one still consumed one of the visitor's
+        # ten analyses for the hour, because the hit was recorded here and
+        # the failure happened afterwards. A visitor could spend their whole
+        # hour on requests that produced nothing and were never explained.
         ip_hits.append(now)
         session_hits.append(now)
         self._demo_ip_hits[remote] = ip_hits
         session["analyses"] = session_hits
         return None
+
+    def _release_demo_quota(self, session, remote, stamp) -> None:
+        """Give back a reservation for a run that never started. §4.
+
+        Idempotent by construction: it removes ONE occurrence of the exact
+        timestamp it was given, so a double release cannot refund twice and
+        a concurrent request's reservation is untouched.
+        """
+        if stamp is None or not session.get("anonymous"):
+            return
+        hits = self._demo_ip_hits.get(remote)
+        if hits and stamp in hits:
+            hits.remove(stamp)
+            self._demo_ip_hits[remote] = hits
+        analyses = list(session.get("analyses") or [])
+        if stamp in analyses:
+            analyses.remove(stamp)
+            session["analyses"] = analyses
+
+    def _demo_quota_reservation(self, session, remote):
+        """The timestamp `_demo_rate_limited` just reserved, or None."""
+        if not session.get("anonymous"):
+            return None
+        hits = self._demo_ip_hits.get(remote) or []
+        return hits[-1] if hits else None
 
     def _stylize(self, body: str) -> str:
         """Ensure every page carries the shared stylesheet and the
@@ -982,8 +1371,255 @@ class WebApp:
         return status, [("Content-Type", "text/html; charset=utf-8"),
                         *extra_headers], self._stylize(body)
 
+    def _telemetry_json(self, session, run_id):
+        """What acquisition had to do, and why the run ended as it did.
+
+        DIAGNOSTICS, NEVER CUSTOMER COPY -- the same contract `/timing` is
+        written under. It exists because a bounded abstention was
+        indistinguishable from every other bounded abstention: 23 of 50 runs
+        in the last requalification took that path under one label, and a
+        cohort cannot act on a number that merges a rate limit, a refusal, a
+        spent time budget and a genuinely thin company.
+
+        IMPLEMENTED IS NOT INSTRUMENTED. `source_health`,
+        `evidence_role_coverage` and `abstention_reason` all had producers
+        and no route, which in this codebase has repeatedly meant "built,
+        green, and never once read in production".
+
+        Owner-gated exactly as `/timing` is: it names hosts this run
+        contacted, so it is not public.
+        """
+        if not self._owned(session, run_id) or not self._is_real_run(run_id):
+            return self._no_such_run(session, run_id)
+        try:
+            payload = self.ci.retrieval_telemetry(run_id)
+        except Exception as exc:                            # noqa: BLE001
+            # A DIAGNOSTIC MAY NEVER FAIL THE THING IT DIAGNOSES, and it may
+            # not pretend either: an unreadable telemetry surface says so.
+            payload = {"error": f"telemetry unavailable: {type(exc).__name__}"}
+        payload["run_id"] = run_id
+        payload["reading"] = self._reading_diagnostics(run_id)
+        payload["thesis"] = self._thesis_diagnostics(run_id)
+        return self._ok_json(payload)
+
+    def _thesis_diagnostics(self, run_id) -> dict:
+        """WHICH strategic reading won, what it beat, and what gated it.
+
+        Thesis collapse -- Synopsys, Emerson Electric and Lowe's each
+        handed the byte-identical headline decision "Whether a supply
+        commitment should be treated as fixed or renegotiable" -- took a
+        source read to attribute, because the run published its answer
+        and nothing about how it got there. Four different defects
+        produce that one symptom, and they call for opposite repairs:
+        a classification that answered UNKNOWN, a gate that admitted
+        everything, a ranking that chose badly, or evidence that
+        supported nothing better.
+
+        `service.py` records the answer at CORE, from the objects the
+        gates were actually given. This carries it, unchanged, to a
+        surface a cohort run can read.
+
+        DIAGNOSTICS, NEVER CUSTOMER COPY, and owner-gated with the rest
+        of `/telemetry` -- no page links to it and no reader is shown a
+        pattern id.
+        """
+        # `_strategic_report_for`, NOT `_result`. A DIAGNOSTIC MAY NOT
+        # MANUFACTURE THE THING IT REPORTS ON: `_result` recomputes the
+        # SYNTHETIC DEMO analysis for any id it does not already hold, so
+        # after a restart this route would have answered a question about
+        # this run with the demo company's reading -- and produced a whole
+        # demo analysis as a side effect of being asked. The real-run
+        # accessor answers None instead, and None is said out loud below.
+        try:
+            report = self._strategic_report_for(run_id) or {}
+        except Exception as exc:                         # noqa: BLE001
+            return {"error": f"unavailable: {type(exc).__name__}"}
+        audit = dict(report.get("pattern_audit") or {})
+        if not audit:
+            # SAID PLAINLY. A run composed before this existed, or one
+            # that never reached composition, is not a run whose gate
+            # admitted everything -- and a silent {} would read as one.
+            return {"error": "no pattern audit recorded for this run"}
+        audit["reasoning_provenance"] = str(
+            report.get("reasoning_provenance") or "")
+        audit["result_state"] = str(report.get("result_state") or "")
+        audit["deep_status"] = str(report.get("deep_status") or "")
+        return audit
+
+    def _reading_diagnostics(self, run_id) -> dict:
+        """WHY a strategic reading was withheld, when one was.
+
+        Q&A refuses a strategic question whenever `brief.key_insight is None`
+        and no executive contract overrides it. Measured live on e4b5ad6b,
+        that refusal fired on 3-5 of 6 questions for EVERY company in the
+        ten-company matrix -- including Synopsys and Amgen, each with 13
+        documents and all three evidence roles filled. The headline question
+        came back "There is not enough public evidence to answer that
+        confidently" on a run that had just published a 50,000-character
+        report.
+
+        Whether that is correct conservatism or a mis-calibrated gate is
+        decided by `safe_insights`, which either received no candidates or
+        dropped all of them -- and `brief.dropped` records which. NOTHING
+        EXPOSED IT, so the question could not be answered from a live run at
+        all; it had to be inferred from source. That is the gap this closes.
+
+        Diagnostics only. It changes no decision and is owner-gated with the
+        rest of the telemetry surface.
+        """
+        try:
+            brief, _report, _name = self._founder_layers(run_id)
+        except Exception as exc:                            # noqa: BLE001
+            return {"error": f"unavailable: {type(exc).__name__}"}
+        insight = getattr(brief, "key_insight", None)
+        dropped = list(getattr(brief, "dropped", ()) or ())
+        contract = None
+        try:
+            contract = self._executive_contract(run_id)
+        except Exception:                                   # noqa: BLE001
+            contract = None
+        return {
+            "key_insight_present": insight is not None,
+            "withheld_reason": str(getattr(brief, "withheld_reason", "") or ""),
+            "candidates_dropped": len(dropped),
+            "dropped_because": [str(d)[:160] for d in dropped[:6]],
+            "contract_present": contract is not None,
+            "contract_reading_exists": bool(
+                getattr(contract, "reading_exists", False)),
+            # The two together decide `withheld` in `founder_brief.qa.answer`,
+            # which is what makes a strategic question answerable or not.
+            "qa_would_withhold": (
+                insight is None
+                and not bool(getattr(contract, "reading_exists", False))),
+        }
+
+    def _timing_json(self, session, run_id):
+        """CANONICAL measurement, so the harness stops inferring from prose.
+
+        Every previous number came from watching the rendered product:
+        CORE_READY was "the progress page stopped redirecting" and the
+        evidence count was a regex for `https?://` over the HTML -- which
+        could never match, because this product cites evidence through
+        internal routes. Six identical zeros across six companies were the
+        tell. A benchmark that reads the UI measures the UI.
+
+        Each value therefore states WHERE IT CAME FROM. A metric that cannot
+        name its source cannot be trusted at the point it decides a release.
+        """
+        if not self._owned(session, run_id) or not self._is_real_run(run_id):
+            return self._no_such_run(session, run_id)
+        marks = self.ci.lifecycle(run_id)
+        import datetime as _dtm
+
+        def _at(key):
+            raw = marks.get(key)
+            if not raw:
+                return None
+            try:
+                return _dtm.datetime.fromisoformat(
+                    raw.replace("Z", "+00:00"))
+            except ValueError:
+                return None
+
+        def _delta(a, b):
+            x, y = _at(a), _at(b)
+            return round((y - x).total_seconds(), 2) if x and y else None
+
+        documents = list(self.ci.store.retrieved(run_id))
+        report = (self._results.get(run_id) or {}).get("strategic_report") or {}
+        return self._ok_json({
+            "run_id": run_id,
+            "markers": marks,
+            "core_latency_s": _delta("accepted", "core_ready"),
+            "deep_latency_s": _delta("accepted", "deep_ready"),
+            "evidence_count": len(documents),
+            "deep_status": report.get("deep_status"),
+            "result_state": report.get("result_state"),
+            "run_state": self.ci.store.run_state(run_id),
+            "trace": self.ci.trace(run_id),
+            "provenance": {
+                "markers": "persisted_lifecycle_event:ci.lifecycle_marked",
+                "core_latency_s": "persisted_lifecycle_event",
+                "deep_latency_s": "persisted_lifecycle_event",
+                "evidence_count": "canonical_retrieved_documents",
+                "deep_status": "composed_report_object",
+                "result_state": "composed_report_object",
+                "run_state": "persisted_run_transitions",
+                "trace": "persisted_spans:ci.trace_recorded",
+            },
+        })
+
     def _ok_json(self, obj):
         return "200 OK", [("Content-Type", "application/json")], json.dumps(obj)
+
+    def _ingest_strategic_dossier(self, environ):
+        """Accept one published dossier from the market publisher.
+
+        Thin on purpose: read the body, hand it to the contract, translate the
+        refusal into a status. Every decision about what is acceptable lives
+        in `dossier_ingest`, which shares the allowlist with the local file
+        path, so this route cannot become a second, weaker way in.
+        """
+        from intent_engine.external_intel import dossier_ingest as DI
+        try:
+            length = int(environ.get("CONTENT_LENGTH") or 0)
+        except (TypeError, ValueError):
+            length = 0
+        if length > DI.MAX_BYTES:
+            return ("413 Payload Too Large",
+                    [("Content-Type", "application/json")],
+                    json.dumps({"error": "dossier too large"}))
+        raw = environ["wsgi.input"].read(length) if length else b""
+        try:
+            result = DI.ingest(
+                raw, runtime_root=self._runtime_root,
+                provided_token=environ.get("HTTP_X_DOSSIER_TOKEN", ""),
+                request_host=environ.get("HTTP_HOST", ""))
+        except DI.IngestRefused as exc:
+            _LOG.info("strategic dossier refused: %s", exc.reason)
+            return (f"{exc.status} Refused",
+                    [("Content-Type", "application/json")],
+                    json.dumps({"error": exc.reason}))
+        # The consumer caches external context per run; a newly-arrived
+        # dossier must be visible to the NEXT analysis rather than to the
+        # next process.
+        self._external_cache.clear()
+        _LOG.info("strategic dossier %s for %s (%s)", result["status"],
+                  result["company_id"], result["revision"])
+        return self._ok_json(result)
+
+    # --- hosted runtime dashboard: read-only view over the durable DB -------
+    # Behind the same operations-console gate as /learning and /dashboard: a
+    # logged-in account only, never a guest demo session. It is plumbing, and a
+    # visitor evaluating the product should not be looking at it.
+    def _durable_store(self):
+        """A FRESH durable store per request — so the view recovers cleanly
+        after a free web service has slept. Reads DATABASE_URL from env."""
+        from intent_engine.storage.durable import DurableStore
+        return DurableStore()
+
+    def _hosted_data(self) -> dict:
+        import datetime
+
+        from intent_engine.hosted.budget import Budget
+        from intent_engine.hosted.dashboard import assemble
+        store = self._durable_store()
+        try:
+            return assemble(store, budget=Budget.from_env(),
+                            as_of=datetime.date.today().isoformat())
+        finally:
+            store.close()
+
+    def _hosted_dashboard(self, session):
+        from intent_engine.hosted.dashboard import render_html
+        frag = render_html(self._hosted_data())
+        body = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
+                '<title>Hosted runtime — paper trading (simulated)</title>'
+                '<meta name="viewport" content="width=device-width,'
+                ' initial-scale=1"></head><body>'
+                f'{self._nav(session, session["csrf"] if session else "")}'
+                f'<main>{frag}</main></body></html>')
+        return self._html(self._stylize(body))
 
     def _redirect(self, where, *, set_sid=None, clear_cookie=False):
         headers = [("Location", where)]
@@ -997,8 +1633,34 @@ class WebApp:
                             f"sid=deleted; Max-Age=0; Path=/{secure}"))
         return "303 See Other", headers, ""
 
-    def _error_page(self, code, message):
+    def _with_run_claim(self, response, session, run_id, company=""):
+        """Attach this session's signed claim on `run_id` to any response.
+
+        Minted the moment a run is opened, because that is the only moment
+        the company name, the run id and the owner are all in hand -- and the
+        instance that knows them may not exist by the time the reader comes
+        back. Nothing is attached for a session-less request; there would be
+        no owner to bind the claim to.
+        """
+        if session is None or not session.get("user_id") or not run_id:
+            return response
+        status, headers, body = response
+        token = _recovery.mint(self.config.secret,
+                               user_id=session["user_id"], run_id=run_id,
+                               company=company)
+        return status, list(headers) + [
+            ("Set-Cookie", _recovery.cookie_header(
+                token, secure=self.config.cookie_secure))], body
+
+    def _error_page(self, code, message, *, category=None):
         """A reader-facing failure. Never a status line and an exception.
+
+        `category` is for a call site that KNOWS the cause rather than one
+        catching an exception. Classifying by substring is right for the
+        latter and wrong for the former: the admission refusal below says "NO
+        ANALYSIS CREDIT WAS USED", and the bare needle "credit" read that as
+        the credit balance being exhausted -- so a run that never started
+        told the reader its evidence had been retrieved.
 
         Measured live: `GET /runs/{id}` on a run that had not yet been
         approved answered "Bad request / approve at least one source" — a
@@ -1008,7 +1670,7 @@ class WebApp:
         The category decides what is said; `message` never reaches the page.
         It is hashed into a short reference an operator can correlate.
         """
-        category = _failures.classify(message)
+        category = category or _failures.classify(message)
         # Decided from the message's OWN classification, before any
         # code-specific substitution below replaces it: substituting first and
         # then reading `explained["category"]` made every unrecognised 404
@@ -1099,6 +1761,94 @@ class WebApp:
         owner = self.web_store.owner_of(run_id)
         return owner is not None and owner == session["user_id"]
 
+    def _run_claim(self, session, run_id):
+        """This browser's signed proof that it started `run_id`, or None.
+
+        Only ever meaningful once ownership has already failed. See
+        `webapp.run_recovery` for why the proof is carried by the browser
+        rather than looked up: the lookup is exactly what a restart destroys.
+        """
+        if session is None:
+            return None
+        claim = getattr(self._request, "claim", None)
+        if _recovery.proves(claim, user_id=session.get("user_id") or "",
+                            run_id=run_id):
+            return claim
+        return None
+
+    def _missing_run_state(self, session, run_id):
+        """Which of the missing-run states this is. Never "unavailable".
+
+        The failure this replaces answered `RUN_NOT_FOUND` to three different
+        situations -- a restart, a typo, and another person's run id -- and so
+        told a guest whose analysis had just been destroyed the same thing it
+        tells a stranger probing ids. They are not the same event and they do
+        not have the same next step.
+        """
+        owner = self.web_store.owner_of(run_id)
+        if owner is not None:
+            if session is not None and owner == session.get("user_id"):
+                return _recovery.RUN_READY          # owned; refused elsewhere
+            return _recovery.RUN_NOT_OWNED
+        if self._run_claim(session, run_id) is not None:
+            return _recovery.RUN_RESTART_LOST
+        return _recovery.RUN_NOT_FOUND
+
+    def _no_such_run(self, session, run_id):
+        """The response for a run this session cannot open.
+
+        EVERY ANALYSIS TERMINATES VISIBLY. A run that the service no longer
+        holds is a terminal state of the customer's journey, so it gets a
+        page that names what happened and offers the one action that can
+        still work -- running the same company again -- instead of a 404 that
+        reads as "you are lost".
+
+        Isolation is unchanged. `RUN_NOT_OWNED` and `RUN_NOT_FOUND` both get
+        exactly the refusal they got before; only the case where THIS session
+        can prove it started THIS run is treated differently, and by then the
+        run is gone from the service either way.
+        """
+        state = self._missing_run_state(session, run_id)
+        if state != _recovery.RUN_RESTART_LOST:
+            return self._error_page(404, "no such run for this account")
+        claim = self._run_claim(session, run_id) or {}
+        return self._lost_run_page(session, claim.get("co") or "")
+
+    def _lost_run_page(self, session, company):
+        """The terminal recovery screen. One explanation, two ways forward."""
+        explained = _failures.explain(_failures.RUN_RESTART_LOST)
+        csrf = session["csrf"] if session else ""
+        named = _e(company) if company else "that company"
+        # RETRY IS A REAL RE-RUN, not a link back to an empty form. The
+        # company name travelled on the signed claim, so the reader does not
+        # retype it and cannot be silently switched to a different company.
+        retry = (f'<form action="/analyze" method="post">'
+                 f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+                 f'<input type="hidden" name="consent" value="on">'
+                 f'<input type="hidden" name="company_name" '
+                 f'value="{_e(company)}">'
+                 f'<button type="submit" class="cta">Analyse {named} again'
+                 f'</button></form>') if company else ''
+        body = (
+            f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            f'<meta name="viewport" content="width=device-width,'
+            f'initial-scale=1">'
+            f'<title>{_e(explained["title"])}</title></head><body>'
+            f'{self._nav(session, csrf)}'
+            f'<main class="brief"><h1>{_e(explained["title"])}</h1>'
+            f'<p><strong>What did work.</strong> '
+            f'{_e(explained["what_worked"])}</p>'
+            f'<p><strong>What did not.</strong> '
+            f'{_e(explained["what_failed"])}</p>'
+            f'<p><strong>Why.</strong> {_e(explained["why"])} '
+            f'Nothing was invented.</p>'
+            f'<p><strong>What to do.</strong> {_e(explained["next_step"])}</p>'
+            f'{retry}'
+            f'<p><a href="/demo">Analyse a different company</a></p>'
+            f'</main></body></html>')
+        return "200 OK", [("Content-Type", "text/html; charset=utf-8")], \
+            self._stylize(body)
+
     def _result(self, run_id):
         """The deterministic demo result for an owned run (idempotent rerun).
 
@@ -1119,8 +1869,49 @@ class WebApp:
         return self._results.get(run_id)
 
     # --- pages ----------------------------------------------------------------
+    def _company_suggestions(self, environ):
+        """Companies matching what the customer has typed. Never raises.
+
+        The SEC ticker table behind the third source is one ~1MB fetch per
+        process; every later keystroke is served from memory. Under test the
+        outbound call is off, and the two curated sources still answer — so
+        the feature degrades to the hundred companies the suite knows about
+        rather than to an error.
+        """
+        from urllib.parse import parse_qs
+
+        from intent_engine.company_ingestion import suggest as CS
+        query = parse_qs(environ.get("QUERY_STRING", "")).get("q", [""])[0]
+        try:
+            rows = CS.suggest(query[:120], limit=8,
+                              allow_registrant=(self.config.env
+                                                != "test"),
+                              transport=self._transport,
+                              resolver=self._resolver)
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("company suggestions failed")
+            rows = ()
+        return self._ok_json({"contract": CS.CONTRACT,
+                              "query": query[:120],
+                              "companies": [r.as_dict() for r in rows]})
+
     def _landing(self, session):
-        page = render_landing_html()
+        """The first screen: what this is, log in, try the demo. Nothing else.
+
+        The company form now lives at /demo. A visitor who already has a
+        session is NOT shortcut past this page — the landing sells the
+        product, and skipping it for returning guests would mean the one
+        screen written to explain the product is the one screen most people
+        never see.
+        """
+        csrf = session["csrf"] if session else ""
+        return self._html(_chrome(
+            render_landing_html(demo_mode=bool(self.config.demo_mode)),
+            self._nav(session, csrf)))
+
+    def _demo_entry(self, session):
+        """Company entry — the demo's first working screen."""
+        page = _AC.inject(render_company_entry_html())
         csrf = session["csrf"] if session else ""
         if session:
             # the analyze form needs the CSRF token; inject it once
@@ -1166,7 +1957,17 @@ class WebApp:
                     f'<input type="hidden" name="website" '
                     f'value="{_e(c["website"])}"></form>'
                     for i, c in enumerate(GOLDEN_COMPANIES))
+                # THE EXPECTATION BEFORE THE COMMITMENT, not only after it.
+                #
+                # A reader who is told nothing decides for themselves at
+                # about forty seconds that the thing has hung. The same wait
+                # is unremarkable once the range has been stated. It sits
+                # here, immediately under the button, because that is the
+                # last thing read before the wait starts -- and it is the
+                # same constant the progress page renders, so the promise
+                # made here and the promise shown there cannot drift.
                 intro = (
+                    f'<p class="eta">{_e(self.ETA_COPY)}</p>'
                     f'<p class="try-line">Not sure where to start? '
                     f'Try {examples}.</p>{forms}')
                 # After the form, not before the headline. Injected at
@@ -1174,19 +1975,11 @@ class WebApp:
                 # visitor read was a footnote about examples.
                 page = page.replace('</form>', '</form>' + intro, 1)
         else:
+            # No session and demo mode is off: this screen cannot do its job,
+            # so say what is needed rather than rendering a form that will be
+            # refused on submit.
             note = ('<p><strong>Early access:</strong> '
                     '<a href="/login">log in</a> to run an analysis.</p>')
-            if self.config.demo_mode:
-                # Feature-flagged anonymous entry point. Absent entirely when
-                # DEMO_MODE is off, so the logged-out landing page is unchanged.
-                note += ('<form action="/demo" method="post" '
-                         'aria-label="Try the demo without logging in">'
-                         '<button type="submit">Try the demo — no login '
-                         'required</button></form>'
-                         '<p class="trust-note">Demo sessions are anonymous '
-                         'and isolated: they can analyze companies and read '
-                         'reports, but cannot see anyone else\'s data or '
-                         'create share links.</p>')
             page = page.replace('<form action="/analyze"',
                                 note + '<form action="/analyze"', 1)
         return self._html(_chrome(page, self._nav(session, csrf)))
@@ -1327,14 +2120,126 @@ class WebApp:
         sid = self.auth.login(form.get("email", ""), form.get("password", ""))
         return self._redirect("/", set_sid=sid)
 
-    def _analyze(self, session, form, remote="unknown", *, smoke=False):
+    def _analyze(self, session, form, remote="unknown", *, smoke=False,
+                 fresh=False):
         if form.get("consent") is None:
             return self._error_page(400, "consent is required")
         limited = None if smoke else self._demo_rate_limited(session, remote)
         if limited is not None:
             return limited
-        website = form.get("website", f"https://{DEMO_DOMAIN}")
-        company_name = form.get("company_name", "")[:120]
+        # The reservation this request holds, so any path that fails to open
+        # or schedule a run can hand it back (§4).
+        _reserved = None if smoke else self._demo_quota_reservation(session,
+                                                                    remote)
+        company_name = form.get("company_name", "")[:120].strip()
+        website = (form.get("website") or "").strip()
+        #: Set only when the company was identified as an SEC filer with no
+        #: domain on record. It is what lets the run open at all, and it must
+        #: never be filled in from anywhere else -- a CIK guessed from a name
+        #: attributes one company's filings to another.
+        filer_cik = ""
+
+        # THE NAME IS ENOUGH.
+        #
+        # `website` used to default to the demo domain when absent, and the
+        # branch below reads that default as "run the canned demo". So once
+        # the form stopped requiring a URL, typing "Cloudflare" would have
+        # analysed the sample company instead -- a confident report about
+        # somebody else, which is the worst failure this product has.
+        #
+        # A typed name is resolved against the entity registry, which is the
+        # component that exists for exactly this and was previously only
+        # consulted when a website had already been supplied.
+        # A CONFIRMED PICK IS AN ANSWER, NOT A HINT.
+        #
+        # The customer chose one row out of a list that showed its legal name,
+        # ticker, country and domain. Re-resolving that name from scratch can
+        # only do one of two things: agree, or disagree with the customer
+        # about which company they meant — and the second is the wrong-company
+        # failure arriving through the one door where the user had already
+        # been explicit. So a confirmed pick sets identity directly.
+        #
+        # The confirmation is checked against the typed name rather than
+        # trusted blind: the hidden fields are client-supplied, and a form
+        # replayed with a mismatched pair must fall through to ordinary
+        # server-side resolution rather than analyse whatever was posted.
+        confirmed = (form.get("suggest_confirmed") or "").strip()
+        if confirmed and confirmed == company_name:
+            picked_domain = (form.get("suggest_domain") or "").strip()
+            picked_cik = "".join(ch for ch in
+                                 (form.get("suggest_cik") or "")
+                                 if ch.isdigit())
+            if picked_domain and "://" not in picked_domain:
+                picked_domain = f"https://{picked_domain}"
+            if picked_domain:
+                website = website or picked_domain
+            if picked_cik:
+                # A CONFIRMED PICK CARRIES BOTH, AND THIS USED TO BE AN ELIF.
+                #
+                # MEASURED LIVE across three deploys. JPMorgan has a domain
+                # AND a CIK, so `picked_domain` won and `filer_cik` stayed
+                # empty — the run opened with cik="", `run_meta` carried no
+                # CIK, and every downstream owner-of-this-document test had
+                # nothing to compare against. That is why the claim-ownership
+                # repair read green in tests, PASSED a real-EDGAR probe that
+                # was handed the CIK directly, and did not move the page:
+                # the producer was correct and was being asked "is this
+                # document filed under ''?".
+                #
+                # The comment above about never filling this in from
+                # elsewhere is about GUESSING — a CIK inferred from a name
+                # attributes one company's filings to another. This is not a
+                # guess. The customer picked a row showing the legal name,
+                # ticker, country and domain, and the pick was already
+                # validated against the typed name a few lines up. A
+                # confirmed pick is an answer, as the block above says.
+                filer_cik = picked_cik
+        if company_name and not website and not filer_cik \
+                and not form.get("entity_id"):
+            from intent_engine.company_ingestion import name_entry as _NE
+            # The SEC registrant source is opted into PER CALL, not by a
+            # module flag: a live request is exactly the context where the
+            # one outbound lookup belongs, and no other caller in the
+            # process should start making it as a side effect. Without it
+            # the register is ~105 companies and every other real firm on
+            # earth comes back "not found".
+            # THE ONE OUTBOUND LOOKUP, and it is off under test.
+            #
+            # Threading the app's transport through is not sufficient on its
+            # own: some tests construct WebApp with no transport at all, so
+            # the lookup fell back to the real SEC and every such test paid
+            # an 8-second timeout. The suite crawled at 7% twice before this
+            # was pinned. `env` is the honest gate -- a test must never make
+            # an outbound call, whatever transport it did or did not inject.
+            entry = _NE.resolve(company_name=company_name,
+                                allow_registrant=True,
+                                transport=self._transport,
+                                resolver=self._resolver)
+            if entry.state == _NE.AMBIGUOUS_COMPANY:
+                # Two real companies share this name. Asking is strictly
+                # better than picking, and it is asked once, before any work.
+                return self._name_choice_page(session, entry, form)
+            if entry.resolved:
+                company_name = entry.company_name
+                website = entry.website
+            elif entry.state == _NE.IDENTIFIED_NO_DOMAIN:
+                # A FILER IS ANALYSABLE WITHOUT A WEBSITE. The regulator
+                # records no domain, and guessing one would send retrieval at
+                # whatever sits on it. What it does record is every filing
+                # this company has made, which is more authoritative than the
+                # marketing site would have been. The run is opened on the
+                # CIK and the acquisition path is EDGAR-first.
+                company_name = entry.company_name
+                filer_cik = entry.company_id
+            else:
+                # NOT A BAD REQUEST. The user did nothing wrong: this is a
+                # company the registry does not carry. Say so, and offer the
+                # one input that would resolve it, rather than returning a
+                # 400 the user cannot act on.
+                return self._company_not_found_page(session, company_name,
+                                                    entry)
+        if not website and not filer_cik:
+            website = f"https://{DEMO_DOMAIN}"
         # WHICH company? A name like "Sony" denotes a parent, a games
         # subsidiary, an electronics subsidiary and more. Picking one for the
         # user produces a confident report about the wrong company — strictly
@@ -1347,8 +2252,31 @@ class WebApp:
             if picked.resolved:
                 company_name = picked.profile.legal_name
                 website = f"https://{picked.profile.primary_domain}"
-        if DEMO_DOMAIN not in website:
-            if not chosen:
+        # A domainless filer skips this block entirely: every branch inside
+        # it resolves or names the company FROM its website, and there isn't
+        # one. Its name came from the regulator, which is a better source
+        # than a domain would have been.
+        # THIS CONDITION SELECTS THE REAL-COMPANY PATH, not merely a block of
+        # entity resolution -- everything below it up to and including
+        # `create_run` is the real analysis, and the `else` at the end of the
+        # method runs the SYNTHETIC DEMO.
+        #
+        # A first version guarded this with `website and ...`, reasoning that
+        # a domainless filer has nothing to resolve from a website. True, and
+        # it dropped Toyota and Vale straight through to the demo: both came
+        # back as a confident report titled "Northwind Logistics Cloud
+        # (synthetic demo)", under a run id shared by every company that took
+        # the same fall. A report about the wrong company is the worst thing
+        # this product can emit, and it shipped because the guard was placed
+        # by what the block APPEARED to do at the top rather than by what it
+        # returns at the bottom. Found on the deployed service.
+        #
+        # A resolved filer is a real company and takes the real path.
+        if filer_cik or (website and DEMO_DOMAIN not in website):
+            # The website-derived resolution below is skipped for a filer:
+            # there is no website to resolve from, and its name came from the
+            # regulator, which is a better source than a domain would be.
+            if not chosen and website:
                 resolution = resolve_entity(company_name=company_name,
                                             website=website)
                 if resolution.status == AMBIGUOUS:
@@ -1369,12 +2297,37 @@ class WebApp:
             try:
                 run = self.ci.create_run(
                     company_name=company_name or "(unnamed company)",
-                    website=website, user_id=session["user_id"],
-                    as_of=__import__("datetime").datetime.now(
-                        __import__("datetime").timezone.utc
-                    ).strftime("%Y-%m-%dT00:00:00+00:00"))
+                    website=website, cik=filer_cik,
+                    user_id=session["user_id"],
+                    as_of=self._as_of(fresh=fresh))
             except (IngestionError, ValueError) as exc:
+                self._release_demo_quota(session, remote, _reserved)
                 return self._error_page(400, str(exc))
+            except Exception:                               # noqa: BLE001
+                # OPENING A RUN CAN FAIL FOR REASONS THAT ARE NOT THE INPUT.
+                #
+                # MEASURED on the deployed preview, six times at concurrency
+                # 1 with one orchestrator: /analyze answered HTTP 500 in
+                # under a second for six different companies, each with a
+                # confirmed CIK, and the visitor got the generic "Something
+                # went wrong on our side" page. Only these two exception
+                # types were caught, so anything the store raised -- and the
+                # runtime root here is EPHEMERAL, which is a documented
+                # blocker -- became an unhandled 500.
+                #
+                # THE QUOTA IS ALREADY SPENT AT THIS POINT: the rate limiter
+                # records the hit before this line, so each of those 500s
+                # consumed one of the visitor's ten analyses for the hour and
+                # told them nothing. That is the part that makes this worth
+                # catching rather than letting the generic handler take it.
+                _LOG.exception("create_run failed company=%r cik=%r",
+                               company_name, filer_cik)
+                self._release_demo_quota(session, remote, _reserved)
+                return self._error_page(
+                    503, "We could not start this analysis right now. This "
+                         "is a fault on our side, not in what you entered. "
+                         "Nothing was fetched and NO ANALYSIS CREDIT WAS "
+                         "USED — try again in a moment.")
             run_id = run["run_id"]
             existing = self.web_store.owner_of(run_id)
             if existing is None:
@@ -1393,12 +2346,46 @@ class WebApp:
                 # discovery is itself a network call and belongs off the
                 # request thread with everything after it.
                 if self._analysis_async:
-                    self._schedule_analysis(session["user_id"], run_id)
-                    return self._redirect(f"/runs/{run_id}/progress")
+                    # A REFUSED SCHEDULE MUST NOT LOOK LIKE A STARTED ONE.
+                    #
+                    # `_schedule_analysis` returns False when the pool is
+                    # saturated or the run is already terminal, and its
+                    # docstring says "refused, not silently dropped: a run
+                    # that can never execute is worse than an honest no".
+                    # The return value was discarded here, so a refusal
+                    # redirected the visitor to a progress page for work
+                    # nobody had queued -- which is the silent drop the
+                    # producer went out of its way to avoid.
+                    #
+                    # A run that is already finished still redirects: that is
+                    # the double-click case and its result exists.
+                    started = self._schedule_analysis(session["user_id"],
+                                                      run_id)
+                    if not started and not (
+                            run_id in self._results
+                            or self.ci.store.run_state(run_id)
+                            in self.TERMINAL_STATES):
+                        self._release_demo_quota(session, remote,
+                                                 _reserved)
+                        # THE CATEGORY IS DECIDED HERE, not inferred from
+                        # the words. This branch knows exactly what happened:
+                        # admission was refused, no run exists, nothing ran.
+                        return self._error_page(
+                            503, "This preview is already running as many "
+                                 "analyses as it can at once. Nothing was "
+                                 "fetched and NO ANALYSIS CREDIT WAS USED — "
+                                 "try again in a few minutes.",
+                            category=_failures.ADMISSION_REFUSED)
+                    return self._with_run_claim(
+                        self._redirect(f"/runs/{run_id}/progress"),
+                        session, run_id, company_name)
                 self.ci.discover(run_id)
-                return self._autorun(session, run_id)
+                return self._with_run_claim(self._autorun(session, run_id),
+                                            session, run_id, company_name)
             self.ci.discover(run_id)
-            return self._redirect(f"/runs/{run_id}/sources")
+            return self._with_run_claim(
+                self._redirect(f"/runs/{run_id}/sources"),
+                session, run_id, company_name)
         result = self.fi.run(company_name=DEMO_COMPANY_NAME,
                              website=f"https://{DEMO_DOMAIN}",
                              claims_by_section=demo_claims(), as_of=DEMO_AS_OF)
@@ -1422,7 +2409,106 @@ class WebApp:
         elif existing != session["user_id"]:
             # deterministic demo produces one run id; never reassign it
             return self._error_page(403, "this run belongs to another account")
-        return self._redirect(f"/runs/{run_id}/progress")
+        return self._with_run_claim(
+            self._redirect(f"/runs/{run_id}/progress"), session, run_id,
+            DEMO_COMPANY_NAME)
+
+    def _name_choice_page(self, session, entry, form):
+        """One name, several real companies. Ask, once, before any work.
+
+        The choices carry a NAME, not an entity id the user could not have
+        meant anything by: a business reader tells companies apart by legal
+        name, sector and country. Each card posts the resolved legal name so
+        the next request resolves exactly, without this page having to know
+        which registry the candidate came from.
+        """
+        csrf = session["csrf"] if session else ""
+        cards = "".join(
+            f'<form action="/analyze" method="post" class="choice">'
+            f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+            f'<input type="hidden" name="consent" value="1">'
+            f'<input type="hidden" name="company_name" '
+            f'value="{_e(c["legal_name"])}">'
+            f'<input type="hidden" name="business_question" '
+            f'value="{_e(form.get("business_question", ""))}">'
+            f'<h3>{_e(c["legal_name"])}</h3>'
+            f'<p class="state">{_e(c.get("describe", ""))}</p>'
+            f'<p class="why">{_e(c.get("note", ""))}</p>'
+            f'<button type="submit">Analyse {_e(c["legal_name"])}</button>'
+            f'</form>' for c in entry.choices)
+        body = (
+            f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            f'<meta name="viewport" content="width=device-width,'
+            f'initial-scale=1"><title>Which company do you mean?</title>'
+            f'</head><body>{self._nav(session, csrf)}<main>'
+            f'<h1>Which company do you mean?</h1>'
+            f'<p>{_e(entry.reason)}. These are different companies with '
+            f'different products, results and risks, so the answer depends '
+            f'on which one you want.</p>{cards}'
+            f'<p><a href="/">Start over with a different company</a></p>'
+            f'</main></body></html>')
+        return self._html(body)
+
+    def _company_not_found_page(self, session, company_name, entry=None):
+        """COMPANY_NOT_FOUND, as a state the user can act on.
+
+        This replaces a 400. A name the registry does not carry is not a
+        malformed request -- it is the ordinary case of a private company, a
+        misspelling, or a firm nobody has analysed here yet, and all three
+        are answered by the same thing: the website, which is the strongest
+        identity signal a person can give.
+
+        The form comes back with the name still in it. Making the user retype
+        what they already typed is how a recoverable state becomes a dead end.
+
+        TWO DIFFERENT STATES SHARE THIS FORM, and they must not share its
+        words. When the SEC names the company as a registrant we know exactly
+        who it is and lack only its domain, and telling that user "we could
+        not identify Toyota Motor Corporation" is simply false. The form is
+        the same because the next step is the same; the heading is not.
+        """
+        csrf = session["csrf"] if session else ""
+        identified = entry is not None and getattr(entry, "state", "") == \
+            "IDENTIFIED_NO_DOMAIN"
+        if identified:
+            ticker = getattr(entry, "ticker", "") or ""
+            heading = (f'We found &ldquo;{_e(entry.company_name)}&rdquo;'
+                       f'{f" ({_e(ticker)})" if ticker else ""}')
+            explain = (
+                f'<p>It is a filing registrant with the SEC, so its identity '
+                f'is not in doubt. What the regulator does not record is a '
+                f'web address, and we will not guess one — a guessed domain '
+                f'sends the analysis at somebody else&rsquo;s company.</p>')
+        else:
+            heading = f'We could not identify &ldquo;{_e(company_name)}&rdquo;'
+            explain = (
+                '<p>No company by that name is in our register. That usually '
+                'means one of three things: it is privately held, the name is '
+                'spelled differently in its filings, or nobody has analysed '
+                'it here yet. None of them is a problem with what you '
+                'typed.</p>')
+        title = "Company identified" if identified else "Company not found"
+        body = (
+            f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            f'<meta name="viewport" content="width=device-width,'
+            f'initial-scale=1"><title>{title}</title>'
+            f'</head><body>{self._nav(session, csrf)}'
+            f'<main class="notice"><h1>{heading}</h1>'
+            f'{explain}'
+            f'<p>Its website settles it — a domain names exactly one '
+            f'company.</p>'
+            f'<form action="/analyze" method="post" class="analyze">'
+            f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+            f'<input type="hidden" name="consent" value="1">'
+            f'<p><label for="company_name">Company name</label> '
+            f'<input id="company_name" name="company_name" '
+            f'value="{_e(company_name)}" required></p>'
+            f'<p><label for="website">Website</label> '
+            f'<input id="website" name="website" type="url" '
+            f'placeholder="https://www.example.com" autofocus required></p>'
+            f'<button type="submit">Analyse company</button></form>'
+            f'<p><a href="/">Start over</a></p></main></body></html>')
+        return self._html(body)
 
     def _disambiguation_page(self, session, resolution, form):
         """Ask which company was meant, once, before any analysis runs.
@@ -1482,32 +2568,128 @@ class WebApp:
         return self.STAGE_COPY.get(
             state or "", "Still working through the available evidence")
 
+    def _elapsed_seconds(self, run_id: str):
+        """Seconds since the analysis was ACCEPTED, or None.
+
+        ANCHORED ON `accepted`, NOT ON THE FIRST EVENT. `mark_lifecycle(...,
+        "accepted")` is recorded at the instant the work was admitted -- the
+        instant the customer's wait starts -- and the comment at that call
+        site says so explicitly: "queue time is part of the wait". The first
+        stored event is `ci.run_created`, which is written slightly earlier
+        and, for a run that was created and then refused admission, is
+        written for a wait that never happened.
+
+        SERVER-DERIVED ON PURPOSE. The browser must not be the clock: a
+        reload, a second tab, or a machine with a skewed clock would each
+        invent a different duration for the same run.
+        """
+        import datetime as _dt
+        marks = {}
+        try:
+            marks = self.ci.lifecycle(run_id) or {}
+        except Exception:                                   # noqa: BLE001
+            marks = {}
+        raw = marks.get("accepted")
+        if not raw:
+            for row in self.ci.store.for_run(run_id):
+                raw = getattr(row, "recorded_at", None)
+                if raw:
+                    break
+        if not raw:
+            return None
+        try:
+            began = _dt.datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+        except ValueError:
+            return None
+        if began.tzinfo is None:
+            began = began.replace(tzinfo=_dt.timezone.utc)
+        return max(0, int((_dt.datetime.now(_dt.timezone.utc)
+                           - began).total_seconds()))
+
+    @staticmethod
+    def _clock(seconds) -> str:
+        """`00:47`, `1:12`. A clock a person reads without converting."""
+        if seconds is None:
+            return "00:00"
+        seconds = max(0, int(seconds))
+        if seconds < 60:
+            return f"00:{seconds:02d}"
+        return f"{seconds // 60}:{seconds % 60:02d}"
+
     def _elapsed_line(self, run_id: str) -> str:
         """Real elapsed time. Never a percentage, never a countdown."""
-        import datetime as _dt
-        first = None
-        for row in self.ci.store.for_run(run_id):
-            first = getattr(row, "recorded_at", None)
-            if first:
-                break
-        if not first:
+        seconds = self._elapsed_seconds(run_id)
+        if seconds is None:
             return "Just started."
-        try:
-            began = _dt.datetime.fromisoformat(str(first).replace("Z", "+00:00"))
-        except ValueError:
-            return "Just started."
-        seconds = int((_dt.datetime.now(_dt.timezone.utc) - began)
-                      .total_seconds())
         if seconds < 60:
             return f"Running for {max(seconds, 1)}s."
         return f"Running for {seconds // 60}m {seconds % 60}s."
 
+    def _waiting_expectation(self, seconds) -> str:
+        """What to tell the reader about the time, given how long it HAS run.
+
+        Two sentences, and which one is true depends on the clock. Promising
+        "within two minutes" to somebody who is already at 2:30 is the kind
+        of small lie that costs a demo its credibility, and a countdown would
+        be worse -- there is no validated ETA model behind one, so it would be
+        fabricated precision.
+        """
+        if seconds is not None and seconds >= self.INTERACTIVE_MAX_S:
+            return ("Taking longer than usual \u2014 additional evidence is "
+                    "still being checked.")
+        return self.ETA_COPY
+
+    @contextlib.contextmanager
+    def _segment(self, name):
+        """Time one named span of a request and keep it on the thread-local.
+
+        WHY A TIMER AND NOT ANOTHER HYPOTHESIS. `/runs/<id>/progress` stops
+        answering for 100+ consecutive seconds during analysis while
+        `/version` answers in 0.15s, and the leading explanation -- the
+        append-only store re-parsing on every read -- was FALSIFIED by
+        removing it: the cost went 153ms -> 1ms per poll and the stall did
+        not move. Guessing a second mechanism costs another deploy and
+        another hour of quota, so the handler measures itself instead.
+
+        Never customer-visible: the numbers travel on a response header, like
+        `X-Evidence-Gate`, and nothing renders them.
+        """
+        start = time.monotonic()
+        try:
+            yield
+        finally:
+            spans = getattr(self._request, "spans", None)
+            if spans is not None:
+                spans.append((name, (time.monotonic() - start) * 1000.0))
+
+    def request_timing(self, wall_ms: float = 0.0) -> str:
+        """The spans this request recorded, longest first.
+
+        `wall` is the whole request and `named` is what the spans account
+        for. THE GAP IS THE POINT: a stall that is not inside any measured
+        segment is not in this handler at all, and that is a different
+        repair from a slow segment.
+        """
+        spans = getattr(self._request, "spans", None) or []
+        if not spans and not wall_ms:
+            return ""
+        named = sum(ms for _, ms in spans)
+        parts = " ".join(f"{n}={ms:.0f}"
+                         for n, ms in sorted(spans, key=lambda s: -s[1])[:9])
+        return (f"wall={wall_ms:.0f} named={named:.0f} "
+                f"unaccounted={max(0.0, wall_ms - named):.0f} {parts}").strip()
+
     def _progress(self, session, run_id):
-        if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
-        real = self._is_real_run(run_id)
+        with self._segment("owned"):
+            owned = self._owned(session, run_id)
+        if not owned:
+            return self._no_such_run(session, run_id)
+        with self._segment("is_real_run"):
+            real = self._is_real_run(run_id)
         if real:
-            status = self.ci.store.run_state(run_id) or "VALIDATING_COMPANY"
+            with self._segment("run_state"):
+                status = self.ci.store.run_state(run_id) \
+                    or "VALIDATING_COMPANY"
         else:
             status = self.fi.run_status(run_id)
             if status == "UNKNOWN":
@@ -1534,18 +2716,68 @@ class WebApp:
         #
         # So completion lands on /runs/<id>. The deck keeps its own route and
         # its place in the layer nav; it is one click away, not compulsory.
-        if status in ("COMPLETE", "PARTIAL"):
-            return self._redirect(f"/runs/{run_id}")
+        # A RESULT THAT EXISTS BEATS A STATE THAT SAYS OTHERWISE.
+        #
+        # This branch used to read `status in ("COMPLETE", "PARTIAL")`, which
+        # is the worker's opinion about its own run rather than an answer to
+        # the only question this page exists to ask. A run can compose a
+        # readable result and still transition FAILED — `_run_analysis` does
+        # exactly that on purpose, storing a bounded reading in `_results`
+        # after marking the run FAILED — and every such customer was told
+        # there was nothing to open while the analysis sat one route away.
+        #
+        # Measured live on eb18371 with "Meta": five sources retrieved, a
+        # readable result present, and this page saying "no result to open".
+        if real:
+            with self._segment("readiness"):
+                readiness = self.result_readiness(run_id)
+            if readiness["opens_result"]:
+                return self._redirect(f"/runs/{run_id}")
 
         # A worker that vanished must not leave this page polling forever.
-        if not terminal and self._interrupted_if_stale(run_id):
+        with self._segment("interrupted_if_stale"):
+            stale = not terminal and self._interrupted_if_stale(run_id)
+        if stale:
             status = self.ci.store.run_state(run_id) or status
             terminal = True
-        refresh = ('' if terminal
-                   else '<meta http-equiv="refresh" content="4">')
+            # The worker dying does not destroy what it had already written.
+            # Re-ask: a stale marker plus a readable result is a redirect,
+            # not a dead end.
+            if real:
+                readiness = self.result_readiness(run_id)
+                if readiness["opens_result"]:
+                    return self._redirect(f"/runs/{run_id}")
+
+        if status in ("COMPLETE", "PARTIAL"):
+            return self._redirect(f"/runs/{run_id}")
+        # NO FULL-PAGE RELOAD. This was
+        #     <meta http-equiv="refresh" content="4">
+        # which reloaded the whole document every 4 seconds: the server
+        # re-rendered ~17KB of HTML each time and the browser threw away the
+        # page and rebuilt it. Measured on the preview, that is ~15 full
+        # renders a minute, on an instance the analysis is already starved
+        # for -- so the poller was competing with the worker it was waiting
+        # on, and the reader saw flicker, scroll reset and focus loss. That
+        # is the whole of the "laggy" complaint; the analysis was not what
+        # felt slow.
+        #
+        # The replacement fetches a small JSON document and patches the three
+        # things that change. The meta refresh survives inside <noscript>, so
+        # a client without scripting keeps exactly the old behaviour rather
+        # than being stranded on a page that never updates.
+        refresh = ('' if terminal else
+                   f'<noscript><meta http-equiv="refresh" content="4">'
+                   f'</noscript>')
         # A run that failed must say so in the heading. Softening every state
         # into "Reading the public evidence…" would hide a failure behind a
         # progress message, which is worse than the jargon it replaced.
+        # A run that is still recoverable may not be mourned. `status` alone
+        # said FAILED for runs that had another attempt available and for runs
+        # that had a result; the heading now follows readiness, which knows
+        # the difference.
+        with self._segment("readiness_retryable"):
+            recoverable = bool(
+                real and self.result_readiness(run_id)["retryable"])
         heading = {
             "FAILED": "This analysis could not be completed",
             # Say what happened. "Reading the public evidence..." on a run
@@ -1553,34 +2785,378 @@ class WebApp:
             "INTERRUPTED": "This analysis was interrupted",
             "REJECTED": "This analysis was not accepted",
         }.get(status, "Reading the public evidence…")
+        # NAME THE COMPANY WHILE THEY WAIT. A reader who submitted three
+        # analyses in a row cannot tell these pages apart otherwise, and the
+        # company they typed is the one fact they are certain of.
+        if status not in ("FAILED", "INTERRUPTED", "REJECTED"):
+            _company = ((self.ci.run_meta(run_id) or {}).get("company_name")
+                        if real else "")
+            if _company:
+                heading = f"Analysing {_company}"
+        if recoverable:
+            heading = "This analysis stopped early"
         head = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
-                f'{refresh}<title>{_e(heading)}</title></head>'
+                f'{refresh}<title>{_e(heading)}</title>{_PROGRESS_CSS}</head>'
                 f'<body>'
                 f'{self._nav(session, session["csrf"])}<main>'
                 f'<h1>{_e(heading)}</h1>')
-        if status == "FAILED":
+        if recoverable:
+            # BOUNDED RECOVERY, NOT A DEAD END. One clear action, offered once
+            # — `result_readiness` has already checked an attempt remains, so
+            # this can never become a loop.
+            tail = (f'<p>We stopped before there was anything worth showing '
+                    f'you. {self._failure_explanation(run_id, real)}</p>'
+                    f'{self._targeted_retry_action(session, run_id)}'
+                    f'<p><a href="/demo">Analyse a different company</a></p>')
+        elif status in ("FAILED", "INTERRUPTED", "REJECTED"):
             # Honest terminal failure: NO "Open the result" — there is no
             # result. Explain why and offer a safe start-over.
             tail = (f'<p>This analysis could not be completed, so there is no '
                     f'result to open. {self._failure_explanation(run_id, real)}'
                     f'</p><p><a href="/runs/{_e(run_id)}">See the failure '
-                    f'details</a> · <a href="/">Start a new analysis</a></p>')
+                    f'details</a> · <a href="/demo">Start a new analysis</a>'
+                    f'</p>')
         else:
             # Still in flight. Say what is happening in words a person uses,
             # not lifecycle names, and never claim a result already exists.
             # THE STAGE, THE ELAPSED TIME, AND WHERE TO FIND THIS LATER.
             # No percentage and no countdown: there is no honest denominator
             # for either, and a fake one is worse than none.
-            tail = (f'<p role="status" aria-live="polite">'
-                    f'<strong>{_e(self._stage_line(status))}.</strong></p>'
-                    f'<p>{_e(self._elapsed_line(run_id))}</p>'
-                    f'<p>You can safely leave this page — the analysis keeps '
-                    f'running, and it will be waiting under '
-                    f'<a href="/analyses">your analyses</a>.</p>'
-                    f'<p class="coverage">This preview stores runs in memory, '
-                    f'so a restart can interrupt one. If that happens the page '
-                    f'says so rather than waiting forever.</p>')
+            # THE CANONICAL HYDRATION PROJECTION, not a generic stage line.
+            # `hydration.assess` was built, unit-proven and called by nothing
+            # on the customer path, so the page a reader actually watches
+            # still showed one lifecycle-derived sentence. Its `current_step`
+            # is the same sentence the tier table is derived from, so the
+            # headline and the detail cannot disagree.
+            hyd = self._hydration_state(run_id, terminal=terminal)
+            _elapsed_s = self._elapsed_seconds(run_id) if real else None
+            step = (hyd.get("current_step") or "").strip() \
+                or self._stage_line(status)
+            # THIS PAGE CARRIES THE CUSTOMER; IT DOES NOT PARK THEM.
+            #
+            # The old copy led with "You can safely leave this page — it will
+            # be waiting under your analyses", which is true and is advice for
+            # the wrong journey: it told a first-time visitor that the normal
+            # way to reach their result was to navigate somewhere else and
+            # find it. The page already redirects into step 1 the moment the
+            # run is readable, so what it should say is that.
+            #
+            # The preview's in-memory storage is still disclosed, because it
+            # is a real limit a tester can hit. It is a footnote now rather
+            # than a boxed warning above the fold — infrastructure limits are
+            # not what a demo is about.
+            # THE POLLER, AND THE ONLY THING ON THIS PAGE THAT RUNS JS.
+            #
+            # It fetches `progress.json` -- a few hundred bytes -- patches the
+            # step line, the ladder and the elapsed line, and navigates ONCE
+            # when the run becomes readable. Nothing else on the page is
+            # touched, so scroll position, focus and any text selection
+            # survive, which a document reload cannot offer.
+            poll = (
+                f'<script>(function(){{'
+                f'var u="/runs/{_e(run_id)}/progress.json",n=0;'
+                f'var base={int(_elapsed_s or 0)},t0=Date.now(),stop=false;'
+                f'function two(x){{return(x<10?"0":"")+x;}}'
+                f'function paint(){{'
+                f'if(stop)return;'
+                f'var s=base+Math.floor((Date.now()-t0)/1000);'
+                f'var e=document.getElementById("pg-timer");'
+                f'if(e)e.textContent=s<60?"00:"+two(s):'
+                f'(Math.floor(s/60)+":"+two(s%60));}}'
+                f'setInterval(paint,1000);'
+                f'function set(id,v){{var e=document.getElementById(id);'
+                f'if(e&&v!=null&&e.innerHTML!==v)e.innerHTML=v;}}'
+                f'function tick(){{'
+                f'fetch(u,{{cache:"no-store",credentials:"same-origin"}})'
+                f'.then(function(r){{return r.ok?r.json():null;}})'
+                f'.then(function(d){{'
+                f'if(!d)return schedule();'
+                f'if(d.open_at){{location.replace(d.open_at);return;}}'
+                f'set("pg-step",d.step_html);set("pg-stages",d.stages_html);'
+                f'set("pg-eta",d.eta);'
+                # THE SERVER IS THE CLOCK. Each poll re-seeds the offset, so
+                # the display can drift by at most one poll interval and can
+                # never invent time the run did not spend.
+                f'if(d.elapsed_s!=null){{base=d.elapsed_s;t0=Date.now();}}'
+                f'if(d.terminal){{stop=true;location.reload();return;}}'
+                f'schedule();}})'
+                f'.catch(schedule);}}'
+                # BACK OFF, do not hammer a starved instance. 2s while the
+                # reader is watching closely, easing to 6s on a long run.
+                f'function schedule(){{n++;'
+                f'setTimeout(tick,n<10?2000:6000);}}'
+                f'schedule();}})();</script>')
+            tail = (poll
+                    + f'<p role="status" aria-live="polite" id="pg-step">'
+                    f'<strong>{_e(step)}.</strong></p>'
+                    f'{self._identity_confirmation(run_id)}'
+                    # ONE LIST, NOT TWO. The tier table and the stage ladder
+                    # are derived from the same producers and were rendered
+                    # one above the other, so the deployed page said
+                    # "Loading what we already know - partial" and "Loading
+                    # prior intelligence - DONE" four lines apart. Two
+                    # vocabularies for one state reads as a malfunction.
+                    f'<div id="pg-stages">{self._stage_ladder(hyd, status)}'
+                    f'</div>'
+                    # THE ELAPSED CLOCK, AND IT ACTUALLY TICKS.
+                    #
+                    # The server value is authoritative and is re-sent on
+                    # every poll; the script only advances the display in
+                    # between, so a reload, a second tab and a skewed client
+                    # clock all still show the run's real age. Rendered into
+                    # the HTML too, so a reader without scripting sees a
+                    # correct (if stepping) figure rather than "00:00".
+                    f'<p class="elapsed"><span id="pg-timer">'
+                    f'{_e(self._clock(_elapsed_s))}</span> elapsed</p>'
+                    # THE EXPECTATION, WHERE THE WAITING HAPPENS. A reader who
+                    # is told nothing assumes the worst at 40 seconds; the
+                    # same wait is unremarkable when the range was stated up
+                    # front. This is the same string the landing page shows,
+                    # from one constant, so the two can never disagree.
+                    f'<p class="eta" id="pg-eta">'
+                    f'{_e(self._waiting_expectation(_elapsed_s))}</p>'
+                    f'<p>We\'re building the analysis now. This page opens it '
+                    f'by itself the moment it is ready.</p>'
+                    # "YOUR ANALYSES" IS NOT A RECOVERY INSTRUCTION.
+                    #
+                    # This footnote used to end by naming /analyses as where
+                    # to find the result. That is how the first external
+                    # tester eventually got to theirs — and being told where
+                    # to go looking is precisely the journey this page exists
+                    # to make unnecessary. The storage limit is real and still
+                    # disclosed; the navigation advice is gone, because the
+                    # page redirects.
+                    # THE NOTE STAYS UNTIL THE STORAGE CHANGES. Removing it
+                    # would be a promise this deployment cannot keep --
+                    # `/readyz` measures the runtime root as ephemeral, so a
+                    # replaced instance really does take completed analyses
+                    # with it. What changed is the ENDING: losing a run is no
+                    # longer a dead end, so the note now says what happens
+                    # instead of only what goes wrong.
+                    f'<p class="fineprint">Preview note: this service keeps '
+                    f'analyses on the instance that produced them, so a '
+                    f'restart can interrupt one. If that happens you are '
+                    f'told, and offered the same company again in one '
+                    f'click \u2014 never left waiting.</p>')
         return self._html(head + tail + '</main></body></html>')
+
+    def _progress_json(self, session, run_id):
+        """The few hundred bytes the progress page actually needs.
+
+        WHY THIS EXISTS. The page used to reload itself every four seconds,
+        which made the server render the whole document -- ~17KB -- to
+        communicate that one word had changed from "to come" to "working".
+        On an instance measured at 7-12% of a local core, ~15 of those a
+        minute is CPU taken from the analysis the reader is waiting for.
+
+        Deliberately NOT a second source of truth: every field here is
+        produced by the same call the HTML page makes, so the two cannot
+        drift into disagreeing about the same run.
+        """
+        # THE SAME OWNERSHIP GATE THE PAGE HAS. A cheap polling route is
+        # still a route: without this, any session could watch the progress
+        # of a run belonging to somebody else, and a run id is the only
+        # secret protecting it. Caught by
+        # `test_every_run_layer_route_calls_the_ownership_guard`, which is
+        # exactly the class of gate that exists because a new route is the
+        # easiest place to forget one.
+        if not self._owned(session, run_id):
+            return ("404 Not Found",
+                    [("Content-Type", "application/json")],
+                    json.dumps({"error": "not_found"}))
+        real = self._is_real_run(run_id)
+        status = self.ci.store.run_state(run_id) or "RUNNING"
+        terminal = status in self.TERMINAL_STATES
+        # `open_at` is the ONLY instruction the client acts on, and it is the
+        # same readiness the HTML route redirects on -- so a reader with
+        # scripting and one without arrive at the same place.
+        open_at = None
+        if real:
+            try:
+                if self.result_readiness(run_id)["opens_result"]:
+                    open_at = f"/runs/{run_id}"
+            except Exception:                             # noqa: BLE001
+                open_at = None
+        if open_at is None and status in ("COMPLETE", "PARTIAL"):
+            open_at = f"/runs/{run_id}"
+        payload = {"run_id": run_id, "status": status, "terminal": terminal,
+                   "open_at": open_at}
+        if open_at is None and not terminal:
+            try:
+                hyd = self._hydration_state(run_id, terminal=terminal)
+                step = (hyd.get("current_step") or "").strip() \
+                    or self._stage_line(status)
+                payload["step_html"] = f"<strong>{_e(step)}.</strong>"
+                payload["stages_html"] = self._stage_ladder(hyd, status)
+                payload["elapsed"] = _e(self._elapsed_line(run_id))
+                # THE CLOCK, AS A NUMBER. The page's ticker re-seeds from
+                # this on every poll, so the server stays authoritative about
+                # how long the run has actually been going and the browser
+                # only fills the gaps between polls.
+                _secs = self._elapsed_seconds(run_id)
+                payload["elapsed_s"] = _secs
+                payload["elapsed_clock"] = self._clock(_secs)
+                payload["eta"] = _e(self._waiting_expectation(_secs))
+            except Exception:                             # noqa: BLE001
+                # A projection failure costs the DETAIL, never the poll: the
+                # client keeps its current text and asks again, which is the
+                # same thing the old reload did on a slow render.
+                pass
+        return self._ok_json(payload)
+
+    #: THE MAXIMUM IS A CONTRACT, NOT REASSURANCE.
+    #:
+    #: A page that says "up to 2 minutes" and then keeps spinning at 2:30 has
+    #: told the reader something false, which is worse than saying nothing.
+    #: `INTERACTIVE_MAX_S` is therefore the same number the deadline enforces:
+    #: at it, the reader gets a bounded CORE or an explicit terminal state.
+    #:
+    #: Measured on the preview at da9fe4da: Apple 72.2s and 84.5s, Microsoft
+    #: 107.78s. So "under a minute" is NOT sayable yet and is deliberately not
+    #: said -- the copy promises what the p90 can currently support, and gets
+    #: tightened when the cohort earns it, never before.
+    INTERACTIVE_MAX_S = 120
+    #: MEASURED, NOT ASPIRATIONAL. The live recovery matrix on d4ce3318 read
+    #: CORE p50 96.3s with 9 of 10 inside 120s, so "about a minute" was
+    #: optimistic for half of all readers. "Most analyses finish within two
+    #: minutes" is what the measurement supports, and `_waiting_expectation`
+    #: replaces it the moment a particular run outgrows it.
+    ETA_COPY = "Most analyses finish within two minutes."
+
+    #: §11. What is being assembled, in the order a person would build it.
+    #: Named for the WORK rather than for the lifecycle, because "VALIDATING
+    #: _COMPANY" tells a customer nothing and "Identifying the company" tells
+    #: them exactly what is happening to their request.
+    _STAGE_LADDER = (
+        ("identity", "Identifying the company"),
+        ("prior", "Loading prior intelligence"),
+        ("evidence", "Reading current company evidence"),
+        ("macro", "Connecting macro and industry conditions"),
+        ("competitors", "Mapping competitors"),
+        ("stress", "Stress-testing the strategic read"),
+        ("story", "Building the executive story"),
+        ("ready", "Preparing the analysis"),
+    )
+
+    #: Which hydration tier proves each rung is done.
+    #:
+    #: FOUR TIERS ARE MEASURED AND EIGHT RUNGS ARE NAMED, so several rungs
+    #: share a tier and therefore flip together. That is deliberate: the
+    #: alternative is eight independently-animating rows whose states are
+    #: invented, which is a progress bar that lies. A rung is marked from a
+    #: PRODUCER's output and never from elapsed time — the contract
+    #: `_hydration_state` already keeps.
+    _STAGE_TIER = {
+        "identity": "T0", "prior": "T1", "evidence": "T2", "macro": "T2",
+        "competitors": "T3", "stress": "T3", "story": "T3", "ready": "T3",
+    }
+
+    def _stage_ladder(self, hyd, status) -> str:
+        """The assembly, as a list a customer can watch fill in."""
+        tiers = (hyd or {}).get("tiers") or {}
+        if not tiers:
+            return ""
+        from intent_engine.founder_brief import hydration as H
+        done_states = (H.READY, H.BOUNDED, H.DEGRADED)
+        rows, reached = [], True
+        for key, label in self._STAGE_LADDER:
+            state = tiers.get(self._STAGE_TIER.get(key, ""), H.PENDING)
+            if state in done_states and key != "ready":
+                mark, cls = "done", "done"
+            elif reached:
+                mark, cls, reached = "working", "now", False
+            else:
+                mark, cls = "to come", "wait"
+            rows.append(f'<li class="{cls}">{_e(label)}'
+                        f'<span class="st">{mark}</span></li>')
+        return (f'<ol class="stages" aria-label="What is being assembled">'
+                f'{"".join(rows)}</ol>')
+
+    def _identity_confirmation(self, run_id) -> str:
+        """§7. Who is being analysed, shown before the answer arrives.
+
+        Not a confirmation STEP — an interstitial the customer has to
+        acknowledge is a click between them and the thing they asked for.
+        The identity is stated where they are already looking, with the
+        correction available beside it, so a wrong company is caught in the
+        first four seconds instead of on the report.
+        """
+        meta = self.ci.run_meta(run_id) or {}
+        name = str(meta.get("company_name") or "").strip()
+        if not name:
+            return ""
+        listing = self._listing_for(run_id)
+        bits = [b for b in (getattr(listing, "ticker", ""),
+                            str(meta.get("country") or ""),
+                            str(meta.get("domain") or "")) if b]
+        detail = (f'<span class="idbits">{_e(" · ".join(bits))}</span>'
+                  if bits else "")
+        return (f'<p class="analysing">Analysing <b>{_e(name)}</b>{detail}'
+                f' — <a href="/">not this company?</a></p>')
+
+    def _hydration_state(self, run_id, *, terminal=False):
+        """What this run can already show, measured from its own outputs.
+
+        Every argument is read from a PRODUCER, never from elapsed time. That
+        is the whole contract: a tier is READY because something produced its
+        output, so a slow run reports honestly instead of a fast one lying.
+        A read that fails costs the reader the tier table, never the page.
+        """
+        try:
+            from intent_engine.founder_brief import hydration
+            meta = self.ci.run_meta(run_id) or {}
+            avail = self._availability(run_id)
+            result = self._results.get(run_id) or {}
+            report = result.get("strategic_report") \
+                if isinstance(result, dict) else None
+            decision = {}
+            if isinstance(report, dict):
+                from intent_engine.strategic_intelligence.decision import \
+                    decision_of
+                composed = decision_of(report)
+                decision = composed.as_dict() if composed is not None else {}
+            try:
+                discovery = self.ci.discovery_report(run_id)
+            except Exception:                               # noqa: BLE001
+                discovery = None
+            return hydration.assess(
+                identity=str(meta.get("company_name") or "") or None,
+                previous_decision=None,
+                market_snapshot=self._market_snapshot(run_id)
+                if self._listing_for(run_id).ticker else None,
+                source_coverage=(result.get("coverage")
+                                 if isinstance(result, dict) else None),
+                discovery_coverage=discovery,
+                decision=decision,
+                economic_history=decision.get("economic_history") or None,
+                second_iteration=decision.get("second_iteration") or None,
+                blocked=bool(avail.get("blocked")),
+                finished=bool(terminal))
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("hydration not assessed for %s", run_id)
+            return {}
+
+    @staticmethod
+    def _hydration_body(hyd) -> str:
+        """The tier table, in the reader's words.
+
+        Ordered by what a reader can ACT on rather than by pipeline order,
+        which is what lets this page be worth reading before it finishes. The
+        raw state never reaches the sentence: PENDING/RUNNING/READY are
+        machine words, and a customer watching an analysis should be told what
+        is known, not which enum a producer landed in.
+        """
+        if not hyd or not hyd.get("tiers"):
+            return ""
+        from intent_engine.founder_brief import hydration as H
+        said = {H.READY: "done", H.BOUNDED: "partial",
+                H.DEGRADED: "limited", H.RUNNING: "working",
+                H.PENDING: "waiting"}
+        rows = "".join(
+            f'<li>{_e(H.TIER_COPY.get(tier, tier))} — '
+            f'{_e(said.get(hyd["tiers"].get(tier), "unknown"))}</li>'
+            for tier in H.TIERS)
+        return f'<ul class="hydration">{rows}</ul>'
 
     def _coverage_note(self, run_id, real):
         """A specific, non-technical statement of WHICH kinds of evidence the
@@ -1691,7 +3267,19 @@ class WebApp:
             return ("No approved source could be retrieved, so there was not "
                     "enough evidence to produce a report.")
         cats = sorted({label for _, label, _, _ in rows})
-        return ("Every approved source failed to retrieve (" +
+        # "EVERY" WAS NEVER CHECKED. This sentence was printed whenever ANY
+        # source failed, so a live Meta run that had read its own 10-K and
+        # 10-Q told the customer that every approved source had failed. A
+        # count is one attribute lookup away and the claim was made without
+        # it; say what actually happened instead.
+        read = len(self._retrieved_documents(run_id))
+        if read:
+            return (f"{len(rows)} source(s) could not be retrieved ("
+                    + _e(", ".join(cats)) + f"), though {read} were read. "
+                    "Public sites can refuse automated access or require "
+                    "JavaScript; a failed retrieval is not evidence of "
+                    "real-world absence.")
+        return ("No approved source could be retrieved (" +
                 _e(", ".join(cats)) + "). Public sites can refuse automated "
                 "access or require JavaScript; a failed retrieval is not "
                 "evidence of real-world absence.")
@@ -1959,7 +3547,7 @@ class WebApp:
 
     def _run_page(self, session, run_id, *, layer="default"):
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         if self._is_real_run(run_id):
             # A FAILED real-company run has no report. Render an honest
             # failed-run page — never redirect back to source approval and
@@ -2009,8 +3597,36 @@ class WebApp:
             # thing — that is the live 400 at t=0 and the live 500 that
             # followed it. The progress page is the honest transitional answer
             # and it already exists.
+            #
+            # ...BUT ONLY WHILE THERE IS NOTHING TO WATCH INSTEAD.
+            #
+            # THE REDIRECT LOOP. `_progress` sends the reader HERE the moment
+            # `result_readiness(...)["opens_result"]` is true, and this line
+            # sent them straight back while the worker was still in flight.
+            # Both conditions are true together for most of a normal run --
+            # from the moment a readable result composes until the worker
+            # clears -- so the two pages bounced off each other until the
+            # client gave up.
+            #
+            # MEASURED LIVE on 8397d67, and it is not an edge case:
+            #
+            #     Alphabet    303 loop from t=36s to t=152s   76% of the run
+            #     Meta        blank from t=37s to t=220s      83%
+            #     JPMorgan    blank from t=37s to t=157s      76%
+            #     Cloudflare  blank from t=9s  to t=20s       50%
+            #
+            # Four of four companies. The customer watching the analysis they
+            # asked for saw a page that never resolved, which is exactly the
+            # "ambiguous limbo" the terminal-state invariant forbids.
+            #
+            # `result_readiness` already states the rule and this line was the
+            # one place not following it: "opens_result is True IF AND ONLY IF
+            # a customer-readable result exists. When it is True the customer
+            # goes to the analysis, WHATEVER THE WORKER'S METADATA SAYS." So
+            # readiness decides, and in-flight only decides when readiness has
+            # nothing to offer.
             avail = self._availability(run_id)
-            if avail["in_flight"]:
+            if self.only_watchable(run_id):
                 return self._redirect(f"/runs/{run_id}/progress")
 
             if self.ci.store.run_state(run_id) == "FAILED":
@@ -2035,8 +3651,30 @@ class WebApp:
                 # from identity, listing and the documents; the primary screen
                 # was the only surface that would not.
                 stored = self._results.get(run_id)
-                if avail["documents"] and avail["has_result"] \
-                        and layer == "default":
+                # EVERY LAYER, NOT ONLY THE DEFAULT ONE.
+                #
+                # `layer == "default"` meant `/full` never reached the bounded
+                # surface and fell through to the failure page even when the
+                # run had documents AND a composed result. The comment below
+                # records the primary screen being repaired and calls it "the
+                # only surface that would not" tolerate a missing report;
+                # `/full` was the other one, and it kept the failure page.
+                #
+                # MEASURED on 517e7ae, Meta Platforms, ONE run:
+                #
+                #     intro    6,008 chars   real analysis
+                #     slides   5,863         real analysis
+                #     story    4,558         real analysis
+                #     history 29,692         real analysis
+                #     step 6   4,110         real analysis
+                #     brief   16,206         real analysis
+                #     full       755         "did not produce a report"
+                #
+                # Ten of ten board questions answered on the same run. The
+                # evidence was never insufficient; one route disagreed with
+                # the other six about the run it was rendering, and that route
+                # is the one a reader opens to read the analysis.
+                if avail["documents"] and avail["has_result"]:
                     # WHICH BOUNDED SURFACE. A run that composed a reading gets
                     # the founder brief. A run whose composition FAILED has
                     # evidence and no view, which is what
@@ -2098,12 +3736,20 @@ class WebApp:
             # never the problem — the default was. So the default is now the
             # brief, and the depth is one click away and still complete.
             if layer == "default":
-                # V3: the default is the 60-SECOND FOUNDER BRIEF, not the
-                # executive brief. The customer's message was that founders
-                # should not have to read everything -- and the executive
-                # brief, at 500-900 words, is still "everything" to someone
-                # with fifteen minutes. Depth is one click away and unchanged.
-                return self._founder_brief_page(session, run_id, result)
+                # THE DEMO IS A STORY, AND A STORY HAS A FIRST PAGE (§17).
+                #
+                # This used to land on the 60-second founder brief, which was
+                # right when the alternative was an eleven-section report. It
+                # is no longer the first thing a reader should meet: the brief
+                # opens on the run's own epistemic verdict, and for a company
+                # whose run retrieved little that verdict was "no strategic
+                # reading cleared the evidence bar" -- a refusal, as the
+                # product's first sentence.
+                #
+                # Step 1 is now the Introduction, which says what the company
+                # is and what the argument is about. The brief is unchanged
+                # and is still served at /brief.
+                return self._redirect(f"/runs/{run_id}/intro")
             return self._strategic_run_page(session, run_id, result,
                                             share_form, feedback_form)
 
@@ -2135,7 +3781,7 @@ class WebApp:
             # not enough here", and silently substituting a summary for it
             # would be a second, quieter dead end.
             if layer == "default":
-                return self._founder_brief_page(session, run_id, result)
+                return self._redirect(f"/runs/{run_id}/intro")
             return self._insufficient_evidence_page(
                 session, run_id, result,
                 reason="The pages that could be read describe what the "
@@ -2193,7 +3839,7 @@ class WebApp:
         budget inside it is finite, so it cannot become a loop.
         """
         if not self._owned(session, run_id) or not self._is_real_run(run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         # A FAILED or INTERRUPTED run is retried as a NEW ATTEMPT on the
         # worker -- retry must not reintroduce the blocking request the async
         # change just removed. Bounded, and a no-op while an attempt is live,
@@ -2283,10 +3929,33 @@ class WebApp:
         # sat directly above a list of ten, because one counts evidence and the
         # other counts fetches. Both are true and the reader needs both, so the
         # sentence relates them rather than printing one and listing the other.
+        # ONE DENOMINATOR PER PAGE.
+        #
+        # `used` is read from the store, NOW. `note["source_count"]` was
+        # computed inside `compose`, THEN. On Meta's live run at 5d43053 the
+        # page said "7 page(s) read; 1 carried usable evidence" and listed
+        # seven, of which three are Meta's own filings. Amazon said the same
+        # thing on the same wave. A reader cannot reconcile those numbers,
+        # and neither could I: the gate, re-run offline on Meta's seven real
+        # documents, answers 7.
+        #
+        # So the page states what it can verify from the evidence in front of
+        # it, and a stale smaller count is not printed as if it described
+        # this list. The gate's verdict still stands -- this changes what the
+        # page SAYS, never what the run was allowed to do -- and the run now
+        # records `readiness_inputs` so the discrepancy is measured on the
+        # next wave rather than argued about.
         usable = note.get("source_count") or 0
         read_line = f"{len(used)} page(s) read"
         if usable and usable != len(used):
-            read_line += f"; {usable} carried usable evidence"
+            if usable < len(used):
+                # The gate saw FEWER documents than the store now holds. Say
+                # what is true of this list; do not attribute the smaller
+                # number to it.
+                read_line += (f"; the evidence gate was applied to {usable} "
+                              f"of them")
+            else:
+                read_line += f"; {usable} carried usable evidence"
         read_line += "."
         if set_aside:
             found += (f'<h3>Sources found but not used</h3>'
@@ -2374,6 +4043,38 @@ class WebApp:
         #
         # "Limited analysis" states the situation without accusing anyone, and
         # the body then says exactly what is missing and what to do about it.
+        # D22. THE LAST SITE THAT DECIDED THIS FOR ITSELF, and the one every
+        # refusing ROUTE funnels into. D17 was fixed at the surfaces that
+        # RENDER a verdict; Caterpillar then failed anyway, because /slides
+        # redirects here when the deck is not ready and this page asserts
+        # "There is not enough public evidence to build a briefing on this
+        # company" while the X-Ray for the same run gives a supported capacity
+        # decision.
+        #
+        # Fixed HERE rather than at /slides deliberately. Three routes reach
+        # this page and patching the one that was caught would have produced
+        # the fifth instance of this defect somewhere else -- the sweep that
+        # found this site is the reason it is being fixed once.
+        #
+        # What was READ is unchanged: this page's whole job is to say what it
+        # found and what is missing, and that is still true and still useful.
+        # What it may no longer do is conclude, from this run alone, that the
+        # system has nothing to say about the company.
+        _contract = self._executive_contract(run_id)
+        if _contract is not None and getattr(_contract, "reading_exists",
+                                             False):
+            # The CONTRACT's name, which is the canonical one resolved for the
+            # dossier. `company` here is whatever the run metadata recorded,
+            # which is what the founder typed -- "Caterpillar" rather than
+            # "Caterpillar Inc.", and "this company" when the run has no
+            # metadata at all.
+            company = getattr(_contract, "company", "") or company
+            reason = (
+                f"A supported reading of {company} exists and is set out on "
+                f"the Executive X-Ray. "
+                + (getattr(_contract, "run_contribution", "") or
+                   "This run did not add enough independent evidence to "
+                   "strengthen it."))
         heading = f'Limited analysis of {_e(company)}'
         body = (
             f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
@@ -2508,20 +4209,28 @@ class WebApp:
         _decision = decision_of(report)
         _external = self._external_context(run_id)
         _story = fn.build_narrative(company=_name, brief=_brief, report=report,
-                                    decision=_decision, external=_external)
+                                    decision=_decision, external=_external,
+                                    contract=self._executive_contract(run_id))
         _book = fd.build_dossier(company=_name, report=report,
                                  decision=_decision, narrative=_story,
                                  documents=self._retrieved_documents(run_id),
                                  external=_external,
                                  market=self._market_snapshot(run_id)
-                                 if self._listing_for(run_id).ticker else None)
-        strat = (fr.BRIEF_CSS + fn.NARRATIVE_CSS + _charts.CHART_CSS
+                                 if self._listing_for(run_id).ticker else None,
+                                 modeled_market=self._modeled_expectation(
+                                     run_id, _name),
+                                 read=self._strategic_read(run_id, _name),
+                                 econ=self._founder_economic_context(run_id))
+        from intent_engine.founder_brief import challenge_block as _cb
+        strat = (fr.BRIEF_CSS + fn.NARRATIVE_CSS + _charts.CHART_CSS + _cb.CSS
                  + fd.render_dossier(
                      _book, depth=fd.FULL, run_id=run_id, wrap=False,
                      citation_labels=self._citation_labels(run_id),
                      charts=_external_charts(_external),
                      lead=fd.render_decision_lead(
-                         _decision, _name, depth=fd.FULL, run_id=run_id)))
+                         _decision, _name, depth=fd.FULL, run_id=run_id,
+                         contract=self._executive_contract(run_id),
+                         read=self._strategic_read(run_id, _name))))
         # The legacy report is NOT appended. It said the same things the
         # dossier above now says -- one decision, one evidence list, one set
         # of alternatives -- so keeping it made every sentence on the page
@@ -2571,7 +4280,7 @@ class WebApp:
                 # 38rem cap and 40px bottom padding, so on a phone the layer
                 # links sat in a stray white panel with a band of dead space
                 # under them -- the first thing below the site nav.
-                f'{self._layer_nav(run_id, "full")}'
+                f''
                 f'{strat}{actions}'
                 f'</main></body></html>')
         return self._html(_BRIEF_CSS + body)
@@ -2639,6 +4348,31 @@ class WebApp:
             f'reusing what was already read.</span>'
             f'</form>')
 
+    @staticmethod
+    def _as_of(*, fresh: bool = False) -> str:
+        """The run's as-of stamp, and therefore half of its identity.
+
+        A run's id is `ci-run:{subject}:{user}:{as_of}`, and this was always
+        truncated to `T00:00:00` -- so the SAME company analysed twice by the
+        same person on the same day is one run, not two. That is the right
+        default: it is what stops a double-submit or a refresh paying for the
+        analysis twice.
+
+        It also made a second iteration structurally unreachable. There is no
+        way, within a day, for a reader to produce the earlier-and-later pair
+        the whole learning surface is built on, which is why the live card
+        reported a baseline for what looked like a second Cloudflare run.
+
+        An EXPLICIT request for a fresh analysis is the one case where the
+        reader has said they want another one, so it keeps full precision and
+        gets its own run. Everything else still dedupes by day.
+        """
+        import datetime as _dt
+
+        now = _dt.datetime.now(_dt.timezone.utc)
+        return (now.strftime("%Y-%m-%dT%H:%M:%S+00:00") if fresh
+                else now.strftime("%Y-%m-%dT00:00:00+00:00"))
+
     def _fresh_analysis(self, session, run_id):
         """Deliberately bypass the compatible-result cache.
 
@@ -2646,14 +4380,28 @@ class WebApp:
         judgement about whether the cached run is still good. A stale
         low-quality report must never be able to trap someone with no way out
         of it.
+
+        IT HAD TO BYPASS THE RUN ID TOO. Clearing `_results` and re-entering
+        `_analyze` rebuilt the same `ci-run:{subject}:{user}:{date}` key, so
+        this returned the SAME run every time -- a button whose whole purpose
+        is "give me another one" that could not give you another one. Passing
+        `fresh` keeps the full timestamp in the as-of, so the reader's
+        explicit request gets its own run and becomes the second observation
+        the learning surface can actually compare against.
         """
         if not self._owned(session, run_id) or not self._is_real_run(run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         meta = self.ci.run_meta(run_id) or {}
-        self._results.pop(run_id, None)
+        # THE OLD RUN'S RESULT IS KEPT. This popped it, which was correct only
+        # while a fresh analysis reused the same run id -- clearing the cache
+        # was then the sole way to force recomputation. Now that the fresh run
+        # gets its own id, popping the old one destroys the very reading the
+        # new run is about to be compared against: the prior vanished at the
+        # moment the second observation was created, so the second iteration
+        # reported a baseline forever.
         form = {"consent": "1", "company_name": meta.get("company_name", ""),
                 "website": meta.get("website", ""), "csrf": session["csrf"]}
-        return self._analyze(session, form)
+        return self._analyze(session, form, fresh=True)
 
     def _founder_layers(self, run_id):
         """Everything the deeper layers need, built from ONE brief.
@@ -2707,6 +4455,238 @@ class WebApp:
         brief = fb.build(company=name, mode=mode, report=report,
                          observations=observations, market=market)
         return brief, report, name
+
+    def _run_evidence(self, session, run_id):
+        """The provenance drawer for a LIVE run — D30.
+
+        `/demo-dossiers/<company>/evidence` renders every source with its
+        author, host, subject, independence, relevance and the reason it was
+        or was not counted, plus the discovery coverage behind it. On a live
+        run that drawer was unreachable: `/runs/<id>/sources` listed what was
+        read and offered no way into any of it.
+
+        This is D9's shape exactly -- a correct, complete surface wired only
+        to the demo-dossier path -- and it is fixed the same way, by routing
+        rather than by building a second drawer. The renderer is untouched.
+        """
+        if not self._owned(session, run_id):
+            return self._no_such_run(session, run_id)
+        from intent_engine.demo_dossier.store import company_key
+        meta = self.ci.run_meta(run_id) or {}
+        name = str(meta.get("company_name") or "")
+        key, _c, _m = self._manifest_placement(
+            company_key(name or str(meta.get("domain") or "") or run_id),
+            name=name, domain=str(meta.get("domain") or ""))
+        return self._evidence_screen(key)
+
+    def _composed_decision(self, run_id):
+        """The composed executive decision as a dict — what the X-Ray renders.
+
+        Q&A routes its per-intent answers at THIS object rather than at the
+        run's reasoning decision, for the same reason the X-Ray does: the
+        reasoning path does not populate `key_risk`, `falsifier`,
+        `economic_history` or `competitors`, and a router pointed at it would
+        answer "no risk recorded" for a company whose X-Ray displays one.
+        """
+        try:
+            from intent_engine.demo_dossier.store import (DossierStore,
+                                                          company_key)
+            meta = self.ci.run_meta(run_id) or {}
+            name = str(meta.get("company_name") or "")
+            key, _c, _m = self._manifest_placement(
+                company_key(name or str(meta.get("domain") or "") or run_id),
+                name=name, domain=str(meta.get("domain") or ""))
+            dossier = DossierStore(self._runtime_root).latest(key)
+            composed = (self._executive_read(dossier)
+                        if dossier is not None else {})
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("composed decision not read for %s", run_id)
+            return {}
+        if not isinstance(composed, dict):
+            return {}
+        # TWO COMPOSERS, AND THE FIELD WAS ADDED TO THE OTHER ONE.
+        #
+        # MEASURED from the captures, not inferred: across all eight Batch-A
+        # companies on fdbfe77, ZERO of eighty Q&A answers carried the
+        # company's own qualifying sentence — on a build that contains
+        # `grounded_in`. The renderer was fine and the field was empty,
+        # because Q&A's decision comes from
+        # `executive.decision_synthesis.compose`, which builds a
+        # FounderDecision from the DOSSIER, while `grounded_in` was added to
+        # `strategic_intelligence.decision.compose_decision`, which builds one
+        # from the run's hypothesis. Same class, two producers, one repaired.
+        #
+        # This is the seam where BOTH objects exist, so the run's own
+        # grounding is joined on here rather than either composer learning
+        # about the other.
+        if not composed.get("grounded_in"):
+            composed["grounded_in"] = self._run_grounding(run_id)
+        # TWO COMPOSERS, AND THE ADVERSARY WAS WIRED INTO THE OTHER ONE.
+        #
+        # Same seam, second field. `analysis_selection._adversary` was
+        # ungated last wave so the L0/L1/L2 engine would run for companies
+        # outside the curated manifest -- but that repair landed in
+        # `strategic_read.compose`, and the X-Ray, the full analysis and the
+        # presentation all render `decision_synthesis.compose`, whose
+        # `selection` still comes from the manifest. MEASURED: `adversary`
+        # scored 0.0 on all 44 companies both before and after.
+        #
+        # `competitors` has the identical shape: it is read off
+        # `profile.strategic_competitors`, which is the manifest's list, so
+        # every company outside the manifest showed no competitor set on the
+        # X-Ray while its own step 1 named rivals from its filings.
+        #
+        # Joined here rather than taught to either composer, which is the
+        # precedent `grounded_in` set directly above: this is the ONE place
+        # both objects exist, and a composer that reached into the other
+        # would be a second place for them to disagree.
+        # `_strategic_read` returns the OBJECT, not its dict. Reading it with
+        # `.get` would silently find nothing and this join would be one more
+        # repair that ships green and inert -- which is the failure mode this
+        # very session measured twice on the standing seam.
+        read = self._strategic_read(run_id)
+        for field in ("adversary", "impossible_hypotheses"):
+            value = list(getattr(read, field, ()) or ())
+            if value and not composed.get(field):
+                composed[field] = value
+        rivals = getattr(read, "level4_competition", ()) or ()
+        if rivals and not composed.get("competitors"):
+            composed["competitors"] = [
+                {"name": str(getattr(row, "name", "")),
+                 "why": str(getattr(row, "why_a_rival", "")
+                            or getattr(row, "why", ""))}
+                for row in rivals if getattr(row, "name", "")]
+        if not composed.get("economic_architecture"):
+            composed["economic_architecture"] = getattr(
+                read, "economic_architecture", None)
+        return composed
+
+    def _run_grounding(self, run_id) -> str:
+        """The sentence from THIS company's filing that qualified its reading.
+
+        Read from the run's own report, which is where the hypothesis and its
+        `mechanism_evidence` live. Never raises: a missing grounding is an
+        absent sentence, not a broken page.
+        """
+        try:
+            from intent_engine.strategic_intelligence import mechanism as MECH
+            report = (self._result(run_id) or {}).get("strategic_report") or {}
+            for hypothesis in (report.get("hypotheses") or ()):
+                line = MECH.because_line(hypothesis, limit=1)
+                if line:
+                    return line
+        except Exception:                                   # noqa: BLE001
+            return ""
+        return ""
+
+    def _executive_contract(self, run_id):
+        """The one answer to "does a supported reading of this company exist".
+
+        D17. Every executive surface used to decide this for itself, from
+        whichever decision object it happened to consume, and on a company
+        with a published market reading they reached opposite answers on the
+        same run. This is the single place that question is settled; the
+        surfaces keep their own prose and their own depth.
+
+        Returns None on any failure, and every consumer treats None as "ask
+        the old way" -- a contract that could fail a page is worse than the
+        contradiction it removes.
+        """
+        try:
+            from intent_engine.demo_dossier.store import (DossierStore,
+                                                          company_key)
+            from intent_engine.executive import contract as ec
+            from intent_engine.strategic_intelligence.decision import \
+                decision_of
+
+            result = self._result(run_id) or {}
+            report = result.get("strategic_report") or {}
+            meta = self.ci.run_meta(run_id) or {}
+            name = str(meta.get("company_name") or "")
+            key, _c, _m = self._manifest_placement(
+                company_key(name or str(meta.get("domain") or "") or run_id),
+                name=name, domain=str(meta.get("domain") or ""))
+            dossier = DossierStore(self._runtime_root).latest(key)
+            market = self._executive_read(dossier) if dossier is not None \
+                else None
+            # The bridge already decided whether this snapshot is for the
+            # right company and recent enough. Asking again here would be a
+            # second freshness contract, and two of those is how the first
+            # one stops being believed.
+            usable = dossier is not None
+            # A DOSSIER IS NOT A MARKET READING.
+            #
+            # This asked only whether a dossier EXISTS. One always does after
+            # a run, including for the 24 gauntlet companies the market
+            # bundle does not cover -- its market side is assembled as
+            # UNAVAILABLE and every block in it is empty. The composed
+            # decision over that dossier was then handed to the contract as
+            # `market_decision` with `market_usable=True`, so whatever
+            # standing it reached was attributed to the market engine.
+            #
+            # It did not matter while such a dossier could only reach
+            # UNMEASURABLE. It matters now that a run's own evidence lifts it
+            # to BOUNDED: a fixture run whose OWN decision is WITHHELD was
+            # told "A supported reading of Acme exists and is set out on the
+            # Executive X-Ray" -- two surfaces of one run disagreeing about
+            # whether a reading exists, which is the single thing this
+            # contract was built to prevent.
+            #
+            # So the market side has to have actually published something.
+            # Absence routes to `market_decision=None`, which the contract
+            # already handles as "no market reading is published for this
+            # company, so the reading below rests on this run alone".
+            if str((getattr(dossier, "market_block", None) or {})
+                   .get("availability") or "") not in ("AVAILABLE", "STALE"):
+                market, usable = None, False
+            # THE THIRD PRODUCER OF A READING, which this contract used not
+            # to be told about.
+            #
+            # MEASURED, Pfizer Inc. on 743df06 and cb9e6b7: twelve usable
+            # documents across five families, `/full` saying "No strategic
+            # reading of Pfizer Inc. cleared the evidence bar, so none is
+            # asserted here", and `/intro`, `/story` and `/connect` on the
+            # SAME run saying Pfizer runs on a product that may only be sold
+            # once a regulator permits it and a payer agrees to pay for it,
+            # naming generic competition to Xtandi and Xeljanz as the
+            # substitution, and setting out rebate economics.
+            #
+            # The curated transition library matching nothing is a fact about
+            # a twelve-entry library. It is not a fact about whether this
+            # product has a reading of Pfizer, and the one place that answers
+            # that question was deciding it from two of the three producers.
+            return ec.decide(
+                company=(getattr(dossier, "canonical_name", "") or name),
+                run_decision=decision_of(report), market_decision=market,
+                market_usable=usable,
+                bounded_read=self._bounded_read_exists(run_id, name))
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("executive contract not composed for %s", run_id)
+            return None
+
+    def _bounded_read_exists(self, run_id, name="") -> bool:
+        """Did this run compose an economic reading the pages are rendering?
+
+        Deliberately asks the SAME object the surfaces project from, rather
+        than re-deriving the question: a second opinion about whether a
+        reading exists is exactly the disagreement the contract removes.
+
+        ONE READER, NOT A SECOND OPINION. `StrategicRead` already answers
+        this as `puts_a_strategy_forward`, and the deep dossier has been
+        branching on it all along -- it is only the narrative, and the
+        contract every surface consults, that were never told. Re-deriving
+        the question here would make a third answer to a question that
+        exists to have one.
+
+        Never raises: a contract that can fail a page is worse than the
+        contradiction it removes.
+        """
+        try:
+            read = self._strategic_read(run_id, name)
+        except Exception:                                   # noqa: BLE001
+            return False
+        return bool(read is not None
+                    and getattr(read, "puts_a_strategy_forward", False))
 
     def _retrieved_documents(self, run_id):
         """The run's retrieved documents, or () when the store has no rows.
@@ -2894,22 +4874,94 @@ class WebApp:
         # no import path from here into the market package, and the package is
         # not even present on this branch. A missing dossier is the normal
         # case and stays silent; see `ExternalContext.has_strategic`.
+        # It is resolved by NAME rather than by one derived filename. The
+        # producer keys its files on an internal universe id it never shares,
+        # and this side knows the company by whatever the founder typed, so a
+        # single-key lookup missed every real dossier ever published without
+        # reporting anything — see `strategic_contract.resolve`. Every name
+        # this run holds for the company is offered, and the dossier has to
+        # name itself back.
         strategic = None
         try:
             from intent_engine.external_intel import (
                 strategic_contract as sc,
             )
-            key = sc.company_key(name)
-            strategic = sc.load(
+            strategic = sc.resolve(
                 pathlib.Path(self._runtime_root) / "reports" / "market"
-                / "strategic" / f"{key}.json",
-                expected_company=key, today=today)
+                / "strategic",
+                names=[name, identity.get("common_name") or "",
+                       identity.get("canonical_legal_name") or "",
+                       identity.get("fallback_subject") or "",
+                       (self.ci.run_meta(run_id) or {}).get(
+                           "company_name") or ""],
+                today=today)
         except Exception:  # noqa: BLE001 - context must never break a run
             _LOG.warning("strategic context unavailable for %s", run_id)
 
+        # THE SHARED ECONOMIC STATE, and this company's evidenced exposure
+        # to it. Read from the canonical core, never recomputed here: the
+        # defect this closes is two macro pictures in one product, with the
+        # better one unreachable. The founder side may not import the market
+        # engine and does not; `econ` is neutral and both consume it.
+        #
+        # Fails soft like every other context family. A deployment where no
+        # market engine has ever run reads "unavailable" with a reason, and
+        # the analysis proceeds on the company's own evidence.
+        # THIS COMPANY'S OWN EVIDENCE CROSSES FIRST, AND THE ORDER IS THE
+        # WHOLE POINT.
+        #
+        # `_filed_exposures` READS what this writes, from the same store,
+        # a few lines below. Running the read first meant the analysis
+        # pass always found zero exposures -- and that pass is the one
+        # that CACHES the context, so every page render of a fresh run
+        # got the empty answer and the economic section reported
+        # INSUFFICIENT_EVIDENCE for a company whose filings had just
+        # established its exposures. It corrected itself only after a
+        # restart dropped the cache, which is the shape of a defect that
+        # cannot be reproduced by looking at it twice.
+        #
+        # THE OTHER DIRECTION, and it runs even when the state is absent.
+        # This company's public statements about hiring, pricing, capacity,
+        # inventories, demand, financing and supply become evidence nodes in
+        # the shared graph, where the market engine's aggregate step reads
+        # them. Nothing about who USED the product crosses; there is no path
+        # from a demo query to an economic node.
+        try:
+            self._publish_econ_evidence(
+                run_id=run_id, company_name=name, observations=observations,
+                documents=documents, today=today)
+        except Exception:  # noqa: BLE001 - see above
+            _LOG.warning("econ evidence not published for %s", run_id)
+
+        economy, exposures = None, ()
+        try:
+            from intent_engine.external_intel import econ_context as ec
+            # THE RUN'S OWN EVIDENCE CUTOFF, NOT TODAY'S DATE.
+            #
+            # §26.16. The company evidence was gathered at `run_meta.as_of`
+            # and the baseline analysis rests on it. Reading the economy at a
+            # later date makes the treatment "the world model PLUS more recent
+            # information", and the difference between the two arms stops
+            # being attributable to the world model at all. `store.load`'s
+            # cutoff is a write-order cutoff, so this asks the store what it
+            # had recorded by the run's date -- which is the question.
+            _run_as_of = str((self.ci.run_meta(run_id) or {}).get("as_of")
+                             or "") or today
+            economy = ec.load(self._runtime_root, as_of=_run_as_of)
+            exposures = self._econ_exposures(macro or (), observations)
+            # Exposures read from this company's own FILINGS, joined to the
+            # ones its macro factors established. The filing path is the one
+            # that finds anything: measured across six companies, the macro
+            # factors contributed a handful and the filings contributed 39.
+            exposures = tuple(dict.fromkeys(
+                tuple(exposures) + self._filed_exposures(run_id, today)))
+        except Exception:  # noqa: BLE001 - context must never break a run
+            _LOG.warning("economic context unavailable for %s", run_id)
+
         context = ep.build_context(market=market, macro=macro or (),
                                    competitors=competitors or (),
-                                   strategic=strategic, as_of=today)
+                                   strategic=strategic, economy=economy,
+                                   economy_exposures=exposures, as_of=today)
 
         # Tell the market engine what became of the dossier it published.
         # Only this side knows: the file is read, validated, accepted or
@@ -2957,11 +5009,427 @@ class WebApp:
                 has_strategic=context.has_strategic, analysis_as_of=today,
                 rendered_blocks=rendered, surface="analysis",
                 decision_impact=impact.as_dict() if impact.changed else None)
+            # THE TEMPORAL COMPARISON, WHICH IS THE ONE LEARNING NEEDS.
+            #
+            # The grading above asks "was the market dossier decision-
+            # relevant" by running the same analysis with and without it.
+            # That is a real question and it stays. It cannot answer "did we
+            # learn anything", and `decision_impact`'s own docstring says
+            # why: the without-dossier side is empty on every field, so every
+            # field reads empty -> populated, nothing can grade NONE, and the
+            # number is 100% by construction.
+            #
+            # Learning needs the BEFORE to be what the founder saw LAST TIME.
+            # `assess_against_prior`, `record_revision` and `record_impact`
+            # were built for exactly this and had ZERO production call sites,
+            # which is why no KnowledgeEffect could exist: the prior state was
+            # never written, so no second run could ever compare against a
+            # first.
+            self._record_learning(
+                run_id=run_id, company_id=_sc.company_key(name),
+                context=context, dossier_revision=str(
+                    getattr(strategic, "as_of", "") or ""))
         except Exception:  # noqa: BLE001 - see above
             _LOG.warning("consumption receipt not written for %s", run_id)
 
         self._external_cache[run_id] = context
         return context
+
+    #: Founder-side macro factor keys -> shared economic-state condition
+    #: kinds. An exposure only counts when the company's OWN evidence
+    #: established it, which is what `macro_contract.validate_factor` already
+    #: enforces -- so this maps factors that survived that gate, and never
+    #: derives an exposure from a sector.
+    _ECON_EXPOSURE_MAP = {
+        "policy_rate": "policy_rate", "interest_rate": "policy_rate",
+        "rates": "policy_rate", "inflation": "inflation",
+        "cpi": "inflation", "unemployment": "labour",
+        "employment": "labour", "labour": "labour", "labor": "labour",
+        "wages": "wages", "gdp": "growth", "growth": "growth",
+        "industrial_production": "industrial_production",
+        "housing": "housing", "oil": "commodity_oil",
+        "energy": "commodity_oil", "gas": "commodity_gas",
+        "copper": "commodity_copper", "dollar": "fx_dxy",
+        "currency": "fx_dxy", "fx": "fx_dxy",
+        "credit": "financial_conditions",
+        "financial_conditions": "financial_conditions",
+        "treasury": "treasury_10y", "yield": "treasury_10y",
+        "real_yield": "real_yield",
+    }
+
+    def _econ_exposures(self, macro_factors, observations) -> tuple:
+        """Which shared economic quantities THIS company is exposed to.
+
+        Derived from the macro factors that already passed
+        `macro_contract.validate_factor`, which refuses a factor not bound to
+        a retrieved observation. Nothing here widens that: a condition the
+        company has no evidenced connection to does not become an exposure
+        because its sector suggests one.
+        """
+        out = []
+        for factor in macro_factors or ():
+            for source in (getattr(factor, "factor", ""),
+                           getattr(factor, "name", ""),
+                           getattr(getattr(factor, "observation", None),
+                                   "series_id", "")):
+                key = str(source or "").strip().lower()
+                if not key:
+                    continue
+                mapped = self._ECON_EXPOSURE_MAP.get(key)
+                if mapped is None:
+                    mapped = next((v for k, v in
+                                   self._ECON_EXPOSURE_MAP.items()
+                                   if k in key), None)
+                if mapped and mapped not in out:
+                    out.append(mapped)
+                    break
+        return tuple(out)
+
+    def _filed_exposures(self, run_id: str, today: str) -> tuple:
+        """Economic quantities this company's own documents state it depends on.
+
+        Read from the shared core, where `_publish_econ_evidence` wrote them
+        during this run's translation. Reading them back rather than keeping
+        them in memory means a page rendered from a cached run gets the same
+        answer as the analysis that produced it.
+        """
+        try:
+            from intent_engine.econ import store as est
+            from intent_engine.external_intel import strategic_contract as sc
+            company_id = sc.company_key(
+                (self.ci.entity_identity(run_id) or {}).get("canonical_name")
+                or (self.ci.run_meta(run_id) or {}).get("company_name") or "")
+            rows = est.load(self._runtime_root, "priority", upto=today)
+            return tuple(
+                str(r.get("quantity"))
+                for r in rows
+                if isinstance(r, dict)
+                and r.get("record") == "company_exposure"
+                and r.get("company_id") == company_id and r.get("quantity"))
+        except Exception:  # noqa: BLE001 - context must never break a run
+            return ()
+
+    def _publish_econ_evidence(self, *, run_id: str, company_name: str,
+                               observations, documents, today: str) -> dict:
+        """This company's public statements, as shared economic evidence.
+
+        Written to the canonical core so the market engine's aggregate step
+        can build candidate indicators from a panel of companies. The
+        translation refuses anything tenant-private and anything with no
+        stated direction, and reports what it declined -- a translator that
+        returned only its output would make a 90% loss invisible.
+        """
+        from intent_engine.econ import store as est
+        from intent_engine.external_intel import econ_evidence as ee
+        from intent_engine.external_intel import strategic_contract as sc
+
+        company_id = sc.company_key(company_name) or run_id
+        out = ee.translate(observations, company_id=company_id,
+                           company_name=company_name, as_of=today,
+                           documents=documents)
+        if out["nodes"]:
+            est.append_many(self._runtime_root, "node",
+                            [n.as_dict() for n in out["nodes"]],
+                            written_at=today)
+        # The exposures travel with the evidence. Without them the shared
+        # economic state reaches this company and stops: `relevant_to` needs
+        # a quantity this company is evidenced to be exposed to, and an
+        # analysis with no exposures reads every economic condition as
+        # irrelevant to it.
+        if out.get("exposures"):
+            est.append_many(
+                self._runtime_root, "priority",
+                [dict(r, record="company_exposure", as_of=today,
+                      company_id=company_id) for r in out["exposures"]],
+                written_at=today)
+        _LOG.info("econ evidence for %s: %d of %d offered crossed (%s)",
+                  company_id, out["translated"], out["offered"],
+                  out["declined"])
+        return out
+
+    def _record_learning(self, *, run_id: str, company_id: str, context,
+                         dossier_revision: str = "") -> dict:
+        """Compare this analysis with the last one, and record what changed.
+
+        ORDER MATTERS AND IS NOT OBVIOUS. The comparison must run against the
+        prior revision BEFORE this one is recorded, or every run compares
+        against itself and nothing ever changes.
+
+        Every failure is swallowed and reported as a state. A learning ledger
+        that can fail an analysis is a worse defect than the missing rows it
+        was added to produce — the same judgement the consumption receipt
+        beside it is built on.
+        """
+        from intent_engine.external_intel import decision_impact as _di
+        from intent_engine.external_intel import effect_producer as _ep
+
+        try:
+            after = _di.semantic_state(context)
+            prior = _di.load_revisions(self._runtime_root).get(company_id)
+            impact = _di.assess_against_prior(
+                self._runtime_root, analysis_id=run_id,
+                company_id=company_id, after=after,
+                provenance=_di.evidence_of(context),
+                dossier_revision=dossier_revision)
+            effects = _ep.effects_from_impact(
+                impact, evidence_ids=_di.evidence_of(context),
+                prior_company_id=str((prior or {}).get("company_id") or ""))
+            written = _ep.record_effects(self._runtime_root, effects)
+            # Recorded AFTER the comparison, and idempotent by content: an
+            # unchanged dossier appends nothing, so the file does not grow by
+            # a row per company per cycle.
+            _di.record_revision(self._runtime_root, company_id=company_id,
+                                state=after,
+                                dossier_revision=dossier_revision)
+            _di.record_impact(self._runtime_root, impact=impact)
+            return {"state": "RECORDED", "effects": len(effects),
+                    "new_effects": written,
+                    "materiality": getattr(impact, "materiality", "")}
+        except Exception as exc:  # noqa: BLE001 - never fail an analysis
+            _LOG.warning("learning not recorded for %s: %s", run_id, exc)
+            return {"state": "PRODUCER_FAILED",
+                    "detail": f"{type(exc).__name__}: {str(exc)[:160]}"}
+
+    def _founder_economic_context(self, run_id: str):
+        """§4/§6/§21: ONE economic decision context per run, for every surface.
+
+        Memoised on the per-request thread-local for the same reason
+        `_strategic_read` is: the brief, the full analysis, the Q&A and the
+        API all render it, and four surfaces each building their own is
+        exactly how brief and full came to say opposite things about the same
+        company. §21 is a property of there being one object, not of four
+        renderers agreeing.
+
+        Never raises. §18 -- a missing or unreadable economic state leaves the
+        founder analysis untouched and the section states what is missing.
+        """
+        memo = getattr(self._request, "econ", None)
+        if memo is None:
+            memo = self._request.econ = {}
+        if run_id in memo:
+            return memo[run_id]
+        memo[run_id] = ctx = self._compose_founder_economic_context(run_id)
+        return ctx
+
+    def _compose_founder_economic_context(self, run_id: str):
+        from intent_engine.econ import founder_contract as FC
+        from intent_engine.external_intel import econ_decision as ED
+        try:
+            meta = self.ci.run_meta(run_id) or {}
+            identity = self.ci.entity_identity(run_id) or {}
+            name = (identity.get("canonical_name") or identity.get("name")
+                    or str(meta.get("company_name") or ""))
+            # THE RUN'S OWN CUTOFF, NOT TODAY'S DATE. §26.16: a product that
+            # reads the economy at a different date from the one its evidence
+            # was gathered at is comparing two vintages and calling the
+            # difference an economic effect. `run_meta.as_of` is the date the
+            # company evidence was gathered at, so it is the date the economic
+            # state must be read at too.
+            as_of = str(meta.get("as_of") or "") or self._as_of()
+            external = self._external_context(run_id)
+            economy = getattr(external, "economy", None)
+            exposures = tuple(getattr(external, "economy_exposures", ()) or ())
+            from intent_engine.external_intel import (
+                strategic_contract as _sc,
+            )
+            company_id = _sc.company_key(name) or run_id
+            if economy is None or not getattr(economy, "available", False):
+                return FC.blocked(
+                    company_id,
+                    reason=(getattr(economy, "reason", "")
+                            or "no shared economic state is available to this "
+                               "deployment"),
+                    as_of=as_of, status=FC.BLOCKED_DATA)
+            ci_in = self.classification_inputs(run_id, name)
+            from intent_engine.executive import company_profile as CPF
+            profile = CPF.profile_for(
+                company_id, name=name,
+                domain=str(meta.get("domain") or ""),
+                registrant=ci_in.get("registrant"),
+                evidence_text=ci_in.get("evidence_text", ""))
+            # THE RUN'S OWN DECISION. `StrategicRead` carries a `Statement`
+            # for the level-5 answer, not a `FounderDecision`, and the object
+            # the comparator projects is the decision -- so it is read from
+            # the report, which is where every other surface reads it.
+            decision = self._run_decision(run_id)
+            return ED.build(
+                company_id=company_id, company_name=name, as_of=as_of,
+                economy=economy, exposures=exposures, profile=profile,
+                decision=decision, risks=self._decision_risks(run_id),
+                runtime_root=self._runtime_root,
+                relations=self._econ_relations(run_id))
+        except Exception as exc:                            # noqa: BLE001
+            # A FAULT IS REPORTED AS A FAULT. Returning an abstention here
+            # would tell a founder the economy does not bear on their
+            # decision, which is a claim, when what happened is that we could
+            # not work it out.
+            _LOG.warning("economic context failed for %s: %s", run_id, exc)
+            from intent_engine.external_intel import (
+                strategic_contract as _sc,
+            )
+            return FC.blocked(
+                _sc.company_key(str((self.ci.run_meta(run_id)
+                                     or {}).get("company_name") or ""))
+                or run_id,
+                reason=(f"the economic reading could not be composed for this "
+                        f"analysis ({type(exc).__name__}); it is reported as "
+                        f"unavailable rather than omitted"),
+                status=FC.BLOCKED_EXTERNAL)
+
+    def _run_decision(self, run_id):
+        """The run's own FounderDecision, or None."""
+        from intent_engine.strategic_intelligence.decision import decision_of
+        try:
+            result = self._result(run_id) or {}
+            report = result.get("strategic_report") or {}
+            return decision_of(report) if report else None
+        except Exception:                                   # noqa: BLE001
+            return None
+
+    def _decision_risks(self, run_id) -> list:
+        """This run's own risks, in the structured comparison vocabulary.
+
+        Baseline A's risks come from the company's OWN evidence -- the
+        strategic report's vulnerabilities -- and each carries the observation
+        that established it. §3: an A with no risks concedes two of the seven
+        material fields before the comparison starts, so a run with no
+        vulnerability produces no baseline and the delta is not claimed.
+        """
+        try:
+            result = self._result(run_id) or {}
+            report = result.get("strategic_report") or {}
+        except Exception:                                   # noqa: BLE001
+            return []
+        # TWO SOURCES, IN ORDER, AND THE FALLBACK IS NOT A CONSOLATION PRIZE.
+        #
+        # MEASURED LIVE on 5f21b055 across ten companies: five produced no
+        # Baseline A at all, so no economic delta could be measured for
+        # half the matrix. The cause is upstream and specific --
+        # `detect_vulnerabilities` only fires for a hypothesis whose
+        # `pattern_id` is in the vulnerability playbook, so a company the
+        # pattern library does not match has zero of them however much
+        # evidence was read.
+        #
+        # A BLIND SPOT IS THE SAME SHAPE. It names an observed tension and
+        # why it may matter -- a channel and a mechanism, resting on the
+        # company's own observations -- which is exactly what a Baseline A
+        # risk is. It is a genuinely weaker claim than a vulnerability, so it
+        # carries LOW severity and the source is recorded on the risk rather
+        # than being silently equivalent.
+        out = []
+        for i, row in enumerate(report.get("vulnerabilities") or ()):
+            d = row.as_dict() if hasattr(row, "as_dict") else row
+            if not isinstance(d, dict):
+                continue
+            layer = str(d.get("exposed_layer") or "")
+            mechanism = str(d.get("mechanism") or "")
+            if not layer.strip() or not mechanism.strip():
+                continue
+            out.append({
+                "risk_id": f"company:{i}",
+                # THE REPORT'S OWN CONFIDENCE, MAPPED. Stamping every
+                # company risk MEDIUM would make `risk_severity` -- one of the
+                # seven material fields -- a constant on the A side, and a
+                # constant baseline field is a field B wins for free.
+                #
+                # The detector writes "moderate" and "low", lower case, and
+                # the first version of this map looked for "MEDIUM" -- so
+                # every company risk fell through to LOW and the field was a
+                # constant anyway.
+                "severity": {"HIGH": "HIGH", "MODERATE": "MEDIUM",
+                             "MEDIUM": "MEDIUM", "LOW": "LOW"}.get(
+                                 str(d.get("confidence", "")).upper(), "LOW"),
+                "channel": layer,
+                "mechanism": mechanism,
+                "standing": "INFERRED",
+                "source": "vulnerability",
+                "evidence": tuple(str(e) for e in
+                                  (d.get("evidence") or ()))[:3]})
+        if not out:
+            for i, row in enumerate(report.get("blind_spots") or ()):
+                d = row.as_dict() if hasattr(row, "as_dict") else row
+                if not isinstance(d, dict):
+                    continue
+                tension = str(d.get("observed_tension") or "")
+                why = str(d.get("why_it_may_matter") or "")
+                if not tension.strip() or not why.strip():
+                    continue
+                out.append({
+                    "risk_id": f"company:blind:{i}",
+                    "severity": "LOW",
+                    "channel": tension,
+                    "mechanism": why,
+                    "standing": "INFERRED",
+                    "source": "blind_spot",
+                    "evidence": tuple(
+                        str(e) for e in
+                        (d.get("supporting_observation_ids") or ()))[:3]})
+        if not out:
+            out.extend(self._stated_exposure_risks(run_id))
+        return out[:4]
+
+    def _stated_exposure_risks(self, run_id) -> list:
+        """What THIS company says it depends on, in its own filings.
+
+        THE THIRD SOURCE, AND THE ONLY ONE THAT IS NEVER LIBRARY TEXT.
+        Vulnerabilities need a matched pattern; blind spots need a tension the
+        business model can have; both are written once and shared by every
+        company that qualifies. This is a sentence out of the subject's own
+        document -- "our results are sensitive to..." -- and it is the shape
+        §3 asks Baseline A to have: the company's own structural economics.
+
+        IT IS NOT THE TREATMENT. A is what the company says about itself; B
+        adds what the economic state says those conditions are actually
+        doing. The exposure is company evidence, the reading is not, and the
+        two are separated by which side of the comparison they enter.
+        """
+        try:
+            from intent_engine.econ import exposure as EXP
+            documents = [d.get("text_content") or ""
+                         for d in self._retrieved_documents(run_id)]
+            rows = EXP.read(documents, company_id=run_id) if documents else []
+        except Exception:                                   # noqa: BLE001
+            return []
+        out = []
+        for i, row in enumerate(rows):
+            basis = str(row.get("basis") or "").strip()
+            dimension = str(row.get("dimension") or "")
+            if not basis or not dimension:
+                continue
+            out.append({
+                "risk_id": f"company:stated:{i}",
+                "severity": "LOW",
+                "channel": dimension.replace("_", " ").lower()
+                                    .replace(" exposure", ""),
+                "mechanism": basis[:240],
+                "standing": "INFERRED",
+                "source": "stated_exposure",
+                "evidence": (f"filing:{run_id}",)})
+        return out[:4]
+
+    def _econ_relations(self, run_id) -> list:
+        """Economic relations held about this economy, with their standing.
+
+        Read from the shared state's beliefs. A belief that has not been
+        supported out of sample arrives CANDIDATE and the contract keeps it in
+        a separate list, so no surface can render it as a finding -- §26.4.
+        """
+        try:
+            external = self._external_context(run_id)
+            economy = getattr(external, "economy", None)
+            rows = []
+            for b in (getattr(economy, "beliefs", ()) or ()):
+                if not isinstance(b, dict):
+                    continue
+                rows.append({
+                    "statement": str(b.get("proposition", "")),
+                    "state": str(b.get("status", "")),
+                    "mechanism": str(b.get("mechanism", "")),
+                    "falsifier": str(b.get("falsifier", "")),
+                    "evidence": (str(b.get("belief_id", "")),)})
+            return rows[:6]
+        except Exception:                                   # noqa: BLE001
+            return []
 
     def _market_snapshot(self, run_id: str):
         """The founder-facing market context, in the shape the layers read.
@@ -2986,11 +5454,29 @@ class WebApp:
             return {"available": False, "modules": {}, "limitations": [],
                     "reason": "The market snapshot could not be read."}
 
+    def _run_company(self, run_id) -> str:
+        """The company this run is about, for surfaces that show only an
+        answer. Never raises and never returns a placeholder that could be
+        mistaken for a name."""
+        try:
+            _brief, _report, name = self._founder_layers(run_id)
+            if name:
+                return name
+        except Exception:                                   # noqa: BLE001
+            pass
+        meta = self.ci.run_meta(run_id) or {}
+        return str(meta.get("company_name") or meta.get("domain") or "")
+
     def _founder_answer_page(self, session, run_id, answer):
         """One answer, in the same shape as every other founder surface."""
         from intent_engine.founder_brief import render as fr
         a = answer
         parts = [f'{fr.BRIEF_CSS}<main class="fb">',
+                 # THE COMPANY IS NAMED ON THE PAGE THAT ANSWERS ABOUT IT.
+                 # A reader who lands here from a shared link, or scrolls
+                 # back to it later, was shown a question and an answer with
+                 # no indication which company either concerned.
+                 f'<p class="kicker">{_e(self._run_company(run_id))}</p>',
                  f'<h1>{_e(a.question[:120])}</h1>',
                  f'<div class="card headline"><p>{_e(a.direct_answer)}</p>']
         if a.so_what:
@@ -3048,11 +5534,11 @@ class WebApp:
         # /slides and /sources, and was simply missing on these three -- so
         # the protection looked present and was not.
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         # The same availability question the other run routes ask. This one
         # answered 200 with a full dossier while the primary screen answered
         # 400, which is how the two surfaces came to contradict each other.
-        if self._is_real_run(run_id) and self._availability(run_id)["in_flight"]:
+        if self._is_real_run(run_id) and self.only_watchable(run_id):
             return self._redirect(f"/runs/{run_id}/progress")
         """The executive brief — depth WITHOUT repetition.
 
@@ -3085,21 +5571,250 @@ class WebApp:
         decision = decision_of(report)
         external = self._external_context(run_id)
         story = fn.build_narrative(company=name, brief=brief, report=report,
-                                   decision=decision, external=external)
+                                   decision=decision, external=external,
+                                   contract=self._executive_contract(run_id))
         book = fd.build_dossier(company=name, report=report,
                                 decision=decision, narrative=story,
                                 documents=self._retrieved_documents(run_id),
                                 external=external,
                                 market=self._market_snapshot(run_id)
-                                if self._listing_for(run_id).ticker else None)
+                                if self._listing_for(run_id).ticker else None,
+                                modeled_market=self._modeled_expectation(
+                                    run_id, name),
+                                read=self._strategic_read(run_id, name),
+                                econ=self._founder_economic_context(run_id))
         body = fr.BRIEF_CSS + fn.NARRATIVE_CSS + _charts.CHART_CSS + \
             fd.render_dossier(
                 book, depth=fd.BRIEF, run_id=run_id,
                 citation_labels=self._citation_labels(run_id),
                 charts=_external_charts(external),
-                lead=fd.render_decision_lead(decision, name, depth=fd.BRIEF,
-                                             run_id=run_id))
+                lead=fd.render_decision_lead(
+                    decision, name, depth=fd.BRIEF, run_id=run_id,
+                    contract=self._executive_contract(run_id),
+                    read=self._strategic_read(run_id, name)))
         return self._html(self._page(f"{name} — executive brief", body,
+                                     session, session.get("csrf", "")))
+
+    def _prior_run(self, session, run_id):
+        """The newest earlier run of the SAME company owned by this reader.
+
+        §16 asks for a prior-run lookup and §17 for a comparability wall. Both
+        are answered from the index that already exists -- `runs_owned_by`
+        plus `run_meta` -- because a second history store would immediately
+        disagree with the first about what has been analysed.
+
+        THE WALL IS APPLIED HERE, not inside `compare`. Four conditions, and
+        each one is a way this has actually gone wrong somewhere in this
+        codebase: the canonical company must match (a name-shaped key matched
+        a different registrant once), the prior must be strictly earlier in
+        the owner's own ordering (a run compared against itself reports every
+        field unchanged, which reads as stability), the prior must have
+        produced a report (comparing against a failure is comparing against
+        nothing), and the prior must belong to this reader (a cross-tenant
+        prior is a leak wearing a delta).
+
+        Returns (run_id, report) or (None, None). No exception escapes: a
+        comparison is an enrichment, and a lookup that fails must cost the
+        reader the delta, never the page.
+        """
+        try:
+            owner = (session or {}).get("user_id")
+            if not owner:
+                return None, None
+            from intent_engine.demo_dossier.store import company_key
+            here = self.ci.run_meta(run_id) or {}
+            mine = company_key(str(here.get("company_name") or ""))
+            if not mine:
+                return None, None
+            ordered = list(self.web_store.runs_owned_by(owner))
+            if run_id not in ordered:
+                return None, None
+            # Strictly EARLIER in the owner's ordering. Slicing at the current
+            # run rather than filtering by timestamp keeps this correct when
+            # two runs share an `as_of` date, which they routinely do.
+            for rid in reversed(ordered[:ordered.index(run_id)]):
+                meta = self.ci.run_meta(rid) or {}
+                if company_key(str(meta.get("company_name") or "")) != mine:
+                    continue
+                _, report, _ = self._founder_layers(rid)
+                if isinstance(report, dict) and report:
+                    return rid, report
+            return None, None
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("prior run not resolved for %s", run_id)
+            return None, None
+
+    def _second_iteration_delta_composed(self, session, run_id, *,
+                                         current, previous):
+        """The delta between two COMPOSED executive readings of one company.
+
+        The first version compared the two runs' `decision_of(report)`
+        objects, which is the same seam that made the X-Ray render empty: the
+        reasoning path does not populate `decision_question`, and `compare`
+        opens by requiring both sides to answer the same question. With the
+        field blank on both, every second reading came back INCOMPARABLE --
+        "these two readings cannot be compared" -- for a company analysed
+        twice from the same evidence. Measured live on ad1de5f.
+
+        So the comparison now reads the decisions the X-Ray actually renders,
+        which are also the ones `what_changed` is computed from. Evidence
+        identity still comes from the RUNS' retrieved documents, keyed by
+        content hash: what a reader means by "new information" is a document
+        we had not held, not a field that moved.
+        """
+        try:
+            from intent_engine.strategic_intelligence import second_iteration \
+                as si
+            prior_id, _prior_report = self._prior_run(session, run_id)
+            return si.compare(
+                previous_decision=previous,
+                current_decision=current,
+                previous_documents=(self._retrieved_documents(prior_id)
+                                    if prior_id else ()),
+                current_documents=self._retrieved_documents(run_id),
+                tested_claims=tuple((current or {}).get(
+                    "supporting_evidence_ids") or ())[:12])
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("second iteration not composed for %s", run_id)
+            return {}
+
+    def _second_iteration_delta(self, session, run_id, decision):
+        """What this run learned against the last reading of the same company.
+
+        Composed on the LIVE run path. `second_iteration.compare` existed with
+        no production caller at all, so `second_iteration` was never written
+        onto any decision and every surface that reads it rendered the absent
+        state -- on the demo dossier as well as here. A projection whose
+        producer is never called is indistinguishable from a company that has
+        only ever been read once.
+        """
+        try:
+            from intent_engine.strategic_intelligence import second_iteration \
+                as si
+            from intent_engine.strategic_intelligence.decision import \
+                decision_of
+            prior_id, prior_report = self._prior_run(session, run_id)
+            current = decision.as_dict() if hasattr(decision, "as_dict") \
+                else dict(decision or {})
+            if prior_id is None:
+                # FIRST OBSERVATION IS A STATE, NOT A GAP. `compare` says so
+                # itself when handed no prior, so it is still called rather
+                # than short-circuited: the card must say "this is the
+                # baseline" in the same words whichever way it got there.
+                return si.compare(previous_decision=None,
+                                  current_decision=current,
+                                  current_documents=self._retrieved_documents(
+                                      run_id))
+            prior = decision_of(prior_report)
+            return si.compare(
+                previous_decision=prior.as_dict() if prior is not None
+                else None,
+                current_decision=current,
+                previous_documents=self._retrieved_documents(prior_id),
+                current_documents=self._retrieved_documents(run_id),
+                tested_claims=tuple(current.get("supporting_evidence_ids")
+                                    or ())[:12])
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("second iteration not composed for %s", run_id)
+            return {}
+
+    def _run_xray(self, session, run_id):
+        """The Executive X-Ray for a LIVE run — the customer's decision home.
+
+        THE ROUTE THAT DID NOT EXIST. The X-Ray, the economic-history state
+        and the second-iteration card were all built, unit-proven and wired to
+        `/demo-dossiers/<company>/xray`, which no live run ever links to and
+        no customer ever reaches. Three consecutive batches shipped correct
+        renderers onto that surface and reported "UI live proof outstanding"
+        without noticing that the proof could not arrive from there.
+
+        WHICH DECISION THIS PROJECTS, measured rather than reasoned about.
+        The first version rendered the run's own `decision_of(report)` on the
+        argument that `/brief`, `/full` and `/story` read it, so anything else
+        would be a second state system. That argument was sound and the result
+        was empty: live on 9a42372 this page said "this company is not
+        classified here", "Nothing changed", "No action is put forward", 0
+        evidence rows and 0 channels, while `/demo-dossiers/cloudflare/xray`
+        rendered "Supported in direction, not in size", a pricing decision,
+        six evidence rows and five beliefs FOR THE SAME COMPANY.
+
+        `xray.render` reads the fields `executive.decision_synthesis.compose`
+        populates -- archetype, selection, transmission, competitors,
+        scenarios, standing. The reasoning path's decision simply does not
+        have them, so the renderer found nothing and said so honestly about a
+        run that had plenty.
+
+        This is not a second reasoning. The dossier is a MATERIALIZED VIEW of
+        this very run -- `_publish_demo_dossier` wrote it from this run's
+        founder snapshot as the run completed -- so composing from it is the
+        executive projection of the same evidence, which is exactly what the
+        demo route does. The two things `compose` does not produce are carried
+        across from the run's own decision below rather than left empty.
+        """
+        if not self._owned(session, run_id):
+            return self._no_such_run(session, run_id)
+        avail = self._availability(run_id)
+        if self.only_watchable(run_id):
+            return self._redirect(f"/runs/{run_id}/progress")
+        from intent_engine.demo_dossier.store import DossierStore, company_key
+        from intent_engine.founder_brief import xray
+        from intent_engine.strategic_intelligence.decision import decision_of
+        _, report, name = self._founder_layers(run_id)
+        meta = self.ci.run_meta(run_id) or {}
+        # The SAME key derivation the publisher used, so this reads the record
+        # that run wrote rather than a near-miss under a different key.
+        key, _cohort, _mv = self._manifest_placement(
+            company_key(name or str(meta.get("domain") or "") or run_id),
+            name=name, domain=str(meta.get("domain") or ""))
+        dossier = DossierStore(self._runtime_root).latest(key)
+        decision = self._executive_read(dossier) if dossier is not None \
+            else None
+        if decision is None:
+            # A RUN THAT RETRIEVED NOTHING IS NOT A FAULT IN THE PRODUCT.
+            # This answered "Something went wrong on our side ... This is a
+            # fault in the product" for Toyota, whose run simply could not
+            # retrieve an approved source -- while `/sources`, on the same
+            # run, said so plainly. Two surfaces describing one failure in
+            # incompatible terms is the same defect class as D17, and the
+            # honest page for this already exists.
+            if self.ci.store.run_state(run_id) in self.TERMINAL_STATES:
+                return self._failed_run_page(session, run_id)
+            return self._error_page(
+                500, "The executive read for this run could not be composed. "
+                     "That is a fault on this side, not a finding about the "
+                     "company.")
+        # THE TWO FIELDS `compose` DOES NOT PRODUCE, carried from the run's
+        # own decision. `economic_history` is measured by the archive during
+        # the run and has never been on the dossier at all; the delta is
+        # computed here. Both are attached to the decision rather than passed
+        # beside it, so they reach the renderer through the same object and
+        # survive being serialised on the way.
+        own = decision_of(report)
+        if own is not None and getattr(own, "economic_history", None):
+            decision["economic_history"] = dict(own.economic_history)
+        # The PREVIOUS composed reading of this company, from the dossier
+        # version before this one -- the same prior `what_changed` uses, so
+        # the two cannot describe one pair of runs differently.
+        prior_dossier = DossierStore(self._runtime_root).previous(
+            key, before=getattr(dossier, "dossier_version", 0))
+        decision["second_iteration"] = self._second_iteration_delta_composed(
+            session, run_id, current=decision,
+            previous=(self._executive_read(prior_dossier)
+                      if prior_dossier is not None else None))
+        listing = self._listing_for(run_id)
+        stamp = " · ".join(bit for bit in (
+            f"Analysis {run_id[:8]}",
+            f"Ticker {listing.ticker}" if listing.ticker else "",
+            str(meta.get("as_of", ""))[:10]) if bit)
+        body = xray.render(
+            decision, company=name, stamp=stamp,
+            labels=self._citation_labels(run_id),
+            crossing=str(getattr(dossier, "crossing", "") or ""),
+            links=[("Full analysis", f"/runs/{run_id}/full"),
+                   ("Presentation", f"/runs/{run_id}/slides"),
+                   ("Evidence and sources", f"/runs/{run_id}/sources"),
+                   ("Executive brief", f"/runs/{run_id}/brief")])
+        return self._html(self._page(f"{name} — executive X-Ray", body,
                                      session, session.get("csrf", "")))
 
     def _intelligence_page(self, session, run_id):
@@ -3111,7 +5826,7 @@ class WebApp:
         route ends up serving an operator page.
         """
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         from intent_engine.founder_brief import layers as fl
         from intent_engine.founder_brief import render as fr
         brief, report, name = self._founder_layers(run_id)
@@ -3129,9 +5844,529 @@ class WebApp:
         return self._html(self._page(f"{name} — intelligence", body, session,
                                      session.get("csrf", "")))
 
-    def _story_page(self, session, run_id):
+    # =====================================================================
+    # THE SIX-STEP STORY — steps 1, 5 and 6
+    # =====================================================================
+    def _strategic_read(self, run_id, name=""):
+        """The canonical bounded read for this run (§56).
+
+        ONE object, built once per request from everything the run holds, and
+        projected by every step -- WHICH IS NOW TRUE. The docstring has said
+        it since it was written and nothing enforced it: ten call sites, no
+        memo, and a single executive page composing the whole read three or
+        four times over. Each composition walks every retrieved document.
+
+        WHY THAT MATTERS MORE THAN IT LOOKS. MEASURED live on 5e1218e:
+        `/runs/<id>/progress` segments that cannot take 100ms -- a dict
+        lookup for `owned`, a lock acquire for `avail.in_flight` -- all
+        cluster at 88-106ms during analysis, which is the container's CPU
+        quota period. The instance is throttled, so every avoidable
+        recomposition is paid for in whole 100ms windows that some other
+        request spends waiting. Composing this once instead of four times is
+        the largest single CPU reduction available on the render path.
+
+        Per REQUEST and on the thread-local, for the same reason the
+        readiness memo is: one shared across requests would project one
+        visitor's run into another's page. The alternative -- each page composing its
+        own -- is what produced a primary screen asserting an industrial
+        capacity mechanism about a software network while the X-Ray two
+        clicks away read it correctly as subscription software.
+
+        Never raises. A step that has to handle "no read" grows its own
+        refusal, and a refusal on the first screen is the defect this whole
+        change exists to remove.
+        """
+        memo = getattr(self._request, "reads", None)
+        key = (run_id, name)
+        if memo is not None and key in memo:
+            return memo[key]
+        read = self._compose_strategic_read(run_id, name)
+        if memo is not None:
+            memo[key] = read
+        return read
+
+    def _compose_strategic_read(self, run_id, name=""):
+        """`_strategic_read` without the per-request memo."""
+        from intent_engine.executive import strategic_read as SR
+        from intent_engine.strategic_intelligence.decision import decision_of
+
+        result = self._result(run_id) or {}
+        report = result.get("strategic_report") or {}
+        observations = [o for o in (report.get("observations") or ())
+                        if isinstance(o, dict)]
+        meta = self.ci.run_meta(run_id) or {}
+        domain = str(meta.get("domain") or result.get("company_domain") or "")
+        company = (name or str(meta.get("company_name") or "")
+                   or str((self.ci.entity_identity(run_id) or {}).get("name")
+                          or "") or domain)
+        documents = list(self._retrieved_documents(run_id))
+        try:
+            run_decision = decision_of(report) if report else None
+        except Exception:                                   # noqa: BLE001
+            run_decision = None
+        dossier = None
+        try:
+            from intent_engine.demo_dossier.store import (DossierStore,
+                                                          company_key)
+            key, _cohort, _mv = self._manifest_placement(
+                company_key(company or domain or run_id),
+                name=company, domain=domain)
+            record = DossierStore(self._runtime_root).latest(key)
+            dossier = record if isinstance(record, dict) else None
+        except Exception:                                   # noqa: BLE001
+            dossier = None
+        own_words, own_source = self._own_words(observations, company)
+        # WHAT KIND OF BUSINESS THIS IS, from the two facts the run already
+        # holds. Omitting them is why a company whose 10-K had been read came
+        # back "no regulator industry classification was found for it".
+        ci_in = self.classification_inputs(run_id, company)
+        try:
+            read = SR.compose(
+                company=company, domain=domain, dossier=dossier,
+                run_decision=run_decision, observations=observations,
+                documents=documents, own_words=own_words,
+                own_words_source=own_source,
+                registrant=ci_in["registrant"],
+                evidence_text=ci_in["evidence_text"],
+                # OWNERSHIP, so the economics are read out of THIS company's
+                # filings. A sentence in a rival's 10-K describes the rival.
+                subject_cik=self.ci.subject_cik(
+                    self.ci.run_meta(run_id) or {}),
+                # THE SIMULATION IS PASSED, NOT REBUILT. The belief layer
+                # needs the observed trajectory and the trajectory comes from
+                # the filed series; deriving it inside `compose` would put a
+                # second set of regulator round trips on the critical path of
+                # every run. This is the same cached object the history step
+                # renders, behind the same outbound-call gate.
+                simulation=self._history_simulation(run_id, company))
+        except Exception:                                   # noqa: BLE001
+            _LOG.exception("strategic_read_compose_failed run=%s", run_id)
+            read = SR.compose(company=company, domain=domain)
+        # STAGES 3-6 OF §64, BEFORE ANYTHING IS RENDERED. The audit is
+        # structural and the repair is targeted; neither reads a model, and
+        # neither may add a claim. A failure here returns the unrepaired read
+        # rather than no read -- a self-correcting loop that can fail closed
+        # is a loop that can delete the product.
+        try:
+            from intent_engine.product_eval import self_correction as SC
+            corrected = SC.correct(read)
+            if corrected.repairs:
+                _LOG.info("strategic_read_repaired run=%s repairs=%s",
+                          run_id, "; ".join(corrected.repairs))
+            return corrected.read
+        except Exception:                                   # noqa: BLE001
+            _LOG.exception("strategic_read_correction_failed run=%s", run_id)
+            return read
+
+    def _own_words(self, observations, company):
+        """The company's best complete sentence about itself, and its source.
+
+        COMPLETE is the operative word (§23). The old opener took 180
+        characters and appended an ellipsis, so the product's first sentence
+        trailed off mid-clause. Here the text is cut at a SENTENCE boundary or
+        not used at all -- a quotation that stops where the company stopped is
+        a quotation; one that stops where the buffer stopped is a bug the
+        reader can see.
+        """
+        import re as _re
+        own = ("company_owned", "executive_statement", "investor_material")
+        best, source = "", ""
+        for obs in observations or ():
+            if obs.get("weak") or obs.get("source_class") not in own:
+                continue
+            text = " ".join(str(obs.get("excerpt") or "").split())
+            if len(text.split()) < 10:
+                continue
+            sentences = _re.split(r"(?<=[.!?])\s+", text)
+            kept = []
+            for sentence in sentences:
+                if not sentence.strip().endswith((".", "!", "?")):
+                    break
+                kept.append(sentence.strip())
+                if sum(len(k) for k in kept) > 240:
+                    break
+            joined = " ".join(kept).strip()
+            # A MISSION STATEMENT IS NOT AN ACCOUNT OF A BUSINESS (§22).
+            # "Cloudflare's mission is to help build a better Internet" is
+            # correctly attributed, genuinely the company's words, and tells a
+            # reader nothing. Quoting it under "in its own words" reintroduced
+            # the marketing opener one section further down the same page.
+            if _re.search(r"mission is to|our vision|we are on a mission"
+                          r"|help build a better|the world'?s leading"
+                          r"|welcome to ", joined, _re.I):
+                continue
+            if len(joined.split()) >= 10 and len(joined) > len(best):
+                best = joined
+                source = str(obs.get("source_title") or obs.get("origin") or "")
+        return best, source
+
+    def _step_guard(self, session, run_id):
+        """Ownership and readiness, shared by every step page.
+
+        Returns a response to send INSTEAD of the step, or None to proceed.
+        """
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
+        availability = self._availability(run_id)
+        if self.only_watchable(run_id):
+            return self._redirect(f"/runs/{run_id}/progress")
+        # ONE RUN MAY NOT SAY TWO THINGS.
+        #
+        # MEASURED LIVE on 4952649, Meta, run 01M09XM6BQDZAM2XJGE9D0K2W6: SEC
+        # EDGAR rate-limited the preview's egress, every source came back 429,
+        # and the run FAILED with no report. `/full` and `/slides` said so —
+        # they carry this check themselves — and `/intro`, `/story`,
+        # `/history` and `/connect` rendered a confident analysis anyway,
+        # including a business model ("recurring software subscription") read
+        # off the SIC code alone because the filing that would have corrected
+        # it was never retrieved.
+        #
+        # Six pages, one run, two irreconcilable answers, and the four that
+        # spoke confidently were the four a customer opens first. The check
+        # that `/slides` already had belongs to every step, which is what a
+        # SHARED guard is for.
+        if availability.get("state") == "FAILED" \
+                and not availability.get("has_report"):
+            return self._failed_run_page(session, run_id)
+        return None
+
+    def _answer_page(self, session, run_id):
+        """The sixty-second scrollable decision narrative."""
+        blocked = self._step_guard(session, run_id)
+        if blocked is not None:
+            return blocked
+        result = self._result(run_id) or {}
+        return self._founder_brief_page(session, run_id, result)
+
+    def _learning_block(self) -> str:
+        """The learning ledger, projected onto the story (§54).
+
+        The ledger has always been served in full at /learning-acceleration,
+        which is a page a customer reaches only if they already believe the
+        system learns. Projecting it into step 1 is how they find out.
+
+        Defensive: no report, no block. A learning panel that renders zeros
+        teaches the opposite of what is true.
+        """
+        try:
+            from intent_engine.demo_dossier import learning_bridge as LB
+            from intent_engine.founder_brief import steps
+            report = LB.load("week")
+            return steps.render_learning(report,
+                                         LB.activity_versus_learning(report))
+        except Exception:                                   # noqa: BLE001
+            return ""
+
+    def _intro_page(self, session, run_id):
+        """Step 1 (§21–§25). The first thing a customer reads."""
+        blocked = self._step_guard(session, run_id)
+        if blocked is not None:
+            return blocked
+        from intent_engine.founder_brief import steps
+        _brief, _report, name = self._founder_layers(run_id)
+        read = self._strategic_read(run_id, name)
+        company = read.company or name
+        body = steps.render_intro(read, run_id=run_id, company=company,
+                                  learning=self._learning_block(),
+                                  identity=self._subject_line(run_id, company))
+        return self._html(self._page(f"{company} — introduction", body,
+                                     session, session.get("csrf", "")))
+
+    def _history_page(self, session, run_id):
+        """Step 5 (§41–§48). The vintage-walled rewind."""
+        blocked = self._step_guard(session, run_id)
+        if blocked is not None:
+            return blocked
+        from intent_engine.founder_brief import steps
+        _brief, _report, name = self._founder_layers(run_id)
+        timeline = self._history_timeline(run_id, name)
+        sim = self._history_simulation(run_id, name)
+        body = steps.render_history(sim, timeline, run_id=run_id,
+                                    company=timeline.company or name)
+        return self._html(self._page(f"{name} — history rewind", body,
+                                     session, session.get("csrf", "")))
+
+    def _subject_line(self, run_id, company) -> str:
+        """§7, §58. Which company this is, in one line a reader can check.
+
+        Only fields a source carries. A country or a ticker that no source
+        recorded is absent from the line rather than filled in — the whole
+        value of a confirmation line is that everything on it was looked up.
+        """
+        meta = self.ci.run_meta(run_id) or {}
+        listing = self._listing_for(run_id)
+        legal = str(meta.get("company_name") or company or "").strip()
+        ticker = getattr(listing, "ticker", "") or ""
+        country = str(meta.get("country") or "")
+        # THE REGISTRY KNOWS WHAT THE RUN DID NOT ASK.
+        #
+        # A run opened from a typed name carries a name and a domain; the
+        # ticker and the country were never part of what it needed, so the
+        # confirmation line read "Cloudflare · cloudflare.com" — which does
+        # not let a reader confirm anything they did not already type. The
+        # suggestion registry holds both and is the same source the entry
+        # combobox showed them, so the line they confirm at the end matches
+        # the row they chose at the start.
+        if not (ticker and country):
+            try:
+                from intent_engine.company_ingestion import suggest as CS
+                match = next(iter(CS.suggest(legal or company, limit=1,
+                                             allow_registrant=False)), None)
+                if match is not None:
+                    ticker = ticker or match.ticker
+                    country = country or match.country
+                    legal = match.legal_name or legal
+            except Exception:                               # noqa: BLE001
+                pass
+        bits = [b for b in (
+            legal if legal and legal != company else "",
+            ticker, country,
+            str(meta.get("domain") or "").replace("https://", "").replace(
+                "http://", "").strip("/"),
+            (f"SEC CIK {meta['cik']}" if meta.get("cik") else ""),
+        ) if b]
+        return " · ".join(dict.fromkeys(bits))
+
+    def _history_simulation(self, run_id, name):
+        """The three-line simulation for this run, cached for the process.
+
+        Deliberately built HERE rather than during the analysis: the XBRL
+        concept calls are two to four round trips to the regulator, and
+        putting them on the critical path of every run would slow the first
+        useful screen for the sake of the fifth. Cached because a reader
+        moving the date control must never re-dial the SEC, and defensive
+        because a chart that raises is worse than one that says what it holds.
+        """
+        from intent_engine.executive import history_simulator as HS
+        cached = getattr(self, "_simulations", None)
+        if cached is None:
+            cached = self._simulations = {}
+        if run_id in cached:
+            return cached[run_id]
+        profile = selection = None
+        try:
+            from intent_engine.executive.analysis_selection import select
+            meta = self.ci.run_meta(run_id) or {}
+            ci_in = self.classification_inputs(run_id, name)
+            selection = select(name=name, domain=str(meta.get("domain") or ""),
+                               registrant=ci_in["registrant"],
+                               evidence_text=ci_in["evidence_text"])
+            profile = selection.profile
+        except Exception:                                   # noqa: BLE001
+            pass
+        # THE OUTBOUND CALL IS OFF UNDER TEST, AND OPTED INTO EXPLICITLY.
+        #
+        # The financial series is two to four requests to the regulator. Left
+        # ungated, every webapp test that renders a history page made them —
+        # the suite went from ten minutes to over an hour, which is how the
+        # omission announced itself. `env == "test"` is the honest gate: a
+        # test must never make an outbound call whatever transport it was or
+        # was not given.
+        #
+        # The local product harnesses are a real exception rather than a
+        # loophole: they drive the whole customer journey against live
+        # sources on purpose, and they set the variable to say so.
+        cik = self._filer_cik(run_id, name) if self._xbrl_allowed() else ""
+        try:
+            sim = HS.build(company=name, cik=cik, profile=profile,
+                           selection=selection, transport=self._transport,
+                           resolver=self._resolver)
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("history simulation not built for %s", run_id)
+            sim = HS.Simulation(company=name, coverage=(
+                "The dated financial record could not be read on this "
+                "request."))
+        cached[run_id] = sim
+        return sim
+
+    def _modeled_expectation(self, run_id, name):
+        """§15. The expectation the published record implies, or None.
+
+        None is a real answer and reaches a passage that says so: a company
+        with no multi-year filed series has nothing to model from, and
+        producing a number anyway is the one thing the whole resolution
+        ladder exists to forbid.
+        """
+        from intent_engine.executive import history_simulator as HS
+        try:
+            return HS.present_expectation(
+                self._history_simulation(run_id, name), company=name)
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("modelled expectation not built for %s", run_id)
+            return None
+
+    #: Set by the product harnesses (`golden_cycle`, `golden_wave`,
+    #: `surface_matrix`), which drive the real journey against real sources.
+    XBRL_OPT_IN = "INTENT_ENGINE_ALLOW_XBRL"
+
+    def _xbrl_allowed(self) -> bool:
+        if self.config.env != "test":
+            return True
+        return os.environ.get(self.XBRL_OPT_IN, "").strip() == "1"
+
+    def _filer_cik(self, run_id, name="") -> str:
+        """The CIK OF THE SUBJECT, or nothing.
+
+        THE DEFECT THIS REPLACES, WHICH WAS THE WORST ONE IN THE CYCLE.
+        The first version took the CIK out of any SEC URL the run had
+        fetched. That is safe only if every SEC document a run holds was
+        filed BY the subject, and it is not: a third party's 10-K that
+        mentions the subject once as a vendor is legitimate independent
+        evidence and is retrieved on purpose. For Stripe — a private company
+        that files no annual report — the run held exactly such a filing, and
+        the history chart drew SOMEBODY ELSE'S nine-year revenue history
+        under the heading "Stripe — the strategy simulator". Index 22, then
+        2301, then 306. A chart of the wrong company is the worst thing this
+        product can emit, and it arrived through a URL.
+
+        So identity is now asserted from a source that is ABOUT the subject:
+
+          1. the CIK the run was OPENED on, which the regulator gave us for
+             this company by name;
+          2. failing that, the registrant table, and only when the filer it
+             returns carries the subject's name.
+
+        There is no third rung. A company with no verified CIK gets no chart
+        and the bounded fallback instead, which for a private company is the
+        correct and honest answer rather than a degraded one.
+        """
+        meta = self.ci.run_meta(run_id) or {}
+        recorded = "".join(ch for ch in str(meta.get("cik") or "")
+                           if ch.isdigit())
+        if recorded:
+            return recorded
+        subject = str(name or meta.get("company_name") or "").strip()
+        # 2. A SEC URL from a document that is the SUBJECT'S OWN FILING.
+        #
+        # The discriminator the first version was missing, and it was already
+        # in the data: `propose_edgar_candidates` resolves the CIK from the
+        # company's NAME and marks what it retrieves `investor_material`,
+        # while `third_party_filings` — the path that found the Aether 10-K
+        # mentioning Stripe — marks its results `competitor`. Same host, same
+        # URL shape, opposite meaning. Reading the class instead of the URL
+        # is what separates "this company's own annual report" from "somebody
+        # else's annual report that says this company's name once".
+        own = {"investor_material", "company_owned", "executive_statement"}
+        from intent_engine.executive import history_rewind as HR
+        mine = [str(d.get("final_url") or d.get("original_url") or "")
+                for d in self._retrieved_documents(run_id)
+                if isinstance(d, dict)
+                and str(d.get("source_class") or "") in own]
+        harvested = HR.cik_from_urls(mine)
+        if harvested:
+            return harvested
+        # THE SAME PREDICATE AS THE SERIES ITSELF, NOT A SECOND ONE.
+        #
+        # This rung was gated on `env == "test"` while the series it feeds
+        # was gated on `_xbrl_allowed()`. The local product harness opts into
+        # the outbound call and is still env="test", so it passed the second
+        # gate and failed the first: Palantir, which has nine years of filed
+        # results, drew no chart because this run happened to hold none of
+        # its own SEC filings. Two gates for one decision is how a capability
+        # ends up switched half on.
+        if not subject or not self._xbrl_allowed():
+            return ""
+        try:
+            from intent_engine.company_ingestion.edgar import resolve_cik
+            found = resolve_cik(subject, transport=self._transport,
+                                resolver=self._resolver)
+        except Exception:                                   # noqa: BLE001
+            return ""
+        if not found:
+            return ""
+        # The registrant table matches on token containment, which is right
+        # for finding a filer and not sufficient for trusting one. The filer
+        # must carry the subject's leading word, or this is a different
+        # company with an overlapping name.
+        head = subject.split(",")[0].split(" Inc")[0].strip().lower()
+        title = str(found.get("title") or "").lower()
+        if head and head.split()[0] not in title:
+            _LOG.warning("registrant %r does not match subject %r; no "
+                         "financial series will be drawn", title, subject)
+            return ""
+        return str(found.get("cik") or "")
+
+    def _history_timeline(self, run_id, name):
+        """The dated record for this company, cached for the process.
+
+        EDGAR's submissions document is one request and it is the only
+        per-company dated series a first run can reach. It is cached because
+        a reader moving the slider must not re-dial the SEC, and it is
+        defensive because a history page that 500s is worse than a history
+        page that says it holds nothing.
+        """
+        from intent_engine.executive import history_rewind as HR
+        cached = getattr(self, "_timelines", None)
+        if cached is None:
+            cached = self._timelines = {}
+        if run_id in cached:
+            return cached[run_id]
+        documents = list(self._retrieved_documents(run_id))
+        filings = ()
+        # THE SAME IDENTITY RULE AS THE CHART, FOR THE SAME REASON.
+        #
+        # `cik_from_urls` reads a CIK out of whatever SEC URL the run holds,
+        # and a run legitimately holds third-party filings that merely
+        # mention the subject. That put another filer's dated history under
+        # this company's timeline exactly as it put another filer's revenue
+        # under its chart — one bug, two surfaces, and only the chart made it
+        # obvious because a wrong number looks wrong and a wrong date does
+        # not.
+        cik = self._filer_cik(run_id, name)
+        if cik:
+            try:
+                from intent_engine.company_ingestion.edgar import submissions
+                filings = HR.filings_from_submissions(submissions(cik),
+                                                      limit=90)
+            except Exception:                               # noqa: BLE001
+                filings = ()
+        if not filings:
+            filings = HR.filings_from_documents(documents)
+        read_selection = None
+        profile = None
+        try:
+            from intent_engine.executive.analysis_selection import select
+            meta = self.ci.run_meta(run_id) or {}
+            ci_in = self.classification_inputs(run_id, name)
+            read_selection = select(name=name,
+                                    domain=str(meta.get("domain") or ""),
+                                    registrant=ci_in["registrant"],
+                                    evidence_text=ci_in["evidence_text"])
+            profile = read_selection.profile
+        except Exception:                                   # noqa: BLE001
+            pass
+        timeline = HR.build(company=name, filings=filings, profile=profile,
+                            selection=read_selection)
+        cached[run_id] = timeline
+        return timeline
+
+    def _connect_page(self, session, run_id):
+        """Step 6 (§49–§52). Public demo becomes product."""
+        blocked = self._step_guard(session, run_id)
+        if blocked is not None:
+            return blocked
+        from intent_engine.founder_brief import steps
+        _brief, _report, name = self._founder_layers(run_id)
+        read = self._strategic_read(run_id, name)
+        company = read.company or name
+        csrf = session.get("csrf", "")
+        sent = self._has_feedback(run_id)
+        body = steps.render_connect(
+            read, run_id=run_id, company=company,
+            feedback=self._full_feedback_form(run_id, csrf, sent=sent))
+        return self._html(self._page(f"{company} — connect your company",
+                                     body, session, session.get("csrf", "")))
+
+    def _story_page(self, session, run_id):
+        # STEP 4 WAS THE ONE THAT KEPT ITS OWN OWNERSHIP CHECK and therefore
+        # never got the readiness one. Measured live on c719979, Meta, run
+        # 01M09Z896GA620CSBXEA5847Q3: five of six steps correctly showed the
+        # failure page and `/story` rendered 5,241 characters of narrative
+        # for a run that retrieved nothing. A guard six pages share is worth
+        # nothing to the page that does not call it.
+        blocked = self._step_guard(session, run_id)
+        if blocked is not None:
+            return blocked
         from intent_engine.founder_brief import layers as fl
         from intent_engine.founder_brief import render as fr
         brief, report, name = self._founder_layers(run_id)
@@ -3151,12 +6386,22 @@ class WebApp:
                 run_id, name,
                 self._listing_for(run_id).ticker))
         actions = fl.build_actions(brief)
-        body = (f'{fr.BRIEF_CSS}<main class="fb"><h1>{_e(name)} — the '
-                f'decision story</h1>'
-                + fr.render_story(sections, run_id=run_id)
-                + fr.render_actions(actions)
-                + fr._deeper(run_id) + "</main>")
-        return self._html(self._page(f"{name} — decision story", body,
+        # THE NARRATIVE IS COMPOSED FROM THE CANONICAL READ (§39), and the
+        # run's own sections are supporting material below it. The other way
+        # round is what produced a step-4 page whose "business story" section
+        # contained the single word "company".
+        from intent_engine.founder_brief import steps
+        read = self._strategic_read(run_id, name)
+        substantive = [s for s in sections
+                       if len(" ".join(getattr(s, "paragraphs", ()) or ())) > 80]
+        extra = (fr.render_story(substantive, run_id=run_id)
+                 + fr.render_actions(actions)) if substantive else \
+            fr.render_actions(actions)
+        body = (f'{fr.BRIEF_CSS}'
+                + steps.render_story(
+                    read, self._history_timeline(run_id, name),
+                    run_id=run_id, company=read.company or name, extra=extra))
+        return self._html(self._page(f"{name} — the full story", body,
                                      session, session.get("csrf", "")))
 
     def _founder_brief_page(self, session, run_id, result):
@@ -3242,7 +6487,8 @@ class WebApp:
             company=name, brief=brief, report=report,
             observations=observations, decision=decision_of(report),
             actions=build_actions(brief),
-            external=self._external_context(run_id))
+            external=self._external_context(run_id),
+            contract=self._executive_contract(run_id))
         # The assistant belongs ON the default screen. Dropping it was a real
         # regression: a founder who has just read a 60-second answer is exactly
         # the person with a follow-up question, and making them navigate first
@@ -3253,6 +6499,63 @@ class WebApp:
             trailing=self._ask_form(run_id, report, session))
         return self._html(self._page(f"{name} — the decision", body,
                                      session, session.get("csrf", "")))
+
+    #: SURFACES THAT MUST CARRY "ASK A FOLLOW-UP", declared once.
+    #:
+    #: MEASURED LIVE on 517180e6 with Microsoft: Q&A appeared on 3 of 9
+    #: surfaces -- `/answer`, `/full`, `/slides` had it; `/brief`, `/xray`,
+    #: `/dashboard`, `/intro`, `/evidence`, `/sources` did not. That is what
+    #: per-page mounting produces: nobody decided `/brief` should be mute, it
+    #: was simply never edited.
+    #:
+    #: So the mount is DECLARATIVE and happens at the route, and this tuple is
+    #: read by both the router and the test. A new report page cannot develop
+    #: a `/brief`-shaped hole without failing the surface test, and the
+    #: question of whether a surface should answer questions is settled here
+    #: rather than in six separate render functions.
+    #:
+    #: `sources` and the per-item evidence pages are deliberately absent: they
+    #: inspect one document's provenance, and a question asked there is a
+    #: question about the analysis, which is one click away on every one of
+    #: them.
+    ASK_SURFACES = ("intro", "answer", "brief", "xray", "dashboard", "story",
+                    "slides", "full", "evidence")
+
+    def _with_ask(self, session, run_id, response):
+        """Mount the ONE canonical Q&A component on a rendered report page.
+
+        Injected rather than passed in, because the alternative is editing
+        every page function and remembering to edit the next one. The form is
+        identical on every surface -- same component, same route, same
+        context -- so a reader who has learned it in one place has learned it
+        everywhere.
+
+        Fails open: a page that cannot build the form is still a page. Losing
+        the follow-up box costs a feature; raising here would cost the report.
+        """
+        try:
+            status, headers, body = response
+        except (TypeError, ValueError):
+            return response
+        if not isinstance(body, str) or "</main>" not in body:
+            return response
+        if "/conversation" in body:
+            return response          # a page that already mounts it
+        # OWNERSHIP, BECAUSE THIS READS RUN DATA. The wrapped handler has
+        # already checked -- but this function calls `_founder_layers(run_id)`
+        # itself to build company-specific suggestions, so it is a reader of
+        # the run in its own right. A future route that wraps a page which
+        # forgot to check would otherwise leak one company's questions onto
+        # another reader's screen, and the wrapper is exactly the place nobody
+        # would think to look.
+        if not self._owned(session, run_id):
+            return response
+        try:
+            _b, report, _n = self._founder_layers(run_id)
+            section = self._ask_form(run_id, report, session)
+        except Exception:                                   # noqa: BLE001
+            return response
+        return status, headers, body.replace("</main>", section + "</main>", 1)
 
     def _ask_form(self, run_id, report, session):
         """The one-click assistant, with company-specific suggestions."""
@@ -3275,8 +6578,12 @@ class WebApp:
             f'<p class="muted small">Suggested:</p>{suggested}</section>')
 
     def _slides_page(self, session, run_id):
-        if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+        # THE SHARED GUARD FIRST. This page had the failed-run check written
+        # into it, which is how four other steps came to be missing it; the
+        # check now lives in one place and this one calls it like the rest.
+        blocked = self._step_guard(session, run_id)
+        if blocked is not None:
+            return blocked
         # THE SAME GUARD `_run_page` HAS, WHICH THIS ROUTE NEVER GOT. A FAILED
         # run composed no report, and building a deck from one raised —
         # measured live on preview-v3 (Alphabet, https://abc.xyz, run
@@ -3288,7 +6595,7 @@ class WebApp:
             # Asking for the deck before the deck exists is the reader
             # following the layer nav, not an error. Send them to the page
             # that says what IS ready.
-            if avail["in_flight"]:
+            if self.only_watchable(run_id):
                 return self._redirect(f"/runs/{run_id}/progress")
             if not avail["slides_ready"]:
                 if avail["state"] == "FAILED" and not avail["has_report"]:
@@ -3304,12 +6611,15 @@ class WebApp:
         as_of, version = self._analysis_stamp(run_id)
         csrf = session["csrf"] if session else ""
         slides = build_slides(report, as_of=as_of, analysis_version=version,
-                              documents=self.ci.store.retrieved(run_id))
+                              contract=self._executive_contract(run_id),
+                              documents=self.ci.store.retrieved(run_id),
+                              read=self._strategic_read(run_id))
         if not deck_is_presentable(slides):
             # Better to say so than to hand someone a three-slide deck in a
             # meeting after promising a presentation.
+            from intent_engine.founder_brief import flow
             body = (
-                f'<main>{self._layer_nav(run_id, "slides")}'
+                f'<main>'
                 f'<h1>Not enough for a presentation</h1>'
                 f'<p>This analysis supports '
                 f'{meaningful_slide_count(slides)} substantive slide(s), and a '
@@ -3317,7 +6627,7 @@ class WebApp:
                 f'analysis contain everything that was found.</p>'
                 f'<p><a href="/runs/{_e(run_id)}/brief">Read the executive '
                 f'brief</a> · <a href="/runs/{_e(run_id)}/full">Full '
-                f'analysis</a></p></main>')
+                f'analysis</a></p>{flow.nav(run_id, "slides")}</main>')
             return self._html(self._page("Presentation unavailable", body,
                                          session, csrf))
         deck = render_deck(slides, company=report.get("company_name", ""),
@@ -3325,10 +6635,1033 @@ class WebApp:
                            run_id=run_id, csrf=csrf,
                            full_analysis_url=f"/runs/{run_id}/full",
                            cite_labels=self._citation_labels(run_id))
-        body = (f'<main>{self._layer_nav(run_id, "slides")}{deck}</main>')
+        from intent_engine.founder_brief import flow
+        body = (f'<main>{deck}{flow.nav(run_id, "slides")}</main>')
         return self._html(self._page(
             f'{report.get("company_name", "")} — presentation', body, session,
             csrf))
+
+    # -- INTERNAL IMPACT ---------------------------------------------------
+    # D-IBG-001 / D-SYN-001 / F-TS-001 all had live proofs that required a
+    # request to reach them, and no Founder request path established a
+    # TenantScope, so all three sat at CAPABILITY_VERIFIED. This route is that
+    # path. It parses the query and calls `internal_view.answer`, and does
+    # NOTHING ELSE -- so a controlled local invocation of `answer()` executes
+    # exactly the code an HTTP request executes, with no helper bypass.
+    def _internal_impact(self, session, environ):
+        from urllib.parse import parse_qs
+
+        from intent_engine.webapp import internal_view
+
+        query = {k: v[0] for k, v in
+                 parse_qs(environ.get("QUERY_STRING", "")).items()}
+        subject = (query.get("subject") or "").strip()
+        if not subject:
+            return self._error_page(
+                400, "an internal-impact question needs a subject")
+        from intent_engine.executive import living_decision as LDR
+        from intent_engine.external_intel import minimum_data_request as MDRM
+
+        root = self.config.web_store_path.parent
+        ans = internal_view.answer(
+            session=session, subject_id=subject,
+            decision=(query.get("decision")
+                      or "what this external subject changes internally"),
+            directory=self._tenant_directory, store=self._private_graph,
+            audit=self._scope_audit,
+            requests=MDRM.DataRequestStore(root),
+            decisions=LDR.LivingDecisionStore(root),
+            decision_id=(query.get("decision_id") or "").strip(),
+            runtime_sha=self._runtime_sha())
+        # The receipt is written for a scopeless request too: the requests an
+        # auditor came for are the refused ones.
+        self._tenant_receipts.append(ans.receipt)
+        # SYSTEM learning, kept apart from anything economic: these counters
+        # describe this engine's restraint, never a market.
+        self._mdr_telemetry = self._mdr_telemetry.merged(ans.telemetry)
+        if query.get("format") == "json":
+            payload = ans.as_dict()
+            payload["telemetry_cumulative"] = self._mdr_telemetry.as_dict()
+            return self._ok_json(payload)
+        return self._html(self._page(
+            "Internal impact", internal_view.render(ans), session,
+            self.auth.csrf_token(self._cookie(environ, "sid") or "") or ""))
+
+    # -- LIVING DECISION RECORDS (E-LDR-001) -------------------------------
+    # A projection, never a generator. Every answer below is computed from
+    # stored revisions, so "what changed your mind?" is auditable rather than
+    # narrated -- which is the difference between a decision record and a chat
+    # transcript.
+    def _decisions(self, session, environ):
+        import html as _html
+        from urllib.parse import parse_qs
+
+        from intent_engine.executive import living_decision as LDR
+        from intent_engine.webapp.tenancy import receipt_for, scope_for_session
+
+        query = {k: v[0] for k, v in
+                 parse_qs(environ.get("QUERY_STRING", "")).items()}
+        scope = scope_for_session(session, directory=self._tenant_directory,
+                                  audit=self._scope_audit)
+        request_id = "dreq_" + (self._runtime_sha() or "0")[:12]
+
+        if scope is None:
+            # A scopeless reader is not shown an empty decision list, because
+            # an empty list reads as "you have no open decisions". It is told
+            # that it holds no authority.
+            payload = {"contract": "living_decisions_view.v1", "scoped": False,
+                       "state": "DECISIONS_UNAVAILABLE",
+                       "reason": "SCOPELESS_READ", "open": [], "awaiting": []}
+            self._tenant_receipts.append(receipt_for(
+                request_id=request_id, scope=None,
+                company_id=query.get("company", ""), operation="decisions.read",
+                denial_reason="SCOPELESS_READ",
+                runtime_sha=self._runtime_sha()))
+        else:
+            root = self.config.web_store_path.parent
+            store = LDR.LivingDecisionStore(root)
+            open_rows = LDR.open_decisions(store, scope=scope)
+            payload = {
+                "contract": "living_decisions_view.v1", "scoped": True,
+                "state": ("NO_OPEN_DECISIONS" if not open_rows
+                          else "OPEN_DECISIONS"),
+                "open": [dict(r, what_would_change_this=None) for r in open_rows],
+                "awaiting_information": [
+                    r["decision_id"]
+                    for r in LDR.awaiting_information(store, scope=scope)],
+                "awaiting_outcome": [
+                    r["decision_id"]
+                    for r in LDR.awaiting_outcome(store, scope=scope)],
+            }
+            # "What are we waiting for, and why?" answered from the canonical
+            # request rows rather than from a copy inside the decision. The
+            # decision holds IDS; dereferencing them here is what keeps one
+            # decision history instead of two.
+            from intent_engine.external_intel import minimum_data_request as MDRM
+
+            _requests = MDRM.DataRequestStore(root)
+            awaiting_ids = {
+                rid for r in LDR.awaiting_information(store, scope=scope)
+                for rid in (r.get("minimum_data_requests") or ())}
+            awaiting_mves = {
+                mid for r in LDR.awaiting_information(store, scope=scope)
+                for mid in (r.get("mve_refs") or ())}
+            payload["minimum_data_requests"] = [
+                q.as_dict() for q in _requests.requests(scope=scope)
+                if q.request_id in awaiting_ids]
+            payload["minimum_viable_experiments"] = [
+                x.as_dict() for x in _requests.experiments(scope=scope)
+                if x.experiment_id in awaiting_mves]
+            if query.get("decision"):
+                payload["changed"] = list(LDR.what_changed(
+                    store, query["decision"], scope=scope))
+            self._tenant_receipts.append(receipt_for(
+                request_id=request_id, scope=scope,
+                company_id=query.get("company", ""), operation="decisions.read",
+                requested=len(open_rows), allowed=len(open_rows),
+                runtime_sha=self._runtime_sha()))
+
+        if query.get("format") == "json":
+            return self._ok_json(payload)
+        rows = "".join(
+            f"<li data-status=\"{_html.escape(r['status'])}\">"
+            f"<strong>{_html.escape(r['decision_question'])}</strong>"
+            f"<span class=\"status\">{_html.escape(r['status'])}</span>"
+            + ("<span class=\"not-decided\">recommendation only — "
+               "no human has chosen</span>"
+               if r.get("is_recommendation_only") else
+               f"<span class=\"decided-by\">decided by "
+               f"{_html.escape(r.get('decided_by', ''))}</span>")
+            + "</li>"
+            for r in payload.get("open", []))
+        body = (f"<section id=\"decisions\" data-state=\""
+                f"{_html.escape(payload['state'])}\"><h2>Open decisions</h2>"
+                + (f"<ul>{rows}</ul>" if rows else
+                   "<p>No decision records are visible to this reader.</p>")
+                + "</section>")
+        return self._html(self._page(
+            "Decisions", body, session,
+            self.auth.csrf_token(self._cookie(environ, "sid") or "") or ""))
+
+    def _record_decision(self, session, form, environ):
+        """A named person records what they chose. The only write path.
+
+        THE WRITE THIS EXISTS TO MAKE POSSIBLE, AND THE ONE IT REFUSES. The
+        product could not previously record that a human decided anything --
+        so every memory screen truthfully said nothing had been decided, and
+        the five stages, while correctly modelled, had no way to be exercised
+        past the first one.
+
+        It refuses, in this order and for different reasons:
+
+          no scope    a decision belongs to a named tenant; there is no such
+                      thing as an unscoped decision, and a public visitor
+                      recording one against a company would be writing into
+                      somebody else's history;
+          no actor    `record_human_decision` refuses it, because a decision
+                      nobody made is a recommendation;
+          no choice   likewise -- "somebody decided" is not a decision.
+
+        The actor is taken from the SESSION, never from the form. A caller
+        who could name the decider could attribute their own choice to
+        somebody else, and the record's whole audit value is that it says who
+        chose.
+        """
+        from intent_engine.core.tenant import ScopeRefused
+        from intent_engine.executive import living_decision as LDR
+        from intent_engine.webapp.tenancy import receipt_for, scope_for_session
+
+        scope = scope_for_session(session, directory=self._tenant_directory,
+                                  audit=self._scope_audit)
+        request_id = "dwri_" + (self._runtime_sha() or "0")[:12]
+        company = str(form.get("company", "") or "").strip()
+        choice = str(form.get("choice", "") or "").strip()
+        rationale = str(form.get("rationale", "") or "").strip()
+        # WHO IS ASKING, not who the form says chose.
+        actor = str((session or {}).get("email", "")
+                    or (session or {}).get("user", "") or "").strip()
+
+        if scope is None:
+            self._tenant_receipts.append(receipt_for(
+                request_id=request_id, scope=None, company_id=company,
+                operation="decisions.write", denial_reason="SCOPELESS_WRITE",
+                runtime_sha=self._runtime_sha()))
+            return self._error_page(
+                403, "Recording a decision requires an account. A decision "
+                     "record says what a named person in a named organisation "
+                     "chose, so there is nowhere to put an anonymous one.")
+        if not actor:
+            return self._error_page(
+                403, "This session does not identify who is deciding, and a "
+                     "decision that cannot name its decider cannot be audited.")
+
+        root = self.config.web_store_path.parent
+        store = LDR.LivingDecisionStore(root)
+        record = self._living_record_for(company, scope=scope)
+        try:
+            if record is None:
+                # No open decision for this company yet: open one, then
+                # decide it. Opening is not deciding -- the record passes
+                # through RECOMMENDATION_READY so the transition table sees
+                # the same move it would see for an engine-opened decision.
+                question = (str(form.get("question", "") or "").strip()
+                            or f"What should we do about {company}?")
+                record = LDR.open_decision(
+                    scope=scope, company_id=company, question=question,
+                    owner=actor, runtime_sha=self._runtime_sha())
+                record = LDR.revise(
+                    record, scope=scope, status=LDR.RECOMMENDATION_READY,
+                    recommendation=str(form.get("recommendation", "") or ""),
+                    reason="opened for a human decision")
+                store.append(record, scope=scope)
+            decided = LDR.record_human_decision(
+                record, scope=scope, choice=choice, actor=actor,
+                rationale=rationale)
+            store.append(decided, scope=scope)
+        except LDR.DecisionRefused as exc:
+            # The refusal states are the product's discipline, so the reader
+            # is told which one refused rather than shown a generic failure.
+            return self._error_page(400, f"{exc.failure_state}: {exc}")
+        except ScopeRefused as exc:
+            return self._error_page(403, str(exc))
+
+        self._tenant_receipts.append(receipt_for(
+            request_id=request_id, scope=scope, company_id=company,
+            operation="decisions.write", requested=1, allowed=1,
+            runtime_sha=self._runtime_sha()))
+        return self._redirect(f"/decisions?company={company}")
+
+    def _manifest_placement(self, company_id: str, *, name: str = "",
+                            domain: str = ""):
+        """This company's manifest id, cohort, and the manifest version.
+
+        Read-only, and read from the canonical manifest rather than from
+        anything the analysis produced: nothing observed at runtime may place
+        a company in a cohort.
+
+        RESOLVES ON DOMAIN AND NAME, NOT ONLY ON A NORMALISED ID. The analysis
+        resolves companies to their LEGAL name, so "Cloudflare, Inc." became
+        the key `cloudflare-inc` and matched no manifest entry — every real
+        company's dossier was stamped with no cohort and no manifest version,
+        which reads exactly like a company outside the universe. Found by the
+        first breaker run; it would have made the whole 100-company
+        measurement read zero without anything raising.
+
+        Returns the MANIFEST id when the company is in the universe, so the
+        dossier is stored where the programme can find it again.
+        """
+        try:
+            from intent_engine.validation import load
+            manifest = load()
+            company = manifest.resolve(domain=domain, name=name,
+                                       company_id=company_id)
+            return ((company.company_id, company.cohort, manifest.version)
+                    if company else (company_id, "", ""))
+        except Exception:  # noqa: BLE001 - the manifest must never fail a run
+            _LOG.warning("validation manifest unavailable for %s", company_id)
+            return company_id, "", ""
+
+    def _demo_dossier_store(self):
+        from intent_engine.demo_dossier.store import DossierStore
+        return DossierStore(self._runtime_root)
+
+    def _demo_dossier_index(self):
+        """Every dossier this deployment has assembled, as an index.
+
+        Deliberately unscoped and deliberately harmless: `views.index_row`
+        emits states, availabilities and runtime SHAs, and no reference ids
+        at all. There is nothing here to partition by tenant because there is
+        nothing here that belongs to one.
+        """
+        from intent_engine.demo_dossier import views
+        store = self._demo_dossier_store()
+        rows = [d for d in (store.latest(c) for c in store.companies())
+                if d is not None]
+        return self._ok_json(views.index(rows))
+
+    def _demo_dossier_detail(self, company_id: str):
+        """One dossier, with tenant-partitioned reference ids withheld.
+
+        The withholding is unconditional — see `views` for why that is
+        stronger than a scope check here, and why a missing company is a
+        stated reading rather than a bare 404.
+        """
+        from urllib.parse import unquote
+
+        from intent_engine.demo_dossier import views
+        from intent_engine.demo_dossier.store import company_key
+        company_id = company_key(unquote(company_id or ""))
+        dossier = self._demo_dossier_store().latest(company_id)
+        if dossier is None:
+            # 404 for the caller, but with a BODY that says which absence
+            # this is. A bare status code cannot distinguish "never analysed
+            # here" from "analysed and refused", and at 100 companies that
+            # difference is the whole signal.
+            return ("404 Not Found",
+                    [("Content-Type", "application/json")],
+                    json.dumps(views.not_found(company_id)))
+        payload = views.with_executive_read(views.detail(dossier),
+                                            self._executive_read(dossier))
+        # THE CEO'S QUESTIONS, ON THE SAME PAYLOAD AS THE READ THEY PROJECT.
+        # A separate endpoint would let a surface pair an answer with a
+        # decision from a different assembly, which is the one thing the
+        # single-decision design exists to prevent.
+        payload["ceo_questions"] = self._ceo_questions(dossier)
+        return self._ok_json(payload)
+
+    def _decision_screen(self, company_id: str, which: str):
+        """The X-Ray, the full analysis or the presentation, rendered.
+
+        THREE ROUTES, ONE DECISION. All three compose the same
+        `FounderDecision` from the same dossier and then project it; none of
+        them reasons. That is what makes the cross-surface consistency check
+        a property of the code rather than a thing to keep re-verifying: a
+        difference between these pages could only come from a rendering bug,
+        never from two answers.
+
+        Open to anyone who can reach the dossier index, like the JSON detail
+        beside it -- these carry no reference ids and nothing tenant-scoped,
+        which is the same reason `views` withholds unconditionally.
+        """
+        from urllib.parse import unquote
+
+        from intent_engine.demo_dossier.store import company_key
+        from intent_engine.founder_brief import deep, xray
+
+        company_id = company_key(unquote(company_id or ""))
+        dossier = self._demo_dossier_store().latest(company_id)
+        if dossier is None:
+            # WHICH ABSENCE. A bare 404 cannot tell "never analysed here"
+            # from "analysed and refused", and at 100 companies that is the
+            # whole signal.
+            return self._error_page(
+                404, f"No analysis is stored here for {company_id!r}. That "
+                     f"means this deployment has not run it — not that the "
+                     f"company was analysed and found empty.")
+        decision = self._executive_read(dossier)
+        if decision is None:
+            return self._error_page(
+                500, "The decision for this company could not be composed. "
+                     "That is a fault on this side, not a finding about the "
+                     "company.")
+        stamp = (f"Market snapshot {dossier.market_snapshot_id} · evidence "
+                 f"cutoff {dossier.effective_evidence_cutoff}")
+        base = f"/demo-dossiers/{company_id}"
+        company = dossier.canonical_name or company_id
+        if which == "full":
+            body = deep.full_analysis(
+                decision, company=company, stamp=stamp,
+                links=[("Executive X-Ray", f"{base}/xray"),
+                       ("Presentation", f"{base}/deck"),
+                       ("Why this reading exists", f"{base}/evidence")])
+        elif which == "deck":
+            body = deep.presentation(
+                decision, company=company, stamp=stamp,
+                links=[("Executive X-Ray", f"{base}/xray"),
+                       ("Full analysis", f"{base}/full"),
+                       ("Why this reading exists", f"{base}/evidence")])
+        else:
+            body = xray.render(
+                decision, company=company, stamp=stamp,
+                crossing=str(getattr(dossier, "crossing", "") or ""),
+                links=[("Full analysis", f"{base}/full"),
+                       ("Presentation", f"{base}/deck"),
+                       ("Why this reading exists", f"{base}/evidence")])
+        return self._html(self._page(company, body, None, ""))
+
+    #: What a leaked constant looks like: SHOUTING words joined by
+    #: underscores. Single all-caps words are NOT constants by shape -- USA,
+    #: 10-K and META all are that -- so the ones that are states are mapped
+    #: by name below instead.
+    #: Internal state names, in the reader's words.
+    #:
+    #: MEASURED on Meta's live `/evidence` at b0ec8cb: "Search coverage:
+    #: DISCOVERY_PARTIAL · reading: HAVE_INDEPENDENT" and "Relevance:
+    #: DIRECTLY_RELEVANT · Counts as corroboration: yes". Those are internal
+    #: enum constants printed as customer copy, on the one page whose whole
+    #: job is to make a hostile reader trust the evidence.
+    #:
+    #: Mapped explicitly rather than transformed. A generic
+    #: `.replace("_", " ").lower()` turns DISCOVERY_PARTIAL into "discovery
+    #: partial", which is not English and still reads as a leaked constant;
+    #: and it would quietly invent wording for states nobody has looked at.
+    #: The fallback exists so an UNMAPPED state degrades to something
+    #: readable instead of shouting, but the guard below is what stops one
+    #: going unnoticed.
+    _PLAIN_STATE = {
+        "DISCOVERY_NOT_RUN": "no search was run",
+        "DISCOVERY_PARTIAL": "partial — more sources remain unread",
+        "DISCOVERY_ADEQUATE": "adequate for this reading",
+        "DISCOVERY_EXHAUSTED": "exhausted — everything findable was read",
+        "DISCOVERY_BLOCKED": "blocked — sources refused automated access",
+        "HAVE_INDEPENDENT": "independent corroboration found",
+        # THE DISTINCTION THIS PRODUCT EXISTS TO KEEP. A zero is either a
+        # fact about the company or a limit of our search, and these two
+        # states are how they are told apart. Mapped by hand rather than
+        # left to the fallback: "failed to find" and "found none" happen to
+        # be readable English, but a distinction this load-bearing must not
+        # depend on a generic transform producing acceptable words.
+        "FAILED_TO_FIND": "none retrieved — a limit of our search, "
+                          "not a finding about the company",
+        "FOUND_NONE": "searched thoroughly and none exists",
+        "PARTIALLY_INDEPENDENT": "partly corroborated by independent sources",
+        "NO_INDEPENDENT": "no independent corroboration yet",
+        "DIRECTLY_RELEVANT": "directly about this company",
+        "DECISION_RELEVANT": "bears on the decision",
+        "CLAIM_RELEVANT": "supports a specific claim",
+        "CONTEXTUALLY_RELEVANT": "background context",
+        "WEAKLY_RELEVANT": "weakly related",
+        "IRRELEVANT": "not relevant",
+        "CURRENT": "current",
+        "STALE": "out of date",
+    }
+
+    @classmethod
+    def _plain_state(cls, value) -> str:
+        """A state name a reader can act on, never the constant itself."""
+        raw = str(value or "").strip()
+        if not raw:
+            return ""
+        if raw in cls._PLAIN_STATE:
+            return cls._PLAIN_STATE[raw]
+        # ONLY UNDERSCORE-JOINED CONSTANTS. A first version also lowered any
+        # all-caps word over three characters, and its own control caught it
+        # rewriting "10-K" to "10-k" -- this runs over every record on the
+        # page, so a form type, a country or a ticker would have been
+        # quietly corrupted to hide a constant nobody had leaked.
+        if _CONSTANT_SHAPED.match(raw):
+            return raw.replace("_", " ").lower()
+        return raw
+
+    @staticmethod
+    def _discovery_detail(discovery: dict) -> str:
+        """How hard we looked, in the buyer's words rather than ours.
+
+        A hostile buyer's second question after "is it independent?" is "how
+        hard did you try?", and a coverage enum alone does not answer it. This
+        renders the WORK: channels tried, candidates considered, documents
+        actually read. Absent when no producer ran -- inventing a number here
+        would be worse than the silence it replaces.
+        """
+        if not discovery:
+            return ('<p class="none">No discovery run is recorded for this '
+                    'analysis, so how hard we searched is unknown.</p>')
+        considered = int(discovery.get("candidates_considered") or 0)
+        fetched = int(discovery.get("candidates_fetched") or 0)
+        hits = int(discovery.get("hits_total") or 0)
+        channels = discovery.get("channels_successful") or []
+        bits = [f'<p class="none">We searched {len(channels) or 0} '
+                f'independent channel(s), found {hits} filing(s) naming this '
+                f'company, judged {considered} of them worth reading, and '
+                f'read {fetched} in full.</p>']
+        if discovery.get("budget_exhausted"):
+            bits.append('<p class="none">We stopped at our reading budget, so '
+                        'candidates remain that we have not assessed.</p>')
+        reasons = discovery.get("rejection_reasons") or {}
+        if isinstance(reasons, dict) and reasons:
+            listed = " · ".join(
+                f"{_e(str(k).replace('_', ' ').lower())}: {int(v)}"
+                for k, v in sorted(reasons.items())[:8])
+            bits.append(f'<p class="none">Set aside — {listed}</p>')
+        return "".join(bits)
+
+    def _evidence_screen(self, company_id: str):
+        """Why this reading exists: every source, and what it is worth.
+
+        THE FIFTH PROJECTION, beside the X-Ray, the full analysis, the
+        presentation and the decision history. It renders the sanitized
+        records that already cross the bridge -- it computes nothing, and
+        deliberately does not re-decide independence or relevance, because
+        two opinions about one document is how the drawer and the count
+        start disagreeing.
+
+        The sources are grouped by WHAT THEY ARE WORTH rather than listed
+        flat, because the interesting fact about this company's evidence is
+        not that there are eleven documents. It is that none of them is an
+        outside voice with anything to say -- and a flat bibliography hides
+        exactly that.
+        """
+        from urllib.parse import unquote
+
+        from intent_engine.company_ingestion import relevance as REL
+        from intent_engine.demo_dossier.store import company_key
+
+        company_id = company_key(unquote(company_id or ""))
+        dossier = self._demo_dossier_store().latest(company_id)
+        if dossier is None:
+            return self._error_page(
+                404, f"No analysis is stored here for {company_id!r}, so "
+                     f"there are no sources to show.")
+        company = getattr(dossier, "canonical_name", "") or company_id
+        founder = getattr(dossier, "founder_block", {}) or {}
+        provenance = founder.get("claim_provenance") or {}
+        base = f"/demo-dossiers/{company_id}"
+        nav = (f'<p class="none"><a href="{base}/xray">X-Ray</a> · '
+               f'<a href="{base}/full">Full analysis</a> · '
+               f'<a href="{base}/deck">Presentation</a> · '
+               f'<a href="{base}/memory">Decision history</a></p>')
+
+        state = str(provenance.get("state") or "")
+        records = provenance.get("records") or []
+        if not records:
+            # An absent projection is a fact about us. Saying "no sources"
+            # would be a claim about the company.
+            reason = str(provenance.get("reason") or
+                         "This analysis carries no source projection.")
+            return self._html(self._page(company, (
+                f'<p class="eyebrow">Why this reading exists</p>'
+                f'<h1>{_e(company)}</h1>{nav}'
+                f'<section class="card"><h2>No sources are attached</h2>'
+                f'<p>{_e(reason)}</p>'
+                f'<p class="none">State: '
+                f'{_e(state or "PROVENANCE_UNAVAILABLE")}'
+                f'</p></section>'), None, ""))
+
+        supporting = [r for r in records if r.get("independence_bearing")]
+        set_aside = [r for r in records
+                     if r.get("independent_voice")
+                     and not r.get("independence_bearing")]
+        own = [r for r in records if not r.get("independent_voice")]
+
+        # WHAT A ZERO LICENCES US TO SAY. The coverage state is MEASURED by
+        # the discovery run -- how many candidates it considered, how many
+        # documents it actually read, whether it ran out of budget or ran out
+        # of candidates. An absent block means no producer ran, which reads
+        # DISCOVERY_NOT_RUN and never licenses "this company has no coverage".
+        discovery = founder.get("discovery_coverage")
+        discovery = discovery if isinstance(discovery, dict) else {}
+        reading = REL.zero_reading(
+            independent_relevant=len(supporting),
+            coverage=str(discovery.get("coverage") or REL.DISCOVERY_NOT_RUN),
+            channels_attempted=len(discovery.get("channels_attempted") or []),
+            channels_successful=len(discovery.get("channels_successful") or []))
+        headline = (
+            f'<section class="card"><h2>Independent support</h2>'
+            f'<p><strong>{len(supporting)}</strong> of {len(records)} '
+            f'source(s) are both independent of {_e(company)} and say enough '
+            f'about it to support the reading.</p>'
+            + (f'<p>{_e(reading["statement"])}</p>' if reading["statement"]
+               else "")
+            + f'<p class="none">Search coverage: '
+              f'{_e(self._plain_state(reading["coverage"]))} · reading: '
+              f'{_e(self._plain_state(reading["reading"]))}</p>'
+            + self._discovery_detail(discovery)
+            + '</section>')
+
+        def _card(rec):
+            bits = []
+            for label, key in (("Author", "author"), ("Host", "host"),
+                               ("Subject", "subject"),
+                               ("Published", "published_at"),
+                               ("Retrieved", "retrieved_at"),
+                               ("Freshness", "freshness")):
+                value = str(rec.get(key) or "")
+                if key == "freshness":          # CURRENT / STALE are internal
+                    value = self._plain_state(value)
+                if value:
+                    bits.append(f"<dt>{label}</dt><dd>{_e(value)}</dd>")
+            url = str(rec.get("url") or "")
+            link = (f'<p><a href="{_e(url)}" rel="nofollow noopener" '
+                    f'target="_blank">{_e(url[:90])}</a></p>' if url else
+                    '<p class="none">This source is not publicly linkable.</p>')
+            passage = str(rec.get("passage") or "")
+            return (
+                f'<section class="card">'
+                f'<h3>{_e(rec.get("title") or "Untitled source")}</h3>'
+                f'<p><strong>{_e(rec.get("plain_statement") or "")}</strong></p>'
+                f'<p>{_e(rec.get("relevance_statement") or "")}</p>'
+                + (f'<blockquote>{_e(passage)}</blockquote>' if passage else "")
+                + link
+                + f'<dl>{"".join(bits)}</dl>'
+                + f'<p class="none">Independent voice: '
+                  f'{"yes" if rec.get("independent_voice") else "no"} · '
+                  f'Relevance: '
+                  f'{_e(self._plain_state(rec.get("relevance")))} · '
+                  f'Counts as corroboration: '
+                  f'{"yes" if rec.get("independence_bearing") else "no"}</p>'
+                + (f'<p class="none">{_e(rec.get("relevance_reason") or "")}'
+                   f'</p>' if rec.get("relevance_reason") else "")
+                + '</section>')
+
+        sections = [headline]
+        for title, note, group in (
+            ("Independent and relevant",
+             "Outside voices that discuss this company. These are what the "
+             "reading rests on.", supporting),
+            ("Independent, but not relevant here",
+             "Written by somebody else, and they do not say enough about "
+             "this company to support the reading. Shown because a source "
+             "set aside is more informative than a source hidden.", set_aside),
+            ("Written by the company itself",
+             "Useful evidence, and often the best there is — but the company "
+             "speaking about itself cannot corroborate itself.", own),
+        ):
+            if not group:
+                continue
+            sections.append(f'<h2>{title} ({len(group)})</h2>'
+                            f'<p class="none">{note}</p>'
+                            + "".join(_card(r) for r in group))
+
+        body = (f'<p class="eyebrow">Why this reading exists</p>'
+                f'<h1>{_e(company)}</h1>{nav}' + "".join(sections))
+        return self._html(self._page(company, body, None, ""))
+
+    def _memory_screen(self, company_id: str):
+        """What we decided, what we did, and what came of it.
+
+        THE FOURTH PROJECTION of the same decision, beside the X-Ray, the
+        full analysis and the presentation -- except that the questions here
+        are about the PAST, and the past lives in `LivingDecisionRecord`
+        rather than in the composed `FounderDecision`.
+
+        Every stage that has not happened is shown as not having happened.
+        The point of the screen is that a reader can see the difference
+        between what the engine recommended, what a person chose, what the
+        company did, and what followed -- because a product that blurs them
+        will eventually tell somebody "we expanded and it worked" about a
+        decision nobody executed.
+        """
+        from urllib.parse import unquote
+
+        from intent_engine.demo_dossier.store import company_key
+        from intent_engine.executive import personal_ai as PA
+
+        company_id = company_key(unquote(company_id or ""))
+        dossier = self._demo_dossier_store().latest(company_id)
+        if dossier is None:
+            return self._error_page(
+                404, f"No analysis is stored here for {company_id!r}, so "
+                     f"there is no decision history to show.")
+        company = getattr(dossier, "canonical_name", "") or company_id
+        # No scope on this public page, so no decision history is read.
+        # The questions still render, each stating that nothing is recorded,
+        # which is the truthful answer for a visitor who has decided nothing.
+        record = self._living_record_for(company_id, scope=None)
+        decision = self._executive_read(dossier)
+        rows = []
+        for question in PA.MEMORY_QUESTIONS:
+            out = PA.answer(question, record=record, decision=decision)
+            state = "" if out.supported else (
+                f'<p class="none">Not established: '
+                f'{_e(out.information_gap or "nothing on the record")}</p>')
+            rows.append(
+                f'<section class="card"><h2>{_e(question)}</h2>'
+                f'<p>{_e(out.answer)}</p>{state}</section>')
+        base = f"/demo-dossiers/{company_id}"
+        body = (
+            f'<p class="eyebrow">Decision history</p><h1>{_e(company)}</h1>'
+            f'<p class="none">The engine&rsquo;s reading is on the '
+            f'<a href="{base}/xray">X-Ray</a>. This page is the record of '
+            f'what was decided and done, which is a different thing: a '
+            f'recommendation is not a decision, and a decision is not an '
+            f'act.</p>' + "".join(rows))
+        return self._html(self._page(company, body, None, ""))
+
+    def _living_record_for(self, company_id: str, scope=None):
+        """This company's latest living decision, or None. Never raises.
+
+        A DECISION HISTORY IS TENANT-SCOPED, always. Without a scope this
+        returns None rather than reading the store unscoped -- the decisions
+        JSON view beside it refuses the same read as SCOPELESS_READ, and a
+        public page that showed one tenant's decisions to another visitor
+        would be the worst kind of leak: it is not evidence about a company,
+        it is what a named person chose to do.
+        """
+        if scope is None:
+            return None
+        try:
+            from intent_engine.executive import living_decision as LDR
+            store = LDR.LivingDecisionStore(self.config.web_store_path.parent)
+            rows = [r for r in store.all(scope=scope)
+                    if str(r.get("company_id") or "") == company_id]
+            if not rows:
+                return None
+            latest = sorted(rows, key=lambda r: r.get("revision", 0))[-1]
+            return LDR.LivingDecisionRecord(**{
+                k: v for k, v in latest.items()
+                if k in LDR.LivingDecisionRecord.__dataclass_fields__})
+        except Exception:                                   # noqa: BLE001
+            # A memory that cannot be read is not a memory that is empty,
+            # but the screen degrades to "nothing recorded" either way and
+            # says so per question rather than failing the page.
+            return None
+
+    def _learning_acceleration(self, environ):
+        """What the engine learned, over three windows.
+
+        RENDERS THE MARKET ENGINE'S OWN REPORT and computes no metric of its
+        own. Two definitions of "novel evidence" is how a dashboard starts
+        disagreeing with the engine it describes.
+
+        The headline is deliberately NOT the arrival count. A cycle that
+        re-reads eighty pages and changes nothing has been busy, not
+        productive, and putting 86 at the top of the page teaches a reader to
+        mistake the first for the second.
+        """
+        from intent_engine.demo_dossier import learning_bridge as LB
+        windows = []
+        for period, label in (("day", "Today"), ("week", "Last 7 days"),
+                              ("month", "Last 30 days")):
+            report = LB.load(period)
+            reading = LB.activity_versus_learning(report)
+            if not report.available:
+                windows.append(
+                    f'<section class="card"><h2>{_e(label)}</h2>'
+                    f'<p class="none">{_e(report.reason)}</p></section>')
+                continue
+            payload = report.payload
+            bottleneck = payload.get("bottleneck") or {}
+            nxt = payload.get("next_research_priority") or {}
+            summary = payload.get("executive_summary") or {}
+            learned = "".join(
+                f"<li>{_e(x)}</li>"
+                for x in (summary.get("top_learnings") or ())[:5])
+            windows.append(
+                f'<section class="card"><h2>{_e(label)}</h2>'
+                f'<p class="verdict"><strong>{_e(reading["verdict"])}</strong>'
+                f' — {_e(reading["why"])}</p>'
+                f'<ul class="counts">'
+                f'<li>{_e(str(reading["arrivals"]))} observations arrived</li>'
+                f'<li>{_e(str(reading["novel"]))} were new; '
+                f'{_e(str(reading["re_observed"]))} had been seen before</li>'
+                f'<li>{_e(str(reading["changed_the_model"]))} changed the model</li>'
+                f'<li>{_e(str(reading["tested_and_unchanged"]))} were tested and '
+                f'held — a result, not an idle period</li></ul>'
+                + (f"<h3>What it learned</h3><ul>{learned}</ul>"
+                   if learned else "")
+                + (f'<h3>What is holding learning back</h3>'
+                   f'<p>{_e(bottleneck.get("bottleneck", ""))}: '
+                   f'{_e(bottleneck.get("reason", ""))}</p>'
+                   if bottleneck else "")
+                + (f'<h3>What it will look at next</h3>'
+                   f'<p>{_e(nxt.get("suggested_action", ""))}</p>'
+                   f'<p class="none">{_e(nxt.get("why_now", ""))}</p>'
+                   if nxt else "")
+                + '</section>')
+        body = (
+            '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            '<meta name="viewport" content="width=device-width,'
+            'initial-scale=1"><title>What the engine learned</title>'
+            '<style>body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;'
+            'max-width:820px;margin:0 auto;padding:2rem;color:#1a1a2e;'
+            'line-height:1.55}.card{border:1px solid #e6e6ef;border-radius:10px;'
+            'padding:1rem 1.2rem;margin:1rem 0}.none{color:#666;'
+            'font-style:italic}.verdict{font-size:1.05rem}'
+            'h3{margin-top:1.2rem;font-size:.95rem}</style></head><body>'
+            '<main><h1>What the engine learned</h1>'
+            '<p class="none">Read from the market engine&rsquo;s own learning '
+            'record. Activity and learning are shown separately: reading more '
+            'is not the same as knowing more.</p>'
+            + "".join(windows)
+            + self._econ_decision_block()
+            + self._collective_block()
+            + '</main></body></html>')
+        return self._html(body)
+
+    def _econ_decision_block(self) -> str:
+        """§39: what the economic layer knows, and what it has not yet earned.
+
+        OPERATOR-FACING, so the enums stay. §41's rule is about CUSTOMER
+        surfaces; an operator debugging why a company abstained needs the
+        refusal code, not a translation of it.
+
+        THE CALIBRATION LINE IS THE POINT. It states PRE-CALIBRATION and the
+        number of RESOLVED forward predictions, which is zero, and it may not
+        contain a percentage -- an accuracy figure with an empty denominator
+        is the claim this whole programme exists to not make. The rehearsal
+        ledger is a different file and this reads the real store only.
+        """
+        import datetime as _dt
+        from intent_engine.econ import founder_contract as FC
+        from intent_engine.external_intel import econ_context as EC
+        from intent_engine.external_intel import econ_decision as ED
+        today = _dt.date.today().isoformat()
+        try:
+            context = EC.load(self._runtime_root, as_of=today)
+        except Exception:                                   # noqa: BLE001
+            context = None
+        if context is None or not context.available:
+            reason = getattr(context, "reason", "") or \
+                "the shared economic state could not be read"
+            return ('<section class="card"><h2>Economic decision layer</h2>'
+                    f'<p class="none">{_e(reason)}</p></section>')
+        fresh, age = FC.freshness_of(context.as_of, at=today)
+        known = [v for v in context.conditions.values() if v.get("known")]
+        moving = [v for v in known if v.get("direction") in ("UP", "DOWN")]
+        try:
+            exps, calibration, counts = ED.forward_status(self._runtime_root,
+                                                          at=today)
+        except Exception:                                   # noqa: BLE001
+            exps, calibration, counts = [], FC.PRE_CALIBRATION, {}
+        supported = [b for b in context.beliefs
+                     if str(b.get("status", "")).upper().startswith(
+                         "SUPPORTED")]
+        candidate = [b for b in context.beliefs if b not in supported]
+        def _row(v) -> str:
+            value = v.get("value")
+            shown = f"{value:g}" if isinstance(value, (int, float)) else ""
+            prior = str(v.get("prior_as_of", "")) or "no earlier reading"
+            return (f'<li>{_e(str(v.get("kind", "")))}: '
+                    f'{_e(str(v.get("direction", "")))} to {_e(shown)} '
+                    f'(as of {_e(str(v.get("as_of", "")))}, from {_e(prior)})'
+                    f'</li>')
+
+        rows = "".join(
+            _row(v) for v in
+            sorted(known, key=lambda x: str(x.get("kind", "")))[:14])
+        forward = "".join(
+            f'<li>{_e(x.quantity)} {_e(x.expected_direction)} by '
+            f'{_e(x.expires_at)}</li>' for x in exps[:3])
+        return (
+            '<section class="card"><h2>Economic decision layer</h2>'
+            f'<p class="verdict"><strong>{_e(fresh)}</strong> — the shared '
+            f'state is dated {_e(context.as_of)} and is '
+            f'{_e("1 day" if age == 1 else f"{age} days")} old.</p>'
+            f'<ul class="counts">'
+            f'<li>{len(known)} condition(s) measured of '
+            f'{_e(str((context.uncertainty or {}).get("vocabulary", "?")))} '
+            f'in the vocabulary</li>'
+            f'<li>{len(moving)} moved; {len(known) - len(moving)} did '
+            f'not</li>'
+            f'<li>{len(supported)} supported relation(s), '
+            f'{len(candidate)} candidate — a candidate is tracked and is '
+            f'never stated as a finding</li>'
+            f'<li>{_e(str(counts.get("open", 0)))} forward prediction(s) '
+            f'open, {_e(str(counts.get("resolved", 0)))} resolved</li>'
+            f'<li>CALIBRATION: {_e(calibration)} — no prediction has come '
+            f'due, so there is no accuracy figure and none is shown</li>'
+            f'<li>rehearsal results are held in a separate ledger this '
+            f'surface does not read</li>'
+            f'</ul>'
+            + (f'<h3>What is being tracked</h3><ul>{forward}</ul>'
+               if forward else "")
+            + f'<h3>Conditions</h3><ul class="counts">{rows}</ul>'
+            '</section>')
+
+    def _collective_block(self) -> str:
+        """Section 49: what the engine believes people are doing differently.
+
+        THREE NUMBERS, ALWAYS TOGETHER. Measured, usable and promoted are
+        almost never equal, and a panel showing only the first would present
+        effort as if it were result -- the same mistake the window panel
+        above refuses to make with arrival counts.
+
+        THE EMPTY CASE IS THE INTERESTING ONE TODAY. One construct of sixteen
+        is measurable, and rendering that as a blank section would read as
+        "nothing to report" rather than "the layer is built and starved".
+        So the block always renders, and always names the reason.
+        """
+        try:
+            from intent_engine.econ import dashboard as CD
+            # An ATTRIBUTE, set in __init__, not a method. Calling it would
+            # raise TypeError, which the except below would swallow into a
+            # permanently blank panel -- the silent-zero shape this codebase
+            # has shipped before.
+            payload = CD.build(self._runtime_root)
+        except Exception:                                   # noqa: BLE001
+            return ""
+        if not payload.get("available"):
+            return ""
+        h = payload["headline"]
+        inc = payload["incremental_value"]
+
+        rows = []
+        for pop in payload.get("populations", []):
+            who = (pop.get("population") or {}).get("name", pop.get("key"))
+            for r in pop.get("readings", []):
+                moved = r.get("moved")
+                move = ("" if moved is None
+                        else f' <span class="none">({moved:+.3f} since the '
+                             f'previous estimate)</span>')
+                rows.append(
+                    f'<li>{_e(r["sentence"])}{move}<br>'
+                    f'<span class="none">{_e(r["promotion_state"])} — '
+                    f'{_e(r["meaning"])}</span></li>')
+        readings = ("<ul>" + "".join(rows) + "</ul>" if rows else
+                    '<p class="none">No population has a usable reading in '
+                    'this store yet.</p>')
+
+        if inc.get("status") == "MEASURED":
+            delta = inc.get("incremental_delta")
+            value = (
+                f'<h3>Base economic model vs base + collective state</h3>'
+                f'<ul class="counts">'
+                f'<li>base economic model: '
+                f'{_e(str(inc.get("base_economic_model_score")))}</li>'
+                f'<li>base + collective state: '
+                f'{_e(str(inc.get("base_plus_collective_score")))}</li>'
+                f'<li><strong>incremental delta: {_e(str(delta))}</strong> '
+                f'({_e(str(inc.get("robust_improvements")))} robust of '
+                f'{_e(str(inc.get("tested")))} tested)</li></ul>')
+        else:
+            value = (f'<h3>Base economic model vs base + collective state</h3>'
+                     f'<p class="none">{_e(inc.get("reason", ""))}</p>')
+
+        retired = "".join(
+            f'<li>{_e(r["dimension"])} — {_e(r["reason"])}</li>'
+            for r in payload.get("retired", []))
+        reality = payload.get("measurement_reality", {})
+        blocked = reality.get("dimensions_blocked_by_data", {})
+        blocked_html = "".join(
+            f'<li>{_e(d)}: {_e("; ".join(v)[:180])}</li>'
+            for d, v in sorted(blocked.items()))
+
+        return (
+            '<section class="card"><h2>What people appear to be doing '
+            'differently</h2>'
+            f'<p class="verdict">{_e(payload.get("verdict", ""))}</p>'
+            f'<ul class="counts">'
+            f'<li>{_e(str(h["vocabulary"]))} constructs declared; '
+            f'{_e(str(h["with_a_proxy"]))} have a proxy; '
+            f'{_e(str(h["measurable_today"]))} can be measured with the data '
+            f'this deployment can actually read</li>'
+            f'<li>{_e(str(h["measured"]))} currently measured, '
+            f'{_e(str(h["promoted"]))} promoted, '
+            f'{_e(str(h["retired"]))} tested and removed</li></ul>'
+            + readings + value
+            + (f'<h3>Removed for adding no predictive value</h3>'
+               f'<ul>{retired}</ul>' if retired else "")
+            + (f'<h3>Cannot be measured here, and why</h3>'
+               f'<ul>{blocked_html}</ul>' if blocked_html else "")
+            + '</section>')
+
+    def _registrant(self, dossier) -> dict:
+        """The SEC's classification of this filer, or {}.
+
+        WHY IT IS RESOLVED HERE. `compose` is deterministic and makes no
+        network call, so the one classification lookup a company outside the
+        validation manifest needs has to happen at the request layer. It is
+        skipped entirely for the 100 manifest companies, which are already
+        classified by hand -- so the common path costs nothing.
+
+        Cached per company for the process lifetime: the SIC code of a
+        registrant does not change between two page loads, and the SEC
+        rate-limits.
+        """
+        cid = getattr(dossier, "company_id", "") or ""
+        name = getattr(dossier, "canonical_name", "") or cid
+        if not cid and not name:
+            return {}
+        cache = getattr(self, "_registrant_cache", None)
+        if cache is None:
+            cache = self._registrant_cache = {}
+        if cid in cache:
+            return cache[cid]
+        out = {}
+        try:
+            from intent_engine.executive.company_profile import profile_for
+            from intent_engine.validation import load as _load_manifest
+            if profile_for(cid, name=name,
+                           manifest=_load_manifest()).known:
+                cache[cid] = out          # in the manifest; no lookup needed
+                return out
+        except Exception:                                   # noqa: BLE001
+            pass
+        try:
+            from intent_engine.company_ingestion.edgar import (
+                registrant_classification, resolve_cik)
+            resolved = resolve_cik(name)
+            if resolved:
+                out = registrant_classification(resolved) or {}
+        except Exception:                                   # noqa: BLE001
+            out = {}
+        cache[cid] = out
+        return out
+
+    def _ceo_questions(self, dossier) -> dict:
+        """Every required CEO question, answered by projecting the decision.
+
+        A failure is a STATE. An empty list would read as "this company has
+        no answers", which is a claim about the company rather than about
+        the composer.
+        """
+        try:
+            from intent_engine.executive import ceo_questions as _Q
+            from intent_engine.executive.decision_synthesis import compose
+            decision = compose(dossier, registrant=self._registrant(dossier))
+            return {"contract": _Q.CONTRACT,
+                    "answers": [_Q.answer(q, decision).as_dict()
+                                for q in _Q.REQUIRED_QUESTIONS]}
+        except Exception as exc:                            # noqa: BLE001
+            return {"state": "CEO_QUESTIONS_UNAVAILABLE",
+                    "reason": f"the answers could not be composed: {exc}"}
+
+    def _executive_read(self, dossier):
+        """Compose the FounderDecision for one dossier. No model call.
+
+        Composed HERE rather than inside `demo_dossier.views` because the
+        synthesis is founder-side reasoning and that package is the neutral
+        seam — the structural guard tokenizes its imports and rejects one,
+        which is how this ended up in the right place.
+
+        The previous version is passed so `what_changed` compares against a
+        real earlier reading rather than announcing a change on every page
+        load. A composer failure returns None, which the view renders as a
+        stated absence: "could not be composed" is about the composer, and
+        must never read as "this company has no decision".
+        """
+        try:
+            from intent_engine.executive.decision_synthesis import compose
+            # CALLED, NOT PROBED. This read `if hasattr(store, "previous")`
+            # against a store that had no such method, so the expression was
+            # None on every request and "what changed" reported a first
+            # reading for every company forever. A capability test that can
+            # only ever answer False is not a guard, it is a switched-off
+            # feature -- and it stayed green because None is a legal value.
+            previous = self._demo_dossier_store().previous(
+                dossier.company_id, before=dossier.dossier_version)
+            return compose(dossier, previous=previous,
+                           registrant=self._registrant(dossier)).as_dict()
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("executive read not composed for %s",
+                         dossier.company_id)
+            return None
+
+    def _runtime_sha(self) -> str:
+        from intent_engine._version import version_info
+
+        info = version_info()
+        return str(info.get("git_sha") or info.get("app_version") or "")
 
     def _page(self, title, body, session, csrf):
         return (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
@@ -3338,7 +7671,7 @@ class WebApp:
 
     def _evidence(self, session, run_id, claim_id):
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         result = self._result(run_id)
         for section in result.get("sections", []):
             for card in section.get("cards", []):
@@ -3488,7 +7821,7 @@ class WebApp:
 
     def _converse(self, session, run_id, form):
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         question = form.get("question", "")
         # Prefer a strategic answer when the run has a strategic report and the
         # question maps to one of its hypotheses: reasoning chain + citations +
@@ -3560,59 +7893,76 @@ class WebApp:
             _trust = _et.as_read_by(_intel, _ran)
         except Exception:  # noqa: BLE001 - a question must still be answerable
             _LOG.warning("trust standing unavailable for %s", run_id)
+        # THE TURNS THIS READER HAS ALREADY HAD, ON THIS RUN.
+        #
+        # `_conversation_context` has existed since the dead second engine
+        # was removed and NOTHING HAS EVER WRITTEN TO IT -- the only writer
+        # was inside the unreachable block below. So the one mechanism this
+        # product had for resolving "Why does that matter?" against the last
+        # answer lived in code that could not execute, and a structural test
+        # asserting the read-before-write order passed against it.
+        #
+        # KEYED BY RUN AND READER, NEVER BY RUN ALONE. A run is owned by one
+        # session, but a key that ignores the reader is one redeploy away
+        # from showing somebody else's questions -- the same reasoning the
+        # request-scoped memos at the top of `_route` are written under.
+        _hist_key = (run_id, str(session.get("user_id") or ""))
+        _history = tuple(self._conversation_context.get(_hist_key, ()))
         founder_answer = fqa.answer(question, brief,
+                                    contract=self._executive_contract(run_id),
+                                    decision=self._composed_decision(run_id),
                                     engine_answer=engine_text,
                                     observations=observations,
-                                    trust=_trust)
+                                    trust=_trust,
+                                    # D31: the canonical read, so Q&A cannot
+                                    # deny a falsifier step 1 is showing.
+                                    read=self._strategic_read(run_id),
+                                    # §22: ONE economic object across brief,
+                                    # full analysis and Q&A. Three surfaces
+                                    # answering an economic question from
+                                    # three derivations is three products.
+                                    econ=self._founder_economic_context(
+                                        run_id),
+                                    # §13. A QUESTION ASKED SIXTEEN
+                                    # SECONDS EARLY IS NOT A COMPANY
+                                    # WITH NO EVIDENCE. The reader can
+                                    # open the result before the deeper
+                                    # reading merges, and until it does
+                                    # `key_insight` is None -- which
+                                    # every strategic question read as a
+                                    # verdict on the company.
+                                    deep_pending=(
+                                        str((_report or {}).get(
+                                            "deep_status") or "")
+                                        == "PENDING"),
+                                    previous=_history)
+        # BOUNDED. Six turns is more than the executive question set and far
+        # short of anything that could grow without limit in a long session.
+        self._conversation_context[_hist_key] = (
+            _history + (founder_answer.as_dict(),))[-6:]
         return self._founder_answer_page(session, run_id, founder_answer)
-        flat_claims = self._run_claims(run_id)
-        # The previous turn's subject, so "Why?" and "Explain that" resolve
-        # against the conversation. Without this every turn starts from nothing
-        # and the assistant behaves like a search box that forgets you.
-        previous = self._conversation_context.get(run_id, ())
-        answer = self.fi.converse(run_id, question, run_claims=flat_claims,
-                                  previous_topics=previous)
-        self._conversation_context[run_id] = answer.get("topics", ())
-
-        paragraphs, citations = [], []
-        for p in (answer.get("answer") or {}).get("paragraphs", []):
-            paragraphs.append(p.get("text", ""))
-            citations.extend(str(c) for c in p.get("citations", []))
-        # Concise first: the direct answer, then the rest behind a disclosure.
-        # A reader who asked a short question is not asking to read the report
-        # again, and burying the answer in paragraph four is how they end up
-        # taking the first confident sentence they see.
-        lead = paragraphs[0] if paragraphs else ""
-        rest = paragraphs[1:]
-        more = (f'<details class="more"><summary>Explain more</summary>'
-                + "".join(f'<p>{_e(p)}</p>' for p in rest) + '</details>') \
-            if rest else ''
-        cited = ("".join(f'<li>{_e(c)}</li>' for c in dict.fromkeys(citations))
-                 if citations else '')
-        body = (
-            f'{_BRIEF_CSS}<main class="brief">'
-            f'{self._layer_nav(run_id, "")}'
-            f'<h1>{_e(question[:120])}</h1>'
-            # The classifier's enum was rendered here verbatim, so a tester
-            # asking a normal question was told "Intent: UNSUPPORTED".
-            # Internal classification names are not part of the product's
-            # vocabulary and never reach a reader.
-            f'<p class="lead">{_e(lead)}</p>{more}'
-            + (f'<section class="b-part"><h2>Evidence</h2><ul>{cited}</ul>'
-               f'</section>' if cited else '')
-            + f'<p class="stamp">Answers use only this run\'s approved '
-            f'evidence. A source outside that set must be added and approved '
-            f'before it can be used.</p>'
-            f'<form action="/runs/{_e(run_id)}/conversation" method="post" '
-            f'class="b-ask"><input type="hidden" name="csrf" '
-            f'value="{_e(session["csrf"])}">'
-            f'<label for="q">Ask something else</label> '
-            f'<input id="q" name="question" required>'
-            f'<button type="submit">Ask</button></form>'
-            f'<p><a href="/runs/{_e(run_id)}/brief">Back to the brief</a></p>'
-            f'</main>')
-        return self._html(self._page("Answer", body, session,
-                                     session["csrf"]))
+        # WHAT USED TO BE HERE, AND WHY IT IS GONE.
+        #
+        # Forty-eight lines of a second Q&A engine sat below this return
+        # and were UNREACHABLE -- proved by walking the function's AST:
+        # twelve of its twenty-four top-level statements could never run.
+        # Among them was the only writer of `_conversation_context`:
+        #
+        #     previous = self._conversation_context.get(run_id, ())
+        #     answer   = self.fi.converse(..., previous_topics=previous)
+        #     self._conversation_context[run_id] = answer.get('topics', ())
+        #
+        # So follow-up memory was never stored on the live path, and a
+        # structural test asserting the read-before-write ORDER passed
+        # against code that could not execute -- a test that cannot fail.
+        #
+        # The dead engine is removed rather than revived: `fqa.answer`
+        # above is the single interpreter this surface is supposed to
+        # have, and reviving `fi.converse` beside it would restore the
+        # two-interpreters split the comment at the top of this method
+        # says was closed. Follow-up context has to be carried THROUGH
+        # `fqa.answer`, which is a change to that contract and is
+        # recorded as an open defect rather than guessed at here.
 
     def _strategic_report_for(self, run_id):
         """The run's strategic report dict, if it has one (real runs only)."""
@@ -3695,7 +8045,7 @@ class WebApp:
 
     def _report(self, session, run_id):
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         preview = render_report_preview(self._result(run_id))
         sections = "".join(f'<li>{_e(s["kind"])}</li>'
                            for s in preview.get("sections", []))
@@ -3715,7 +8065,7 @@ class WebApp:
             return self._error_page(403, "sharing is not available in demo "
                                          "mode")
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         token = self.sharing.create_share(run_id=run_id,
                                           owner_id=session["user_id"])
         share_hash = __import__("hashlib").sha256(token.encode()).hexdigest()
@@ -3742,7 +8092,7 @@ class WebApp:
             return self._error_page(403, "sharing is not available in demo "
                                          "mode")
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         self.sharing.revoke_share(token_hash=form.get("token_hash", ""),
                                   owner_id=session["user_id"])
         body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
@@ -3774,11 +8124,16 @@ class WebApp:
             # demonstrated." That is a paragraph about our hosting at the foot
             # of someone's report on their competitor. It is still reported in
             # full at /readyz, where the person who can act on it looks.
+            # TRUTHFUL, AND NOT AN INFRASTRUCTURE REPORT. The previous copy
+            # was honest but explained OUR hosting at the foot of someone
+            # else's report; the operator detail stays at /readyz, where the
+            # person who can act on it looks. The gate itself is unchanged:
+            # this deployment may not promise to keep what it is sent, so it
+            # does not ask.
             return (
                 f'<section class="fb" aria-label="Feedback"><h2>Feedback</h2>'
-                f'<p>Feedback is switched off here for now — we could not '
-                f'promise to keep what you sent, and asking anyway would be '
-                f'worse than not asking.</p></section>')
+                f'<p>Feedback is temporarily unavailable in this preview '
+                f'environment.</p></section>')
         return (
             f'<form action="/runs/{_e(run_id)}/feedback" method="post" '
             f'class="fb"><input type="hidden" name="csrf" value="{_e(csrf)}">'
@@ -3792,9 +8147,101 @@ class WebApp:
             f'<input id="fbnote" name="note" maxlength="4000">'
             f'<button type="submit">Send feedback</button></form>')
 
+    def _has_feedback(self, run_id) -> bool:
+        """Whether THIS run already carries feedback. Never raises.
+
+        Scoped to the run, which is scoped to the session that owns it — the
+        confirmation must not be derivable from anyone else's submission
+        (§49, §82). A read that fails costs the confirmation line, never the
+        page.
+        """
+        try:
+            return bool(self.feedback_log.find(run_id=run_id))
+        except Exception:                                   # noqa: BLE001
+            return False
+
+    def _full_feedback_form(self, run_id, csrf, *, sent=False) -> str:
+        """§46-§49. The whole workflow, on the step that closes the demo.
+
+        Deliberately more than a rating. A three-value "was this useful?" tells
+        an operator that something was wrong and nothing about what, which is
+        why the tags exist and why each one maps to a defect class the repair
+        loop already clusters on — a customer saying "too generic" and the
+        machine rubric finding TEMPLATE_COLLAPSE are the same defect from two
+        sides.
+
+        Every field except the score is optional. A form that demands five
+        answers collects none.
+        """
+        from intent_engine.webapp.feedback import TAGS
+        if not self.feedback_available():
+            return (
+                '<section class="fbx" aria-labelledby="fbh">'
+                '<h2 id="fbh">Tell us what this was worth</h2>'
+                '<p>Feedback is switched off on this deployment — we could '
+                'not promise to keep what you sent, and asking anyway would '
+                'be worse than not asking. Nothing you typed here would '
+                'survive the next restart, so the form is not shown rather '
+                'than shown and quietly discarded.</p></section>')
+        thanks = ('<p class="fb-ok" role="status">Recorded — and read. '
+                  'It is kept against this analysis so the next version of '
+                  'it can be measured against what you said.</p>'
+                  ) if sent else ''
+        tags = "".join(
+            f'<label class="tag"><input type="checkbox" name="tag" '
+            f'value="{_e(key)}" aria-label="{_e(label)}"> {_e(label)}'
+            f'</label>' for key, label in TAGS)
+        # Each control announces its MEANING, not its number. "5" read aloud
+        # on its own tells a screen-reader user nothing about which end of
+        # the scale they are on.
+        meaning = {1: "not useful at all", 2: "slightly useful",
+                   3: "somewhat useful", 4: "useful",
+                   5: "useful enough to act on"}
+        scores = "".join(
+            f'<label class="sc"><input type="radio" name="score" '
+            f'value="{n}" required aria-label="{n} — {meaning[n]}"> {n}'
+            f'</label>' for n in range(1, 6))
+        return (
+            f'<section class="fbx" aria-labelledby="fbh"><h2 id="fbh">'
+            f'Tell us what this was worth</h2>{thanks}'
+            f'<form action="/runs/{_e(run_id)}/feedback" method="post">'
+            f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+            f'<input type="hidden" name="page" value="connect">'
+            f'<fieldset><legend>How useful was this analysis?</legend>'
+            f'<p class="scale"><span>Not useful</span>{scores}'
+            f'<span>Would act on it</span></p>'
+            f'<input type="hidden" name="useful" value="partly"></fieldset>'
+            f'<fieldset><legend>What describes it? (optional)</legend>'
+            f'<div class="tags">{tags}</div></fieldset>'
+            f'<p><label for="fb_useful">What was most useful?</label>'
+            f'<input id="fb_useful" name="most_useful" maxlength="2000"></p>'
+            f'<p><label for="fb_missing">What was missing?</label>'
+            f'<input id="fb_missing" name="what_was_missing" '
+            f'maxlength="2000"></p>'
+            f'<p><label for="fb_wrong">What looked wrong?</label>'
+            f'<input id="fb_wrong" name="what_looked_wrong" '
+            f'maxlength="2000"></p>'
+            f'<p><label for="fb_decision">What decision would you use this '
+            f'for?</label><input id="fb_decision" name="decision_use" '
+            f'maxlength="2000"></p>'
+            f'<fieldset><legend>Would you connect your own internal '
+            f'context?</legend>'
+            f'<label><input type="radio" name="would_connect" value="yes"> '
+            f'Yes</label> <label><input type="radio" name="would_connect" '
+            f'value="maybe"> Maybe</label> '
+            f'<label><input type="radio" name="would_connect" value="no"> '
+            f'No</label></fieldset>'
+            f'<p><label for="fb_note">Anything else</label>'
+            f'<input id="fb_note" name="note" maxlength="4000"></p>'
+            f'<button type="submit">Send feedback</button>'
+            f'<p class="fb-priv">Your feedback is tied to this session and '
+            f'this analysis. It is not shown to other visitors, and sending '
+            f'it is not permission to quote you.</p>'
+            f'</form></section>')
+
     def _feedback(self, session, run_id, form):
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         csrf = session["csrf"]
         if not self.feedback_available():
             return self._error_page(
@@ -3816,7 +8263,17 @@ class WebApp:
                 deployed_commit=info.get("commit", ""),
                 analysis_version=info.get("app_version", ""),
                 category=form.get("category", ""),
-                user_id=session["user_id"])
+                user_id=session["user_id"],
+                # `cand` is the only key `_form` joins on commas, so a
+                # multi-checkbox field arrives as its first value only. The
+                # tag list is posted under a name the parser splits itself.
+                score=(form.get("score") or "")[:1],
+                tags=[t for t in (form.get("tag") or "").split(",") if t],
+                most_useful=form.get("most_useful", ""),
+                what_was_missing=form.get("what_was_missing", ""),
+                what_looked_wrong=form.get("what_looked_wrong", ""),
+                decision_use=form.get("decision_use", ""),
+                would_connect=form.get("would_connect", ""))
         except (FeedbackNotDurable, ValueError) as exc:
             # No success page. The whole defect being fixed is a page that said
             # "recorded" because the code reached the next line.
@@ -4026,7 +8483,8 @@ class WebApp:
     )
 
     @classmethod
-    def _recommended_candidate_ids(cls, candidates, *, refusing_hosts=()):
+    def _recommended_candidate_ids(cls, candidates, *, refusing_hosts=(),
+                                   subject_cik="", memory=None):
         """The default source set, chosen for EVIDENCE-FAMILY COVERAGE.
 
         Takes one candidate from each family in priority order, then a second
@@ -4077,16 +8535,249 @@ class WebApp:
             return any(host == bad or host.endswith("." + bad)
                        for bad in refused)
 
+        # A GUESS AT A CLOSED DOOR IS NOT WORTH A REQUEST, and ranking it last
+        # was not enough to stop it being made.
+        #
+        # MEASURED on 743df06. The comment above already says a guess aimed at
+        # a host we have watched refuse us "cannot succeed" -- but rank 9 is
+        # still eligible, and the leftover fill spends the unused budget on
+        # exactly these once the real candidates run out. Which is what
+        # happened to every blocked company in the gauntlet:
+        #
+        #     Union Pacific  failed=27, 24 of them at up.com
+        #     Goldman Sachs  failed=26, 24 of them at goldmansachs.com
+        #     Mastercard     failed=24, 22 of them at mastercard.com
+        #     Costco         failed=23, 21 of them at costco.com
+        #
+        # Twenty-odd requests per run to a host that had already refused the
+        # homepage, each one waiting out a refusal or a timeout before the
+        # customer sees anything. It is the largest single avoidable cost in
+        # first-useful latency, and it buys nothing.
+        #
+        # THE EXEMPTIONS ARE THE ONES THE RANKING ALREADY ARGUES FOR: a
+        # curated URL a human asserted, a regulatory filing, and a filing by
+        # another registrant are worth trying on a host that turned us away.
+        # Only the guesses are dropped.
+        def _is_a_guess_at_a_closed_door(candidate) -> bool:
+            if not _on_refusing_host(candidate):
+                return False
+            method = candidate.get("discovery_method")
+            if method in ("official_fallback", "third_party_filing"):
+                return False
+            if "SEC EDGAR" in (candidate.get("why_relevant") or ""):
+                return False
+            return True
+
+        candidates = [c for c in candidates
+                      if not _is_a_guess_at_a_closed_door(c)]
+
+        # A SLOT SPENT ON A KNOWN 404 IS A SLOT INDEPENDENT EVIDENCE DID NOT
+        # GET. `AcquisitionMemory` remembers outcomes that are properties of
+        # the ADDRESS -- gone, refused, unreadable -- across runs, and this is
+        # where that memory is worth the most: not saving a request, but
+        # handing the slot to a candidate that can actually answer.
+        #
+        # NEVER TO EMPTY. If every candidate is known-dead the run still tries
+        # them and still records honest failures -- reporting "no source could
+        # be retrieved" without having asked would be a different product.
+        if memory is not None:
+            from intent_engine.company_ingestion.acquisition_memory import (
+                ALLOW as _ALLOW,
+            )
+            alive = [c for c in candidates
+                     if memory.verdict(c.get("url") or "")["verdict"] == _ALLOW]
+            if alive:
+                candidates = alive
+
+        #: The subject's own CIK, as ten digits, or "". Ownership of an EDGAR
+        #: document is stated by its URL -- `/edgar/data/<CIK>/...` names the
+        #: FILER -- so it is decided here rather than inferred from a
+        #: source_class, which says what KIND of document it is and never
+        #: whose it is.
+        subject_cik = "".join(ch for ch in str(subject_cik or "")
+                              if ch.isdigit()).lstrip("0")
+
+        def _filed_by_subject(candidate) -> bool:
+            import re as _re
+            match = _re.search(r"/edgar/data/(\d+)",
+                               str(candidate.get("url") or ""))
+            if not match or not subject_cik:
+                return False
+            return match.group(1).lstrip("0") == subject_cik
+
+        #: WHICH OF THE SUBJECT'S OWN FILINGS EARNS A SCARCE SLOT.
+        #:
+        #: `_EVIDENCE_FAMILIES` groups by VENUE -- its "identity" bucket is
+        #: `source_type in ("homepage", "about")` -- so every SEC filing a
+        #: company files lands in the "investor" bucket, whose quota is TWO.
+        #: A 10-K, a 10-Q, an 8-K and a DEF 14A therefore competed for two
+        #: slots, and `_relevance_first` scored all four identically at 1, so
+        #: the tie-break that actually chose them was `(len(url), url)`.
+        #:
+        #: `coverage.family_of` -- the view `readiness.assess_readiness`
+        #: consults -- does NOT agree that these are the same thing. It reads
+        #: a 10-K as `identity` (Item 1. Business is the company's own account
+        #: of what it is and does), a 10-Q as `investor`, an 8-K as
+        #: `strategy`, a DEF 14A as `talent`. So which filings win those two
+        #: slots decides which evidence ROLES the run ends up holding.
+        #:
+        #: MEASURED 2026-09-03. For seven of eight sub-threshold companies the
+        #: blocking check was `official_identity_or_product` -- no identity and
+        #: no product family -- while the run held FIVE of the company's own
+        #: filings. Their websites answered 403 (amd.com, intel.com,
+        #: oracle.com, abc.xyz and appliedmaterials.com, seven refusals each),
+        #: so EDGAR was the only evidence left, and whether the annual report
+        #: was among it came down to URL length. Two Oracle runs minutes apart
+        #: differed by exactly this: one retrieved two 10-Ks and covered five
+        #: families, the other retrieved none and covered two.
+        #:
+        #: ORDER ONLY, INSIDE ONE BUCKET. No candidate becomes eligible, no
+        #: extra request is made, and the subject's filings still rank ahead
+        #: of sitemap URLs and behind curated ones exactly as before. It
+        #: changes WHICH two of the company's own filings are read, in favour
+        #: of the one that carries the role the run is missing.
+        _ANNUAL_FORMS = ("10-K", "20-F", "40-F")
+
+        def _form_order(candidate) -> float:
+            form = str(candidate.get("form") or "").upper().strip()
+            if form.rstrip("/A") in _ANNUAL_FORMS or form in _ANNUAL_FORMS:
+                return 0.0                # identity + product + strategy
+            if form.startswith("10-Q"):
+                return 0.3                # investor
+            if form.startswith("8-K") or form.startswith("6-K"):
+                return 0.5                # strategy
+            if form.startswith("DEF"):
+                return 0.7                # talent
+            return 0.8
+
         def _relevance_first(candidate):
             method = candidate.get("discovery_method")
             why = candidate.get("why_relevant", "")
             if method == "official_fallback":
                 return 0
+            # A THIRD PARTY'S FILING MAY NOT TAKE THE SUBJECT'S SLOT.
+            #
+            # `third_party_filing` and the subject's own EDGAR filing both
+            # returned 1, so they competed on equal footing. For a company
+            # with a domain that is survivable -- homepage and sitemap
+            # candidates fill the other families. For a company with NO domain
+            # on record the entire pool is EDGAR, and the two ranks interleave.
+            #
+            # MEASURED LIVE on 49b6c3a and 517e7ae. Meta Platforms is the one
+            # Wave-1 company with no domain, and its run read seven sources of
+            # which four were other registrants:
+            #
+            #     1326801  Meta Platforms          the subject
+            #     1849056  Oklo Inc.
+            #      895728  Enbridge Inc
+            #     1065078  Network-1 Technologies
+            #     1384905  RingCentral, Inc.
+            #
+            # One usable source, below the floor, and the customer was shown
+            # "this analysis could not be completed" for one of the most
+            # heavily documented companies in the world. The filings were not
+            # wrong to be found -- each does mention Meta -- they were wrong to
+            # displace Meta's own 10-K and 10-Q.
+            #
+            # So ownership ranks ahead of relevance: the subject's own filing
+            # first, a third party's mention of the subject well behind the
+            # company's own web sources, never level with it.
+            if "SEC EDGAR" in why and _filed_by_subject(candidate):
+                return 1 + _form_order(candidate)
+            # ONLY WHERE OWNERSHIP CAN ACTUALLY BE DECIDED.
+            #
+            # The first version of this demoted every `third_party_filing`
+            # unconditionally, and broke three guards that had nothing to do
+            # with the subject: with NO subject CIK on the run, a filing an
+            # index returned is still the best ATTESTED source in the
+            # independent family, and "attested beats guessed" is a separate
+            # invariant with its own measured defect behind it (10 of 10
+            # slots to a guessed g2.com URL). Demoting it there did not make
+            # the subject's filings win -- there were none in the pool -- it
+            # just handed the slot back to the guess.
+            #
+            # So ownership only ranks where ownership is KNOWN. Without a
+            # subject CIK this rule has no opinion.
+            if subject_cik and not _filed_by_subject(candidate) and (
+                    method == "third_party_filing" or "SEC EDGAR" in why):
+                return 6
             if "SEC EDGAR" in why:
+                return 1 + _form_order(candidate)
+            # ATTESTED BEATS GUESSED — INSIDE THE INDEPENDENT FAMILY TOO.
+            #
+            # Batch 12 established this for the company's own domain (an
+            # attested `homepage_link` over a guessed `known_path`) and the
+            # same defect survived one bucket over, where it was costing far
+            # more.
+            #
+            # A `third_party_filing` is a filing by a DIFFERENT registrant that
+            # an EDGAR full-text query just returned: the accession exists, the
+            # filer is named, the date is exact, and the regulator serves it as
+            # plain HTML. An `external_proposed` review-site URL is built by
+            # slugifying the company name into a template and is marked
+            # UNVERIFIED by its own producer — a guess, and one that is only
+            # ever plausible for consumer software.
+            #
+            # Both scored 4, and the `independent` family takes ONE candidate,
+            # so insertion order decided it. Measured on the frozen ten
+            # (b13_discovery_before, 6645a4f): 39 third-party filings were
+            # discovered and 38 discarded, while 10 of 10 companies spent
+            # their single independent slot on a guessed g2.com URL — for a
+            # bank, a miner, an airframer and a pharmaceutical company alike.
+            # That is the whole of "zero independent external sources".
+            #
+            # ORDER ONLY. Nothing here makes a candidate eligible that was not
+            # already eligible, and no host, scheme or redirect rule moves.
+            if method == "third_party_filing":
                 return 1
             if _on_refusing_host(candidate):
                 return 9
-            return 2 if "sitemap" in why else 3
+            if "sitemap" in why:
+                return 2
+            # ATTESTED beats GUESSED, and until Batch 12 these tied.
+            #
+            # A `homepage_link` is a URL the company itself rendered on its
+            # own page, so the publisher has asserted it exists. A
+            # `known_path` is one of ~44 paths this system GUESSES at every
+            # company (/about, /pricing, /newsroom, ...). Both scored 3, so a
+            # guess could take one of the 14 approved-source slots ahead of a
+            # link the site actually published.
+            #
+            # Measured on the frozen ten (b12_before, 6c3370d): 38 of 62
+            # http_status failures were 404 — the largest single failure class
+            # in the wave, larger than 403 (24), and every 404 is a slot spent
+            # discovering that a guessed path does not exist. The slot is the
+            # scarce resource, not the request: a run gets 14 of them.
+            #
+            # This changes ORDER ONLY. No candidate becomes eligible that was
+            # not eligible before, no host, scheme or redirect rule moves, and
+            # guesses still fill the leftover budget below. It is also
+            # company-agnostic: no rule here can name a company, and a site
+            # with no usable homepage links (the Sony case, where the homepage
+            # 403s) has no attested links to promote and is unaffected.
+            if method in ("homepage_link", "entered"):
+                # `entered` is the URL the founder typed. It is the most
+                # strongly attested URL in the run and the company's own
+                # homepage is the single densest identity document there is;
+                # leaving it tied with the guesses let a diversity tie-break
+                # promote a slug-built review URL over it (measured on the
+                # `non_english` fixture: the homepage dropped out of the run).
+                return 3
+            # A TEMPLATE GUESS, AND ITS OWN PRODUCER MARKS IT UNVERIFIED.
+            #
+            # `external_proposed` builds review-site URLs by slugifying the
+            # company name. It ranks below a guessed path on the company's own
+            # domain because it is measured to be worse: across the frozen ten
+            # every one of these that took a slot answered 403, for a bank, a
+            # miner, an airframer and a pharmaceutical company alike — none of
+            # which a software review site has ever covered.
+            #
+            # DEMOTED, NOT EXCLUDED. For a consumer-software company these are
+            # exactly the right sources, so they still take leftover budget;
+            # they simply no longer outrank evidence that exists.
+            if method == "external_proposed":
+                return 5
+            return 4
 
         # Per-family quotas. Coverage across families is what stops a report
         # resting on three filings and nothing else, but one page per family is
@@ -4107,18 +8798,50 @@ class WebApp:
             group.sort(key=_relevance_first)
             claimed.update(c["candidate_id"] for c in group)
             buckets.append((name, group))
-        picked, depth = [], 0
+        # AMONG EQUALLY USEFUL CANDIDATES, PREFER AN ORIGIN WE DO NOT HAVE.
+        #
+        # Information value stays primary and this can never override it: the
+        # preference applies ONLY inside one relevance tier of one family, so
+        # a more relevant candidate is never displaced by a fresher origin.
+        # That restriction is the point — a diversity rule that outranked
+        # relevance would trade real evidence for variety, and several of the
+        # frozen ten genuinely publish everything useful on one host.
+        #
+        # It binds here rather than in the leftover fill below because this
+        # loop is where most slots are spent: `product` alone takes five, and
+        # taking five pages from one host is how a cohort reaches a mean
+        # origin concentration of 0.82 (b13_before) while other origins sit
+        # unapproved.
+        from intent_engine.company_ingestion.independence import origin_family
+
+        pools = {name: list(group) for name, group in buckets}
+        used = {name: 0 for name, _group in buckets}
+        picked, seen_origins = [], set()
         while len(picked) < MAX_APPROVED_SOURCES:
             progressed = False
-            for name, group in buckets:
-                if depth >= _QUOTAS.get(name, 1):
+            for name, _group in buckets:
+                if len(picked) >= MAX_APPROVED_SOURCES:
+                    break
+                if used[name] >= _QUOTAS.get(name, 1):
                     continue
-                if depth < len(group) and len(picked) < MAX_APPROVED_SOURCES:
-                    picked.append(group[depth]["candidate_id"])
-                    progressed = True
+                pool = pools[name]
+                if not pool:
+                    continue
+                # `pool` is already sorted by relevance, so its head defines
+                # the best tier available in this family right now.
+                best_tier = _relevance_first(pool[0])
+                choice = next(
+                    (c for c in pool
+                     if _relevance_first(c) == best_tier
+                     and origin_family(c.get("url", "")) not in seen_origins),
+                    pool[0])
+                pool.remove(choice)
+                picked.append(choice["candidate_id"])
+                seen_origins.add(origin_family(choice.get("url", "")))
+                used[name] += 1
+                progressed = True
             if not progressed:
                 break
-            depth += 1
         # Budget left over because some families had no candidates at all (the
         # Sony case: nothing on the company's own domain can be retrieved). Fill
         # it from the best remaining evidence rather than returning a short list
@@ -4135,10 +8858,25 @@ class WebApp:
             remaining = [c for _name, group in buckets for c in group
                          if c["candidate_id"] not in taken]
             remaining.sort(key=_relevance_first)
+            # Same tie-break as above, over what the quotas left behind, and
+            # carrying the SAME `seen_origins` — otherwise the leftover budget
+            # would happily refill the origin the quota loop just avoided.
+            tiers: dict = {}
             for candidate in remaining:
+                tiers.setdefault(_relevance_first(candidate),
+                                 []).append(candidate)
+            for tier in sorted(tiers):
+                pool = tiers[tier]
+                while pool and len(picked) < MAX_APPROVED_SOURCES:
+                    choice = next(
+                        (c for c in pool
+                         if origin_family(c.get("url", "")) not in seen_origins),
+                        pool[0])
+                    pool.remove(choice)
+                    picked.append(choice["candidate_id"])
+                    seen_origins.add(origin_family(choice.get("url", "")))
                 if len(picked) >= MAX_APPROVED_SOURCES:
                     break
-                picked.append(candidate["candidate_id"])
         return picked
 
     # --- asynchronous analysis ------------------------------------------
@@ -4146,10 +8884,46 @@ class WebApp:
     #: treated as INTERRUPTED. The free instance restarts without warning, and
     #: a run left permanently "reading evidence" is the worst of both worlds:
     #: it never finishes and never admits it.
-    STALE_ATTEMPT_SECONDS = 15 * 60
+    #:
+    #: FIFTEEN MINUTES WAS NOT A SAFETY MARGIN, IT WAS THE BUG. This check
+    #: only ever fires for a run that is NOT in `_analysis_inflight` -- and
+    #: the in-flight entry is written before the work is submitted, so a run
+    #: missing from it has no worker in this process at all. Its worker is
+    #: provably gone. Waiting another quarter of an hour to say so is how a
+    #: restarted instance produced a page that polled itself forever.
+    #:
+    #: Three minutes is still generous against the 60s/120s hard budgets: it
+    #: is longer than any run is allowed to take, so a live run can never be
+    #: mistaken for a dead one.
+    STALE_ATTEMPT_SECONDS = 180
 
     TERMINAL_STATES = ("COMPLETE", "PARTIAL", "FAILED", "REJECTED",
                        "INTERRUPTED")
+
+    #: §22. Seconds held back from the interactive budget for composition.
+    #: Letting acquisition spend the whole budget would push the ANSWER past
+    #: the hard deadline -- the customer would have waited the full 60s and
+    #: still be handed a spinner, which is the exact failure this exists to
+    #: remove.
+    #:
+    #: THIS NUMBER IS CALIBRATED AGAINST LOCAL HARDWARE AND IS WRONG ON THE
+    #: PREVIEW. It was set from "composition costs 7-11s locally and is pure
+    #: CPU, so it is the one stage whose duration we can predict". The premise
+    #: holds; the number does not travel. Measured on the preview at 14fc0a1a,
+    #: Apple, with `/runs/<id>/timing`:
+    #:
+    #:     core_composition   50.29s wall / 7.31s cpu
+    #:     cpu yardstick      196.63ms wall / 27.26ms cpu -> 7.2x stretch
+    #:
+    #: The instance grants roughly 7-12% of a local core, so composition needs
+    #: ~26s there even after the discarded `analyst_evidence` scan (18.0s) and
+    #: the enrichment moved off CORE (6.1s) are removed. A reserve is a
+    #: PREDICTION about the machine, so it cannot be a constant shared by
+    #: machines that differ 8-15x in scheduling. Raising it here would only
+    #: starve acquisition; the honest fix is fewer seconds of work or more CPU,
+    #: both of which are measured elsewhere. Left at its current value
+    #: deliberately, with the discrepancy recorded rather than hidden.
+    COMPOSE_RESERVE_S = 20.0
 
     # --- what exists for a run, asked once -------------------------------
     #
@@ -4175,6 +8949,191 @@ class WebApp:
     AVAIL_BOUNDED = "BOUNDED_DOSSIER_AVAILABLE"
     AVAIL_FULL = "FULL_REPORT_AVAILABLE"
     AVAIL_FAILURE = "TERMINAL_FAILURE"
+
+    # --- the canonical customer lifecycle ------------------------------------
+    #
+    # ONE ANSWER TO "IS THIS READY FOR THE CUSTOMER?", AND ONLY ONE.
+    #
+    # MEASURED LIVE, not hypothesised. A first-time visitor typed "Meta" on a
+    # phone against eb18371 and was told:
+    #
+    #     "This analysis could not be completed, so there is no result to
+    #      open. Every approved source failed to retrieve (too large)."
+    #
+    # Both halves were false. Five sources HAD been retrieved — including
+    # Meta's own SEC 10-K and 10-Q — and a readable result existed the whole
+    # time at /runs/<id>, which is where the visitor eventually found it by
+    # clicking "Your analyses". The only true statement on that page was that
+    # the run's last TRANSITION was FAILED.
+    #
+    # That is the defect in one line: `_progress` branched on the run's
+    # lifecycle STATE, while the thing the customer wanted was the RESULT.
+    # `_availability` — which already derives exactly this, and whose own
+    # docstring calls it "the single source every run route consults" — was
+    # never called by the progress page. A repair that lives in one function
+    # and is read by another is this programme's oldest failure mode.
+    #
+    # So: readiness is derived HERE, every customer-facing route asks THIS,
+    # and a state name may never again out-vote a result that exists.
+    READY_CREATED = "CREATED"
+    READY_RESOLVING = "RESOLVING_IDENTITY"
+    READY_RETRIEVING = "RETRIEVING"
+    READY_ANALYSING = "ANALYSING"
+    READY_COMPOSING = "COMPOSING"
+    READY_RESULT = "RESULT_READY"
+    READY_DEGRADED = "DEGRADED_RESULT_READY"
+    READY_BLOCKED = "BLOCKED_RECOVERABLE"
+    READY_FAILED = "FAILED_FINAL"
+
+    #: The ONLY two states that open the analysis, and the ONLY state that may
+    #: show a customer a final failure. Anything else is still in motion.
+    READY_OPENS_RESULT = (READY_RESULT, READY_DEGRADED)
+
+    #: Internal pipeline state -> the phase a customer is in. Deliberately
+    #: many-to-few: a reader does not need eight nouns for "we are working".
+    _READY_PHASE = {
+        "VALIDATING_COMPANY": READY_RESOLVING,
+        "DISCOVERING_SOURCES": READY_RETRIEVING,
+        "AWAITING_SOURCE_APPROVAL": READY_RETRIEVING,
+        "FETCHING_APPROVED_SOURCES": READY_RETRIEVING,
+        "PARSING_SOURCES": READY_RETRIEVING,
+        "BUILDING_SOURCE_ARTIFACTS": READY_ANALYSING,
+        "ASSEMBLING_COMPANY_UNDERSTANDING": READY_ANALYSING,
+        "ASSEMBLING_REPORT": READY_COMPOSING,
+    }
+
+    def classification_inputs(self, run_id, name: str = "") -> dict:
+        """What this run knows about WHAT KIND OF BUSINESS its subject is.
+
+        DELEGATED, NOT DUPLICATED. This logic used to live here and only
+        here, and the ingestion layer — which gates the pattern library —
+        had no answer at all, so one run carried two classifications of the
+        same company and only one of them reached the hypotheses. A second
+        copy is how that happened, so there is now one implementation, on
+        the service that owns the run, its meta and its documents.
+
+        `allow_network` carries this layer's rule that a test environment
+        makes no SEC call; the service passes its own injected transport, so
+        an in-process test is unaffected either way.
+        """
+        cache = getattr(self, "_classification_cache", None)
+        if cache is None:
+            cache = self._classification_cache = {}
+        if run_id in cache:
+            return cache[run_id]
+        try:
+            out = self.ci.classification_inputs(
+                run_id, name, documents=self._retrieved_documents(run_id),
+                allow_network=(self.config.env != "test"))
+        except Exception:                                     # noqa: BLE001
+            out = {"registrant": {}, "evidence_text": ""}
+        cache[run_id] = out
+        return out
+
+    def only_watchable(self, run_id) -> bool:
+        """Is watching the run the ONLY thing this reader can do right now?
+
+        True while the worker is live AND nothing readable exists yet. False
+        the moment a result can be opened, whatever the worker is still doing.
+
+        WHY THIS IS ONE PREDICATE AND NOT FIVE CONDITIONS. Five surfaces asked
+        "is the worker in flight?" and sent the reader to the progress page if
+        so -- and the progress page sends them back as soon as
+        `result_readiness(...)["opens_result"]` is true. Both were true
+        together for most of a normal run, so the pages bounced off each other
+        until the client gave up.
+
+        MEASURED LIVE on 8397d67, four of four companies, as a 303 whose final
+        URL was the page it started from:
+
+            Alphabet    36s -> 152s   76% of the run
+            Meta        37s -> 220s   83%
+            JPMorgan    37s -> 157s   76%
+            Cloudflare   9s ->  20s   50%
+
+        Reproduced offline as a three-node cycle -- /runs/<id> -> /intro ->
+        /progress -> /runs/<id> -- which is why fixing the first site alone
+        only moved the loop one hop along.
+
+        The rule was already written down, in `result_readiness` below:
+        "opens_result is True IF AND ONLY IF a customer-readable result
+        exists. When it is True the customer goes to the analysis, whatever
+        the worker's metadata says." This is that sentence, in one place, so
+        the next surface to ask the question cannot answer it differently.
+        """
+        if not self._availability(run_id).get("in_flight"):
+            return False
+        return not self.result_readiness(run_id)["opens_result"]
+
+    def result_readiness(self, run_id) -> dict:
+        """Is there something this customer may be shown, and what is it?
+
+        READ-ONLY. Composes nothing, approves nothing, fetches nothing — a
+        page a reader refreshes must never be the thing that mutates the run.
+
+        The contract every caller may rely on:
+
+          * ``opens_result`` is True IF AND ONLY IF a customer-readable result
+            exists. When it is True the customer goes to the analysis, whatever
+            the worker's metadata says.
+          * ``FAILED_FINAL`` is the only state that may show a final failure,
+            and it requires that NO readable result exists.
+        """
+        memo = getattr(self._request, "readiness", None)
+        if memo is not None and run_id in memo:
+            return memo[run_id]
+        verdict = self._result_readiness(run_id)
+        if memo is not None:
+            memo[run_id] = verdict
+        return verdict
+
+    def _result_readiness(self, run_id) -> dict:
+        """`result_readiness` without the per-request memo."""
+        avail = self._availability(run_id)
+        state = avail["state"] or "VALIDATING_COMPANY"
+        # A readable result is a composed report, or a bounded reading built
+        # from documents that were actually retrieved. The second is not a
+        # consolation prize: it is what the run established, and it is strictly
+        # more than a page saying nothing was established.
+        readable = bool(avail["has_report"]
+                        or (avail["has_result"] and avail["documents"]))
+        if readable:
+            phase = (self.READY_RESULT if avail["has_report"]
+                     else self.READY_DEGRADED)
+            return {"state": phase, "opens_result": True,
+                    "terminal": True, "in_flight": avail["in_flight"],
+                    "documents": avail["documents"],
+                    "degraded": phase == self.READY_DEGRADED,
+                    "retryable": False, "availability": avail}
+        if avail["in_flight"] or state not in self.TERMINAL_STATES:
+            phase = self._READY_PHASE.get(state, self.READY_ANALYSING)
+            return {"state": phase, "opens_result": False,
+                    "terminal": False, "in_flight": avail["in_flight"],
+                    "documents": avail["documents"], "degraded": False,
+                    "retryable": False, "availability": avail}
+        # Terminal, and nothing readable. A run whose worker vanished is NOT a
+        # final failure — telling a customer their analysis is dead when one
+        # more attempt would actually run is the same lie in a quieter voice.
+        #
+        # BUT "RETRYABLE" IS NOT "STATE == FAILED". Every FAILED run passing
+        # this test would put a retry button in front of someone whose sources
+        # all answered 403 — the button dials the same refusing hosts and
+        # fails again, which is a manual-recovery loop wearing a helpful face.
+        # The retrieval layer already grades each failure: 429 and 5xx are
+        # marked retryable, 403/404/unsafe-redirect are not. Ask it.
+        attempts_left = self.attempt_count(run_id) < self.MAX_ANALYSIS_ATTEMPTS
+        try:
+            transient = any(row.get("retryable")
+                            for row in self.ci.store.failures(run_id))
+        except Exception:                                     # noqa: BLE001
+            transient = False
+        retryable = attempts_left and (state == "INTERRUPTED" or transient)
+        return {"state": (self.READY_BLOCKED if retryable
+                          else self.READY_FAILED),
+                "opens_result": False, "terminal": True,
+                "in_flight": False, "documents": avail["documents"],
+                "degraded": False, "retryable": retryable,
+                "availability": avail}
 
     def _analysis_in_flight(self, run_id) -> bool:
         with self._analysis_lock:
@@ -4269,12 +9228,194 @@ class WebApp:
         except Exception:                                     # noqa: BLE001
             return "unknown"
 
+    #: A run-scoped path names its run in the second segment. Kept as one
+    #: pattern so the header cannot be attached to a different set of routes
+    #: than the ones a customer reads.
+    _RUN_PATH = re.compile(r"^/runs/([A-Za-z0-9_-]{6,64})(?:/|$)")
+
+    @classmethod
+    def _run_id_of(cls, path: str) -> str:
+        match = cls._RUN_PATH.match(str(path or ""))
+        return match.group(1) if match else ""
+
+    def analysis_outcome(self, run_id) -> str:
+        """WHAT HAPPENED TO THIS CUSTOMER'S ANALYSIS. The one producer.
+
+        Every consumer -- the progress page, the run page, the six steps, the
+        capture harness and the acceptance audit -- reads THIS, instead of
+        each deciding for itself from rendered text. `outcome.classify` holds
+        the rule; this supplies it with the two facts it needs and is the only
+        place that knows how to get them.
+        """
+        return OUTCOME.classify(
+            readiness=self.result_readiness(run_id),
+            run_state=self.ci.store.run_state(run_id),
+            exhaustion=self.evidence_report(run_id))
+
+    def _readiness_on_current_evidence(self, run_id):
+        """Re-run the gate over every document the store now holds.
+
+        CHEAP ON PURPOSE. This reads stored text and fetches nothing, which
+        is what makes it usable on a run that has already composed once --
+        the expensive half is synthesis, not the gate.
+        """
+        try:
+            from intent_engine.company_ingestion.readiness import (
+                assess_readiness,
+            )
+            return assess_readiness(
+                documents=self.ci.store.retrieved(run_id),
+                identity=self.ci.entity_identity(run_id),
+                failures=self.ci.store.failures(run_id), attempt=1)
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("re-gating failed for %s", run_id)
+            return None
+
+    def evidence_gate_summary(self, run_id) -> str:
+        """What the readiness gate held, versus what the store holds now.
+
+        A COMPACT HEADER BECAUSE THE ANSWER HAS TO SURVIVE A WAVE. `compose`
+        records `readiness_inputs`, and a field nothing reads is a field that
+        does not exist -- the whole reason Meta's discrepancy had to be
+        chased through three falsified mechanisms is that no artifact on disk
+        recorded which document set the gate was looking at.
+
+        Never customer-visible, never allowed to raise, and deliberately not
+        rendered on any page: this is measurement, not product copy.
+        """
+        inputs = (self._results.get(run_id) or {}).get("readiness_inputs") or {}
+        try:
+            stored = len([d for d in self.ci.store.retrieved(run_id)
+                          if d.get("retrieval_status") == "OK"])
+        except Exception:                                   # noqa: BLE001
+            stored = -1
+        dropped = "/".join(str(inputs.get(k, "?")) for k in (
+            "dropped_not_ok", "dropped_empty", "dropped_duplicate",
+            "dropped_language"))
+        return (f"compose={inputs.get('documents_at_compose', '?')} "
+                f"usable={inputs.get('usable_at_compose', '?')} "
+                f"families={'|'.join(inputs.get('families_at_compose') or []) or '-'} "
+                f"stored={stored} "
+                f"attempt={inputs.get('attempt', '?')} "
+                f"failed={len(self.ci.store.failures(run_id))}/"
+                f"{self.evidence_report(run_id).get('subject_failures', '?')} "
+                # status/empty/duplicate/language -- four different repairs,
+                # and `usable` alone cannot tell them apart.
+                f"dropped={dropped}"
+                # Attrition no filter above accounts for. Non-zero means the
+                # gate dropped documents for a reason nothing here names yet,
+                # which is a finding rather than a rounding error.
+                f" unexplained={inputs.get('dropped_unexplained', '?')}"
+                # DID THE RE-GATE RUN AT ALL? `compose < stored` alone cannot
+                # tell "the re-gate never fired" from "it fired and still saw
+                # the smaller set", and those are different repairs. Meta on
+                # 8fd6c82 read `compose=1 stored=9` and which of the two it
+                # was could not be established from the header.
+                f" regated={inputs.get('regated_from', 'no')}"
+                # WHICH documents the language wall took, so `dropped=x/x/x/8`
+                # can be adjudicated as false positives or as localised pages
+                # discovery should not have proposed.
+                f" lang_rejected={_language_note(inputs)}")
+
+    def evidence_report(self, run_id) -> dict:
+        """Was the SUBJECT's own evidence actually looked for and retrieved?
+
+        THE DISTINCTION THIS EXISTS FOR. "We could not find enough about this
+        company" and "our retrieval did not work" rendered the same apologetic
+        page, so retrieval defects hid behind honest-sounding copy for as long
+        as anyone cared to read it. Meta's run read seven sources of which
+        four were filed by Oklo, Enbridge, Network-1 and RingCentral; calling
+        that scarcity is a false statement about Meta.
+
+        Ownership of an EDGAR document is stated by its URL --
+        `/edgar/data/<CIK>/` names the FILER -- and ownership of a web page by
+        its host. Neither is inferred from `source_class`, which says how a
+        document was retrieved and never whose it is.
+        """
+        meta = (self.ci.run_meta(run_id) or {})
+        cik = "".join(c for c in str(meta.get("cik") or "")
+                      if c.isdigit()).lstrip("0")
+        host = str(meta.get("domain") or meta.get("website") or "").lower()
+        host = host.split("//")[-1].split("/")[0].removeprefix("www.")
+        try:
+            retrieved = self.ci.store.retrieved(run_id)
+            failures = self.ci.store.failures(run_id)
+            candidates = self.ci.store.candidates(run_id)
+        except Exception:                                   # noqa: BLE001
+            return {}
+
+        own = foreign = 0
+        for row in retrieved:
+            url = str(row.get("final_url") or row.get("original_url") or "")
+            filer = re.search(r"/edgar/data/(\d+)", url)
+            if filer:
+                if cik and filer.group(1).lstrip("0") == cik:
+                    own += 1
+                else:
+                    foreign += 1
+                continue
+            page_host = url.split("//")[-1].split("/")[0].lower()
+            page_host = page_host.removeprefix("www.")
+            if host and (page_host == host or page_host.endswith("." + host)):
+                own += 1
+            elif page_host:
+                foreign += 1
+
+        # DID THE SUBJECT'S OWN SITE REFUSE US?
+        #
+        # MEASURED on dc17a9d. Seven of ten Wave-3 companies rendered
+        # "Limited analysis", every one of them with `compose=3 usable=3
+        # families=investor dropped=0/0/0/0` -- the gate discarding NOTHING
+        # and only SEC filings ever arriving. Fetching their homepages with
+        # this service's own user agent says why:
+        #
+        #     goldmansachs.com   HTTP 403
+        #     mastercard.com     HTTP 403
+        #     costco.com         timeout
+        #     nike.com           HTTP 200   -> FULL_ANALYSIS
+        #     walmart.com        HTTP 200   -> FULL_ANALYSIS
+        #     coca-colacompany   HTTP 200   -> FULL_ANALYSIS
+        #
+        # The publishers refused the bot. That is an operational fact about
+        # retrieval and it is emphatically NOT a finding about Goldman Sachs,
+        # which the product's own page already says in the next paragraph:
+        # "Public websites can refuse automated access."
+        subject_failures = 0
+        for row in failures:
+            candidate = next((c for c in candidates
+                              if c.get("candidate_id") == row.get(
+                                  "candidate_id")), None)
+            url = str((candidate or {}).get("url") or "")
+            page_host = url.split("//")[-1].split("/")[0].lower()
+            page_host = page_host.removeprefix("www.")
+            if host and (page_host == host or page_host.endswith("." + host)):
+                subject_failures += 1
+        return {
+            "attempted": bool(candidates),
+            "retrieved": len(retrieved),
+            "subject_failures": subject_failures,
+            "subject_documents": own,
+            "foreign_documents": foreign,
+            # A run whose ONLY documents belong to other registrants did not
+            # establish scarcity about this company; it established that this
+            # company's own material never arrived.
+            "subject_retrieval_ok": own > 0,
+            "displaced_by_foreign": own == 0 and foreign > 0,
+            "rate_limited": any(
+                "429" in str(f.get("safe_message", "")) or
+                f.get("failure_type") == "rate_limited" for f in failures),
+            "retrieval_failures": len(failures),
+        }
+
     def _availability(self, run_id) -> dict:
         """What this run currently has. READ-ONLY, and the single source every
         run route consults before deciding what it may render."""
-        in_flight = self._analysis_in_flight(run_id)
-        state = self.ci.store.run_state(run_id)
-        documents = self._retrieved_documents(run_id)
+        with self._segment("avail.in_flight"):
+            in_flight = self._analysis_in_flight(run_id)
+        with self._segment("avail.run_state"):
+            state = self.ci.store.run_state(run_id)
+        with self._segment("avail.documents"):
+            documents = self._retrieved_documents(run_id)
         # `self._results.get` deliberately, NOT `_real_result`: composing here
         # would make a read a write again, which is the defect this exists for.
         result = self._results.get(run_id) or {}
@@ -4405,6 +9546,16 @@ class WebApp:
             self._analysis_inflight[run_id] = time.monotonic()
             self._analysis_attempts[run_id] = \
                 self._analysis_attempts.get(run_id, 0) + 1
+        from intent_engine.company_ingestion.deadline import Deadline
+        self._analysis_deadlines[run_id] = Deadline.for_tier(
+            self._tier_for(run_id))
+        # THE CLOCK STARTS WHERE THE CUSTOMER'S WAIT STARTS -- when the work
+        # is accepted, not when a worker happens to pick it up. Queue time is
+        # part of the wait, and measuring from job start would hide it.
+        try:
+            self.ci.mark_lifecycle(run_id, "accepted")
+        except Exception:                       # noqa: BLE001 - never block
+            _LOG.warning("lifecycle accepted marker failed run=%s", run_id)
         try:
             self._analysis_pool.submit(self._run_analysis, user_id, run_id)
         except RuntimeError:                    # pool shut down
@@ -4424,21 +9575,196 @@ class WebApp:
             self._worker_starts[run_id] = self._worker_starts.get(run_id, 0) + 1
         meta = self.ci.run_meta(run_id) or {}
         domain = meta.get("domain", "")
+        deadline = self._analysis_deadlines.get(run_id)
+        # Read ONCE, before composition, and reused by the deep pass — the
+        # persisted model is what "what changed since last time" is computed
+        # against, and re-reading it after the core has been published would
+        # compare the deep reading against a model this run just wrote.
+        previous_model_for_deep = (self.strategic_memory.latest_model(domain)
+                                   if domain else None)
+        from intent_engine.company_ingestion.latency import Trace
+        trace = Trace(run_id)
+        # CALIBRATE THE MACHINE BEFORE TRUSTING THE SPANS. Every stage on the
+        # preview reads 14-15% CPU whether it fetches, computes, or writes
+        # files, which is the signature of a CPU share rather than of I/O.
+        # This measures it directly instead of arguing it from ratios.
+        trace.calibrate("cpu_yardstick")
         try:
-            self.ci.discover(run_id)
+            # ONE BUDGET ACROSS BOTH ACQUISITION STAGES. Discovery and
+            # retrieval are the two halves of the same wait; budgeting only
+            # the second one leaves the customer exposed to the first.
+            with trace.span("discovery", deadline=deadline) as sp:
+                self.ci.discover(run_id, trace=trace, deadline=(
+                    deadline.reserving(self.COMPOSE_RESERVE_S)
+                    if deadline is not None else None))
+                sp["item_count"] = len(self.ci.store.candidates(run_id))
             candidates = self.ci.store.candidates(run_id)
+            # DEFINED ON EVERY PATH, not only the one that assigns it. A run
+            # whose approval was already recorded skips the block below
+            # entirely, and the continuation further down still reads this.
+            deferred_ids: list = []
             if self.ci.store.approval(run_id) is None:
-                approved = self._recommended_candidate_ids(
-                    candidates, refusing_hosts=self.ci.refusing_hosts(run_id))
-                rejected = [c["candidate_id"] for c in candidates
-                            if c["candidate_id"] not in approved]
-                self.ci.approve(run_id, user_id=user_id,
-                                approved_ids=approved, rejected_ids=rejected)
-                self.ci.fetch_approved(run_id)
-            self._results[run_id] = self._compose(run_id)
+                with trace.span("source_selection", deadline=deadline) as sp:
+                    approved = self._recommended_candidate_ids(
+                        candidates,
+                        refusing_hosts=self.ci.refusing_hosts(run_id),
+                        subject_cik=(self.ci.run_meta(run_id) or {}).get("cik"),
+                        memory=self.ci.acquisition_memory)
+                    rejected = [c["candidate_id"] for c in candidates
+                                if c["candidate_id"] not in approved]
+                    self.ci.approve(run_id, user_id=user_id,
+                                    approved_ids=approved,
+                                    rejected_ids=rejected)
+                    sp["item_count"] = len(approved)
+                    sp["candidates"] = len(candidates)
+                # §22. The acquisition phase stops early ON PURPOSE, so the
+                # step that turns evidence into an answer is still inside the
+                # interactive budget when it runs.
+                with trace.span("retrieval", deadline=deadline) as sp:
+                    # §5/§7. CORE STOPS BLOCKING WHEN THE CONTRACT IS MET,
+                    # not when the approved list runs out.
+                    #
+                    # MEASURED: `readiness.assess_readiness` reached
+                    # READY_FOR_FULL_REPORT after 5 documents for NVIDIA and
+                    # Microsoft and 8 for JPMorgan, against 13, 8 and 10
+                    # fetched, and never changed state again. Everything
+                    # after that index was evidence the reader waited for and
+                    # the product's own contract did not require.
+                    #
+                    # The rest is DEFERRED, not dropped: it is acquired after
+                    # `core_ready` below, on a fresh budget, and a source that
+                    # never arrives is a recorded gap.
+                    #
+                    # THIS CALL SITE IS THE WHOLE CHANGE. An earlier edit
+                    # added `_sufficiency_probe` and `_acquire_deferred` and
+                    # failed to write this line: the helpers existed, sixteen
+                    # break proofs held, thirty-one tests passed, and every
+                    # production run called `fetch_approved` with no probe and
+                    # then raised NameError on `deferred_ids`. A fix with no
+                    # caller is not a fix, and no test that drives a helper
+                    # directly can tell the difference.
+                    fetched = self.ci.fetch_approved(
+                        run_id,
+                        deadline=(deadline.reserving(self.COMPOSE_RESERVE_S)
+                                  if deadline is not None else None),
+                        sufficiency_probe=self._sufficiency_probe(run_id))
+                    deferred_ids = list(fetched.get("deferred") or ())
+                    sp["item_count"] = len(list(self.ci.store.retrieved(run_id)))
+                    sp["deferred"] = len(deferred_ids)
+                    if fetched.get("sufficiency"):
+                        sp["stopped_on"] = fetched["sufficiency"].get("reason")
+            # §22. COMPOSITION IS NOT OPTIONAL AND IS NOT BUDGETED AWAY.
+            #
+            # The budget bounds ACQUISITION -- the part that talks to hosts we
+            # do not control and that produced the 4m54s stall. Reasoning over
+            # what already arrived is local, bounded, and is the only step
+            # that turns evidence into something a reader can use. Skipping it
+            # to save time would hit the latency target by deleting the
+            # product, which §3 forbids: a run that spent its budget composes
+            # what it has and SAYS which evidence is missing.
+            # §7/§9/§10. THE CORE IS COMPOSED, PUBLISHED, AND OPENABLE
+            # BEFORE THE MODEL RUNS.
+            #
+            # `_availability` reads `strategic_report` out of `self._results`,
+            # and `result_readiness` opens the analysis the moment one exists
+            # -- in flight or not. So publishing the core here is what turns a
+            # four-minute wait into a readable page: the reader gets the
+            # evidence, the exposure and the economic reading while the
+            # strategic review is still being written.
+            with trace.span("core_composition", deadline=deadline) as sp:
+                core = self._compose(run_id, deep=False, trace=trace)
+                sp["item_count"] = len(list(self.ci.store.retrieved(run_id)))
+            self._results[run_id] = core
+            self._core_ready_at[run_id] = time.monotonic()
+            # Marked AFTER publication, so the recorded instant is one at
+            # which the result could actually be opened. Marking before would
+            # record an intention rather than an availability.
+            try:
+                self.ci.mark_lifecycle(run_id, "core_ready")
+            except Exception:                   # noqa: BLE001
+                _LOG.warning("lifecycle core_ready marker failed run=%s",
+                             run_id)
+            # ENRICHMENT RUNS HERE: AFTER the marker, not before it.
+            #
+            # The market refresh (3.2s deployed) and the dossier write (2.9s)
+            # used to run inside `_compose`, ahead of `core_ready` -- 6.1s the
+            # reader waited for work that adds nothing to what they are about
+            # to read. Neither produces the answer, so neither may delay it.
+            #
+            # IT STILL RUNS. `_publish_demo_dossier` is the real path, not a
+            # demo-only one: every composed analysis emits a versioned record
+            # and the 100-company runner reads it. Moving the call and failing
+            # to make it is how a latency repair quietly deletes a feature --
+            # the guard caught exactly that, because the first version of this
+            # change split the function out and wired only the batch caller.
+            try:
+                self._publish_enrichment(run_id, core, trace=trace)
+            except Exception:                   # noqa: BLE001 - never a run
+                _LOG.warning("enrichment failed after core_ready run=%s",
+                             run_id)
+            # §5. THE DEFERRED EVIDENCE IS ACQUIRED HERE, and the reader is
+            # already reading. If it changes the answer they are TOLD, through
+            # `analysis_updated`, rather than having the page rewritten under
+            # them -- a recommendation that silently becomes a different
+            # recommendation is worse than a slower one.
+            trace.calibrate("cpu_yardstick_after")
+            # RECORDED AT CORE_READY, not at the end of the run. A trace
+            # written only after DEEP would be lost for exactly the runs
+            # whose latency is worth reading -- the ones that never finish.
+            self.ci.record_trace(run_id, "core", trace.waterfall())
+            # THE CORE TRACE LANDS BEFORE THE CONTINUATION, NOT AFTER IT.
+            #
+            # `record_trace` already ran a few seconds behind the `core_ready`
+            # marker, and two of ten cohort rows -- Caterpillar and Alphabet,
+            # the two SLOWEST -- were read inside that window and came back
+            # with no spans at all, quietly removing the most interesting rows
+            # from every bucket ranking. Putting the deferred acquisition in
+            # front of it would widen exactly that window, on exactly the runs
+            # whose latency is worth reading.
+            #
+            # The continuation records its own phase below, so nothing is lost
+            # -- the core trace simply stops waiting for work the core did not
+            # do.
+            if deferred_ids:
+                try:
+                    core = self._acquire_deferred(run_id, core, deferred_ids,
+                                                  trace=trace)
+                    self._results[run_id] = core
+                    self.ci.record_trace(run_id, "core", trace.waterfall())
+                except Exception as exc:            # noqa: BLE001
+                    _LOG.warning("deferred acquisition failed run=%s %s: %s",
+                                 run_id, type(exc).__name__, str(exc)[:200])
+            # A SECOND READING, taken where the cost actually landed. The
+            # first is at t=0 when the worker contends with nothing;
+            # composition is where 48 of the 90 seconds went, so the CPU
+            # share DURING it is the number that explains those seconds.
+            # Two readings also test REPRODUCIBILITY: a constraint that shows
+            # up once could be a noisy neighbour, one that shows up at both
+            # ends of the run is the machine we were given.
+
             with self._analysis_lock:
                 self._terminal_writes[run_id] = \
                     self._terminal_writes.get(run_id, 0) + 1
+            # §25. The deep half may fail, time out, or be refused, and the
+            # core the customer is already reading survives all three. It is
+            # deliberately NOT inside the outer handler's failure path: a deep
+            # failure is not an analysis failure and may not mark the run
+            # FAILED, because the run produced a result the reader can use.
+            try:
+                self.ci.mark_lifecycle(run_id, "deep_started")
+            except Exception:                   # noqa: BLE001
+                pass
+            try:
+                self._results[run_id] = self.ci.enrich_deep(
+                    run_id, core, previous_model=previous_model_for_deep,
+                    deadline=self._analysis_deadlines.get(run_id))
+                try:
+                    self.ci.mark_lifecycle(run_id, "deep_ready")
+                except Exception:               # noqa: BLE001
+                    pass
+            except Exception as exc:              # noqa: BLE001
+                _LOG.warning("deep enrichment failed run=%s %s: %s", run_id,
+                             type(exc).__name__, str(exc)[:200])
         except Exception as exc:  # noqa: BLE001 - a worker may not escape
             # THE CLASS ALONE COULD NOT BE ACTED ON. Every composition failure
             # on this service logged "ValueError" and nothing else, and
@@ -4473,6 +9799,35 @@ class WebApp:
         finally:
             with self._analysis_lock:
                 self._analysis_inflight.pop(run_id, None)
+                spent = self._analysis_deadlines.pop(run_id, None)
+            if spent is not None and spent.gaps:
+                # The gaps outlive the budget object: they are what the reader
+                # is told, so they are recorded where the page can read them
+                # rather than discarded with the timer that produced them.
+                self._analysis_gaps[run_id] = spent.as_dict()
+
+    def _tier_for(self, run_id: str) -> str:
+        """Which interactive contract this run is held to (§2).
+
+        Tier 1 is the well-known public company an executive types in and
+        expects an answer to inside half a minute. Everything else -- a filer
+        with no domain, a sparse private company -- is a deeper read and is
+        held to the tier-2 budget, because holding it to tier 1 would not make
+        it faster, only earlier to give up.
+        """
+        from intent_engine.company_ingestion.deadline import TIER_1, TIER_2
+        try:
+            meta = self.ci.run_meta(run_id) or {}
+            if not meta.get("website"):
+                return TIER_2               # filer-only: filings are the path
+            listing = self._listing_for(run_id)
+            return TIER_1 if getattr(listing, "ticker", "") else TIER_2
+        except Exception:                                   # noqa: BLE001
+            return TIER_2
+
+    def analysis_gaps(self, run_id: str) -> dict:
+        """What this run could not finish inside its budget, if anything."""
+        return self._analysis_gaps.get(run_id) or {}
 
     def _interrupted_if_stale(self, run_id: str) -> bool:
         """Mark a run INTERRUPTED when its worker vanished.
@@ -4513,7 +9868,9 @@ class WebApp:
             candidates = self.ci.store.candidates(run_id)
             approved_ids = self._recommended_candidate_ids(
                 candidates,
-                refusing_hosts=self.ci.refusing_hosts(run_id))
+                refusing_hosts=self.ci.refusing_hosts(run_id),
+                subject_cik=(self.ci.run_meta(run_id) or {}).get("cik"),
+                memory=self.ci.acquisition_memory)
             rejected = [c["candidate_id"] for c in candidates
                         if c["candidate_id"] not in approved_ids]
             try:
@@ -4542,7 +9899,7 @@ class WebApp:
     def _sources_page(self, session, run_id, *, selected_ids=None,
                       message=None, pasted=None):
         if not self._owned(session, run_id) or not self._is_real_run(run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         meta = self.ci.run_meta(run_id)
         candidates = self.ci.store.candidates(run_id)
         approval = self.ci.store.approval(run_id)
@@ -4557,7 +9914,9 @@ class WebApp:
             # Same reachability knowledge as auto-run, so the pre-checked set
             # on the review page and the set auto-run approves never disagree.
             selected = set(self._recommended_candidate_ids(
-                candidates, refusing_hosts=self.ci.refusing_hosts(run_id)))
+                candidates, refusing_hosts=self.ci.refusing_hosts(run_id),
+                subject_cik=(self.ci.run_meta(run_id) or {}).get("cik"),
+                memory=self.ci.acquisition_memory))
 
         def _tag(c):
             if c.get("source_class") == "investor_material":
@@ -4667,7 +10026,7 @@ class WebApp:
 
     def _sources_approve(self, session, run_id, form):
         if not self._owned(session, run_id) or not self._is_real_run(run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         if form.get("approve_consent") is None:
             return self._error_page(400, "explicit approval is required")
         # parse_qs collapsed to first value in _form; re-read all checkboxes
@@ -4719,7 +10078,7 @@ class WebApp:
 
     def _source_detail(self, session, run_id, source_id):
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         for record in self.ci.store.retrieved(run_id):
             if record["source_id"] == source_id:
                 body = (f'<!doctype html><html lang="en"><head>'
@@ -4742,11 +10101,55 @@ class WebApp:
                 return self._html(body)
         return self._error_page(404, "no such source in this run")
 
+    #: What a READ may recompose. A reader asking for a page may not trigger
+    #: a model call on the request thread, and may not have the answer they
+    #: are already holding replaced by one that failed.
+    #:
+    #: MEASURED LIVE on 5a27b2a7: five of ten cohort runs answered
+    #: `result_state: FAILED` with `deep_status: RUNNING` -- the exact shape
+    #: of a `deep=True` payload whose analyst gave up, because
+    #: `_strategic_report` sets RUNNING before the call and only
+    #: `enrich_deep` ever finishes it. `_compose` defaults to `deep=True`,
+    #: so a read that found the cache stale ran the whole deep pass
+    #: SYNCHRONOUSLY and published its failure over a good core.
+    #:
+    #: The reader needs a CORE. The deep half belongs to the worker, which
+    #: already has a guard stopping a failed model from overwriting the
+    #: core's state; a read had no such guard because it was never supposed
+    #: to be doing this work.
+    def _recompose_for_reader(self, run_id, previous=None):
+        """A bounded recompose for a READ, which may only improve the page.
+
+        ALWAYS RETURNS WHAT IT COMPOSED WHEN THERE IS NOTHING TO PROTECT.
+        The first version returned `previous` on an unusable recompose, and
+        on a cache miss `previous` is None -- so the caller stored None and
+        every later read recomposed again. That is unbounded recomposition on
+        the request thread, measured at 98% CPU for 2h52m in one suite, and
+        for a reader it is a poisoned run that never opens.
+        """
+        fresh = self._compose(run_id, deep=False)
+        if not previous:
+            # Nothing to protect: whatever compose produced IS the answer for
+            # this run, and it is a dict, so it can be cached and not redone.
+            return fresh
+        if not (fresh or {}).get("strategic_report"):
+            _LOG.warning("read-triggered recompose produced no report run=%s "
+                         "— keeping the published result", run_id)
+            return previous
+        if (fresh["strategic_report"].get("result_state") == "FAILED"
+                and (previous.get("strategic_report") or {}).get(
+                    "result_state") not in (None, "FAILED")):
+            # A recompose that failed is not a newer answer; it is no answer.
+            _LOG.warning("read-triggered recompose failed run=%s — keeping "
+                         "the published result", run_id)
+            return previous
+        return fresh
+
     def _real_result(self, run_id):
         if run_id not in self._results:
             if self.ci.store.approval(run_id) is None:
                 return None
-            self._results[run_id] = self._compose(run_id)
+            self._results[run_id] = self._recompose_for_reader(run_id)
         elif not self._cache_compatibility(run_id)["reusable"]:
             # A stored analysis is served again only while it still agrees with
             # the product that would produce it. Otherwise the fixes that
@@ -4754,7 +10157,8 @@ class WebApp:
             # that capped confidence without an outside source, never reach
             # anyone whose analysis predates them — they see the old answer
             # under today's date and cannot tell.
-            self._results[run_id] = self._compose(run_id)
+            self._results[run_id] = self._recompose_for_reader(
+                run_id, previous=self._results.get(run_id))
         return self._results.get(run_id)
 
     def _cache_compatibility(self, run_id) -> dict:
@@ -4768,7 +10172,7 @@ class WebApp:
         return assess(stored,
                       app_version=version_info().get("app_version", ""))
 
-    def _compose(self, run_id):
+    def _compose(self, run_id, *, deep: bool = True, trace=None):
         """Compose the run, threading the persisted mental model so the report
         is a VIEW over the company's evolving state, then persist the new
         snapshot and publish strategic events durably (idempotent).
@@ -4780,13 +10184,159 @@ class WebApp:
         domain = meta["domain"] if meta else ""
         previous_model = self.strategic_memory.latest_model(domain) \
             if domain else None
-        result = self.ci.compose_with_quality(run_id, fi_service=self.fi,
-                                              previous_model=previous_model)
+        # The FULL budget, not the reserved view: the reserve exists to
+        # protect composition, so composition is what spends it — including
+        # the targeted retry passes the quality gate can order from inside.
+        result = self.ci.compose_with_quality(
+            run_id, fi_service=self.fi, previous_model=previous_model,
+            deadline=self._analysis_deadlines.get(run_id), deep=deep,
+            trace=trace)
+        # THE GATE MUST JUDGE THE EVIDENCE THAT ARRIVED, NOT THE EVIDENCE
+        # THAT HAD ARRIVED WHEN IT RAN.
+        #
+        # MEASURED LIVE on 10d1620, Meta Platforms, first run after the
+        # evidence-gate header was deployed:
+        #
+        #     compose=1  usable=1  families=investor  stored=7  attempt=1
+        #
+        # The readiness gate was handed ONE document. The store holds SEVEN,
+        # three of them Meta's own SEC filings. The customer was told the
+        # public evidence about Meta Platforms was too thin to analyse, on a
+        # run that had read Meta's 10-K and its 10-Q.
+        #
+        # This was chased through three offline reproductions first, and all
+        # three were wrong: `usable_documents` keeps 7 of 7, `is_english` is
+        # True for 7 of 7, and raw-HTML truncation swept from 16MB to 200KB
+        # keeps 7 of 7. The gate itself, re-run on those seven documents,
+        # answers 7. Nothing was miscounting. Composition simply happened
+        # before the evidence finished arriving, and nothing looked again.
+        #
+        # ONE EXTRA PASS, AND ONLY WHEN DOCUMENTS ACTUALLY ARRIVED LATE.
+        # This does not re-run retrieval, does not fetch, and cannot loop:
+        # it recomposes at most once, and only when the store is strictly
+        # larger than the set the gate judged. `compose` is already
+        # idempotent and restart-safe -- rebuilding from stored documents is
+        # what it is written to do.
+        #
+        # NOT A FIX TO THE RACE. Which caller composed early is not
+        # established, and this deliberately does not guess: whatever the
+        # ordering turns out to be, judging seven documents is right and
+        # judging one of them is wrong.
+        # A GATE THAT JUDGED NOTHING STILL JUDGED SOMETHING.
+        #
+        # `documents_at_compose` is absent exactly when `compose` took its
+        # early return -- "no approved source could be retrieved" -- because
+        # that path returns before `readiness_inputs` is recorded. This used
+        # to read `isinstance(seen, int)` and skip the re-gate entirely in
+        # that case, which is the ONE case where looking again matters most:
+        # the gate saw nothing, and evidence arrived afterwards.
+        #
+        # MEASURED live on 5e1218e, Meta Platforms: `compose=? stored=9
+        # regated=no`, outcome TRUE_EVIDENCE_SCARCITY. Nine documents in the
+        # store, a gate that judged none of them, and a re-gate whose
+        # precondition was the very field the failing path does not produce.
+        # A guard keyed on the presence of an instrument is not a guard.
+        seen = (result.get("readiness_inputs") or {}).get(
+            "documents_at_compose")
+        if seen is None:
+            seen = 0
+        if isinstance(seen, int):
+            try:
+                stored = len(self.ci.store.retrieved(run_id))
+            except Exception:                               # noqa: BLE001
+                stored = seen
+            if stored > seen:
+                # ASK THE GATE AGAIN BEFORE PAYING FOR A SECOND SYNTHESIS.
+                #
+                # The first version of this recomposed unconditionally, and
+                # the cost was not theoretical. MEASURED on b37bee2, 0d02c0b
+                # and e78c2a0: Meta's service stopped answering
+                # `/runs/<id>/progress` from t=33 to t=349 -- over five
+                # minutes of a single-worker deployment serving nobody -- and
+                # four consecutive Meta runs were unobservable. On the two
+                # SHAs before it, the same analysis finished in 48 and 52
+                # seconds.
+                #
+                # Re-running `assess_readiness` on the full document set is
+                # cheap: it reads text that is already in memory and fetches
+                # nothing. Re-running SYNTHESIS is what costs the five
+                # minutes. So the gate is asked first, and the expensive pass
+                # happens only when the extra evidence actually changes the
+                # verdict -- which is the only case where it could change
+                # what the customer reads.
+                verdict = self._readiness_on_current_evidence(run_id)
+                if verdict is not None:
+                    result["readiness"] = verdict
+                    from intent_engine.company_ingestion.readiness import (
+                        explain as _explain,
+                    )
+                    result["readiness_explanation"] = _explain(verdict)
+                    # EVERY COUNTER, OVER THE SET THE GATE JUST JUDGED.
+                    #
+                    # This used to overwrite three keys and leave the four
+                    # `dropped_*` counters describing the FIRST composition,
+                    # so the header reported two document sets at once and
+                    # its arithmetic did not close (UnitedHealth on 743df06:
+                    # `compose=13 usable=9 dropped=0/0/2/0`). A breakdown
+                    # that cannot be subtracted is worse than none: it looks
+                    # like an answer.
+                    from intent_engine.company_ingestion.readiness import (
+                        readiness_inputs as _inputs,
+                    )
+                    prior = result.get("readiness_inputs") or {}
+                    # READ HERE, NOT SMUGGLED THROUGH THE VERDICT. A first
+                    # version attached the document list to the verdict dict
+                    # and counted that, which silently became an empty list
+                    # the moment anything supplied its own
+                    # `_readiness_on_current_evidence` -- and the counters
+                    # then described nothing at all while looking populated.
+                    # The caller can see the store; it does not need the
+                    # callee's cooperation to count what is in it.
+                    fresh = _inputs(self.ci.store.retrieved(run_id), verdict,
+                                    attempt=prior.get("attempt", 1))
+                    fresh["regated_from"] = seen
+                    result.setdefault("readiness_inputs", {}).update(fresh)
+                changed = (verdict or {}).get("may_synthesize") and \
+                    not result.get("strategic_report")
+                if changed:
+                    _LOG.info("recomposing %s: gate saw %d, store holds %d, "
+                              "and the fuller set clears the bar",
+                              run_id, seen, stored)
+                    # `deep=deep`, NOT the default. This branch only fires
+                    # when the first pass produced no report at all, so it
+                    # cannot double a model call today -- but it defaults to
+                    # deep=True, and a CORE pass that reached here would run
+                    # the very call the core exists to not wait for. The flag
+                    # travels or the split has a hole in it.
+                    result = self.ci.compose_with_quality(
+                        run_id, fi_service=self.fi,
+                        previous_model=previous_model, deep=deep)
+                    result.setdefault("readiness_inputs",
+                                      {})["recomposed_from"] = seen
         report = result.get("strategic_report")
         if report and domain:
-            self.strategic_memory.save_snapshot(domain, report["mental_model"])
-            self.strategic_memory.publish(
-                domain, report.get("analytics_events", []), run_id=run_id)
+            # THE DISK IS NOT THE SAME DISK. Locally these are ~1.9s against a
+            # local SSD; the preview writes append-only files to a NETWORK-
+            # ATTACHED Render volume, and `core_composition` amplifies 12.5x
+            # deployed while the network stages amplify 4x. Composition is
+            # 14% CPU there, so it is waiting on something -- and after the
+            # quality-retry hypothesis was measured and found not to fire,
+            # this is the only I/O left inside it. Split so the next trace
+            # says which of the two writes owns the time.
+            if trace is not None:
+                with trace.span("memory_snapshot"):
+                    self.strategic_memory.save_snapshot(
+                        domain, report["mental_model"])
+                with trace.span("memory_publish") as _sp:
+                    events = report.get("analytics_events", [])
+                    _sp["item_count"] = len(events)
+                    self.strategic_memory.publish(domain, events,
+                                                  run_id=run_id)
+            else:
+                self.strategic_memory.save_snapshot(domain,
+                                                    report["mental_model"])
+                self.strategic_memory.publish(
+                    domain, report.get("analytics_events", []), run_id=run_id)
         # The last read before a stranger sees it. Attached rather than
         # applied: a critic that edits is a second author with less context
         # than the first, and its corrections would reach the reader
@@ -4794,8 +10344,13 @@ class WebApp:
         # worth more than a silent fix.
         if report is not None:
             from intent_engine.strategic_intelligence.critic import critique
-            result["critique"] = critique(
-                report, documents=self.ci.store.retrieved(run_id))
+            if trace is not None:
+                with trace.span("critic"):
+                    result["critique"] = critique(
+                        report, documents=self.ci.store.retrieved(run_id))
+            else:
+                result["critique"] = critique(
+                    report, documents=self.ci.store.retrieved(run_id))
         # Record what produced this, so a later reuse can be checked rather
         # than assumed.
         from intent_engine._version import version_info
@@ -4814,11 +10369,431 @@ class WebApp:
         # empty run and cache the emptiness.
         self._results[run_id] = stamped
         self._external_cache.pop(run_id, None)
-        try:
-            self._external_context(run_id, allow_fetch=True)
-        except Exception:  # noqa: BLE001 - context must never lose a run
-            _LOG.warning("external context refresh failed for %s", run_id)
+        # THE ONE NETWORK CALL LEFT INSIDE COMPOSITION, and it was the only
+        # stage in the whole pipeline with no span on it. `core_composition`
+        # measures 54.66s deployed at 14% CPU while every child span found so
+        # far is 90-100% CPU and small; an external fetch is the only thing
+        # in here that can wait. It is also wrapped in a bare `except`, so a
+        # slow or hanging provider costs the customer the time and reports
+        # nothing at all.
+        # NEITHER OF THESE PRODUCES THE ANSWER, so neither may delay it.
+        #
+        # Measured on the preview: the market refresh is 3.9s and the dossier
+        # write 2.6s, both AHEAD of the `core_ready` marker -- 6.5s the reader
+        # waits for work that adds nothing to what they are about to read.
+        # §26 classifies the refresh as enrichment and forbids it blocking
+        # CORE_READY; the dossier is a read-model write with the same standing.
+        #
+        # GATED ON `deep`, NOT ON A NEW KEYWORD. Adding a keyword-only
+        # parameter to a method that tests stub is a breaking change to every
+        # stub of it, and the break surfaces as "composition failed" -- the
+        # very condition those tests exercise. That has now happened three
+        # times in this investigation (`deep`, then `trace`, then `trace` on
+        # `_strategic_report`). `deep` already distinguishes the interactive
+        # CORE pass from the batch callers, so it is the gate.
+        #
+        # The interactive worker calls `_publish_enrichment` itself, AFTER the
+        # marker. Batch callers (deep=True) keep the old inline behaviour.
+        if deep:
+            self._publish_enrichment(run_id, stamped, trace=trace)
         return stamped
+
+    # ------------------------------------------------------------------
+    # §5/§7/§24. Minimum-evidence CORE, and what happens to the rest.
+    # ------------------------------------------------------------------
+    def _sufficiency_probe(self, run_id: str):
+        """A callable acquisition consults after each wave.
+
+        It asks `readiness.assess_readiness` -- the SAME contract that decides
+        whether a report may be published. A second definition of "enough
+        evidence" would let acquisition stop on one standard while composition
+        refused on another, and the run would be fast because it had stopped
+        producing a product. This project shipped that failure once already.
+        """
+        from intent_engine.company_ingestion import sufficiency
+
+        meta = self.ci.run_meta(run_id) or {}
+        # `ci.subject_cik`, NOT `meta["cik"]`. A run started from a website
+        # carries no CIK -- which is the ORDINARY case -- so reading meta
+        # directly made the "wait for the subject's own filing" condition
+        # return True for every domain-entry run and never fire once.
+        # Measured: meta["cik"] is "" for Apple and NVIDIA, while
+        # `subject_cik` resolves 320193 and 1045810. A guard that cannot fail
+        # is not a guard.
+        subject_cik = str(self.ci.subject_cik(meta) or "")
+
+        def probe(documents):
+            try:
+                return sufficiency.evaluate(
+                    documents,
+                    identity=self.ci.entity_identity(run_id),
+                    failures=list(self.ci.store.failures(run_id)),
+                    subject_cik=subject_cik)
+            except Exception as exc:            # noqa: BLE001
+                # A probe that cannot answer means "keep going", which is the
+                # behaviour that existed before it. LOGGED, because a silent
+                # fallback here looks exactly like a run that never had enough
+                # evidence to stop -- the failure mode this session already
+                # shipped once with the snapshot short-circuit.
+                _LOG.warning("sufficiency probe failed run=%s %s: %s", run_id,
+                             type(exc).__name__, str(exc)[:200])
+                return {"sufficient": False, "reason": "probe unavailable"}
+
+        return probe
+
+    #: How much of the report may change before the reader is TOLD it changed,
+    #: rather than the page being rewritten under them. Any change to the
+    #: thesis, the decision implications or the result state is material by
+    #: construction: those are the sentences a reader acts on.
+    _MATERIAL_REPORT_FIELDS = ("thesis", "decision_implications",
+                              "result_state", "status")
+
+    @staticmethod
+    def _decision_fingerprint(result) -> dict:
+        """The part of a composed result a reader would notice changing."""
+        report = (result or {}).get("strategic_report") or {}
+        out = {}
+        for field in WebApp._MATERIAL_REPORT_FIELDS:
+            value = report.get(field)
+            out[field] = json.dumps(value, sort_keys=True, default=str)                 if isinstance(value, (list, dict)) else str(value or "")
+        return out
+
+    def _acquire_deferred(self, run_id, core, deferred_ids, trace=None):
+        """Acquire the evidence CORE did not wait for, then say what changed.
+
+        THE READER IS ALREADY READING. `core_ready` has been marked and the
+        result is openable, so this stage may not fail the run, may not block,
+        and may not silently replace what is on the screen. Three rules:
+
+        1. It composes AGAIN over the wider evidence.
+        2. If the decision fingerprint is unchanged, the richer result
+           replaces the core silently -- nothing a reader acts on moved.
+        3. If it CHANGED, the run records `ci.analysis_updated` naming the
+           fields that moved and how many new documents caused it, so the
+           change is visible as a change rather than as a different page.
+
+        A recommendation that quietly becomes a different recommendation is
+        worse than a slower one, which is the whole reason deferral has to
+        carry an update signal rather than just a recompose.
+        """
+        from contextlib import nullcontext
+        span = (trace.span("deferred_acquisition") if trace is not None
+                else nullcontext({}))
+        before_documents = len(list(self.ci.store.retrieved(run_id)))
+        with span as sp:
+            # A FRESH BUDGET, NOT THE SPENT ONE. The interactive deadline
+            # bounds the WAIT, and by here `core_ready` is marked and there is
+            # no wait left to bound. Passing the spent deadline would make
+            # `budget_for` return 0.0 for every deferred source, record each
+            # one as `deadline_exceeded`, and turn deferral into deletion
+            # wearing a retrieval failure -- against evidence nobody had asked
+            # for yet.
+            from intent_engine.company_ingestion.deadline import Deadline
+            fetched = self.ci.fetch_approved(
+                run_id, candidate_ids=list(deferred_ids),
+                deadline=Deadline.for_continuation(self._tier_for(run_id)))
+            after_documents = len(list(self.ci.store.retrieved(run_id)))
+            if isinstance(sp, dict):
+                sp["item_count"] = after_documents - before_documents
+            if after_documents <= before_documents:
+                # Nothing new arrived, so there is nothing to recompose and
+                # nothing to tell the reader. The gaps the fetch recorded are
+                # already on the run.
+                return core
+            widened = self._compose(run_id, deep=False, trace=trace)
+        # A WIDER RECOMPOSE MAY ONLY REPLACE THE CORE IF IT IS STILL A REPORT.
+        #
+        # MEASURED LIVE on 5a27b2a7: five of ten cohort runs came back with
+        # `result_state: FAILED`, and they were EXACTLY the five with
+        # deferred evidence. `compose` returns `{"status": "FAILED", ...}`
+        # with NO `strategic_report` key on its own failure paths, and this
+        # function handed that object straight back to the worker, which
+        # published it over a core the reader was already holding.
+        #
+        # The core is not improved by a recompose that produced nothing. It
+        # is destroyed by it -- the same failure as the warm path that was
+        # fast because it had stopped producing the product, one layer over.
+        if not (widened or {}).get("strategic_report"):
+            _LOG.warning("deferred recompose produced no report run=%s "
+                         "status=%s — keeping the published core", run_id,
+                         (widened or {}).get("status"))
+            return core
+        before = self._decision_fingerprint(core)
+        after = self._decision_fingerprint(widened)
+        changed = sorted(k for k in before if before[k] != after[k])
+        if changed:
+            try:
+                self.ci.record_analysis_updated(
+                    run_id, fields=changed,
+                    new_documents=after_documents - before_documents,
+                    reason="evidence acquired after the first answer was "
+                           "published")
+            except Exception:                   # noqa: BLE001
+                _LOG.warning("analysis_updated marker failed run=%s", run_id)
+        return widened
+
+    def _publish_enrichment(self, run_id, stamped, trace=None):
+        """Market refresh and dossier write -- everything CORE does not need.
+
+        THE REFRESH CANNOT BE STARTED EARLIER, which is why it is here rather
+        than at the top of the run: it reads the composed report to find
+        exposure phrases and competitor passages, and building it against an
+        empty run cached the emptiness. So it runs after composition -- but it
+        no longer runs before the reader is told the answer is ready.
+
+        Fails soft, and now says so. The bare `except` this replaces reported
+        neither a duration nor a failure class, which is how an unbounded
+        network call sat on the critical path through four wrong hypotheses.
+        """
+        if trace is not None:
+            _ctx = trace.span("external_context")
+        else:
+            from contextlib import nullcontext
+            _ctx = nullcontext({})
+        try:
+            with _ctx:
+                self._external_context(run_id, allow_fetch=True)
+        except Exception as exc:  # noqa: BLE001 - context must never lose a run
+            _LOG.warning("external context refresh failed for %s %s: %s",
+                         run_id, type(exc).__name__, str(exc)[:200])
+        if trace is not None:
+            with trace.span("demo_dossier"):
+                self._publish_demo_dossier(run_id, stamped)
+        else:
+            self._publish_demo_dossier(run_id, stamped)
+
+    def _publish_demo_dossier(self, run_id, result):
+        """Emit this run's founder snapshot and assemble its demo dossier.
+
+        THE REAL PATH, not a demo-only one: every composed analysis passes
+        through here, so the 100-company runner gets a comparable versioned
+        record for free rather than another ad hoc report (§12).
+
+        The market side may be absent — usually is, since it publishes from a
+        different process on its own schedule — and that is a stated product
+        state, not a failure. `FOUNDER_AVAILABLE_MARKET_UNAVAILABLE` is a
+        valid dossier.
+
+        Every failure inside is swallowed. A read-model write that can fail an
+        analysis is a worse defect than the missing record it was added to
+        produce; the same judgement the consumption receipt above is built on.
+        """
+        try:
+            from intent_engine.demo_dossier import (assemble,
+                                                    read_founder_snapshot,
+                                                    read_market_snapshot)
+            from intent_engine.demo_dossier import transport as dt
+            from intent_engine.demo_dossier.store import (DossierStore,
+                                                          company_key)
+            from intent_engine.external_intel import founder_demo_snapshot \
+                as fds
+
+            meta = self.ci.run_meta(run_id) or {}
+            report = (result or {}).get("strategic_report")
+            name = str(meta.get("company_name") or "")
+            domain = str(meta.get("domain") or "")
+            # IDENTITY IS SETTLED BEFORE ANYTHING IS BUILT. Both snapshots,
+            # the market lookup and the store key must agree on who this
+            # company is; resolving afterwards would file the dossier under
+            # one identity while its contents claimed another.
+            key, cohort, manifest_version = self._manifest_placement(
+                company_key(name or domain or run_id), name=name,
+                domain=domain)
+            context = self._external_cache.get(run_id)
+
+            # EVIDENCE INDEPENDENCE AND LEARNING, MEASURED HERE RATHER THAN
+            # DESCRIBED AS UNAVAILABLE.
+            #
+            # The producer for both already exists; until now the dossier
+            # hardcoded `INDEPENDENCE_UNAVAILABLE` and emitted no learning
+            # summary at all, so a founder reading a dossier could not tell
+            # nine copies of one release from nine separate accounts.
+            #
+            # Both are computed defensively and their FAILURE IS A STATE, not
+            # a zero: `assess` raising must not turn into "no independent
+            # sources", which is a claim about the company.
+            from intent_engine.company_ingestion import independence as _IND
+            from intent_engine.company_ingestion import (
+                learning_attribution as _LA,
+            )
+            try:
+                # THE SUBJECT IS PASSED IN, or its own filings corroborate it.
+                # A company's 10-K is hosted by the SEC, so without this the
+                # venue check made the subject's own annual report an
+                # "independent origin" -- Cloudflare's dossier published
+                # INDEPENDENTLY_CORROBORATED off two origins, one of which was
+                # Cloudflare.
+                #
+                # RESOLVED THROUGH `subject_cik`, NOT read off `meta`. Reading
+                # `meta["cik"]` directly was the first repair and it shipped
+                # doing nothing: a run started from a WEBSITE carries no CIK,
+                # which is the ordinary case, so the filter received an empty
+                # subject and the live claim never changed. Filing discovery
+                # had the fallback all along; this is the same one.
+                _assessed = _IND.assess(
+                    self.ci.store.retrieved(run_id),
+                    subject_filers=(self.ci.subject_cik(meta),),
+                    subject_domain=str(meta.get("domain") or ""),
+                    subject_name=name)
+            except Exception:  # noqa: BLE001 - a read model may not fail a run
+                _assessed = None
+            # THE SAME SUBJECT, THE SAME DOCUMENTS, ONE MORE PROJECTION.
+            # Built from `independence.classify` rather than beside it, so
+            # the drawer and the independence count can never disagree about
+            # whether a document is the company's own.
+            try:
+                from intent_engine.company_ingestion import provenance as _PRV
+                _provenance = _PRV.project(
+                    self.ci.store.retrieved(run_id),
+                    subject_filers=(self.ci.subject_cik(meta),),
+                    subject_domain=str(meta.get("domain") or ""),
+                    subject_name=name)
+            except Exception:  # noqa: BLE001 - a read model may not fail a run
+                # A projection that could not be built is UNAVAILABLE, which
+                # is a fact about us. An empty record list would read as "this
+                # company has no sources", which is a claim about the company.
+                _provenance = None
+            # No strategic report means the reasoning layer produced no
+            # knowledge state, so no evidence row could have moved one. That
+            # is BLOCKED, never a measured zero (§21).
+            # THE EFFECTS ARE READ FROM THE LEDGER, not passed as an empty
+            # literal. `effects=()` was hard-coded here and in the wave, which
+            # is why learning conversion could only ever report NOT_ATTEMPTED
+            # however well retrieval performed.
+            from intent_engine.external_intel import effect_producer as _EP
+            try:
+                _effects = _EP.load_effects(self._runtime_root,
+                                            company_id=key)
+            except Exception:  # noqa: BLE001 - a read model may not fail a run
+                _effects = []
+            _learning = _LA.conversion(
+                evidence_rows=(_assessed or {}).get("rows", ()),
+                effects=_effects,
+                independence_rows=(_assessed or {}).get("rows", ()),
+                knowledge_layer_ran=isinstance(report, dict),
+                blocked_reason=(
+                    "" if isinstance(report, dict) else
+                    "no strategic report was produced for this run, so no "
+                    "knowledge state existed for evidence to change"))
+
+            # HOW HARD THE SEARCH WORKED. Read from the run that just ran,
+            # never defaulted: an absent report crosses as None and the drawer
+            # reads DISCOVERY_NOT_RUN, which is the only honest reading when
+            # nothing searched.
+            try:
+                _discovery = self.ci.discovery_report(run_id)
+            except Exception:  # noqa: BLE001 - a read model may not fail a run
+                _discovery = {}
+
+            # THE RUN'S OWN EVIDENCE REFERENCES, PASSED.
+            #
+            # `build_payload` has always accepted `evidence_ids`, and this --
+            # its ONLY production call site -- has never supplied them. Every
+            # dossier this deployment has ever written therefore carried
+            # `evidence_reference_ids = {state: NOT_ATTEMPTED, count: 0}`,
+            # for every company, however many documents the run composed.
+            #
+            # That is not a cosmetic gap. `decision_synthesis._standing_of`
+            # asks this block whether the run has anything to stand on, so a
+            # repair keyed on it could never fire: MEASURED by instrumenting
+            # the production path (scripts/qa_seam_instrument.py), Goldman
+            # Sachs reads NOT_ATTEMPTED/0 and lands on REFUSED, which is how
+            # a live CEO answer came to read "Do not act on this reading" on
+            # a company that composed eleven documents. Two repairs shipped
+            # green and inert against this field before it was measured.
+            #
+            # OBSERVATIONS, NOT DOCUMENTS. A retrieved page is not evidence
+            # until it yields a dated, checkable observation, and this
+            # product has one denominator per page for exactly that reason.
+            #
+            # MEASURED: feeding retrieved documents here broke the two tests
+            # that hold the honest page for a run which fetched ten sources
+            # and derived no signal from any of them -- "the sources were
+            # read and none carried dated, checkable material". That page is
+            # TRUE and it is the one absence state worth keeping, so the
+            # count that decides standing has to be the count of what was
+            # actually derived. Goldman composed eleven observations and is
+            # unaffected; the silent run keeps its page.
+            _evidence_ids = []
+            try:
+                for _obs in ((report or {}).get("observations") or ()):
+                    if not isinstance(_obs, dict):
+                        continue
+                    _oid = _obs.get("observation_id") or _obs.get("source_id")
+                    if _oid:
+                        _evidence_ids.append(str(_oid))
+            except Exception:  # noqa: BLE001 - a read model may not fail a run
+                _evidence_ids = []
+            founder = read_founder_snapshot(fds.build_payload(
+                run_id=run_id, company_id=key, canonical_name=name,
+                domain=str(meta.get("domain") or ""), report=report,
+                context=context, scope=None,
+                evidence_ids=_evidence_ids,
+                independence=_assessed, claim_provenance=_provenance,
+                discovery=_discovery, learning=_learning))
+
+            # The market snapshot, through the CONFIGURED bridge.
+            #
+            # This read used `self._runtime_root` -- the founder's own
+            # persistent disk. The market engine publishes under its own root,
+            # so the two never met: 26 real snapshots sat on disk while every
+            # dossier reported "no market snapshot has been published", which
+            # is a true sentence about the wrong directory and therefore
+            # raised nothing for months.
+            from intent_engine.demo_dossier import bridge as _bridge
+            # THE OTHER KEYS THIS COMPANY IS KNOWN BY. `key` is the manifest
+            # id (`cloudflare`); the market publishes under the key derived
+            # from the legal name (`cloudflare-inc`). Live, that produced
+            # FOUNDER_AVAILABLE_MARKET_UNAVAILABLE for a company whose
+            # snapshot was on disk. Each candidate is still identity-checked
+            # against the snapshot filed under it.
+            _aliases = [k for k in (company_key(name), company_key(domain))
+                        if k and k != key]
+            assessment = _bridge.for_company(key, aliases=_aliases)
+            self._market_bridge_last = assessment.as_dict()
+            market = assessment.snapshot if assessment.usable else None
+            if market is None:
+                from intent_engine.demo_dossier import market_unavailable
+                # The bridge's own reason, which names WHICH of the four
+                # states this is. "Nothing was published" and "the root is
+                # not configured" and "the bytes could not be read" are
+                # different repairs, and the founder surface said the same
+                # sentence for all three.
+                market = market_unavailable(
+                    assessment.reason or
+                    "No market demo snapshot has been published for this "
+                    "company in this deployment. The market blocks are "
+                    "unavailable; nothing about the market was measured.",
+                    company_id=key)
+
+            # The validation universe reaches the dossier BY REFERENCE: only
+            # the cohort and the manifest version cross, because copying the
+            # rest would make every dossier version a snapshot of the
+            # manifest and the two would drift. A company absent from the
+            # manifest keeps its derived key and no cohort — it simply is not
+            # part of the 100, which is a legitimate state, not an unknown.
+            store = DossierStore(self._runtime_root)
+            previous = store.latest(key)
+            # The keys this company is legitimately known by, carried
+            # into the join. Without them the assembler compares the
+            # two sides' ids as strings and quarantines every real
+            # company as WRONG_COMPANY_EVIDENCE -- found live.
+            dossier = assemble(market, founder, cohort=cohort,
+                               known_as=tuple([key, *_aliases]),
+                               manifest_version=manifest_version,
+                               now=__import__("datetime").date.today()
+                               .isoformat(), previous=previous)
+            stored = store.save(dossier)
+            self._demo_telemetry.snapshot_read(founder)
+            self._demo_telemetry.snapshot_read(market)
+            self._demo_telemetry.assembled(stored)
+            self._demo_telemetry.persisted(
+                created=previous is None
+                or previous.content_key() != stored.content_key())
+            from intent_engine.demo_dossier.diff import compare
+            self._demo_telemetry.differed(compare(previous, stored).state)
+        except Exception:  # noqa: BLE001 - see docstring
+            _LOG.warning("demo dossier not published for %s", run_id)
 
     def _ready(self):
         try:
@@ -4850,9 +10825,22 @@ class WebApp:
             )
             ephemeral = (self._storage["durability"] == _EPHEMERAL)
             degraded = ephemeral and self.config.env == "production"
+            from intent_engine.webapp import storage_state as _ss
             payload = {"status": "degraded" if degraded else "ready",
                        "env": self.config.env,
                        "runtime_root": str(self._runtime_root),
+                       # WHO THIS PROCESS IS. A client that sees `boot_id`
+                       # change between two requests has WATCHED a restart --
+                       # which `boot_count` structurally cannot report, since
+                       # its ledger dies with the instance whose restart is in
+                       # question. This is how a lost run gets attributed to a
+                       # restart instead of guessed at.
+                       "process": _ss.process_identity(),
+                       # Is a persistent disk attached but unused? "No disk"
+                       # and "disk attached, RUNTIME_ROOT never pointed at it"
+                       # produce identical symptoms and have very different
+                       # fixes. Looked at, never acted on.
+                       "persistent_mounts": _ss.persistent_mount_candidates(),
                        "storage": {
                                       "durability": self._storage["durability"],
                                       "writable": self._storage["writable"],
@@ -4861,6 +10849,13 @@ class WebApp:
                                       "boot_count": self._storage["boot_count"],
                                       "accepting_feedback":
                                           self.feedback_available()},
+                       # THE MARKET BRIDGE, STATED AT STARTUP. Whether this
+                       # deployment can read the market engine's output is
+                       # not discoverable from a dossier that correctly
+                       # reports "nothing published for this company" -- that
+                       # sentence is identical whether the root is wrong,
+                       # unset, or genuinely empty.
+                       "market_bridge": self._market_bridge_state(),
                        "capabilities": self._capability_state()}
             if degraded:
                 payload["degraded_reason"] = (
@@ -4873,6 +10868,25 @@ class WebApp:
             return ("503 Service Unavailable",
                     [("Content-Type", "application/json")],
                     json.dumps({"status": "not ready", "reason": str(exc)}))
+
+    def _market_bridge_state(self) -> dict:
+        """The configured market bridge, assessed now rather than at boot.
+
+        Assessed per request because the market engine writes on its own
+        schedule from another process: a value cached at boot would report
+        MISSING for the whole life of a web service that started before the
+        first market cycle of the day.
+
+        A failure to assess is its own state. Returning MISSING here would
+        claim the market engine published nothing, which is a statement about
+        the market and not about this probe.
+        """
+        from intent_engine.demo_dossier import bridge as _bridge
+        try:
+            return _bridge.assess()
+        except Exception as exc:                                # noqa: BLE001
+            return {"state": "MARKET_BRIDGE_UNASSESSED",
+                    "reason": f"the bridge could not be assessed: {exc}"}
 
     def _capability_state(self) -> dict:
         """Sanitized, OBSERVED runtime capability state — never a restatement
@@ -4937,6 +10951,117 @@ class WebApp:
         _os.remove(probe)
 
     # --- unified operational dashboard (Part 5) -----------------------------
+    def _run_provenance(self, run_id) -> dict:
+        """Whose document is behind each thing this run states. Operator only.
+
+        WHY A SURFACE AND NOT ANOTHER HYPOTHESIS. The claim-ownership repair
+        has now read green in unit tests, passed a probe against real EDGAR
+        documents, and left the rendered page unchanged three times — and
+        five separate hypotheses about why have all been wrong. Two of them
+        were argued from a RENDERED LABEL rather than from the class it was
+        computed from, which is the same error in both directions.
+
+        This ends the guessing by making the run say what it used. For every
+        observation: the id, the title a reader sees, the source_class the
+        label is computed FROM, the origin URL (whose EDGAR path names the
+        filer), and whether the ownership gate marked it the subject's own.
+        A row where those disagree is the defect, and it takes one run.
+        """
+        meta = self.ci.run_meta(run_id) or {}
+        subject_cik = "".join(ch for ch in str(meta.get("cik") or "")
+                              if ch.isdigit())
+        rows = []
+        try:
+            from intent_engine.founder_brief.narrative import provenance_label
+            result = self._result(run_id) or {}
+            report = result.get("strategic_report") or {}
+            company = str(meta.get("company_name") or "")
+            for raw in (report.get("observations") or ()):
+                if not isinstance(raw, dict):
+                    continue
+                origin = str(raw.get("origin") or "")
+                source_class = str(raw.get("source_class") or "")
+                filed_by = ""
+                if "/data/" in origin:
+                    filed_by = origin.split("/data/", 1)[1].split("/", 1)[0]
+                rows.append({
+                    "observation_id": raw.get("observation_id", ""),
+                    "source_title": raw.get("source_title", ""),
+                    "source_class": source_class,
+                    "rendered_label": provenance_label(
+                        source_class, title=str(raw.get("source_title") or ""),
+                        focal=company,
+                        excerpt=str(raw.get("excerpt") or "")[:200],
+                        origin=origin),
+                    "origin": origin,
+                    "filed_by_cik": filed_by,
+                    "is_subject_filing": (bool(filed_by)
+                                          and filed_by == subject_cik),
+                    "subject_owned": raw.get("subject_owned"),
+                    "strategic_signal": raw.get("strategic_signal", ""),
+                })
+        except Exception as exc:                            # noqa: BLE001
+            return {"run_id": run_id, "error": type(exc).__name__}
+        # The rows that ANSWER the question, called out rather than left to
+        # be spotted: a document filed by someone else that the gate marked
+        # the subject's own, or the reverse.
+        disagreeing = [r for r in rows
+                       if r["filed_by_cik"]
+                       and r["is_subject_filing"] is not bool(
+                           r["subject_owned"])]
+        # AND THE ROWS AS THE PAGE COMPOSES THEM.
+        #
+        # If the defect is a JOIN, every observation above looks correct on
+        # its own and the mismatch exists ONLY in the row — a clean
+        # observation list would then read as a clean bill of health and
+        # leave the join invisible. So each rendered row is resolved here the
+        # way a surface resolves it: the component's own evidence ids, and
+        # what each id actually points at.
+        by_id = {r["observation_id"]: r for r in rows}
+        rendered = []
+        try:
+            components = ((report.get("mental_model") or {}).get("components")
+                          or {})
+            for name, component in components.items():
+                if not isinstance(component, dict):
+                    continue
+                ids = list(component.get("supporting_observation_ids") or ())
+                cited = []
+                for oid in ids[:3]:
+                    hit = by_id.get(oid)
+                    cited.append({
+                        "observation_id": oid,
+                        "resolves": bool(hit),
+                        "source_title": (hit or {}).get("source_title", ""),
+                        "source_class": (hit or {}).get("source_class", ""),
+                        "rendered_label": (hit or {}).get("rendered_label", ""),
+                        "filed_by_cik": (hit or {}).get("filed_by_cik", ""),
+                        "is_subject_filing": (hit or {}).get(
+                            "is_subject_filing"),
+                    })
+                rendered.append({
+                    "row": name,
+                    "states": str(component.get("current_state") or "")[:200],
+                    "cited": cited,
+                    "cites_a_document_filed_by_someone_else": any(
+                        c["filed_by_cik"] and c["is_subject_filing"] is False
+                        for c in cited),
+                    "cites_an_id_that_does_not_resolve": any(
+                        not c["resolves"] for c in cited),
+                })
+        except Exception as exc:                            # noqa: BLE001
+            rendered = [{"error": type(exc).__name__}]
+
+        return {"run_id": run_id, "subject_cik": subject_cik,
+                "company_name": str(meta.get("company_name") or ""),
+                "observations": rows,
+                "rows_where_ownership_disagrees_with_the_filer": disagreeing,
+                "rendered_rows": rendered,
+                "rows_citing_another_filers_document": [
+                    r for r in rendered
+                    if r.get("cites_a_document_filed_by_someone_else")
+                    or r.get("cites_an_id_that_does_not_resolve")]}
+
     def _platform_status(self) -> dict:
         """One read-only status object for the whole platform — assembled from
         persisted runtime state. Every value is real (from the stores/status
@@ -5026,9 +11151,20 @@ class WebApp:
             last_failure_detail = {"job": job, "at": at,
                                    "error": redact_secrets(err)}
 
+        # WHAT RETRIEVAL HAD TO DO. Operator-only on purpose: a chief
+        # executive must never be asked to understand "429", and an operator
+        # looking at a thin run must be able to tell "sec.gov asked us to
+        # wait" from "this company has published nothing". Before this the
+        # answer existed only inside a local variable.
+        try:
+            retrieval = self.ci.retrieval_telemetry_overview()
+        except Exception as exc:                            # noqa: BLE001
+            retrieval = {"error": type(exc).__name__}
+
         return {
             "as_of": as_of,
             "version": version_info(),
+            "retrieval": retrieval,
             "market": {
                 "candidate_pipeline": pipeline,
                 "predictions": pred_total,
@@ -5221,6 +11357,188 @@ class WebApp:
         return self._html(_chrome(body, self._nav(session)))
 
     # --- learning platform (read-only observation via Personal AI) ----------
+    #: The eleven questions Section 28 requires `/learning` to answer. Kept
+    #: as data so the page cannot quietly stop answering one: every question
+    #: renders, and a question with no answer renders its absence and the
+    #: reason, rather than being dropped from the list.
+    _ECON_QUESTIONS = (
+        ("what_changed", "What changed?"),
+        ("why", "Why?"),
+        ("market_belief", "What does the engine currently believe?"),
+        ("most_fragile", "Which belief is most fragile?"),
+        ("what_would_break_it", "What would break it?"),
+        ("learning_faster", "What are we learning faster about?"),
+        ("stuck", "Where is the system stuck?"),
+        ("seek_next", "What should we find out next?"),
+        ("open_expectations", "What forward expectations are open?"),
+        ("resolved", "What resolved recently?"),
+        ("wrong", "What did the system get wrong?"),
+    )
+
+    def _econ_intelligence(self, as_of: str) -> dict:
+        """Answer Section 28's questions from the shared economic core.
+
+        READS, NEVER COMPUTES. Every number here is already in the core; this
+        assembles them. A surface that derived its own version of a belief
+        count is how two pages of the same product came to disagree about how
+        much the engine knew.
+
+        An unanswerable question returns an ABSENCE with a reason. That is
+        the difference between "the engine has resolved nothing yet" and
+        "this page does not know how to ask", and only the first is a fact
+        about the engine.
+        """
+        from intent_engine.econ import calibration as CAL
+        from intent_engine.econ import store as EST
+        from intent_engine.external_intel import econ_context as EC
+
+        out = {"as_of": as_of, "answers": {}, "available": False}
+        try:
+            summary = EST.summary(self._runtime_root)
+        except Exception as exc:  # noqa: BLE001
+            summary = {"counts": {}, "error": str(exc)}
+        out["store"] = summary
+        context = EC.load(self._runtime_root, as_of=as_of)
+        out["available"] = context.available
+        if not context.available:
+            for key, question in self._ECON_QUESTIONS:
+                out["answers"][key] = {"answer": "", "absent": True,
+                                       "reason": context.reason}
+            return out
+
+        beliefs = list(context.beliefs)
+        conditions = {k: v for k, v in context.conditions.items()
+                      if v.get("known")}
+        moving = [v for v in conditions.values()
+                  if v.get("direction") in ("UP", "DOWN")]
+        fragile = max(beliefs, key=lambda b: float(b.get("fragility") or 0),
+                      default=None)
+
+        def answer(key, text, absent_reason=""):
+            out["answers"][key] = {
+                "answer": text, "absent": not text,
+                "reason": absent_reason or (
+                    "" if text else "the core holds nothing that answers "
+                                    "this yet")}
+
+        answer("what_changed",
+               (f"{len(moving)} of {len(conditions)} measured conditions "
+                f"moved: "
+                + ", ".join(f"{v['kind'].replace('_', ' ')} "
+                            f"{'up' if v['direction'] == 'UP' else 'down'}"
+                            for v in moving[:5]))
+               if moving else "")
+        answer("why",
+               ("each reading names the publisher and the evidence node it "
+                "is; the causal graph states which mechanisms connect them, "
+                "and only edges at evidence level 3 or above are permitted "
+                "to say one causes another")
+               if conditions else "")
+        answer("market_belief",
+               (f"{len(beliefs)} belief(s) published to the shared core. "
+                + "; ".join(str(b.get("proposition", ""))[:110]
+                            for b in beliefs[:3]))
+               if beliefs else "",
+               absent_reason=("the market engine has published no belief "
+                              "that carries a mechanism, a falsifier and a "
+                              "preregistered observation; beliefs missing "
+                              "any of the three are refused at the bridge "
+                              "and reported by causal family in the cycle "
+                              "report"))
+        answer("most_fragile",
+               (f"{str(fragile.get('proposition', ''))[:140]} "
+                f"(probability {fragile.get('probability')}, fragility "
+                f"{fragile.get('fragility')})") if fragile else "")
+        answer("what_would_break_it",
+               str(fragile.get("falsifier", "")) if fragile else "")
+
+        counts = summary.get("counts") or {}
+        answer("learning_faster",
+               (f"the core holds {counts.get('node', 0)} evidence node(s) "
+                f"and {counts.get('aggregate', 0)} candidate indicator(s); "
+                "learning acceleration is reported per rolling window in the "
+                "cycle report")
+               if counts else "")
+        unmeasured = (context.uncertainty or {}).get("unmeasured") or []
+        answer("stuck",
+               (f"{len(unmeasured)} economic condition(s) in the vocabulary "
+                f"are unmeasured: {', '.join(unmeasured[:6])}")
+               if unmeasured else "")
+        answer("seek_next",
+               (f"the unmeasured conditions above, ranked by how far a "
+                "belief could move on them; series this deployment cannot "
+                "read at all are listed with the reason in `econ.series`")
+               if unmeasured else "")
+
+        try:
+            expectations = EST.load(self._runtime_root, "expectation")
+        except Exception:  # noqa: BLE001
+            expectations = []
+        open_count = sum(1 for e in expectations
+                         if isinstance(e, dict) and e.get("outcome") == "OPEN")
+        resolved = [e for e in expectations if isinstance(e, dict)
+                    and e.get("outcome") in ("CORRECT", "INCORRECT",
+                                             "NEAR_MISS")]
+        answer("open_expectations",
+               f"{open_count} open forward expectation(s)"
+               if open_count else "")
+        answer("resolved",
+               f"{len(resolved)} resolved forward expectation(s)"
+               if resolved else "",
+               absent_reason=("no forward expectation has been written to "
+                              "the shared core and reached its window yet"))
+        wrong = [e for e in resolved if e.get("outcome") == "INCORRECT"]
+        answer("wrong",
+               "; ".join(str(e.get("reconciliation", ""))[:100]
+                         for e in wrong[:3]) if wrong else "")
+
+        # SECTION 37. The calibration line is rendered from the ledger, and
+        # it is PRE-CALIBRATION until the declared minimum is met. There is
+        # no branch here that prints a percentage before then.
+        from intent_engine.econ import belief as EB
+        rehydrated = []
+        for row in expectations:
+            if not isinstance(row, dict):
+                continue
+            try:
+                rehydrated.append(EB.Expectation(**{
+                    k: v for k, v in row.items()
+                    if k in EB.Expectation.__dataclass_fields__}))
+            except Exception:  # noqa: BLE001
+                continue
+        out["calibration"] = CAL.report(rehydrated).as_dict()
+        return out
+
+    def _econ_learning_block(self, as_of: str) -> str:
+        """The shared-core section of `/learning`, as HTML."""
+        data = self._econ_intelligence(as_of)
+        rows = []
+        for key, question in self._ECON_QUESTIONS:
+            entry = data["answers"].get(key) or {}
+            if entry.get("absent"):
+                rows.append(
+                    f"<li><strong>{_e(question)}</strong><br>"
+                    f"<em>not answerable yet — {_e(entry.get('reason', ''))}"
+                    f"</em></li>")
+            else:
+                rows.append(f"<li><strong>{_e(question)}</strong><br>"
+                            f"{_e(entry.get('answer', ''))}</li>")
+        counts = (data.get("store") or {}).get("counts") or {}
+        counts_html = (", ".join(f"{_e(k)}: {v}"
+                                 for k, v in sorted(counts.items()))
+                       or "the shared core holds nothing yet")
+        cal = data.get("calibration") or {}
+        cal_html = _e(cal.get("headline", "")) if cal else (
+            "no forward expectations have been recorded")
+        return (
+            f'<h2>Shared economic core</h2>'
+            f'<p><em>One economic state, read by both the market engine and '
+            f'every company analysis. This page shows what the core holds; '
+            f'it exposes no position, no book and no scheduler.</em></p>'
+            f'<p><strong>Calibration:</strong> {cal_html}</p>'
+            f'<p><strong>Core contents:</strong> {counts_html}</p>'
+            f'<ul>{"".join(rows)}</ul>')
+
     def _learning_page(self, session):
         """Personal AI's read-only view of the learning brain: the candidate
         pipeline by status and the paper book's scored metrics. This page
@@ -5251,6 +11569,7 @@ class WebApp:
             f'<h2>Candidates</h2>{cand_html}'
             f'<h2>Paper-trading book (shadow — no real money)</h2>'
             f'<p>{_e(pb["text"])}</p>'
+            f'{self._econ_learning_block(as_of)}'
             f'<p><a href="/">Back to start</a></p>'
             f'</main></body></html>')
         return self._html(_chrome(body, self._nav(session)))

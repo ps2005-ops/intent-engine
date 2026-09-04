@@ -1,0 +1,128 @@
+{
+ "contract": "wave10_coverage.v1",
+ "as_of": "2026-08-08",
+ "source_maturity": {
+  "family": "release_notes",
+  "question": "ACTION_OBJECT",
+  "documents": 11,
+  "actors": 2,
+  "established_objects": 1,
+  "established_per_document": 0.0909,
+  "maturity": "PROVISIONAL",
+  "reason": "short on 11 documents against 20",
+  "verdict": "1 of 3 was LUCK. A 3.7x larger sample moved the rate from 0.333 to 0.091 and produced no new established object \u2014 it is still the same single one, 'Shopify Shipping expands to Italy and Spain'. Eight of twelve official surfaces returned nothing at all, and BigCommerce and Magento returned nothing from any of their six."
+ },
+ "world_model_predicate_coverage": {
+  "total_edges": 25,
+  "predicates_with_edges": 2,
+  "predicates_defined": 11,
+  "by_predicate": {
+   "BUYS_FROM": {
+    "edges": 0,
+    "subjects": 0,
+    "objects": 0,
+    "statuses": {}
+   },
+   "COMPETES_WITH": {
+    "edges": 0,
+    "subjects": 0,
+    "objects": 0,
+    "statuses": {}
+   },
+   "COMPLEMENTS": {
+    "edges": 0,
+    "subjects": 0,
+    "objects": 0,
+    "statuses": {}
+   },
+   "DEPENDS_ON": {
+    "edges": 0,
+    "subjects": 0,
+    "objects": 0,
+    "statuses": {}
+   },
+   "DISTRIBUTES": {
+    "edges": 0,
+    "subjects": 0,
+    "objects": 0,
+    "statuses": {}
+   },
+   "FINANCES": {
+    "edges": 0,
+    "subjects": 0,
+    "objects": 0,
+    "statuses": {}
+   },
+   "PARTNERS_WITH": {
+    "edges": 3,
+    "subjects": 3,
+    "objects": 3,
+    "statuses": {
+     "OBSERVED": 3
+    }
+   },
+   "REGULATES": {
+    "edges": 0,
+    "subjects": 0,
+    "objects": 0,
+    "statuses": {}
+   },
+   "SELLS_TO": {
+    "edges": 22,
+    "subjects": 10,
+    "objects": 20,
+    "statuses": {
+     "OBSERVED": 22
+    }
+   },
+   "SUBSTITUTES_FOR": {
+    "edges": 0,
+    "subjects": 0,
+    "objects": 0,
+    "statuses": {}
+   },
+   "SUPPLIES": {
+    "edges": 0,
+    "subjects": 0,
+    "objects": 0,
+    "statuses": {}
+   }
+  },
+  "finding": "COMPETES_WITH has ZERO edges in the measured world model. The three rivalry edges the whole game-theory branch rests on live in `competitive_relationships.CompetitiveClaim`, a separate type that is never written into the actor-relationship graph. The episode ranker cannot read them from the graph, and that is why it is not built on the graph.",
+  "no_inference": "missing predicates are reported as missing. None is inferred from model knowledge."
+ },
+ "macro_capital_compatibility": {
+  "existing_node_types": [
+   "BACKLOG",
+   "CAPEX",
+   "COMPANY_DEMAND",
+   "CUSTOMER_STATE",
+   "GUIDANCE",
+   "HIRING",
+   "MACRO_STATE",
+   "MARGIN",
+   "ORDERS",
+   "OUTCOME",
+   "PRICING",
+   "SUPPLIER_STATE"
+  ],
+  "required_by_roadmap": [
+   "CAPITAL_STATE",
+   "CREDIT_STATE",
+   "ECONOMIC_FACTOR",
+   "INDUSTRY_STATE",
+   "MACRO_STATE"
+  ],
+  "already_representable": [
+   "MACRO_STATE"
+  ],
+  "missing": [
+   "CAPITAL_STATE",
+   "CREDIT_STATE",
+   "ECONOMIC_FACTOR",
+   "INDUSTRY_STATE"
+  ],
+  "graph_is_typed_by_a_closed_tuple": true,
+  "link_has_free_text_mechanism": true
+ }
+}

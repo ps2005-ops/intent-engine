@@ -1,0 +1,63 @@
+{
+  "company": "Walmart Inc.",
+  "deployed_sha": "dc17a9d",
+  "run_id": "01M0JA5K11YG7NC95MY8TVJVJS",
+  "analysis_seconds": 186,
+  "stage_transitions": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Walmart Inc. WMT \u00b7 walmart.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working",
+      "status": 200,
+      "html_bytes": 17009
+    },
+    {
+      "t": 46.3,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Walmart Inc. WMT \u00b7 walmart.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done C",
+      "status": 200,
+      "html_bytes": 17005
+    },
+    {
+      "t": 97.7,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17005,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JA5K11YG7NC95MY8TVJVJS/progress",
+      "head": ""
+    },
+    {
+      "t": 186.0,
+      "text": "Walmart Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Walmart Inc. WMT \u00b7 USA \u00b7 walmart.com \u00b7 SEC CIK 0000104169 Walmart Inc. is a consumer business that runs on sale of other people's products at deliberately thin margin, where the return comes from scale in b",
+      "status": 200,
+      "html_bytes": 30228
+    }
+  ],
+  "route_seconds": {
+    "run": 3.79,
+    "intro": 5.63,
+    "slides": 7.54,
+    "full": 8.98,
+    "story": 6.71,
+    "history": 0.28,
+    "connect": 4.95
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "9890b2f49d944a8a",
+    "started_at": 1787319148.8228748,
+    "uptime_seconds": 1894.2
+  },
+  "process_after": {
+    "boot_id": "9890b2f49d944a8a",
+    "started_at": 1787319148.8228748,
+    "uptime_seconds": 2264.7
+  },
+  "errors": [
+    "GET /runs/01M0JA5K11YG7NC95MY8TVJVJS/progress: timeout",
+    "GET /runs/01M0JA5K11YG7NC95MY8TVJVJS/progress: timeout"
+  ]
+}

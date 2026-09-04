@@ -1,0 +1,15 @@
+{
+ "company": "Meta Platforms, Inc.",
+ "deployed_sha": "f8c183f",
+ "captured_at": "2026-08-22T04:36:27Z",
+ "run_id": "01M0KVJRVATJS94DNEN3QMYMDD",
+ "outcome": "",
+ "routes": {},
+ "seconds": 528,
+ "reliability": {
+  "connection_reset": 0,
+  "quota_block": false,
+  "retry_required": 0,
+  "manual_recovery": 0
+ }
+}

@@ -130,20 +130,46 @@ def test_an_observation_excerpt_comes_from_a_section_not_the_cover_page():
         assert "27-2825503" not in o.excerpt
 
 
-def test_a_web_page_still_uses_its_meta_description():
-    """The fallback must not regress: only filings change behaviour."""
+def test_a_web_page_is_read_from_its_body_not_its_search_blurb():
+    """REWRITTEN AT THE UNIFICATION, and the reason matters.
+
+    This test used to assert the opposite -- that a web page's excerpt comes
+    from `meta_description` -- on the reasoning that only filings should
+    change behaviour. The market lineage then MEASURED that rule on live
+    output: of seventeen real observations across two companies, roughly
+    fifteen carried no commercial event in any phrasing, because a marketing
+    page's `meta_description` IS its blurb. `evidence_text.body_text` is the
+    unified rule, and it inverts the preference: body first, blurb only when
+    there is no body at all.
+
+    The ORIGINAL intent of this test survives and is what is asserted below:
+    a web page must not be put through filing-section selection. It is read
+    as a page, and `section` stays empty.
+    """
+    from intent_engine.strategic_intelligence import evidence_text as ET
     from intent_engine.strategic_intelligence import observations as O
+    body = ("Datadog announced usage-based pricing for its log management "
+            "product, replacing the per-host tier that enterprise customers "
+            "had asked us to revisit. The change takes effect next quarter "
+            "for all new contracts and at renewal for existing ones.")
     docs = [{
         "final_url": "https://www.datadoghq.com/",
         "title": "Datadog",
         "meta_description": "Monitor infrastructure metrics and logs in one "
                             "unified platform with Datadog.",
-        "text_content": "Some other body text entirely.",
+        "text_content": body,
         "source_class": "company_owned",
         "content_hash": "h2",
     }]
-    for o in O.derive_observations(docs, company="Datadog"):
-        assert "Some other body text" not in o.excerpt
+    out = O.derive_observations(docs, company="Datadog")
+    assert out, "a page with real prose must still produce an observation"
+    for o in out:
+        assert "Monitor infrastructure metrics" not in o.excerpt, (
+            "the search-engine blurb was preferred over the page's own prose")
+
+    # And the blurb is still the last resort, not a discarded field: a page
+    # with no body at all falls back to it rather than returning nothing.
+    assert ET.body_text({"text_content": "", "meta_description": "B"}) == "B"
 
 
 # --- found live, not in a fixture -------------------------------------------

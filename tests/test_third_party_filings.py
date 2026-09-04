@@ -27,11 +27,28 @@ def _transport(hits):
     return lambda url: {"hits": {"hits": hits}}
 
 
+#: THE PROSE LIVES IN THE FILING, NOT IN THE SEARCH RESULT.
+#:
+#: These fixtures used to carry the substantive sentence in `_snippet`, and
+#: production has no snippet at all -- measured live, EDGAR full-text search
+#: returns neither `_snippet` nor `highlight` on any hit. So the tests were
+#: proving selection against a field that is always empty in the real system,
+#: which is why a vendor-list mention could pass discovery for months.
+#: Selection now reads the document, so the fixture puts the sentence where
+#: the real one is.
+_PROSE = ("The company competes with Datadog in observability. "
+          "Datadog's pricing pressured our renewal revenue this year.")
+
+
+def _fetcher(text=_PROSE):
+    return lambda url: f"<html><body><p>{text}</p></body></html>"
+
+
 def test_a_competitor_filing_is_independent_of_the_subject():
     got = TPF.propose_third_party_filings(
         company_name="Datadog", subject_cik="0001561550",
         transport=_transport([_hit("0001477333", "Cloudflare, Inc.  (NET)")]),
-        today=TODAY)
+        fetcher=_fetcher(), today=TODAY)
     assert len(got) == 1
     assert got[0]["source_class"] == "competitor"
     assert S.is_independent_of_subject(got[0]["source_class"])
@@ -54,7 +71,7 @@ def test_the_edgar_venue_does_not_make_a_filing_independent():
         company_name="Datadog", subject_cik="0001561550",
         transport=_transport([_hit("0001561550", "Datadog, Inc."),
                               _hit("0001477333", "Cloudflare, Inc.")]),
-        today=TODAY)
+        fetcher=_fetcher(), today=TODAY)
     assert [c["third_party_filer"] for c in got] == ["Cloudflare, Inc."]
 
 
@@ -65,7 +82,7 @@ def test_a_stale_filing_cannot_corroborate_a_current_claim():
         company_name="Adobe", subject_cik="0000796343",
         transport=_transport([_hit("0000897893", "PEERLESS SYSTEMS CORP",
                                    date="2006-10-26")]),
-        today=TODAY)
+        fetcher=_fetcher(), today=TODAY)
     assert got == []
 
 
@@ -73,25 +90,59 @@ def test_an_undated_filing_is_not_usable_as_evidence():
     got = TPF.propose_third_party_filings(
         company_name="Datadog", subject_cik="0001561550",
         transport=_transport([_hit("0001477333", "Cloudflare", date="")]),
-        today=TODAY)
+        fetcher=_fetcher(), today=TODAY)
     assert got == []
 
 
 def test_an_incidental_mention_is_not_evidence():
-    """Named once in an exhibit index is not an account of the company."""
+    """Named once in an exhibit index is not an account of the company.
+
+    The index text now sits in the DOCUMENT, because that is the only place
+    the real system can ever read it from.
+    """
     got = TPF.propose_third_party_filings(
         company_name="Datadog", subject_cik="0001561550",
-        transport=_transport([_hit("0001477333", "Cloudflare",
-                                   snippet="EXHIBIT INDEX  Datadog  10.4")]),
+        transport=_transport([_hit("0001477333", "Cloudflare")]),
+        fetcher=_fetcher("EXHIBIT INDEX  Datadog  10.4"), today=TODAY)
+    assert got == []
+
+
+def test_a_vendor_list_mention_never_reaches_the_dossier():
+    """THE EVENTIKO SHAPE, refused at discovery instead of downstream.
+
+    A real filer named Cloudflare in a list of hosting vendors, spent one of
+    four candidate slots, was retrieved and stored, and was only then refused
+    as irrelevant. The slot bought nothing. Rejecting it here is the same
+    adjudication asked one stage earlier -- and it can only be asked at all
+    because we now read the filing rather than a snippet that does not exist.
+    """
+    got = TPF.propose_third_party_filings(
+        company_name="Cloudflare", subject_cik="0001477333",
+        transport=_transport([_hit("0000999", "EVENTIKO INC.")]),
+        fetcher=_fetcher("Our website is engaged via reputable companies "
+                         "such as Namecheap, Godaddy and Cloudflare."),
         today=TODAY)
     assert got == []
+
+
+def test_the_excerpt_shown_is_the_span_that_matched():
+    """An excerpt that does not contain the mention cannot justify the
+    verdict printed beside it."""
+    got = TPF.propose_third_party_filings(
+        company_name="Datadog", subject_cik="0001561550",
+        transport=_transport([_hit("0001477333", "Cloudflare")]),
+        fetcher=_fetcher("Unrelated opening paragraph about our own segments. "
+                         + _PROSE), today=TODAY)
+    assert len(got) == 1
+    assert "Datadog" in got[0]["mention_excerpt"]
+    assert "Unrelated opening" not in got[0]["mention_excerpt"]
 
 
 def test_a_non_substantive_form_is_rejected():
     got = TPF.propose_third_party_filings(
         company_name="Datadog", subject_cik="0001561550",
         transport=_transport([_hit("0001477333", "Cloudflare", form="4")]),
-        today=TODAY)
+        fetcher=_fetcher(), today=TODAY)
     assert got == []
 
 
@@ -101,21 +152,21 @@ def test_one_organisational_voice_per_filer():
             for i in range(3)]
     got = TPF.propose_third_party_filings(
         company_name="Datadog", subject_cik="0001561550",
-        transport=_transport(hits), today=TODAY)
+        transport=_transport(hits), fetcher=_fetcher(), today=TODAY)
     assert len(got) == 1
 
 
 def test_competitor_bias_is_recorded_not_hidden():
     got = TPF.propose_third_party_filings(
         company_name="Datadog", subject_cik="0001561550",
-        transport=_transport([_hit("0001477333", "Cloudflare")]), today=TODAY)
+        transport=_transport([_hit("0001477333", "Cloudflare")]), fetcher=_fetcher(), today=TODAY)
     assert "interest in how it describes" in got[0]["bias_note"]
 
 
 def test_every_candidate_carries_a_durable_citation_and_a_date():
     got = TPF.propose_third_party_filings(
         company_name="Datadog", subject_cik="0001561550",
-        transport=_transport([_hit("0001477333", "Cloudflare")]), today=TODAY)
+        transport=_transport([_hit("0001477333", "Cloudflare")]), fetcher=_fetcher(), today=TODAY)
     c = got[0]
     assert c["url"].startswith("https://www.sec.gov/Archives/edgar/data/")
     assert c["filed_on"] == "2026-01-15"
@@ -135,7 +186,7 @@ def test_the_result_is_bounded():
             for i in range(1, 40)]
     got = TPF.propose_third_party_filings(
         company_name="Datadog", subject_cik="0001561550",
-        transport=_transport(hits), today=TODAY)
+        transport=_transport(hits), fetcher=_fetcher(), today=TODAY)
     assert len(got) <= TPF.MAX_CANDIDATES
 
 

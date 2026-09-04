@@ -1,0 +1,163 @@
+{
+  "contract": "market_learning_report.v1",
+  "report_version": 1,
+  "period": "week",
+  "start": "2026-08-10",
+  "end": "2026-08-16",
+  "partial_period": true,
+  "partial_month": false,
+  "generated_at": "2026-08-12T23:03:03.777607+00:00",
+  "system_of_record": "market_intelligence_learning_engine",
+  "data_root": "/Users/prathamsharma/intent-engine-market/reports/market/learning_ledger.jsonl",
+  "runtime_sha": "",
+  "rows": {
+    "in_period": 1120,
+    "ledger_all_time": 4960,
+    "undatable_all_time": 25,
+    "undatable_by_kind": {
+      "causal_estimate": 25
+    },
+    "date_field_used": {
+      "as_of": 270,
+      "at": 2,
+      "available_at": 41,
+      "changed_at": 5,
+      "chosen_at": 14,
+      "completed_at": 14,
+      "created_at": 199,
+      "detected_at": 66,
+      "evaluated_at": 2,
+      "last_updated": 10,
+      "measured_as_of": 162,
+      "preregistered_at": 10,
+      "retrieved_at": 102,
+      "seen_at": 223
+    }
+  },
+  "channels": {
+    "evidence": {
+      "evidence_rows": 41,
+      "re_observations": 223,
+      "arrivals_total": 264,
+      "new_information_share": 0.1553,
+      "knowledge_effects": 199,
+      "evidence_that_changed_something": 25,
+      "zero_effect_evidence": 16,
+      "effects_by_type": {
+        "CONTRADICTED": 12,
+        "CREATED": 21,
+        "NO_CHANGE": 92,
+        "RESOLVED": 43,
+        "SUPPORTED": 31
+      },
+      "changing_effect_share": 0.5377,
+      "independent_evidence_rows": "UNAVAILABLE",
+      "independent_evidence_note": "evidence independence is produced on the founder branch (company_ingestion.independence); the market ledger carries no independence column"
+    },
+    "beliefs": {
+      "beliefs_declared": 10,
+      "beliefs_updated": 2,
+      "distinct_beliefs_touched": 12,
+      "transitions": {
+        "UNSPECIFIED": 2
+      }
+    },
+    "expectations": {
+      "preregistered": 10,
+      "reconciled": 2,
+      "outcomes": {
+        "CONFIRMED": 2
+      },
+      "open_after_period": 8
+    },
+    "thesis": {
+      "snapshots": 48,
+      "revisions": 5,
+      "distinct_theses_revised": 5,
+      "transitions": {
+        "CREATED": 5
+      }
+    },
+    "research": {
+      "decisions": 14,
+      "outcomes": 14,
+      "by_status": {
+        "FAILED": 1,
+        "NO_RESULT": 1,
+        "SUCCESS": 12
+      },
+      "zero_result_captured": true
+    },
+    "method": {
+      "performance_rows": 162,
+      "beat_baseline": 33,
+      "beat_baseline_share": 0.2037,
+      "assumption_checks": 216,
+      "assumptions_held": 0,
+      "assumptions_held_share": 0.0
+    },
+    "sources": {
+      "observations": 66,
+      "families_tracked": 6,
+      "by_state": {
+        "DEGRADED": 1,
+        "HEALTHY": 51,
+        "UNCLASSIFIED": 14
+      },
+      "degraded_families": [
+        "bureau_of_labor_statistics"
+      ],
+      "fallbacks_active": [],
+      "longest_failure_streak": 1,
+      "affected_intelligence": [],
+      "note": "a degraded source reduces observability; it is never evidence that a company did nothing"
+    },
+    "macro": {
+      "observations": 102,
+      "distinct_conditions": 6,
+      "by_condition": {
+        "CURRENCY": 2,
+        "EMPLOYMENT": 30,
+        "INFLATION": 30,
+        "MARKET_RATE": 6,
+        "POLICY_RATE": 3,
+        "WAGES": 31
+      }
+    }
+  },
+  "bottleneck": {
+    "bottleneck": "EVIDENCE_INDEPENDENCE",
+    "severity": 0.1553,
+    "reason": "223 of 264 arrivals were re-observations (84% already known)",
+    "runners_up": []
+  },
+  "next_research_priority": {
+    "bottleneck": "EVIDENCE_INDEPENDENCE",
+    "missing_fact": "arrivals are dominated by pages already read",
+    "suggested_action": "seek a source family off the companies' own domains",
+    "why_now": "223 of 264 arrivals were re-observations (84% already known)",
+    "forbidden_shape": "a query that names its desired conclusion is refused; the action must be able to fail"
+  },
+  "executive_summary": {
+    "top_learnings": [
+      "25 evidence row(s) changed the model",
+      "12 contradicted effect(s)",
+      "21 created effect(s)",
+      "43 resolved effect(s)",
+      "31 supported effect(s)"
+    ],
+    "top_contradictions": [
+      "12 contradicting effect(s)"
+    ],
+    "top_revalidations": [
+      "92 observation(s) confirmed existing knowledge"
+    ],
+    "top_degradations": [
+      "bureau_of_labor_statistics"
+    ],
+    "top_information_gaps": [
+      "223 of 264 arrivals were re-observations (84% already known)"
+    ],
+    "material_change": true
+  }
+}

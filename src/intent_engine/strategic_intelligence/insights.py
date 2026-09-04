@@ -133,14 +133,27 @@ def passes_specificity(text: str, company: str) -> bool:
     return sum(1 for w in specific if w in low) >= 1
 
 
-def _live_tensions(observations):
+def _live_tensions(observations, business_model: str = ""):
+    """Tensions both observed AND applicable to this kind of business.
+
+    The same gate `reasoning._build_blind_spots` applies, and for the same
+    reason: a tension fires on signal names, and signal names are generic
+    enough that a chip designer's partner and platform language matched a
+    marketplace's. Surprises and opportunities are built from these, so an
+    ungated tension leaked commerce language onto every surface that renders
+    them, not just the blind-spot section.
+    """
+    from intent_engine.strategic_intelligence.patterns import tension_applies
     present = set()
     for o in observations:
         present.update(o.signals)
     live = []
     for t in TENSIONS:
-        if any(s in present for s in t["left"]) and \
-                any(s in present for s in t["right"]):
+        if not (any(s in present for s in t["left"])
+                and any(s in present for s in t["right"])):
+            continue
+        ok, _kind = tension_applies(t, business_model)
+        if ok:
             live.append(t)
     return live
 
@@ -159,13 +172,14 @@ def _cite(obs, limit=2):
             for o in obs[:limit]]
 
 
-def detect_surprises(company, observations, hypotheses):
+def detect_surprises(company, observations, hypotheses,
+                     business_model: str = ""):
     """A surprise is a meaningful mismatch, not a fact. Built from live tensions
     plus a cross-source-class emphasis check."""
     surprises = []
     classes = {o.source_class for o in observations}
     exec_present = "executive_statement" in classes
-    for t in _live_tensions(observations):
+    for t in _live_tensions(observations, business_model):
         a = _obs_for(observations, t["left"])
         b = _obs_for(observations, t["right"])
         if not (a and b):
@@ -231,9 +245,10 @@ _OPPORTUNITY_PLAYBOOK = {
 }
 
 
-def detect_opportunities(company, observations, hypotheses):
+def detect_opportunities(company, observations, hypotheses,
+                         business_model: str = ""):
     opps = []
-    for t in _live_tensions(observations):
+    for t in _live_tensions(observations, business_model):
         play = _OPPORTUNITY_PLAYBOOK.get(t["tension_id"])
         if not play:
             continue

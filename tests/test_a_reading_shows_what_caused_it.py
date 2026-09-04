@@ -304,8 +304,36 @@ def test_only_the_mechanism_module_phrases_the_evidence_line():
     defect wearing different clothes.
     """
     marker = "The company's own words:"
+
+    def _code_only(text):
+        """The module's CODE, with comments and docstrings removed.
+
+        A GUARD THAT GREPS PROSE MATCHES THE COMMENT EXPLAINING THE RULE.
+        This flagged `founder_brief/steps.py`, whose ONLY occurrence of the
+        marker is a comment describing where the company's own words belong
+        on the page; the module renders "in its own words" and never this
+        string. A structural rule has to read structure.
+        """
+        import io
+        import tokenize
+        kept = []
+        try:
+            for token in tokenize.generate_tokens(io.StringIO(text).readline):
+                if token.type in (tokenize.COMMENT, tokenize.NL):
+                    continue
+                if token.type == tokenize.STRING:
+                    stripped = token.line.strip()
+                    triple = ('"' * 3, "'" * 3)
+                    if any(stripped.startswith(q) for q in triple):
+                        continue          # a docstring, not a rendered value
+                kept.append(token.string)
+        except Exception:                 # noqa: BLE001 - unparseable: be safe
+            return text
+        return "\n".join(kept)
+
     owners = sorted(p.relative_to(SRC).as_posix()
-                    for p in SRC.rglob("*.py") if marker in p.read_text())
+                    for p in SRC.rglob("*.py")
+                    if marker in _code_only(p.read_text()))
     assert owners == ["founder_brief/narrative.py",
                       "strategic_intelligence/slides.py"], owners
     # ...and both get the QUOTE itself from the one module that builds it.

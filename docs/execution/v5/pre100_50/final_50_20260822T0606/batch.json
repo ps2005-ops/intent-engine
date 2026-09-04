@@ -1,0 +1,47 @@
+[
+ {
+  "company": "Meta Platforms, Inc.",
+  "seconds": 1383.2,
+  "run_id": "01M0M17NPCTD70E2FHZ93AW9YX",
+  "outcome": "",
+  "error": "",
+  "core_mean": 8.36,
+  "core_min": 0
+ },
+ {
+  "company": "Alphabet Inc.",
+  "seconds": 517.8,
+  "run_id": "01M0M2HW8PMCQ3ZQTMPZ1RRVAB",
+  "outcome": "",
+  "error": "",
+  "core_mean": 9.64,
+  "core_min": 6
+ },
+ {
+  "company": "Microsoft Corporation",
+  "seconds": 516.3,
+  "run_id": "01M0M31NW1SDM8PBYM80K72T58",
+  "outcome": "",
+  "error": "",
+  "core_mean": 9.27,
+  "core_min": 6
+ },
+ {
+  "company": "Amazon.com, Inc.",
+  "seconds": 660.7,
+  "run_id": "01M0M3HE62DCMX2CW57FP6B03G",
+  "outcome": "",
+  "error": "",
+  "core_mean": 9.27,
+  "core_min": 6
+ },
+ {
+  "company": "Salesforce, Inc.",
+  "seconds": 440.4,
+  "run_id": "01M0M45KC0E2SCRQEPZARAF37E",
+  "outcome": "",
+  "error": "",
+  "core_mean": 2.6,
+  "core_min": 0
+ }
+]

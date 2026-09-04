@@ -40,8 +40,15 @@ import re
 import urllib.request
 from urllib.parse import urlparse
 
+from intent_engine.company_ingestion import httppool
+from intent_engine.company_ingestion import (
+    public_metadata as PUBLIC_METADATA,
+)
 from intent_engine.company_ingestion.records import (
     MAX_RESPONSE_BYTES, USER_AGENT,
+)
+from intent_engine.company_ingestion.transient import (
+    DEFAULT_POLICY, call_with_retry,
 )
 from intent_engine.company_ingestion.validation import (
     resolve_public_addresses, validate_candidate_url,
@@ -63,6 +70,28 @@ FILING_INDEX_URL = ("https://www.sec.gov/Archives/edgar/data/{cik}/"
 _PREFERRED_FORMS = ("10-K", "10-Q", "20-F", "40-F", "8-K", "6-K", "S-1",
                     "424B4", "DEF 14A")
 MAX_EDGAR_CANDIDATES = 3
+#: How many filings to propose when the company's own web presence produced
+#: NOTHING -- either it refused every request, or the run never had a domain.
+#:
+#: MEASURED across the 50-company gauntlet on 743df06. Twelve companies
+#: composed on exactly three documents, all of them SEC filings:
+#:
+#:     Goldman Sachs  failed=26/24   compose=3 families=investor
+#:     Mastercard     failed=24/22   compose=3 families=investor
+#:     Union Pacific  failed=27/24   compose=2 families=investor
+#:     UPS (no domain) failed=1/0    compose=2 families=investor
+#:
+#: The web budget was being spent on hosts that answer 403 to this service's
+#: egress -- lilly.com answers 200 from a laptop with the same User-Agent and
+#: refused this deployment seventeen times -- while the source that DOES
+#: answer was capped at three.
+#:
+#: So the budget moves rather than grows: a run that fetched nothing from the
+#: company's own site does not make MORE requests in total, it makes them
+#: somewhere they are served. Five filings span the annual report, the
+#: quarterly, a current report and the proxy, which after `family_of` reads
+#: the form is four evidence families rather than one.
+MAX_EDGAR_CANDIDATES_WEB_BLOCKED = 5
 
 # ONE FILING OF EACH KIND, NOT THREE OF THE SAME KIND.
 #
@@ -135,6 +164,33 @@ TRUNCATABLE_FORMS = frozenset({"10-K", "20-F", "40-F"})
 #: bounded analysis. 16MB clears the largest observed filing with headroom
 #: without pretending there is no limit at all.
 MAX_FILING_BYTES = 16_000_000
+
+#: THE SUBMISSIONS INDEX IS NOT A WEB DOCUMENT AND MUST NOT SHARE ITS CAP.
+#:
+#: MEASURED. JPMorgan Chase (CIK 19617) files 25,746 recent documents, 22,368
+#: of them 424B2 structured-note prospectuses, and its submissions JSON is
+#: 4,573,499 bytes against a 2,000,000-byte MAX_RESPONSE_BYTES. The transport
+#: truncated it at exactly 2 MB, `json.loads` raised on the half-object, the
+#: broad `except` returned [], and the customer was told "no approved source
+#: could be retrieved" for a company whose 10-K was sitting in the index.
+#:
+#: Every other Batch-A company's index is about 160 KB, so nothing else in
+#: the cohort came near the cap and the defect looked like a JPMorgan quirk.
+#: It is not: it is every filer that issues frequently — the large banks and
+#: shelf issuers — and it scales with filing count, not with company size.
+MAX_SUBMISSIONS_BYTES = 32_000_000
+
+
+class SubmissionsTruncated(Exception):
+    """The index was cut off by the byte budget, so it cannot be read.
+
+    A DISTINCT EXCEPTION BECAUSE THE TWO OUTCOMES ARE DIFFERENT FACTS. "This
+    filer has no usable filings" and "we could not read the filer's index"
+    were both reported as an empty candidate list, and the second is a defect
+    in us that was being displayed as a fact about the company.
+    """
+
+
 _DROP_TOKENS = {"inc", "incorporated", "corp", "corporation", "co", "company",
                 "ltd", "limited", "plc", "llc", "lp", "holdings", "group",
                 "technologies", "technology", "the", "and", "of"}
@@ -157,9 +213,16 @@ def _sec_transport(url: str, timeout: float,
     MAX_FILING_BYTES."""
     contact = os.environ.get("SEC_CONTACT_EMAIL", "").strip()
     ua = USER_AGENT + (f" contact:{contact}" if contact else "")
+    head = {"User-Agent": ua, "Accept": "application/json,text/html"}
+    # SEC is the host this module talks to most and the one it is most
+    # careful with. Reuse changes the number of CONNECTIONS, never the number
+    # of requests, so the fair-access discipline recorded in
+    # docs/INTERACTIVE_PERFORMANCE.md is untouched -- and a run that opens one
+    # connection instead of nine is, if anything, a lighter guest.
+    if httppool.pooling_enabled():
+        return httppool.POOL.request(url, timeout, max_bytes, headers=head)
     opener = urllib.request.build_opener(_NoRedirect())
-    request = urllib.request.Request(url, headers={
-        "User-Agent": ua, "Accept": "application/json,text/html"})
+    request = urllib.request.Request(url, headers=head)
     response = opener.open(request, timeout=timeout)
     body = response.read(max_bytes + 1)
     headers = {k.lower(): v for k, v in response.headers.items()}
@@ -167,18 +230,88 @@ def _sec_transport(url: str, timeout: float,
             len(body) > max_bytes)
 
 
-def _fetch_bytes(url, *, transport, resolver, timeout=8.0) -> bytes:
+#: WHICH SEC URLS ARE THE SAME FACT FOR EVERY COMPANY.
+#:
+#: The registrant tables are a public index: identical bytes whatever the
+#: customer typed, downloaded 795,179 bytes at a time, TWICE per analysis
+#: before this existed. A submissions index is per-registrant and changes only
+#: when that registrant files, so it is cacheable for far less time.
+#:
+#: A FILING IS NOT IN HERE. `FilingCache` owns filing documents, keyed on
+#: attested EDGAR identity, and a 16MB primary document has no business in a
+#: process-memory cache sized for index tables.
+def _registry_ttl(url: str):
+    """The cache lifetime for a SEC metadata URL, or None if it is not one."""
+    if not PUBLIC_METADATA.enabled():
+        return None
+    plain = str(url or "")
+    if plain in (TICKERS_URL,) or plain.startswith(
+            "https://www.sec.gov/files/company_tickers"):
+        return PUBLIC_METADATA.TTL_REGISTRY_S
+    if plain.startswith("https://data.sec.gov/submissions/"):
+        return PUBLIC_METADATA.TTL_SUBMISSIONS_S
+    return None
+
+
+def _fetch_bytes(url, *, transport, resolver, timeout=8.0,
+                 max_bytes=None, retry_policy=None, retry_ledger=None,
+                 sleeper=None, rng=None) -> bytes:
     """Fetch a permitted SEC URL through the SSRF wall. The URL is validated
     and its host resolved to public addresses before any request; SEC serves
     JSON, so this is not subject to the HTML-only MIME gate. Injected
-    transports (tests) are honoured so the suite never touches the network."""
+    transports (tests) are honoured so the suite never touches the network.
+
+    SEC is the host that actually throttles this product, and this function —
+    not `safe_fetch` — is how every EDGAR metadata read reaches it. Bounded,
+    host-scoped retry is applied here for the same reason it is applied
+    there: a 429 is "not now", and answering it by telling a customer their
+    company has no filings is wrong."""
     url = validate_candidate_url(url)
     if resolver is not False:
         resolve_public_addresses(urlparse(url).hostname, resolver=resolver)
     tx = transport if transport is not None else _sec_transport
-    status, headers, body, _exceeded = tx(url, timeout)
+
+    def _attempt():
+        if max_bytes is None:
+            return tx(url, timeout)
+        try:
+            return tx(url, timeout, max_bytes)
+        except TypeError:
+            # An injected transport that predates the budget argument keeps
+            # working against its own cap, which is what every test double
+            # does today.
+            return tx(url, timeout)
+
+    cache_ttl = _registry_ttl(url) if transport is None else None
+    if cache_ttl is not None:
+        # A cached body short-circuits BEFORE the request. Only registry
+        # tables and submission indexes qualify -- never a filing document,
+        # which `FilingCache` already owns and which would not fit here.
+        #
+        # Only when the caller did NOT inject a transport. An injected
+        # transport means the caller is deciding what comes back, and a cache
+        # answering in front of it would be answering for it -- which in the
+        # suite is one test's fixture serving another test's assertion.
+        hit = PUBLIC_METADATA.STORE.get(url)
+        if hit is not None:
+            return hit
+
+    status, headers, body, exceeded = call_with_retry(
+        _attempt, url=url, policy=retry_policy or DEFAULT_POLICY,
+        ledger=retry_ledger, sleeper=sleeper, rng=rng)
     if isinstance(body, str):
         body = body.encode()
+    # TRUNCATION IS NOT AN ANSWER. Returning the cut-off bytes hands a broken
+    # JSON document to a parser whose failure is indistinguishable from a
+    # filer with nothing on file.
+    if exceeded:
+        raise SubmissionsTruncated(
+            f"{url} exceeded the {max_bytes or MAX_RESPONSE_BYTES:,}-byte "
+            f"budget for this call")
+    if cache_ttl is not None and PUBLIC_METADATA.enabled():
+        # Stored only after every check above passed. A truncated or failed
+        # response must never be served again as if it were the record.
+        PUBLIC_METADATA.STORE.put(url, body, cache_ttl)
     return body
 
 
@@ -216,8 +349,42 @@ def business_document(cik, accession_nodash, primary_doc, *, transport=None,
     return (best, True) if best else (primary_doc, False)
 
 
+#: Apostrophe forms a customer's keyboard or a copy-paste can produce.
+_APOSTROPHES = "\u0027\u2019\u02bc\u02be\u0060\u00b4"
+
+
 def _tokens(name: str) -> set:
-    words = re.sub(r"[^a-z0-9]+", " ", (name or "").lower()).split()
+    """Comparable name tokens for full-containment matching.
+
+    AN APOSTROPHE IS DELETED, NOT SPLIT ON, AND THAT ONE CHARACTER COST A
+    COMPANY ITS ENTIRE EVIDENCE SET.
+
+    MEASURED LIVE on dd1511f0. A customer typed "Lowe's Companies" with a
+    website and submitted without choosing a suggestion. Splitting on
+    non-alphanumerics gave {lowe, s, companies}; the SEC's own title is
+    "LOWES COMPANIES INC" -> {lowes, companies}; containment failed, so
+    `resolve_cik` answered None. With no CIK there were no EDGAR filing
+    candidates AT ALL, lowes.com refused the fetch, and the run reached
+    composition with ONE document and no `direction` or `market` evidence.
+    `may_synthesize` was False, so `strategic_report` was None and the
+    business-model gate never ran -- on a company with a 10-K sitting in
+    EDGAR.
+
+    The autocomplete surface already normalises this: typing `lowe's` returns
+    "Lowes Companies Inc". The SERVER-SIDE fallback did not get that repair,
+    so the defect survived exactly where nobody was looking -- the path a
+    customer takes when they type past the dropdown.
+
+    Deleting is symmetric: both sides of the comparison lose the character,
+    so a registrant whose own title carries one is unaffected. Splitting is
+    not, because it manufactures a one-letter token ("s") that no title
+    contains. Every possessive company name in EDGAR has this shape:
+    McDonald's, Macy's, Moody's, Kohl's, Dillard's, Wendy's, Domino's.
+    """
+    lowered = (name or "").lower()
+    for ch in _APOSTROPHES:
+        lowered = lowered.replace(ch, "")
+    words = re.sub(r"[^a-z0-9]+", " ", lowered).split()
     return {w for w in words if w and w not in _DROP_TOKENS}
 
 
@@ -304,6 +471,67 @@ def _spread_by_family(order, forms, dates=(), today="") -> list:
     return out + stale
 
 
+def registrant_classification(resolved, *, transport=None,
+                              resolver=None) -> dict:
+    """The SIC classification the SEC assigns this registrant.
+
+    WHY THIS IS ALLOWED TO CLASSIFY A BUSINESS. The validation manifest
+    classifies 100 companies by hand, and a company outside it used to fall
+    to an implicit UNKNOWN -- which read to a customer as "we know nothing
+    about Toyota". That was never true: Toyota is a registrant and the
+    regulator has already classified it.
+
+    A SIC code is the same KIND of fact as the manifest's
+    business_model_class: authored, reviewed, assigned by a third party, and
+    definitional rather than empirical. It says which industry the filer was
+    placed in; it says nothing about what the company did last quarter. So
+    it may seed a business-model profile and it may never seed a finding.
+
+    It is strictly coarser than the manifest -- one code covers a whole
+    major group -- which is why a profile derived from it is labelled
+    PARTIAL and never AVAILABLE.
+
+    Returns {"sic", "sic_description", "cik"} or {}. Never raises.
+    """
+    try:
+        raw = _fetch_bytes(
+            SUBMISSIONS_URL.format(cik10=resolved["cik10"]),
+            transport=transport, resolver=resolver,
+            max_bytes=MAX_SUBMISSIONS_BYTES)
+        payload = json.loads(raw.decode("utf-8", "replace"))
+    except Exception:                                       # noqa: BLE001
+        return {}
+    sic = str(payload.get("sic") or "").strip()
+    if not sic:
+        return {}
+    return {"sic": sic,
+            "sic_description": str(payload.get("sicDescription") or "").strip(),
+            "cik": str(resolved.get("cik") or "")}
+
+
+def submissions(cik, *, transport=None, resolver=None) -> dict:
+    """The registrant's submissions record, or {}. Never raises.
+
+    Exists so the history surface can read a company's DATED filing record
+    without re-resolving it by name. `filing_candidates` already fetches this
+    document to pick three URLs and then discards the dates, which is the
+    only per-company dated series a first run has any access to.
+
+    `cik` may be padded or bare; EDGAR wants ten digits.
+    """
+    digits = "".join(c for c in str(cik or "") if c.isdigit())
+    if not digits:
+        return {}
+    try:
+        raw = _fetch_bytes(SUBMISSIONS_URL.format(cik10=digits.zfill(10)),
+                           transport=transport, resolver=resolver,
+                           max_bytes=MAX_SUBMISSIONS_BYTES)
+        payload = json.loads(raw.decode("utf-8", "replace"))
+    except Exception:                                       # noqa: BLE001
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
 def filing_candidates(resolved, *, transport=None, resolver=None,
                       limit=MAX_EDGAR_CANDIDATES) -> list:
     """Propose recent filing primary-document candidates for a resolved CIK.
@@ -311,7 +539,8 @@ def filing_candidates(resolved, *, transport=None, resolver=None,
     try:
         raw = _fetch_bytes(
             SUBMISSIONS_URL.format(cik10=resolved["cik10"]),
-            transport=transport, resolver=resolver)
+            transport=transport, resolver=resolver,
+            max_bytes=MAX_SUBMISSIONS_BYTES)
         recent = json.loads(raw.decode("utf-8", "replace"))["filings"]["recent"]
         forms = recent["form"]
         accessions = recent["accessionNumber"]
@@ -378,16 +607,29 @@ def filing_candidates(resolved, *, transport=None, resolver=None,
 
 
 def propose_edgar_candidates(*, company_name, ticker=None, transport=None,
-                             resolver=None) -> list:
+                             resolver=None, cik="",
+                             limit=MAX_EDGAR_CANDIDATES) -> list:
     """Resolve the company and return authoritative SEC filing candidates.
     Fully defensive: returns [] if the company can't be resolved or SEC is
-    unreachable — discovery must never fail because of this adapter."""
+    unreachable — discovery must never fail because of this adapter.
+
+    `cik` short-circuits the name lookup. A run opened on a CIK already knows
+    exactly which filer it is about, and re-deriving that from the typed name
+    can only lose: name matching is fuzzy, and a second resolution that lands
+    on a different registrant would attribute one company's filings to
+    another.
+    """
     try:
-        resolved = resolve_cik(company_name, ticker=ticker,
-                               transport=transport, resolver=resolver)
+        if cik:
+            digits = str(cik).strip().lstrip("0") or "0"
+            resolved = {"cik": int(digits), "cik10": f"{int(digits):010d}",
+                        "title": company_name, "ticker": ticker or ""}
+        else:
+            resolved = resolve_cik(company_name, ticker=ticker,
+                                   transport=transport, resolver=resolver)
         if not resolved:
             return []
         return filing_candidates(resolved, transport=transport,
-                                 resolver=resolver)
+                                 resolver=resolver, limit=limit)
     except Exception:                                       # noqa: BLE001
         return []

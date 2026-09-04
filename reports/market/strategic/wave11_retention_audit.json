@@ -1,0 +1,181 @@
+{
+ "audit": {
+  "contract": "knowledge_retention.v1",
+  "kinds": 15,
+  "original_kinds": 10,
+  "by_standing": {
+   "DURABLE": 5,
+   "DERIVED": 5,
+   "LOST": 1,
+   "UNUSED": 4
+  },
+  "lost": [
+   {
+    "name": "counterfactual_episode",
+    "is_original": true,
+    "write_path": "",
+    "produced": 8,
+    "reloadable": 0,
+    "standing": "LOST",
+    "lost": 8,
+    "note": "8 episodes derived from the ledger each run; re-derivable, but the ADJUDICATION attached to them is not"
+   }
+  ],
+  "objects_lost": 8,
+  "status": "DEGRADED",
+  "reason": "1 kind(s) produced knowledge this session that no fresh process can load: counterfactual_episode",
+  "note": "a DERIVED kind is not a failure: recomputing a fold over the ledger is correct and cheap. Only knowledge that cannot be re-derived is tracked for loss."
+ },
+ "kinds": [
+  {
+   "name": "belief",
+   "is_original": true,
+   "write_path": "declare_belief",
+   "produced": 52,
+   "reloadable": 52,
+   "standing": "DURABLE",
+   "lost": 0,
+   "note": "on the production ledger"
+  },
+  {
+   "name": "evidence",
+   "is_original": true,
+   "write_path": "record_evidence",
+   "produced": 295,
+   "reloadable": 295,
+   "standing": "DURABLE",
+   "lost": 0,
+   "note": ""
+  },
+  {
+   "name": "expectation",
+   "is_original": true,
+   "write_path": "record_expectation",
+   "produced": 52,
+   "reloadable": 52,
+   "standing": "DURABLE",
+   "lost": 0,
+   "note": "company-level expected observation"
+  },
+  {
+   "name": "reconciliation",
+   "is_original": true,
+   "write_path": "record_reconciliation",
+   "produced": 8,
+   "reloadable": 8,
+   "standing": "DURABLE",
+   "lost": 0,
+   "note": ""
+  },
+  {
+   "name": "belief_lifecycle",
+   "is_original": true,
+   "write_path": "record_lifecycle",
+   "produced": 0,
+   "reloadable": 0,
+   "standing": "UNUSED",
+   "lost": 0,
+   "note": ""
+  },
+  {
+   "name": "competes_with",
+   "is_original": true,
+   "write_path": "record_relationship",
+   "produced": 4,
+   "reloadable": 4,
+   "standing": "DURABLE",
+   "lost": 0,
+   "note": "FIXED this wave; was LOST for five waves"
+  },
+  {
+   "name": "cross_actor_expectation",
+   "is_original": true,
+   "write_path": "record_cross_actor_expectation",
+   "produced": 0,
+   "reloadable": 0,
+   "standing": "UNUSED",
+   "lost": 0,
+   "note": "FIXED this wave; had no write path, and a preregistration that does not survive the process cannot claim it preceded the evidence"
+  },
+  {
+   "name": "near_miss_corpus",
+   "is_original": false,
+   "write_path": "",
+   "produced": 37,
+   "reloadable": 0,
+   "standing": "DERIVED",
+   "lost": 0,
+   "note": ""
+  },
+  {
+   "name": "event_corroboration",
+   "is_original": false,
+   "write_path": "",
+   "produced": 155,
+   "reloadable": 0,
+   "standing": "DERIVED",
+   "lost": 0,
+   "note": ""
+  },
+  {
+   "name": "episode_candidates",
+   "is_original": false,
+   "write_path": "",
+   "produced": 3,
+   "reloadable": 0,
+   "standing": "DERIVED",
+   "lost": 0,
+   "note": ""
+  },
+  {
+   "name": "source_family_performance",
+   "is_original": false,
+   "write_path": "",
+   "produced": 6,
+   "reloadable": 0,
+   "standing": "DERIVED",
+   "lost": 0,
+   "note": ""
+  },
+  {
+   "name": "action_context",
+   "is_original": false,
+   "write_path": "",
+   "produced": 15,
+   "reloadable": 0,
+   "standing": "DERIVED",
+   "lost": 0,
+   "note": ""
+  },
+  {
+   "name": "strategic_objective",
+   "is_original": true,
+   "write_path": "",
+   "produced": 0,
+   "reloadable": 0,
+   "standing": "UNUSED",
+   "lost": 0,
+   "note": "no write path; unpopulated, so nothing is lost YET"
+  },
+  {
+   "name": "actor_response_episode",
+   "is_original": true,
+   "write_path": "",
+   "produced": 0,
+   "reloadable": 0,
+   "standing": "UNUSED",
+   "lost": 0,
+   "note": "no write path; unpopulated"
+  },
+  {
+   "name": "counterfactual_episode",
+   "is_original": true,
+   "write_path": "",
+   "produced": 8,
+   "reloadable": 0,
+   "standing": "LOST",
+   "lost": 8,
+   "note": "8 episodes derived from the ledger each run; re-derivable, but the ADJUDICATION attached to them is not"
+  }
+ ]
+}
