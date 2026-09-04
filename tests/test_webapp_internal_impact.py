@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import io
 import json
+import re
 
 import pytest
 
@@ -303,6 +304,40 @@ def test_the_answer_declares_that_it_rests_on_synthetic_rows(world):
 # =============================================================================
 # 7. MINIMUM DATA REQUEST, OPERATIONALIZED
 # =============================================================================
+
+
+def _prose(payload) -> str:
+    """The payload's human-readable content, with generated ids removed.
+
+    THE ASSERTION BELOW COULD FAIL WITHOUT A LEAK. This searched the raw JSON,
+    which searches the ULIDs too -- and Crockford base32 spells real words by
+    accident. Measured: the request carried
+    `01M1P271GACRMYJZ9WTBCK9DJP`, whose "ACRM" contains "CRM", and a full
+    guard went red over a random identifier. Roughly one run in several
+    hundred, which is worse than a reliable failure: it blocks a commit for a
+    reason that is not there, and it trains a reader to re-run rather than
+    look.
+
+    A test that can fail without the defect can also pass while the defect is
+    present, so the repair is to search the TEXT rather than the identifiers.
+    The tenant's vocabulary reaching another surface is prose or a field
+    label; it is never a substring of a generated key.
+
+    The canary assertions elsewhere in this file are deliberately left reading
+    the raw JSON: they check for a leaked VALUE, and stripping identifiers is
+    not obviously safe for a value that could legitimately live in one.
+    """
+    return re.sub(r"[0-9A-Z]{20,}", " ", json.dumps(payload))
+
+
+def test_the_leak_check_can_still_catch_a_leak():
+    """POSITIVE CONTROL. The id-stripping above must not also strip the words
+    it exists to catch -- a guard that cannot fail is not a guard."""
+    assert "CRM" in _prose({"note": "the CRM pipeline is the subject"})
+    assert "Salesforce" in _prose({"fields": ["Salesforce account id"]})
+    assert "CRM" not in _prose({"request_id": "01M1P271GACRMYJZ9WTBCK9DJP"})
+
+
 def test_a_gap_produces_a_bounded_data_request_on_the_surface(world):
     got = _json(world.app, SE.SUBJECT_LINK_NO_METRIC, session=ALPHA)
     req = got["minimum_data_request"]
@@ -315,8 +350,8 @@ def test_a_gap_produces_a_bounded_data_request_on_the_surface(world):
     # requested fields themselves declare.
     assert req["window_days"] == max(
         (f["time_window_days"] for f in req["requested_fields"]), default=0)
-    assert "Salesforce" not in json.dumps(req)
-    assert "CRM" not in json.dumps(req)
+    assert "Salesforce" not in _prose(req)
+    assert "CRM" not in _prose(req)
     _, html = _get(world.app, "/internal-impact", session=ALPHA,
                    query=f"subject={SE.SUBJECT_LINK_NO_METRIC}")
     assert "Missing information" in html

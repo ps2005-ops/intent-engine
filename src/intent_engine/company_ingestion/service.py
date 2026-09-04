@@ -2873,9 +2873,24 @@ class CompanyIngestionService:
         # 429 -- the failure this host actually produces -- pin the run
         # at UNKNOWN for every later gate, which is the exact outcome
         # the repair exists to remove.
+        # `getattr`, NOT `self._subject_cik_cache`.
+        #
+        # THIS METHOD IS CALLED ON OBJECTS THAT NEVER RAN `__init__`.
+        # `test_subject_filing_is_not_independent` invokes it unbound against
+        # a two-attribute double, which is a legitimate way to test one rule
+        # in isolation -- and is exactly how a memo added to a read path
+        # breaks a caller that has no state to hold it. Caught by the guard,
+        # after the same attribute read had already reached HEAD.
+        #
+        # A caller with no memo gets a throwaway dict: it resolves correctly
+        # and caches nothing, which is the right answer for something that
+        # owns no lifetime.
         name = str((meta or {}).get("company_name") or "")
-        if self._subject_cik_cache.get(name):
-            return self._subject_cik_cache[name]
+        memo = getattr(self, "_subject_cik_cache", None)
+        if memo is None:
+            memo = {}
+        if memo.get(name):
+            return memo[name]
         try:
             from intent_engine.company_ingestion.edgar import resolve_cik
             resolved = resolve_cik(name,
@@ -2885,7 +2900,7 @@ class CompanyIngestionService:
         except Exception:  # noqa: BLE001 - subject identification is best-effort
             return ""
         if out:
-            self._subject_cik_cache[name] = out
+            memo[name] = out
         return out
 
     def archive_depth(self, run_id: str) -> dict:
