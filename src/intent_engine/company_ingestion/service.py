@@ -273,6 +273,11 @@ class CompanyIngestionService:
         # run_id -> what each retrieval avenue yielded.
         self._retrieval_plans: dict = {}
         self._registrant_cache: dict = {}
+        #: Resolved subject CIKs, keyed by the name asked for. See
+        #: `subject_cik`: its fallback reads the SEC's entire ticker
+        #: table, and the ownership gate, the pattern gate and the
+        #: readiness probe all ask the same question of the same run.
+        self._subject_cik_cache: dict = {}
         self._classification_cache: dict = {}
         # The reasoning backend. None means "not configured", which produces
         # an honest EVIDENCE_LIMITED result -- never a template dressed up as
@@ -2446,7 +2451,19 @@ class CompanyIngestionService:
         # THE SUBJECT'S CIK IS WHAT DECIDES OWNERSHIP. Without it every
         # EDGAR document looks equally like this filer's own, and Wells
         # Fargo's 10-K stated JPMorgan's business model on the live page.
-        subject_cik = str((self.run_meta(run_id) or {}).get("cik") or "")
+        #
+        # RESOLVED THROUGH `subject_cik`, NOT READ OFF `meta`. THE SAME
+        # SEAM AS THE PATTERN GATE, ONE PRODUCER UPSTREAM OF IT. A run
+        # started from a WEBSITE carries no `meta["cik"]` -- the ordinary
+        # case -- so this rule received "" on every such run, and
+        # `subject_documents` skips its `/data/<cik>/` filter entirely
+        # when the subject is unknown. The JPMorgan/Wells Fargo repair
+        # the paragraph above describes had therefore never once fired in
+        # production: another registrant's 10-K could still supply the
+        # signals that qualify a pattern, and a pattern qualifies at a
+        # threshold of two.
+        subject_cik = str(
+            self.subject_cik(self.run_meta(run_id) or {}) or "")
         if trace is not None:
             # BYTES, NOT JUST DOCUMENTS. This stage scans each document's full
             # text -- signal detection, filing detection, section-aware
@@ -2559,6 +2576,22 @@ class CompanyIngestionService:
         else:
             classification = self.classification_inputs(
                 run_id, company_name, documents=documents)
+        # ONE CLASSIFICATION, READ ONCE AND KEPT.
+        #
+        # The two gates below each asked for it separately, so neither
+        # answer could be RECORDED beside the thesis it produced -- and a
+        # thesis whose classification was never recorded cannot be told
+        # apart from one whose gate was wrong. That is four different
+        # defects wearing one symptom. See `pattern_audit` below.
+        _domain = str((self.run_meta(run_id) or {}).get("domain") or "")
+        _eligible = _patterns_for_company(
+            company_name, domain=_domain,
+            registrant=classification["registrant"],
+            evidence_text=classification["evidence_text"])
+        _model = _business_model_of(
+            company_name, domain=_domain,
+            registrant=classification["registrant"],
+            evidence_text=classification["evidence_text"])
         _build_span = (trace.span("build_report") if trace is not None
                        else __import__("contextlib").nullcontext({}))
         with _build_span:
@@ -2584,11 +2617,7 @@ class CompanyIngestionService:
                 # about take-or-pay terms. The domain, the regulator's industry
                 # code, and the filer's OWN revenue/segment sentences are what
                 # separate two businesses sharing one SIC code.
-                patterns=_patterns_for_company(
-                    company_name,
-                    domain=str((self.run_meta(run_id) or {}).get("domain") or ""),
-                    registrant=classification["registrant"],
-                    evidence_text=classification["evidence_text"]),
+                patterns=_eligible,
                 # WHAT THE SEARCH DID, carried to the surface a reader sees. The
                 # brief rendered "Another registrant's filing - none" as a bare
                 # zero because this never crossed; only the provenance drawer had
@@ -2611,12 +2640,71 @@ class CompanyIngestionService:
                 # "Consolidating checkout/identity/data rails may encroach on
                 # layers partners currently monetize". One classification, two
                 # gates, no second copy.
-                business_model=_business_model_of(
-                    company_name,
-                    domain=str((self.run_meta(run_id) or {}).get("domain") or ""),
-                    registrant=classification["registrant"],
-                    evidence_text=classification["evidence_text"]))
+                business_model=_model)
         payload = report.as_dict()
+
+        # --- WHY THIS READING, AND WHAT IT BEAT ---------------------
+        #
+        # DIAGNOSTICS, NEVER CUSTOMER COPY -- the contract `/timing` and
+        # `/telemetry` are written under. Thesis collapse (three
+        # unrelated companies handed one scaffold, measured live on
+        # 56921bce) was diagnosable ONLY by reading source, because
+        # nothing recorded which classification the gate was given, which
+        # patterns survived it, or why the winner won. Those are four
+        # distinct defects with one symptom:
+        #
+        #   classification  -- `business_model` is UNKNOWN
+        #   eligibility     -- the excluded set is empty, or wrong
+        #   ranking         -- a defensible runner-up lost to a generic
+        #   evidence        -- nothing fired, or one thing fired on two
+        #
+        # Recorded once, at CORE, from the objects the gates were
+        # actually given rather than from a second lookup that could
+        # disagree with them. No key here is in `merged`, so it survives
+        # the DEEP pass and a strange thesis on a finished run can still
+        # be attributed.
+        from intent_engine.strategic_intelligence.patterns import (
+            PATTERN_LIBRARY as _LIB,
+        )
+        _hyps = list(payload.get("hypotheses") or ())
+        _top = _hyps[0] if _hyps else {}
+        _next = _hyps[1] if len(_hyps) > 1 else {}
+        _support = list(_top.get("strongest_support_ids")
+                        or _top.get("supporting_observation_ids") or ())
+        payload["pattern_audit"] = {
+            "business_model": _model or "UNKNOWN",
+            "library_size": len(_LIB),
+            "eligible_pattern_ids": [p.pattern_id for p in _eligible],
+            "excluded_pattern_ids": sorted(
+                {p.pattern_id for p in _LIB}
+                - {p.pattern_id for p in _eligible}),
+            "fired_pattern_ids": [str(h.get("pattern_id") or "")
+                                  for h in _hyps],
+            "chosen_pattern": str(_top.get("pattern_id") or ""),
+            "chosen_thesis": str((payload.get("thesis") or {}).get(
+                "view") or ""),
+            "company_specific_mechanism": str(
+                (payload.get("thesis") or {}).get("transition") or ""),
+            "supporting_observation_ids": [str(o) for o in _support],
+            "supporting_evidence": [
+                str(getattr(o, "excerpt", "") or "")[:300]
+                for o in (observations or ())
+                if getattr(o, "observation_id", "") in set(_support)][:3],
+            "alternative": ({"pattern_id": str(_next.get("pattern_id")
+                                              or ""),
+                             "claim": str(_next.get("title") or ""),
+                             "confidence": str(_next.get("confidence")
+                                               or "")}
+                            if _next else None),
+            "reason_chosen": (
+                f"{_top.get('confidence') or 'unrated'} confidence on "
+                f"{len(_support)} supporting observation(s)"
+                + (f", ahead of {_next.get('pattern_id')} at "
+                   f"{_next.get('confidence') or 'unrated'}"
+                   if _next else "; no other pattern qualified")
+                if _top else
+                "no pattern qualified on this run's observations"),
+        }
 
         # --- the reasoning layer ------------------------------------------
         # The pattern library above produced `payload["hypotheses"]`. Those
@@ -2773,14 +2861,32 @@ class CompanyIngestionService:
         recorded = str((meta or {}).get("cik") or "").strip()
         if recorded:
             return recorded
+        # MEMOISED, BECAUSE THE FALLBACK IS AN 800KB DOWNLOAD.
+        #
+        # `resolve_cik` reads the SEC's whole ticker table -- 795KB
+        # fetched and JSON-parsed -- and nothing caches it;
+        # `public_metadata` already records it being fetched twice per
+        # run. Every caller that asks who a domain-entry run is about
+        # pays it again, and this repair adds two such callers.
+        #
+        # Only a RESOLVED answer is kept. Caching "" would let one SEC
+        # 429 -- the failure this host actually produces -- pin the run
+        # at UNKNOWN for every later gate, which is the exact outcome
+        # the repair exists to remove.
+        name = str((meta or {}).get("company_name") or "")
+        if self._subject_cik_cache.get(name):
+            return self._subject_cik_cache[name]
         try:
             from intent_engine.company_ingestion.edgar import resolve_cik
-            resolved = resolve_cik((meta or {}).get("company_name", ""),
+            resolved = resolve_cik(name,
                                    transport=self.transport,
                                    resolver=self.resolver)
-            return str((resolved or {}).get("cik") or "")
+            out = str((resolved or {}).get("cik") or "")
         except Exception:  # noqa: BLE001 - subject identification is best-effort
             return ""
+        if out:
+            self._subject_cik_cache[name] = out
+        return out
 
     def archive_depth(self, run_id: str) -> dict:
         """How far back OUR OWN observations go, for the history assessment.

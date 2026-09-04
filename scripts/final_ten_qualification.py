@@ -210,19 +210,61 @@ def journey(name, domain, sector, *, budget_s=300.0) -> dict:
     row["autocomplete_found"] = chosen is not None
     row["chosen_identity"] = (chosen or {}).get("legal_name")
 
+    # ASSERT THE IDENTITY, THEN SUBMIT -- NEVER THE OTHER WAY ROUND.
+    #
+    # This used to fall through to a raw name+website submit whenever no
+    # suggestion scored, which spends one of ten hourly analyses on a run
+    # whose identity was never bound by the product. The row that comes back
+    # is then unreadable: a wrong company looks exactly like a product
+    # defect, and the quota is gone either way. A harness that cannot name
+    # the entity it selected has failed, and says so instead.
+    if chosen is None:
+        row["result"] = "HARNESS_ERROR"
+        row["error"] = (f"no suggestion covered {name!r}: best overlap "
+                        f"{row['match_score']} across {row['suggestions']}")
+        return row
+
     fields = {"consent": "on", "company_name": name,
               "website": f"https://{domain}"}
     if chosen:
-        # Exactly what `confirm()` writes into the form.
+        # EXACTLY WHAT `confirm()` WRITES, AND IT USED TO WRITE THREE OF SEVEN.
+        #
+        # `autocomplete.js: confirm(row)` sets id, cik, tk, dm, ct and ok --
+        # and `ok` (`suggest_confirmed`) is the field the server checks before
+        # it will honour ANY of the others: `confirmed == company_name` gates
+        # the whole confirmed-pick branch, and that branch is the only thing
+        # that sets `filer_cik`.
+        #
+        # This harness sent entity_id, company_name and website. So every
+        # analysis it has ever driven fell THROUGH the confirmed-pick branch
+        # and opened with cik="", while a real customer picking the same row
+        # opens with 60667. Read live from the deployed form after a keyboard
+        # selection of "Lowes Companies Inc": suggest_cik=60667,
+        # suggest_ticker=LOW, suggest_confirmed="Lowes Companies Inc".
+        #
+        # That is not a small fidelity gap. An empty CIK is precisely the
+        # condition that leaves the business-model gate at UNKNOWN, so the
+        # thesis collapse this qualification exists to re-measure was, in
+        # part, produced by the instrument. `pre100/capture.py` already sends
+        # these; this harness did not, and nothing compared them.
         if chosen.get("entity_id"):
             fields["entity_id"] = chosen["entity_id"]
         if chosen.get("legal_name"):
             fields["company_name"] = chosen["legal_name"]
+            fields["suggest_confirmed"] = chosen["legal_name"]
+        for key, field in (("cik", "suggest_cik"),
+                           ("ticker", "suggest_ticker"),
+                           ("domain", "suggest_domain"),
+                           ("country", "suggest_country")):
+            if chosen.get(key):
+                fields[field] = str(chosen[key])
         if chosen.get("domain"):
             fields["website"] = f"https://{chosen['domain']}"
     if csrf:
         fields["csrf"] = csrf.group(1)
     row["submitted_company"] = fields["company_name"]
+    row["submitted_cik"] = fields.get("suggest_cik", "")
+    row["confirmed_pick"] = bool(fields.get("suggest_confirmed"))
 
     began = time.monotonic()
     st, body, url, submit_s = _req(op, "/analyze", fields,
@@ -297,6 +339,10 @@ def journey(name, domain, sector, *, budget_s=300.0) -> dict:
             break
         time.sleep(POLL_S)
     row["deep_ready_s"] = deep_ready_s
+    # CORE_READY answers "may this be opened"; STRATEGIC_QA_READY answers
+    # "may this be interrogated". Reporting the second as the first is how
+    # DEEP latency was once charged to CORE.
+    row["strategic_qa_ready_s"] = deep_ready_s
     if deep_ready_s is None:
         row["defects"].append(
             "the deeper strategic review never merged within the budget")
@@ -336,6 +382,25 @@ def journey(name, domain, sector, *, budget_s=300.0) -> dict:
                                    + mem.get("skipped_host_open", 0))
             row["cache_hits"] = (data.get("filing_cache")
                                  or {}).get("CACHE_HIT")
+            # THE THESIS AUDIT. Same-thesis is allowed; UNEXPLAINED
+            # same-thesis is not, and the two are distinguishable only if the
+            # run says which classification it was given and which readings
+            # survived it.
+            audit = data.get("thesis") or {}
+            row["business_model"] = audit.get("business_model")
+            row["eligible_patterns"] = audit.get("eligible_pattern_ids")
+            row["excluded_patterns"] = audit.get("excluded_pattern_ids")
+            row["chosen_pattern"] = audit.get("chosen_pattern")
+            row["headline_thesis"] = audit.get("chosen_thesis")
+            row["mechanism"] = audit.get("company_specific_mechanism")
+            row["thesis_alternative"] = audit.get("alternative")
+            row["reason_chosen"] = audit.get("reason_chosen")
+            row["thesis_evidence"] = audit.get("supporting_evidence")
+            row["reasoning_provenance"] = audit.get("reasoning_provenance")
+            if audit.get("business_model") == "UNKNOWN":
+                row["defects"].append(
+                    "the pattern gate was never told what kind of business "
+                    "this is (UNKNOWN takes the whole library)")
         except Exception:                                    # noqa: BLE001
             row["defects"].append("telemetry unreadable")
 
@@ -384,6 +449,54 @@ def journey(name, domain, sector, *, budget_s=300.0) -> dict:
     return row
 
 
+#: PUNCTUATION IS A REAL CUSTOMER INPUT. "Lowe\'s" broke identity binding
+#: once already, and a prefix proof costs no analysis quota -- only
+#: `/api/companies` is touched, so this runs before the cohort rather than
+#: instead of a row in it.
+PREFIX_PROOFS = [
+    ("Lowe\'s Companies", ["lowe", "lowe\'s", "Lowe\'s Companies"]),
+    ("Old Dominion Freight Line", ["old d", "old dominion"]),
+    ("T-Mobile US", ["t-mob", "t-mobile"]),
+    ("SLB", ["slb"]),
+]
+
+
+def autocomplete_proof() -> list:
+    """Does the deployed product resolve the INTENDED company from what a
+    customer actually types? Suggestions only -- no analysis is spent."""
+    op, _ = _opener()
+    _req(op, "/demo")
+    out = []
+    for intended, prefixes in PREFIX_PROOFS:
+        for typed in prefixes:
+            t0 = time.monotonic()
+            st, body, _u, _d = _req(
+                op, "/api/companies?q=" + urllib.parse.quote(typed))
+            ms = int((time.monotonic() - t0) * 1000)
+            try:
+                companies = json.loads(body).get("companies", []) \
+                    if st == 200 else []
+            except Exception:                                # noqa: BLE001
+                companies = []
+            want = {w for w in re.split(r"[^a-z0-9]+", intended.lower())
+                    if len(w) > 2 and w not in ("inc", "the", "com", "ltd")}
+            best, best_name = 0.0, ""
+            for c in companies:
+                got = {w for w in re.split(
+                    r"[^a-z0-9]+", (c.get("legal_name") or "").lower()) if w}
+                score = len(want & got) / max(1, len(want))
+                if score > best:
+                    best, best_name = score, c.get("legal_name") or ""
+            out.append({"intended": intended, "typed": typed, "status": st,
+                        "ms": ms, "results": len(companies),
+                        "best_match": best_name, "score": round(best, 2),
+                        "resolves": best >= 0.5})
+            print(f"  {typed:<24} {ms:>5}ms  {len(companies):>2} results  "
+                  f"{'OK ' if best >= 0.5 else 'MISS'}  {best_name}",
+                  flush=True)
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True)
@@ -392,12 +505,24 @@ def main() -> int:
     ap.add_argument("--only", default="")
     args = ap.parse_args()
 
-    cohort = [c for c in TEN
-              if not args.only or c[0].lower().startswith(args.only.lower())]
+    # `--only synopsys,emerson,blackrock,slb` runs the focused proof that
+    # must pass BEFORE the ten are spent. One prefix could never express it,
+    # and spending ten analyses to prove four is how an hourly quota is lost.
+    wanted = [w.strip().lower() for w in args.only.split(",") if w.strip()]
+    cohort = [c for c in TEN if not wanted
+              or any(c[0].lower().startswith(w) for w in wanted)]
     out = pathlib.Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     rows, began = [], time.monotonic()
     print(f"FINAL TEN — live UI qualification against {BASE}\n")
+    print("AUTOCOMPLETE PREFIX PROOF (no analysis spent)")
+    proofs = autocomplete_proof()
+    misses = [p for p in proofs if not p["resolves"]]
+    print(f"  -> {len(proofs) - len(misses)}/{len(proofs)} resolve"
+          + (f"; MISSES {[(p['typed']) for p in misses]}" if misses else "")
+          + "\n", flush=True)
+    out.with_name(out.stem + "_autocomplete.json").write_text(
+        json.dumps(proofs, indent=2), "utf-8")
     for i, (name, domain, sector) in enumerate(cohort, 1):
         started = time.monotonic()
         row = journey(name, domain, sector, budget_s=args.budget)

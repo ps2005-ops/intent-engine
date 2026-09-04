@@ -1399,7 +1399,52 @@ class WebApp:
             payload = {"error": f"telemetry unavailable: {type(exc).__name__}"}
         payload["run_id"] = run_id
         payload["reading"] = self._reading_diagnostics(run_id)
+        payload["thesis"] = self._thesis_diagnostics(run_id)
         return self._ok_json(payload)
+
+    def _thesis_diagnostics(self, run_id) -> dict:
+        """WHICH strategic reading won, what it beat, and what gated it.
+
+        Thesis collapse -- Synopsys, Emerson Electric and Lowe's each
+        handed the byte-identical headline decision "Whether a supply
+        commitment should be treated as fixed or renegotiable" -- took a
+        source read to attribute, because the run published its answer
+        and nothing about how it got there. Four different defects
+        produce that one symptom, and they call for opposite repairs:
+        a classification that answered UNKNOWN, a gate that admitted
+        everything, a ranking that chose badly, or evidence that
+        supported nothing better.
+
+        `service.py` records the answer at CORE, from the objects the
+        gates were actually given. This carries it, unchanged, to a
+        surface a cohort run can read.
+
+        DIAGNOSTICS, NEVER CUSTOMER COPY, and owner-gated with the rest
+        of `/telemetry` -- no page links to it and no reader is shown a
+        pattern id.
+        """
+        # `_strategic_report_for`, NOT `_result`. A DIAGNOSTIC MAY NOT
+        # MANUFACTURE THE THING IT REPORTS ON: `_result` recomputes the
+        # SYNTHETIC DEMO analysis for any id it does not already hold, so
+        # after a restart this route would have answered a question about
+        # this run with the demo company's reading -- and produced a whole
+        # demo analysis as a side effect of being asked. The real-run
+        # accessor answers None instead, and None is said out loud below.
+        try:
+            report = self._strategic_report_for(run_id) or {}
+        except Exception as exc:                         # noqa: BLE001
+            return {"error": f"unavailable: {type(exc).__name__}"}
+        audit = dict(report.get("pattern_audit") or {})
+        if not audit:
+            # SAID PLAINLY. A run composed before this existed, or one
+            # that never reached composition, is not a run whose gate
+            # admitted everything -- and a silent {} would read as one.
+            return {"error": "no pattern audit recorded for this run"}
+        audit["reasoning_provenance"] = str(
+            report.get("reasoning_provenance") or "")
+        audit["result_state"] = str(report.get("result_state") or "")
+        audit["deep_status"] = str(report.get("deep_status") or "")
+        return audit
 
     def _reading_diagnostics(self, run_id) -> dict:
         """WHY a strategic reading was withheld, when one was.
@@ -7862,7 +7907,19 @@ class WebApp:
                                     # answering an economic question from
                                     # three derivations is three products.
                                     econ=self._founder_economic_context(
-                                        run_id))
+                                        run_id),
+                                    # §13. A QUESTION ASKED SIXTEEN
+                                    # SECONDS EARLY IS NOT A COMPANY
+                                    # WITH NO EVIDENCE. The reader can
+                                    # open the result before the deeper
+                                    # reading merges, and until it does
+                                    # `key_insight` is None -- which
+                                    # every strategic question read as a
+                                    # verdict on the company.
+                                    deep_pending=(
+                                        str((_report or {}).get(
+                                            "deep_status") or "")
+                                        == "PENDING"))
         return self._founder_answer_page(session, run_id, founder_answer)
         # WHAT USED TO BE HERE, AND WHY IT IS GONE.
         #

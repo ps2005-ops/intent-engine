@@ -677,7 +677,8 @@ def _pattern_grounding(decision) -> str:
 def answer(question: str, brief, *, engine_answer: str = "",
            observations: Optional[Sequence[dict]] = None,
            trust=None, contract=None, decision=None,
-           read=None, econ=None) -> FounderAnswer:
+           read=None, econ=None,
+           deep_pending: bool = False) -> FounderAnswer:
     """Frame an answer using the shared object. Never invents a conclusion.
 
     `trust` is the CANONICAL standing produced by the market side, not a
@@ -767,11 +768,32 @@ def answer(question: str, brief, *, engine_answer: str = "",
         out.so_what = out_contribution
         return out
     if withheld and _intent(question, _STRATEGIC_INTENT):
+        # STILL RUNNING IS NOT THE SAME AS NOT SUPPORTED.
+        #
+        # `key_insight` is None for the seconds between CORE opening the
+        # result and the deeper reading merging into it. Every strategic
+        # question asked in that window was answered "the public
+        # evidence does not support one" -- a verdict on the COMPANY,
+        # delivered because of the CLOCK. Measured across a ten-company
+        # matrix as a 70% refusal rate that vanished when the identical
+        # questions were asked 16 seconds later.
+        #
+        # The honest refusal below is kept for the case it was written
+        # for: a review that HAS finished and still found nothing.
         out.direct_answer = (
+            "The deeper strategic review of this company is still running, so no "
+            "strategic conclusion is being asserted yet. That is a "
+            "statement about this page, not a judgement about the "
+            "evidence: it usually finishes within a minute, and this "
+            "answer will change when it lands." if deep_pending else
             "I am not going to give you a strategic read on this company, "
             "because the public evidence does not support one — the same "
             "reason the summary above withheld it.")
         out.so_what = (
+            "Everything already established is on the page beneath this: "
+            "what was retrieved, what this company depends on, and how "
+            "the current economy reaches it. Questions about those are "
+            "answerable now." if deep_pending else
             "What can be established is what a customer, partner or investor "
             "can verify from outside. That is a different and smaller "
             "question, and it is answerable.")
@@ -817,6 +839,16 @@ def answer(question: str, brief, *, engine_answer: str = "",
                "strengthen it.")
             + " This particular question is not answerable from what this run "
               "retrieved.")
+    elif deep_pending:
+        # Same fact, the branch a question matching no intent falls to.
+        # A contract reading, where one exists, still wins above: an
+        # answer that exists beats an explanation of why one is late.
+        _fallback = (
+            "The deeper strategic review of this company is still running, so no "
+            "strategic conclusion is being asserted yet. That is a "
+            "statement about this page, not a judgement about the "
+            "evidence: it usually finishes within a minute, and this "
+            "answer will change when it lands.")
     out.direct_answer = _plain(engine_answer) or (k.fact if k else _fallback)
 
     if k:
