@@ -38,6 +38,9 @@ from intent_engine.company_ingestion.external_discovery import (
     propose_external_candidates,
 )
 from intent_engine.company_ingestion.fetch import FetchResult, safe_fetch
+from intent_engine.company_ingestion.acquisition_memory import (
+    ALLOW as _ACQ_ALLOW, AcquisitionMemory,
+)
 from intent_engine.company_ingestion.filing_cache import FilingCache
 from intent_engine.company_ingestion.snapshot import (
     PublicCompanySnapshot, SnapshotStore, SourceRecord,
@@ -217,7 +220,8 @@ DEEP_MATERIAL_FIELDS = ("result_state", "reasoning_provenance")
 class CompanyIngestionService:
     def __init__(self, path=DEFAULT_CI_PATH, *, transport=None,
                  resolver=None, analyst_client=None, analyst_cache=None,
-                 filing_cache=None, retry_ledger=None):
+                 filing_cache=None, retry_ledger=None,
+                 acquisition_memory=None):
         self.store = IngestionStore(path)
         self.transport = transport      # injectable; None = real HTTP
         self.resolver = resolver        # injectable; False disables DNS check
@@ -239,6 +243,24 @@ class CompanyIngestionService:
         # Sibling of the store rather than inside it, so a snapshot that
         # cannot be read costs a run its head start and never its evidence.
         self.snapshots = SnapshotStore(pathlib.Path(path).parent)
+        # WHAT WE ALREADY LEARNED ABOUT ASKING. `FilingCache` remembers
+        # content and `SnapshotStore` remembers where to look; neither
+        # remembers that `https://jnj.com/developers` answered 404 last time,
+        # so every run re-bought that answer with one of its fourteen slots.
+        # DISABLED under an injected transport: a test double defines its own
+        # outcomes, and a memory written by one test would decide another.
+        #
+        # CO-LOCATED WITH THE STORE, exactly as `SnapshotStore` above is, and
+        # for the same two reasons: in production the ingestion store lives on
+        # the persistent disk (RUNTIME_ROOT), so the memory survives a deploy
+        # and a cohort does not re-learn every dead URL; under test it lands in
+        # the tmp path the store already uses, so the suite never writes into
+        # the repository. A repo-relative default would have done both wrongly.
+        self.acquisition_memory = (
+            acquisition_memory if acquisition_memory is not None
+            else AcquisitionMemory(
+                pathlib.Path(path).parent / "cache" / "acquisition",
+                enabled=(transport is None)))
         # RETRY ACCOUNTING IS PER RUN, AND THE DISTINCTION IS LOAD-BEARING.
         # The webapp builds exactly ONE of these services for the whole
         # process, so a ledger held on the service is shared by every
@@ -287,7 +309,100 @@ class CompanyIngestionService:
             cache = self.filing_cache.snapshot()
         except Exception:                                   # noqa: BLE001
             cache = {}
-        return {"retry": retry, "filing_cache": cache}
+        try:
+            memory = self.acquisition_memory.snapshot()
+        except Exception:                                   # noqa: BLE001
+            memory = {}
+        return {"retry": retry, "filing_cache": cache,
+                "acquisition_memory": memory,
+                "sources": self.source_health(run_id),
+                "evidence_roles": self.evidence_role_coverage(run_id),
+                "abstention": self.abstention_reason(run_id)}
+
+    #: The readiness ROLES, and which evidence families can fill each. This is
+    #: `readiness`'s own grouping, imported rather than restated: a second
+    #: copy would drift, and this file already learned that lesson three times
+    #: over (`_EVIDENCE_FAMILIES`, `evidence_gaps` and `family_of` were three
+    #: answers to "which family is this?").
+    _ROLE_FAMILIES = {
+        "identity_or_product": ("identity", "product"),
+        "direction": ("strategy", "investor"),
+        "market": ("customers", "independent", "commercial"),
+    }
+
+    def evidence_role_coverage(self, run_id: str) -> dict:
+        """Which evidence ROLES this run filled, and which are still empty.
+
+        Counting documents answers the wrong question: ten copies of one
+        company narrative is weaker evidence than one filing, one independent
+        filing and one economic source. The roles are what the readiness gate
+        actually requires, so they are what a run should be measured against.
+        """
+        from intent_engine.company_ingestion.coverage import family_of
+        try:
+            documents = list(self.store.retrieved(run_id))
+        except Exception:                                   # noqa: BLE001
+            return {}
+        families: dict = {}
+        for document in documents:
+            family = family_of(document)
+            families[family] = families.get(family, 0) + 1
+        covered = set(families)
+        filled = [role for role, members in self._ROLE_FAMILIES.items()
+                  if covered & set(members)]
+        missing = [role for role in self._ROLE_FAMILIES if role not in filled]
+        return {"required": sorted(self._ROLE_FAMILIES),
+                "filled": sorted(filled), "missing": sorted(missing),
+                "families": dict(sorted(families.items())),
+                "documents": len(documents)}
+
+    def source_health(self, run_id: str) -> dict:
+        """Per-run acquisition outcomes, by cause and by host.
+
+        The counts a qualification run needs to tell a degraded network from
+        a degraded product, and the ones a live incident needs to tell which
+        publisher stopped answering.
+        """
+        try:
+            candidates = {c["candidate_id"]: c
+                          for c in self.store.candidates(run_id)}
+            failures = list(self.store.failures(run_id))
+            retrieved = list(self.store.retrieved(run_id))
+        except Exception:                                   # noqa: BLE001
+            return {}
+        counts = {"rate_limited": 0, "refused": 0, "not_found": 0,
+                  "timed_out": 0, "budget": 0, "unreadable": 0, "other": 0}
+        hosts: dict = {}
+        for failure in failures:
+            kind = failure.get("failure_type") or ""
+            message = str(failure.get("safe_message") or "")
+            url = (candidates.get(failure.get("candidate_id")) or {}).get("url")
+            host = (urlparse(url or "").hostname or "")
+            if host:
+                hosts[host] = hosts.get(host, 0) + 1
+            if kind == "deadline_exceeded":
+                counts["budget"] += 1
+            elif "429" in message:
+                counts["rate_limited"] += 1
+            elif any(c in message for c in ("401", "402", "403", "451")):
+                counts["refused"] += 1
+            elif "404" in message or "410" in message:
+                counts["not_found"] += 1
+            elif kind in ("timeout", "connection", "host_unreachable"):
+                counts["timed_out"] += 1
+            elif kind in ("javascript_only", "parse_error", "bad_mime",
+                          "content_rejected", "too_large"):
+                counts["unreadable"] += 1
+            else:
+                counts["other"] += 1
+        requested = len(retrieved) + len(failures)
+        return {"discovered": len(candidates), "requested": requested,
+                "retrieved": len(retrieved), "failed": len(failures),
+                "yield": (round(len(retrieved) / requested, 3)
+                          if requested else 0.0),
+                "by_cause": counts,
+                "by_host": dict(sorted(hosts.items(),
+                                       key=lambda kv: -kv[1])[:8])}
 
     def ownership_record(self, run_id: str) -> dict:
         """What this run decided about whose documents it was reading.
@@ -1261,6 +1376,27 @@ class CompanyIngestionService:
                 # below on every path, so analysing one filing for two companies
                 # still produces two different readings.
                 _cache_outcome, cached = self.filing_cache.get(candidate["url"])
+                # WHAT WE ALREADY LEARNED ABOUT THIS ADDRESS.
+                #
+                # A 404 is not a fact about today. Measured on a clean
+                # Johnson & Johnson run, NINE of fourteen approved slots went
+                # to guessed paths -- /api, /docs, /developers, /plans -- on a
+                # pharmaceutical company, every one a 404, and the next run
+                # bought the same nine answers again. The slot is the scarce
+                # resource, so remembering the answer IS the repair.
+                #
+                # The cached branch wins: a filing already on disk costs no
+                # request at all, so a stale verdict may never suppress it.
+                # The skip is RECORDED as a failure with the date and status
+                # that justified it, so the reader is told about the gap
+                # rather than quietly shown less.
+                memory = self.acquisition_memory.verdict(candidate["url"])
+                if cached is None and memory["verdict"] != _ACQ_ALLOW:
+                    failed.append(self._fail(
+                        run_id, domain, candidate_id,
+                        memory.get("failure_type") or "http_status",
+                        memory["reason"], False))
+                    continue
                 if cached is not None:
                     result = FetchResult(
                         ok=True, status_code=cached["status_code"],
@@ -1389,11 +1525,39 @@ class CompanyIngestionService:
                         str(exc), False))
                     continue
                 total_bytes += record["byte_count"]
-                self._append("ci.source_retrieved", run_id=run_id, domain=domain,
-                             subject_type="source", subject_id=source_id,
-                             payload=record,
-                             idempotency_key=f"src:{run_id}:{source_id}:"
-                                             f"{record['content_hash'][:12]}")
+                # THE SAME REFUSAL, RAISED FROM THE OTHER END.
+                #
+                # The guard above catches `SecretRejected` from
+                # `_build_record`, and the comment there is explicit that a
+                # false positive "must cost this one source, never the run".
+                # But the credential rule is enforced a SECOND time, by
+                # `records.validate()` inside `store.append`, and it raises
+                # `IngestionError` -- which that guard does not catch. So the
+                # protected path was only half protected.
+                #
+                # MEASURED 2026-09-03: an NVIDIA run died outright with
+                # "raw credentials / auth headers must never be persisted",
+                # raised from `_append`, after a third-party filing reached
+                # the store. The detector is deliberately blunt -- any 13-16
+                # digit run reads as a card number, and SEC filings
+                # concatenate commission file numbers into exactly that shape
+                # -- so this is the false positive the first guard was written
+                # for, arriving through the door it does not cover.
+                #
+                # One source is dropped and recorded honestly; the run
+                # continues with the rest of its evidence.
+                try:
+                    self._append("ci.source_retrieved", run_id=run_id,
+                                 domain=domain, subject_type="source",
+                                 subject_id=source_id, payload=record,
+                                 idempotency_key=f"src:{run_id}:{source_id}:"
+                                                 f"{record['content_hash'][:12]}")
+                except IngestionError as exc:
+                    total_bytes -= record["byte_count"]
+                    failed.append(self._fail(
+                        run_id, domain, candidate_id, "content_rejected",
+                        str(exc), False))
+                    continue
                 ok.append(record)
 
             if sufficiency_probe is not None:
@@ -1475,7 +1639,21 @@ class CompanyIngestionService:
             max_bytes=int(candidate.get("max_bytes") or MAX_RESPONSE_BYTES))
         if timeout is not None:
             kwargs["timeout"] = timeout
+        # POLITENESS BEFORE THE REQUEST, not after being told off for it.
+        # Zero for almost every host; it exists so a cohort's SEC reads
+        # arrive spaced instead of as a burst, which is what a rate limiter
+        # actually reacts to.
+        wait = self.acquisition_memory.delay_before(candidate["url"])
+        if wait > 0:
+            time.sleep(min(wait, 2.0))
         result = safe_fetch(candidate["url"], **kwargs)
+        # REMEMBERED ACROSS RUNS, so the next analysis of this company spends
+        # the slot on something that can succeed. Only outcomes that are a
+        # property of the TARGET are kept -- see `classify_outcome`.
+        self.acquisition_memory.record(
+            candidate["url"], ok=bool(result["ok"]),
+            status=result.get("status_code"),
+            failure_type=result.get("failure_type") or "")
         if result["ok"]:
             self.filing_cache.put(
                 candidate["url"],
@@ -1526,6 +1704,9 @@ class CompanyIngestionService:
                 continue                      # the breaker has this host
             if self.filing_cache.get(candidate["url"])[1] is not None:
                 continue                      # served from disk, not dialled
+            if self.acquisition_memory.verdict(
+                    candidate["url"])["verdict"] != _ACQ_ALLOW:
+                continue                      # known dead; the loop records it
             pending.append((candidate_id, candidate, host or ""))
         if len(pending) < 2:
             return {}                         # nothing to overlap
@@ -1878,7 +2059,8 @@ class CompanyIngestionService:
                 missing_families=gaps["missing_families"],
                 candidates=self.store.candidates(run_id),
                 already_approved=already, failed_urls=failed_urls,
-                refusing_hosts=self.refusing_hosts(run_id))
+                refusing_hosts=self.refusing_hosts(run_id),
+                memory=self.acquisition_memory)
             if not extra:
                 break                    # nothing new could be tried
             reason = ("missing evidence families: "
@@ -2647,6 +2829,37 @@ class CompanyIngestionService:
         except Exception:  # noqa: BLE001 - a read model may not fail a run
             return {}
         return counts
+
+    def abstention_reason(self, run_id: str, *, reasoning_error: str = "",
+                          capacity_refused: bool = False) -> dict:
+        """WHY this run did not produce a full report, as one classified label.
+
+        For telemetry and qualification, never for the reader: the customer
+        gets prose that names the hosts and says what is missing. A cohort
+        that reports every bounded abstention as "insufficient evidence"
+        cannot tell a rate limit from a genuinely thin company, and the
+        50-company requalification had 23 such rows under one label.
+
+        Never raises: a read model may not fail a run.
+        """
+        from intent_engine.company_ingestion import abstention as _AB
+        try:
+            documents = list(self.store.retrieved(run_id))
+            failures = list(self.store.failures(run_id))
+            verdict = assess_readiness(
+                documents=documents,
+                identity=self.entity_identity(run_id),
+                failures=failures)
+            return _AB.classify(
+                readiness_state=verdict.get("state", ""),
+                failures=failures, documents=documents,
+                unmet_checks=verdict.get("unmet_checks") or (),
+                reasoning_error=reasoning_error,
+                capacity_refused=capacity_refused)
+        except Exception:                       # noqa: BLE001
+            return {"reason": _AB.INTERNAL_FAILURE,
+                    "detail": "the abstention reason could not be computed",
+                    "counts": {}, "hosts": {}, "documents": 0}
 
     def record_analysis_updated(self, run_id: str, *, fields, new_documents,
                                 reason: str) -> None:

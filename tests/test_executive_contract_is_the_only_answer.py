@@ -351,6 +351,17 @@ def test_every_strategic_surface_is_declared_in_the_verdict_register():
         # into a register of strategic conclusions makes that register mean
         # less.
         "_timing_json",
+        # Diagnostics, on the same contract as `/timing` directly above.
+        # `/telemetry` serves retrieval counts by cause and by host, which
+        # evidence ROLES were filled, and one machine-readable abstention
+        # reason code. Every one of those is a statement about OUR RETRIEVAL,
+        # never about the company: there is no thesis, no decision, no finding
+        # and no recommendation for a register of executive verdicts to
+        # source. It is owner-gated for the same reason `/timing` is -- it
+        # names the hosts a run contacted -- and the customer-facing sentence
+        # about a bounded abstention is still written by the brief, which IS
+        # declared in the register.
+        "_telemetry_json",
         # The same reasoning, for the progress poller. `/progress.json`
         # serves the stage ladder, an elapsed line and ONE instruction --
         # where to navigate when the run becomes readable. Every field is

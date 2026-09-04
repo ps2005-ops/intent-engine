@@ -1027,6 +1027,8 @@ class WebApp:
             return self._source_detail(session, parts[1], parts[3])
         if route == ("GET", "runs", 3) and parts[2] == "timing":
             return self._timing_json(session, parts[1])
+        if route == ("GET", "runs", 3) and parts[2] == "telemetry":
+            return self._telemetry_json(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "progress.json":
             return self._progress_json(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "progress":
@@ -1359,6 +1361,35 @@ class WebApp:
     def _html(self, body, *, status="200 OK", extra_headers=()):
         return status, [("Content-Type", "text/html; charset=utf-8"),
                         *extra_headers], self._stylize(body)
+
+    def _telemetry_json(self, session, run_id):
+        """What acquisition had to do, and why the run ended as it did.
+
+        DIAGNOSTICS, NEVER CUSTOMER COPY -- the same contract `/timing` is
+        written under. It exists because a bounded abstention was
+        indistinguishable from every other bounded abstention: 23 of 50 runs
+        in the last requalification took that path under one label, and a
+        cohort cannot act on a number that merges a rate limit, a refusal, a
+        spent time budget and a genuinely thin company.
+
+        IMPLEMENTED IS NOT INSTRUMENTED. `source_health`,
+        `evidence_role_coverage` and `abstention_reason` all had producers
+        and no route, which in this codebase has repeatedly meant "built,
+        green, and never once read in production".
+
+        Owner-gated exactly as `/timing` is: it names hosts this run
+        contacted, so it is not public.
+        """
+        if not self._owned(session, run_id) or not self._is_real_run(run_id):
+            return self._no_such_run(session, run_id)
+        try:
+            payload = self.ci.retrieval_telemetry(run_id)
+        except Exception as exc:                            # noqa: BLE001
+            # A DIAGNOSTIC MAY NEVER FAIL THE THING IT DIAGNOSES, and it may
+            # not pretend either: an unreadable telemetry surface says so.
+            payload = {"error": f"telemetry unavailable: {type(exc).__name__}"}
+        payload["run_id"] = run_id
+        return self._ok_json(payload)
 
     def _timing_json(self, session, run_id):
         """CANONICAL measurement, so the harness stops inferring from prose.
@@ -8250,7 +8281,7 @@ class WebApp:
 
     @classmethod
     def _recommended_candidate_ids(cls, candidates, *, refusing_hosts=(),
-                                   subject_cik=""):
+                                   subject_cik="", memory=None):
         """The default source set, chosen for EVIDENCE-FAMILY COVERAGE.
 
         Takes one candidate from each family in priority order, then a second
@@ -8337,6 +8368,24 @@ class WebApp:
         candidates = [c for c in candidates
                       if not _is_a_guess_at_a_closed_door(c)]
 
+        # A SLOT SPENT ON A KNOWN 404 IS A SLOT INDEPENDENT EVIDENCE DID NOT
+        # GET. `AcquisitionMemory` remembers outcomes that are properties of
+        # the ADDRESS -- gone, refused, unreadable -- across runs, and this is
+        # where that memory is worth the most: not saving a request, but
+        # handing the slot to a candidate that can actually answer.
+        #
+        # NEVER TO EMPTY. If every candidate is known-dead the run still tries
+        # them and still records honest failures -- reporting "no source could
+        # be retrieved" without having asked would be a different product.
+        if memory is not None:
+            from intent_engine.company_ingestion.acquisition_memory import (
+                ALLOW as _ALLOW,
+            )
+            alive = [c for c in candidates
+                     if memory.verdict(c.get("url") or "")["verdict"] == _ALLOW]
+            if alive:
+                candidates = alive
+
         #: The subject's own CIK, as ten digits, or "". Ownership of an EDGAR
         #: document is stated by its URL -- `/edgar/data/<CIK>/...` names the
         #: FILER -- so it is decided here rather than inferred from a
@@ -8352,6 +8401,51 @@ class WebApp:
             if not match or not subject_cik:
                 return False
             return match.group(1).lstrip("0") == subject_cik
+
+        #: WHICH OF THE SUBJECT'S OWN FILINGS EARNS A SCARCE SLOT.
+        #:
+        #: `_EVIDENCE_FAMILIES` groups by VENUE -- its "identity" bucket is
+        #: `source_type in ("homepage", "about")` -- so every SEC filing a
+        #: company files lands in the "investor" bucket, whose quota is TWO.
+        #: A 10-K, a 10-Q, an 8-K and a DEF 14A therefore competed for two
+        #: slots, and `_relevance_first` scored all four identically at 1, so
+        #: the tie-break that actually chose them was `(len(url), url)`.
+        #:
+        #: `coverage.family_of` -- the view `readiness.assess_readiness`
+        #: consults -- does NOT agree that these are the same thing. It reads
+        #: a 10-K as `identity` (Item 1. Business is the company's own account
+        #: of what it is and does), a 10-Q as `investor`, an 8-K as
+        #: `strategy`, a DEF 14A as `talent`. So which filings win those two
+        #: slots decides which evidence ROLES the run ends up holding.
+        #:
+        #: MEASURED 2026-09-03. For seven of eight sub-threshold companies the
+        #: blocking check was `official_identity_or_product` -- no identity and
+        #: no product family -- while the run held FIVE of the company's own
+        #: filings. Their websites answered 403 (amd.com, intel.com,
+        #: oracle.com, abc.xyz and appliedmaterials.com, seven refusals each),
+        #: so EDGAR was the only evidence left, and whether the annual report
+        #: was among it came down to URL length. Two Oracle runs minutes apart
+        #: differed by exactly this: one retrieved two 10-Ks and covered five
+        #: families, the other retrieved none and covered two.
+        #:
+        #: ORDER ONLY, INSIDE ONE BUCKET. No candidate becomes eligible, no
+        #: extra request is made, and the subject's filings still rank ahead
+        #: of sitemap URLs and behind curated ones exactly as before. It
+        #: changes WHICH two of the company's own filings are read, in favour
+        #: of the one that carries the role the run is missing.
+        _ANNUAL_FORMS = ("10-K", "20-F", "40-F")
+
+        def _form_order(candidate) -> float:
+            form = str(candidate.get("form") or "").upper().strip()
+            if form.rstrip("/A") in _ANNUAL_FORMS or form in _ANNUAL_FORMS:
+                return 0.0                # identity + product + strategy
+            if form.startswith("10-Q"):
+                return 0.3                # investor
+            if form.startswith("8-K") or form.startswith("6-K"):
+                return 0.5                # strategy
+            if form.startswith("DEF"):
+                return 0.7                # talent
+            return 0.8
 
         def _relevance_first(candidate):
             method = candidate.get("discovery_method")
@@ -8386,7 +8480,7 @@ class WebApp:
             # first, a third party's mention of the subject well behind the
             # company's own web sources, never level with it.
             if "SEC EDGAR" in why and _filed_by_subject(candidate):
-                return 1
+                return 1 + _form_order(candidate)
             # ONLY WHERE OWNERSHIP CAN ACTUALLY BE DECIDED.
             #
             # The first version of this demoted every `third_party_filing`
@@ -8405,7 +8499,7 @@ class WebApp:
                     method == "third_party_filing" or "SEC EDGAR" in why):
                 return 6
             if "SEC EDGAR" in why:
-                return 1
+                return 1 + _form_order(candidate)
             # ATTESTED BEATS GUESSED — INSIDE THE INDEPENDENT FAMILY TOO.
             #
             # Batch 12 established this for the company's own domain (an
@@ -9311,7 +9405,8 @@ class WebApp:
                     approved = self._recommended_candidate_ids(
                         candidates,
                         refusing_hosts=self.ci.refusing_hosts(run_id),
-                        subject_cik=(self.ci.run_meta(run_id) or {}).get("cik"))
+                        subject_cik=(self.ci.run_meta(run_id) or {}).get("cik"),
+                        memory=self.ci.acquisition_memory)
                     rejected = [c["candidate_id"] for c in candidates
                                 if c["candidate_id"] not in approved]
                     self.ci.approve(run_id, user_id=user_id,
@@ -9571,7 +9666,8 @@ class WebApp:
             approved_ids = self._recommended_candidate_ids(
                 candidates,
                 refusing_hosts=self.ci.refusing_hosts(run_id),
-                subject_cik=(self.ci.run_meta(run_id) or {}).get("cik"))
+                subject_cik=(self.ci.run_meta(run_id) or {}).get("cik"),
+                memory=self.ci.acquisition_memory)
             rejected = [c["candidate_id"] for c in candidates
                         if c["candidate_id"] not in approved_ids]
             try:
@@ -9616,7 +9712,8 @@ class WebApp:
             # on the review page and the set auto-run approves never disagree.
             selected = set(self._recommended_candidate_ids(
                 candidates, refusing_hosts=self.ci.refusing_hosts(run_id),
-                subject_cik=(self.ci.run_meta(run_id) or {}).get("cik")))
+                subject_cik=(self.ci.run_meta(run_id) or {}).get("cik"),
+                memory=self.ci.acquisition_memory))
 
         def _tag(c):
             if c.get("source_class") == "investor_material":
