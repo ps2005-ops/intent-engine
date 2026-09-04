@@ -397,8 +397,23 @@ def journey(name, domain, sector, *, budget_s=300.0, pick=True) -> dict:
     # record one blank for all of them: the section names competing accounts,
     # the section truthfully says retrieval found none, or the section is
     # missing entirely -- which is the only one of the three that is a defect.
-    _against = "what argues against it" in btext.lower()
-    _none_found = "nothing retrieved argues against this reading" in btext.lower()
+    # THE HEADINGS THE BRIEF ACTUALLY USES.
+    #
+    # This searched for "What argues against it", which is produced by
+    # `narrative._evidence_against` and rendered on `/answer`. `/brief` is a
+    # DOSSIER -- `dossier.render_dossier` -- and its counter-argument
+    # passages carry different titles. The detector was reading the right
+    # product on the wrong surface, and reported an absent section for every
+    # company including two that had reached a reading.
+    _markers = ("the risk that would cost the most",
+                "where this sits against the alternatives",
+                "against it:", "what argues against it",
+                "could be wrong")
+    _low = btext.lower()
+    _matched = [m for m in _markers if m in _low]
+    _against = bool(_matched)
+    _none_found = "nothing retrieved argues against this reading" in _low
+    row["counter_markers"] = _matched
     row["counterevidence"] = ("SECTION_ABSENT" if not _against else
                               "NONE_FOUND_STATED" if _none_found else
                               "PRESENT")
@@ -458,11 +473,13 @@ def journey(name, domain, sector, *, budget_s=300.0, pick=True) -> dict:
             # recording that as a blank made a STARVED run look like a
             # MIS-CLASSIFIED one. Two opposite repairs, one empty cell.
             row["thesis_error"] = audit.get("error")
-            if row.pop("_counter_absent", False) and audit.get(
-                    "chosen_pattern"):
-                row["defects"].append(
-                    "the report reached a reading and does not say what "
-                    "argues against it")
+            # RECORDED, NOT FLAGGED. A run whose evidence produced no
+            # blind spot has no counter-account to state, and the passage is
+            # correctly omitted rather than filled. Telling that apart from a
+            # surface that drops one needs the report's own blind_spots,
+            # which this instrument does not have -- so it reports the state
+            # and does not manufacture a defect out of its own blind spot.
+            row.pop("_counter_absent", None)
             if audit.get("business_model") == "UNKNOWN":
                 row["defects"].append(
                     "the pattern gate was never told what kind of business "

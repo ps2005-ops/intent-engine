@@ -1,0 +1,1745 @@
+[
+  {
+    "company": "Synopsys",
+    "domain": "synopsys.com",
+    "sector": "technology / EDA",
+    "picked": true,
+    "defects": [],
+    "error": "",
+    "suggest_ms": 204,
+    "typed_prefix": "synops",
+    "suggestions": [
+      "Synopsys Inc"
+    ],
+    "match_score": 1.0,
+    "autocomplete_found": true,
+    "chosen_identity": "Synopsys Inc",
+    "submitted_company": "Synopsys Inc",
+    "submitted_cik": "883241",
+    "confirmed_pick": true,
+    "submit_ack_s": 0.81,
+    "analyze_status": 200,
+    "run_id": "01M1PB1ZCWY03HCWNMKHAPZGTC",
+    "core_ready_s": 58.3,
+    "timer_shown": true,
+    "eta_shown": true,
+    "stages_seen": [
+      "Identifying the company",
+      "Reading current company",
+      "Connecting macro",
+      "Mapping competitors",
+      "Stress-testing",
+      "Building the executive"
+    ],
+    "ui_timer_at_core": "00:18",
+    "deep_ready_s": 88.4,
+    "strategic_qa_ready_s": 88.4,
+    "page_open_s": 26.34,
+    "brief_chars": 61508,
+    "leaks": [],
+    "names_company": true,
+    "foreign_companies": [],
+    "spinner_after_terminal": false,
+    "counter_markers": [
+      "where this sits against the alternatives"
+    ],
+    "counterevidence": "PRESENT",
+    "documents": 15,
+    "roles_filled": [
+      "direction",
+      "identity_or_product",
+      "market"
+    ],
+    "roles_missing": [],
+    "families": {
+      "customers": 4,
+      "identity": 2,
+      "investor": 1,
+      "product": 5,
+      "strategy": 2,
+      "talent": 1
+    },
+    "sources": {
+      "discovered": 55,
+      "requested": 18,
+      "retrieved": 15,
+      "failed": 3,
+      "yield": 0.833,
+      "by_cause": {
+        "rate_limited": 0,
+        "refused": 2,
+        "not_found": 1,
+        "timed_out": 0,
+        "budget": 0,
+        "unreadable": 0,
+        "other": 0
+      },
+      "by_host": {
+        "www.capterra.com": 1,
+        "www.g2.com": 1,
+        "synopsys.com": 1
+      }
+    },
+    "abstention": "SOURCE_DIVERSITY_INSUFFICIENT",
+    "memory_skips": 112,
+    "cache_hits": 8,
+    "meta_cik": "883241",
+    "subject_cik": "883241",
+    "registrant_sic": "7372",
+    "business_model": "SUBSCRIPTION_SOFTWARE",
+    "eligible_patterns": [
+      "product_to_platform",
+      "smb_wedge_to_enterprise",
+      "human_to_agent_workflow",
+      "single_product_to_ecosystem",
+      "ecosystem_control_vs_openness",
+      "differentiator_commoditization",
+      "services_to_product",
+      "single_to_multi_segment",
+      "tool_to_system_of_record",
+      "buyer_concentration_exposure",
+      "portfolio_run_as_one"
+    ],
+    "excluded_patterns": [
+      "capacity_ahead_of_demand"
+    ],
+    "chosen_pattern": "",
+    "headline_thesis": "No curated transition pattern matched Synopsys Inc in this pass, so the reading below is not built from one.",
+    "mechanism": "",
+    "thesis_alternative": null,
+    "reason_chosen": "no pattern qualified on this run's observations",
+    "thesis_evidence": [],
+    "reasoning_provenance": "pattern_library",
+    "thesis_error": null,
+    "evidence_page": 200,
+    "provenance_has_sources": true,
+    "qa": [
+      {
+        "q": "What is the most important strategic implication?",
+        "status": 200,
+        "chars": 23120,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 18.8,
+        "answer_text": "What is the most important strategic implication? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Synopsys Inc What is the most important strategic implication? A supported reading of Synopsys Inc exists and is set out on the Executive X-Ray. This particular question is not answerable from what this run retrieved. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest evidence supporting that?",
+        "status": 200,
+        "chars": 23657,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 18.2,
+        "answer_text": "What is the strongest evidence supporting that? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Synopsys Inc What is the strongest evidence supporting that? A supported reading of Synopsys Inc exists and is set out on the Executive X-Ray. This particular question is not answerable from what this run retrieved. 2026-09-04: Synopsys Inc sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. 2026-09-04: Synopsys Inc keeps pricing behind a sales conversation, so price is set deal by deal, which protects margin and slows the sales cycle. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest argument against this conclusion?",
+        "status": 200,
+        "chars": 23673,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 18.1,
+        "answer_text": "What is the strongest argument against this conclusion? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Synopsys Inc What is the strongest argument against this conclusion? A supported reading of Synopsys Inc exists and is set out on the Executive X-Ray. This particular question is not answerable from what this run retrieved. 2026-09-04: Synopsys Inc sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. 2026-09-04: Synopsys Inc keeps pricing behind a sales conversation, so price is set deal by deal, which protects margin and slows the sales cycle. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What would make this recommendation wrong?",
+        "status": 200,
+        "chars": 23041,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 18.1,
+        "answer_text": "What would make this recommendation wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Synopsys Inc What would make this recommendation wrong? Hold this decision \u2014 what to charge, and for what \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What should management monitor next?",
+        "status": 200,
+        "chars": 23155,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 18.9,
+        "answer_text": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Synopsys Inc What should management monitor next? customer count \u2014 revenue at a business of this kind moves with customer count.; seats or usage per customer \u2014 revenue at a business of this kind moves with seats or usage per customer.; list and realised price \u2014 revenue at a business of this kind moves with list and realised price. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "Why does that matter most for this company specifically?",
+        "status": 200,
+        "chars": 23395,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 19.3,
+        "answer_text": "Why does that matter most for this company specifically? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Synopsys Inc Why does that matter most for this company specifically? That was the whole of it: \u201ccustomer count \u2014 revenue at a business of this kind moves with customer count.; seats or usage per customer \u2014 revenue at a business of this kind moves with seats or usage per customer.; list and realised price \u2014 revenue at a business of this kind moves with list and realised price.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      }
+    ],
+    "context_retained": true,
+    "qa_ok": "6/6",
+    "result": "FULL_REPORT",
+    "index": 1
+  },
+  {
+    "company": "Emerson Electric",
+    "domain": "emerson.com",
+    "sector": "industrial",
+    "picked": true,
+    "defects": [],
+    "error": "",
+    "suggest_ms": 181,
+    "typed_prefix": "emerso",
+    "suggestions": [
+      "Emerson Radio Corp",
+      "Emerson Electric Co"
+    ],
+    "match_score": 1.0,
+    "autocomplete_found": true,
+    "chosen_identity": "Emerson Electric Co",
+    "submitted_company": "Emerson Electric Co",
+    "submitted_cik": "32604",
+    "confirmed_pick": true,
+    "submit_ack_s": 0.79,
+    "analyze_status": 200,
+    "run_id": "01M1PBE66D2KW8TH7RWRYJ75XJ",
+    "core_ready_s": 25.3,
+    "timer_shown": true,
+    "eta_shown": true,
+    "stages_seen": [
+      "Identifying the company",
+      "Reading current company",
+      "Connecting macro",
+      "Mapping competitors",
+      "Stress-testing",
+      "Building the executive"
+    ],
+    "ui_timer_at_core": "00:01",
+    "deep_ready_s": 37.6,
+    "strategic_qa_ready_s": 37.6,
+    "page_open_s": 12.51,
+    "brief_chars": 54339,
+    "leaks": [],
+    "names_company": true,
+    "foreign_companies": [],
+    "spinner_after_terminal": false,
+    "counter_markers": [
+      "where this sits against the alternatives"
+    ],
+    "counterevidence": "PRESENT",
+    "documents": 3,
+    "roles_filled": [
+      "direction"
+    ],
+    "roles_missing": [
+      "identity_or_product",
+      "market"
+    ],
+    "families": {
+      "investor": 3
+    },
+    "sources": {
+      "discovered": 38,
+      "requested": 5,
+      "retrieved": 3,
+      "failed": 2,
+      "yield": 0.6,
+      "by_cause": {
+        "rate_limited": 0,
+        "refused": 0,
+        "not_found": 2,
+        "timed_out": 0,
+        "budget": 0,
+        "unreadable": 0,
+        "other": 0
+      },
+      "by_host": {
+        "emerson.com": 2
+      }
+    },
+    "abstention": "PRIMARY_EVIDENCE_MISSING",
+    "memory_skips": 189,
+    "cache_hits": 14,
+    "meta_cik": null,
+    "subject_cik": null,
+    "registrant_sic": null,
+    "business_model": null,
+    "eligible_patterns": null,
+    "excluded_patterns": null,
+    "chosen_pattern": null,
+    "headline_thesis": null,
+    "mechanism": null,
+    "thesis_alternative": null,
+    "reason_chosen": null,
+    "thesis_evidence": null,
+    "reasoning_provenance": null,
+    "thesis_error": "no pattern audit recorded for this run",
+    "evidence_page": 200,
+    "provenance_has_sources": true,
+    "qa": [
+      {
+        "q": "What is the most important strategic implication?",
+        "status": 200,
+        "chars": 23181,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 16.0,
+        "answer_text": "What is the most important strategic implication? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Emerson Electric Co What is the most important strategic implication? A supported reading of Emerson Electric Co exists and is set out on the Executive X-Ray. This particular question is not answerable from what this run retrieved. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest evidence supporting that?",
+        "status": 200,
+        "chars": 23536,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 16.2,
+        "answer_text": "What is the strongest evidence supporting that? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Emerson Electric Co What is the strongest evidence supporting that? A supported reading of Emerson Electric Co exists and is set out on the Executive X-Ray. This particular question is not answerable from what this run retrieved. No independent source was found; everything rests on the company&#x27;s own material. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest argument against this conclusion?",
+        "status": 200,
+        "chars": 23552,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 17.4,
+        "answer_text": "What is the strongest argument against this conclusion? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Emerson Electric Co What is the strongest argument against this conclusion? A supported reading of Emerson Electric Co exists and is set out on the Executive X-Ray. This particular question is not answerable from what this run retrieved. No independent source was found; everything rests on the company&#x27;s own material. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What would make this recommendation wrong?",
+        "status": 200,
+        "chars": 23038,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 16.5,
+        "answer_text": "What would make this recommendation wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Emerson Electric Co What would make this recommendation wrong? Do not act on this reading. Re-run once the market engine publishes a snapshot this side will read. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What should management monitor next?",
+        "status": 200,
+        "chars": 23185,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 17.5,
+        "answer_text": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Emerson Electric Co What should management monitor next? unit volume \u2014 revenue at a business of this kind moves with unit volume.; product and node mix \u2014 revenue at a business of this kind moves with product and node mix.; average selling price \u2014 revenue at a business of this kind moves with average selling price. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "Why does that matter most for this company specifically?",
+        "status": 200,
+        "chars": 23425,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 17.2,
+        "answer_text": "Why does that matter most for this company specifically? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Emerson Electric Co Why does that matter most for this company specifically? That was the whole of it: \u201cunit volume \u2014 revenue at a business of this kind moves with unit volume.; product and node mix \u2014 revenue at a business of this kind moves with product and node mix.; average selling price \u2014 revenue at a business of this kind moves with average selling price.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      }
+    ],
+    "context_retained": true,
+    "qa_ok": "6/6",
+    "result": "FULL_REPORT",
+    "index": 2
+  },
+  {
+    "company": "Lowe's Companies",
+    "domain": "lowes.com",
+    "sector": "consumer / retail",
+    "picked": true,
+    "defects": [],
+    "error": "",
+    "suggest_ms": 214,
+    "typed_prefix": "lowe's",
+    "suggestions": [
+      "Lowes Companies Inc"
+    ],
+    "match_score": 0.5,
+    "autocomplete_found": true,
+    "chosen_identity": "Lowes Companies Inc",
+    "submitted_company": "Lowes Companies Inc",
+    "submitted_cik": "60667",
+    "confirmed_pick": true,
+    "submit_ack_s": 0.81,
+    "analyze_status": 200,
+    "run_id": "01M1PBTCNFW6JDXMADQ5E4DCQ1",
+    "core_ready_s": 68.7,
+    "timer_shown": true,
+    "eta_shown": true,
+    "stages_seen": [
+      "Identifying the company",
+      "Reading current company",
+      "Connecting macro",
+      "Mapping competitors",
+      "Stress-testing",
+      "Building the executive"
+    ],
+    "ui_timer_at_core": "00:04",
+    "deep_ready_s": 97.6,
+    "strategic_qa_ready_s": 97.6,
+    "page_open_s": 13.35,
+    "brief_chars": 53132,
+    "leaks": [],
+    "names_company": true,
+    "foreign_companies": [],
+    "spinner_after_terminal": false,
+    "counter_markers": [
+      "where this sits against the alternatives"
+    ],
+    "counterevidence": "PRESENT",
+    "documents": 5,
+    "roles_filled": [
+      "direction",
+      "identity_or_product",
+      "market"
+    ],
+    "roles_missing": [],
+    "families": {
+      "identity": 2,
+      "independent": 1,
+      "investor": 1,
+      "strategy": 1
+    },
+    "sources": {
+      "discovered": 36,
+      "requested": 18,
+      "retrieved": 5,
+      "failed": 13,
+      "yield": 0.278,
+      "by_cause": {
+        "rate_limited": 0,
+        "refused": 13,
+        "not_found": 0,
+        "timed_out": 0,
+        "budget": 0,
+        "unreadable": 0,
+        "other": 0
+      },
+      "by_host": {
+        "lowes.com": 11,
+        "www.g2.com": 1,
+        "www.capterra.com": 1
+      }
+    },
+    "abstention": "NOT_ABSTAINED",
+    "memory_skips": 292,
+    "cache_hits": 21,
+    "meta_cik": "60667",
+    "subject_cik": "60667",
+    "registrant_sic": "5211",
+    "business_model": "SCALE_RETAIL",
+    "eligible_patterns": [
+      "product_to_platform",
+      "human_to_agent_workflow",
+      "single_product_to_ecosystem",
+      "ecosystem_control_vs_openness",
+      "differentiator_commoditization",
+      "single_to_multi_segment",
+      "portfolio_run_as_one"
+    ],
+    "excluded_patterns": [
+      "buyer_concentration_exposure",
+      "capacity_ahead_of_demand",
+      "services_to_product",
+      "smb_wedge_to_enterprise",
+      "tool_to_system_of_record"
+    ],
+    "chosen_pattern": "",
+    "headline_thesis": "No curated transition pattern matched Lowes Companies Inc in this pass, so the reading below is not built from one.",
+    "mechanism": "",
+    "thesis_alternative": null,
+    "reason_chosen": "no pattern qualified on this run's observations",
+    "thesis_evidence": [],
+    "reasoning_provenance": "pattern_library",
+    "thesis_error": null,
+    "evidence_page": 200,
+    "provenance_has_sources": true,
+    "qa": [
+      {
+        "q": "What is the most important strategic implication?",
+        "status": 200,
+        "chars": 23134,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 16.2,
+        "answer_text": "What is the most important strategic implication? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Lowes Companies Inc What is the most important strategic implication? A supported reading of Lowes Companies Inc exists and is set out on the Executive X-Ray. This particular question is not answerable from what this run retrieved. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest evidence supporting that?",
+        "status": 200,
+        "chars": 23578,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 15.7,
+        "answer_text": "What is the strongest evidence supporting that? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Lowes Companies Inc What is the strongest evidence supporting that? A supported reading of Lowes Companies Inc exists and is set out on the Executive X-Ray. This particular question is not answerable from what this run retrieved. 2026-09-04: Lowes Companies Inc sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest argument against this conclusion?",
+        "status": 200,
+        "chars": 23594,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 16.6,
+        "answer_text": "What is the strongest argument against this conclusion? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Lowes Companies Inc What is the strongest argument against this conclusion? A supported reading of Lowes Companies Inc exists and is set out on the Executive X-Ray. This particular question is not answerable from what this run retrieved. 2026-09-04: Lowes Companies Inc sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What would make this recommendation wrong?",
+        "status": 200,
+        "chars": 23048,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 16.0,
+        "answer_text": "What would make this recommendation wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Lowes Companies Inc What would make this recommendation wrong? Hold this decision \u2014 what to charge, and for what \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What should management monitor next?",
+        "status": 200,
+        "chars": 23138,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 17.6,
+        "answer_text": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Lowes Companies Inc What should management monitor next? store and site traffic \u2014 revenue at a business of this kind moves with store and site traffic.; average ticket \u2014 revenue at a business of this kind moves with average ticket.; comparable sales \u2014 revenue at a business of this kind moves with comparable sales. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "Why does that matter most for this company specifically?",
+        "status": 200,
+        "chars": 23378,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 17.6,
+        "answer_text": "Why does that matter most for this company specifically? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Lowes Companies Inc Why does that matter most for this company specifically? That was the whole of it: \u201cstore and site traffic \u2014 revenue at a business of this kind moves with store and site traffic.; average ticket \u2014 revenue at a business of this kind moves with average ticket.; comparable sales \u2014 revenue at a business of this kind moves with comparable sales.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      }
+    ],
+    "context_retained": true,
+    "qa_ok": "6/6",
+    "result": "FULL_REPORT",
+    "index": 3
+  },
+  {
+    "company": "BlackRock",
+    "domain": "blackrock.com",
+    "sector": "financial services",
+    "picked": true,
+    "defects": [],
+    "error": "",
+    "suggest_ms": 223,
+    "typed_prefix": "blackr",
+    "suggestions": [
+      "BlackRock, Inc.",
+      "Blackrock Core Bond Trust",
+      "BlackRock TCP Capital Corp.",
+      "Blackrock Income Trust, Inc.",
+      "Blackrock Muniassets Fund, Inc."
+    ],
+    "match_score": 1.0,
+    "autocomplete_found": true,
+    "chosen_identity": "BlackRock, Inc.",
+    "submitted_company": "BlackRock, Inc.",
+    "submitted_cik": "2012383",
+    "confirmed_pick": true,
+    "submit_ack_s": 0.67,
+    "analyze_status": 200,
+    "run_id": "01M1PC6KCM6SYCAK5YAD83CYNX",
+    "core_ready_s": 55.6,
+    "timer_shown": true,
+    "eta_shown": true,
+    "stages_seen": [
+      "Identifying the company",
+      "Reading current company",
+      "Connecting macro",
+      "Mapping competitors",
+      "Stress-testing",
+      "Building the executive"
+    ],
+    "ui_timer_at_core": "00:17",
+    "deep_ready_s": 77.8,
+    "strategic_qa_ready_s": 77.8,
+    "page_open_s": 11.81,
+    "brief_chars": 58129,
+    "leaks": [],
+    "names_company": true,
+    "foreign_companies": [],
+    "spinner_after_terminal": false,
+    "counter_markers": [
+      "where this sits against the alternatives"
+    ],
+    "counterevidence": "PRESENT",
+    "documents": 6,
+    "roles_filled": [
+      "direction",
+      "identity_or_product",
+      "market"
+    ],
+    "roles_missing": [],
+    "families": {
+      "identity": 2,
+      "independent": 1,
+      "investor": 1,
+      "product": 1,
+      "strategy": 1
+    },
+    "sources": {
+      "discovered": 47,
+      "requested": 28,
+      "retrieved": 6,
+      "failed": 22,
+      "yield": 0.214,
+      "by_cause": {
+        "rate_limited": 0,
+        "refused": 4,
+        "not_found": 16,
+        "timed_out": 0,
+        "budget": 0,
+        "unreadable": 2,
+        "other": 0
+      },
+      "by_host": {
+        "blackrock.com": 15,
+        "www.blackrock.com": 3,
+        "www.g2.com": 1,
+        "www.capterra.com": 1,
+        "www.trustpilot.com": 1,
+        "www.sec.gov": 1
+      }
+    },
+    "abstention": "NOT_ABSTAINED",
+    "memory_skips": 364,
+    "cache_hits": 24,
+    "meta_cik": "2012383",
+    "subject_cik": "2012383",
+    "registrant_sic": "6211",
+    "business_model": "BALANCE_SHEET_OR_NETWORK",
+    "eligible_patterns": [
+      "product_to_platform",
+      "smb_wedge_to_enterprise",
+      "human_to_agent_workflow",
+      "single_product_to_ecosystem",
+      "ecosystem_control_vs_openness",
+      "differentiator_commoditization",
+      "services_to_product",
+      "single_to_multi_segment",
+      "tool_to_system_of_record",
+      "buyer_concentration_exposure",
+      "portfolio_run_as_one"
+    ],
+    "excluded_patterns": [
+      "capacity_ahead_of_demand"
+    ],
+    "chosen_pattern": "",
+    "headline_thesis": "No curated transition pattern matched BlackRock, Inc. in this pass, so the reading below is not built from one.",
+    "mechanism": "",
+    "thesis_alternative": null,
+    "reason_chosen": "no pattern qualified on this run's observations",
+    "thesis_evidence": [],
+    "reasoning_provenance": "pattern_library",
+    "thesis_error": null,
+    "evidence_page": 200,
+    "provenance_has_sources": true,
+    "qa": [
+      {
+        "q": "What is the most important strategic implication?",
+        "status": 200,
+        "chars": 23126,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 13.4,
+        "answer_text": "What is the most important strategic implication? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo BlackRock, Inc. What is the most important strategic implication? A supported reading of BlackRock, Inc. This particular question is not answerable from what this run retrieved. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest evidence supporting that?",
+        "status": 200,
+        "chars": 23549,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 13.5,
+        "answer_text": "What is the strongest evidence supporting that? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo BlackRock, Inc. What is the strongest evidence supporting that? A supported reading of BlackRock, Inc. This particular question is not answerable from what this run retrieved. 2026-09-04: BlackRock, Inc. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest argument against this conclusion?",
+        "status": 200,
+        "chars": 23565,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 14.4,
+        "answer_text": "What is the strongest argument against this conclusion? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo BlackRock, Inc. What is the strongest argument against this conclusion? A supported reading of BlackRock, Inc. This particular question is not answerable from what this run retrieved. 2026-09-04: BlackRock, Inc. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What would make this recommendation wrong?",
+        "status": 200,
+        "chars": 23044,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 14.2,
+        "answer_text": "What would make this recommendation wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo BlackRock, Inc. What would make this recommendation wrong? Hold this decision \u2014 what to charge, and for what \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What should management monitor next?",
+        "status": 200,
+        "chars": 23192,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 14.5,
+        "answer_text": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo BlackRock, Inc. What should management monitor next? spread on assets and liabilities \u2014 revenue at a business of this kind moves with spread on assets and liabilities.; transaction and fee volume \u2014 revenue at a business of this kind moves with transaction and fee volume.; balance or asset growth \u2014 revenue at a business of this kind moves with balance or asset growth. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "Why does that matter most for this company specifically?",
+        "status": 200,
+        "chars": 23432,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 15.1,
+        "answer_text": "Why does that matter most for this company specifically? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo BlackRock, Inc. Why does that matter most for this company specifically? That was the whole of it: \u201cspread on assets and liabilities \u2014 revenue at a business of this kind moves with spread on assets and liabilities.; transaction and fee volume \u2014 revenue at a business of this kind moves with transaction and fee volume.; balance or asset growth \u2014 revenue at a business of this kind moves with balance or asset growth.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      }
+    ],
+    "context_retained": true,
+    "qa_ok": "6/6",
+    "result": "FULL_REPORT",
+    "index": 4
+  },
+  {
+    "company": "Amgen",
+    "domain": "amgen.com",
+    "sector": "healthcare / biotech",
+    "picked": true,
+    "defects": [],
+    "error": "",
+    "suggest_ms": 231,
+    "typed_prefix": "amgen",
+    "suggestions": [
+      "Amgen Inc"
+    ],
+    "match_score": 1.0,
+    "autocomplete_found": true,
+    "chosen_identity": "Amgen Inc",
+    "submitted_company": "Amgen Inc",
+    "submitted_cik": "318154",
+    "confirmed_pick": true,
+    "submit_ack_s": 0.65,
+    "analyze_status": 200,
+    "run_id": "01M1PCJT6GRKQWKAHSGJP0E78X",
+    "core_ready_s": 55.3,
+    "timer_shown": true,
+    "eta_shown": true,
+    "stages_seen": [
+      "Identifying the company",
+      "Reading current company",
+      "Connecting macro",
+      "Mapping competitors",
+      "Stress-testing",
+      "Building the executive"
+    ],
+    "ui_timer_at_core": "00:18",
+    "deep_ready_s": 73.6,
+    "strategic_qa_ready_s": 73.6,
+    "page_open_s": 29.88,
+    "brief_chars": 46368,
+    "leaks": [],
+    "names_company": true,
+    "foreign_companies": [],
+    "spinner_after_terminal": false,
+    "counter_markers": [
+      "where this sits against the alternatives"
+    ],
+    "counterevidence": "PRESENT",
+    "documents": 13,
+    "roles_filled": [
+      "direction",
+      "identity_or_product",
+      "market"
+    ],
+    "roles_missing": [],
+    "families": {
+      "customers": 4,
+      "identity": 2,
+      "investor": 1,
+      "product": 3,
+      "strategy": 3
+    },
+    "sources": {
+      "discovered": 50,
+      "requested": 18,
+      "retrieved": 13,
+      "failed": 5,
+      "yield": 0.722,
+      "by_cause": {
+        "rate_limited": 0,
+        "refused": 2,
+        "not_found": 3,
+        "timed_out": 0,
+        "budget": 0,
+        "unreadable": 0,
+        "other": 0
+      },
+      "by_host": {
+        "amgen.com": 3,
+        "www.g2.com": 1,
+        "www.capterra.com": 1
+      }
+    },
+    "abstention": "NOT_ABSTAINED",
+    "memory_skips": 370,
+    "cache_hits": 27,
+    "meta_cik": "318154",
+    "subject_cik": "318154",
+    "registrant_sic": "2836",
+    "business_model": "REGULATED_PRODUCT_OR_PROVIDER",
+    "eligible_patterns": [
+      "product_to_platform",
+      "human_to_agent_workflow",
+      "single_product_to_ecosystem",
+      "differentiator_commoditization",
+      "services_to_product",
+      "single_to_multi_segment",
+      "tool_to_system_of_record",
+      "buyer_concentration_exposure",
+      "portfolio_run_as_one"
+    ],
+    "excluded_patterns": [
+      "capacity_ahead_of_demand",
+      "ecosystem_control_vs_openness",
+      "smb_wedge_to_enterprise"
+    ],
+    "chosen_pattern": "",
+    "headline_thesis": "No curated transition pattern matched Amgen Inc in this pass, so the reading below is not built from one.",
+    "mechanism": "",
+    "thesis_alternative": null,
+    "reason_chosen": "no pattern qualified on this run's observations",
+    "thesis_evidence": [],
+    "reasoning_provenance": "pattern_library",
+    "thesis_error": null,
+    "evidence_page": 200,
+    "provenance_has_sources": true,
+    "qa": [
+      {
+        "q": "What is the most important strategic implication?",
+        "status": 200,
+        "chars": 23114,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 17.8,
+        "answer_text": "What is the most important strategic implication? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amgen Inc What is the most important strategic implication? A supported reading of Amgen Inc exists and is set out on the Executive X-Ray. This particular question is not answerable from what this run retrieved. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest evidence supporting that?",
+        "status": 200,
+        "chars": 23611,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 18.9,
+        "answer_text": "What is the strongest evidence supporting that? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amgen Inc What is the strongest evidence supporting that? A supported reading of Amgen Inc exists and is set out on the Executive X-Ray. This particular question is not answerable from what this run retrieved. 2026-09-04: SEC 10-K (2026-02-13) sells several distinct products rather than one Weakest. 2026-09-04: Amgen strives to serve patients by transforming the promise of science and biotechnology into therapies that have the power to restore health or save lives. As one of the early pio Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest argument against this conclusion?",
+        "status": 200,
+        "chars": 23627,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 17.9,
+        "answer_text": "What is the strongest argument against this conclusion? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amgen Inc What is the strongest argument against this conclusion? A supported reading of Amgen Inc exists and is set out on the Executive X-Ray. This particular question is not answerable from what this run retrieved. 2026-09-04: SEC 10-K (2026-02-13) sells several distinct products rather than one Weakest. 2026-09-04: Amgen strives to serve patients by transforming the promise of science and biotechnology into therapies that have the power to restore health or save lives. As one of the early pio Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What would make this recommendation wrong?",
+        "status": 200,
+        "chars": 23064,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 18.0,
+        "answer_text": "What would make this recommendation wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amgen Inc What would make this recommendation wrong? Hold this decision \u2014 which development programmes to fund and which to stop \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What should management monitor next?",
+        "status": 200,
+        "chars": 23212,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 18.9,
+        "answer_text": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amgen Inc What should management monitor next? approved products and indications \u2014 revenue at a business of this kind moves with approved products and indications.; volume and prescriptions or procedures \u2014 revenue at a business of this kind moves with volume and prescriptions or procedures.; net price after rebates \u2014 revenue at a business of this kind moves with net price after rebates. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "Why does that matter most for this company specifically?",
+        "status": 200,
+        "chars": 23452,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 19.4,
+        "answer_text": "Why does that matter most for this company specifically? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amgen Inc Why does that matter most for this company specifically? That was the whole of it: \u201capproved products and indications \u2014 revenue at a business of this kind moves with approved products and indications.; volume and prescriptions or procedures \u2014 revenue at a business of this kind moves with volume and prescriptions or procedures.; net price after rebates \u2014 revenue at a business of this kind moves with net price after rebates.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      }
+    ],
+    "context_retained": true,
+    "qa_ok": "6/6",
+    "result": "FULL_REPORT",
+    "index": 5
+  },
+  {
+    "company": "SLB",
+    "domain": "slb.com",
+    "sector": "energy services",
+    "picked": true,
+    "defects": [],
+    "error": "",
+    "suggest_ms": 185,
+    "typed_prefix": "slb",
+    "suggestions": [
+      "Slb Limited"
+    ],
+    "match_score": 1.0,
+    "autocomplete_found": true,
+    "chosen_identity": "Slb Limited",
+    "submitted_company": "Slb Limited",
+    "submitted_cik": "87347",
+    "confirmed_pick": true,
+    "submit_ack_s": 0.86,
+    "analyze_status": 200,
+    "run_id": "01M1PCZ0R3SN3518QP6W9WPKHA",
+    "core_ready_s": 55.8,
+    "timer_shown": true,
+    "eta_shown": true,
+    "stages_seen": [
+      "Identifying the company",
+      "Reading current company",
+      "Connecting macro",
+      "Mapping competitors",
+      "Stress-testing",
+      "Building the executive"
+    ],
+    "ui_timer_at_core": "00:21",
+    "deep_ready_s": 65.2,
+    "strategic_qa_ready_s": 65.2,
+    "page_open_s": 9.41,
+    "brief_chars": 45454,
+    "leaks": [],
+    "names_company": true,
+    "foreign_companies": [],
+    "spinner_after_terminal": false,
+    "counter_markers": [
+      "where this sits against the alternatives"
+    ],
+    "counterevidence": "PRESENT",
+    "documents": 7,
+    "roles_filled": [
+      "direction",
+      "identity_or_product",
+      "market"
+    ],
+    "roles_missing": [],
+    "families": {
+      "customers": 1,
+      "identity": 1,
+      "investor": 1,
+      "product": 3,
+      "strategy": 1
+    },
+    "sources": {
+      "discovered": 44,
+      "requested": 18,
+      "retrieved": 7,
+      "failed": 11,
+      "yield": 0.389,
+      "by_cause": {
+        "rate_limited": 0,
+        "refused": 2,
+        "not_found": 4,
+        "timed_out": 0,
+        "budget": 3,
+        "unreadable": 1,
+        "other": 1
+      },
+      "by_host": {
+        "slb.com": 6,
+        "commerce.slb.com": 1,
+        "www.g2.com": 1,
+        "www.capterra.com": 1,
+        "careers.slb.com": 1,
+        "www.sec.gov": 1
+      }
+    },
+    "abstention": "SOURCE_DIVERSITY_INSUFFICIENT",
+    "memory_skips": 393,
+    "cache_hits": 29,
+    "meta_cik": "87347",
+    "subject_cik": "87347",
+    "registrant_sic": "1389",
+    "business_model": "COMMODITY_PRODUCER",
+    "eligible_patterns": [
+      "differentiator_commoditization",
+      "single_to_multi_segment",
+      "buyer_concentration_exposure",
+      "capacity_ahead_of_demand",
+      "portfolio_run_as_one"
+    ],
+    "excluded_patterns": [
+      "ecosystem_control_vs_openness",
+      "human_to_agent_workflow",
+      "product_to_platform",
+      "services_to_product",
+      "single_product_to_ecosystem",
+      "smb_wedge_to_enterprise",
+      "tool_to_system_of_record"
+    ],
+    "chosen_pattern": "capacity_ahead_of_demand",
+    "headline_thesis": "Slb Limited appears to be committing capital to capacity ahead of uncertain demand. The evidence supports this as a low-confidence hypothesis, not a settled fact.",
+    "mechanism": "Slb Limited appears to be committing capital to capacity ahead of demand it does not control, concentrating the outcome in a small number of buyers' product cycles.",
+    "thesis_alternative": null,
+    "reason_chosen": "low confidence on 2 supporting observation(s); no other pattern qualified",
+    "thesis_evidence": [
+      "SLB previously reported its results on the basis of four Divisions: Digital & Integration, Reservoir Performance, Well Construction, and Production Systems. Commencing the third quarter of 2025, SLB's Digital business is reported as a separate Division. Additionally, SLB's Asset Performance Solution",
+      "Second Quarter 2026 Compared to First Quarter 2026. Reservoir Performance 1,556 232 1,594 257. Eliminations & other (299 ) (167 ) (261 ) (104 ). Comprised principally of certain corporate expenses not allocated to the segments, stock-based compensation costs, amortization expense associated with cer"
+    ],
+    "reasoning_provenance": "pattern_library",
+    "thesis_error": null,
+    "evidence_page": 404,
+    "provenance_has_sources": false,
+    "qa": [
+      {
+        "q": "What is the most important strategic implication?",
+        "status": 200,
+        "chars": 23271,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 14.1,
+        "answer_text": "What is the most important strategic implication? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Slb Limited What is the most important strategic implication? The decision this most affects: Whether a supply commitment should be treated as fixed or renegotiable. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest evidence supporting that?",
+        "status": 200,
+        "chars": 23833,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 14.7,
+        "answer_text": "What is the strongest evidence supporting that? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Slb Limited What is the strongest evidence supporting that? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (low confidence). 2026-09-04: Slb Limited sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. 2026-09-04: Slb Limited publishes named customers rather than logos alone, so those customers agreed to be named, which is a stronger claim than a logo wall. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest argument against this conclusion?",
+        "status": 200,
+        "chars": 23798,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 14.4,
+        "answer_text": "What is the strongest argument against this conclusion? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Slb Limited What is the strongest argument against this conclusion? The strongest case against it: mainly the open evidence gaps below. 2026-09-04: Slb Limited sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. 2026-09-04: Slb Limited publishes named customers rather than logos alone, so those customers agreed to be named, which is a stronger claim than a logo wall. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What would make this recommendation wrong?",
+        "status": 200,
+        "chars": 23247,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 14.3,
+        "answer_text": "What would make this recommendation wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Slb Limited What would make this recommendation wrong? One check separates them: disclosed long-term purchase commitments covering the new capacity. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What should management monitor next?",
+        "status": 200,
+        "chars": 23426,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 13.6,
+        "answer_text": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Slb Limited What should management monitor next? produced volume \u2014 revenue at a business of this kind moves with produced volume.; realised commodity price \u2014 revenue at a business of this kind moves with realised commodity price.; grade or quality of output \u2014 revenue at a business of this kind moves with grade or quality of output. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "Why does that matter most for this company specifically?",
+        "status": 200,
+        "chars": 23666,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 14.3,
+        "answer_text": "Why does that matter most for this company specifically? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Slb Limited Why does that matter most for this company specifically? That was the whole of it: \u201cproduced volume \u2014 revenue at a business of this kind moves with produced volume.; realised commodity price \u2014 revenue at a business of this kind moves with realised commodity price.; grade or quality of output \u2014 revenue at a business of this kind moves with grade or quality of output.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      }
+    ],
+    "context_retained": true,
+    "qa_ok": "6/6",
+    "result": "FULL_REPORT",
+    "index": 6
+  },
+  {
+    "company": "T-Mobile US",
+    "domain": "t-mobile.com",
+    "sector": "communications",
+    "picked": true,
+    "defects": [],
+    "error": "",
+    "suggest_ms": 307,
+    "typed_prefix": "t-mobi",
+    "suggestions": [
+      "T-Mobile US, Inc."
+    ],
+    "match_score": 1.0,
+    "autocomplete_found": true,
+    "chosen_identity": "T-Mobile US, Inc.",
+    "submitted_company": "T-Mobile US, Inc.",
+    "submitted_cik": "1283699",
+    "confirmed_pick": true,
+    "submit_ack_s": 1.45,
+    "analyze_status": 200,
+    "run_id": "01M1PDB78NKQF1FBH8T6K181CK",
+    "core_ready_s": 94.3,
+    "timer_shown": true,
+    "eta_shown": true,
+    "stages_seen": [
+      "Identifying the company",
+      "Reading current company",
+      "Connecting macro",
+      "Mapping competitors",
+      "Stress-testing",
+      "Building the executive"
+    ],
+    "ui_timer_at_core": "00:21",
+    "deep_ready_s": 121.8,
+    "strategic_qa_ready_s": 121.8,
+    "page_open_s": 17.6,
+    "brief_chars": 57701,
+    "leaks": [],
+    "names_company": true,
+    "foreign_companies": [],
+    "spinner_after_terminal": false,
+    "counter_markers": [
+      "where this sits against the alternatives"
+    ],
+    "counterevidence": "PRESENT",
+    "documents": 5,
+    "roles_filled": [
+      "direction",
+      "identity_or_product"
+    ],
+    "roles_missing": [
+      "market"
+    ],
+    "families": {
+      "identity": 2,
+      "investor": 1,
+      "strategy": 1,
+      "talent": 1
+    },
+    "sources": {
+      "discovered": 37,
+      "requested": 25,
+      "retrieved": 5,
+      "failed": 20,
+      "yield": 0.2,
+      "by_cause": {
+        "rate_limited": 0,
+        "refused": 18,
+        "not_found": 0,
+        "timed_out": 0,
+        "budget": 2,
+        "unreadable": 0,
+        "other": 0
+      },
+      "by_host": {
+        "t-mobile.com": 16,
+        "www.g2.com": 1,
+        "www.trustpilot.com": 1,
+        "www.capterra.com": 1
+      }
+    },
+    "abstention": "SOURCE_DIVERSITY_INSUFFICIENT",
+    "memory_skips": 438,
+    "cache_hits": 34,
+    "meta_cik": "1283699",
+    "subject_cik": "1283699",
+    "registrant_sic": "4812",
+    "business_model": "CONTRACTED_OR_RATE_BASE_ASSETS",
+    "eligible_patterns": [
+      "differentiator_commoditization",
+      "single_to_multi_segment",
+      "buyer_concentration_exposure",
+      "capacity_ahead_of_demand",
+      "portfolio_run_as_one"
+    ],
+    "excluded_patterns": [
+      "ecosystem_control_vs_openness",
+      "human_to_agent_workflow",
+      "product_to_platform",
+      "services_to_product",
+      "single_product_to_ecosystem",
+      "smb_wedge_to_enterprise",
+      "tool_to_system_of_record"
+    ],
+    "chosen_pattern": "capacity_ahead_of_demand",
+    "headline_thesis": "T-Mobile US, Inc. appears to be committing capital to capacity ahead of uncertain demand. The evidence supports this as a low-confidence hypothesis, not a settled fact.",
+    "mechanism": "T-Mobile US, Inc. appears to be committing capital to capacity ahead of demand it does not control, concentrating the outcome in a small number of buyers' product cycles.",
+    "thesis_alternative": null,
+    "reason_chosen": "low confidence on 3 supporting observation(s); no other pattern qualified",
+    "thesis_evidence": [
+      "\u2022We controlled an average of 394 MHz of combined low- and mid-band spectrum nationwide as of December 31, 2025. This spectrum is comprised of: \u2022An average of 43 MHz in the 600 MHz band; \u2022An average of 12 MHz in the 700 MHz band; \u2022An average of 14 MHz in the 800 MHz band; \u2022An average of 42 MHz in the",
+      "\u2022We controlled an average of 394 MHz of combined low- and mid-band spectrum nationwide as of December 31, 2024. This spectrum is comprised of: \u2022An average of 41 MHz in the 600 MHz band; \u2022An average of 10 MHz in the 700 MHz band; \u2022An average of 14 MHz in the 800 MHz band; \u2022An average of 41 MHz in the",
+      "T-Mobile Announces Planned Chief Financial Officer Transition. Jessica Uhl Appointed CFO Designate; To Succeed Peter Osvaldik as Chief Financial Officer in February 2027. Peter Osvaldik to Continue as CFO Through a Transition Period Before Assuming a Strategic Advisor Role Until His Planned July 1, "
+    ],
+    "reasoning_provenance": "pattern_library",
+    "thesis_error": null,
+    "evidence_page": 200,
+    "provenance_has_sources": true,
+    "qa": [
+      {
+        "q": "What is the most important strategic implication?",
+        "status": 200,
+        "chars": 23277,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 20.2,
+        "answer_text": "What is the most important strategic implication? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo T-Mobile US, Inc. What is the most important strategic implication? The decision this most affects: Whether a supply commitment should be treated as fixed or renegotiable. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest evidence supporting that?",
+        "status": 200,
+        "chars": 23643,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 21.3,
+        "answer_text": "What is the strongest evidence supporting that? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo T-Mobile US, Inc. What is the strongest evidence supporting that? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (low confidence). 2026-09-04: SEC 10-K (2026-02-11) sells several distinct products rather than one Weakest. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest argument against this conclusion?",
+        "status": 200,
+        "chars": 23608,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 20.3,
+        "answer_text": "What is the strongest argument against this conclusion? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo T-Mobile US, Inc. What is the strongest argument against this conclusion? The strongest case against it: mainly the open evidence gaps below. 2026-09-04: SEC 10-K (2026-02-11) sells several distinct products rather than one Weakest. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What would make this recommendation wrong?",
+        "status": 200,
+        "chars": 23328,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 19.5,
+        "answer_text": "What would make this recommendation wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo T-Mobile US, Inc. What would make this recommendation wrong? Hold this decision \u2014 where the next increment of capital goes \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What should management monitor next?",
+        "status": 200,
+        "chars": 23432,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 19.9,
+        "answer_text": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo T-Mobile US, Inc. What should management monitor next? contracted or regulated volume \u2014 revenue at a business of this kind moves with contracted or regulated volume.; tariff or rate \u2014 revenue at a business of this kind moves with tariff or rate.; asset base in service \u2014 revenue at a business of this kind moves with asset base in service. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "Why does that matter most for this company specifically?",
+        "status": 200,
+        "chars": 23672,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 19.0,
+        "answer_text": "Why does that matter most for this company specifically? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo T-Mobile US, Inc. Why does that matter most for this company specifically? That was the whole of it: \u201ccontracted or regulated volume \u2014 revenue at a business of this kind moves with contracted or regulated volume.; tariff or rate \u2014 revenue at a business of this kind moves with tariff or rate.; asset base in service \u2014 revenue at a business of this kind moves with asset base in service.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      }
+    ],
+    "context_retained": true,
+    "qa_ok": "6/6",
+    "result": "FULL_REPORT",
+    "index": 7
+  },
+  {
+    "company": "Old Dominion Freight Line",
+    "domain": "odfl.com",
+    "sector": "transportation",
+    "picked": true,
+    "defects": [],
+    "error": "",
+    "suggest_ms": 193,
+    "typed_prefix": "old do",
+    "suggestions": [
+      "Old Dominion Freight Line, Inc."
+    ],
+    "match_score": 1.0,
+    "autocomplete_found": true,
+    "chosen_identity": "Old Dominion Freight Line, Inc.",
+    "submitted_company": "Old Dominion Freight Line, Inc.",
+    "submitted_cik": "878927",
+    "confirmed_pick": true,
+    "submit_ack_s": 0.72,
+    "analyze_status": 200,
+    "run_id": "01M1PDQDTE7X5F5XH9VDTMJE25",
+    "core_ready_s": 84.0,
+    "timer_shown": true,
+    "eta_shown": true,
+    "stages_seen": [
+      "Identifying the company",
+      "Reading current company",
+      "Connecting macro",
+      "Mapping competitors",
+      "Stress-testing",
+      "Building the executive"
+    ],
+    "ui_timer_at_core": "00:30",
+    "deep_ready_s": 119.8,
+    "strategic_qa_ready_s": 119.8,
+    "page_open_s": 12.4,
+    "brief_chars": 57464,
+    "leaks": [],
+    "names_company": true,
+    "foreign_companies": [],
+    "spinner_after_terminal": false,
+    "counter_markers": [
+      "where this sits against the alternatives"
+    ],
+    "counterevidence": "PRESENT",
+    "documents": 12,
+    "roles_filled": [
+      "direction",
+      "identity_or_product",
+      "market"
+    ],
+    "roles_missing": [],
+    "families": {
+      "customers": 1,
+      "identity": 2,
+      "investor": 1,
+      "product": 5,
+      "strategy": 3
+    },
+    "sources": {
+      "discovered": 45,
+      "requested": 18,
+      "retrieved": 12,
+      "failed": 6,
+      "yield": 0.667,
+      "by_cause": {
+        "rate_limited": 0,
+        "refused": 2,
+        "not_found": 4,
+        "timed_out": 0,
+        "budget": 0,
+        "unreadable": 0,
+        "other": 0
+      },
+      "by_host": {
+        "odfl.com": 4,
+        "www.g2.com": 1,
+        "www.trustpilot.com": 1
+      }
+    },
+    "abstention": "NOT_ABSTAINED",
+    "memory_skips": 445,
+    "cache_hits": 37,
+    "meta_cik": "878927",
+    "subject_cik": "878927",
+    "registrant_sic": "4213",
+    "business_model": "PEOPLE_OR_ROUTE_BASED_SERVICES",
+    "eligible_patterns": [
+      "product_to_platform",
+      "smb_wedge_to_enterprise",
+      "human_to_agent_workflow",
+      "single_product_to_ecosystem",
+      "ecosystem_control_vs_openness",
+      "differentiator_commoditization",
+      "services_to_product",
+      "single_to_multi_segment",
+      "tool_to_system_of_record",
+      "buyer_concentration_exposure",
+      "portfolio_run_as_one"
+    ],
+    "excluded_patterns": [
+      "capacity_ahead_of_demand"
+    ],
+    "chosen_pattern": "",
+    "headline_thesis": "No curated transition pattern matched Old Dominion Freight Line, Inc. in this pass, so the reading below is not built from one.",
+    "mechanism": "",
+    "thesis_alternative": null,
+    "reason_chosen": "no pattern qualified on this run's observations",
+    "thesis_evidence": [],
+    "reasoning_provenance": "pattern_library",
+    "thesis_error": null,
+    "evidence_page": 200,
+    "provenance_has_sources": true,
+    "qa": [
+      {
+        "q": "What is the most important strategic implication?",
+        "status": 200,
+        "chars": 23158,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 18.6,
+        "answer_text": "What is the most important strategic implication? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Old Dominion Freight Line, Inc. What is the most important strategic implication? A supported reading of Old Dominion Freight Line, Inc. This particular question is not answerable from what this run retrieved. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest evidence supporting that?",
+        "status": 200,
+        "chars": 23573,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 18.1,
+        "answer_text": "What is the strongest evidence supporting that? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Old Dominion Freight Line, Inc. What is the strongest evidence supporting that? A supported reading of Old Dominion Freight Line, Inc. This particular question is not answerable from what this run retrieved. 2026-09-04: 10-K is committing capital to capacity ahead of the demand for it Weakest. 2026-09-04: LTL Freight Shipping &amp; Logistics Services | ODFL publishes named customers rather than logos alone Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest argument against this conclusion?",
+        "status": 200,
+        "chars": 23589,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 16.4,
+        "answer_text": "What is the strongest argument against this conclusion? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Old Dominion Freight Line, Inc. What is the strongest argument against this conclusion? A supported reading of Old Dominion Freight Line, Inc. This particular question is not answerable from what this run retrieved. 2026-09-04: 10-K is committing capital to capacity ahead of the demand for it Weakest. 2026-09-04: LTL Freight Shipping &amp; Logistics Services | ODFL publishes named customers rather than logos alone Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What would make this recommendation wrong?",
+        "status": 200,
+        "chars": 23060,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 16.3,
+        "answer_text": "What would make this recommendation wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Old Dominion Freight Line, Inc. What would make this recommendation wrong? Hold this decision \u2014 what to charge, and for what \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What should management monitor next?",
+        "status": 200,
+        "chars": 23154,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 16.2,
+        "answer_text": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Old Dominion Freight Line, Inc. What should management monitor next? billable headcount or capacity \u2014 revenue at a business of this kind moves with billable headcount or capacity.; utilisation \u2014 revenue at a business of this kind moves with utilisation.; rate or yield \u2014 revenue at a business of this kind moves with rate or yield. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "Why does that matter most for this company specifically?",
+        "status": 200,
+        "chars": 23394,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 17.5,
+        "answer_text": "Why does that matter most for this company specifically? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Old Dominion Freight Line, Inc. Why does that matter most for this company specifically? That was the whole of it: \u201cbillable headcount or capacity \u2014 revenue at a business of this kind moves with billable headcount or capacity.; utilisation \u2014 revenue at a business of this kind moves with utilisation.; rate or yield \u2014 revenue at a business of this kind moves with rate or yield.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      }
+    ],
+    "context_retained": true,
+    "qa_ok": "6/6",
+    "result": "FULL_REPORT",
+    "index": 8
+  },
+  {
+    "company": "Novartis",
+    "domain": "novartis.com",
+    "sector": "international (20-F)",
+    "picked": true,
+    "defects": [],
+    "error": "",
+    "suggest_ms": 316,
+    "typed_prefix": "novart",
+    "suggestions": [
+      "Novartis AG"
+    ],
+    "match_score": 1.0,
+    "autocomplete_found": true,
+    "chosen_identity": "Novartis AG",
+    "submitted_company": "Novartis AG",
+    "submitted_cik": "1114448",
+    "confirmed_pick": true,
+    "submit_ack_s": 1.59,
+    "analyze_status": 200,
+    "run_id": "01M1PE3MJCJJ994KK8D02NDAKY",
+    "core_ready_s": 72.7,
+    "timer_shown": true,
+    "eta_shown": true,
+    "stages_seen": [
+      "Identifying the company",
+      "Reading current company",
+      "Connecting macro",
+      "Mapping competitors",
+      "Stress-testing",
+      "Building the executive"
+    ],
+    "ui_timer_at_core": "00:31",
+    "deep_ready_s": 89.9,
+    "strategic_qa_ready_s": 89.9,
+    "page_open_s": 10.97,
+    "brief_chars": 52415,
+    "leaks": [],
+    "names_company": true,
+    "foreign_companies": [],
+    "spinner_after_terminal": false,
+    "counter_markers": [
+      "where this sits against the alternatives"
+    ],
+    "counterevidence": "PRESENT",
+    "documents": 6,
+    "roles_filled": [
+      "direction",
+      "identity_or_product",
+      "market"
+    ],
+    "roles_missing": [],
+    "families": {
+      "customers": 1,
+      "identity": 2,
+      "product": 1,
+      "strategy": 2
+    },
+    "sources": {
+      "discovered": 44,
+      "requested": 18,
+      "retrieved": 6,
+      "failed": 12,
+      "yield": 0.333,
+      "by_cause": {
+        "rate_limited": 0,
+        "refused": 2,
+        "not_found": 2,
+        "timed_out": 0,
+        "budget": 8,
+        "unreadable": 0,
+        "other": 0
+      },
+      "by_host": {
+        "novartis.com": 8,
+        "www.sec.gov": 2,
+        "www.capterra.com": 1,
+        "www.g2.com": 1
+      }
+    },
+    "abstention": "NOT_ABSTAINED",
+    "memory_skips": 451,
+    "cache_hits": 38,
+    "meta_cik": "1114448",
+    "subject_cik": "1114448",
+    "registrant_sic": "2834",
+    "business_model": "REGULATED_PRODUCT_OR_PROVIDER",
+    "eligible_patterns": [
+      "product_to_platform",
+      "human_to_agent_workflow",
+      "single_product_to_ecosystem",
+      "differentiator_commoditization",
+      "services_to_product",
+      "single_to_multi_segment",
+      "tool_to_system_of_record",
+      "buyer_concentration_exposure",
+      "portfolio_run_as_one"
+    ],
+    "excluded_patterns": [
+      "capacity_ahead_of_demand",
+      "ecosystem_control_vs_openness",
+      "smb_wedge_to_enterprise"
+    ],
+    "chosen_pattern": "",
+    "headline_thesis": "No curated transition pattern matched Novartis AG in this pass, so the reading below is not built from one.",
+    "mechanism": "",
+    "thesis_alternative": null,
+    "reason_chosen": "no pattern qualified on this run's observations",
+    "thesis_evidence": [],
+    "reasoning_provenance": "pattern_library",
+    "thesis_error": null,
+    "evidence_page": 200,
+    "provenance_has_sources": true,
+    "qa": [
+      {
+        "q": "What is the most important strategic implication?",
+        "status": 200,
+        "chars": 23118,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 14.2,
+        "answer_text": "What is the most important strategic implication? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Novartis AG What is the most important strategic implication? A supported reading of Novartis AG exists and is set out on the Executive X-Ray. This particular question is not answerable from what this run retrieved. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest evidence supporting that?",
+        "status": 200,
+        "chars": 23554,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 14.8,
+        "answer_text": "What is the strongest evidence supporting that? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Novartis AG What is the strongest evidence supporting that? A supported reading of Novartis AG exists and is set out on the Executive X-Ray. This particular question is not answerable from what this run retrieved. 2026-09-04: Novartis AG sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest argument against this conclusion?",
+        "status": 200,
+        "chars": 23570,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 13.3,
+        "answer_text": "What is the strongest argument against this conclusion? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Novartis AG What is the strongest argument against this conclusion? A supported reading of Novartis AG exists and is set out on the Executive X-Ray. This particular question is not answerable from what this run retrieved. 2026-09-04: Novartis AG sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What would make this recommendation wrong?",
+        "status": 200,
+        "chars": 23066,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 14.1,
+        "answer_text": "What would make this recommendation wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Novartis AG What would make this recommendation wrong? Hold this decision \u2014 which development programmes to fund and which to stop \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What should management monitor next?",
+        "status": 200,
+        "chars": 23214,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 12.8,
+        "answer_text": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Novartis AG What should management monitor next? approved products and indications \u2014 revenue at a business of this kind moves with approved products and indications.; volume and prescriptions or procedures \u2014 revenue at a business of this kind moves with volume and prescriptions or procedures.; net price after rebates \u2014 revenue at a business of this kind moves with net price after rebates. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "Why does that matter most for this company specifically?",
+        "status": 200,
+        "chars": 23454,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 13.3,
+        "answer_text": "Why does that matter most for this company specifically? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Novartis AG Why does that matter most for this company specifically? That was the whole of it: \u201capproved products and indications \u2014 revenue at a business of this kind moves with approved products and indications.; volume and prescriptions or procedures \u2014 revenue at a business of this kind moves with volume and prescriptions or procedures.; net price after rebates \u2014 revenue at a business of this kind moves with net price after rebates.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      }
+    ],
+    "context_retained": true,
+    "qa_ok": "6/6",
+    "result": "FULL_REPORT",
+    "index": 9
+  },
+  {
+    "company": "Sprouts Farmers Market",
+    "domain": "sprouts.com",
+    "sector": "small-cap / sparse",
+    "picked": true,
+    "defects": [],
+    "error": "",
+    "suggest_ms": 193,
+    "typed_prefix": "sprout",
+    "suggestions": [
+      "Sprout Social, Inc.",
+      "Sprouts Farmers Market, Inc."
+    ],
+    "match_score": 1.0,
+    "autocomplete_found": true,
+    "chosen_identity": "Sprouts Farmers Market, Inc.",
+    "submitted_company": "Sprouts Farmers Market, Inc.",
+    "submitted_cik": "1575515",
+    "confirmed_pick": true,
+    "submit_ack_s": 1.99,
+    "analyze_status": 200,
+    "run_id": "01M1PEFV2PNKHK29MRM8BYPPM6",
+    "core_ready_s": 94.3,
+    "timer_shown": true,
+    "eta_shown": true,
+    "stages_seen": [
+      "Identifying the company",
+      "Reading current company",
+      "Connecting macro",
+      "Mapping competitors",
+      "Stress-testing",
+      "Building the executive"
+    ],
+    "ui_timer_at_core": "00:24",
+    "deep_ready_s": 120.8,
+    "strategic_qa_ready_s": 120.8,
+    "page_open_s": 12.31,
+    "brief_chars": 60413,
+    "leaks": [],
+    "names_company": true,
+    "foreign_companies": [],
+    "spinner_after_terminal": false,
+    "counter_markers": [
+      "where this sits against the alternatives"
+    ],
+    "counterevidence": "PRESENT",
+    "documents": 9,
+    "roles_filled": [
+      "direction",
+      "identity_or_product",
+      "market"
+    ],
+    "roles_missing": [],
+    "families": {
+      "commercial": 1,
+      "identity": 2,
+      "investor": 1,
+      "product": 2,
+      "strategy": 2,
+      "talent": 1
+    },
+    "sources": {
+      "discovered": 48,
+      "requested": 19,
+      "retrieved": 9,
+      "failed": 10,
+      "yield": 0.474,
+      "by_cause": {
+        "rate_limited": 0,
+        "refused": 3,
+        "not_found": 7,
+        "timed_out": 0,
+        "budget": 0,
+        "unreadable": 0,
+        "other": 0
+      },
+      "by_host": {
+        "sprouts.com": 7,
+        "www.g2.com": 1,
+        "www.trustpilot.com": 1,
+        "www.capterra.com": 1
+      }
+    },
+    "abstention": "NOT_ABSTAINED",
+    "memory_skips": 488,
+    "cache_hits": 40,
+    "meta_cik": "1575515",
+    "subject_cik": "1575515",
+    "registrant_sic": "5411",
+    "business_model": "SCALE_RETAIL",
+    "eligible_patterns": [
+      "product_to_platform",
+      "human_to_agent_workflow",
+      "single_product_to_ecosystem",
+      "ecosystem_control_vs_openness",
+      "differentiator_commoditization",
+      "single_to_multi_segment",
+      "portfolio_run_as_one"
+    ],
+    "excluded_patterns": [
+      "buyer_concentration_exposure",
+      "capacity_ahead_of_demand",
+      "services_to_product",
+      "smb_wedge_to_enterprise",
+      "tool_to_system_of_record"
+    ],
+    "chosen_pattern": "",
+    "headline_thesis": "No curated transition pattern matched Sprouts Farmers Market, Inc. in this pass, so the reading below is not built from one.",
+    "mechanism": "",
+    "thesis_alternative": null,
+    "reason_chosen": "no pattern qualified on this run's observations",
+    "thesis_evidence": [],
+    "reasoning_provenance": "pattern_library",
+    "thesis_error": null,
+    "evidence_page": 200,
+    "provenance_has_sources": true,
+    "qa": [
+      {
+        "q": "What is the most important strategic implication?",
+        "status": 200,
+        "chars": 23152,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 19.0,
+        "answer_text": "What is the most important strategic implication? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Sprouts Farmers Market, Inc. What is the most important strategic implication? A supported reading of Sprouts Farmers Market, Inc. This particular question is not answerable from what this run retrieved. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest evidence supporting that?",
+        "status": 200,
+        "chars": 23605,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 18.9,
+        "answer_text": "What is the strongest evidence supporting that? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Sprouts Farmers Market, Inc. What is the strongest evidence supporting that? A supported reading of Sprouts Farmers Market, Inc. This particular question is not answerable from what this run retrieved. 2026-09-04: Sprouts Farmers Market, Inc. sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest argument against this conclusion?",
+        "status": 200,
+        "chars": 23621,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 19.0,
+        "answer_text": "What is the strongest argument against this conclusion? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Sprouts Farmers Market, Inc. What is the strongest argument against this conclusion? A supported reading of Sprouts Farmers Market, Inc. This particular question is not answerable from what this run retrieved. 2026-09-04: Sprouts Farmers Market, Inc. sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What would make this recommendation wrong?",
+        "status": 200,
+        "chars": 23057,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 18.9,
+        "answer_text": "What would make this recommendation wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Sprouts Farmers Market, Inc. What would make this recommendation wrong? Hold this decision \u2014 what to charge, and for what \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What should management monitor next?",
+        "status": 200,
+        "chars": 23147,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 17.3,
+        "answer_text": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Sprouts Farmers Market, Inc. What should management monitor next? store and site traffic \u2014 revenue at a business of this kind moves with store and site traffic.; average ticket \u2014 revenue at a business of this kind moves with average ticket.; comparable sales \u2014 revenue at a business of this kind moves with comparable sales. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "Why does that matter most for this company specifically?",
+        "status": 200,
+        "chars": 23387,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 18.4,
+        "answer_text": "Why does that matter most for this company specifically? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Sprouts Farmers Market, Inc. Why does that matter most for this company specifically? That was the whole of it: \u201cstore and site traffic \u2014 revenue at a business of this kind moves with store and site traffic.; average ticket \u2014 revenue at a business of this kind moves with average ticket.; comparable sales \u2014 revenue at a business of this kind moves with comparable sales.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      }
+    ],
+    "context_retained": true,
+    "qa_ok": "6/6",
+    "result": "FULL_REPORT",
+    "index": 10
+  }
+]

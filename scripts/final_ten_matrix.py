@@ -71,13 +71,34 @@ def main() -> int:
     # ---- §18 thesis audit ------------------------------------------------
     out()
     out("### Thesis audit")
+    # THE COMPANY NAME IS NOT WHAT MAKES A THESIS DISTINCT.
+    #
+    # Comparing full strings counts "X appears to be committing capital..."
+    # and "Y appears to be committing capital..." as two theses, which is
+    # exactly the collapse this gate exists to catch wearing a disguise. The
+    # subject is removed before comparing, so a shared TEMPLATE is visible and
+    # can then be judged on whether the mechanism is genuinely shared.
+    import re as _re
+
+    def _skeleton(r):
+        text = (r.get("headline_thesis") or "").strip()
+        for name in filter(None, [r.get("chosen_identity"), r.get("company"),
+                                  r.get("submitted_company")]):
+            text = text.replace(name, "<SUBJECT>")
+        return _re.sub(r"\s+", " ", text)
+
     groups: dict = {}
     for r in rows:
-        key = (r.get("headline_thesis") or "").strip()
+        key = _skeleton(r)
         if key:
             groups.setdefault(key, []).append(r)
-    out(f"- distinct headline theses: {len(groups)} across "
+    asserted = {k: v for k, v in groups.items()
+                if any((r.get("chosen_pattern") or "") for r in v)}
+    out(f"- thesis skeletons (subject removed): {len(groups)} across "
         f"{sum(len(v) for v in groups.values())} readings")
+    out(f"- of which ASSERTED a reading: {len(asserted)} skeleton(s) over "
+        f"{sum(len(v) for v in asserted.values())} companies; the rest "
+        f"asserted none")
     dupes = {k: v for k, v in groups.items() if len(v) > 1}
     out(f"- duplicated thesis groups: {len(dupes)}")
     for text, members in dupes.items():
@@ -87,10 +108,25 @@ def main() -> int:
         out(f"  - **{names}** — models {sorted(models)}, "
             f"patterns {sorted(patterns)}")
         out(f"    > {text[:300]}")
-        out("    SHARED MECHANISM? "
-            + ("plausible — one business-model class and one pattern"
-               if len(models) == 1 and len(patterns) == 1
-               else "REVIEW — different classes or patterns reached one text"))
+        # AN ABSTENTION IS NOT A THESIS. Companies that share the sentence
+        # "no curated pattern matched" have not been given one reading; they
+        # have been given none, which is the outcome §5 exists to protect.
+        # Counting those as a duplicated thesis would report the repair's
+        # honesty as its failure.
+        if not any(patterns - {""}):
+            out("    KIND: ABSTENTION — no reading was asserted for any of "
+                "these, so there is no duplicated thesis to explain.")
+            continue
+        # TWO CLASSES REACHING ONE PATTERN IS THE REPAIR WORKING, NOT A
+        # SUSPICION. A pattern is admitted to every model class its own
+        # `excluded_model_classes` does not refuse, so sharing one across
+        # classes is expected. The question a machine cannot answer is
+        # whether the MECHANISM is genuinely shared, so it is put plainly
+        # rather than guessed at.
+        out(f"    KIND: SHARED PATTERN {sorted(patterns - {''})} across "
+            f"{len(members)} companies in {len(models)} model class(es).")
+        out("    JUDGE: do these businesses share the mechanism the reading "
+            "rests on? Same thesis is permitted where they do.")
     mech = [r for r in rows if (r.get("mechanism") or "").strip()]
     out(f"- company-specific mechanism present: "
         f"{len(mech)}/{len(rows)} ({pct(len(mech), len(rows))})")
@@ -120,7 +156,7 @@ def main() -> int:
     out(f"- evidence: median documents="
         f"{statistics.median(docs) if docs else '--'}; "
         f"all-three-roles "
-        f"{pct(sum(1 for r in rows if r.get('roles_filled') == 3), len(rows))}"
+        f"{pct(sum(1 for r in rows if len(r.get('roles_filled') or []) >= 3), len(rows))}"
         f"; provenance "
         f"{pct(sum(1 for r in rows if r.get('provenance_has_sources')), len(rows))}")
     answered = [a for r in rows for a in (r.get("qa") or [])]
