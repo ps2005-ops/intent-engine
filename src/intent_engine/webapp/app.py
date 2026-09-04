@@ -1398,7 +1398,55 @@ class WebApp:
             # not pretend either: an unreadable telemetry surface says so.
             payload = {"error": f"telemetry unavailable: {type(exc).__name__}"}
         payload["run_id"] = run_id
+        payload["reading"] = self._reading_diagnostics(run_id)
         return self._ok_json(payload)
+
+    def _reading_diagnostics(self, run_id) -> dict:
+        """WHY a strategic reading was withheld, when one was.
+
+        Q&A refuses a strategic question whenever `brief.key_insight is None`
+        and no executive contract overrides it. Measured live on e4b5ad6b,
+        that refusal fired on 3-5 of 6 questions for EVERY company in the
+        ten-company matrix -- including Synopsys and Amgen, each with 13
+        documents and all three evidence roles filled. The headline question
+        came back "There is not enough public evidence to answer that
+        confidently" on a run that had just published a 50,000-character
+        report.
+
+        Whether that is correct conservatism or a mis-calibrated gate is
+        decided by `safe_insights`, which either received no candidates or
+        dropped all of them -- and `brief.dropped` records which. NOTHING
+        EXPOSED IT, so the question could not be answered from a live run at
+        all; it had to be inferred from source. That is the gap this closes.
+
+        Diagnostics only. It changes no decision and is owner-gated with the
+        rest of the telemetry surface.
+        """
+        try:
+            brief, _report, _name = self._founder_layers(run_id)
+        except Exception as exc:                            # noqa: BLE001
+            return {"error": f"unavailable: {type(exc).__name__}"}
+        insight = getattr(brief, "key_insight", None)
+        dropped = list(getattr(brief, "dropped", ()) or ())
+        contract = None
+        try:
+            contract = self._executive_contract(run_id)
+        except Exception:                                   # noqa: BLE001
+            contract = None
+        return {
+            "key_insight_present": insight is not None,
+            "withheld_reason": str(getattr(brief, "withheld_reason", "") or ""),
+            "candidates_dropped": len(dropped),
+            "dropped_because": [str(d)[:160] for d in dropped[:6]],
+            "contract_present": contract is not None,
+            "contract_reading_exists": bool(
+                getattr(contract, "reading_exists", False)),
+            # The two together decide `withheld` in `founder_brief.qa.answer`,
+            # which is what makes a strategic question answerable or not.
+            "qa_would_withhold": (
+                insight is None
+                and not bool(getattr(contract, "reading_exists", False))),
+        }
 
     def _timing_json(self, session, run_id):
         """CANONICAL measurement, so the harness stops inferring from prose.
@@ -7816,54 +7864,28 @@ class WebApp:
                                     econ=self._founder_economic_context(
                                         run_id))
         return self._founder_answer_page(session, run_id, founder_answer)
-        flat_claims = self._run_claims(run_id)
-        # The previous turn's subject, so "Why?" and "Explain that" resolve
-        # against the conversation. Without this every turn starts from nothing
-        # and the assistant behaves like a search box that forgets you.
-        previous = self._conversation_context.get(run_id, ())
-        answer = self.fi.converse(run_id, question, run_claims=flat_claims,
-                                  previous_topics=previous)
-        self._conversation_context[run_id] = answer.get("topics", ())
-
-        paragraphs, citations = [], []
-        for p in (answer.get("answer") or {}).get("paragraphs", []):
-            paragraphs.append(p.get("text", ""))
-            citations.extend(str(c) for c in p.get("citations", []))
-        # Concise first: the direct answer, then the rest behind a disclosure.
-        # A reader who asked a short question is not asking to read the report
-        # again, and burying the answer in paragraph four is how they end up
-        # taking the first confident sentence they see.
-        lead = paragraphs[0] if paragraphs else ""
-        rest = paragraphs[1:]
-        more = (f'<details class="more"><summary>Explain more</summary>'
-                + "".join(f'<p>{_e(p)}</p>' for p in rest) + '</details>') \
-            if rest else ''
-        cited = ("".join(f'<li>{_e(c)}</li>' for c in dict.fromkeys(citations))
-                 if citations else '')
-        body = (
-            f'{_BRIEF_CSS}<main class="brief">'
-            f'{self._layer_nav(run_id, "")}'
-            f'<h1>{_e(question[:120])}</h1>'
-            # The classifier's enum was rendered here verbatim, so a tester
-            # asking a normal question was told "Intent: UNSUPPORTED".
-            # Internal classification names are not part of the product's
-            # vocabulary and never reach a reader.
-            f'<p class="lead">{_e(lead)}</p>{more}'
-            + (f'<section class="b-part"><h2>Evidence</h2><ul>{cited}</ul>'
-               f'</section>' if cited else '')
-            + f'<p class="stamp">Answers use only this run\'s approved '
-            f'evidence. A source outside that set must be added and approved '
-            f'before it can be used.</p>'
-            f'<form action="/runs/{_e(run_id)}/conversation" method="post" '
-            f'class="b-ask"><input type="hidden" name="csrf" '
-            f'value="{_e(session["csrf"])}">'
-            f'<label for="q">Ask something else</label> '
-            f'<input id="q" name="question" required>'
-            f'<button type="submit">Ask</button></form>'
-            f'<p><a href="/runs/{_e(run_id)}/brief">Back to the brief</a></p>'
-            f'</main>')
-        return self._html(self._page("Answer", body, session,
-                                     session["csrf"]))
+        # WHAT USED TO BE HERE, AND WHY IT IS GONE.
+        #
+        # Forty-eight lines of a second Q&A engine sat below this return
+        # and were UNREACHABLE -- proved by walking the function's AST:
+        # twelve of its twenty-four top-level statements could never run.
+        # Among them was the only writer of `_conversation_context`:
+        #
+        #     previous = self._conversation_context.get(run_id, ())
+        #     answer   = self.fi.converse(..., previous_topics=previous)
+        #     self._conversation_context[run_id] = answer.get('topics', ())
+        #
+        # So follow-up memory was never stored on the live path, and a
+        # structural test asserting the read-before-write ORDER passed
+        # against code that could not execute -- a test that cannot fail.
+        #
+        # The dead engine is removed rather than revived: `fqa.answer`
+        # above is the single interpreter this surface is supposed to
+        # have, and reviving `fi.converse` beside it would restore the
+        # two-interpreters split the comment at the top of this method
+        # says was closed. Follow-up context has to be carried THROUGH
+        # `fqa.answer`, which is a change to that contract and is
+        # recorded as an open defect rather than guessed at here.
 
     def _strategic_report_for(self, run_id):
         """The run's strategic report dict, if it has one (real runs only)."""

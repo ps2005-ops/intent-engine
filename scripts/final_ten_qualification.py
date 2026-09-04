@@ -110,16 +110,114 @@ def leaks(text: str) -> list:
     return sorted(set(found))
 
 
+def _names(text: str, company: str) -> bool:
+    """Does this page name the company it is about?
+
+    Compared against the CANONICAL identity that was submitted, and with no
+    minimum token length. The first version required tokens longer than three
+    characters, which for "SLB" left NO tokens at all -- so `any([])` returned
+    False and a page that said "Slb Limited" three times was reported as not
+    naming its own company. Two of that row's defects were this rule.
+    """
+    haystack = (text or "").lower()
+    tokens = [t for t in str(company or "").replace(",", " ").split()
+              if len(t) >= 2 and t.lower() not in
+              ("inc", "inc.", "corp", "corp.", "ltd", "ltd.", "the", "co",
+               "company", "limited", "group", "holdings", "plc", "&")]
+    if not tokens:
+        tokens = [str(company or "").strip()]
+    return any(t.lower() in haystack for t in tokens if t)
+
+
+def _answer_excerpt(answer_text: str, brief_text: str) -> str:
+    """What the ANSWER added, with the surrounding page chrome removed.
+
+    The conversation route re-renders the whole brief with the answer on it,
+    so `len(html)` measures the report and not the reply. Subtracting the
+    brief's own sentences leaves the part that was written for the question.
+    """
+    known = set()
+    for sentence in re.split(r"(?<=[.!?])\s+", brief_text):
+        cleaned = sentence.strip()
+        if len(cleaned) > 25:
+            known.add(cleaned)
+    fresh = [s.strip() for s in re.split(r"(?<=[.!?])\s+", answer_text)
+             if len(s.strip()) > 25 and s.strip() not in known]
+    return " ".join(fresh)[:1400]
+
+
 def journey(name, domain, sector, *, budget_s=300.0) -> dict:
     op, _ = _opener()
     row = {"company": name, "domain": domain, "sector": sector,
            "defects": [], "error": ""}
     st, entry, _u, _d = _req(op, "/demo")
     csrf = re.search(r'name="csrf"\s+value="([^"]+)"', entry)
+
+    # --- SELECT FROM SUGGESTIONS, as the customer does ---------------------
+    #
+    # Submitting name+website directly would skip the exact step where the
+    # wrong-company failure lives. The UI queries `/api/companies` as the
+    # customer types, and `confirm()` binds the CHOSEN row's canonical
+    # identity into hidden fields; this reproduces that, so the identity
+    # invariant (chosen -> analysed -> reported -> answered) is actually
+    # exercised rather than assumed.
+    # ENOUGH CHARACTERS TO BE A REAL QUERY. `name.split()[0][:5]` gave "old"
+    # for Old Dominion Freight Line -- three characters, which returned five
+    # unrelated "Old ..." registrants. A customer types more than one word
+    # before expecting the right answer, and the product does return exactly
+    # "Old Dominion Freight Line, Inc." for "Old D".
+    typed = name.lower()[:6].strip()
+    t0 = time.monotonic()
+    st_s, sug, _u, _d = _req(op, "/api/companies?q=" + urllib.parse.quote(typed))
+    row["suggest_ms"] = int((time.monotonic() - t0) * 1000)
+    row["typed_prefix"] = typed
+    chosen = None
+    try:
+        companies = json.loads(sug).get("companies", []) if st_s == 200 else []
+    except Exception:                                        # noqa: BLE001
+        companies = []
+    row["suggestions"] = [c.get("legal_name") for c in companies[:5]]
+
+    # PICK THE INTENDED COMPANY, NOT THE FIRST LOOSE MATCH.
+    #
+    # This took the first suggestion whose name contained the target's FIRST
+    # WORD. For "Old Dominion Freight Line" that word is "old", so it selected
+    # "Old QVC Group, Inc." and the whole row analysed the wrong company --
+    # not a product failure (the identity chain held perfectly: Old QVC was
+    # chosen, submitted, analysed and reported consistently) but a harness one
+    # that invalidates the row.
+    #
+    # Now scored by how much of the INTENDED name a suggestion actually
+    # covers, and a suggestion that covers almost none of it is refused
+    # outright rather than accepted as the best of a bad list.
+    def _overlap(legal_name: str) -> float:
+        want = {w for w in re.split(r"[^a-z0-9]+", name.lower())
+                if len(w) > 2 and w not in ("inc", "the", "com", "ltd")}
+        got = {w for w in re.split(r"[^a-z0-9]+", (legal_name or "").lower())
+               if w}
+        return len(want & got) / max(1, len(want))
+
+    scored = sorted(((_overlap(c.get("legal_name") or ""), c)
+                     for c in companies), key=lambda pair: -pair[0])
+    if scored and scored[0][0] >= 0.5:
+        chosen = scored[0][1]
+    row["match_score"] = round(scored[0][0], 2) if scored else 0.0
+    row["autocomplete_found"] = chosen is not None
+    row["chosen_identity"] = (chosen or {}).get("legal_name")
+
     fields = {"consent": "on", "company_name": name,
               "website": f"https://{domain}"}
+    if chosen:
+        # Exactly what `confirm()` writes into the form.
+        if chosen.get("entity_id"):
+            fields["entity_id"] = chosen["entity_id"]
+        if chosen.get("legal_name"):
+            fields["company_name"] = chosen["legal_name"]
+        if chosen.get("domain"):
+            fields["website"] = f"https://{chosen['domain']}"
     if csrf:
         fields["csrf"] = csrf.group(1)
+    row["submitted_company"] = fields["company_name"]
 
     began = time.monotonic()
     st, body, url, submit_s = _req(op, "/analyze", fields,
@@ -172,13 +270,11 @@ def journey(name, domain, sector, *, budget_s=300.0) -> dict:
     st, brief, _u, page_open = _req(op, f"/runs/{run_id}/brief", timeout=90)
     row["page_open_s"] = round(page_open, 2)
     row["brief_chars"] = len(brief)
-    btext = visible(brief)
+    btext = brief_text = visible(brief)
     row["leaks"] = leaks(btext)
     if row["leaks"]:
         row["defects"].append(f"internal vocabulary on the brief: {row['leaks']}")
-    row["names_company"] = any(
-        tok.lower() in btext.lower()
-        for tok in name.replace(",", "").split() if len(tok) > 3)
+    row["names_company"] = _names(btext, row.get("submitted_company") or name)
     if not row["names_company"]:
         row["defects"].append("the report does not name the company")
     foreign = [c for c in FOREIGN
@@ -226,13 +322,20 @@ def journey(name, domain, sector, *, budget_s=300.0) -> dict:
                                {"csrf": token, "question": q}, timeout=120)
         atext = visible(ans)
         # The answer is whatever the page gained beyond the brief's chrome.
+        # THE ANSWER ITSELF IS KEPT, NOT JUST A COUNT.
+        #
+        # "6/6 answered" is not a quality measurement: a generic LLM bolted to
+        # the bottom of a report answers 6/6 too. The text is retained so the
+        # depth standard can be judged against what was actually said --
+        # whether the answer names THIS company's mechanism, cites evidence
+        # from THIS run, and states uncertainty where the evidence is thin.
         answers.append({
             "q": q, "status": st, "chars": len(ans),
             "leaks": leaks(atext),
-            "names_company": any(
-                t.lower() in atext.lower()
-                for t in name.replace(",", "").split() if len(t) > 3),
+            "names_company": _names(
+                atext, row.get("submitted_company") or name),
             "seconds": round(dt, 1),
+            "answer_text": _answer_excerpt(atext, brief_text),
         })
     row["qa"] = answers
     ok_qa = [a for a in answers

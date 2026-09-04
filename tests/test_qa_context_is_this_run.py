@@ -62,8 +62,15 @@ def test_another_session_cannot_ask_about_this_run(tmp_path):
 
 
 def test_two_runs_keep_separate_conversation_memory(tmp_path):
-    """`_conversation_context` is keyed by run, so one company's follow-up
-    context can never be handed to another's."""
+    """Whatever follow-up memory exists is keyed BY RUN.
+
+    Asserted against the store itself rather than against the source text.
+    The previous version of this test grepped `_converse` for
+    `_conversation_context.get(run_id` and passed -- against code that could
+    never execute. A structural assertion is only as true as the reachability
+    of the line it matches, which is why `test_the_answer_path_has_no_dead_code`
+    below now guards that separately.
+    """
     app = _app(tmp_path)
     _c1, run_a = _run(app, "Acme", "acme.example")
     _c2, run_b = _run(app, "Brightlake", "brightlake.example")
@@ -72,20 +79,60 @@ def test_two_runs_keep_separate_conversation_memory(tmp_path):
     app._conversation_context[run_b] = ("regulation",)
     assert app._conversation_context[run_a] == ("pricing_power",)
     assert app._conversation_context[run_b] == ("regulation",)
-    src = inspect.getsource(WebApp._converse)
-    assert "_conversation_context.get(run_id" in src, \
-        "follow-up context is not scoped to the run"
 
 
-def test_the_previous_turn_is_carried_into_the_next_answer(tmp_path):
-    """A follow-up like "why is that more important?" needs the referent."""
-    src = inspect.getsource(WebApp._converse)
-    assert "previous = self._conversation_context.get(run_id" in src, \
-        "the previous turn is never read, so a follow-up has no referent"
-    assert "self._conversation_context[run_id] =" in src, \
-        "nothing is remembered for the next turn"
-    read_at = src.index("previous = self._conversation_context")
-    write_at = src.index("self._conversation_context[run_id] =")
-    assert read_at < write_at, (
-        "the turn is overwritten before it is read, so every follow-up sees "
-        "its own topics instead of the previous answer's")
+def test_the_answer_path_has_no_dead_code(tmp_path):
+    """A STRUCTURAL ASSERTION IS WORTHLESS ON AN UNREACHABLE LINE.
+
+    `_converse` carried forty-eight lines of a second, older Q&A engine below
+    an unconditional `return`: twelve of its twenty-four top-level statements
+    could never run, and the only writer of `_conversation_context` was among
+    them. A test that grepped for that writer passed while follow-up memory
+    was never stored on the live path.
+
+    This walks the AST instead of the text, so the same class of defect
+    cannot come back and take a green test with it.
+    """
+    import ast
+    for name in ("_converse", "_progress", "_analyze"):
+        function = ast.parse(
+            inspect.getsource(getattr(WebApp, name)).lstrip()).body[0]
+        returned_at = None
+        for index, node in enumerate(function.body):
+            if isinstance(node, ast.Return):
+                returned_at = index
+                break
+        if returned_at is None:
+            continue
+        unreachable = len(function.body) - (returned_at + 1)
+        assert unreachable == 0, (
+            f"{name} has {unreachable} unreachable top-level statement(s) "
+            f"after an unconditional return; any structural test matching "
+            f"them is a false green")
+
+
+def test_why_a_reading_was_withheld_is_visible(tmp_path):
+    """THE DIAGNOSTIC THAT DID NOT EXIST.
+
+    Q&A refuses a strategic question when `brief.key_insight is None` and no
+    executive contract overrides it. Live on e4b5ad6b that refusal fired on
+    3-5 of 6 questions for every company in the ten-company matrix, including
+    two with 13 documents and all three evidence roles filled -- and there was
+    no way to tell from a live run whether `safe_insights` had received no
+    candidates or dropped every one of them. It had to be inferred from
+    source, which is not a diagnosis.
+    """
+    import json
+    app = _app(tmp_path)
+    client, run_id = _run(app)
+    status, _h, body = client.request("GET", f"/runs/{run_id}/telemetry")
+    assert status.startswith("200"), status
+    reading = json.loads(body).get("reading") or {}
+    for key in ("key_insight_present", "candidates_dropped",
+                "contract_present", "contract_reading_exists",
+                "qa_would_withhold"):
+        assert key in reading, f"the diagnostic does not report {key}"
+    # And it must agree with the rule Q&A actually applies.
+    assert reading["qa_would_withhold"] == (
+        not reading["key_insight_present"]
+        and not reading["contract_reading_exists"])

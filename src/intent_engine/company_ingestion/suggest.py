@@ -91,10 +91,29 @@ _SUFFIXES = frozenset({
 })
 
 
+#: Punctuation that sits INSIDE a word and must not change what it matches.
+#:
+#: MEASURED LIVE 2026-09-04 on e4b5ad6b: "lowe" returned Lowes Companies Inc,
+#: and "lowe's" returned NOTHING -- as did "Lowe's Companies", which is the
+#: company's actual name and the obvious thing to type. The registrant table
+#: spells it "LOWES COMPANIES INC" with no apostrophe, so `"lowes"
+#: .startswith("lowe's")` was False and every branch of `_match` declined.
+#:
+#: 36 of 10,412 registrants carry an apostrophe -- Macy's, Dick's Sporting
+#: Goods, Campbell's, Victoria's Secret, BJ's Wholesale, McDonald's -- and
+#: the spelling a customer types is not the spelling the regulator filed.
+#: Both sides are normalised, so it does not matter which one has it.
+#:
+#: The RIGHT SINGLE QUOTE is included because that is what a phone keyboard
+#: and most word processors emit; a fix that only handled the ASCII form
+#: would still fail the customers most likely to hit it.
+_IN_WORD_PUNCTUATION = str.maketrans({"'": "", "\u2019": "", "\u02bc": ""})
+
+
 def _words(text: str) -> List[str]:
     out = []
     for raw in str(text or "").lower().replace(",", " ").split():
-        word = raw.strip(".,&")
+        word = raw.strip(".,&").translate(_IN_WORD_PUNCTUATION)
         if word and word not in _SUFFIXES:
             out.append(word)
     return out

@@ -201,3 +201,49 @@ def test_a_suggestion_never_invents_a_domain():
             assert not row.domain, (
                 f"{row.legal_name} carries a domain the registrant table "
                 f"does not have: {row.domain!r}")
+
+
+# =============================================================================
+# punctuation the customer types but the regulator did not file
+# =============================================================================
+
+def test_an_apostrophe_does_not_erase_the_company(table):
+    """MEASURED LIVE on e4b5ad6b: "lowe" found Lowes Companies Inc and
+    "lowe's" found NOTHING -- as did "Lowe's Companies", which is the actual
+    company name and the obvious thing for a customer to type.
+
+    The registrant table spells it without the apostrophe, so the customer's
+    spelling and the regulator's never matched. 36 of 10,412 registrants are
+    affected: Macy's, Dick's, Campbell's, Victoria's Secret, BJ's, McDonald's.
+    """
+    for typed in ("lowe's", "Lowe's Companies", "LOWE'S"):
+        hits = [r.legal_name.lower()
+                for r in CS.suggest(typed, limit=8, allow_registrant=True)]
+        assert any("lowes" in h or "lowe's" in h for h in hits), \
+            f"{typed!r} found nothing: {hits}"
+
+
+def test_a_right_single_quote_works_too(table):
+    """Phone keyboards and word processors emit U+2019, not U+0027. A fix
+    that only handled the ASCII form would fail the customers most likely to
+    hit it."""
+    hits = [r.legal_name.lower()
+            for r in CS.suggest("lowe’s", limit=8, allow_registrant=True)]
+    assert any("lowes" in h for h in hits), hits
+
+
+def test_normalising_punctuation_did_not_break_ampersands(table):
+    """`at&t` and `p&g` must still resolve: the change removes apostrophes,
+    not every symbol."""
+    hits = [r.legal_name.lower()
+            for r in CS.suggest("at&t", limit=8, allow_registrant=True)]
+    assert any("at&t" in h for h in hits), hits
+
+
+def test_the_index_still_matches_the_full_scan_after_normalisation(table):
+    """The index keys come from `_words`, so changing `_words` changes the
+    buckets. Equivalence is re-asserted rather than assumed."""
+    for query in ("lowe's", "macy's", "dick's", "mcdonald's", "at&t",
+                  "black", "nov", "ibm"):
+        assert sorted(_indexed(query)) == sorted(_unindexed(query, table)), \
+            f"index and full scan disagree for {query!r}"
