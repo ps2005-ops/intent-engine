@@ -491,8 +491,14 @@ class CompanyIngestionService:
                 documents = list(self.store.retrieved(run_id))
             except Exception:                               # noqa: BLE001
                 documents = []
-        out["evidence_text"] = _subject_evidence_text(
-            documents, str(meta.get("cik") or ""))
+        # The SUBJECT'S OWN filing text, and the subject is identified the
+        # same way as above -- reading `meta["cik"]` here selected the text of
+        # no filer at all on every domain-entry run.
+        try:
+            _subject = str(self.subject_cik(meta) or "")
+        except Exception:                                   # noqa: BLE001
+            _subject = str(meta.get("cik") or "")
+        out["evidence_text"] = _subject_evidence_text(documents, _subject)
         self._classification_cache[run_id] = out
         return out
 
@@ -507,7 +513,35 @@ class CompanyIngestionService:
         if run_id in self._registrant_cache:
             return self._registrant_cache[run_id]
         out: dict = {}
-        cik = str((meta or {}).get("cik") or "").strip()
+        # `subject_cik`, NOT `meta["cik"]` -- THE SAME MISTAKE, A THIRD TIME.
+        #
+        # `meta["cik"]` is only populated when the customer TYPED a filer with
+        # no website. Every run started from a domain -- the ordinary case,
+        # and all ten of the unseen-company matrix -- carries "" here, so this
+        # branch never ran, no registrant was ever fetched, and
+        # `profile_for(registrant={})` answered UNKNOWN.
+        #
+        # UNKNOWN takes the WHOLE pattern library, which is what produced
+        # thesis collapse: measured live on 56921bce, Synopsys (EDA
+        # software), Emerson Electric (industrial) and Lowe's (retail) each
+        # received the byte-identical headline decision "Whether a supply
+        # commitment should be treated as fixed or renegotiable" -- the
+        # `capacity_ahead_of_demand` scaffold, whose own
+        # `excluded_model_classes` names SUBSCRIPTION_SOFTWARE and
+        # SCALE_RETAIL and could never fire because nothing but UNKNOWN
+        # reached the gate.
+        #
+        # `sufficiency.py` carries a comment describing this exact defect
+        # being repaired in ITS guard: "a run started from a website carries
+        # no CIK -- which is the ORDINARY case". The repair did not reach
+        # here. Measured after the change: Synopsys resolves
+        # SUBSCRIPTION_SOFTWARE, Emerson DESIGN_AND_MANUFACTURE, Lowe's
+        # SCALE_RETAIL, BlackRock BALANCE_SHEET_OR_NETWORK -- three of which
+        # exclude the capacity scaffold outright.
+        try:
+            cik = str(self.subject_cik(meta) or "").strip()
+        except Exception:                                   # noqa: BLE001
+            cik = str((meta or {}).get("cik") or "").strip()
         if cik:
             try:
                 from intent_engine.company_ingestion.edgar import (

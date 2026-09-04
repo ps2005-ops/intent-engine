@@ -30,6 +30,11 @@ POLL_S = 3.0
 SUBMIT_TIMEOUT = 300
 PAGE_TIMEOUT = 90
 
+#: The sentence ResultState.DEEP_PENDING renders on the brief. Its
+#: ABSENCE is DEEP_READY -- read from the served page rather than from
+#: a header the harness would have had to ask the product to add.
+DEEP_PENDING_MARK = "deeper strategic review is still"
+
 #: Never a run subject in any repo artifact. See PART 18 audit.
 TEN = [
     ("Synopsys", "synopsys.com", "technology / EDA"),
@@ -265,6 +270,36 @@ def journey(name, domain, sector, *, budget_s=300.0) -> dict:
         row["result"] = "NO_TERMINAL"
         row["defects"].append("no terminal outcome within budget")
         return row
+
+    # --- WAIT FOR THE DEEP READING BEFORE ASKING ANYTHING ------------------
+    #
+    # CORE_READY is when the analysis becomes OPENABLE, not when it is
+    # finished: the deeper strategic review continues behind it, and until it
+    # lands the brief has no key insight, so `founder_brief.qa` withholds
+    # every strategic answer by contract.
+    #
+    # Asking at CORE therefore measures a half-built analysis. It produced a
+    # "70% of answers are refusals" reading across ten companies that was
+    # entirely an artifact of asking too early -- the same run answered
+    # "Whether a supply commitment should be treated as fixed or
+    # renegotiable" once DEEP had merged, 16 seconds later.
+    #
+    # The marker is the sentence DEEP_PENDING renders; its ABSENCE is
+    # DEEP_READY. Bounded, and a run that never finishes is recorded rather
+    # than waited on forever.
+    deep_ready_s = None
+    brief = ""
+    while time.monotonic() - began < budget_s:
+        st, brief, _u, page_open = _req(op, f"/runs/{run_id}/brief", timeout=90)
+        if st == 200 and len(brief) > 2000 and \
+                DEEP_PENDING_MARK not in visible(brief).lower():
+            deep_ready_s = round(time.monotonic() - began, 1)
+            break
+        time.sleep(POLL_S)
+    row["deep_ready_s"] = deep_ready_s
+    if deep_ready_s is None:
+        row["defects"].append(
+            "the deeper strategic review never merged within the budget")
 
     # --- the report --------------------------------------------------------
     st, brief, _u, page_open = _req(op, f"/runs/{run_id}/brief", timeout=90)
