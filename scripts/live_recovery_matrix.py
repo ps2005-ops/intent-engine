@@ -82,12 +82,27 @@ def visible(html: str) -> str:
     return " ".join(re.sub(r"<[^>]+>", " ", s).split())
 
 
+#: SENTENCES THAT APPEAR ONLY ON THE ABSTENTION PAGE.
+#:
+#: The first version of this list included "could not be retrieved" and "not
+#: enough public evidence", which are what a GOOD report says while listing
+#: the sources it could not read. Measured live on d4ce3318: three of ten
+#: rows were classified BOUNDED_ABSTENTION while carrying 52-59k-character
+#: briefs with every evidence role filled -- against ~12k for a real
+#: abstention page. All three were full reports.
+#:
+#: This is the second time in this programme that a keyword over rendered
+#: HTML invented a product state (`USABLE_NO_REPORT` was the first). The
+#: marks below are sentences the abstention branch alone emits.
 ABSTAIN_MARKS = (
     "rather than show a briefing that looks complete",
-    "did not add enough independent evidence",
-    "could not be retrieved",
-    "not enough public evidence",
+    "this run did not add enough independent evidence to strengthen it",
 )
+
+#: A COROBORATING SIGNAL, because a phrase match is not a measurement. A real
+#: abstention page renders far shorter than a brief; anything near full length
+#: is a report whatever words it happens to contain.
+ABSTENTION_MAX_CHARS = 30_000
 
 
 def analyse(name, domain, *, budget_s) -> dict:
@@ -136,9 +151,11 @@ def analyse(name, domain, *, budget_s) -> dict:
     st, brief, _u, _d = _req(op, f"/runs/{run_id}/brief", timeout=90)
     text = visible(brief).lower()
     row["brief_chars"] = len(brief)
-    row["outcome"] = ("BOUNDED_ABSTENTION"
-                      if any(mark in text for mark in ABSTAIN_MARKS)
-                      else "USABLE_REPORT")
+    row["outcome"] = (
+        "BOUNDED_ABSTENTION"
+        if (any(mark in text for mark in ABSTAIN_MARKS)
+            and len(brief) < ABSTENTION_MAX_CHARS)
+        else "USABLE_REPORT")
     st, tel, _u, _d = _req(op, f"/runs/{run_id}/telemetry", timeout=60)
     if st == 200:
         try:
