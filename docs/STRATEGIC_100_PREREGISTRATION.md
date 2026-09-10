@@ -2,19 +2,50 @@
 
 Written and frozen at the PRE-100 boundary. Nothing in this document may be
 edited after the first Strategic-100 analysis is submitted; a cohort or a
-threshold chosen after seeing results measures the chooser.
+threshold chosen after seeing results measures the chooser. One correction was
+made before any analysis was submitted -- see §0.
 
-**Strategic-100 is NOT executed by this session.**
+**Strategic-100 is NOT executed by the session that wrote this.**
 
 ---
 
+## 0. Correction, 2026-09-04, before any analysis was submitted
+
+The cohort paragraph below previously read "...plus a second frozen 50 drawn
+on the same rules", and the stage name "Strategic-100" was read as implying a
+hundred companies. **Both readings were wrong.** There is one cohort and there
+has only ever been one: `perf_progressive_matrix.QUALIFY_50`.
+
+That sentence caused a cohort-governance session to conclude
+`SECOND FROZEN 50 = MISSING` and to report Strategic-100 as blocked on a
+source universe. It was blocked on a sentence. Corrected here rather than in a
+conversation, because the wrong version is the one that would have been read
+next.
+
+This edit is inside the freeze clause below: it is permitted only because
+**zero Strategic-100 analyses had been submitted** when it was made, and it
+changes the cohort's DESCRIPTION, never its membership. `QUALIFY_50` is
+byte-identical and still hashes to `716ea020b2fecb35`. Editing it is
+recorded, not silent, so no later reader can mistake this document for one
+that was never touched.
+
+"Strategic-100" is the name of the evaluation STAGE. It is not a sample size.
+
 ## 1. Cohort
 
-`perf_progressive_matrix.QUALIFY_50` (50 companies, frozen and already run as
-the PRE-100 qualification) plus a second frozen 50 drawn on the same rules:
-filers and non-filers, sectors spread deliberately rather than by convenience,
-and a deliberately thin tail. The cohort is stored in the repository, not in a
-conversation, and its hash is recorded with the qualifying SHA.
+`perf_progressive_matrix.QUALIFY_50` -- 50 companies, frozen in source control
+before any of them was analysed, and the entire Strategic-100 evaluation
+population. There is no second cohort.
+
+    COHORT       QUALIFY_50
+    COUNT        50
+    HASH         716ea020b2fecb35
+    ALGORITHM    sha256(json.dumps(QUALIFY_50, sort_keys=True).encode())[:16]
+
+The cohort is stored in the repository, not in a conversation, and its hash is
+recorded with the qualifying SHA. `tests/test_the_first_fifty_is_immutable.py`
+fails on a substitution and on a reorder, so the freeze is enforced rather
+than asserted.
 
 Selection rules, applied before any company was analysed:
 

@@ -13,6 +13,10 @@ from typing import Any, Dict, Optional, Union
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
+from intent_engine.core.model_gate import (
+    record_call, require_anthropic_allowed,
+)
+
 load_dotenv()
 
 DEFAULT_MODEL = "claude-sonnet-5"
@@ -57,6 +61,10 @@ class LLMClient:
 
     def __init__(self, model: str = DEFAULT_MODEL, api_key: Optional[str] = None,
                  timeout: Optional[float] = None):
+        # THE GATE COMES FIRST, BEFORE THE CREDENTIAL IS EVEN READ. A client
+        # that never exists cannot be called, cannot be cached on a service
+        # object, and cannot be reached by a retry. See `core.model_gate`.
+        require_anthropic_allowed("constructing an Anthropic client")
         resolved_key = api_key or os.environ.get("ANTHROPIC_API_KEY")
         if not resolved_key:
             raise RuntimeError(
@@ -93,6 +101,14 @@ class LLMClient:
         # spend what IT has left rather than what this client was built with.
         client = (self._client if timeout is None
                   else self._client.with_options(timeout=float(timeout)))
+        # RE-CHECKED HERE, AND NOT ONLY AT CONSTRUCTION. A client built while
+        # the gate was open is an ordinary object that outlives the flag --
+        # `WebApp` builds one in `__init__` and holds it for the life of the
+        # process -- so a construction-only guard would be consulted once, at
+        # boot, and never again. This is the last instruction under this
+        # repository's control before the network.
+        require_anthropic_allowed("an Anthropic model call")
+        record_call()
         response = client.messages.create(
             model=self.model,
             max_tokens=max_tokens,

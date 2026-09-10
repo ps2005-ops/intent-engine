@@ -218,11 +218,19 @@ class FileCache:
 
 
 def default_client(model=DEFAULT_MODEL):
-    """The real client, or None when no key is configured.
+    """The real client, or None when no key is configured or the gate is shut.
 
     Returning None rather than raising lets a deployment run in deterministic
     mode without pretending the analyst exists.
     """
+    # BEFORE `load_dotenv`, AND THAT ORDER IS THE WHOLE POINT. This function
+    # loads a `.env` before it looks at the environment, so "the operator
+    # removed ANTHROPIC_API_KEY" was never sufficient to reach a
+    # zero-Anthropic run -- a file on disk resupplied it. ZERO_ANTHROPIC is
+    # checked first so no credential, from any source, can reopen the gate.
+    from intent_engine.core.model_gate import anthropic_disabled
+    if anthropic_disabled():
+        return None
     try:                        # a .env is how local runs supply the key
         from dotenv import load_dotenv
         load_dotenv()
