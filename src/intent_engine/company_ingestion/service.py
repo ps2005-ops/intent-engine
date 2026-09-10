@@ -134,7 +134,26 @@ def _business_model_of(company_name, *, domain="", registrant=None,
         from intent_engine.executive.company_profile import profile_for
         profile = profile_for(name=company_name, domain=domain,
                               registrant=registrant,
-                              evidence_text=evidence_text)
+                              evidence_text=evidence_text,
+                              # THE SAME TEXT, OFFERED TO THE THIRD
+                              # CLASSIFIER TOO. `evidence_text` is
+                              # `_subject_evidence_text` output -- the
+                              # SUBJECT'S own documents, filings for a filer
+                              # and its own pages for everyone else -- and
+                              # `profile_for` reads it two different ways:
+                              # as a correction to an industry code, and (as
+                              # `published_text`) as a classification of last
+                              # resort when there is no industry code at all.
+                              #
+                              # Passing only the first is how ONE RUN CAME TO
+                              # HOLD TWO ANSWERS. Measured live on df8830f0,
+                              # Highspot: this gate reported
+                              # `business_model: UNKNOWN` in the run's own
+                              # telemetry while the reading layer reported
+                              # SUBSCRIPTION_SOFTWARE off the same text, so
+                              # the pattern library stayed wide open on a
+                              # company the product had in fact classified.
+                              published_text=evidence_text)
         return profile.business_model_class if profile.known else ""
     except Exception:                                       # noqa: BLE001
         return ""
@@ -191,7 +210,12 @@ def _patterns_for_company(company_name: str, domain: str = "",
         from intent_engine.executive.company_profile import profile_for
         model = profile_for(name=company_name, domain=domain,
                             registrant=registrant,
-                            evidence_text=evidence_text
+                            evidence_text=evidence_text,
+                            # See `_business_model_of` above: the same text,
+                            # offered to the third classifier as well, so
+                            # this gate and that one cannot disagree about
+                            # what kind of business the run is about.
+                            published_text=evidence_text
                             ).business_model_class
     except Exception:                                       # noqa: BLE001
         return list(PATTERN_LIBRARY)

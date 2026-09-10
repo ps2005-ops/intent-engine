@@ -380,10 +380,15 @@ def value_block(company: str, adaptive) -> str:
     if top is not None:
         out.append(f'<p class="ad-sub">The decision category this would '
                    f'improve first: {_e(top.decision_domain)}. No return is '
-                   f'claimed for it — none has been measured.</p>')
+                   f'claimed for it, because none has been measured.</p>')
     else:
-        out.append('<p class="ad-sub">No return is claimed for any of this. '
-                   'None has been measured.</p>')
+        # LOWER CASE, AND DELIBERATELY. A sentence beginning "None has been
+        # measured" is correct English and puts the bare token `None` on a
+        # customer page, where the raw-internals detector -- rightly -- reads
+        # it as a rendered Python object. The detector is the more valuable
+        # of the two, so the copy moves.
+        out.append('<p class="ad-sub">No return is claimed for any of this, '
+                   'because none has been measured.</p>')
     out.append('</section>')
     return "".join(out)
 

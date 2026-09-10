@@ -156,3 +156,57 @@ def test_the_assembler_hands_over_subject_owned_text_alone():
     ]}}
     fallback = WebApp._subject_published_text(app, "r1")
     assert "Globex" in fallback
+
+
+def test_one_run_holds_one_business_model():
+    """TWO PROFILE RESOLUTIONS, ONE RUN -- measured live and repaired.
+
+    On df8830f0 the reading layer classified Highspot SUBSCRIPTION_SOFTWARE
+    from its own pages while the run's own telemetry reported
+    `business_model: UNKNOWN`, because the ingestion gates called
+    `profile_for` with `evidence_text` and not with `published_text`. The
+    pattern library therefore stayed wide open on a company the product had
+    in fact classified -- twelve patterns offered where the classification
+    allows eleven.
+
+    Both gates read the SAME text, so they must return the same answer.
+    """
+    from intent_engine.company_ingestion.service import (
+        _business_model_of, _patterns_for_company)
+    from intent_engine.strategic_intelligence.patterns import PATTERN_LIBRARY
+
+    reading = profile_for(name="Acme", published_text=SOFTWARE)
+    ingestion = _business_model_of("Acme", evidence_text=SOFTWARE)
+    assert reading.business_model_class == ingestion == "SUBSCRIPTION_SOFTWARE"
+
+    # ...and the classification actually narrows the library, which is the
+    # thing UNKNOWN was silently switching off.
+    gated = _patterns_for_company("Acme", evidence_text=SOFTWARE)
+    assert 0 < len(gated) < len(PATTERN_LIBRARY)
+
+
+def test_the_classification_says_how_it_decided_not_only_what():
+    """Telemetry went blank the moment `profile_for` started winning: the
+    branch that computed the evidence read stopped running, so a matrix could
+    report WHAT was decided and never HOW."""
+    from intent_engine.adaptive.engine import build
+    ai = build(company="Acme", evidence_text=SOFTWARE)
+    t = ai.telemetry()
+    assert t["business_model"] == "SUBSCRIPTION_SOFTWARE"
+    assert t["business_model_confidence"]
+    assert t["business_model_evidence"]
+
+
+def test_no_customer_sentence_puts_a_bare_python_token_on_the_page():
+    """The raw-internals detector reads a bare `None` as a rendered object,
+    and it is right to. A sentence that opens "None has been measured" is
+    correct English and indistinguishable from the defect, so the copy moves
+    rather than the detector."""
+    from intent_engine.adaptive import render as ar
+    from intent_engine.adaptive.engine import build
+    for text in (SOFTWARE, "Nothing much here."):
+        ai = build(company="Acme", evidence_text=text)
+        html = ar.block("Acme", "r1", ai, csrf="t", base="/runs/r1/intro")
+        import re
+        assert not re.search(r"\bNone\b", html), html[:400]
+        assert not re.search(r"\bUNKNOWN\b", html)

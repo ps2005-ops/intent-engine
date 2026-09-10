@@ -446,6 +446,18 @@ def build_profile(*, company: str, domain: str = "",
     # --- what kind of business, in strict order of authority ----------------
     classification = None
     model_class = str(getattr(ip, "business_model_class", "") or "UNKNOWN")
+    # READ IT BACK EVEN WHEN `profile_for` ALREADY DID THE WORK.
+    #
+    # Once the third classifier moved inside `profile_for`, `ip.known` became
+    # True for exactly the companies this layer exists to serve, so the branch
+    # below stopped running and `classification` stayed None -- taking the
+    # confidence and the quoted span out of telemetry with it. Measured live:
+    # `business_model: SUBSCRIPTION_SOFTWARE` beside an empty
+    # `business_model_confidence` and an empty `business_model_evidence`, so
+    # the matrix could report WHAT was decided and never HOW. It is a pure
+    # function over text already in memory.
+    if str(getattr(ip, "profile_source", "")) == "SUBJECT_EVIDENCE" and body:
+        classification = classify_from_evidence(body)
     state = str(getattr(ip, "profile_state", "") or "PROFILE_SPARSE")
     source = str(getattr(ip, "profile_source", "") or "NONE")
     limitation = str(getattr(ip, "profile_limitation", "") or "")
