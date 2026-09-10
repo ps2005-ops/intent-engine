@@ -304,18 +304,15 @@ class EvidenceClassification:
 
 
 def _span_around(text: str, match: "re.Match") -> str:
-    """The sentence the match sits in, so the read can be quoted back."""
-    start = max(0, match.start() - 220)
-    end = min(len(text), match.end() + 220)
-    window = text[start:end]
-    # trim to sentence boundaries where there are any
-    left = window.find(". ")
-    if 0 <= left < (match.start() - start):
-        window = window[left + 2:]
-    right = window.rfind(". ")
-    if right > 40:
-        window = window[:right + 1]
-    return " ".join(window.split())[:300]
+    """The sentence the match sits in, so the read can be quoted back.
+
+    Delegated to `adaptive.spans`, which snaps to sentences and refuses page
+    furniture using the rule `evidence_text` already owns. The arithmetic
+    window this replaced produced quotes beginning mid-word on the deployed
+    service.
+    """
+    from intent_engine.adaptive.spans import quote_around
+    return quote_around(text, match.start(), match.end())
 
 
 def classify_from_evidence(text: str) -> EvidenceClassification:

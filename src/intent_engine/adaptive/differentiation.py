@@ -228,6 +228,9 @@ def build_differentiation(*, company: str, profile=None, lens_selection=None,
         evidence.extend(str(c) for c in (insight.get("citations") or [])[:3])
 
     lens_span = str(getattr(lens_selection, "evidence_span", "") or "")
+    # A SPAN THAT CAME BACK EMPTY IS A REFUSAL, NOT A GAP TO FILL. `spans`
+    # returns "" when everything near the match was page furniture, and the
+    # right rendering of that is no quotation at all.
     if lens_span:
         evidence.append(lens_span)
 

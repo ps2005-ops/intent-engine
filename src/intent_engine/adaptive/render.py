@@ -55,6 +55,10 @@ CSS = """
   border-radius:10px;padding:1rem 1.1rem;margin:1rem 0}
 .ad-panel>*:first-child{margin-top:0}
 .ad-panel>*:last-child{margin-bottom:0}
+.ad-bounded{border:1px dashed var(--ad-line);border-radius:10px;
+  padding:.2rem 1.1rem 1rem;margin:1.2rem 0}
+.ad-note{font-size:.85rem;color:var(--ad-muted);margin:.2em 0 .8em}
+.ad-domain{border-style:dashed}
 .ad-flag{background:var(--ad-warn-bg);color:var(--ad-warn-fg);
   border:1px solid var(--ad-warn-line);border-radius:8px;
   padding:.6rem .85rem;margin:.7rem 0;font-size:.9rem}
@@ -168,8 +172,17 @@ def why_different(company: str, adaptive) -> str:
     else:
         out.append(f'<p>{_e(d.flag_reason)}</p>')
     if d.decision_implication:
-        out.append('<span class="ad-label">Decision implication</span>'
+        out.append('<span class="ad-label">Decision consequence</span>'
                    f'<p>{_e(d.decision_implication)}</p>')
+    # THE FOURTH PART, AND IT BELONGS HERE RATHER THAN ONLY LOWER DOWN.
+    # A reader meeting "this analysis is different" immediately asks "says
+    # who?" -- and the answer was three sections away, which is far enough
+    # that most readers never connected the two.
+    sel = getattr(adaptive, "lens_selection", None)
+    if sel is not None and sel.primary_name:
+        out.append('<span class="ad-label">Why Intent Engine reads it this '
+                   'way</span>'
+                   f'<p>{_e(sel.why_selected)}</p>')
     if d.flagged and d.company_specific_difference:
         out.append(f'<p class="ad-flag">{_e(d.flag_reason)}</p>')
     if d.evidence:
@@ -204,46 +217,131 @@ def lens_block(adaptive) -> str:
 
 
 def opportunities(adaptive) -> str:
+    """The decision map, in whichever of its three states this run is in.
+
+    BRANCHING ON STATE IS THE WHOLE POINT. An empty `opportunities` tuple and
+    an empty map are different facts about a company -- "we understand this
+    business and cannot yet say what to do" is not "we could not get far
+    enough to say even that" -- and rendering one card for both is what makes
+    a careful product look like a broken one. Measured live: the first
+    version showed "no decision opportunity cleared the bar" followed by
+    three rejected candidates, on the screen that matters most.
+    """
     m = getattr(adaptive, "opportunity_map", None)
     if m is None:
         return ""
-    out = ['<section aria-labelledby="ad-opp-h">',
-           '<h2 id="ad-opp-h">Where better intelligence could change a '
-           'decision</h2>']
-    if not m.opportunities:
-        out.append(f'<p>{_e(m.reason)}</p>')
+    from intent_engine.adaptive import opportunity as O
+
+    if m.state == O.DECISION_READING:
+        out = ['<section aria-labelledby="ad-opp-h">',
+               '<h2 id="ad-opp-h">Where better intelligence could change a '
+               'decision</h2>']
+        for index, o in enumerate(m.opportunities, start=1):
+            out.append('<article class="ad-opp">')
+            out.append(f'<h3><span class="ad-rank">{index:02d}</span> '
+                       f'{_e(o.decision_description)}</h3>')
+            if o.why_now:
+                out.append('<span class="ad-label">Why now</span>'
+                           f'<p>{_e(o.why_now)}</p>')
+            out.append(f'<p class="ad-sub" style="margin:.4em 0">Owner: '
+                       f'{_e(o.decision_owner_role.upper())} · domain: '
+                       f'{_e(o.decision_domain)} · priority '
+                       f'{o.decision_priority:.2f}</p>')
+            if o.contradicting_evidence:
+                out.append('<span class="ad-label">What argues against it'
+                           '</span>'
+                           f'<p>{_e(o.contradicting_evidence)}</p>')
+            if o.recommended_information_next:
+                out.append('<span class="ad-label">What to find out next'
+                           '</span>'
+                           f'<p>{_e(o.recommended_information_next)}</p>')
+            out.append('<details><summary>How this was ranked</summary>'
+                       f'<p>{_e(o.score_reason)}</p><ul class="ad-bars">')
+            for label, value in (("Materiality", o.materiality),
+                                 ("Change velocity", o.change_velocity),
+                                 ("Company exposure", o.company_exposure),
+                                 ("Actionability", o.actionability),
+                                 ("Evidence strength", o.evidence_strength)):
+                out.append(_meter(label, value))
+            out.append('</ul></details></article>')
         for line in (m.withheld or ()):
             out.append(f'<p class="ad-quote">{_e(line)}</p>')
         out.append('</section>')
         return "".join(out)
-    for index, o in enumerate(m.opportunities, start=1):
-        out.append('<article class="ad-opp">')
-        out.append(f'<h3><span class="ad-rank">{index:02d}</span> '
-                   f'{_e(o.decision_description)}</h3>')
-        if o.why_now:
-            out.append('<span class="ad-label">Why now</span>'
-                       f'<p>{_e(o.why_now)}</p>')
-        out.append(f'<p class="ad-sub" style="margin:.4em 0">Owner: '
-                   f'{_e(o.decision_owner_role.upper())} · domain: '
-                   f'{_e(o.decision_domain)} · priority '
-                   f'{o.decision_priority:.2f}</p>')
-        if o.contradicting_evidence:
-            out.append('<span class="ad-label">What argues against it</span>'
-                       f'<p>{_e(o.contradicting_evidence)}</p>')
-        if o.recommended_information_next:
-            out.append('<span class="ad-label">What to find out next</span>'
-                       f'<p>{_e(o.recommended_information_next)}</p>')
-        out.append('<details><summary>How this was ranked</summary>'
-                   f'<p>{_e(o.score_reason)}</p><ul class="ad-bars">')
-        for label, value in (("Materiality", o.materiality),
-                             ("Change velocity", o.change_velocity),
-                             ("Company exposure", o.company_exposure),
-                             ("Actionability", o.actionability),
-                             ("Evidence strength", o.evidence_strength)):
-            out.append(_meter(label, value))
-        out.append('</ul></details></article>')
-    for line in (m.withheld or ()):
-        out.append(f'<p class="ad-quote">{_e(line)}</p>')
+
+    if m.state == O.POTENTIAL_DOMAINS:
+        out = ['<section class="ad-bounded" aria-labelledby="ad-opp-h">',
+               '<h2 id="ad-opp-h">Potential decision domains</h2>',
+               '<p class="ad-note">Areas this company model suggests are '
+               'worth investigating — <strong>not current '
+               'recommendations</strong>.</p>',
+               f'<p>{_e(m.reason)}</p>']
+        for index, d in enumerate(m.domains, start=1):
+            out.append('<article class="ad-opp ad-domain">')
+            out.append(f'<h3><span class="ad-rank">{index:02d}</span> '
+                       f'{_e(d.domain[0].upper() + d.domain[1:])}</h3>')
+            out.append(f'<p>{_e(d.why_it_could_matter)}</p>')
+            out.append(f'<p class="ad-sub">Would sit with: '
+                       f'{_e(d.owner_role.upper())}</p>')
+            out.append('<span class="ad-label">What would make this a '
+                       'recommendation</span>'
+                       f'<p>{_e(d.what_would_make_it_a_recommendation)}</p>')
+            out.append('</article>')
+        out.append('</section>')
+        return "".join(out)
+
+    return ('<section aria-labelledby="ad-opp-h">'
+            '<h2 id="ad-opp-h">Decision domains</h2>'
+            f'<p>{_e(m.reason)}</p></section>')
+
+
+def bounded_block(company: str, adaptive) -> str:
+    """What we know, what we cannot yet conclude, and what would change that.
+
+    Shown ONLY when there is no decision reading. It is the positive form of
+    an abstention: a reader should finish it knowing that the product
+    understood their company and declined to guess, which is a different
+    impression from a page with gaps in it.
+    """
+    m = getattr(adaptive, "opportunity_map", None)
+    if m is None or getattr(m, "has_reading", False):
+        return ""
+    p = getattr(adaptive, "profile", None)
+    sel = getattr(adaptive, "lens_selection", None)
+    said = getattr(p, "self_description", None)
+    out = ['<section class="ad-panel" aria-labelledby="ad-bounded-h">',
+           f'<h2 id="ad-bounded-h" style="margin-top:0">What we can and '
+           f'cannot say about {_e(company)}</h2>']
+
+    out.append('<span class="ad-label">What we know</span><ul>')
+    if said is not None and said.value:
+        out.append(f'<li>{_e(said.value)}</li>')
+    model = str(getattr(p, "business_model_class", "") or "")
+    if model and model != "UNKNOWN":
+        out.append(f'<li>It is a {_e(model.replace("_", " ").lower())} '
+                   f'business, read from its own account of how it is '
+                   f'paid.</li>')
+    for fact in (tuple(getattr(p, "critical_dependencies", ()) or ())[:2]):
+        out.append(f'<li>It names {_e(fact.value)} as something it depends '
+                   f'on.</li>')
+    out.append('</ul>')
+
+    if sel is not None and sel.primary_name:
+        out.append('<span class="ad-label">The lens this points to</span>'
+                   f'<p>{_e(sel.primary_name)} — {_e(sel.why_selected)}</p>')
+
+    out.append('<span class="ad-label">What we cannot yet conclude</span>'
+               '<p>What this management should actually do. Knowing what '
+               'kind of business this is tells us which decisions tend to '
+               'matter for a business like it; it does not tell us which one '
+               'is live here, or which way it should go.</p>')
+    if m.evidence_limitation:
+        out.append('<span class="ad-label">Why not</span>'
+                   f'<p>{_e(m.evidence_limitation)}</p>')
+    if m.what_would_unlock_a_decision:
+        out.append('<span class="ad-label">What would unlock a decision'
+                   '</span>'
+                   f'<p>{_e(m.what_would_unlock_a_decision)}</p>')
     out.append('</section>')
     return "".join(out)
 
@@ -252,8 +350,17 @@ def causal_chain(adaptive) -> str:
     c = getattr(adaptive, "causal_chain", None)
     if c is None:
         return ""
-    out = ['<section aria-labelledby="ad-chain-h">',
-           '<h2 id="ad-chain-h">From the change to the decision</h2>']
+    from intent_engine.adaptive import causal as C
+    investigating = getattr(c, "kind", "") == C.INVESTIGATION_CHAIN
+    heading = ("What would be worth investigating" if investigating
+               else "From the change to the decision")
+    out = [f'<section class="{"ad-bounded" if investigating else ""}" '
+           f'aria-labelledby="ad-chain-h">',
+           f'<h2 id="ad-chain-h">{heading}</h2>']
+    if investigating:
+        out.append('<p class="ad-note">A line of enquiry, not a causal '
+                   'claim. Nothing below asserts that one thing caused '
+                   'another.</p>')
     if not c.links:
         out.append(f'<p>{_e(c.reason)}</p></section>')
         return "".join(out)
@@ -407,6 +514,10 @@ def block(company: str, run_id: str, adaptive, *, role_id: str = "ceo",
         "strategic_lens": lambda: lens_block(adaptive),
         "decision_opportunity_map": lambda: opportunities(adaptive),
         "causal_chain": lambda: causal_chain(adaptive),
+        # Rendered only when there is no decision reading; returns "" when
+        # there is, so it costs nothing on a full run.
+        "what_would_change_our_mind": lambda: bounded_block(company,
+                                                            adaptive),
     }
     order = list(getattr(getattr(adaptive, "role", None), "order", ())
                  or getattr(getattr(adaptive, "composition", None),

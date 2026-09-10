@@ -269,11 +269,16 @@ def test_a_link_built_from_this_companys_own_words_is_not_flagged():
     assert not generic
 
 
-def test_no_chain_is_composed_without_a_mechanism():
+def test_no_chain_is_composed_without_a_mechanism_or_a_lens():
+    """WITH NEITHER, nothing is drawn. With a lens but no mechanism there is
+    now an INVESTIGATION chain instead -- see
+    `test_an_investigation_chain_never_implies_settled_causality`. The two
+    are different product states and this pins the emptier one."""
     chain = causal.build_causal_chain(company="X", profile=None,
                                       analysis=None)
     assert not chain
-    assert "did not establish a mechanism" in chain.reason
+    assert chain.kind == causal.NO_CHAIN
+    assert "neither a mechanism nor a lens" in chain.stopped_because
 
 
 # --- differentiation --------------------------------------------------------

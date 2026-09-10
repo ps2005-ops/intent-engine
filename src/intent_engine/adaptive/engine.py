@@ -101,6 +101,29 @@ class AdaptiveIntelligence:
             "company": self.company,
             "company_profile_status": getattr(p, "profile_state", "ABSENT"),
             "company_profile_source": getattr(p, "profile_source", "NONE"),
+            "business_model_source": prof.model_source_of(
+                getattr(p, "profile_source", "NONE")),
+            "business_model_source_words": prof.MODEL_SOURCE_WORDS.get(
+                prof.model_source_of(getattr(p, "profile_source", "NONE")),
+                ""),
+            "business_model_alternatives": (
+                [getattr(cls, "runner_up", "")]
+                if getattr(cls, "runner_up", "") else []),
+            # THE THREE STATES A RUN CAN HONESTLY BE IN, reported separately
+            # because they are separate questions and a reader (or a matrix)
+            # that collapses them cannot tell "we understand this company and
+            # will not guess" from "we could not read this company".
+            "profile_available": bool(getattr(p, "known", False)),
+            "lens_available": bool(getattr(l, "primary", "")),
+            "decision_reading_available": bool(
+                getattr(m, "has_reading", False)),
+            "decision_map_state": getattr(m, "state", ""),
+            "causal_chain_kind": getattr(c, "kind", ""),
+            "potential_domains": [d.domain for d in
+                                  (getattr(m, "domains", ()) or ())],
+            "evidence_limitation": getattr(m, "evidence_limitation", ""),
+            "what_would_unlock_a_decision": getattr(
+                m, "what_would_unlock_a_decision", ""),
             "business_model": getattr(p, "business_model_class", "UNKNOWN"),
             "business_model_confidence": getattr(cls, "confidence", ""),
             "business_model_evidence": (getattr(cls, "evidence_span", "")

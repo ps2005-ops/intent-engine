@@ -48,6 +48,44 @@ from intent_engine.adaptive.classify import (
 
 CONTRACT = "company_strategic_profile.v1"
 
+#: WHAT KIND OF SOURCE ESTABLISHED THE BUSINESS MODEL, in four kinds that
+#: call for four different levels of trust. Exposed in telemetry so a matrix
+#: can say HOW a classification was reached, never only WHAT it was -- the
+#: live run that prompted this reported a populated model beside an empty
+#: confidence and an empty span.
+MODEL_SOURCE_CURATED = "CURATED_CLASSIFICATION"
+MODEL_SOURCE_REGULATOR = "REGULATOR_INDUSTRY_CODE"
+MODEL_SOURCE_SUBJECT = "SUBJECT_PUBLISHED_EVIDENCE"
+MODEL_SOURCE_NONE = "NOT_ESTABLISHED"
+
+#: How each maps to what `company_profile` records internally.
+_MODEL_SOURCE = {
+    "VALIDATION_MANIFEST": MODEL_SOURCE_CURATED,
+    "SEC_SIC": MODEL_SOURCE_REGULATOR,
+    "SEC_SIC+FILING_REVENUE": MODEL_SOURCE_REGULATOR,
+    "SUBJECT_EVIDENCE": MODEL_SOURCE_SUBJECT,
+    "NONE": MODEL_SOURCE_NONE,
+}
+
+#: What each means to a reader who has never heard of any of them.
+MODEL_SOURCE_WORDS = {
+    MODEL_SOURCE_CURATED:
+        "a reviewed classification of this company held by this system",
+    MODEL_SOURCE_REGULATOR:
+        "the industry code a regulator assigns this filer",
+    MODEL_SOURCE_SUBJECT:
+        "this company's own published account of what it sells and how it "
+        "is paid",
+    MODEL_SOURCE_NONE:
+        "not enough evidence to classify confidently",
+}
+
+
+def model_source_of(profile_source: str) -> str:
+    return _MODEL_SOURCE.get(str(profile_source or "NONE"),
+                             MODEL_SOURCE_NONE)
+
+
 SUBJECT_EVIDENCE = "SUBJECT_EVIDENCE"
 ANALYST = "ANALYST"
 CLASS_PRIOR = "CLASS_PRIOR"
@@ -149,6 +187,14 @@ _SELF_PATTERNS = (
 )
 
 
+#: Third-party recognition, which is about a ranking rather than a business.
+_ACCOLADE = re.compile(
+    r"\b(?:strong performer|leader in the|magic quadrant|forrester wave|"
+    r"gartner|named (?:a|the)|recognit?[sz]ed as|awarded|award[- ]winning|"
+    r"ranked|rated|#\s*1|no\.\s*1|winner of|voted|top \d+|best[- ]in[- ]class"
+    r")\b", re.I)
+
+
 def _self_description(text: str, company: str):
     """(sentence, quoted span) -- how this company describes itself, or None.
 
@@ -206,6 +252,15 @@ def _self_description(text: str, company: str):
             if any(w.lower() in ("is", "was", "are", "were", "has", "have")
                    for w in head[:3]):
                 continue
+            # AN ACCOLADE IS NOT A DESCRIPTION OF A BUSINESS. Measured on
+            # Druva's own site: "Druva is a Strong Performer in The Forrester
+            # Wave" matched perfectly and would have been printed to an
+            # executive as what the company IS. It is a third party's rating,
+            # in the same family as the customer testimonial this filter
+            # already refuses -- grammatically a self-description, and about
+            # how the company was ranked rather than about what it sells.
+            if _ACCOLADE.search(phrase):
+                continue
             # THE WHOLE CLAUSE, VERB INCLUDED, so it can be QUOTED rather than
             # paraphrased. Returning the object alone produced "BigID
             # describes itself as organizations discover and govern their
@@ -213,9 +268,9 @@ def _self_description(text: str, company: str):
             # it. A quotation cannot be ungrammatical, because it is what the
             # company wrote.
             said = " ".join(text[m.start():m.end()].split()).rstrip(" .,;:")
-            start = max(0, m.start() - 40)
-            end = min(len(text), m.end() + 120)
-            return said + ".", " ".join(text[start:end].split())[:280]
+            from intent_engine.adaptive.spans import quote_around
+            return said + ".", quote_around(text, m.start(), m.end(),
+                                            max_chars=280)
     return None
 
 
@@ -257,8 +312,10 @@ def _extract(patterns, text: str, *, limit: int = 6) -> Tuple[Tuple[str, str], .
             if key in seen:
                 continue
             seen.add(key)
-            start, end = max(0, m.start() - 120), min(len(text), m.end() + 120)
-            out.append((phrase, " ".join(text[start:end].split())[:240]))
+            from intent_engine.adaptive.spans import quote_around
+            out.append((phrase,
+                        quote_around(text, m.start(), m.end(),
+                                     max_chars=240)))
             if len(out) >= limit:
                 return tuple(out)
     return tuple(out)

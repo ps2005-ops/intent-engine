@@ -42,6 +42,26 @@ CONTRACT = "company_causal_chain.v1"
 EVIDENCED = "EVIDENCED"
 INFERENCE = "INFERENCE"
 HYPOTHESIS = "HYPOTHESIS"
+#: An open question is not a weak link -- it is a link we are not making.
+OPEN_QUESTION = "OPEN_QUESTION"
+
+#: What KIND of chain this is. A decision-grade chain claims causality; an
+#: investigation chain claims only that a question is worth asking. Drawing
+#: them the same way is how a product implies settled causality it does not
+#: have, which is the single most expensive thing a strategy tool can do.
+DECISION_CHAIN = "DECISION_CHAIN"
+INVESTIGATION_CHAIN = "INVESTIGATION_CHAIN"
+NO_CHAIN = "NO_CHAIN"
+
+INVESTIGATION_POSITIONS = ("signal", "possible_mechanism",
+                           "required_evidence", "decision_it_could_affect")
+
+INVESTIGATION_LABEL = {
+    "signal": "What we can see",
+    "possible_mechanism": "How it could reach this company",
+    "required_evidence": "What we would need to know",
+    "decision_it_could_affect": "The decision it could bear on",
+}
 
 POSITIONS = ("change", "mechanism", "exposure", "second_order",
              "competitive_response", "consequence", "decision")
@@ -102,6 +122,8 @@ class CausalLink:
 @dataclasses.dataclass(frozen=True)
 class CausalChain:
     links: Tuple[CausalLink, ...] = ()
+    #: DECISION_CHAIN | INVESTIGATION_CHAIN | NO_CHAIN
+    kind: str = NO_CHAIN
     stopped_because: str = ""
     evidence_coverage: float = 0.0
     generic_links: int = 0
@@ -115,8 +137,13 @@ class CausalChain:
     def evidenced(self) -> int:
         return sum(1 for l in self.links if l.standing == EVIDENCED)
 
+    @property
+    def is_investigation(self) -> bool:
+        return self.kind == INVESTIGATION_CHAIN
+
     def as_dict(self) -> dict:
         return {"links": [l.as_dict() for l in self.links],
+                "kind": self.kind,
                 "stopped_because": self.stopped_because,
                 "evidence_coverage": self.evidence_coverage,
                 "generic_links": self.generic_links,
@@ -181,6 +208,112 @@ def _is_generic(text: str, vocab: set) -> Tuple[bool, str]:
                   "it could be shown unchanged to another company")
 
 
+def _channel_words(channel: str) -> str:
+    """A macro channel in a reader's words.
+
+    `MARKET_RATE` and `LABOR` are table keys. Printing them to an executive
+    is the same defect as printing `PROFILE_SPARSE`, and the raw-internals
+    detector reads them the same way.
+    """
+    return str(channel or "").replace("_", " ").lower()
+
+
+def _investigation_chain(*, company, profile, lens_selection,
+                         opportunity) -> CausalChain:
+    """What is worth asking, when what is worth concluding cannot be shown."""
+    lens = getattr(lens_selection, "lens", None)
+    if lens is None:
+        return CausalChain(
+            kind=NO_CHAIN,
+            reason=("No chain is shown, of either kind. The run established "
+                    "neither a mechanism nor a reading of what this company "
+                    "is for, so there is nothing to follow and nothing to "
+                    "ask about that would not be a guess."),
+            stopped_because="neither a mechanism nor a lens was established")
+
+    said = getattr(profile, "self_description", None)
+    deps = tuple(getattr(profile, "critical_dependencies", ()) or ())
+    channels = tuple(getattr(profile, "macro_exposures", ()) or ())
+    own_words = ()
+    for score in (getattr(lens_selection, "scores", ()) or ()):
+        if score.lens_id == getattr(lens_selection, "primary", ""):
+            own_words = tuple(phrase for phrase, _w in score.fired[:4])
+            break
+    model = str(getattr(profile, "business_model_class", "") or "")
+    pretty = model.replace("_", " ").lower()
+    domain = (opportunity.decision_domain if opportunity is not None
+              else (lens.decision_domains[0] if lens.decision_domains else ""))
+
+    links = []
+
+    def _add(position, text, standing):
+        text = " ".join(str(text or "").split())
+        if text:
+            links.append(CausalLink(
+                position=position, label=INVESTIGATION_LABEL[position],
+                text=text, standing=standing))
+
+    # QUOTED, NOT RESTATED. `self_description` is now a whole sentence that
+    # already begins with the company's name, so "X describes itself as X
+    # is the ..." said the name twice in six words.
+    _add("signal",
+         (f"In its own words: \u201c{said.value.rstrip('.').lstrip()}\u201d"
+          if said and said.value
+          else f"{company}'s published material is about "
+               f"{', '.join(d for d in lens.decision_domains[:2])}"),
+         EVIDENCED if (said and said.value) else INFERENCE)
+
+    # THE COMPANY'S OWN VOCABULARY, WHERE IT HAS NO NAMED DEPENDENCY.
+    #
+    # Measured: Sigma Computing and Druva produced a byte-identical mechanism
+    # link -- "a subscription software business is reached through market
+    # rate, labor" -- because neither had a dependency to name and the rest
+    # of the sentence is the class prior. Two companies of one class share
+    # the channels; they do not share what they publish about themselves.
+    own = tuple(w for w in (own_words or ()))[:2]
+    _add("possible_mechanism",
+         (f"A {pretty} business is reached through "
+          f"{', '.join(_channel_words(c) for c in channels[:2])}"
+          if channels and model != "UNKNOWN" else
+          f"How an outside change would reach a business of this kind has "
+          f"not been established")
+         + (f", and this one names {deps[0].value} as something it depends "
+            f"on" if deps else
+            f", reaching this one through what it sells: "
+            + ", ".join(own) if own else ""),
+         INFERENCE if channels else OPEN_QUESTION)
+
+    gaps = tuple(getattr(profile, "information_gaps", ()) or ())
+    _add("required_evidence",
+         ("A dated account, from someone other than this company, of "
+          "something it has actually decided or changed"
+          + (f" -- specifically {gaps[0].rstrip('.')}" if gaps else "")
+          + (f", or a third-party view of {deps[0].value}, which it names as "
+             f"a dependency" if deps else
+             f", or anyone other than {company} writing about "
+             + " or ".join(own) if own else "")
+          + ". Nothing retrieved in this run carries one, which is why no "
+            "mechanism is asserted above."),
+         OPEN_QUESTION)
+
+    if domain:
+        _add("decision_it_could_affect",
+             f"{domain[0].upper()}{domain[1:]} -- the decision area this "
+             f"company's own material points at, not a recommendation.",
+             OPEN_QUESTION)
+
+    return CausalChain(
+        links=tuple(links), kind=INVESTIGATION_CHAIN,
+        evidence_coverage=round(
+            sum(1 for l in links if l.standing == EVIDENCED)
+            / float(len(links)), 3) if links else 0.0,
+        generic_links=sum(1 for l in links if l.generic),
+        stopped_because="",
+        reason=("This is an investigation, not a conclusion. No mechanism "
+                "connecting an outside change to this company was "
+                "established, so nothing below claims one."))
+
+
 def build_causal_chain(*, company: str, profile=None, analysis=None,
                        opportunity=None, lens_selection=None,
                        observations=()) -> CausalChain:
@@ -205,12 +338,15 @@ def build_causal_chain(*, company: str, profile=None, analysis=None,
         economics, dict) else ""
 
     if not (consequence_chain or mechanism or competitive):
-        return CausalChain(
-            reason=("No causal chain is shown. The run did not establish a "
-                    "mechanism connecting an external change to this "
-                    "company, and a chain composed without one would be an "
-                    "illustration rather than a finding."),
-            stopped_because="no mechanism was established")
+        # NOT AN EMPTY CARD. The run failed to establish a MECHANISM; it did
+        # not fail to establish anything. Where a lens was selected we can
+        # still say what we can see, how it could reach this company, what we
+        # would need to know, and which decision it would bear on -- which is
+        # an honest investigation, drawn so that nobody could mistake it for
+        # settled causality.
+        return _investigation_chain(company=company, profile=profile,
+                                    lens_selection=lens_selection,
+                                    opportunity=opportunity)
 
     built = []
 
@@ -289,9 +425,9 @@ def build_causal_chain(*, company: str, profile=None, analysis=None,
              opportunity.supporting_evidence[:2])
 
     if not built:
-        return CausalChain(
-            reason="Nothing the run established could be placed on a chain.",
-            stopped_because="no link could be composed")
+        return _investigation_chain(company=company, profile=profile,
+                                    lens_selection=lens_selection,
+                                    opportunity=opportunity)
 
     filled = {l.position for l in built}
     missing = [p for p in POSITIONS if p not in filled]
@@ -310,7 +446,7 @@ def build_causal_chain(*, company: str, profile=None, analysis=None,
     evidenced = sum(1 for l in built if l.standing == EVIDENCED)
     generic = sum(1 for l in built if l.generic)
     return CausalChain(
-        links=tuple(built), stopped_because=stopped,
+        links=tuple(built), kind=DECISION_CHAIN, stopped_because=stopped,
         evidence_coverage=round(evidenced / float(len(built)), 3),
         generic_links=generic,
         reason=("" if generic == 0 else

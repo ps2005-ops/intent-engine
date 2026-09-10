@@ -495,8 +495,11 @@ class LensSelection:
 
 
 def _span_around(text: str, match: "re.Match") -> str:
-    start, end = max(0, match.start() - 200), min(len(text), match.end() + 200)
-    return " ".join(text[start:end].split())[:280]
+    """See `adaptive.spans`. Two of the three quotes on the first live page
+    were drawn from a press-release index, which is furniture and is not
+    evidence that a lens applies."""
+    from intent_engine.adaptive.spans import quote_around
+    return quote_around(text, match.start(), match.end(), max_chars=280)
 
 
 def select_lens(*, evidence_text: str, business_model: str = "",

@@ -197,6 +197,128 @@ PROOFS = [
                "test_no_registrant_at_all_is_sparse_and_says_why",
         expect_failure_contains="manifest",
     ),
+    # --- evidence spans: every one replays the live Highspot defect -------
+    Proof(
+        label="a quoted passage is cut by arithmetic and begins mid-word",
+        path=SRC / "adaptive" / "spans.py",
+        find="        if offset <= target < offset + len(sentence):\n"
+             "            return clean[:max_chars]",
+        replace="        if offset <= target < offset + len(sentence):\n"
+                "            return _word_snapped(body, start, end, "
+                "max_chars)[3:]",
+        target="tests/test_adaptive_guards.py::"
+               "test_a_quoted_passage_never_begins_or_ends_mid_word",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="page furniture is quoted in place of a real sentence",
+        path=SRC / "adaptive" / "spans.py",
+        find="        if len(clean) < 30 or furniture_reason(clean):",
+        replace="        if len(clean) < 30:",
+        target="tests/test_adaptive_guards.py::"
+               "test_page_furniture_never_wins_over_a_substantive_passage",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="a span that found only furniture returns a fragment anyway",
+        path=SRC / "adaptive" / "spans.py",
+        find="    if best is None:\n        return \"\"",
+        replace="    if best is None:\n        return _word_snapped("
+                "body, start, end, max_chars)",
+        target="tests/test_adaptive_guards.py::"
+               "test_everything_nearby_being_furniture_returns_nothing",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="a quotation is attributed to the wrong document",
+        path=SRC / "adaptive" / "corpus.py",
+        find="        if source is not None and passage and passage not in "
+             "source.text:",
+        replace="        if False:",
+        target="tests/test_adaptive_guards.py::"
+               "test_a_span_may_not_cross_from_one_document_into_another",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="a third party's passage is labelled as the company's own",
+        path=SRC / "adaptive" / "corpus.py",
+        find="            return THIRD_PARTY",
+        replace="            return SUBJECT_PUBLISHED",
+        target="tests/test_adaptive_guards.py::"
+               "test_a_third_party_passage_is_never_labelled_as_the_"
+               "companys_own",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="a paraphrase is rendered as though it were a quotation",
+        path=SRC / "adaptive" / "corpus.py",
+        find="            role=role, is_quote=bool(passage))",
+        replace="            role=role, is_quote=True)",
+        target="tests/test_adaptive_guards.py::"
+               "test_a_paraphrase_is_never_dressed_as_a_quotation",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="a rival's text stays in the corpus the subject is read from",
+        path=SRC / "adaptive" / "corpus.py",
+        find="        return Corpus([s for s in self.sources "
+             "if s.subject_owned])",
+        replace="        return Corpus(list(self.sources))",
+        target="tests/test_adaptive_guards.py::"
+               "test_the_subject_only_corpus_removes_third_parties_rather_"
+               "than_reordering",
+        expect_failure_contains="assert",
+    ),
+
+    # --- the three reading states ----------------------------------------
+    Proof(
+        label="a potential domain is promoted to a recommendation",
+        path=SRC / "adaptive" / "opportunity.py",
+        find="    if kept:\n        return DecisionOpportunityMap(\n"
+             "            opportunities=tuple(kept[:3]), "
+             "state=DECISION_READING,",
+        replace="    if True:\n        return DecisionOpportunityMap(\n"
+                "            opportunities=tuple(kept[:3]), "
+                "state=DECISION_READING,",
+        target="tests/test_adaptive_guards.py::"
+               "test_understanding_a_company_is_not_the_same_as_advising_it",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="a bounded run shows an empty decision card again",
+        path=SRC / "adaptive" / "render.py",
+        find="    if m.state == O.POTENTIAL_DOMAINS:",
+        replace="    if False:",
+        target="tests/test_adaptive_guards.py::"
+               "test_a_bounded_run_shows_no_empty_decision_or_chain_card",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="an investigation chain is drawn as settled causality",
+        path=SRC / "adaptive" / "causal.py",
+        find="        return _investigation_chain(company=company, "
+             "profile=profile,\n"
+             "                                    "
+             "lens_selection=lens_selection,\n"
+             "                                    opportunity=opportunity)\n"
+             "\n    built = []",
+        replace="        return CausalChain(kind=NO_CHAIN, "
+                "reason=\"none\")\n\n    built = []",
+        target="tests/test_adaptive_guards.py::"
+               "test_an_investigation_chain_never_implies_settled_causality",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="the classification source stops distinguishing its four kinds",
+        path=SRC / "adaptive" / "profile.py",
+        find="    return _MODEL_SOURCE.get(str(profile_source or \"NONE\"),\n"
+             "                             MODEL_SOURCE_NONE)",
+        replace="    return MODEL_SOURCE_NONE",
+        target="tests/test_adaptive_guards.py::"
+               "test_the_classification_names_what_kind_of_source_"
+               "established_it",
+        expect_failure_contains="assert",
+    ),
 ]
 
 if __name__ == "__main__":

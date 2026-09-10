@@ -210,3 +210,186 @@ def test_no_customer_sentence_puts_a_bare_python_token_on_the_page():
         import re
         assert not re.search(r"\bNone\b", html), html[:400]
         assert not re.search(r"\bUNKNOWN\b", html)
+
+
+# --- evidence spans: the defect measured on the deployed service ----------
+
+def test_a_quoted_passage_never_begins_or_ends_mid_word():
+    """MEASURED LIVE (Highspot, df8830f0): the primary screen carried
+
+        "The evidence this rests on omers are transforming GTM performance."
+
+    A window of "match minus 220 characters" has no idea where a word starts.
+    """
+    from intent_engine.adaptive.spans import quote_around
+    text = ("See how customers are transforming performance. Pricing is per "
+            "user per month and renews annually.")
+    i = text.index("per user")
+    q = quote_around(text, i, i + 8)
+    assert q
+    assert q[0].isupper() or q[0] in "“‘"
+    assert not text[max(0, text.index(q) - 1):text.index(q)].isalnum()
+    end = text.index(q) + len(q)
+    assert end >= len(text) or not text[end].isalnum()
+
+
+def test_page_furniture_never_wins_over_a_substantive_passage():
+    """Two of three quotations on the first live page came from a
+    press-release index. The furniture rule is owned by `evidence_text`; this
+    asserts the span selector actually consults it."""
+    from intent_engine.adaptive.spans import quote_around
+    # THE MATCH MUST LAND INSIDE THE FURNITURE, or the guard is not the thing
+    # being tested. An earlier fixture matched inside the substantive
+    # sentence, where the "sentence containing the match" branch wins anyway
+    # -- so deleting the furniture filter changed nothing and the break proof
+    # ran NOT_CAUGHT.
+    text = ("Get in touch for any press inquiries about sales enablement: "
+            "press@highspot.com. Highspot is the sales enablement platform "
+            "that increases the performance of revenue teams.")
+    i = text.index("sales enablement")          # the FIRST one, in furniture
+    q = quote_around(text, i, i + 16)
+    assert "press inquiries" not in q, q
+    assert "press@" not in q, q
+    assert "increases the performance of revenue teams" in q, q
+
+
+def test_everything_nearby_being_furniture_returns_nothing():
+    """A refusal, not a fragment. A quotation that begins mid-word tells a
+    reader the machine is not reading, which costs more than the quote."""
+    from intent_engine.adaptive.spans import quote_around
+    text = "Read article. Highspot in the news. Learn more. Contact us."
+    assert quote_around(text, 20, 24) == ""
+
+
+def test_a_quote_is_attributed_to_the_document_it_came_from():
+    """A quotation with no source is not evidence."""
+    from intent_engine.adaptive.corpus import Corpus, Source
+    corpus = Corpus([
+        Source(text="Globex is a consulting firm that serves many clients.",
+               title="Globex", url="https://globex.example",
+               source_class="competitor"),
+        Source(text="Acme is the sales enablement platform for revenue "
+                    "teams and is sold on subscription.",
+               title="Acme home", url="https://acme.example",
+               source_class="company_owned"),
+    ])
+    i = corpus.text.index("sales enablement")
+    ref = corpus.evidence_at(i, i + 16, claim="what Acme sells")
+    assert ref.is_quote
+    assert "sales enablement" in ref.passage
+    assert ref.source_title == "Acme home"
+    assert ref.provenance == "SUBJECT_PUBLISHED"
+    assert "Globex" not in ref.passage
+
+
+def test_a_span_may_not_cross_from_one_document_into_another():
+    """The window either side of a match can reach past the join, which is
+    how a sentence gets attributed to a page it never appeared on."""
+    from intent_engine.adaptive.corpus import Corpus, Source
+    corpus = Corpus([
+        Source(text="Acme sells software on subscription to revenue teams.",
+               title="Acme", source_class="company_owned"),
+        Source(text="Globex is a consulting firm with many consultants.",
+               title="Globex", source_class="competitor"),
+    ])
+    i = corpus.text.index("subscription")
+    ref = corpus.evidence_at(i, i + 12)
+    assert "consulting firm" not in ref.passage
+    assert ref.source_title == "Acme"
+
+
+def test_a_third_party_passage_is_never_labelled_as_the_companys_own():
+    from intent_engine.adaptive.corpus import Corpus, Source
+    corpus = Corpus([Source(
+        text="Analysts said the vendor had grown quickly last year.",
+        title="Trade press", url="https://press.example",
+        source_class="independent_reporting")])
+    i = corpus.text.index("grown quickly")
+    ref = corpus.evidence_at(i, i + 13)
+    assert ref.provenance == "THIRD_PARTY"
+    assert not corpus.sources[0].subject_owned
+
+
+def test_a_paraphrase_is_never_dressed_as_a_quotation():
+    """Inventing quotation marks is inventing a source's words."""
+    from intent_engine.adaptive.corpus import Corpus, Source
+    corpus = Corpus([Source(text="Read article. Learn more. Contact us.",
+                            title="Index", source_class="company_owned")])
+    ref = corpus.evidence_at(5, 12, paraphrase="the page is an index")
+    assert not ref.is_quote
+    assert ref.passage == ""
+    assert ref.paraphrase
+
+
+def test_the_subject_only_corpus_removes_third_parties_rather_than_reordering():
+    """Ordering does not protect a subject: the scorer reads the whole
+    string, so a rival with more signal simply wins. Measured 9.0 vs 13.0."""
+    from intent_engine.adaptive.corpus import Corpus, Source
+    corpus = Corpus([
+        Source(text="Acme sells software on subscription.",
+               source_class="company_owned"),
+        Source(text="Globex is a consulting firm. Our consultants deliver "
+                    "client engagements. Billable.",
+               source_class="competitor"),
+    ])
+    assert "Globex" in corpus.text
+    assert "Globex" not in corpus.subject_only.text
+    assert "Acme" in corpus.subject_only.text
+
+
+# --- the three reading states --------------------------------------------
+
+def test_understanding_a_company_is_not_the_same_as_advising_it():
+    """The distinction this whole pass exists to make visible."""
+    from intent_engine.adaptive import opportunity as O
+    from intent_engine.adaptive.engine import build
+    ai = build(company="Acme", evidence_text=SOFTWARE)
+    t = ai.telemetry()
+    assert t["profile_available"] is True
+    assert t["lens_available"] is True
+    assert t["decision_reading_available"] is False
+    assert ai.opportunity_map.state == O.POTENTIAL_DOMAINS
+    assert ai.opportunity_map.domains
+    assert ai.opportunity_map.what_would_unlock_a_decision
+
+
+def test_a_potential_domain_cannot_be_ranked_beside_a_recommendation():
+    """A KIND, not a low score. A type that cannot be sorted into the
+    opportunity list is how that stays true whoever renders it."""
+    from intent_engine.adaptive import opportunity as O
+    assert not hasattr(O.PotentialDomain, "decision_priority")
+    assert not issubclass(O.PotentialDomain, O.DecisionOpportunity)
+
+
+def test_a_bounded_run_shows_no_empty_decision_or_chain_card():
+    """Do not show an empty decision map. Do not show an empty causal chain.
+    Do not fabricate one so the layout looks complete."""
+    from intent_engine.adaptive import render as ar
+    from intent_engine.adaptive.engine import build
+    ai = build(company="Acme", evidence_text=SOFTWARE)
+    html = ar.block("Acme", "r1", ai, csrf="t", base="/b")
+    assert "Potential decision domains" in html
+    assert "not current recommendations" in html
+    assert "What would be worth investigating" in html
+    assert "What we can and cannot say about Acme" in html
+    assert "No decision opportunity cleared the bar" not in html
+
+
+def test_an_investigation_chain_never_implies_settled_causality():
+    from intent_engine.adaptive import causal as C
+    from intent_engine.adaptive.engine import build
+    ai = build(company="Acme", evidence_text=SOFTWARE)
+    assert ai.causal_chain.kind == C.INVESTIGATION_CHAIN
+    assert any(l.standing == C.OPEN_QUESTION for l in ai.causal_chain.links)
+
+
+def test_the_classification_names_what_kind_of_source_established_it():
+    from intent_engine.adaptive import profile as P
+    assert P.model_source_of("VALIDATION_MANIFEST") == P.MODEL_SOURCE_CURATED
+    assert P.model_source_of("SEC_SIC") == P.MODEL_SOURCE_REGULATOR
+    assert P.model_source_of("SUBJECT_EVIDENCE") == P.MODEL_SOURCE_SUBJECT
+    assert P.model_source_of("NONE") == P.MODEL_SOURCE_NONE
+    for key, words in P.MODEL_SOURCE_WORDS.items():
+        assert words and words[0].islower()
+        assert "manifest" not in words
+        assert "SIC" not in words

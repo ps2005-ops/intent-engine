@@ -134,23 +134,54 @@ class DecisionOpportunity:
         return out
 
 
+#: The three states this map can honestly be in.
+DECISION_READING = "DECISION_READING"      #: the evidence raised real ones
+POTENTIAL_DOMAINS = "POTENTIAL_DOMAINS"    #: we know where, not what
+NOTHING = "NOTHING"                        #: not even a lens to reason from
+
+
 @dataclasses.dataclass(frozen=True)
 class DecisionOpportunityMap:
+    """Ranked opportunities, or the areas a reading of this company suggests.
+
+    `state` is the field every renderer must branch on. An empty
+    `opportunities` tuple is NOT the same fact as an empty map: the first
+    means "we understand this company and cannot yet say what to do", the
+    second means "we could not get far enough to say even that", and showing
+    the same card for both is what makes a product look broken when it is
+    being careful.
+    """
     opportunities: Tuple[DecisionOpportunity, ...] = ()
+    domains: Tuple["PotentialDomain", ...] = ()
+    state: str = NOTHING
     considered: int = 0
     withheld: Tuple[str, ...] = ()
     reason: str = ""
+    #: what the evidence lacked, in the reader's language
+    evidence_limitation: str = ""
+    #: what would move this from POTENTIAL_DOMAINS to DECISION_READING
+    what_would_unlock_a_decision: str = ""
     contract: str = CONTRACT
 
     @property
     def top(self) -> Optional[DecisionOpportunity]:
         return self.opportunities[0] if self.opportunities else None
 
+    @property
+    def has_reading(self) -> bool:
+        return self.state == DECISION_READING
+
     def as_dict(self) -> dict:
         return {"opportunities": [o.as_dict() for o in self.opportunities],
+                "domains": [d.as_dict() for d in self.domains],
+                "state": self.state,
                 "considered": self.considered,
                 "withheld": list(self.withheld),
-                "reason": self.reason, "contract": self.contract}
+                "reason": self.reason,
+                "evidence_limitation": self.evidence_limitation,
+                "what_would_unlock_a_decision":
+                    self.what_would_unlock_a_decision,
+                "contract": self.contract}
 
 
 def _score(*, materiality, change, exposure, actionability, evidence,
@@ -291,50 +322,111 @@ def _from_analyst_decision(d: dict, *, company: str, lens, profile,
             + (", and evidence is named as missing" if gap else "")))
 
 
-def _from_lens_domain(domain: str, *, company: str, lens, profile,
-                      exposure_note: str) -> DecisionOpportunity:
-    """A candidate the analyst did not name, built from lens x exposure.
+@dataclasses.dataclass(frozen=True)
+class PotentialDomain:
+    """An area worth investigating. NOT a recommendation, and labelled so.
 
-    Deliberately scored LOW on evidence: nothing cited this, it is the
-    router's own suggestion, and it must never outrank something the evidence
-    actually raised. It exists so the map shows what else was on the table.
+    WHY THIS IS A DIFFERENT TYPE FROM `DecisionOpportunity`, and not a
+    low-scoring one.
+
+    These used to be built as opportunities with a deliberately low evidence
+    score, ranked against real ones, and then withheld under the floor. That
+    produced the worst of both: a card that said "no decision opportunity
+    cleared the bar" followed by three lines of what had been rejected --
+    an empty state dressed as a finding, on the screen that matters most.
+
+    The distinction the product actually needs is not a score. It is a
+    KIND. Knowing what sort of business this is tells you which decisions
+    tend to matter for a business like it; it does not tell you what THIS
+    management should do. A type that cannot be ranked beside a real
+    opportunity is how that stays true no matter who renders it.
     """
-    text = (f"whether to change what this company does about "
-            f"{domain}")
-    generic = _genericity_of(text, company=company, profile=profile)
-    exposure = 0.7 if getattr(profile, "known", False) else 0.45
-    priority = _score(materiality=0.6, change=0.5, exposure=exposure,
-                      actionability=0.5, evidence=0.3,
-                      uncertainty=0.7, gap=1.0, generic=generic)
-    return DecisionOpportunity(
-        decision_domain=domain, decision_owner_role=_owner_for(domain),
-        decision_description=text.capitalize(),
-        why_now=exposure_note,
-        materiality=0.6, change_velocity=0.5, company_exposure=exposure,
-        actionability=0.5, evidence_strength=0.3, uncertainty=0.7,
-        evidence_gap=1.0, genericity=generic, decision_priority=priority,
-        supporting_evidence=(),
-        contradicting_evidence="",
-        what_would_change_priority=(
-            "evidence that this company is actually deciding this, rather "
-            "than that a business reading through this lens usually is"),
-        recommended_information_next=(
+    domain: str
+    owner_role: str = "ceo"
+    why_it_could_matter: str = ""
+    what_would_make_it_a_recommendation: str = ""
+    #: the lens that raised it, so the reader can see it is derived
+    raised_by: str = ""
+
+    def as_dict(self) -> dict:
+        return dataclasses.asdict(self)
+
+
+def _potential_domain(domain: str, *, lens, lens_name: str,
+                      profile, own_words=()) -> PotentialDomain:
+    """One area worth investigating, in THIS company's own vocabulary.
+
+    `own_words` are the phrases from this company's own material that
+    selected the lens. Without them, two companies sharing a lens received
+    byte-identical domain cards -- measured on BigID and Cyera, both
+    correctly routed to data security and governance and both shown the same
+    three sentences. The lens is genuinely the same; what each company says
+    about itself is not, and the card should show the difference it has
+    rather than the one it does not.
+    """
+    model = str(getattr(profile, "business_model_class", "") or "")
+    pretty = model.replace("_", " ").lower() if model != "UNKNOWN" else ""
+    words = [w for w in own_words if w][:3]
+
+    # THE LENS'S VOCABULARY IS NOT THE COMPANY'S, AND USING IT HERE IS
+    # CIRCULAR. `own_words` are the phrases the lens searched for and found;
+    # two companies routed to the same lens will, by construction, tend to
+    # have matched the same highest-weighted ones. Measured on their real
+    # sites: BigID and Cyera both fired "dspm, sensitive data, data
+    # governance" as their top three, so every domain card was identical --
+    # while their own sentences about themselves have nothing in common.
+    #
+    # So the company's OWN description comes first, its named dependencies
+    # second, and the lens vocabulary only when it has neither.
+    said = getattr(profile, "self_description", None)
+    deps = tuple(getattr(profile, "critical_dependencies", ()) or ())
+    distinguishing = ""
+    if said is not None and said.value:
+        clause = said.value.rstrip(".")
+        distinguishing = (clause.split(" is ", 1)[-1] if " is " in clause
+                          else clause)
+    elif deps:
+        distinguishing = f"a business built on {deps[0].value}"
+    return PotentialDomain(
+        domain=str(domain), owner_role=_owner_for(str(domain)),
+        # ONE SENTENCE, AND IT IS THIS COMPANY'S. The lens rationale is
+        # stated ONCE at the section level; repeating it on all three cards
+        # put the same sentence on the page three times per company and six
+        # times across any two companies sharing a lens -- which is what the
+        # collapse detector was reporting for BigID and Cyera.
+        why_it_could_matter=(
+            (f"It describes itself as {distinguishing}, which is what puts "
+             f"{domain} in scope."
+             if distinguishing else
+             f"Its own material is about " + ", ".join(words) + ", which is "
+             f"what puts {domain} in scope."
+             if words else
+             f"A {pretty} business usually has something at stake in "
+             f"{domain}." if pretty else
+             f"This is an area {lens_name.lower()} treats as material.")),
+        what_would_make_it_a_recommendation=(
             f"a dated, first-party statement from this company about "
-            f"{domain}"),
-        origin="LENS_AND_EXPOSURE",
-        score_reason=(
-            "raised by the selected lens rather than by the evidence, so its "
-            "evidence strength is low by construction and it cannot outrank "
-            "something the record actually carries"))
+            f"{domain}, or a third-party account of it -- at present nothing "
+            f"in the retrieved record raises it"),
+        raised_by=lens_name)
 
 
 def build_opportunity_map(*, company: str, profile=None, analysis=None,
-                          lens_selection=None,
-                          observations=()) -> DecisionOpportunityMap:
-    """Rank the places better intelligence could change a decision here."""
+                         lens_selection=None,
+                         observations=(),
+                         evidence_limitation: str = ""
+                         ) -> DecisionOpportunityMap:
+    """Rank what the evidence raised; name what it did not.
+
+    Returns one of three states and never blends them. The old behaviour --
+    build lens-derived candidates, score them low, rank them beside real ones
+    and then withhold them under a floor -- produced a card reading "no
+    decision opportunity cleared the bar" followed by the rejects. That is an
+    empty state wearing the clothes of a finding.
+    """
     lens = getattr(lens_selection, "lens", None)
+    lens_name = str(getattr(lens_selection, "primary_name", "") or "")
     decisions = list(getattr(analysis, "decisions", ()) or [])
-    obs_count = len(observations or ())
 
     candidates, withheld = [], []
     for d in decisions:
@@ -342,22 +434,7 @@ def build_opportunity_map(*, company: str, profile=None, analysis=None,
             continue
         candidates.append(_from_analyst_decision(
             d, company=company, lens=lens, profile=profile,
-            observation_count=obs_count))
-
-    # Fill toward three ONLY from the lens the evidence selected, and never
-    # past three: a founder with five minutes cannot hold more, and the
-    # fourth is always the weakest.
-    if lens is not None and len(candidates) < 3:
-        named = " ".join(c.decision_domain.lower() for c in candidates)
-        note = (getattr(lens_selection, "why_selected", "") or "")[:200]
-        for domain in lens.decision_domains:
-            if len(candidates) >= 3:
-                break
-            if str(domain).split()[0].lower() in named:
-                continue
-            candidates.append(_from_lens_domain(
-                str(domain), company=company, lens=lens, profile=profile,
-                exposure_note=note))
+            observation_count=len(observations or ())))
 
     considered = len(candidates)
     ranked = sorted(candidates, key=lambda c: -c.decision_priority)
@@ -367,7 +444,7 @@ def build_opportunity_map(*, company: str, profile=None, analysis=None,
             withheld.append(
                 f"{c.decision_description[:80]} -- priority "
                 f"{c.decision_priority:.3f} is under the {SHOW_FLOOR} floor: "
-                + ("nothing in the record raises it"
+                + ("nothing in the record cites it"
                    if c.evidence_strength <= 0.3 else
                    "it reads as something that would be said about any "
                    "company in this position"
@@ -376,17 +453,55 @@ def build_opportunity_map(*, company: str, profile=None, analysis=None,
             continue
         kept.append(c)
 
-    reason = ""
-    if not kept:
-        reason = (
-            "No decision opportunity cleared the bar. That is a statement "
-            "about the evidence, not about this company: "
-            + (f"{considered} candidate(s) were built and each was either "
-               f"unevidenced, unactionable, or would have read the same way "
-               f"about an unrelated company."
-               if considered else
-               "the strategic reading named no decision, so there was "
-               "nothing to rank."))
+    if kept:
+        return DecisionOpportunityMap(
+            opportunities=tuple(kept[:3]), state=DECISION_READING,
+            considered=considered, withheld=tuple(withheld[:4]))
+
+    # NO DECISION READING. Two different facts follow, and they are not the
+    # same product state.
+    if lens is not None:
+        fired = ()
+        for score in (getattr(lens_selection, "scores", ()) or ()):
+            if score.lens_id == getattr(lens_selection, "primary", ""):
+                fired = tuple(phrase for phrase, _w in score.fired[:4])
+                break
+        domains = tuple(
+            _potential_domain(d, lens=lens, lens_name=lens_name,
+                              profile=profile, own_words=fired)
+            for d in lens.decision_domains[:3])
+        return DecisionOpportunityMap(
+            domains=domains, state=POTENTIAL_DOMAINS,
+            considered=considered, withheld=tuple(withheld[:4]),
+            reason=(
+                f"We can say what KIND of decisions matter for a company "
+                f"like this one. We cannot yet say what this management "
+                f"should do about them"
+                + (f", because {considered} candidate decision(s) were built "
+                   f"from the evidence and none of them cited enough of it"
+                   if considered else
+                   ", because the retrieved record raised none")
+                + "."),
+            evidence_limitation=(
+                evidence_limitation
+                or "the run did not retrieve enough independent material to "
+                   "test this company's own account of itself"),
+            what_would_unlock_a_decision=(
+                "a dated, third-party account of something this company has "
+                "actually decided or changed -- a filing, a customer or "
+                "competitor statement, or reporting that is not the "
+                "company's own"))
+
     return DecisionOpportunityMap(
-        opportunities=tuple(kept[:3]), considered=considered,
-        withheld=tuple(withheld[:4]), reason=reason)
+        state=NOTHING, considered=considered, withheld=tuple(withheld[:4]),
+        reason=(
+            "No decision reading and no decision domains. This company's own "
+            "published material did not say clearly enough what it is for, "
+            "so there is no basis even for saying which decisions would "
+            "matter."),
+        evidence_limitation=(
+            evidence_limitation
+            or "what kind of business this is was not established"),
+        what_would_unlock_a_decision=(
+            "one page or filing stating what this company sells and how it "
+            "is paid"))
