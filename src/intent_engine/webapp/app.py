@@ -376,6 +376,24 @@ _SECURITY_HEADERS = [
 ]
 
 
+def _qs_role(environ) -> str:
+    """The `role` query parameter, bounded and sanitised.
+
+    Bounded because it is reflected into links on the page it renders: a
+    role id is a short identifier from a closed list, and anything else is
+    discarded here rather than escaped later. `roles.role` maps an unknown
+    id to the default, so a typo costs a reader nothing.
+    """
+    import urllib.parse as _up
+    try:
+        query = _up.parse_qs(environ.get("QUERY_STRING", "") or "")
+    except Exception:                                        # noqa: BLE001
+        return ""
+    value = (query.get("role") or [""])[0]
+    value = str(value or "").strip().lower()[:24]
+    return value if value.replace("_", "").isalnum() else ""
+
+
 def _chrome(page_html: str, nav: str) -> str:
     """Inject the session nav into a full presentation-rendered page."""
     return page_html.replace("<body>", f"<body>{nav}", 1)
@@ -581,11 +599,25 @@ class WebApp:
         # add the variable, or fix the code. A whole cycle was spent guessing
         # between them. Both are booleans; the value is never read anywhere.
         import os as _os
+        from intent_engine.core.model_gate import (
+            ZERO_ANTHROPIC_ENV as _ZERO_ENV, anthropic_disabled as _gate_shut,
+        )
         self._analyst_key_present = bool(_os.environ.get("ANTHROPIC_API_KEY"))
+        #: True when this process was DELIBERATELY put in zero-Anthropic mode.
+        #: Distinct from "no key": a key may be present and the operator may
+        #: still have refused the model, and those two states need opposite
+        #: fixes. Reporting the refusal as "key present but no client was
+        #: built" would send an operator to debug a bug they created on
+        #: purpose -- the same class of mistake as reporting an exhausted API
+        #: balance as an evidence shortfall.
+        self._anthropic_gate_shut = _gate_shut()
         if not getattr(self, "_analyst_error", ""):
             self._analyst_error = (
                 "" if ci_analyst is not None
-                else ("ANTHROPIC_API_KEY is not set in this environment"
+                else (f"{_ZERO_ENV} is set: this process refuses hosted "
+                      "model access by configuration"
+                      if self._anthropic_gate_shut
+                      else "ANTHROPIC_API_KEY is not set in this environment"
                       if not self._analyst_key_present
                       else "key present but no client was built"))
         self._analyst_client = ci_analyst
@@ -827,6 +859,11 @@ class WebApp:
         # visitor's company, and this one carries their run's economic
         # exposures and decision delta.
         self._request.econ = {}
+        # THE ADAPTIVE READING, cleared for the same reason.
+        # It carries a company profile, a selected lens and a
+        # ranked decision map, all of one visitor's company.
+        self._request.adaptive = {}
+        self._request.published = {}
         if (self.config.env == "production"
                 and environ.get("HTTP_HOST", "").split(":")[0]
                 not in self.config.trusted_hosts):
@@ -1046,9 +1083,28 @@ class WebApp:
             return self._report(session, parts[1])
         # THE SIX-STEP STORY (§17). `founder_brief.flow` owns the order;
         # these three routes are the steps the product did not have.
+        # THE ROLE COMES OFF THE QUERY STRING, and an unknown one falls back
+        # to the default rather than 404ing: a role selector is a reading
+        # preference, not an authorisation boundary, and a typo in it must
+        # never cost a reader their analysis. `roles.role` does the fallback,
+        # so nothing here has to know the list.
+        #
+        # THIS COMMENT SITS ABOVE THE `if`, NOT INSIDE IT, AND THAT MATTERS.
+        # `test_every_declared_surface_is_wired_at_the_route` reads this
+        # router's SOURCE and requires `return self._with_ask(` on the line
+        # after each declared surface's test. A comment between the two is
+        # invisible at runtime and breaks the guard -- which is the guard
+        # working: it exists because a surface once lost its follow-up form
+        # silently, and a structural test that tolerated anything between the
+        # two lines would not have caught that either.
         if route == ("GET", "runs", 3) and parts[2] == "intro":
-            return self._with_ask(session, parts[1],
-                                  self._intro_page(session, parts[1]))
+            return self._with_ask(
+                session, parts[1],
+                self._intro_page(session, parts[1],
+                                 role_id=_qs_role(environ)))
+        if route == ("GET", "runs", 3) and parts[2] == "adaptive.json":
+            return self._adaptive_json(session, parts[1],
+                                       role_id=_qs_role(environ))
         # THE SCROLLABLE DECISION NARRATIVE. It was the default route until
         # step 1 took that place, and a designed 900-word surface with no
         # route into it is exactly the defect the verdict register exists to
@@ -1400,6 +1456,34 @@ class WebApp:
         payload["run_id"] = run_id
         payload["reading"] = self._reading_diagnostics(run_id)
         payload["thesis"] = self._thesis_diagnostics(run_id)
+        return self._ok_json(payload)
+
+    def _adaptive_json(self, session, run_id, *, role_id: str = ""):
+        """The adaptive reading as machine-readable telemetry.
+
+        Every field here exists because a qualification matrix that fails on
+        it has to be able to say WHY from its own output. A blank cell costs
+        a whole re-run to explain, and an instrument that names producer
+        fields wrongly invents uniform defects that are not there.
+
+        Ownership-gated like every other run route: this carries a company
+        profile and a ranked decision map, which are the run's content.
+        """
+        if not self._owned(session, run_id):
+            return self._no_such_run(session, run_id)
+        try:
+            adaptive = self._adaptive(
+                run_id, role_id=str(role_id or "").strip() or "ceo")
+            payload = adaptive.telemetry()
+        except Exception as exc:                              # noqa: BLE001
+            _LOG.exception("adaptive_telemetry_failed run=%s", run_id)
+            # AN INSTRUMENT THAT 500s TEACHES NOTHING. A matrix reading this
+            # route needs to know WHAT failed, and a stack trace behind a 500
+            # is a blank cell in its output -- the thing that costs a whole
+            # re-run to explain.
+            payload = {"contract": "adaptive_intelligence.v1",
+                       "errors": [f"{type(exc).__name__}: {str(exc)[:200]}"]}
+        payload["run_id"] = run_id
         return self._ok_json(payload)
 
     def _thesis_diagnostics(self, run_id) -> dict:
@@ -3031,8 +3115,15 @@ class WebApp:
         ("identity", "Identifying the company"),
         ("prior", "Loading prior intelligence"),
         ("evidence", "Reading current company evidence"),
+        # THE TWO RUNGS THE ADAPTIVE LAYER ADDED, and they are named because
+        # they are real work a reader is waiting on rather than filler. The
+        # business model is read from the company's own evidence, so it
+        # cannot resolve before T2; the lens is chosen from the profile, so
+        # it cannot resolve before T3.
+        ("model", "Establishing what kind of business this is"),
         ("macro", "Connecting macro and industry conditions"),
         ("competitors", "Mapping competitors"),
+        ("lens", "Selecting the strategic lens for this company"),
         ("stress", "Stress-testing the strategic read"),
         ("story", "Building the executive story"),
         ("ready", "Preparing the analysis"),
@@ -3047,8 +3138,10 @@ class WebApp:
     #: PRODUCER's output and never from elapsed time — the contract
     #: `_hydration_state` already keeps.
     _STAGE_TIER = {
-        "identity": "T0", "prior": "T1", "evidence": "T2", "macro": "T2",
-        "competitors": "T3", "stress": "T3", "story": "T3", "ready": "T3",
+        "identity": "T0", "prior": "T1", "evidence": "T2", "model": "T2",
+        "macro": "T2",
+        "competitors": "T3", "lens": "T3", "stress": "T3", "story": "T3",
+        "ready": "T3",
     }
 
     def _stage_ladder(self, hyd, status) -> str:
@@ -5928,6 +6021,13 @@ class WebApp:
                 own_words_source=own_source,
                 registrant=ci_in["registrant"],
                 evidence_text=ci_in["evidence_text"],
+                # THE COMPANY'S OWN PAGES, not only its filings. Every
+                # company this build could not classify was a company that
+                # files nothing, and `evidence_text` is filings-only -- so
+                # the classifier was being asked to work from the one
+                # source these companies do not have. See
+                # `_subject_published_text`.
+                published_text=self._subject_published_text(run_id),
                 # OWNERSHIP, so the economics are read out of THIS company's
                 # filings. A sentence in a rival's 10-K describes the rival.
                 subject_cik=self.ci.subject_cik(
@@ -5957,6 +6057,173 @@ class WebApp:
         except Exception:                                   # noqa: BLE001
             _LOG.exception("strategic_read_correction_failed run=%s", run_id)
             return read
+
+    def _subject_published_text(self, run_id) -> str:
+        """This company's OWN published material, filings and pages alike.
+
+        WHY THIS EXISTS BESIDE `classification_inputs`. That one returns
+        `evidence_text`, which is built from the subject's FILINGS -- exactly
+        right for correcting an industry code, and empty for every company
+        that does not file. Those are the companies with no manifest row and
+        no industry code either, so the one input that could classify them
+        was the one nobody assembled.
+
+        SUBJECT-OWNED ONLY, and "first" was not good enough. An earlier
+        version put company-owned text FIRST and appended everything else
+        behind it, reasoning that the subject would win on order.
+
+        IT DOES NOT. `classify_from_evidence` scores the WHOLE string, so the
+        winner is whichever class has the most signal anywhere in it.
+        Measured on a two-observation fixture -- Highspot's own "sales
+        enablement platform ... subscription ... per user per month" plus one
+        competitor page reading "Globex is a consulting firm, our consultants
+        deliver client engagements" -- the subject scored 9.0 and the RIVAL
+        scored 13.0, and Highspot was classified PEOPLE_OR_ROUTE_BASED_
+        SERVICES. A rival's page classified the subject, which is the exact
+        failure `subject_documents` exists to prevent, in a different shape.
+
+        So the two sets are never concatenated. Subject-owned material is
+        returned alone. Everything else is returned ONLY when the company
+        said nothing about itself at all, and that fallback is a different
+        claim -- a classification read off third-party descriptions -- so it
+        is marked with a sentinel the profile layer can see rather than
+        blended in silently.
+
+        Memoised per REQUEST: it walks every observation, and the intro page
+        reaches it through two different consumers.
+        """
+        memo = getattr(self._request, "published", None)
+        if memo is None:
+            memo = self._request.published = {}
+        if run_id in memo:
+            return memo[run_id]
+        result = self._result(run_id) or {}
+        report = result.get("strategic_report") or {}
+        observations = [o for o in (report.get("observations") or ())
+                        if isinstance(o, dict)]
+        # WHY `investor_material` IS NOT IN THIS LIST, since it looks like an
+        # omission and is not. `source_semantics` maps it to COMPANY
+        # authorship -- a 10-K is written BY the company, the regulator is
+        # only the venue -- so the obvious "fix" is to add it here.
+        #
+        # It would be wrong. `source_class` says WHO WROTE IT, never WHICH
+        # COMPANY: a rival's 10-K is `investor_material` too, and adding the
+        # class would let a competitor's filing classify this subject. The
+        # subject's OWN filings already arrive through
+        # `classification_inputs["evidence_text"]`, which resolves ownership
+        # against the filer's CIK before returning anything. Two classes here
+        # plus one CIK-verified body is the whole subject-owned set.
+        owned, other = [], []
+        for o in observations:
+            excerpt = str(o.get("excerpt") or "")
+            title = str(o.get("source_title") or "")
+            target = (owned if o.get("source_class") in
+                      ("company_owned", "executive_statement") else other)
+            if title:
+                target.append(title)
+            if excerpt:
+                target.append(excerpt)
+        try:
+            # THE SUBJECT'S OWN FILINGS ARE SUBJECT-OWNED BY CONSTRUCTION --
+            # `_subject_evidence_text` already excludes documents filed under
+            # another registrant and documents the run classed `competitor`.
+            filings = str(self.classification_inputs(
+                run_id).get("evidence_text") or "")
+        except Exception:                                     # noqa: BLE001
+            filings = ""
+        subject = "\n".join([t for t in ([filings] + owned) if t])
+        if subject.strip():
+            text = subject[:200_000]
+        else:
+            # NOTHING THE COMPANY SAID ABOUT ITSELF WAS RETRIEVED. Third-party
+            # descriptions are all there is, and reading a business model off
+            # them is a weaker claim than reading one off the company's own
+            # words. It is allowed, and it is labelled.
+            text = "\n".join(other)[:200_000]
+        memo[run_id] = text
+        return text
+
+    def _adaptive(self, run_id, *, role_id: str = "ceo"):
+        """The adaptive strategic reading for this run. Never raises.
+
+        ONE PER REQUEST, on the thread-local, for exactly the reason
+        `_strategic_read` and the readiness memo are: worker threads are
+        reused, so a memo on `self` would project one visitor's company into
+        another's page. Keyed on the ROLE as well as the run, because the
+        role changes the composition and two roles in one request would
+        otherwise share the first one's ordering.
+
+        Composing it costs one pass over text the run already holds and makes
+        no network call, but the intro page reaches it several times and this
+        instance is CPU-throttled -- every avoidable recomposition is paid for
+        in whole 100ms quota windows some other request spends waiting.
+        """
+        memo = getattr(self._request, "adaptive", None)
+        if memo is None:
+            memo = self._request.adaptive = {}
+        key = (run_id, role_id)
+        if key in memo:
+            return memo[key]
+        from intent_engine.adaptive.engine import build as _build
+        result = self._result(run_id) or {}
+        report = result.get("strategic_report") or {}
+        observations = [o for o in (report.get("observations") or ())
+                        if isinstance(o, dict)]
+        meta = self.ci.run_meta(run_id) or {}
+        _brief, _report, name = self._founder_layers(run_id)
+        domain = str(meta.get("domain") or meta.get("website")
+                     or result.get("company_domain") or "")
+        ci_in = self.classification_inputs(run_id, name)
+        # THE SUBJECT'S OWN TEXT, and where that is empty, the subject's own
+        # OBSERVATIONS. A private company files nothing, so `evidence_text`
+        # -- which is built from filings -- is empty for exactly the
+        # companies this layer exists to serve. The observations carry the
+        # same first-party sentences from the company's own pages, and they
+        # are already attributed, so using them adds no new trust assumption.
+        body = self._subject_published_text(run_id)
+        try:
+            from intent_engine.executive.company_profile import profile_for
+            ip = profile_for(name=name, domain=domain,
+                             registrant=ci_in.get("registrant"),
+                             evidence_text=ci_in.get("evidence_text") or "",
+                             published_text=body)
+        except Exception:                                     # noqa: BLE001
+            ip = None
+        analysis = self._analyst_analysis(run_id)
+        out = _build(company=name, domain=domain, evidence_text=body,
+                     intelligence_profile=ip, analysis=analysis,
+                     observations=observations,
+                     documents=self._retrieved_documents(run_id),
+                     identity_line=self._subject_line(run_id, name),
+                     role_id=role_id)
+        memo[key] = out
+        return out
+
+    def _analyst_analysis(self, run_id):
+        """The verified `StrategicAnalysis` for this run, or None.
+
+        Read from wherever the run stored it, and NEVER recomputed: a second
+        model call on a render path is a second bill and a second answer, and
+        two answers about one company is the defect this whole architecture
+        is built to avoid.
+        """
+        result = self._result(run_id) or {}
+        for holder in (result, result.get("strategic_report") or {}):
+            for key in ("analysis", "strategic_analysis", "analyst_analysis"):
+                found = holder.get(key) if isinstance(holder, dict) else None
+                if found is None:
+                    continue
+                if isinstance(found, dict):
+                    try:
+                        from intent_engine.strategic_intelligence.analyst \
+                            .contract import StrategicAnalysis
+                        return StrategicAnalysis(**{
+                            k: v for k, v in found.items()
+                            if k in StrategicAnalysis.__dataclass_fields__})
+                    except Exception:                         # noqa: BLE001
+                        return None
+                return found
+        return None
 
     def _own_words(self, observations, company):
         """The company's best complete sentence about itself, and its source.
@@ -6057,20 +6324,64 @@ class WebApp:
         except Exception:                                   # noqa: BLE001
             return ""
 
-    def _intro_page(self, session, run_id):
-        """Step 1 (§21–§25). The first thing a customer reads."""
+    def _intro_page(self, session, run_id, *, role_id: str = ""):
+        """Step 1 (§21–§25). The first thing a customer reads.
+
+        THE ADAPTIVE BLOCK LEADS, and the reason is a measured one. Before
+        it, the first screen a Highspot executive met said:
+
+            "Highspot could not be classified into a business model from the
+             public record ... this company is not in the validation
+             manifest ... Adding this company to the validation manifest
+             would resolve it."
+
+        and the recommendation the product made to them was "Classify the
+        business before commissioning analysis". That is the product naming
+        an internal artifact to a customer and asking them to do its job,
+        on the screen that decides whether they read the second one. The
+        same run had already retrieved Highspot's own "AI Platform for
+        Revenue Execution" page, which says what the business is.
+
+        The adaptive block reads that page. What follows it is unchanged.
+        """
         blocked = self._step_guard(session, run_id)
         if blocked is not None:
             return blocked
+        from intent_engine.adaptive import render as ar
         from intent_engine.founder_brief import steps
         _brief, _report, name = self._founder_layers(run_id)
         read = self._strategic_read(run_id, name)
         company = read.company or name
+        role = str(role_id or "").strip().lower() or "ceo"
+        # FAILS OPEN, LIKE THE FOLLOW-UP BOX BESIDE IT. `engine.build` cannot
+        # raise, but rendering can -- and this is the first screen a customer
+        # reads. Losing the adaptive block costs a feature; raising here would
+        # cost the whole report, and a 500 on the primary screen is the one
+        # outcome worse than a thin one. The exception is logged with the run
+        # id so a missing block is never silent.
+        headline, block = '<p class="kicker">Introduction</p>', ''
+        try:
+            adaptive = self._adaptive(run_id, role_id=role)
+            base = f"/runs/{run_id}/intro"
+            headline += ar.headline(company, adaptive)
+            block = ('<div class="adaptive" id="adaptive">'
+                     + ar.block(company, run_id, adaptive, role_id=role,
+                                base=base,
+                                csrf=session.get("csrf", "")) + '</div>')
+        except Exception:                                     # noqa: BLE001
+            _LOG.exception("adaptive_block_failed run=%s role=%s", run_id,
+                           role)
+            adaptive = None
+            headline += f'<h1>{_e(company)}</h1>'
         body = steps.render_intro(read, run_id=run_id, company=company,
                                   learning=self._learning_block(),
-                                  identity=self._subject_line(run_id, company))
-        return self._html(self._page(f"{company} — introduction", body,
-                                     session, session.get("csrf", "")))
+                                  identity=self._subject_line(run_id, company),
+                                  adaptive=block, headline=headline)
+        title = (f"{company} — {adaptive.headline_lens}"
+                 if adaptive is not None and adaptive.headline_lens
+                 else f"{company} — introduction")
+        return self._html(self._page(title, ar.CSS + body, session,
+                                     session.get("csrf", "")))
 
     def _history_page(self, session, run_id):
         """Step 5 (§41–§48). The vintage-walled rewind."""

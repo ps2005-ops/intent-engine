@@ -174,7 +174,8 @@ def _badge(standing: str) -> str:
 # STEP 1 — INTRODUCTION
 # ===========================================================================
 def render_intro(read, *, run_id: str, company: str,
-                 learning: str = "", identity: str = "") -> str:
+                 learning: str = "", identity: str = "",
+                 adaptive: str = "", headline: str = "") -> str:
     """§21–§25. Compelling immediately, synthesized, no truncated copy.
 
     `identity` is the canonical subject line — legal name, ticker, country,
@@ -183,12 +184,26 @@ def render_intro(read, *, run_id: str, company: str,
     the persona pass found a chief executive who could not confirm, from the
     first screen, which company this analysis was about. The page said
     "Cloudflare" six times and never "Cloudflare, Inc. · NET".
+
+    `adaptive` and `headline` are pre-rendered HTML from
+    `intent_engine.adaptive.render`, and they are PASSED IN rather than
+    wrapped around this page. The first attempt put them in a `<main>` of
+    their own, which gave the page two main landmarks -- a screen reader
+    meets two, and "skip to main content" can land on either. That is the
+    same defect the layer nav already caused once, on the longest page in
+    the product. One landmark, and the renderer that owns it places
+    everything inside it.
     """
-    out = [STEP_CSS, '<main class="step">',
-           '<p class="kicker">Introduction</p>',
-           f'<h1>{_e(company)}</h1>']
+    out = [STEP_CSS, '<main class="step">']
+    if headline:
+        out.append(headline)
+    else:
+        out.append('<p class="kicker">Introduction</p>')
+        out.append(f'<h1>{_e(company)}</h1>')
     if identity:
         out.append(f'<p class="subject">{_e(identity)}</p>')
+    if adaptive:
+        out.append(adaptive)
 
     # ONE opening line. `economic_role` and `strategic_position` say what the
     # story chapters below say, and printing both put the same two sentences

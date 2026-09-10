@@ -145,7 +145,14 @@ def test_no_registrant_at_all_is_sparse_and_says_why():
     profile = profile_for("olo-inc", name="Olo Inc.", registrant=None)
     assert profile.profile_state == PROFILE_SPARSE
     assert profile.profile_limitation
-    assert "validation manifest" in profile.profile_limitation
+    # THE REASON IS STILL STATED; THE INTERNAL NAME FOR IT IS NOT. A reader
+    # who has never heard of a validation manifest cannot act on being told
+    # their company is missing from one, and the sentence used to end by
+    # asking them to add it. `basis` -- which has no customer surface --
+    # still records exactly which of the three classifiers refused.
+    assert "manifest" not in profile.profile_limitation
+    assert "has not been established" in profile.profile_limitation
+    assert "validation manifest" in profile.basis
 
 
 def test_sparse_never_borrows_another_companys_economics():
@@ -179,4 +186,8 @@ def test_sparse_company_selection_explains_itself():
     """An unclassified company gets the generic path AND is told why."""
     sel = AS.select("olo-inc", name="Olo Inc.", registrant=None)
     assert sel.why_this_question
-    assert "manifest" in sel.why_this_question.lower()
+    # See `test_an_unknown_company_still_gets_an_honest_decision_question`:
+    # the internal artifact's name is gone from customer-facing text, and
+    # what replaced it is what the reader can act on.
+    assert "manifest" not in sel.why_this_question.lower()
+    assert "has not been established" in sel.why_this_question.lower()

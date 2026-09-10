@@ -1631,15 +1631,31 @@ class _Classified:
 
 def profile_for(company_id: str = "", *, name: str = "", domain: str = "",
                 manifest=None, registrant=None,
-                evidence_text: str = "") -> CompanyIntelligenceProfile:
+                evidence_text: str = "",
+                published_text: str = "") -> CompanyIntelligenceProfile:
     """The profile for one company, with its quality stated.
 
-    Three outcomes, always one of them explicitly:
+    Four outcomes, always one of them explicitly:
 
       * in the validation manifest -> PROFILE_AVAILABLE;
       * not in it, but the SEC has classified the registrant -> the model
         class the regulator's SIC code implies, PROFILE_PARTIAL;
-      * neither -> PROFILE_SPARSE, naming what is missing.
+      * neither, but the company's OWN published material states how it is
+        paid -> that class, PROFILE_PARTIAL from SUBJECT_EVIDENCE;
+      * none of the three -> PROFILE_SPARSE, naming what is missing.
+
+    `published_text` is the third classifier and is ranked LAST, so it can
+    never override a manifest row or an industry code. It exists because a
+    PRIVATE company has neither of those, and UNKNOWN switches off the
+    pattern library, the per-class metrics, the macro transmission table,
+    the causal questions and the competitor set simultaneously -- so a
+    company we could not classify got no differentiated analysis at all,
+    however much of its own material we had read. Measured on ten real
+    private companies: 10 of 10 UNKNOWN.
+
+    It trusts the same KIND of evidence `revenue_model_hint` already trusts
+    -- a first-party statement of how the money works -- and applies the same
+    rule: it may not guess. See `adaptive.classify`.
 
     `registrant` is `edgar.registrant_classification()`'s result, passed in
     rather than fetched here so this module makes no network call.
@@ -1677,55 +1693,113 @@ def profile_for(company_id: str = "", *, name: str = "", domain: str = "",
         sic = str((registrant or {}).get("sic") or "").strip()
         sic_text = str((registrant or {}).get("sic_description") or "").strip()
         derived = classify_sic(sic)
-        if derived is None:
-            why = (f"the regulator's industry code for this filer "
+        evidence_read = None
+        if derived is None and published_text:
+            # THE THIRD CLASSIFIER. Consulted only where both authored
+            # sources refused, and it may not guess: it returns UNKNOWN with
+            # a stated reason unless this company's own material carries a
+            # first-party statement of how it is paid.
+            try:
+                from intent_engine.adaptive.classify import (
+                    classify_from_evidence)
+                evidence_read = classify_from_evidence(published_text)
+            except Exception:                               # noqa: BLE001
+                evidence_read = None
+        if derived is None and evidence_read is not None \
+                and evidence_read.known:
+            company = _Classified(
+                company_id=company_id or display, canonical_name=display,
+                sector=UNKNOWN,
+                business_model_class=evidence_read.model_class)
+            state = PROFILE_PARTIAL
+            source = "SUBJECT_EVIDENCE"
+            limitation = (
+                f"Classified from this company's own published account of "
+                f"what it sells and how it is paid, rather than from a "
+                f"regulator's industry code -- it does not file one. The "
+                f"business model is therefore established and the analysis "
+                f"is selected for it; the within-industry detail a filing "
+                f"would carry -- capital intensity, demand cyclicality and "
+                f"regulatory regime -- is not, and is shown as not "
+                f"established.")
+        elif derived is None:
+            # WHAT IS TRUE ABOUT THE COMPANY'S RECORD, NOT ABOUT OUR TABLES.
+            #
+            # This sentence used to name an internal artifact to a customer
+            # and then ask them to do our job. Measured live on the deployed
+            # preview, and it was the FIRST thing a Highspot executive read:
+            #
+            #   "this company is not in the validation manifest and no
+            #    regulator industry classification was found for it ...
+            #    Adding this company to the validation manifest would
+            #    resolve it."
+            #
+            # A reader has no idea what our manifest is, cannot add anything
+            # to it, and did not come here to be told about our data model.
+            # What they can act on is what was missing from the RECORD and
+            # what we would read next, so that is what it says.
+            why = (f"the industry code the regulator assigns this filer "
                    f"({sic} {sic_text}) is a residual category that does not "
                    f"determine a business model"
                    if sic else
-                   "this company is not in the validation manifest and no "
-                   "regulator industry classification was found for it")
+                   "no regulator classifies this company, and the material "
+                   "that was read describes what it does without stating "
+                   "how it is paid")
+            if evidence_read is not None and evidence_read.reason:
+                why = (f"no regulator classifies this company, and "
+                       f"{evidence_read.reason}")
             return CompanyIntelligenceProfile(
                 company_id=company_id, company_name=display, known=False,
                 profile_state=PROFILE_SPARSE, profile_source="NONE",
                 profile_limitation=(
                     f"What kind of business this is has not been "
-                    f"established: {why}. The analysis below is selected "
-                    f"from the published record alone, so it does not use "
-                    f"this company's business model to decide what is worth "
-                    f"asking. Adding this company to the validation manifest "
-                    f"would resolve it."),
-                basis=(f"business model not classified -- {why}"))
-        model, sector = derived
-        source = "SEC_SIC"
-        cited = f"{sic} {sic_text}".strip()
-        # THE FILER'S OWN SENTENCE OUTRANKS THE INDUSTRY CODE.
-        #
-        # Only where the code is known to hold two different businesses, and
-        # only on an explicit first-party revenue statement. Meta and
-        # Salesforce are both SIC 7370 and their economics are opposite, so
-        # taking the code's word for it makes one of them wrong every time.
-        # Multi-engine is tested FIRST: a company that reports a cloud engine
-        # beside a commerce engine is mis-described by either single class,
-        # including the advertising one it would otherwise qualify for.
-        hinted = multi_engine_hint(evidence_text) \
-            or revenue_model_hint(evidence_text)
-        if hinted and hinted != model and hinted in _ECONOMICS:
-            model = hinted
-            source = "SEC_SIC+FILING_REVENUE"
-            cited = (f"{cited}, corrected by this company's own statement of "
-                     f"where its revenue comes from")
-        company = _Classified(
-            company_id=company_id or display, canonical_name=display,
-            sector=sector, business_model_class=model)
-        state = PROFILE_PARTIAL
-        limitation = (
-            f"Classified from the regulator's own industry code for this "
-            f"filer ({cited}) rather than from the validation "
-            f"manifest. The business model is therefore established and the "
-            f"analysis is selected for it; what is not established is the "
-            f"within-industry detail the manifest records per company -- "
-            f"capital intensity, demand cyclicality and regulatory regime "
-            f"are not used below, and are shown as not established.")
+                    f"established: {why}. The reading below is selected from "
+                    f"the published record alone, so it does not use this "
+                    f"company's business model to decide what is worth "
+                    f"asking. What would settle it is one page or filing "
+                    f"stating where the revenue comes from."),
+                # `basis` IS INTERNAL AND STAYS PRECISE. It has no customer
+                # surface -- xray, deep, `why_this_question` and
+                # `strategic_read` all read `profile_limitation`, which is
+                # the field the manifest was removed from. Sanitising this
+                # one too would delete a real diagnostic (WHICH of the three
+                # classifiers refused) to fix a leak that is not here.
+                basis=(f"business model not classified -- not in the "
+                       f"validation manifest, no usable SEC industry code, "
+                       f"and no first-party revenue statement in the "
+                       f"published text -- {why}"))
+        else:
+            model, sector = derived
+            source = "SEC_SIC"
+            cited = f"{sic} {sic_text}".strip()
+            # THE FILER'S OWN SENTENCE OUTRANKS THE INDUSTRY CODE.
+            #
+            # Only where the code is known to hold two different businesses,
+            # and only on an explicit first-party revenue statement. Meta and
+            # Salesforce are both SIC 7370 and their economics are opposite,
+            # so taking the code's word for it makes one of them wrong every
+            # time. Multi-engine is tested FIRST: a company that reports a
+            # cloud engine beside a commerce engine is mis-described by
+            # either single class, including the advertising one it would
+            # otherwise qualify for.
+            hinted = multi_engine_hint(evidence_text) \
+                or revenue_model_hint(evidence_text)
+            if hinted and hinted != model and hinted in _ECONOMICS:
+                model = hinted
+                source = "SEC_SIC+FILING_REVENUE"
+                cited = (f"{cited}, corrected by this company's own "
+                         f"statement of where its revenue comes from")
+            company = _Classified(
+                company_id=company_id or display, canonical_name=display,
+                sector=sector, business_model_class=model)
+            state = PROFILE_PARTIAL
+            limitation = (
+                f"Classified from the industry code the regulator assigns "
+                f"this filer ({cited}). The business model is therefore "
+                f"established and the analysis is selected for it; what is "
+                f"not established is the within-industry detail -- capital "
+                f"intensity, demand cyclicality and regulatory regime are "
+                f"not used below, and are shown as not established.")
     econ = _ECONOMICS.get(company.business_model_class)
     if econ is None:
         return CompanyIntelligenceProfile(

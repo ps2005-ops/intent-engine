@@ -219,4 +219,11 @@ def test_an_unknown_company_still_gets_an_honest_decision_question():
     # same fact, so the intent is asserted rather than the old wording.
     why = sel.why_this_question.lower()
     assert "has not been established" in why or "not classified" in why
-    assert "manifest" in why
+    # NOT "manifest". That word was removed from every CUSTOMER-facing
+    # sentence: it named an internal artifact to a reader who has never
+    # heard of it and then asked them to add their own company to it.
+    # Measured live -- it was the first thing a Highspot executive read.
+    # What the sentence has to do is say what was missing from the RECORD
+    # and what would settle it, which is what is asserted now.
+    assert "manifest" not in why
+    assert "revenue comes from" in why
