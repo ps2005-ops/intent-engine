@@ -24,9 +24,18 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
-#: The aspects §27 names, keyed to the sections the renderer labels.
+#: The aspects the preregistration names, keyed to the sections the renderer
+#: labels. These are the ones where shared substance would be a finding.
 ASPECTS = ("why_this_company", "decision_or_domains", "chain", "bounded",
-           "lens", "value")
+           "lens")
+
+#: MEASURED AND REPORTED, NEVER COUNTED AS A COLLAPSE. "Where Intent Engine
+#: could create value" is a statement about what the PRODUCT can do -- the
+#: current/future capability split -- and it is identical across companies
+#: because the capability is. Counting it would make every pair look
+#: contaminated for the one reason that proves nothing about the analysis.
+#: Measured on the two development companies it scored 0.914.
+FRAMEWORK = ("value",)
 
 #: At or above this, two companies' prose is the same prose.
 COLLAPSE = 0.92
@@ -82,6 +91,12 @@ def main() -> int:
             elif verdict == "INSPECT":
                 inspects += 1
             aspects[aspect] = {"ratio": r, "verdict": verdict}
+        for aspect in FRAMEWORK:
+            lt = normalise((left.get("sections") or {}).get(aspect, ""), ln)
+            rt = normalise((right.get("sections") or {}).get(aspect, ""), rn)
+            aspects[aspect] = {
+                "ratio": round(ratio(lt, rt), 3) if lt and rt else None,
+                "verdict": "FRAMEWORK_SHARED_BY_DESIGN"}
         same_lens = (left.get("primary_lens") and
                      left.get("primary_lens") == right.get("primary_lens"))
         pairs.append({"left": ln, "right": rn,

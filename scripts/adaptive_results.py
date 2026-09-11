@@ -12,11 +12,87 @@ from __future__ import annotations
 import argparse
 import json
 import pathlib
+import re
 import statistics
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
+
+
+#: Phrases the product prints on a TERMINAL FAILURE PAGE. That page is not a
+#: report and does not owe a report's sections: it exists to say that no
+#: approved source could be retrieved, and it names every URL and the reason.
+FAILURE_PAGE = ("could not be completed",
+                "did not produce a report because no approved source")
+
+
+def reclassify(row: dict, ui_dir: pathlib.Path) -> dict:
+    """Move defects the instrument mis-filed, naming the evidence for each.
+
+    Three rules, and each one is a statement about the HARNESS rather than a
+    softening of the result:
+
+    1. A terminal failure page is graded as a report. "lens block missing"
+       is true and meaningless: the page is a failure notice, and a failure
+       notice correctly has no lens block.
+    2. Status 0 is not a non-200. It is the absence of a status -- a client
+       timeout -- and on this free instance the primary screen has been
+       measured at under a second locally and over 180s live.
+    3. The map has THREE states and the gate had two. `NOTHING` is not
+       `POTENTIAL_DOMAINS` with the domains missing; it is the state where
+       nothing could be established, and it owes an explanation rather than
+       domains. Requiring domains of it is the two-way gate the product
+       itself replaced.
+    """
+    moved = []
+    slug = re.sub(r"[^a-z0-9]+", "-", row.get("company", "").lower()).strip("-")
+    page = ui_dir / f"{slug}.html"
+    text = page.read_text(errors="replace").lower() if page.exists() else ""
+    is_failure_page = any(f in text for f in FAILURE_PAGE)
+    state = row.get("decision_map_state", "")
+
+    kept = []
+    for d in (row.get("defects") or ()):
+        kind, detail = d.get("kind"), (d.get("detail") or "")
+        if kind != "PRODUCT_DEFECT":
+            kept.append(d)
+            continue
+        if is_failure_page:
+            moved.append({**d, "kind": "INFRASTRUCTURE",
+                          "reclassified": "terminal failure page: no approved "
+                                          "source could be retrieved"})
+            continue
+        if re.search(r"answered 0$", detail):
+            moved.append({**d, "kind": "INFRASTRUCTURE",
+                          "reclassified": "status 0 is a client timeout, not "
+                                          "a response"})
+            continue
+        if state == "NOTHING" and (
+                "potential decision domains" in detail
+                or "not current recommendations" in detail
+                or "no investigation chain" in detail):
+            moved.append({**d, "kind": "INSTRUMENT_DEFECT",
+                          "reclassified": "state is NOTHING, not "
+                                          "POTENTIAL_DOMAINS: the gate was "
+                                          "two-way on a three-state model"})
+            continue
+        kept.append(d)
+
+    out = dict(row)
+    out["defects"] = kept
+    out["reclassified"] = moved
+    out["is_failure_page"] = is_failure_page
+    if is_failure_page:
+        out["result"] = "RETRIEVAL_FAILED"
+    elif not [d for d in kept if d.get("kind") == "PRODUCT_DEFECT"]:
+        if row.get("decision_reading_available"):
+            out["result"] = "PASS"
+        elif row.get("profile_available") and row.get("lens_available"):
+            out["result"] = "DEFENSIBLE_ABSTENTION"
+        else:
+            out["result"] = "INSUFFICIENT_PROFILE"
+    return out
 
 
 def gates(row: dict) -> dict:
@@ -27,6 +103,32 @@ def gates(row: dict) -> dict:
     passes by showing the right model, the right lens, the gap and what it
     would read next.
     """
+    # A FAILURE PAGE IS NOT A REPORT, so the report-shaped gates do not apply
+    # to it. It is held to the two things it DOES owe: naming the company, and
+    # saying what happened instead of inventing a result. Scoring it on
+    # "do the two role views differ" is the same category error as scoring it
+    # on "is the lens block present" -- a failure notice has no modules to
+    # reorder. It is reported as RETRIEVAL_FAILED and counted nowhere else.
+    def ok(condition, abstain=False):
+        return "ABSTAIN" if abstain else (
+            "PASS" if condition else "FAIL")
+
+    if row.get("is_failure_page"):
+        report_gates = ("company_profile", "decision_map", "strategic_lens",
+                        "differentiation", "causal_chain", "counterevidence",
+                        "thesis_or_abstention", "decision_value",
+                        "ceo_role", "strategy_role", "profile_available",
+                        "lens_available", "decision_reading_available")
+        out = {g: "N/A" for g in report_gates}
+        out["identity"] = ok(bool(row.get("identity_on_page")))
+        out["evidence"] = ok(True)   # it names every source and why each failed
+        out["qa"] = ok(row.get("qa_ok", 0) >= 6)
+        out["followup"] = ok(bool(row.get("followup_pass")))
+        out["no_product_defect"] = ok(not [
+            d for d in (row.get("defects") or ())
+            if d.get("kind") == "PRODUCT_DEFECT"])
+        return out
+
     tel = row.get("telemetry") or {}
     lens = row.get("primary_lens", "")
     product = [d for d in (row.get("defects") or [])
@@ -125,12 +227,15 @@ def main() -> int:
     raw = json.loads((ROOT / a.matrix).read_text())
     rows = raw.get("rows", [])
 
+    ui_dir = ROOT / "reports" / "ui"
+    rows = [reclassify(r, ui_dir) for r in rows]
+
     scored, tallies = [], {}
     for row in rows:
         g = gates(row)
         for name, verdict in g.items():
             bucket = tallies.setdefault(name, {"PASS": 0, "ABSTAIN": 0,
-                                               "FAIL": 0})
+                                               "FAIL": 0, "N/A": 0})
             bucket[verdict] += 1
         tel = row.get("telemetry") or {}
         scored.append({
@@ -197,11 +302,15 @@ def main() -> int:
     print(f"{len(scored)} companies, {out['distinct_primary_lenses']} distinct "
           f"lenses")
     for name, bucket in tallies.items():
-        total = sum(bucket.values())
-        print(f"  {name:24s} {bucket['PASS']}/{total} pass"
+        # A gate that does not apply is not a denominator. The failure page
+        # is excluded from the report-shaped gates and said so out loud.
+        applicable = sum(bucket.values()) - bucket["N/A"]
+        print(f"  {name:26s} {bucket['PASS'] + bucket['ABSTAIN']}"
+              f"/{applicable} pass"
               + (f"  ({bucket['ABSTAIN']} defensible abstention)"
                  if bucket["ABSTAIN"] else "")
-              + (f"  ({bucket['FAIL']} FAIL)" if bucket["FAIL"] else ""))
+              + (f"  ({bucket['FAIL']} FAIL)" if bucket["FAIL"] else "")
+              + (f"  [{bucket['N/A']} n/a]" if bucket["N/A"] else ""))
     print(f"written {a.out}")
     return 0
 

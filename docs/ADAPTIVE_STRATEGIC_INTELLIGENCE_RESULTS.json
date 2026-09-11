@@ -1,0 +1,867 @@
+{
+  "live_commit": "807a414361b0fbc1999b4595e875c67e2a20524a",
+  "base": "https://intent-engine-preview-bridge.onrender.com",
+  "companies": 10,
+  "distinct_primary_lenses": 5,
+  "gate_tallies": {
+    "identity": {
+      "PASS": 10,
+      "ABSTAIN": 0,
+      "FAIL": 0,
+      "N/A": 0
+    },
+    "company_profile": {
+      "PASS": 8,
+      "ABSTAIN": 0,
+      "FAIL": 1,
+      "N/A": 1
+    },
+    "decision_map": {
+      "PASS": 8,
+      "ABSTAIN": 0,
+      "FAIL": 1,
+      "N/A": 1
+    },
+    "strategic_lens": {
+      "PASS": 8,
+      "ABSTAIN": 0,
+      "FAIL": 1,
+      "N/A": 1
+    },
+    "differentiation": {
+      "PASS": 8,
+      "ABSTAIN": 0,
+      "FAIL": 1,
+      "N/A": 1
+    },
+    "causal_chain": {
+      "PASS": 8,
+      "ABSTAIN": 0,
+      "FAIL": 1,
+      "N/A": 1
+    },
+    "evidence": {
+      "PASS": 10,
+      "ABSTAIN": 0,
+      "FAIL": 0,
+      "N/A": 0
+    },
+    "counterevidence": {
+      "PASS": 9,
+      "ABSTAIN": 0,
+      "FAIL": 0,
+      "N/A": 1
+    },
+    "thesis_or_abstention": {
+      "PASS": 8,
+      "ABSTAIN": 0,
+      "FAIL": 1,
+      "N/A": 1
+    },
+    "profile_available": {
+      "PASS": 8,
+      "ABSTAIN": 0,
+      "FAIL": 1,
+      "N/A": 1
+    },
+    "lens_available": {
+      "PASS": 8,
+      "ABSTAIN": 0,
+      "FAIL": 1,
+      "N/A": 1
+    },
+    "decision_reading_available": {
+      "PASS": 0,
+      "ABSTAIN": 8,
+      "FAIL": 1,
+      "N/A": 1
+    },
+    "decision_value": {
+      "PASS": 9,
+      "ABSTAIN": 0,
+      "FAIL": 0,
+      "N/A": 1
+    },
+    "qa": {
+      "PASS": 10,
+      "ABSTAIN": 0,
+      "FAIL": 0,
+      "N/A": 0
+    },
+    "followup": {
+      "PASS": 10,
+      "ABSTAIN": 0,
+      "FAIL": 0,
+      "N/A": 0
+    },
+    "ceo_role": {
+      "PASS": 9,
+      "ABSTAIN": 0,
+      "FAIL": 0,
+      "N/A": 1
+    },
+    "strategy_role": {
+      "PASS": 9,
+      "ABSTAIN": 0,
+      "FAIL": 0,
+      "N/A": 1
+    },
+    "no_product_defect": {
+      "PASS": 1,
+      "ABSTAIN": 0,
+      "FAIL": 9,
+      "N/A": 0
+    }
+  },
+  "core_p50_s": 25.2,
+  "core_max_s": 49.3,
+  "total_product_defects": 9,
+  "total_leaks": 0,
+  "rows": [
+    {
+      "company": "Highspot",
+      "result": "PRODUCT_DEFECT",
+      "resolved_identity": "Highspot",
+      "business_model": "SUBSCRIPTION_SOFTWARE",
+      "profile_source": "SUBJECT_EVIDENCE",
+      "specificity": 0.235,
+      "customer_job": "",
+      "strategic_assets": [],
+      "critical_dependencies": [
+        "LearnCore"
+      ],
+      "primary_lens": "revenue_gtm",
+      "primary_lens_name": "Revenue & Go-To-Market Strategy",
+      "secondary_lenses": [
+        "decision_execution"
+      ],
+      "lens_confidence": "moderate",
+      "why_lens_selected": "This company's own material is about \u201csales enablement\u201d, \u201crevenue execution\u201d, \u201crevenue teams\u201d, which is what revenue & go-to-market strategy reads. It scored 45.5 against 18.5 for the next eligible lens.",
+      "lens_refusals": [
+        "Operational Intelligence: scored 5.5 against 45.5, carried by workflow, automation alone",
+        "Planning & Assumption Validation: scored 4.5 against 45.5, carried by budget, targets alone",
+        "Financial & Capital Allocation: scored 3.0 against 45.5, carried by guidance alone"
+      ],
+      "lens_outside_expectation": false,
+      "decision_opportunities": 0,
+      "top_decision_domain": "",
+      "top_decision_priority": 0.0,
+      "top_decision_components": {},
+      "causal_chain_nodes": 4,
+      "causal_evidence_coverage": 0.25,
+      "genericity_flags": 1,
+      "differentiation_carried_by": [
+        "self_description",
+        "own_vocabulary",
+        "critical_dependencies",
+        "technology_exposure"
+      ],
+      "counterevidence": false,
+      "information_priority": "",
+      "abstention_reason": "We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none.",
+      "qa_ok": 6,
+      "qa_company_specific": 6,
+      "followup_pass": true,
+      "ceo_status": 200,
+      "strategy_status": 200,
+      "role_views_differ": true,
+      "role_facts_identical": true,
+      "core_s": 18.1,
+      "leaks": [],
+      "defects": [
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "/intro establishes the business model and /xray says it has not been established (decision_synthesis._select passes neither evidence_text nor published_text)"
+        }
+      ],
+      "gates": {
+        "identity": "PASS",
+        "company_profile": "PASS",
+        "decision_map": "PASS",
+        "strategic_lens": "PASS",
+        "differentiation": "PASS",
+        "causal_chain": "PASS",
+        "evidence": "PASS",
+        "counterevidence": "PASS",
+        "thesis_or_abstention": "PASS",
+        "profile_available": "PASS",
+        "lens_available": "PASS",
+        "decision_reading_available": "ABSTAIN",
+        "decision_value": "PASS",
+        "qa": "PASS",
+        "followup": "PASS",
+        "ceo_role": "PASS",
+        "strategy_role": "PASS",
+        "no_product_defect": "FAIL"
+      }
+    },
+    {
+      "company": "BigID",
+      "result": "PRODUCT_DEFECT",
+      "resolved_identity": "BigID",
+      "business_model": "SUBSCRIPTION_SOFTWARE",
+      "profile_source": "SUBJECT_EVIDENCE",
+      "specificity": 0.235,
+      "customer_job": "",
+      "strategic_assets": [],
+      "critical_dependencies": [
+        "Alation"
+      ],
+      "primary_lens": "data_security_governance",
+      "primary_lens_name": "Data Security & Governance",
+      "secondary_lenses": [
+        "enterprise_data_ai"
+      ],
+      "lens_confidence": "moderate",
+      "why_lens_selected": "This company's own material is about \u201cdspm\u201d, \u201csensitive data\u201d, \u201cdata governance\u201d, which is what data security & governance reads. It scored 52.5 against 24.5 for the next eligible lens.",
+      "lens_refusals": [
+        "Data Infrastructure & Decision Trust: scored 19.0 against 52.5, carried by data quality, data pipelines alone",
+        "Regulatory & Risk Intelligence: scored 16.5 against 52.5, carried by hipaa, pci alone",
+        "Revenue & Go-To-Market Strategy: scored 6.0 against 52.5, carried by pipeline, crm alone"
+      ],
+      "lens_outside_expectation": false,
+      "decision_opportunities": 0,
+      "top_decision_domain": "",
+      "top_decision_priority": 0.0,
+      "top_decision_components": {},
+      "causal_chain_nodes": 4,
+      "causal_evidence_coverage": 0.25,
+      "genericity_flags": 1,
+      "differentiation_carried_by": [
+        "self_description",
+        "own_vocabulary",
+        "critical_dependencies",
+        "technology_exposure"
+      ],
+      "counterevidence": false,
+      "information_priority": "",
+      "abstention_reason": "We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none.",
+      "qa_ok": 6,
+      "qa_company_specific": 6,
+      "followup_pass": true,
+      "ceo_status": 200,
+      "strategy_status": 200,
+      "role_views_differ": true,
+      "role_facts_identical": true,
+      "core_s": 15.0,
+      "leaks": [],
+      "defects": [
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "/intro establishes the business model and /xray says it has not been established (decision_synthesis._select passes neither evidence_text nor published_text)"
+        }
+      ],
+      "gates": {
+        "identity": "PASS",
+        "company_profile": "PASS",
+        "decision_map": "PASS",
+        "strategic_lens": "PASS",
+        "differentiation": "PASS",
+        "causal_chain": "PASS",
+        "evidence": "PASS",
+        "counterevidence": "PASS",
+        "thesis_or_abstention": "PASS",
+        "profile_available": "PASS",
+        "lens_available": "PASS",
+        "decision_reading_available": "ABSTAIN",
+        "decision_value": "PASS",
+        "qa": "PASS",
+        "followup": "PASS",
+        "ceo_role": "PASS",
+        "strategy_role": "PASS",
+        "no_product_defect": "FAIL"
+      }
+    },
+    {
+      "company": "Cyera",
+      "result": "PRODUCT_DEFECT",
+      "resolved_identity": "Cyera",
+      "business_model": "SUBSCRIPTION_SOFTWARE",
+      "profile_source": "SUBJECT_EVIDENCE",
+      "specificity": 0.176,
+      "customer_job": "",
+      "strategic_assets": [],
+      "critical_dependencies": [],
+      "primary_lens": "data_security_governance",
+      "primary_lens_name": "Data Security & Governance",
+      "secondary_lenses": [],
+      "lens_confidence": "high",
+      "why_lens_selected": "This company's own material is about \u201cdspm\u201d, \u201csensitive data\u201d, \u201cdata governance\u201d, which is what data security & governance reads. It scored 42.5 against 16.0 for the next eligible lens.",
+      "lens_refusals": [
+        "Operational Intelligence: scored 16.0 against 42.5, carried by mean time to, operational efficiency alone",
+        "Enterprise Data & AI Strategy: scored 14.0 against 42.5, carried by enterprise data, generative ai alone",
+        "Regulatory & Risk Intelligence: scored 12.5 against 42.5, carried by pci, enforcement alone"
+      ],
+      "lens_outside_expectation": false,
+      "decision_opportunities": 0,
+      "top_decision_domain": "",
+      "top_decision_priority": 0.0,
+      "top_decision_components": {},
+      "causal_chain_nodes": 4,
+      "causal_evidence_coverage": 0.0,
+      "genericity_flags": 1,
+      "differentiation_carried_by": [
+        "own_vocabulary",
+        "technology_exposure"
+      ],
+      "counterevidence": false,
+      "information_priority": "",
+      "abstention_reason": "We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none.",
+      "qa_ok": 6,
+      "qa_company_specific": 6,
+      "followup_pass": true,
+      "ceo_status": 200,
+      "strategy_status": 200,
+      "role_views_differ": true,
+      "role_facts_identical": true,
+      "core_s": 18.6,
+      "leaks": [],
+      "defects": [
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "/intro establishes the business model and /xray says it has not been established (decision_synthesis._select passes neither evidence_text nor published_text)"
+        }
+      ],
+      "gates": {
+        "identity": "PASS",
+        "company_profile": "PASS",
+        "decision_map": "PASS",
+        "strategic_lens": "PASS",
+        "differentiation": "PASS",
+        "causal_chain": "PASS",
+        "evidence": "PASS",
+        "counterevidence": "PASS",
+        "thesis_or_abstention": "PASS",
+        "profile_available": "PASS",
+        "lens_available": "PASS",
+        "decision_reading_available": "ABSTAIN",
+        "decision_value": "PASS",
+        "qa": "PASS",
+        "followup": "PASS",
+        "ceo_role": "PASS",
+        "strategy_role": "PASS",
+        "no_product_defect": "FAIL"
+      }
+    },
+    {
+      "company": "Monte Carlo Data",
+      "result": "RETRIEVAL_FAILED",
+      "resolved_identity": "Monte Carlo Data",
+      "business_model": "UNKNOWN",
+      "profile_source": "NONE",
+      "specificity": 0.059,
+      "customer_job": "",
+      "strategic_assets": [],
+      "critical_dependencies": [],
+      "primary_lens": "",
+      "primary_lens_name": "",
+      "secondary_lenses": [],
+      "lens_confidence": "none",
+      "why_lens_selected": "No strategic lens was selected. This company's published material does not say clearly enough what decision it serves -- the strongest reading, Enterprise Data & AI Strategy, scored 0.0 against the 4 needed. The reading below is therefore the general one, and it is labelled as such rather than dressed as a company-specific finding.",
+      "lens_refusals": [],
+      "lens_outside_expectation": false,
+      "decision_opportunities": 0,
+      "top_decision_domain": "",
+      "top_decision_priority": 0.0,
+      "top_decision_components": {},
+      "causal_chain_nodes": 0,
+      "causal_evidence_coverage": 0.0,
+      "genericity_flags": 1,
+      "differentiation_carried_by": [],
+      "counterevidence": false,
+      "information_priority": "",
+      "abstention_reason": "No decision reading and no decision domains. This company's own published material did not say clearly enough what it is for, so there is no basis even for saying which decisions would matter.",
+      "qa_ok": 6,
+      "qa_company_specific": 6,
+      "followup_pass": true,
+      "ceo_status": 200,
+      "strategy_status": 200,
+      "role_views_differ": false,
+      "role_facts_identical": true,
+      "core_s": 6.3,
+      "leaks": [],
+      "defects": [
+        {
+          "kind": "EXPECTED_ABSTENTION",
+          "detail": "no lens selected: No strategic lens was selected. This company's published material does not say clearly enough what decision it serves -- the strongest reading, Enterprise Data & AI Strategy, scored 0.0 against the 4 "
+        }
+      ],
+      "gates": {
+        "company_profile": "N/A",
+        "decision_map": "N/A",
+        "strategic_lens": "N/A",
+        "differentiation": "N/A",
+        "causal_chain": "N/A",
+        "counterevidence": "N/A",
+        "thesis_or_abstention": "N/A",
+        "decision_value": "N/A",
+        "ceo_role": "N/A",
+        "strategy_role": "N/A",
+        "profile_available": "N/A",
+        "lens_available": "N/A",
+        "decision_reading_available": "N/A",
+        "identity": "PASS",
+        "evidence": "PASS",
+        "qa": "PASS",
+        "followup": "PASS",
+        "no_product_defect": "PASS"
+      }
+    },
+    {
+      "company": "Veeam",
+      "result": "PRODUCT_DEFECT",
+      "resolved_identity": "Veeam",
+      "business_model": "SUBSCRIPTION_SOFTWARE",
+      "profile_source": "SUBJECT_EVIDENCE",
+      "specificity": 0.294,
+      "customer_job": "",
+      "strategic_assets": [
+        "cloud-native apps",
+        "backup"
+      ],
+      "critical_dependencies": [
+        "Splunk",
+        "Critical Enterprise Applications",
+        "Windows Server",
+        "DataAI Command Graph"
+      ],
+      "primary_lens": "enterprise_data_ai",
+      "primary_lens_name": "Enterprise Data & AI Strategy",
+      "secondary_lenses": [],
+      "lens_confidence": "high",
+      "why_lens_selected": "This company's own material is about \u201cdata platform\u201d, \u201cunstructured data\u201d, \u201cdata management\u201d, which is what enterprise data & ai strategy reads. It scored 23.5 against 9.0 for the next eligible lens.",
+      "lens_refusals": [
+        "Operational Intelligence: scored 9.0 against 23.5, carried by workflow, orchestration alone",
+        "Data Infrastructure & Decision Trust: scored 7.5 against 23.5, carried by data trust, analytics alone",
+        "Data Security & Governance: scored 5.0 against 23.5, carried by privacy, compliance alone"
+      ],
+      "lens_outside_expectation": false,
+      "decision_opportunities": 0,
+      "top_decision_domain": "",
+      "top_decision_priority": 0.0,
+      "top_decision_components": {},
+      "causal_chain_nodes": 4,
+      "causal_evidence_coverage": 0.25,
+      "genericity_flags": 1,
+      "differentiation_carried_by": [
+        "self_description",
+        "own_vocabulary",
+        "strategic_assets",
+        "critical_dependencies",
+        "technology_exposure"
+      ],
+      "counterevidence": false,
+      "information_priority": "",
+      "abstention_reason": "We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none.",
+      "qa_ok": 6,
+      "qa_company_specific": 6,
+      "followup_pass": true,
+      "ceo_status": 200,
+      "strategy_status": 200,
+      "role_views_differ": true,
+      "role_facts_identical": true,
+      "core_s": 29.0,
+      "leaks": [],
+      "defects": [
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "/intro establishes the business model and /xray says it has not been established (decision_synthesis._select passes neither evidence_text nor published_text)"
+        }
+      ],
+      "gates": {
+        "identity": "PASS",
+        "company_profile": "PASS",
+        "decision_map": "PASS",
+        "strategic_lens": "PASS",
+        "differentiation": "PASS",
+        "causal_chain": "PASS",
+        "evidence": "PASS",
+        "counterevidence": "PASS",
+        "thesis_or_abstention": "PASS",
+        "profile_available": "PASS",
+        "lens_available": "PASS",
+        "decision_reading_available": "ABSTAIN",
+        "decision_value": "PASS",
+        "qa": "PASS",
+        "followup": "PASS",
+        "ceo_role": "PASS",
+        "strategy_role": "PASS",
+        "no_product_defect": "FAIL"
+      }
+    },
+    {
+      "company": "Druva",
+      "result": "PRODUCT_DEFECT",
+      "resolved_identity": "Druva",
+      "business_model": "SUBSCRIPTION_SOFTWARE",
+      "profile_source": "SUBJECT_EVIDENCE",
+      "specificity": 0.118,
+      "customer_job": "",
+      "strategic_assets": [],
+      "critical_dependencies": [],
+      "primary_lens": "enterprise_data_ai",
+      "primary_lens_name": "Enterprise Data & AI Strategy",
+      "secondary_lenses": [
+        "data_security_governance"
+      ],
+      "lens_confidence": "moderate",
+      "why_lens_selected": "This company's own material is about \u201cdata platform\u201d, \u201centerprise data\u201d, \u201cdata management\u201d, which is what enterprise data & ai strategy reads. It scored 23.5 against 10.5 for the next eligible lens.",
+      "lens_refusals": [
+        "Regulatory & Risk Intelligence: scored 7.0 against 23.5, carried by legal hold, regulatory alone",
+        "Operational Intelligence: scored 3.0 against 23.5, carried by incident alone",
+        "Decision to Execution: scored 3.0 against 23.5, carried by onboarding alone"
+      ],
+      "lens_outside_expectation": false,
+      "decision_opportunities": 0,
+      "top_decision_domain": "",
+      "top_decision_priority": 0.0,
+      "top_decision_components": {},
+      "causal_chain_nodes": 4,
+      "causal_evidence_coverage": 0.0,
+      "genericity_flags": 1,
+      "differentiation_carried_by": [
+        "own_vocabulary",
+        "technology_exposure"
+      ],
+      "counterevidence": false,
+      "information_priority": "",
+      "abstention_reason": "We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none.",
+      "qa_ok": 6,
+      "qa_company_specific": 6,
+      "followup_pass": true,
+      "ceo_status": 200,
+      "strategy_status": 200,
+      "role_views_differ": true,
+      "role_facts_identical": true,
+      "core_s": 26.0,
+      "leaks": [],
+      "defects": [
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "/intro establishes the business model and /xray says it has not been established (decision_synthesis._select passes neither evidence_text nor published_text)"
+        }
+      ],
+      "gates": {
+        "identity": "PASS",
+        "company_profile": "PASS",
+        "decision_map": "PASS",
+        "strategic_lens": "PASS",
+        "differentiation": "PASS",
+        "causal_chain": "PASS",
+        "evidence": "PASS",
+        "counterevidence": "PASS",
+        "thesis_or_abstention": "PASS",
+        "profile_available": "PASS",
+        "lens_available": "PASS",
+        "decision_reading_available": "ABSTAIN",
+        "decision_value": "PASS",
+        "qa": "PASS",
+        "followup": "PASS",
+        "ceo_role": "PASS",
+        "strategy_role": "PASS",
+        "no_product_defect": "FAIL"
+      }
+    },
+    {
+      "company": "Slalom",
+      "result": "PRODUCT_DEFECT",
+      "resolved_identity": "Slalom",
+      "business_model": "PEOPLE_OR_ROUTE_BASED_SERVICES",
+      "profile_source": "SUBJECT_EVIDENCE",
+      "specificity": 0.176,
+      "customer_job": "",
+      "strategic_assets": [],
+      "critical_dependencies": [],
+      "primary_lens": "consulting_portfolio",
+      "primary_lens_name": "Client Portfolio & Multi-Client Intelligence",
+      "secondary_lenses": [
+        "decision_execution",
+        "enterprise_data_ai"
+      ],
+      "lens_confidence": "moderate",
+      "why_lens_selected": "This company's own material is about \u201cconsulting\u201d, \u201ctransformation\u201d, \u201cdelivery\u201d, which is what client portfolio & multi-client intelligence reads. It scored 11.0 against 7.5 for the next eligible lens.",
+      "lens_refusals": [
+        "Data Security & Governance: scored 5.0 against 11.0, carried by privacy, compliance alone",
+        "Revenue & Go-To-Market Strategy: scored 3.0 against 11.0, carried by crm alone",
+        "Planning & Assumption Validation: scored 2.5 against 11.0, carried by planning alone"
+      ],
+      "lens_outside_expectation": false,
+      "decision_opportunities": 0,
+      "top_decision_domain": "",
+      "top_decision_priority": 0.0,
+      "top_decision_components": {},
+      "causal_chain_nodes": 4,
+      "causal_evidence_coverage": 0.25,
+      "genericity_flags": 1,
+      "differentiation_carried_by": [
+        "self_description",
+        "own_vocabulary",
+        "technology_exposure"
+      ],
+      "counterevidence": false,
+      "information_priority": "",
+      "abstention_reason": "We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none.",
+      "qa_ok": 6,
+      "qa_company_specific": 6,
+      "followup_pass": true,
+      "ceo_status": 200,
+      "strategy_status": 200,
+      "role_views_differ": true,
+      "role_facts_identical": true,
+      "core_s": 36.6,
+      "leaks": [],
+      "defects": [
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "/intro establishes the business model and /xray says it has not been established (decision_synthesis._select passes neither evidence_text nor published_text)"
+        }
+      ],
+      "gates": {
+        "identity": "PASS",
+        "company_profile": "PASS",
+        "decision_map": "PASS",
+        "strategic_lens": "PASS",
+        "differentiation": "PASS",
+        "causal_chain": "PASS",
+        "evidence": "PASS",
+        "counterevidence": "PASS",
+        "thesis_or_abstention": "PASS",
+        "profile_available": "PASS",
+        "lens_available": "PASS",
+        "decision_reading_available": "ABSTAIN",
+        "decision_value": "PASS",
+        "qa": "PASS",
+        "followup": "PASS",
+        "ceo_role": "PASS",
+        "strategy_role": "PASS",
+        "no_product_defect": "FAIL"
+      }
+    },
+    {
+      "company": "Sigma Computing",
+      "result": "PRODUCT_DEFECT",
+      "resolved_identity": "Sigma Computing",
+      "business_model": "SUBSCRIPTION_SOFTWARE",
+      "profile_source": "SUBJECT_EVIDENCE",
+      "specificity": 0.294,
+      "customer_job": "",
+      "strategic_assets": [
+        "clue you get is"
+      ],
+      "critical_dependencies": [],
+      "primary_lens": "data_infrastructure",
+      "primary_lens_name": "Data Infrastructure & Decision Trust",
+      "secondary_lenses": [
+        "planning_assumption",
+        "data_security_governance"
+      ],
+      "lens_confidence": "moderate",
+      "why_lens_selected": "This company's own material is about \u201cdata quality\u201d, \u201cdata warehouse\u201d, \u201clineage\u201d, which is what data infrastructure & decision trust reads. It scored 28.0 against 16.0 for the next eligible lens.",
+      "lens_refusals": [
+        "Operational Intelligence: scored 8.5 against 28.0, carried by workflow, orchestration alone",
+        "Regulatory & Risk Intelligence: scored 6.0 against 28.0, carried by sox, audit alone",
+        "Decision to Execution: scored 6.0 against 28.0, carried by execution, adoption alone"
+      ],
+      "lens_outside_expectation": false,
+      "decision_opportunities": 0,
+      "top_decision_domain": "",
+      "top_decision_priority": 0.0,
+      "top_decision_components": {},
+      "causal_chain_nodes": 4,
+      "causal_evidence_coverage": 0.25,
+      "genericity_flags": 1,
+      "differentiation_carried_by": [
+        "self_description",
+        "own_vocabulary",
+        "strategic_assets",
+        "technology_exposure"
+      ],
+      "counterevidence": false,
+      "information_priority": "",
+      "abstention_reason": "We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none.",
+      "qa_ok": 6,
+      "qa_company_specific": 6,
+      "followup_pass": true,
+      "ceo_status": 200,
+      "strategy_status": 200,
+      "role_views_differ": true,
+      "role_facts_identical": true,
+      "core_s": 24.4,
+      "leaks": [],
+      "defects": [
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "/intro establishes the business model and /xray says it has not been established (decision_synthesis._select passes neither evidence_text nor published_text)"
+        }
+      ],
+      "gates": {
+        "identity": "PASS",
+        "company_profile": "PASS",
+        "decision_map": "PASS",
+        "strategic_lens": "PASS",
+        "differentiation": "PASS",
+        "causal_chain": "PASS",
+        "evidence": "PASS",
+        "counterevidence": "PASS",
+        "thesis_or_abstention": "PASS",
+        "profile_available": "PASS",
+        "lens_available": "PASS",
+        "decision_reading_available": "ABSTAIN",
+        "decision_value": "PASS",
+        "qa": "PASS",
+        "followup": "PASS",
+        "ceo_role": "PASS",
+        "strategy_role": "PASS",
+        "no_product_defect": "FAIL"
+      }
+    },
+    {
+      "company": "ZoomInfo",
+      "result": "PRODUCT_DEFECT",
+      "resolved_identity": "ZoomInfo",
+      "business_model": "SUBSCRIPTION_SOFTWARE",
+      "profile_source": "SEC_SIC",
+      "specificity": 0.353,
+      "customer_job": "",
+      "strategic_assets": [
+        "human-in-the-loop approach",
+        "technology",
+        "intellectual property"
+      ],
+      "critical_dependencies": [],
+      "primary_lens": "revenue_gtm",
+      "primary_lens_name": "Revenue & Go-To-Market Strategy",
+      "secondary_lenses": [
+        "decision_execution",
+        "enterprise_data_ai"
+      ],
+      "lens_confidence": "moderate",
+      "why_lens_selected": "This company's own material is about \u201csales enablement\u201d, \u201csales cycle\u201d, \u201cgo to market\u201d, which is what revenue & go-to-market strategy reads. It scored 18.5 against 18.5 for the next eligible lens.",
+      "lens_refusals": [
+        "Regulatory & Risk Intelligence: scored 12.5 against 18.5, carried by sox, enforcement alone",
+        "Data Infrastructure & Decision Trust: scored 11.0 against 18.5, carried by data quality, business intelligence alone",
+        "Planning & Assumption Validation: scored 11.0 against 18.5, carried by forecast, assumptions alone"
+      ],
+      "lens_outside_expectation": false,
+      "decision_opportunities": 0,
+      "top_decision_domain": "",
+      "top_decision_priority": 0.0,
+      "top_decision_components": {},
+      "causal_chain_nodes": 4,
+      "causal_evidence_coverage": 0.25,
+      "genericity_flags": 0,
+      "differentiation_carried_by": [
+        "self_description",
+        "own_vocabulary",
+        "strategic_assets",
+        "technology_exposure"
+      ],
+      "counterevidence": false,
+      "information_priority": "",
+      "abstention_reason": "We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none.",
+      "qa_ok": 6,
+      "qa_company_specific": 6,
+      "followup_pass": true,
+      "ceo_status": 200,
+      "strategy_status": 200,
+      "role_views_differ": true,
+      "role_facts_identical": true,
+      "core_s": 49.3,
+      "leaks": [],
+      "defects": [
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "1 quotation(s) start or end mid-word, or are navigation furniture: ['\u2022We experience competition from other companies and technologies that allow businesses to gather and aggregate sales, marketing, recruiting, and other data, and we may in the future face competition from prominent large-language-model (LLM) providers and generative AI companies,']"
+        }
+      ],
+      "gates": {
+        "identity": "PASS",
+        "company_profile": "PASS",
+        "decision_map": "PASS",
+        "strategic_lens": "PASS",
+        "differentiation": "PASS",
+        "causal_chain": "PASS",
+        "evidence": "PASS",
+        "counterevidence": "PASS",
+        "thesis_or_abstention": "PASS",
+        "profile_available": "PASS",
+        "lens_available": "PASS",
+        "decision_reading_available": "ABSTAIN",
+        "decision_value": "PASS",
+        "qa": "PASS",
+        "followup": "PASS",
+        "ceo_role": "PASS",
+        "strategy_role": "PASS",
+        "no_product_defect": "FAIL"
+      }
+    },
+    {
+      "company": "Point B",
+      "result": "PRODUCT_DEFECT",
+      "resolved_identity": "Point B",
+      "business_model": "UNKNOWN",
+      "profile_source": "NONE",
+      "specificity": 0.059,
+      "customer_job": "",
+      "strategic_assets": [],
+      "critical_dependencies": [],
+      "primary_lens": "",
+      "primary_lens_name": "",
+      "secondary_lenses": [],
+      "lens_confidence": "none",
+      "why_lens_selected": "No strategic lens was selected. This company's published material does not say clearly enough what decision it serves -- the strongest reading, Enterprise Data & AI Strategy, scored 0.0 against the 4 needed. The reading below is therefore the general one, and it is labelled as such rather than dressed as a company-specific finding.",
+      "lens_refusals": [],
+      "lens_outside_expectation": false,
+      "decision_opportunities": 0,
+      "top_decision_domain": "",
+      "top_decision_priority": 0.0,
+      "top_decision_components": {},
+      "causal_chain_nodes": 0,
+      "causal_evidence_coverage": 0.0,
+      "genericity_flags": 1,
+      "differentiation_carried_by": [],
+      "counterevidence": false,
+      "information_priority": "",
+      "abstention_reason": "No decision reading and no decision domains. This company's own published material did not say clearly enough what it is for, so there is no basis even for saying which decisions would matter.",
+      "qa_ok": 6,
+      "qa_company_specific": 6,
+      "followup_pass": true,
+      "ceo_status": 200,
+      "strategy_status": 200,
+      "role_views_differ": true,
+      "role_facts_identical": true,
+      "core_s": 44.9,
+      "leaks": [],
+      "defects": [
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "a bounded run drew settled causality"
+        },
+        {
+          "kind": "EXPECTED_ABSTENTION",
+          "detail": "no lens selected: No strategic lens was selected. This company's published material does not say clearly enough what decision it serves -- the strongest reading, Enterprise Data & AI Strategy, scored 0.0 against the 4 "
+        }
+      ],
+      "gates": {
+        "identity": "PASS",
+        "company_profile": "FAIL",
+        "decision_map": "FAIL",
+        "strategic_lens": "FAIL",
+        "differentiation": "FAIL",
+        "causal_chain": "FAIL",
+        "evidence": "PASS",
+        "counterevidence": "PASS",
+        "thesis_or_abstention": "FAIL",
+        "profile_available": "FAIL",
+        "lens_available": "FAIL",
+        "decision_reading_available": "FAIL",
+        "decision_value": "PASS",
+        "qa": "PASS",
+        "followup": "PASS",
+        "ceo_role": "PASS",
+        "strategy_role": "PASS",
+        "no_product_defect": "FAIL"
+      }
+    }
+  ]
+}

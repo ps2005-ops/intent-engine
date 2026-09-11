@@ -188,3 +188,66 @@ company-facing sentence is composed from that company's own evidence, or from
 the structural economics of the class its own evidence selected. A claim that
 survives being made about an unrelated company is something this package
 **detects**, not something it ships.
+## Addendum — what the live development run changed (be5fde12 → freeze)
+
+The architecture above was written from the build. This section is written from
+the deployed product, and every defect in it was found by reading a real page
+rather than by reading telemetry. That distinction matters: the telemetry for
+the Highspot run was clean — `0 defects`, `0 leaks` — on the same page that
+told its chief executive the company depended on itself.
+
+### The three states, and where each is decided
+
+```
+profile_available            profile.known               "what kind of business is this"
+lens_available               lens_selection.primary      "which decisions tend to matter for it"
+decision_reading_available   opportunity_map.has_reading "what THIS management should consider"
+```
+
+`DecisionOpportunityMap.state` is the field every renderer branches on, and
+`PotentialDomain` is a different TYPE from `DecisionOpportunity` — not a
+low-scoring one — so nothing can rank an area worth investigating beside a
+recommendation, whoever renders it.
+
+### Four seams, and the defect each one hid
+
+| seam | what went wrong | why telemetry could not see it |
+|---|---|---|
+| dependency extractor → page | `partners with ([A-Z]…)` captured the SUBJECT: "Partner with Highspot's services team" | a dependency was found, so the field was populated and the count was right |
+| retrieved corpus → classifier | the corpus is observation EXCERPTS, and Slalom's were its CLIENTS' industry pages | the classifier behaved correctly on the text it was given |
+| classifier vocabulary | "consulting **services**" and "consulting **company**" were absent; only "advisory services" and "consulting **firm**" were present | a score of 0.0 is indistinguishable from a company that is not a consultancy |
+| adaptive block → founder layer | the page abstains, then recommends | each layer's own output is internally consistent |
+
+The last is the one worth remembering. `webapp/app.py` composes the adaptive
+block and then the founder brief, and its own comment states the boundary:
+"The adaptive block reads that page. **What follows it is unchanged.**" That
+was a deliberate, documented decision — and it was made before there was an
+abstention for the rest of the page to contradict. A seam is not wrong when it
+is drawn; it becomes wrong when one side learns to say something new.
+
+### The span module's own last line
+
+`quote_around` exists because a window of "match minus 220 characters" has no
+idea where a word begins. It snaps to sentences — and returned
+`clean[:max_chars]`. Six break proofs mutated the START of the span; none
+mutated the end; and the test named "never begins **or ends** mid-word" had a
+fixture of two short sentences, so the truncation branch never executed. The
+half of the name after the "or" asserted nothing for as long as it existed.
+
+The general lesson, and it is the third time this codebase has recorded a
+version of it: **a test's name is not a test.** The fixture has to be able to
+reach the branch, and the way to know it can is to watch it fail.
+
+### What the environment bounds, and what it does not
+
+The preview reports `DISCOVERY_NOT_RUN` — "no search was run" — so no
+independent third-party source can be discovered there. Every source on the
+Highspot and Slalom runs was company-owned, which is why `0 of 6` and `0 of 4`
+sources were independent, and why neither run could raise a decision-grade
+reading. The product reports this as a limit of retrieval rather than as a
+finding about the company, which is the correct behaviour and is asserted.
+
+This bounds how many of the ten can reach `DECISION_READING` on this
+deployment. It does not bound identity, profile, lens, differentiation,
+evidence handling, roles, Q&A or UI, which are what the rest of the matrix
+measures.

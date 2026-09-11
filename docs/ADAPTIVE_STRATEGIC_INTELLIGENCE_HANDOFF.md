@@ -115,3 +115,80 @@ template — the detector flags it rather than hiding it.
 that reason, and it refuses rather than guesses: applicability is enforced,
 the margin is proportional, and the matched span is quoted so a reader can
 disagree with it.
+## The live qualification phase — what the deployed product taught
+
+Everything above was written from the build. This section was written from the
+deployed service, and it is the more useful half, because **every defect in it
+had clean telemetry.** The Highspot development run reported `0 defects` and
+`0 leaks` on the same page that told its chief executive the company depended
+on itself.
+
+### Six defects, all found by reading a page
+
+| # | defect | how it presented | class |
+|---|---|---|---|
+| 1 | the subject extracted as its own critical dependency | "It names Highspot as something it depends on" — and Slalom said it of Slalom | PRODUCT, 2 of 2 |
+| 2 | a consultancy scored 0.0 on the services class | Slalom returned `business_model = UNKNOWN`; its text says "consulting **services**", the library held "consulting **firm**" | PRODUCT |
+| 3 | a client's sector classified the subject | Point B nearly read BRANDED_CONSUMER off "Consumer Packaged Goods **industries**" | PRODUCT |
+| 4 | the span module's own last line was an arithmetic cut | live: "Highspot by Seismic is an AI plat" | PRODUCT |
+| 5 | one page abstained and then recommended | "we cannot conclude what management should do" above "**WHAT WE RECOMMEND**" | PRODUCT |
+| 6 | one run resolved two business models | `/intro` "a subscription software business"; `/xray` "has not been established" | PRODUCT |
+
+Plus a newsletter call to action quoted as evidence, and four instrument
+defects listed below.
+
+### The pattern worth carrying forward
+
+**Three of six are the same shape: one run saying two things.** Not one
+component being wrong — two components each internally consistent, disagreeing
+across a seam:
+
+- adaptive block vs founder layer (#5)
+- `/intro` vs `/xray` (#6)
+- the classifier vs the corpus it was handed (#2)
+
+`webapp/app.py`'s own comment records seam #5 being drawn deliberately: "The
+adaptive block reads that page. **What follows it is unchanged.**" That was a
+correct decision when it was made. It became a defect when one side of the
+seam learned to abstain and nothing told the other side.
+
+**So the question to ask of any new capability is not "does it work" but
+"which surfaces now disagree with it".** Telemetry cannot answer that, because
+each surface reports its own state truthfully. Only reading the pages can.
+
+### Instruments, listed so they can be discounted
+
+Four instrument defects were found, and finding them was worth more than the
+product defects, because each would have produced a false number in this
+document:
+
+1. The matrix asserted one fixed set of sections on every page, so a correct
+   refusal was recorded as six PRODUCT_DEFECTs.
+2. The scorer defined abstention as "no lens selected", which under the
+   three-state model fails a defensibly-abstaining company on three gates.
+3. `strategic_lens` read `abstaining` where every sibling gate reads
+   `not X_ok and abstaining`, so Highspot — lens selected at 41.5 against
+   21.5, six published refusals — scored ABSTAIN on the gate it most clearly
+   passed. **Found by running the whole downstream pipeline against the
+   development rows before spending a live quota on it.**
+4. The harness posted `company`; `/analyze` reads `company_name`. Every
+   harness run had opened on the WEBSITE alone, so the typed-name path a
+   customer actually uses had never been exercised.
+
+And one measurement error, recorded because the shape of it is the lesson:
+light-mode contrast first reported 53 failures **all at exactly 1.23**. An
+identical ratio across 53 different colours is a statement about the
+instrument, not the page — `bgOf()` walked up for a painted background, fell
+off a transparent `body`, and scored near-black text against `rgba(0,0,0,0)`.
+
+### What the environment bounds
+
+The preview reports `DISCOVERY_NOT_RUN` — "no search was run". No independent
+third-party source can be discovered there, so `0 of 6` sources were
+independent for Highspot and `0 of 4` for Slalom, and neither run could raise
+a decision-grade reading. The product states this as a limit of retrieval
+rather than as a finding about the company, which is correct and is asserted.
+
+This bounds how many of the ten can reach `DECISION_READING`. It does not
+bound identity, profile, lens, differentiation, evidence handling, roles, Q&A
+or UI.

@@ -303,6 +303,22 @@ def qualify(name, domain, *, with_qa=True, verbose=True) -> dict:
     # product published rather than re-derived, and so a run that reached
     # nothing can be told apart from a run whose sources refused it.
     row["evidence_text"] = visible(pages.get("evidence", ""))[:6000]
+
+    # /intro vs /xray: ONE RUN MAY NOT SAY TWO THINGS about whether it knows
+    # what kind of business this is. Only a contradiction when the profile IS
+    # available -- a run that genuinely could not classify the company is
+    # right to say so on both surfaces.
+    xray_text = visible(pages.get("xray", ""))
+    row["xray_says_unclassified"] = (
+        "has not been established" in xray_text
+        or "is not classified" in xray_text)
+    row["profile_contradiction"] = bool(
+        row.get("profile_available") and row["xray_says_unclassified"])
+    if row["profile_contradiction"]:
+        note("PRODUCT_DEFECT",
+             "/intro establishes the business model and /xray says it has "
+             "not been established (decision_synthesis._select passes "
+             "neither evidence_text nor published_text)")
     # THE RENDERED PAGE ITSELF. Self-contained, so the UI sweep measures what
     # the server actually served rather than a second run of it.
     ui_dir = ROOT / "reports" / "ui"

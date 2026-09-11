@@ -1,94 +1,70 @@
-# Adaptive Strategic Intelligence — the live qualification matrix
+# Adaptive Strategic Intelligence — final ten-company matrix
 
-## What this measures, and what it deliberately does not
+Frozen SHA: `807a414361b0fbc1999b4595e875c67e2a20524a`  
+Service: https://intent-engine-preview-bridge.onrender.com
 
-The gates below are about whether the product **understood a particular
-company** and said something a strategy executive could act on. They are not
-about whether it produced a confident recommendation.
+| Company | Identity | Profile | Lens | Diff | Decision/Abst | Evidence | Chain | CEO | Strategy | Q&A | Follow-up | Result |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Highspot | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | **PRODUCT_DEFECT** |
+| BigID | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | **PRODUCT_DEFECT** |
+| Cyera | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | **PRODUCT_DEFECT** |
+| Monte Carlo Data | PASS | N/A | N/A | N/A | N/A | PASS | N/A | N/A | N/A | PASS | PASS | **RETRIEVAL_FAILED** |
+| Veeam | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | **PRODUCT_DEFECT** |
+| Druva | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | **PRODUCT_DEFECT** |
+| Slalom | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | **PRODUCT_DEFECT** |
+| Sigma Computing | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | **PRODUCT_DEFECT** |
+| ZoomInfo | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | **PRODUCT_DEFECT** |
+| Point B | PASS | **FAIL** | **FAIL** | **FAIL** | **FAIL** | PASS | **FAIL** | PASS | PASS | PASS | PASS | **PRODUCT_DEFECT** |
 
-> **10/10 does not mean ten confident theses.** A company whose public record
-> cannot support a strategic reading passes by showing the correct company
-> model, the correct lens, an explicit statement of what is missing, and what
-> it would read next. That is `DEFENSIBLE_ABSTENTION` and it counts. Lowering
-> the epistemic standard to turn a cell green would make the matrix a record
-> of what we were willing to claim rather than of what the product knows.
+### Per company
 
-## The cohort
+| Company | P/L/D | model | source | lens | state | chain | spec | quotes | leaks | Q&A | CORE |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Highspot | `YYN` | SUBSCRIPTION_SOFTWARE | SUBJECT_EVIDENCE | revenue_gtm | POTENTIAL_DOMAINS | INVESTIGATION_CHAIN | 0.235 | 5 | 0 | 6/6 | 18.1s |
+| BigID | `YYN` | SUBSCRIPTION_SOFTWARE | SUBJECT_EVIDENCE | data_security_governance | POTENTIAL_DOMAINS | INVESTIGATION_CHAIN | 0.235 | 5 | 0 | 6/6 | 15.0s |
+| Cyera | `YYN` | SUBSCRIPTION_SOFTWARE | SUBJECT_EVIDENCE | data_security_governance | POTENTIAL_DOMAINS | INVESTIGATION_CHAIN | 0.176 | 3 | 0 | 6/6 | 18.6s |
+| Monte Carlo Data | `NNN` | UNKNOWN | NONE | — | NOTHING | NO_CHAIN | 0.059 | 0 | 0 | 6/6 | 6.3s |
+| Veeam | `YYN` | SUBSCRIPTION_SOFTWARE | SUBJECT_EVIDENCE | enterprise_data_ai | POTENTIAL_DOMAINS | INVESTIGATION_CHAIN | 0.294 | 5 | 0 | 6/6 | 29.0s |
+| Druva | `YYN` | SUBSCRIPTION_SOFTWARE | SUBJECT_EVIDENCE | enterprise_data_ai | POTENTIAL_DOMAINS | INVESTIGATION_CHAIN | 0.118 | 3 | 0 | 6/6 | 26.0s |
+| Slalom | `YYN` | PEOPLE_OR_ROUTE_BASED_SERVICES | SUBJECT_EVIDENCE | consulting_portfolio | POTENTIAL_DOMAINS | INVESTIGATION_CHAIN | 0.176 | 4 | 0 | 6/6 | 36.6s |
+| Sigma Computing | `YYN` | SUBSCRIPTION_SOFTWARE | SUBJECT_EVIDENCE | data_infrastructure | POTENTIAL_DOMAINS | INVESTIGATION_CHAIN | 0.294 | 5 | 0 | 6/6 | 24.4s |
+| ZoomInfo | `YYN` | SUBSCRIPTION_SOFTWARE | SEC_SIC | revenue_gtm | POTENTIAL_DOMAINS | INVESTIGATION_CHAIN | 0.353 | 5 (1 broken) | 0 | 6/6 | 49.3s |
+| Point B | `NNN` | UNKNOWN | NONE | — | NOTHING | NO_CHAIN | 0.059 | 0 | 0 | 6/6 | 44.9s |
 
-The exact ten, not substitutable:
+### Numeric verdict
 
-| # | company | domain |
-|---|---|---|
-| 1 | Highspot | highspot.com |
-| 2 | BigID | bigid.com |
-| 3 | Cyera | cyera.com |
-| 4 | Monte Carlo Data | montecarlodata.com |
-| 5 | Veeam | veeam.com |
-| 6 | Druva | druva.com |
-| 7 | Slalom | slalom.com |
-| 8 | Sigma Computing | sigmacomputing.com |
-| 9 | ZoomInfo | zoominfo.com |
-| 10 | Point B | pointb.com |
+```
+IDENTITY:                           10/10
+PROFILE:                            8/10   (1 FAIL)
+PROFILE_AVAILABLE:                  8/10   (1 FAIL)
+LENS_AVAILABLE:                     8/10   (1 FAIL)
+DECISION_READING_AVAILABLE:         8/10   (8 defensible abstention)   (1 FAIL)
+STRATEGIC_LENS:                     8/10   (1 FAIL)
+WHY_THIS_COMPANY:                   8/10   (1 FAIL)
+DECISION_OR_DEFENSIBLE_ABSTENTION:  8/10   (1 FAIL)
+CAUSAL_OR_INVESTIGATION:            8/10   (1 FAIL)
+EVIDENCE:                           10/10
+COUNTEREVIDENCE_OR_LIMITATION:      9/10
+DECISION_VALUE:                     9/10
+CEO_ROLE:                           9/10
+STRATEGY_ROLE:                      9/10
+QA:                                 10/10
+FOLLOWUP_CONTEXT:                   10/10
+NO_PRODUCT_DEFECT:                  1/10   (9 FAIL)
+QA_ANSWERS:                         60/60
+FOLLOWUP:                           10/10
 
-None was replaced because its evidence was difficult. That is the thing being
-measured.
+RAW_ENUM/INTERNAL_TERM_LEAKS:       0
+ATTRIBUTION/SPAN_DEFECTS:           1
+UNEXPLAINED_TEMPLATE_COLLAPSES:     2
+PAIRS FLAGGED FOR INSPECTION:       13
+ENDLESS_SPINNERS:                   0
+```
 
-## The expectations, and their status
+### Performance
 
-`scripts/adaptive_ten_matrix.EXPECTED_LENS` records what a strategist would
-expect each company's lens to be. It is a **check**, never an input: the
-product is never told the expected answer, and a company that lands elsewhere
-is examined rather than corrected. A miss is recorded as `DATA_LIMITATION`
-pending examination, not as a product defect and not as a pass.
-
-## The gates
-
-| gate | what has to be true |
+| metric | value |
 |---|---|
-| **A. Identity** | canonical company on the page, right entity, no parent/subsidiary confusion, no cross-company leakage |
-| **B. Company profile** | business model defensible and evidence-backed, customer job right, assets and dependencies this company's own |
-| **C. Decision map** | defensible company-specific opportunities, sane rank order, top decision materially relevant, no boilerplate |
-| **D. Strategic lens** | primary defensible, secondaries sensible, `WHY_SELECTED` visible, refusals published, no identical explanation across unrelated companies |
-| **E. Differentiation** | materially unique, company mechanism present, not reusable unchanged |
-| **F. Causal chain** | change → mechanism → exposure → consequence → decision, evidence-linked, uncertainty explicit |
-| **G. Evidence** | supporting and counter-evidence, provenance, source-role diversity, no fabricated quote, no unsupported precision |
-| **H. Thesis** | company-specific and evidence-entailing, or a defensible abstention |
-| **I. Decision value** | management implication, trade-off, what would make it wrong, information priority |
-| **J. Q&A** | 6/6 substantive and company-specific, follow-up retains context |
-| **K. Role lens** | CEO and Strategy both pass, same facts, different priority |
-| **L. UI** | 375/390/768/1280/1440, light and dark, keyboard-only, no overflow, no invisible text, no spinner after terminal, no raw enums |
-| **M. Demo quality** | visibly different from another company's page; lens, decision, chain, why-this-company, provenance, Q&A and uncertainty all visible |
-
-## Defect classification
-
-Counting defects without classifying them produces one number and no next
-action. Five kinds, four responses:
-
-- **PRODUCT_DEFECT** — the product did the wrong thing. Fix it.
-- **INSTRUMENT_DEFECT** — the harness did. Fix the harness; the row is void.
-- **INFRASTRUCTURE** — the deployment or the network. Re-run.
-- **EXPECTED_ABSTENTION** — the product correctly declined. Nothing.
-- **DATA_LIMITATION** — the public record does not carry it. Examine, record.
-
-## Instrument notes carried forward
-
-- **Drive the real form.** `/analyze` is posted with exactly the fields the
-  browser posts — `csrf`, `company`, `website`, `consent`. Sending less than
-  the real form does is bypassing the customer flow just as surely as calling
-  an internal function would be.
-- **One session per company, held open.** `/runs/<id>/conversation` checks run
-  ownership, so a second anonymous session cannot ask anything about the run
-  the first one created.
-- **Persist every row immediately.** A wave that dies on company seven must
-  not lose one to six.
-- **The demo quota is 10 analyses per IP per rolling hour.** The cohort is
-  exactly the budget, so a scorer bug spends the whole hour silently. Run the
-  development set first, on a different day-hour, and read the telemetry
-  before spending the matrix.
-
-## Results
-
-Filled in from `reports/adaptive_ten_matrix.json` after the frozen run. See
-`ADAPTIVE_STRATEGIC_INTELLIGENCE_RESULTS.json` for the machine-readable form
-and `ADAPTIVE_STRATEGIC_INTELLIGENCE_UI_PROOF.md` for the responsive, dark and
-keyboard sweep.
+| CORE p50 | 25.2s |
+| CORE p90 | 44.9s |
+| CORE max | 49.3s |
