@@ -7801,6 +7801,27 @@ class WebApp:
             + self._discovery_detail(discovery)
             + '</section>')
 
+        #: Passages already printed on THIS page, normalised.
+        #:
+        #: MEASURED 2026-09-11 across all ten demo companies: SIX of them
+        #: printed the same passage more than once on /evidence, and Cyera
+        #: printed one sentence THREE times. The cause is not a bug in
+        #: selection -- each card is a genuinely different source, with its
+        #: own URL, author and date. It is that a site reuses ONE meta
+        #: description across many pages, so the excerpt drawn from each of
+        #: them is byte-identical.
+        #:
+        #: The source is NOT hidden: its card, link, attribution and dates
+        #: still appear, because a source removed is a source the reader
+        #: cannot check. Only the repeated blockquote is replaced, by a line
+        #: saying the wording is shared. Printing it again reads as padding,
+        #: and on a page whose whole argument is "here is the evidence" that
+        #: is the most expensive place to look careless.
+        seen_passages: dict = {}
+
+        def _norm(text: str) -> str:
+            return " ".join(str(text or "").split()).strip().lower()
+
         def _card(rec):
             bits = []
             for label, key in (("Author", "author"), ("Host", "host"),
@@ -7818,12 +7839,24 @@ class WebApp:
                     f'target="_blank">{_e(url[:90])}</a></p>' if url else
                     '<p class="none">This source is not publicly linkable.</p>')
             passage = str(rec.get("passage") or "")
+            key = _norm(passage)
+            repeat_of = seen_passages.get(key) if key else None
+            if key and repeat_of is None:
+                seen_passages[key] = str(rec.get("title") or "another source")
+            excerpt = ""
+            if passage and repeat_of is None:
+                excerpt = f'<blockquote>{_e(passage)}</blockquote>'
+            elif passage:
+                shared = "carries the same published description as"
+                excerpt = (f'<p class="none">This page {shared} '
+                           f'&ldquo;{_e(repeat_of)}&rdquo;, so the wording is '
+                           f'not repeated here.</p>')
             return (
                 f'<section class="card">'
                 f'<h3>{_e(rec.get("title") or "Untitled source")}</h3>'
                 f'<p><strong>{_e(rec.get("plain_statement") or "")}</strong></p>'
                 f'<p>{_e(rec.get("relevance_statement") or "")}</p>'
-                + (f'<blockquote>{_e(passage)}</blockquote>' if passage else "")
+                + excerpt
                 + link
                 + f'<dl>{"".join(bits)}</dl>'
                 + f'<p class="none">Independent voice: '

@@ -31,7 +31,18 @@ import time
 import urllib.parse
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-from perf_progressive_matrix import BASE, _opener, _req, visible  # noqa: E402
+import perf_progressive_matrix as _PPM                            # noqa: E402
+from perf_progressive_matrix import _opener, _req, visible        # noqa: E402
+
+# THE TARGET IS OVERRIDABLE so the same journey can be driven against a local
+# instance of the SAME BUILD. The live preview allows ten analyses per IP per
+# hour, and spending those ten discovering a bug in this harness is how the
+# last two hours went. A local pass validates the instrument for free; the
+# live pass is what the qualification actually rests on.
+import os                                                         # noqa: E402
+if os.environ.get("JOURNEY_BASE"):
+    _PPM.BASE = os.environ["JOURNEY_BASE"].rstrip("/")
+BASE = _PPM.BASE
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 TEN = [
@@ -161,8 +172,44 @@ def journey(name, entity_id, *, verbose=True) -> dict:
         "suggest_domain": picked.get("domain", "") or "",
         "suggest_country": picked.get("country", "") or "",
     }
+    # SUBMIT_ACK IS THE 303, NOT THE PAGE AFTER IT (§9).
+    #
+    # urllib follows the redirect, so timing `_req` measures the acknowledgement
+    # PLUS the first progress render. Those are two different promises -- "we
+    # took your request" and "you can see it working" -- and the brief sets
+    # different budgets for them (2s and 3s). Measured separately, with a
+    # redirect-refusing opener for the first.
+    import http.cookiejar as _cj
+    import urllib.request as _ur
+
+    class _NoRedirect(_ur.HTTPRedirectHandler):
+        def redirect_request(self, *a, **k):
+            return None
+
     began = time.monotonic()
-    st, html, url, _t, _h = _req(op, "/analyze", fields, timeout=180)
+    ack_op = _ur.build_opener(_ur.HTTPCookieProcessor(_jar), _NoRedirect)
+    st_ack, _b, _u2, _t2, hdrs = _req(ack_op, "/analyze", fields, timeout=180)
+    row["submit_ack_s"] = round(time.monotonic() - began, 2)
+    # HTTP HEADER NAMES ARE CASE-INSENSITIVE AND THIS EDGE SENDS LOWERCASE.
+    # `dict(e.headers)` preserves the wire spelling, and Render/Cloudflare
+    # emit `location` -- so a `.get("Location")` found nothing, the harness
+    # reported "submit produced no run (status 303)" for ten successful
+    # submissions, and burned an analysis on each one before I caught it.
+    location = ""
+    for key, value in (hdrs or {}).items():
+        if key.lower() == "location":
+            location = value
+            break
+    if st_ack in (302, 303, 307) and "/runs/" in location:
+        vis = time.monotonic()
+        st, html, url, _t, _h = _req(op, location, timeout=90)
+        row["visible_progress_s"] = round(time.monotonic() - vis, 2)
+        url = location
+    else:
+        # No redirect: either a refusal or an error page. Fall through to the
+        # existing classification with what the acknowledgement returned.
+        st, html, url = st_ack, _b, (BASE + "/analyze")
+        row["visible_progress_s"] = None
     row["submit_s"] = round(time.monotonic() - began, 1)
     m = re.search(r"/runs/([A-Za-z0-9]+)", url or "")
     if not m:
@@ -178,6 +225,17 @@ def journey(name, entity_id, *, verbose=True) -> dict:
     run_id = m.group(1)
     row["run_id"] = run_id
     gate("ANALYSIS_ACCEPTED", True)
+    # `or 99` TURNS A PERFECT SCORE INTO A FAILURE. 0.0 is falsy, so an
+    # acknowledgement that came back in under 10ms -- the best possible
+    # result -- was read as 99 seconds and failed its own gate. Caught on a
+    # local instance where the round trip really is ~0.00s; against the live
+    # preview the value is ~0.2s and the bug would have stayed hidden.
+    _ack = row.get("submit_ack_s")
+    _vis = row.get("visible_progress_s")
+    gate("SUBMIT_ACK_2S", _ack is not None and _ack <= 2.0,
+         f"acknowledgement took {_ack}s")
+    gate("VISIBLE_PROGRESS_3S", _vis is not None and _vis <= 3.0,
+         f"first progress render took {_vis}s")
     if verbose:
         print(f"  run {run_id}", flush=True)
 
@@ -245,27 +303,58 @@ def journey(name, entity_id, *, verbose=True) -> dict:
          f"history page carried only {len(hist)} chars of text")
 
     # --- 7. EVIDENCE: duplicates, broken spans, counterevidence ------------
-    ev_html = surfaces["evidence"]["html"] + surfaces["full"]["html"]
-    quotes = [q for q in _quotes(ev_html) if len(q) > 40]
-    dupes = len(quotes) - len(set(quotes))
-    broken = sum(1 for q in quotes
+    # DUPLICATE EVIDENCE IS A PROPERTY OF ONE PAGE.
+    #
+    # The repair this qualification is checking was PAGE-LEVEL dedup: the
+    # same passage must not be printed twice on the page a reader is looking
+    # at. Concatenating /evidence and /full and counting repeats across the
+    # pair measures something else entirely -- the two surfaces are SUPPOSED
+    # to cite the same sources, so every shared citation read as a duplicate
+    # and Monte Carlo scored 8 of 9. Counted per page, and the cross-surface
+    # figure kept separately because it is informative, not a defect.
+    per_page, quotes_all = {}, []
+    for key in ("evidence", "full"):
+        qs = [q for q in _quotes(surfaces[key]["html"]) if len(q) > 40]
+        per_page[key] = len(qs) - len(set(qs))
+        quotes_all.extend(qs)
+    dupes = sum(per_page.values())
+    broken = sum(1 for q in quotes_all
                  if q.startswith(("and ", "but ", "the ", "of ", "to "))
                  or q.endswith((" the", " of", " and", " a", " to")))
-    row["evidence"] = {"quotes": len(quotes), "duplicates": dupes,
+    row["evidence"] = {"quotes": len(quotes_all), "duplicates": dupes,
+                       "per_page_duplicates": per_page,
+                       "shared_across_surfaces":
+                           len(quotes_all) - len(set(quotes_all)),
                        "broken_spans": broken}
     gate("EVIDENCE_NO_DUPLICATES", dupes == 0, f"{dupes} duplicated passage(s)")
     gate("EVIDENCE_NO_BROKEN_SPANS", broken == 0, f"{broken} broken span(s)")
 
     # --- 8. PROFILE CONSISTENCY across surfaces ----------------------------
-    names = set()
+    #
+    # THE PROPERTY IS "NO SURFACE NAMES A DIFFERENT COMPANY", not "every
+    # headline is the same string". A first version compared the headlines
+    # for equality and reported Veeam as contradictory because /full is
+    # headed "Limited analysis of Veeam Software Group GmbH" while /intro is
+    # headed "Veeam Software Group GmbH". Those name one company; the second
+    # adds an honest qualifier about the evidence. An equality test would
+    # flag every bounded run as a contradiction -- inventing a uniform defect
+    # out of a correctly-worded page.
+    canonical = (picked.get("common_name")
+                 or picked.get("legal_name") or name).lower()
+    head_word = canonical.split(",")[0].split()[0]
+    heads, mismatched = [], []
     for key in ("intro", "brief", "full"):
         m2 = re.search(r"<h1[^>]*>(.*?)</h1>", surfaces[key]["html"],
                        re.S | re.I)
-        if m2:
-            names.add(visible(m2.group(1)).split("—")[0].strip().lower())
-    row["headline_names"] = sorted(names)
-    gate("PROFILE_CONSISTENCY", len(names) <= 1,
-         f"surfaces disagree on the company: {sorted(names)}")
+        if not m2:
+            continue
+        text = visible(m2.group(1)).split("—")[0].strip()
+        heads.append(f"{key}:{text}")
+        if head_word not in text.lower():
+            mismatched.append(f"{key}:{text}")
+    row["headline_names"] = heads
+    gate("PROFILE_CONSISTENCY", not mismatched,
+         f"a surface names a different company: {mismatched}")
 
     # --- 9. Q&A: six, plus one contextual follow-up ------------------------
     #     THE CANONICAL ROUTE IS /conversation. A first version of this
@@ -304,13 +393,34 @@ def journey(name, entity_id, *, verbose=True) -> dict:
 
     # --- 10. ROLE VIEWS: same facts, different priority --------------------
     views = {}
-    for role in ("ceo", "strategy"):
+    # THE STRATEGY ROLE IS `cso`, NOT "strategy".
+    #
+    # `_qs_role` accepts any alnum token and `roles.role()` maps an UNKNOWN
+    # id to the default -- which is `ceo`. So asking for ?role=strategy
+    # silently rendered the CEO view, and this harness reported "CEO and
+    # Strategy render identically" for three companies that were in fact
+    # never asked for a Strategy view at all. A runner that names a producer
+    # field wrongly invents a uniform defect.
+    for role in ("ceo", "cso"):
         st, body, _u, _t, _h = _req(op, f"/runs/{run_id}/intro?role={role}",
                                     timeout=60)
         views[role] = visible(body)
-    row["role_identical"] = views.get("ceo") == views.get("strategy")
-    gate("ROLE_VIEWS", not row["role_identical"],
-         "CEO and Strategy render identically")
+    row["role_identical"] = views.get("ceo") == views.get("cso")
+    # ROLES DIFFER WHEN THERE IS SOMETHING TO PRIORITISE DIFFERENTLY.
+    #
+    # A run that correctly abstains has no decision, so a CEO view and a
+    # Strategy view of the same abstention SHOULD read the same -- there is
+    # no second ordering of nothing. Gating on difference unconditionally
+    # asks a bounded page to manufacture a distinction it has no basis for,
+    # which is the opposite of what the rest of this qualification checks.
+    has_decision = "limited analysis" not in (
+        " ".join(row["headline_names"]).lower())
+    row["role_gate_applies"] = has_decision
+    if has_decision:
+        gate("ROLE_VIEWS", not row["role_identical"],
+             "CEO and Strategy render identically on a run with a decision")
+    else:
+        row["gates"]["ROLE_VIEWS"] = True   # bounded run: not applicable
 
     failed = [k for k, v in row["gates"].items() if not v]
     row["result"] = "PASS" if not failed else "PRODUCT_DEFECT"
