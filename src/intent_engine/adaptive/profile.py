@@ -297,6 +297,42 @@ def _clean_phrase(text: str) -> str:
     return " ".join(words).strip(" .,-")
 
 
+#: Legal-form words that carry no identity, stripped before comparing names.
+_LEGAL_FORMS = frozenset((
+    "inc", "inc.", "incorporated", "llc", "ltd", "limited", "corp",
+    "corporation", "co", "company", "plc", "gmbh", "sa", "nv", "ab", "as",
+    "group", "holdings", "technologies", "software",
+))
+
+
+def _name_tokens(value: str) -> Tuple[str, ...]:
+    """A name reduced to the words that identify it."""
+    cleaned = re.sub(r"[^\w\s]", " ", str(value or "")).casefold()
+    return tuple(t for t in cleaned.split() if t and t not in _LEGAL_FORMS)
+
+
+def _is_the_subject(phrase: str, company: str) -> bool:
+    """Is this extracted name the company we are analysing?
+
+    MEASURED LIVE (Highspot, be5fde12). Its own page says "Partner with
+    Highspot's services team", the dependency pattern matched `partners with`
+    and captured the subject, and the report told Highspot's chief executive:
+
+        "It names Highspot as something it depends on."
+
+    A company is not its own dependency. The comparison is WHOLE TOKENS and
+    prefix-wise in both directions -- "Monte Carlo" against "Monte Carlo
+    Data" is still the subject -- and never a substring, because a substring
+    wall refuses real companies ("alpha" inside "Alphabet") and invents
+    false ones.
+    """
+    a, b = _name_tokens(phrase), _name_tokens(company)
+    if not a or not b:
+        return False
+    shorter, longer = (a, b) if len(a) <= len(b) else (b, a)
+    return longer[:len(shorter)] == shorter
+
+
 def _extract(patterns, text: str, *, limit: int = 6) -> Tuple[Tuple[str, str], ...]:
     """(phrase, quoted span) pairs, deduplicated, in order of appearance."""
     seen, out = set(), []
@@ -655,7 +691,10 @@ def build_profile(*, company: str, domain: str = "",
              basis="named by this company as something it builds on, "
                    "integrates with or partners with",
              evidence=span)
-        for phrase, span in _extract(_DEPENDENCY_PATTERNS, body))
+        for phrase, span in _extract(_DEPENDENCY_PATTERNS, body)
+        # A COMPANY IS NOT ITS OWN DEPENDENCY. "Partner with Highspot's
+        # services team" is the subject talking about itself.
+        if not _is_the_subject(phrase, company))
 
     data_assets = ()
     if re.search(r"\b(?:our|proprietary)\s+(?:data|dataset|database|index|"

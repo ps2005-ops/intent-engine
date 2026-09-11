@@ -38,6 +38,8 @@ statements are the ones that always apply.
 """
 from __future__ import annotations
 
+from intent_engine.adaptive.spans import trim_to_word
+
 import dataclasses
 import re
 from typing import Optional, Tuple
@@ -442,7 +444,7 @@ def build_opportunity_map(*, company: str, profile=None, analysis=None,
     for c in ranked:
         if c.decision_priority < SHOW_FLOOR:
             withheld.append(
-                f"{c.decision_description[:80]} -- priority "
+                f"{trim_to_word(c.decision_description, 80)} -- priority "
                 f"{c.decision_priority:.3f} is under the {SHOW_FLOOR} floor: "
                 + ("nothing in the record cites it"
                    if c.evidence_strength <= 0.3 else

@@ -40,15 +40,30 @@ def gates(row: dict) -> dict:
                    and not row.get("leaks"))
     profile_ok = (row.get("business_model", "UNKNOWN") != "UNKNOWN"
                   and row.get("profile_source", "NONE") != "NONE")
-    map_ok = row.get("decision_opportunity_count", 0) >= 1
+    # THE THREE STATES, read from the product rather than inferred from
+    # whether a lens happened to be selected.
+    reading = bool(tel.get("decision_reading_available"))
+    has_profile = bool(tel.get("profile_available"))
+    has_lens = bool(tel.get("lens_available"))
+    domains = list(tel.get("potential_domains") or ())
+
+    # A decision-grade run owes ranked opportunities and a causal chain; a
+    # bounded run owes potential domains and an investigation chain. Holding
+    # a bounded run to the decision-grade gate is how an instrument reports a
+    # correct refusal as a defect.
+    map_ok = (row.get("decision_opportunity_count", 0) >= 1 if reading
+              else bool(domains))
     lens_ok = bool(lens) and row.get("lens_matches_expectation", False)
     diff_ok = (row.get("has_why_different", False)
                and bool(tel.get("differentiation_carried_by")))
-    chain_ok = row.get("causal_chain_nodes", 0) >= 3
+    chain_ok = (row.get("causal_chain_nodes", 0) >= 3 if reading
+                else bool(row.get("has_investigation_chain")))
     evidence_ok = (row.get("evidence_status") == 200
                    or row.get("causal_evidence_coverage", 0) > 0)
-    counter_ok = bool(tel.get("counterevidence_present"))
-    value_ok = bool(tel.get("information_priority")) or map_ok
+    counter_ok = (bool(tel.get("counterevidence_present")) if reading
+                  else bool(tel.get("evidence_limitation")))
+    value_ok = bool(tel.get("information_priority")) or bool(
+        tel.get("what_would_unlock_a_decision")) or map_ok
     qa_ok = row.get("qa_ok", 0) >= 6
     follow_ok = row.get("followup_pass", False)
     ceo_ok = row.get("role_ceo_status") == 200
@@ -58,8 +73,12 @@ def gates(row: dict) -> dict:
 
     # ABSTENTION is only defensible when the model, the gap and the next step
     # are all present. An empty page is not an abstention.
-    abstaining = not lens and profile_ok and bool(
-        tel.get("lens_selection_reasons"))
+    # A DEFENSIBLE ABSTENTION is: we read the company, we know which
+    # decisions tend to matter for it, and the evidence will not carry a
+    # recommendation -- and it says all three. An empty page is not one.
+    abstaining = (not reading and has_profile and has_lens
+                  and bool(tel.get("evidence_limitation"))
+                  and bool(tel.get("what_would_unlock_a_decision")))
     return {
         "identity": ok(identity_ok),
         "company_profile": ok(profile_ok),
@@ -70,7 +89,11 @@ def gates(row: dict) -> dict:
         "evidence": ok(evidence_ok),
         "counterevidence": ok(counter_ok, abstain=not counter_ok
                               and abstaining),
-        "thesis_or_abstention": ok(map_ok or abstaining),
+        "thesis_or_abstention": ok((reading and map_ok) or abstaining),
+        "profile_available": ok(has_profile),
+        "lens_available": ok(has_lens),
+        "decision_reading_available": ok(reading, abstain=not reading
+                                         and abstaining),
         "decision_value": ok(value_ok),
         "qa": ok(qa_ok),
         "followup": ok(follow_ok),

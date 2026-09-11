@@ -232,6 +232,32 @@ def test_a_quoted_passage_never_begins_or_ends_mid_word():
     end = text.index(q) + len(q)
     assert end >= len(text) or not text[end].isalnum()
 
+    # POSITIVE CONTROL FOR THE OTHER END. The fixture above is two short
+    # sentences, so `[:max_chars]` -- the only place a span is cut at its
+    # end -- never ran, and the half of this test's name after "or" asserted
+    # nothing. A sentence LONGER than the budget is the case that reaches it.
+    from intent_engine.adaptive.spans import MAX_CHARS
+    long_one = (
+        "Highspot is the sales enablement platform that increases the "
+        "performance of sales teams by bridging the gap between strategy "
+        "and execution across every customer conversation and every revenue "
+        "motion a modern enterprise runs, and it does so with unified "
+        "content management, guided selling, training and coaching, and "
+        "engagement analytics in one system.")
+    assert len(long_one) > MAX_CHARS, "fixture must exceed the budget"
+    body = "Intro line here. " + long_one + " Trailing sentence follows."
+    j = body.index("bridging")
+    q2 = quote_around(body, j, j + 8)
+    assert q2
+    assert len(q2) <= MAX_CHARS
+    # THE PROPERTY: the quote may be elided, but the cut must land on a word
+    # boundary of the source sentence. Unpatched this ends "...training an"
+    # and the next character in the source is "d".
+    core = q2.rstrip(" \u2026")
+    assert core and long_one.startswith(core), q2
+    nxt = long_one[len(core):len(core) + 1]
+    assert (not nxt) or (not nxt.isalnum()), q2
+
 
 def test_page_furniture_never_wins_over_a_substantive_passage():
     """Two of three quotations on the first live page came from a
@@ -393,3 +419,61 @@ def test_the_classification_names_what_kind_of_source_established_it():
         assert words and words[0].islower()
         assert "manifest" not in words
         assert "SIC" not in words
+
+def test_a_company_is_never_its_own_critical_dependency():
+    """MEASURED LIVE (Highspot, be5fde12). Its own page carries
+
+        "Partner with Highspot's services team to move fast..."
+
+    the `partners with` dependency pattern captured the subject, and the
+    report told Highspot's chief executive "It names Highspot as something it
+    depends on."
+    """
+    from intent_engine.adaptive.profile import build_profile, _is_the_subject
+    body = ("Highspot is the sales enablement platform for revenue teams. "
+            "Partner with Highspot's services team to move fast and scale. "
+            "Highspot integrates with Salesforce for pipeline data.")
+    p = build_profile(company="Highspot", domain="highspot.com",
+                      evidence_text=body)
+    named = [f.value for f in p.critical_dependencies]
+    assert not any(_is_the_subject(v, "Highspot") for v in named), named
+    # POSITIVE CONTROL: the real dependency in the same text still survives,
+    # or this guard is just switching the extractor off.
+    assert any("Salesforce" in v for v in named), named
+
+def test_a_consultancy_is_read_as_services_from_its_own_words():
+    """MEASURED LIVE (Slalom and Point B, be5fde12).
+
+    Slalom's run retrieved four company-owned pages, all of them CLIENT
+    INDUSTRY pages, whose text says "personalized consulting services". The
+    library held "advisory services" and "consulting firm" and matched
+    neither, so a consultancy scored 0.0 on the services class and the page
+    told its chief executive the business model was not established.
+
+    Point B scored 6.0 for services against 4.0 for branded consumer -- and
+    the 4.0 was "Consumer Packaged Goods INDUSTRIES", a sector it SERVES.
+    """
+    from intent_engine.adaptive.classify import classify_from_evidence
+    slalom = ("Media & communications | Slalom AU. Slalom’s deep experience "
+              "and personalized consulting services help media and "
+              "communications companies keep pace with the industry’s rapid "
+              "evolution.")
+    assert classify_from_evidence(slalom).model_class == (
+        "PEOPLE_OR_ROUTE_BASED_SERVICES")
+
+    point_b = ("Point B is a management consulting firm that specializes in "
+               "leveraging technology to unlock human potential. We work "
+               "across the Life Sciences, Retail, and Consumer Packaged "
+               "Goods (CPG) industries.")
+    c = classify_from_evidence(point_b)
+    assert c.model_class == "PEOPLE_OR_ROUTE_BASED_SERVICES", c.reason
+
+    # NEGATIVE CONTROL. A subscription business that also sells
+    # implementation help is still a subscription business -- widening the
+    # services vocabulary must not reach across the margin and take it.
+    saas = ("Highspot is the sales enablement platform for revenue teams. "
+            "Pricing is per user per month, billed annually as a "
+            "subscription with annual recurring revenue. Our professional "
+            "services team also offers consulting services for onboarding.")
+    assert classify_from_evidence(saas).model_class == "SUBSCRIPTION_SOFTWARE"
+

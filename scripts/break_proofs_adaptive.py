@@ -199,13 +199,41 @@ PROOFS = [
     ),
     # --- evidence spans: every one replays the live Highspot defect -------
     Proof(
+        label="a consultancy's own words are missing from the services "
+              "vocabulary",
+        path=SRC / "adaptive" / "classify.py",
+        find='        Signal("consulting services", "MODEL", 3.0),',
+        replace="",
+        target="tests/test_adaptive_guards.py::"
+               "test_a_consultancy_is_read_as_services_from_its_own_words",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="the subject is extracted as its own critical dependency",
+        path=SRC / "adaptive" / "profile.py",
+        find="        if not _is_the_subject(phrase, company))",
+        replace="        )",
+        target="tests/test_adaptive_guards.py::"
+               "test_a_company_is_never_its_own_critical_dependency",
+        expect_failure_contains="assert",
+    ),
+    Proof(
         label="a quoted passage is cut by arithmetic and begins mid-word",
         path=SRC / "adaptive" / "spans.py",
         find="        if offset <= target < offset + len(sentence):\n"
-             "            return clean[:max_chars]",
+             "            return trim_to_word(clean, max_chars)",
         replace="        if offset <= target < offset + len(sentence):\n"
                 "            return _word_snapped(body, start, end, "
                 "max_chars)[3:]",
+        target="tests/test_adaptive_guards.py::"
+               "test_a_quoted_passage_never_begins_or_ends_mid_word",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="a quoted passage is truncated by arithmetic and ends mid-word",
+        path=SRC / "adaptive" / "spans.py",
+        find="            return trim_to_word(clean, max_chars)",
+        replace="            return clean[:max_chars]",
         target="tests/test_adaptive_guards.py::"
                "test_a_quoted_passage_never_begins_or_ends_mid_word",
         expect_failure_contains="assert",

@@ -28,6 +28,7 @@ import argparse
 import http.cookiejar
 import json
 import pathlib
+import html as html_mod
 import re
 import sys
 import time
@@ -148,9 +149,16 @@ def _req(op, path, fields=None, timeout=PAGE_TIMEOUT):
 
 
 def visible(html: str) -> str:
+    """What a READER sees, which means entities are resolved.
+
+    This returned "the company&#x27;s own account" -- correctly escaped HTML
+    that a browser renders as an apostrophe. Every consumer of this function
+    compares or inspects prose, so leaving the entities in makes two
+    identical sentences differ and makes a clean page look mangled.
+    """
     s = re.sub(r"<!--.*?-->", " ", html, flags=re.S)
     s = re.sub(r"<(script|style)\b[^>]*>.*?</\1>", " ", s, flags=re.S | re.I)
-    return " ".join(re.sub(r"<[^>]+>", " ", s).split())
+    return " ".join(html_mod.unescape(re.sub(r"<[^>]+>", " ", s)).split())
 
 
 def analyse(name, domain, *, budget_s, verbose=True) -> dict:

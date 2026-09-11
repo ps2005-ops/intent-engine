@@ -30,6 +30,39 @@ WINDOW = 600
 MAX_CHARS = 300
 
 
+def trim_to_word(text: str, max_chars: int) -> str:
+    """Shorten to `max_chars` without ending mid-word.
+
+    The whole point of this module is that a span is cut by grammar and not
+    by arithmetic, and the last line of it was `clean[:max_chars]`. A reader
+    meeting "...with unified content manag" learns the same thing they learn
+    from a quote that begins mid-word: that nothing here is reading.
+
+    A clause boundary the reader already pauses at is preferred; failing
+    that, the last whole word, marked as an elision so the quote does not
+    claim the sentence ended there.
+    """
+    body = str(text or "")
+    if len(body) <= max_chars:
+        return body
+    head = body[:max_chars]
+    # a sentence that genuinely ends inside the budget needs no marker
+    for mark in (". ", "! ", "? "):
+        cut = head.rfind(mark)
+        if cut >= max_chars // 2:
+            return head[:cut + 1].rstrip()
+    for mark in ("; ", ", ", " -- "):
+        cut = head.rfind(mark)
+        if cut >= max_chars // 2:
+            return head[:cut].rstrip(" ,;-") + " \u2026"
+    cut = head.rfind(" ")
+    if cut <= 0:
+        # one unbroken token longer than the budget: there is no honest
+        # way to shorten it, so quote nothing.
+        return ""
+    return head[:cut].rstrip(" ,;:-") + " \u2026"
+
+
 def quote_around(text: str, start: int, end: int,
                  *, max_chars: int = MAX_CHARS) -> str:
     """The best real sentence containing or adjoining [start, end).
@@ -61,13 +94,13 @@ def quote_around(text: str, start: int, end: int,
             continue
         # the sentence the match is INSIDE wins outright
         if offset <= target < offset + len(sentence):
-            return clean[:max_chars]
+            return trim_to_word(clean, max_chars)
         distance = abs(offset - target)
         if best_distance is None or distance < best_distance:
             best, best_distance = clean, distance
     if best is None:
         return ""
-    return best[:max_chars]
+    return trim_to_word(best, max_chars)
 
 
 def _word_snapped(body: str, start: int, end: int, max_chars: int) -> str:
@@ -78,4 +111,4 @@ def _word_snapped(body: str, start: int, end: int, max_chars: int) -> str:
         left -= 1
     while right < len(body) and body[right].isalnum():
         right += 1
-    return " ".join(body[left:right].split())[:max_chars]
+    return trim_to_word(" ".join(body[left:right].split()), max_chars)

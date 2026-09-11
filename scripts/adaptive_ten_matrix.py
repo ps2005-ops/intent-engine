@@ -115,6 +115,71 @@ def _leaks_in(text: str):
     return found
 
 
+#: Furniture: a "quotation" that is really a navigation or index strip.
+FURNITURE = ("read more", "press release", "all news", "learn more",
+             "cookie", "sign in", "contact us", "newsroom", "share this",
+             "subscribe", "privacy policy", "skip to", "menu")
+
+
+#: The rendered sections, keyed by the id their heading is labelled with.
+SECTION_IDS = {
+    "ad-why": "why_this_company",
+    "ad-lens-h": "lens",
+    "ad-opp-h": "decision_or_domains",
+    "ad-chain-h": "chain",
+    "ad-bounded-h": "bounded",
+    "ad-role-h": "role",
+    "ad-value-h": "value",
+}
+
+
+def _sections(html: str) -> dict:
+    """Each <section> as visible prose, keyed by what it is.
+
+    Keyed on `aria-labelledby` rather than on heading text, because the
+    heading text is one of the things that legitimately changes between the
+    two states and a key that moves cannot be compared across companies.
+    """
+    out = {}
+    for m in re.finditer(r'<section\b[^>]*aria-labelledby="([^"]+)"[^>]*>'
+                         r'(.*?)</section>', html or "", re.S):
+        key = SECTION_IDS.get(m.group(1))
+        if key:
+            out[key] = visible(m.group(2))
+    return out
+
+
+def _quotes_in(html: str):
+    """Every rendered evidence quotation, as the reader sees it."""
+    out = []
+    for m in re.finditer(r'<p class="ad-quote">(.*?)</p>', html or "", re.S):
+        text = visible(m.group(1)).strip()
+        if text:
+            out.append(text)
+    return out
+
+
+def _span_is_broken(quote: str) -> bool:
+    """A span cut by arithmetic rather than by grammar.
+
+    Three separable faults: it begins inside a word (a lower-case letter
+    with no sentence in front of it), it ends inside one (no terminal
+    punctuation and the last token is not an abbreviation), or the whole
+    span is navigation furniture rather than a statement.
+    """
+    q = quote.strip().strip('"\u201c\u201d')
+    if not q:
+        return True
+    low = q.lower()
+    if any(f in low for f in FURNITURE) and len(q.split()) < 25:
+        return True
+    if q[0].islower():
+        return True
+    if q[-1] not in ".!?\u2026" and not q.endswith('."'):
+        return True
+    return False
+
+
 def qualify(name, domain, *, with_qa=True, verbose=True) -> dict:
     op, _jar = _opener()
     row = {"company": name, "domain": domain, "result": "", "defects": [],
@@ -195,6 +260,18 @@ def qualify(name, domain, *, with_qa=True, verbose=True) -> dict:
     row["differentiation_carried_by"] = tel.get(
         "differentiation_carried_by", [])
     row["abstention_reason"] = tel.get("abstention_reason", "")
+    # THE THREE STATES, never collapsed into one flag. A company may
+    # legitimately be YES / YES / NO and still be handled correctly.
+    row["profile_available"] = bool(tel.get("profile_available"))
+    row["lens_available"] = bool(tel.get("lens_available"))
+    row["decision_reading_available"] = bool(
+        tel.get("decision_reading_available"))
+    row["decision_map_state"] = tel.get("decision_map_state", "")
+    row["causal_chain_kind"] = tel.get("causal_chain_kind", "")
+    row["potential_domains"] = tel.get("potential_domains", [])
+    row["evidence_limitation"] = tel.get("evidence_limitation", "")
+    row["what_would_unlock"] = tel.get(
+        "what_would_unlock_a_decision", "")
     for err in (tel.get("errors") or []):
         note("PRODUCT_DEFECT", f"adaptive producer failed: {err}")
 
@@ -214,6 +291,13 @@ def qualify(name, domain, *, with_qa=True, verbose=True) -> dict:
     intro = pages.get("intro", "")
     intro_text = visible(intro)
     row["intro_words"] = len(intro_text.split())
+    # WHAT THE READER SEES, kept for the genericity matrix. Bounded so a
+    # ten-company file stays readable.
+    row["sections"] = {k: v[:2500] for k, v in _sections(intro).items()}
+    # THE EVIDENCE SURFACE, kept so provenance (§18) is read from what the
+    # product published rather than re-derived, and so a run that reached
+    # nothing can be told apart from a run whose sources refused it.
+    row["evidence_text"] = visible(pages.get("evidence", ""))[:6000]
 
     # identity, read off the page rather than off our own telemetry
     row["identity_on_page"] = bool(
@@ -229,19 +313,73 @@ def qualify(name, domain, *, with_qa=True, verbose=True) -> dict:
     # the sections this phase exists to put there
     row["has_why_different"] = "Why this analysis is different" in intro
     row["has_lens_block"] = "The lens this analysis is using" in intro
-    row["has_decision_map"] = ("Where better intelligence could change a "
-                               "decision") in intro
-    row["has_causal_chain"] = "From the change to the decision" in intro
     row["has_role_switch"] = "Read this as" in intro
     row["has_value_block"] = "Where Intent Engine could create value" in intro
     for key, label in (("has_why_different", "why-this-company"),
                        ("has_lens_block", "lens block"),
-                       ("has_decision_map", "decision map"),
-                       ("has_causal_chain", "causal chain"),
                        ("has_role_switch", "role switch"),
                        ("has_value_block", "value block")):
         if not row[key]:
             note("PRODUCT_DEFECT", f"{label} missing from /intro")
+
+    # THE SECTIONS ARE STATE-DEPENDENT, and asserting one fixed set on every
+    # page is how an instrument records a correct refusal as six defects.
+    # A decision reading owes a decision map and a causal chain; a bounded
+    # run owes potential domains, an investigation chain, and the block that
+    # says what could not be concluded.
+    reading = row["decision_reading_available"]
+    row["has_decision_map"] = ("Where better intelligence could change a "
+                               "decision") in intro
+    row["has_causal_chain"] = "From the change to the decision" in intro
+    row["has_potential_domains"] = "Potential decision domains" in intro
+    row["has_not_a_recommendation"] = "not current recommendations" in intro
+    row["has_investigation_chain"] = ("What would be worth investigating"
+                                      in intro)
+    row["has_bounded_block"] = "What we can and cannot say about" in intro
+    if reading:
+        if not row["has_decision_map"]:
+            note("PRODUCT_DEFECT", "decision map missing from a "
+                                   "decision-grade /intro")
+        if not row["has_causal_chain"]:
+            note("PRODUCT_DEFECT", "causal chain missing from a "
+                                   "decision-grade /intro")
+        if row["has_potential_domains"]:
+            note("PRODUCT_DEFECT", "a decision-grade run also rendered "
+                                   "potential domains")
+    else:
+        if not row["has_potential_domains"]:
+            note("PRODUCT_DEFECT", "a bounded run rendered no potential "
+                                   "decision domains")
+        if not row["has_not_a_recommendation"]:
+            note("PRODUCT_DEFECT", "potential domains are not labelled "
+                                   "'not current recommendations'")
+        if not row["has_investigation_chain"]:
+            note("PRODUCT_DEFECT", "a bounded run rendered no investigation "
+                                   "chain")
+        if not row["has_bounded_block"]:
+            note("PRODUCT_DEFECT", "a bounded run does not say what it "
+                                   "cannot conclude")
+        if row["has_causal_chain"]:
+            note("PRODUCT_DEFECT", "a bounded run drew settled causality")
+        if not row["what_would_unlock"]:
+            note("PRODUCT_DEFECT", "a bounded run names nothing that would "
+                                   "unlock a decision reading")
+
+    # The exact copy this phase exists to remove, kept as a live break proof.
+    for gone in ("no decision opportunity cleared the bar",
+                 "Economic Decision Intelligence"):
+        if gone in intro_text:
+            note("PRODUCT_DEFECT", f"retired copy is back: {gone!r}")
+
+    # --- evidence spans, read the way a reader meets them ------------------
+    row["quotes"] = quotes = _quotes_in(intro)
+    row["quote_count"] = len(quotes)
+    bad = [q for q in quotes if _span_is_broken(q)]
+    row["broken_quotes"] = bad[:6]
+    if bad:
+        note("PRODUCT_DEFECT",
+             f"{len(bad)} quotation(s) start or end mid-word, or are "
+             f"navigation furniture: {bad[:3]}")
 
     # the headline is the company AND the lens, not a product name
     row["headline_is_generic"] = "Economic Decision Intelligence" in intro
@@ -326,9 +464,22 @@ def qualify(name, domain, *, with_qa=True, verbose=True) -> dict:
                  if row["followup_is_replay"] else "the follow-up was empty")
 
     product = [d for d in row["defects"] if d["kind"] == "PRODUCT_DEFECT"]
-    row["result"] = ("PASS" if not product else "PRODUCT_DEFECT")
-    if not product and not row["primary_lens"]:
+    # A correctly handled company is EITHER a decision-grade reading OR a
+    # defensible abstention. The distinction is the map's own state, never
+    # whether a lens happened to be selected -- a run can have a lens and
+    # still, honestly, have nothing to recommend.
+    if product:
+        row["result"] = "PRODUCT_DEFECT"
+    elif row["decision_reading_available"]:
+        row["result"] = "PASS"
+    elif row["profile_available"] and row["lens_available"]:
         row["result"] = "DEFENSIBLE_ABSTENTION"
+    else:
+        row["result"] = "INSUFFICIENT_PROFILE"
+        note("DATA_LIMITATION",
+             f"profile={row['profile_available']} "
+             f"lens={row['lens_available']} -- neither a reading nor a "
+             f"defensible abstention")
     return row
 
 

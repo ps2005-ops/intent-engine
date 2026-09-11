@@ -170,6 +170,30 @@ _RULES = {
         Signal("consultancy", "MODEL", 4.0),
         Signal("our consultants", "MODEL", 4.0),
         Signal("professional services firm", "MODEL", 4.0),
+        # MEASURED LIVE (Slalom, be5fde12). The subject-owned text the run
+        # actually retrieved said "personalized consulting SERVICES" and
+        # "business and technology consulting COMPANY"; the library held
+        # "advisory services" and "consulting firm" and nothing matched, so
+        # a consultancy scored 0.0 on the services class and was read off
+        # its CLIENTS' industry pages instead. An absent phrase is a
+        # spelling test, not a judgement about the company.
+        Signal("consulting company", "MODEL", 4.0),
+        # MEASURED LIVE (Point B). Its own meta-description reads "Point B is
+        # a management consulting firm"; services still only reached 6.0
+        # against BRANDED_CONSUMER at 4.0 -- which fired on "Consumer
+        # Packaged Goods INDUSTRIES", an industry it SERVES. A first-party
+        # statement of what the company IS has to outweigh an incidental
+        # mention of a client's sector, so the self-descriptions are scored
+        # as the strong signals they are.
+        Signal("management consulting", "MODEL", 4.0),
+        Signal("strategy consulting", "MODEL", 4.0),
+        Signal("professional services company", "MODEL", 4.0),
+        Signal("advisory firm", "MODEL", 4.0),
+        Signal("systems integrator", "MODEL", 3.5),
+        # Weighted below the unambiguous self-descriptions above: a software
+        # company that also sells implementation help says this too, and its
+        # own subscription signals must still be able to win the margin.
+        Signal("consulting services", "MODEL", 3.0),
         Signal("client engagements", "MODEL", 3.5),
         Signal("advisory services", "MODEL", 3.0),
         Signal("managed services", "MODEL", 2.0),
