@@ -5339,7 +5339,14 @@ class WebApp:
                 company_id, name=name,
                 domain=str(meta.get("domain") or ""),
                 registrant=ci_in.get("registrant"),
-                evidence_text=ci_in.get("evidence_text", ""))
+                evidence_text=ci_in.get("evidence_text", ""),
+                # RUNG 3, WHICH THIS CALL SITE WAS MISSING. Without it the
+                # strategic read resolves a SECOND, worse profile for the
+                # same run: /intro said "a subscription software business"
+                # while /xray said "what kind of business this is has not
+                # been established". One run may not say two things, and the
+                # sentence it said is the defect this phase exists to remove.
+                published_text=self._subject_published_text(run_id))
             # THE RUN'S OWN DECISION. `StrategicRead` carries a `Statement`
             # for the level-5 answer, not a `FounderDecision`, and the object
             # the comparator projects is the decision -- so it is read from

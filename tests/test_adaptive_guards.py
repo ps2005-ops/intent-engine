@@ -529,3 +529,42 @@ def test_a_newsletter_call_to_action_is_not_evidence():
         "Highspot is the sales enablement platform that increases the "
         "performance of revenue teams across every customer conversation.")
 
+def test_one_run_resolves_one_business_model_on_every_surface():
+    """MEASURED LIVE (Highspot, be5fde12). `/intro` said "It is a subscription
+    software business, read from its own account of how it is paid" and
+    `/xray` -- linked from that same page -- said "What kind of business this
+    is has not been established", which is the defect this phase exists to
+    remove, alive on a second surface.
+
+    `profile_for` has three rungs and rung 3 only fires when the caller passes
+    `published_text`. The adaptive call site passed it; the strategic-read
+    call site did not.
+    """
+    import inspect
+
+    from intent_engine.executive.company_profile import profile_for
+
+    owned = ("Media & communications | Slalom AU. Slalom’s deep experience "
+             "and personalized consulting services help media and "
+             "communications companies keep pace with the industry’s rapid "
+             "evolution.")
+
+    # THE TWO RUNGS ARE REALLY DIFFERENT, or the rest of this proves nothing.
+    without = profile_for(name="Slalom", domain="slalom.com",
+                          registrant=None, evidence_text="")
+    with_text = profile_for(name="Slalom", domain="slalom.com",
+                            registrant=None, evidence_text="",
+                            published_text=owned)
+    assert not getattr(without, "known", False)
+    assert getattr(with_text, "known", False)
+    assert with_text.business_model_class == "PEOPLE_OR_ROUTE_BASED_SERVICES"
+
+    # AND THE STRATEGIC-READ CALL SITE USES THE SECOND ONE. Read from the
+    # running code rather than from a comment about it, because a grep over
+    # prose matches the sentence explaining the rule.
+    from intent_engine.webapp import app as webapp_app
+    src = inspect.getsource(
+        webapp_app.WebApp._compose_founder_economic_context)
+    assert "published_text=" in src, (
+        "the strategic read resolves a second profile for the same run")
+

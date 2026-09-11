@@ -230,6 +230,17 @@ PROOFS = [
         expect_failure_contains="assert",
     ),
     Proof(
+        label="the strategic read resolves a second business model for the "
+              "same run",
+        path=SRC / "webapp" / "app.py",
+        find="                published_text=self._subject_published_text("
+             "run_id))",
+        replace="                )",
+        target="tests/test_adaptive_guards.py::"
+               "test_one_run_resolves_one_business_model_on_every_surface",
+        expect_failure_contains="assert",
+    ),
+    Proof(
         label="the subject is extracted as its own critical dependency",
         path=SRC / "adaptive" / "profile.py",
         find="        if not _is_the_subject(phrase, company))",

@@ -12,6 +12,7 @@ import pathlib
 import subprocess
 import sys
 import time
+import urllib.request
 
 ROOT = pathlib.Path("/Users/prathamsharma/intent-engine-econ")
 PY = str(ROOT / ".venv" / "bin" / "python")
@@ -50,8 +51,25 @@ def is_quota(row: dict) -> bool:
     return False
 
 
+def served_identity() -> tuple:
+    """The SHA the service is ACTUALLY serving, recorded with the results.
+
+    A matrix whose rows cannot name the build they were measured against is
+    not a qualification of anything.
+    """
+    base = "https://intent-engine-preview-bridge.onrender.com"
+    try:
+        with urllib.request.urlopen(base + "/version", timeout=90) as r:
+            return base, json.loads(r.read().decode())
+    except Exception:                                        # noqa: BLE001
+        return base, {}
+
+
 def main() -> int:
     only = sys.argv[1:] or TEN
+    BASE, version = served_identity()
+    LIVE = str(version.get("commit", ""))
+    print(f"base {BASE}\nlive {LIVE or '?'}\n", flush=True)
     rows, waits = [], 0
     if OUT.exists():
         try:
@@ -78,7 +96,8 @@ def main() -> int:
         rows = [r for r in rows if r.get("company") != name] + [row]
         order = {n: i for i, n in enumerate(TEN)}
         rows.sort(key=lambda r: order.get(r.get("company"), 99))
-        OUT.write_text(json.dumps({"live_commit": "", "rows": rows}, indent=2))
+        OUT.write_text(json.dumps(
+            {"live_commit": LIVE, "base": BASE, "rows": rows}, indent=2))
         print(f"      -> {row.get('result')}  "
               f"lens={row.get('primary_lens', '-')} "
               f"model={row.get('business_model', '-')} "

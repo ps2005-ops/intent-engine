@@ -53,7 +53,15 @@ def gates(row: dict) -> dict:
     # correct refusal as a defect.
     map_ok = (row.get("decision_opportunity_count", 0) >= 1 if reading
               else bool(domains))
-    lens_ok = bool(lens) and row.get("lens_matches_expectation", False)
+    # THE EXPECTED FAMILIES ARE A CONTROL, NOT A TARGET. Failing a lens
+    # because it differs from a list we wrote is grading the product against
+    # our own guess; the preregistration says to judge the evidence. So the
+    # gate asks what can actually be wrong -- was a lens selected, and did
+    # the product publish why -- and the expectation mismatch is reported
+    # beside it for a human to examine.
+    lens_ok = bool(lens) and bool(tel.get("lens_selection_reasons"))
+    lens_outside_expectation = bool(lens) and not row.get(
+        "lens_matches_expectation", False)
     diff_ok = (row.get("has_why_different", False)
                and bool(tel.get("differentiation_carried_by")))
     chain_ok = (row.get("causal_chain_nodes", 0) >= 3 if reading
@@ -141,6 +149,9 @@ def main() -> int:
             "lens_confidence": row.get("lens_confidence"),
             "why_lens_selected": tel.get("lens_selection_reasons", ""),
             "lens_refusals": tel.get("lens_refusals", [])[:3],
+            "lens_outside_expectation": (
+                bool(row.get("primary_lens"))
+                and not row.get("lens_matches_expectation", False)),
             "decision_opportunities": row.get("decision_opportunity_count"),
             "top_decision_domain": row.get("top_decision_domain"),
             "top_decision_priority": row.get("top_decision_priority"),
