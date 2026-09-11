@@ -370,6 +370,68 @@ def _terminated(line: str) -> str:
     return line + "."
 
 
+#: Date keys schema.org uses, strongest first. `datePublished` is when the
+#: company said the thing; `dateModified` is when the page was last touched.
+#: Both are dates the PUBLISHER asserted, which is what makes them usable.
+_JSONLD_DATE_KEYS = ("datePublished", "dateCreated", "dateModified",
+                     "uploadDate")
+
+
+def _jsonld_date(blocks) -> str:
+    """A publication date from JSON-LD, when the meta tags carried none.
+
+    MEASURED 2026-09-11 across the ten demo companies: `<meta
+    article:modified_time>` and `<time datetime>` found a date on four of
+    them. Six published one in JSON-LD instead and the parser walked past it,
+    so those companies reached the history surface with no dated record at
+    all -- and the page told their reader the company had no history rather
+    than that we had not read the date it was published with.
+
+    Walks nested graphs because schema.org blocks are routinely wrapped in
+    `@graph`, and the date is usually on an inner node rather than the root.
+    """
+    import json
+
+    def walk(node, depth=0):
+        if depth > 6:
+            return ""
+        if isinstance(node, str):
+            # `_jsonld_raw` holds the RAW SCRIPT TEXT, not parsed objects --
+            # `handle_data` appends the characters as they stream in. A first
+            # version of this reader walked it as though it were already
+            # decoded, matched nothing on every real page, and returned the
+            # empty string exactly as often as having no reader at all. It
+            # passed its own unit test because that test handed it dicts.
+            try:
+                node = json.loads(node)
+            except Exception:                               # noqa: BLE001
+                return ""
+            return walk(node, depth + 1)
+        if isinstance(node, dict):
+            for key in _JSONLD_DATE_KEYS:
+                value = node.get(key)
+                if isinstance(value, str) and value.strip():
+                    return value.strip()
+            for value in node.values():
+                found = walk(value, depth + 1)
+                if found:
+                    return found
+        elif isinstance(node, (list, tuple)):
+            for value in node:
+                found = walk(value, depth + 1)
+                if found:
+                    return found
+        return ""
+    # Joined as well as walked singly: a long JSON-LD block reaches
+    # `handle_data` in several chunks, so no individual fragment parses.
+    for candidate in (list(blocks or ()) + ["".join(
+            str(b) for b in (blocks or ()))]):
+        found = walk(candidate)
+        if found:
+            return found
+    return ""
+
+
 def parse_html(html: str) -> dict:
     """Returns {title, meta_description, canonical_url, headings, text,
     links, content_hash, parser_version}. Deterministic."""
@@ -457,7 +519,8 @@ def parse_html(html: str) -> dict:
         "title": extractor.title or og.get("og:title", ""),
         "meta_description": meta_description,
         "canonical_url": extractor.canonical_url,
-        "modified_date": extractor.modified_date,
+        "modified_date": (extractor.modified_date
+                          or _jsonld_date(extractor._jsonld_raw)),
         "headings": extractor.headings,
         "text": text,
         "links": extractor.links,

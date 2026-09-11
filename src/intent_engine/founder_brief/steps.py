@@ -332,8 +332,9 @@ def _lower(text: str) -> str:
 # ===========================================================================
 # STEP 5 — HISTORY REWIND
 # ===========================================================================
-def render_history(sim, timeline=None, *, run_id: str, company: str) -> str:
-    """§17-§36. A strategy simulator, chart first.
+def render_history(sim, timeline=None, *, run_id: str, company: str,
+                   bounded=None, level=None) -> str:
+    """§17-§36 / §I. The rewind this company's evidence supports.
 
     The old version of this surface changed BLOCKS OF PROSE when you moved the
     slider. It was correct about the vintage wall and it did not answer the
@@ -344,16 +345,59 @@ def render_history(sim, timeline=None, *, run_id: str, company: str) -> str:
     `timeline` (the dated filing record) is optional and secondary: it is the
     provenance of the dates, shown under the chart rather than instead of it.
     """
+    from intent_engine.executive import history_rewind as HR
+
+    # THE HEADING IS DECIDED BY THE EVIDENCE, NOT WRITTEN ABOVE IT.
+    #
+    # This page used to open, for every company on earth, with
+    # "<name> — the strategy simulator" and an invitation to pick a year and
+    # read a chart. For a company with no filed series it then explained,
+    # below that heading, that no chart could be drawn and asked the reader
+    # to go and find three years of revenue. Reported from the live demo on
+    # Highspot: truthful in every sentence and useless as a page, because
+    # the title promised an experience the body withdrew.
+    #
+    # A heading is a promise. This one is now made after we know what can be
+    # kept.
+    if level is None:
+        # Only for a caller that did not classify -- the page handler does.
+        level = (HR.LEVEL_SERIES
+                 if (sim is not None and getattr(sim, "available", False))
+                 else HR.LEVEL_BOUNDED
+                 if getattr(bounded, "available", False)
+                 else HR.LEVEL_GAP)
     out = [STEP_CSS, HC.CHART_CSS, '<main class="step">',
            '<p class="kicker">History rewind</p>',
-           f'<h1>{_e(company)} — the strategy simulator</h1>']
-    out.append('<p class="lede">Pick a year. The chart holds the path the '
-               'company actually took, what the record published by then '
-               'implied about where it was going, and where a named '
-               'alternative available on the same information could have led. '
-               'Nothing modelled at a date can see a filing made after it.</p>')
+           f'<h1>{_e(company)} — '
+           f'{_e(HR.LEVEL_TITLES.get(level, "the dated record"))}</h1>']
+
+    if level == HR.LEVEL_SERIES:
+        out.append('<p class="lede">Pick a year. The chart holds the path the '
+                   'company actually took, what the record published by then '
+                   'implied about where it was going, and where a named '
+                   'alternative available on the same information could have '
+                   'led. Nothing modelled at a date can see a filing made '
+                   'after it.</p>')
+    elif level == HR.LEVEL_BOUNDED:
+        out.append('<p class="lede">No reported financial series was '
+                   'retrieved for this company, so there is no chart on this '
+                   'page and none is implied. What there is: the dates this '
+                   'company published on its own record, walked in order. At '
+                   'each date you see what had been said by then and what '
+                   'had not happened yet — the same wall the chart version '
+                   'holds, without the figures.</p>')
+    else:
+        out.append('<p class="lede">This company\'s dated record is too thin '
+                   'to rewind, and this page says so rather than drawing an '
+                   'empty frame. Below: what is established, what is '
+                   'missing, why the gap matters for a decision, and what '
+                   'would close it.</p>')
 
     if sim is None or not sim.available:
+        if level == HR.LEVEL_BOUNDED and bounded is not None:
+            out.append(_bounded_rewind(bounded, company))
+        else:
+            out.append(_evidence_gap(sim, bounded, company))
         out.append(_history_fallback(sim, timeline, company))
         out.append(flow.drawer(run_id, ("sources",),
                                title="What was retrieved"))
@@ -839,4 +883,88 @@ def render_learning(report, reading) -> str:
     action = str(nxt.get("suggested_action") or "")
     if action:
         out.append(f'<p><strong>What to learn next:</strong> {_e(action)}.</p>')
+    return "".join(out)
+
+
+def _bounded_rewind(bounded, company: str) -> str:
+    """§I LEVEL B. The company's own dated record, walked, with no chart.
+
+    Every stop shows the wall explicitly: what had been published by that
+    date, what a reader could have established from it, what had not happened
+    yet, and -- separately and labelled -- what followed. The separation is
+    the whole point: a rewind that quietly uses hindsight teaches the reader
+    that the past was obvious.
+    """
+    if bounded is None or not getattr(bounded, "available", False):
+        return ""
+    out = ['<div class="readbox">',
+           '<h2>What we can actually reconstruct</h2>',
+           f'<p class="q">{_e(bounded.coverage_note)}</p>',
+           '</div>']
+    out.append('<h2>The dated record, in order</h2>')
+    out.append('<div class="hcards">')
+    for stop in bounded.stops:
+        out.append(
+            f'<article class="obs"><h3>{_e(stop.label)}'
+            f'<span class="basis">observed</span></h3>'
+            f'<p>{_e(stop.record_then)}</p>'
+            f'<p><strong>What was knowable then:</strong> '
+            f'{_e(stop.knowable)}</p>'
+            f'<p><strong>What was not yet knowable:</strong> '
+            f'{_e(stop.unknowable)}</p>'
+            f'<p class="basis"><strong>After this date '
+            f'(hindsight, not available then):</strong> '
+            f'{_e(stop.later)}</p></article>')
+    out.append('</div>')
+    out.append('<div class="readbox">')
+    out.append('<h2>The strategic question this leaves open</h2>')
+    out.append(f'<p class="q">{_e(bounded.open_question)}</p>')
+    out.append(f'<p><strong>What would upgrade this rewind:</strong> '
+               f'{_e(bounded.what_would_upgrade)}.</p>')
+    out.append('</div>')
+    return "".join(out)
+
+
+def _evidence_gap(sim, bounded, company: str) -> str:
+    """§I LEVEL C. Name the gap; never draw an empty frame.
+
+    Reached when the company published fewer than two dated documents we
+    could read. The honest content of this page is the gap itself, stated
+    with enough specificity that the reader knows whether it is about their
+    company or about our retrieval -- and it is almost always the second.
+    """
+    note = getattr(bounded, "coverage_note", "") if bounded is not None else ""
+    out = ['<div class="readbox">',
+           '<h2>What the dated record supports</h2>',
+           f'<p class="q">'
+           f'{_e(note) if note else _e(f"No dated document published by {company} was retrieved, so there is no sequence to walk.")}</p>',
+           '<p><strong>Why this is a limit of retrieval, not a finding about '
+           'the company:</strong> a page carries a machine-readable date only '
+           'if its publisher put one there. Most corporate pages do not. An '
+           'absent date is evidence about the page, never about whether the '
+           'company has a history.</p>',
+           '</div>']
+    out.append('<div class="readbox">')
+    out.append('<h2>Why the gap matters for a decision</h2>')
+    out.append(f'<p>Without dated points there is no way to ask what '
+               f'{_e(company)} appeared to be optimising for at a past moment, '
+               f'and therefore no way to test whether its current direction '
+               f'is a continuation or a reversal. Any reading of its strategy '
+               f'here is a reading of its position <em>now</em>.</p>')
+    out.append('</div>')
+    out.append('<div class="readbox">')
+    out.append('<h2>What would complete the rewind</h2>')
+    out.append('<ul>'
+               '<li>Three or more years of reported revenue and operating '
+               'result — this draws the full chart.</li>'
+               '<li>Any dated filing series for this entity, if it files '
+               'anywhere.</li>'
+               '<li>Dated company announcements: funding, launches, '
+               'acquisitions, leadership changes, each with the date the '
+               'company published it.</li>'
+               '<li>Internal: a dated record of the targets management was '
+               'working to at each point, which is the one input no public '
+               'source carries.</li>'
+               '</ul>')
+    out.append('</div>')
     return "".join(out)

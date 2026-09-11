@@ -56,6 +56,26 @@ class AppConfig:
     smoke_test_token: str = ""
     demo_ip_analyses_per_hour: int = 10      # per client IP, rolling hour
     demo_session_analyses_per_day: int = 25  # per anon session, rolling day
+    #: ONE VISITOR MAY NOT TAKE THE WHOLE ADDRESS'S ALLOWANCE.
+    #:
+    #: The per-IP cap above is the ABUSE ceiling and stays a hard ceiling: a
+    #: visitor who mints a fresh session buys nothing, which is the property
+    #: six tests in `test_smoke_test_token.py` and `test_per_ip_hourly_cap`
+    #: exist to hold. Scaling that ceiling by the number of sessions seen --
+    #: the first attempt at the shared-network problem -- defeats it exactly,
+    #: because minting sessions is free.
+    #:
+    #: What CAN be fixed without weakening it is monopolisation. Behind one
+    #: office NAT the old limiter let the first visitor consume all ten, so
+    #: the second arrived to a network that was already spent. A per-visitor
+    #: share means no single visitor can do that, and the colleagues behind
+    #: them still find allowance left.
+    #:
+    #: 0 means DERIVE it from the IP cap (half, floor 2), so an operator who
+    #: sets only the IP cap still gets the share, and one who sets both is
+    #: obeyed. It is never larger than the IP cap: a share bigger than the
+    #: whole is not a share.
+    demo_session_analyses_per_hour: int = 0  # per visitor, rolling hour
     # Frictionless flow: when on (the default), submitting the analyze form
     # auto-approves the recommended sources (core company pages + authoritative
     # SEC filings) and runs straight through to the result — the separate
@@ -89,6 +109,39 @@ class AppConfig:
                 raise ConfigError("demo_ip_analyses_per_hour must be >= 1")
             if self.demo_session_analyses_per_day < 1:
                 raise ConfigError("demo_session_analyses_per_day must be >= 1")
+            if self.demo_session_analyses_per_hour < 0:
+                raise ConfigError(
+                    "demo_session_analyses_per_hour must be >= 0 "
+                    "(0 derives it from the IP cap)")
+
+    @property
+    def visitor_analyses_per_hour(self) -> int:
+        """What ONE visitor may run in an hour. Never above the IP ceiling.
+
+        Derived when unset so that an operator who configures only the IP cap
+        still gets monopolisation protection, rather than a knob that silently
+        does nothing.
+        """
+        configured = int(self.demo_session_analyses_per_hour or 0)
+        ceiling = int(self.demo_ip_analyses_per_hour)
+        if configured > 0:
+            return min(configured, ceiling)
+        return max(2, ceiling // 2)
+
+
+
+def _int_or_zero_factory(env_map):
+    """0 (or unset) means "derive it"; see `demo_session_analyses_per_hour`."""
+    def read(name: str) -> int:
+        raw = str(env_map.get(name, "") or "").strip()
+        if not raw:
+            return 0
+        try:
+            value = int(raw)
+        except ValueError:
+            return 0
+        return max(0, value)
+    return read
 
 
 def from_env(environ=None) -> AppConfig:
@@ -140,6 +193,8 @@ def from_env(environ=None) -> AppConfig:
             "DEMO_MAX_ANALYSES_PER_HOUR", 10),
         demo_session_analyses_per_day=_pos_int(
             "DEMO_MAX_ANALYSES_PER_DAY", 25),
+        demo_session_analyses_per_hour=_int_or_zero_factory(env_map)(
+            "DEMO_MAX_ANALYSES_PER_HOUR_PER_VISITOR"),
         autorun_sources=env_map.get("WEBAPP_AUTORUN_SOURCES", "1").strip()
         .lower() not in ("0", "false", "no", "off"),
     )

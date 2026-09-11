@@ -185,7 +185,14 @@ def _from_registry(typed: str) -> List[Suggestion]:
             continue
         out.append(Suggestion(
             legal_name=profile.legal_name,
-            common_name=_common(profile.legal_name),
+            # THE CURATED NAME WINS OVER THE DERIVED ONE. `_common` strips
+            # legal furniture from a name, and "group" is on that list -- so
+            # "Veeam Software Group GmbH" was shown to the customer as "Veeam
+            # Software GmbH", a company name that does not exist. A registry
+            # entry that states the name a person would say is a better source
+            # than a rule that guesses it, so it is used when present.
+            common_name=(getattr(profile, "common_name", "") or "").strip()
+                        or _common(profile.legal_name),
             country=getattr(profile, "country", "") or "",
             domain=getattr(profile, "primary_domain", "") or "",
             entity_id=getattr(profile, "entity_id", "") or "",

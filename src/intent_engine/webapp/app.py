@@ -752,6 +752,10 @@ class WebApp:
         # product does not.
         self._analysis_async = True
         self._demo_ip_hits: dict = {}   # client_ip -> [analysis timestamps]
+        #: canonical company key -> {"run_id", "user_id", "started"}. Lets a
+        #: visitor who asks for a company they are already analysing rejoin
+        #: that run instead of paying for a second one (§F).
+        self._demo_inflight: dict = {}
         # run_id -> the last answered topics, so a bare "Why?" has a subject.
         self._conversation_context: dict = {}
         # Storage durability is MEASURED, once, at startup. Recording this
@@ -1179,7 +1183,13 @@ class WebApp:
         if route == ("POST", "runs", 3) and parts[2] == "retry":
             return self._retry_evidence(session, parts[1])
         if route == ("POST", "runs", 3) and parts[2] == "fresh":
-            return self._fresh_analysis(session, parts[1])
+            # THE CALLER'S ADDRESS, not the default. `_fresh_analysis` used
+            # the signature default `remote="unknown"`, so every fresh
+            # re-analysis on the service -- from every visitor -- was
+            # metered into ONE bucket literally keyed "unknown". Ten across
+            # all visitors and the eleventh person to ask for a fresh read
+            # was refused because of ten strangers.
+            return self._fresh_analysis(session, parts[1], remote)
         # The operator surfaces are for operators. The gate only asked whether
         # a session existed, and an anonymous demo session is a session -- so
         # any guest who typed /dashboard was shown the operations console:
@@ -1326,11 +1336,40 @@ class WebApp:
         return True
 
     def _demo_rate_limited(self, session, remote):
-        """Anonymous-session abuse guardrail. Enforces a per-IP rolling-hour
-        cap and a per-session rolling-day cap on analyses. Returns a 429
-        response to block, or None to allow (recording the hit against both
-        windows). Real (logged-in) sessions are never limited here, so their
-        behaviour is unchanged."""
+        """Anonymous-visitor abuse guardrail.
+
+        THREE WINDOWS, and which one refuses you decides what you are told:
+
+          1. this VISITOR's rolling hour  -- their share of the address
+          2. this VISITOR's rolling day
+          3. this ADDRESS's rolling hour  -- the hard abuse ceiling
+
+        WHY THE ADDRESS CEILING IS STILL HARD. The first version of this
+        repair scaled it by how many distinct sessions had been seen at the
+        address, reasoning that an office NAT carries many real people. It
+        does -- and so does one person opening incognito windows, which costs
+        nothing. Seven tests exist to hold "minting a session buys no extra
+        allowance", and that scaling defeated every one of them. An IP and a
+        cookie cannot tell those two cases apart, so the ceiling stays.
+
+        WHAT CAN BE FIXED WITHOUT WEAKENING IT is monopolisation. The old
+        limiter had no per-visitor bound at all, so behind one NAT the first
+        visitor could consume all ten and the second arrived to a network
+        already spent -- which is the shape of the reported failure. A
+        per-visitor share means no one visitor can do that.
+
+        The honest limit of this: heavy AGGREGATE use behind one address can
+        still exhaust the ceiling, and no IP-based scheme can avoid that.
+
+        Returns a 429 response to block, or None to allow (reserving the hit
+        against every window). Real (logged-in) sessions are never limited.
+
+        NOTHING BUT A NEW ANALYSIS REACHES THIS METHOD. Viewing a result,
+        reopening a run, polling progress, asking a question and every page
+        of navigation go nowhere near it -- asserted by a test rather than
+        argued here, because "only /analyze calls it" is the kind of claim
+        that stays in a docstring after it stops being true.
+        """
         if not session.get("anonymous"):
             return None
         now = self.auth.now()
@@ -1338,11 +1377,14 @@ class WebApp:
         ip_hits = [t for t in self._demo_ip_hits.get(remote, [])
                    if t > hour_ago]
         session_hits = [t for t in session.get("analyses", []) if t > day_ago]
-        if len(ip_hits) >= self.config.demo_ip_analyses_per_hour:
+        visitor_hour = [t for t in session_hits if t > hour_ago]
+        if len(visitor_hour) >= self.config.visitor_analyses_per_hour:
+            session["analyses"] = session_hits
             self._demo_ip_hits[remote] = ip_hits
             return self._error_page(
-                429, "Demo analysis limit reached for your network. "
-                     f"{_retry_phrase(min(ip_hits) + 3600 - now)} "
+                429, "You have reached the demo analysis limit for this "
+                     "hour. "
+                     f"{_retry_phrase(min(visitor_hour) + 3600 - now)} "
                      "Analyses already running are unaffected, and finished "
                      "ones stay under your analyses.")
         if len(session_hits) >= self.config.demo_session_analyses_per_day:
@@ -1352,6 +1394,13 @@ class WebApp:
                 429, "This demo session has reached its analysis limit for "
                      "today. "
                      f"{_retry_phrase(min(session_hits) + 86400 - now)} "
+                     "Analyses already running are unaffected, and finished "
+                     "ones stay under your analyses.")
+        if len(ip_hits) >= self.config.demo_ip_analyses_per_hour:
+            self._demo_ip_hits[remote] = ip_hits
+            return self._error_page(
+                429, "Demo analysis limit reached for your network. "
+                     f"{_retry_phrase(min(ip_hits) + 3600 - now)} "
                      "Analyses already running are unaffected, and finished "
                      "ones stay under your analyses.")
         # RESERVED, NOT SPENT. §4: quota is committed only once a run has
@@ -2328,6 +2377,11 @@ class WebApp:
             if entry.state == _NE.AMBIGUOUS_COMPANY:
                 # Two real companies share this name. Asking is strictly
                 # better than picking, and it is asked once, before any work.
+                #
+                # AND IT IS FREE. This page opens no run; it asks a question.
+                # Charging for it made the customer pay to be asked which
+                # company they meant, and pay again when they answered.
+                self._release_demo_quota(session, remote, _reserved)
                 return self._name_choice_page(session, entry, form)
             if entry.resolved:
                 company_name = entry.company_name
@@ -2346,6 +2400,17 @@ class WebApp:
                 # company the registry does not carry. Say so, and offer the
                 # one input that would resolve it, rather than returning a
                 # 400 the user cannot act on.
+                # NO RUN WAS OPENED, SO NOTHING WAS SPENT.
+                #
+                # MEASURED 2026-09-11 on the deployed preview and reproduced
+                # offline: typing "Highspot" -- a company the register did not
+                # carry -- returned this page in under a second AND consumed
+                # one of the visitor's ten analyses for the hour. Ten such
+                # attempts and the demo was closed to them for an hour,
+                # having produced nothing. That is how the reported "Too many
+                # analyses for now" was reached without a single analysis
+                # having run.
+                self._release_demo_quota(session, remote, _reserved)
                 return self._company_not_found_page(session, company_name,
                                                     entry)
         if not website and not filer_cik:
@@ -2390,6 +2455,8 @@ class WebApp:
                 resolution = resolve_entity(company_name=company_name,
                                             website=website)
                 if resolution.status == AMBIGUOUS:
+                    # Also a question, also free -- see the two paths above.
+                    self._release_demo_quota(session, remote, _reserved)
                     return self._disambiguation_page(
                         session, resolution, form)
                 # The landing form asks for a website, not a name, so almost
@@ -2448,8 +2515,33 @@ class WebApp:
                     payload={"user_id": session["user_id"],
                              "run_id": run_id}))
             elif existing != session["user_id"]:
+                # Refused, so refunded. The visitor opened nothing.
+                self._release_demo_quota(session, remote, _reserved)
                 return self._error_page(403, "this run belongs to another "
                                              "account")
+            else:
+                # REJOINING YOUR OWN RUN IS NOT A NEW ANALYSIS (§F).
+                #
+                # `create_run` keys a run on (subject, user, as_of), so a
+                # visitor who asks for a company they are already analysing
+                # -- a second tab, a reload, a back button, an impatient
+                # re-submit -- gets the run they already have. No retrieval
+                # is repeated and no work is queued twice.
+                #
+                # The quota was charged for it anyway. That is the failure
+                # the brief names as "the user revisits an already-running
+                # company": the visitor pays again for the run they are
+                # already waiting on, and the page they land on is the one
+                # they were already looking at. The reservation is handed
+                # back because nothing new was started.
+                #
+                # DELIBERATELY NOT CROSS-SESSION. Two different visitors
+                # asking for one company get two runs, because ownership is
+                # what keeps one session's result out of another's, and a
+                # shared run id would put them in the same owned object. The
+                # duplicate work is bounded by the admission pool instead.
+                self._release_demo_quota(session, remote, _reserved)
+                _reserved = None
             if self.config.autorun_sources:
                 # Frictionless default: no separate source-review page. The
                 # work is SCHEDULED and the response returns at once;
@@ -2469,12 +2561,38 @@ class WebApp:
                     #
                     # A run that is already finished still redirects: that is
                     # the double-click case and its result exists.
+                    # `_schedule_analysis` returns False for FOUR different
+                    # reasons and only one of them is a refusal:
+                    #
+                    #   1. the run is already in flight   <- watch it
+                    #   2. it is already finished          <- read it
+                    #   3. the pool is saturated           <- REFUSED
+                    #   4. the pool is shut down           <- REFUSED
+                    #
+                    # Only (2) was recognised here, so (1) -- a visitor
+                    # re-requesting the company they are ALREADY analysing --
+                    # was answered "This preview is already running as many
+                    # analyses as it can at once. The analysis did not start."
+                    # Their own run was running perfectly well two feet away.
+                    # Reproduced offline: the second POST for one company by
+                    # one visitor returned 503 while the first was mid-flight.
+                    #
+                    # That is the case the brief names as "the user revisits
+                    # an already-running company", and it is a refusal the
+                    # product invented about work it was doing.
+                    #
+                    # KEPT ABOVE THE CALL, not between it and its test: a
+                    # structural guard reads a fixed window from
+                    # `started = self._schedule_analysis(` and this paragraph
+                    # sitting inside that window pushed `if not started` out
+                    # of it, turning an explanation into a test failure.
                     started = self._schedule_analysis(session["user_id"],
                                                       run_id)
-                    if not started and not (
-                            run_id in self._results
-                            or self.ci.store.run_state(run_id)
-                            in self.TERMINAL_STATES):
+                    watchable = (run_id in self._results
+                                 or run_id in self._analysis_inflight
+                                 or self.ci.store.run_state(run_id)
+                                 in self.TERMINAL_STATES)
+                    if not started and not watchable:
                         self._release_demo_quota(session, remote,
                                                  _reserved)
                         # THE CATEGORY IS DECIDED HERE, not inferred from
@@ -2518,6 +2636,7 @@ class WebApp:
                 payload={"user_id": session["user_id"], "run_id": run_id}))
         elif existing != session["user_id"]:
             # deterministic demo produces one run id; never reassign it
+            self._release_demo_quota(session, remote, _reserved)
             return self._error_page(403, "this run belongs to another account")
         return self._with_run_claim(
             self._redirect(f"/runs/{run_id}/progress"), session, run_id,
@@ -4492,7 +4611,7 @@ class WebApp:
         return (now.strftime("%Y-%m-%dT%H:%M:%S+00:00") if fresh
                 else now.strftime("%Y-%m-%dT00:00:00+00:00"))
 
-    def _fresh_analysis(self, session, run_id):
+    def _fresh_analysis(self, session, run_id, remote="unknown"):
         """Deliberately bypass the compatible-result cache.
 
         The point of the button is that the user does not have to trust our
@@ -4520,7 +4639,7 @@ class WebApp:
         # reported a baseline forever.
         form = {"consent": "1", "company_name": meta.get("company_name", ""),
                 "website": meta.get("website", ""), "csrf": session["csrf"]}
-        return self._analyze(session, form, fresh=True)
+        return self._analyze(session, form, remote, fresh=True)
 
     def _founder_layers(self, run_id):
         """Everything the deeper layers need, built from ONE brief.
@@ -6550,14 +6669,32 @@ class WebApp:
         blocked = self._step_guard(session, run_id)
         if blocked is not None:
             return blocked
+        from intent_engine.executive import history_rewind as HR
         from intent_engine.founder_brief import steps
         _brief, _report, name = self._founder_layers(run_id)
         timeline = self._history_timeline(run_id, name)
         sim = self._history_simulation(run_id, name)
+        # WHICH REWIND THIS COMPANY'S EVIDENCE SUPPORTS (§I). Decided here,
+        # once, and handed to the renderer -- so the page's heading, its
+        # opening sentence and its body all describe the same thing. The
+        # renderer used to name the page "the strategy simulator" before
+        # anything had been read, and then explain underneath that no
+        # simulation was possible.
+        bounded = None
+        if sim is None or not getattr(sim, "available", False):
+            records = HR.dated_records(self._retrieved_documents(run_id))
+            bounded = HR.bounded_rewind(company=timeline.company or name,
+                                        records=records)
+            level = (HR.LEVEL_BOUNDED if bounded.available else HR.LEVEL_GAP)
+        else:
+            level = HR.LEVEL_SERIES
         body = steps.render_history(sim, timeline, run_id=run_id,
-                                    company=timeline.company or name)
-        return self._html(self._page(f"{name} — history rewind", body,
-                                     session, session.get("csrf", "")))
+                                    company=timeline.company or name,
+                                    bounded=bounded, level=level)
+        # The tab title carries the same promise as the heading.
+        return self._html(self._page(
+            f"{name} — {HR.LEVEL_TITLES.get(level, 'history rewind')}", body,
+            session, session.get("csrf", "")))
 
     def _subject_line(self, run_id, company) -> str:
         """§7, §58. Which company this is, in one line a reader can check.

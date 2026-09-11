@@ -262,7 +262,7 @@ def retrieved_record(*, source_id, run_id, company_id, original_url,
                      retrieval_status="OK", privacy="public",
                      origin_note="", source_class="company_owned",
                      extraction_mode="body", blocks_found=0,
-                     filing=None) -> dict:
+                     published_date="", filing=None) -> dict:
     assert_no_secret(text_content[:20000], where="retrieved source text")
     if privacy not in PRIVACY_CLASSES:
         raise IngestionError(f"unknown privacy class {privacy!r}")
@@ -284,6 +284,20 @@ def retrieved_record(*, source_id, run_id, company_id, original_url,
             # og:description is not the same evidence as a document whose body
             # was read, and every gate downstream was blind to the difference.
             "extraction_mode": extraction_mode, "blocks_found": blocks_found,
+            # WHEN THE PUBLISHER SAYS THIS WAS PUBLISHED, verbatim.
+            #
+            # The parser has always extracted this and the service has always
+            # thrown it away, keeping only a CURRENT/STALE flag derived from
+            # it. So the history surface -- whose entire job is "what did the
+            # record show at date X" -- had no dates for any company that does
+            # not file with a regulator, and told those readers their company
+            # had no history. It did not; we discarded the dates and then
+            # reported the absence as a fact about them.
+            #
+            # Empty when the publisher asserted none. NEVER inferred from the
+            # retrieval time: when we read a page is not when it was written,
+            # and conflating the two is how a rewind acquires a fake timeline.
+            "published_date": str(published_date or ""),
             # WHAT WAS READ, for a regulatory filing: the quality verdict, the
             # sections located, and the span each retained excerpt was cut
             # from. Absent (None) for every other kind of document, so no

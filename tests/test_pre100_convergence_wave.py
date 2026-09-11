@@ -509,10 +509,21 @@ def test_a_refused_schedule_is_not_reported_as_started():
     The return value was discarded, so a refusal redirected the visitor to a
     progress page for work nobody had queued."""
     import inspect
+    import re
 
     from intent_engine.webapp import app as APP
     source = inspect.getsource(APP.WebApp._analyze)
-    i = source.index("if self._analysis_async:")
-    window = source[i:i + 1400]
+    # READ THE CODE, NOT THE PROSE.
+    #
+    # This took a fixed 1400-character window and required both lines inside
+    # it. The window is characters, so every comment written between the call
+    # and its test pushes the test out of range -- and the guard then fails
+    # for a paragraph rather than for a defect. Comment lines are stripped
+    # first, so the window measures code and the explanation beside it can be
+    # as long as it needs to be.
+    code = "\n".join(line for line in source.splitlines()
+                     if not line.lstrip().startswith("#"))
+    i = code.index("if self._analysis_async:")
+    window = code[i:i + 700]
     assert "started = self._schedule_analysis(" in window
     assert "if not started" in window

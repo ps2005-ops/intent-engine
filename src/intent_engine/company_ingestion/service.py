@@ -992,6 +992,9 @@ class CompanyIngestionService:
             # neither is required for a defensible reading. A budget already
             # spent skips them and SAYS so, rather than making the customer
             # wait for enrichment they will not be shown.
+            from intent_engine.company_ingestion import (
+                relevance as _COVERAGE,
+            )
             from intent_engine.company_ingestion.deadline import (
                 HIGH_VALUE_OPTIONAL,
             )
@@ -1001,6 +1004,30 @@ class CompanyIngestionService:
                 deadline.record_gap(
                     "discovery", "third-party filings and sitemap not "
                                  "searched — interactive budget spent")
+                # AND IT IS RECORDED AS A COVERAGE STATE, not only as a gap.
+                #
+                # The gap list is prose for the reader; the coverage state is
+                # what `zero_reading` consults to decide whether a zero means
+                # "none exists" or "we did not look hard enough". Skipping the
+                # search without writing one left the state at
+                # DISCOVERY_NOT_RUN, which is true but says nothing about WHY
+                # -- and "we ran out of interactive budget" is a fact about
+                # this deployment that the reader can act on.
+                if run_id:
+                    if not hasattr(self, "_discovery_reports"):
+                        self._discovery_reports = {}
+                    self._discovery_reports[run_id] = {
+                        "contract": "third_party_discovery.v1",
+                        "channel": "edgar_full_text_search",
+                        "query": meta.get("company_name", ""),
+                        "candidates": [], "coverage": _COVERAGE.DISCOVERY_NOT_RUN,
+                        "channels_attempted": [], "channels_successful": [],
+                        "hits_total": 0, "candidates_considered": 0,
+                        "candidates_fetched": 0, "rejected": [],
+                        "rejection_reasons": {"INTERACTIVE_BUDGET_SPENT": 1},
+                        "independent_relevant_origins": 0,
+                        "budget_exhausted": True,
+                    }
             third_party = (_pool.submit(self._third_party_filing_candidates,
                                         meta, run_id=run_id)
                            if optional_ok else None)
@@ -1846,6 +1873,9 @@ class CompanyIngestionService:
                 freshness=freshness,
                 extraction_mode=parsed.get("extraction_mode", "body"),
                 blocks_found=parsed.get("blocks_found") or 0,
+                # The date the parser already found. It was used to compute
+                # `freshness` and then dropped; see `retrieved_record`.
+                published_date=parsed.get("modified_date") or "",
                 filing=parsed.get("filing"))
 
     def _fail(self, run_id, domain, candidate_id, failure_type, message,
@@ -3107,18 +3137,50 @@ class CompanyIngestionService:
         if self.transport is not None:
             return []
         company_name = meta.get("company_name", "")
-        subject_cik = self.subject_cik(meta)
+        if not hasattr(self, "_discovery_reports"):
+            self._discovery_reports = {}
         try:
+            subject_cik = self.subject_cik(meta)
             report = discover_third_party_filings(
                 company_name=company_name, subject_cik=subject_cik)
-        except Exception:  # noqa: BLE001 - discovery must never break
+        except Exception as exc:  # noqa: BLE001 - discovery must never break
+            # A CHANNEL WE COULD NOT REACH IS BLOCKED, NOT UNSEARCHED.
+            #
+            # This returned [] and recorded nothing, so `discovery_report`
+            # stayed empty and every consumer read DISCOVERY_NOT_RUN -- the
+            # state that means "no producer ran". MEASURED LIVE 2026-09-11 on
+            # the deployed preview: every analysis said "Search coverage: no
+            # search was run", and offline the identical code searched EDGAR
+            # successfully. So the deployment was failing INSIDE this try and
+            # reporting it as never having tried, which is the one distinction
+            # this whole module exists to preserve.
+            #
+            # The reader is owed the difference between "we looked and found
+            # nothing" and "we could not look".
+            from intent_engine.company_ingestion import relevance as _R
+            if run_id:
+                self._discovery_reports[run_id] = {
+                    "contract": "third_party_discovery.v1",
+                    "channel": "edgar_full_text_search",
+                    "query": company_name,
+                    "candidates": [],
+                    "coverage": _R.DISCOVERY_BLOCKED,
+                    "channels_attempted": ["edgar_full_text_search"],
+                    "channels_successful": [],
+                    "hits_total": 0, "candidates_considered": 0,
+                    "candidates_fetched": 0, "rejected": [],
+                    "rejection_reasons": {
+                        f"DISCOVERY_RAISED:{type(exc).__name__}": 1},
+                    "independent_relevant_origins": 0,
+                    "budget_exhausted": False,
+                }
+            _LOG.warning("third_party_discovery_raised company=%r %s: %s",
+                         company_name, type(exc).__name__, exc)
             return []
         # RETAINED, NOT JUST RETURNED. The candidates flow onward as sources;
         # the SEARCH ITSELF -- what it tried, read and rejected -- has no other
         # route to the dossier, and without it the drawer cannot tell a
         # finding about the company from a limit of our retrieval.
-        if not hasattr(self, "_discovery_reports"):
-            self._discovery_reports = {}
         if run_id:
             self._discovery_reports[run_id] = report
         return report.get("candidates") or []

@@ -44,8 +44,18 @@ def test_a_successful_reservation_consumes_exactly_one(app):
 # Q2 -------------------------------------------------------------------------
 
 def test_a_429_consumes_no_new_quota(app):
+    """Whichever window refuses first, the refusal must be free.
+
+    DRIVEN TO THE BINDING LIMIT, not to the IP cap. One visitor is now held
+    to a SHARE of their address's hourly ceiling -- so that the first person
+    behind an office NAT cannot spend the whole network's allowance -- and
+    that share binds before the ceiling does. Looping to the ceiling asserted
+    `is None` for requests the product had already correctly refused, which
+    tested the old limit rather than the property.
+    """
     s = _session()
-    cap = app.config.demo_ip_analyses_per_hour
+    cap = min(app.config.visitor_analyses_per_hour,
+              app.config.demo_ip_analyses_per_hour)
     for _ in range(cap):
         assert app._demo_rate_limited(s, "1.2.3.4") is None
     before = _spent(app, s)
@@ -121,12 +131,68 @@ def test_a_logged_in_session_is_never_refunded_or_limited(app):
 # --- the structural guard: every failure path must release ----------------
 
 def test_every_early_return_after_reservation_releases_it():
-    """A path that returns without scheduling work and without releasing is
-    the defect this file exists for, re-introduced."""
+    """Every path that returns a PAGE instead of a run must refund.
+
+    THE VERSION THIS REPLACES COULD NOT FAIL. It counted occurrences of
+    `_release_demo_quota` in the source and required three or more. Three
+    were present from the day it was written, so the assertion was satisfied
+    for as long as the file existed -- while three other paths
+    (`_company_not_found_page`, `_name_choice_page`, `_disambiguation_page`)
+    returned without refunding anything. A visitor typing a company we could
+    not name paid for the privilege, which is how "Too many analyses for now"
+    was reached on the live preview without a single analysis running.
+
+    So this reads the code rather than counting a substring: every `return`
+    of a page-producing helper that sits after the reservation must have a
+    release in the same block, ahead of it.
+    """
+    import ast
     import inspect
-    source = inspect.getsource(WebApp._analyze)
-    start = source.index("_reserved =")
-    body = source[start:]
-    releases = body.count("_release_demo_quota(session, remote")
-    assert releases >= 3, (
-        f"only {releases} failure paths hand the reservation back")
+    import textwrap
+
+    #: Helpers that build a PAGE. Reaching one means no run was opened.
+    PAGE_RETURNS = {"_error_page", "_company_not_found_page",
+                    "_name_choice_page", "_disambiguation_page"}
+    source = textwrap.dedent(inspect.getsource(WebApp._analyze))
+    tree = ast.parse(source)
+
+    def call_name(node):
+        func = getattr(node, "func", None)
+        return getattr(func, "attr", "") if func is not None else ""
+
+    def releases(stmt):
+        return any(call_name(n) == "_release_demo_quota"
+                   for n in ast.walk(stmt) if isinstance(n, ast.Call))
+
+    # WHERE THE RESERVATION IS MADE. Returns ABOVE it (the consent check)
+    # cannot leak anything, because nothing has been reserved yet.
+    reserve_line = min(
+        (n.lineno for n in ast.walk(tree)
+         if isinstance(n, ast.Assign)
+         and any(getattr(t, "id", "") == "_reserved" for t in n.targets)),
+        default=0)
+    offenders, reserved_seen = [], bool(reserve_line)
+    for parent in ast.walk(tree):
+        body = getattr(parent, "body", None)
+        if not isinstance(body, list):
+            continue
+        freed = False
+        for stmt in body:
+            if stmt.lineno < reserve_line:
+                continue
+            # the reservation itself, and any refund, arm the block
+            if isinstance(stmt, ast.Assign) and any(
+                    getattr(t, "id", "") == "_reserved" for t in stmt.targets):
+                reserved_seen = True
+                freed = True
+                continue
+            if releases(stmt):
+                freed = True
+            if isinstance(stmt, ast.Return) and isinstance(stmt.value, ast.Call):
+                if call_name(stmt.value) in PAGE_RETURNS and not freed:
+                    offenders.append(
+                        f"line {stmt.lineno}: {call_name(stmt.value)}")
+    assert reserved_seen, "the reservation this guard keys on has moved"
+    assert not offenders, (
+        "these paths return a page without refunding the reservation: "
+        + "; ".join(offenders))

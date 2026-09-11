@@ -413,8 +413,25 @@ _SHOPIFY = EntityProfile(
     ),
 )
 
+#: Hand-written entries above; curated catalog rows below.
+#:
+#: WHY THE CATALOG IS SPLICED IN HERE RATHER THAN KEPT SEPARATE. Three
+#: different consumers reach identity through this tuple -- `suggest` (via
+#: `_registry_profiles`), `resolve_entity` by name, and `_domain_match` by
+#: host. A catalog that only the suggestion list could see would offer a
+#: company the resolver then failed to open, which is a worse experience than
+#: not offering it. One registry, one answer, three readers.
+#:
+#: Imported lazily-but-eagerly at module import: the catalog imports
+#: EntityProfile and OfficialSource FROM here, so the import must come after
+#: both are defined. That is why it sits at the bottom of the module and not
+#: at the top with the others.
+from intent_engine.company_ingestion.catalog import (            # noqa: E402
+    CATALOG_REGISTRY as _CATALOG,
+)
+
 REGISTRY = (_SONY_GROUP, _SONY_INTERACTIVE, _SONY_ELECTRONICS, _PALANTIR,
-            _SHOPIFY)
+            _SHOPIFY) + _CATALOG
 
 
 def _by_id(entity_id: str):

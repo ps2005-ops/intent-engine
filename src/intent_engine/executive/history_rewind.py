@@ -609,3 +609,259 @@ def _join(items) -> str:
     if len(items) == 1:
         return items[0]
     return ", ".join(items[:-1]) + " and " + items[-1]
+
+
+# ===========================================================================
+# WHICH REWIND THIS COMPANY CAN HAVE (§I)
+# ===========================================================================
+#
+# THE DEFECT THIS REPLACES, reported from the live demo on b88df2bb.
+# Highspot's history page was headed "Highspot — the strategy simulator" and
+# opened "Pick a year. The chart holds the path the company actually took...".
+# Underneath, it said Highspot is not an SEC filer, has no dated regulator
+# series, that the chart cannot be drawn, and asked the reader to supply three
+# years of reported revenue.
+#
+# Every one of those sentences is true. Together they are a page that promises
+# an experience in its heading and withdraws it in its body, which reads as a
+# broken feature rather than an honest bound. The heading was written before
+# anything was known about what could be drawn -- it is a constant at the top
+# of the renderer -- so it made the same promise to every company on earth.
+#
+# The fix is not softer wording. It is to decide WHAT KIND OF REWIND THIS
+# COMPANY SUPPORTS, name the page after that, and fill it accordingly.
+#
+#: A dated financial or operating series exists: the three-line chart.
+LEVEL_SERIES = "LEVEL_A_SERIES"
+#: No series, but the company's own dated record can be walked: a bounded
+#: strategic rewind. Events and positions, no chart, vintage wall intact.
+LEVEL_BOUNDED = "LEVEL_B_BOUNDED"
+#: Not enough dated evidence for either: an explicit evidence-gap rewind that
+#: says what is missing and what would close it.
+LEVEL_GAP = "LEVEL_C_GAP"
+
+#: How the page names itself at each level. A heading is a promise.
+LEVEL_TITLES = {
+    LEVEL_SERIES: "the strategy simulator",
+    LEVEL_BOUNDED: "a bounded strategic rewind",
+    LEVEL_GAP: "what the dated record does not yet support",
+}
+
+#: Two dated points is the floor for a REWIND. One date is a fact about a
+#: document, not a path: there is no "before" to stand in and no "after" to
+#: have been surprised by, so a one-point page would be a rewind in name.
+MIN_BOUNDED_POINTS = 2
+
+
+@dataclasses.dataclass(frozen=True)
+class DatedRecord:
+    """One thing this company published, and when it said so.
+
+    NOT A FILING, and deliberately a different type. `Filing` carries a
+    regulator's form code and the prose built from it says "filings on the
+    public record". Pushing a marketing page through that vocabulary would
+    describe an About page as a filing, which is a smaller lie than an
+    invented chart and still a lie.
+    """
+    date: _dt.date
+    title: str
+    url: str
+    kind: str = "page"          #: corporate / newsroom / segment / pricing
+    source_class: str = ""
+    #: WHERE the date came from, so the page can say. "metadata" is the
+    #: publisher's own schema.org/OpenGraph date; "url_path" is a dated
+    #: path segment the publisher chose. Never "retrieval".
+    date_source: str = "metadata"
+
+    @property
+    def iso(self) -> str:
+        return self.date.isoformat()
+
+
+#: A dated path segment, as publishers structure article URLs:
+#: `/insights/articles/2023/08/learn-to-thrive`. BOTH a four-digit year and a
+#: two-digit month, ADJACENT and separated by slashes.
+#:
+#: WHY THIS IS NOT "READING A DATE OUT OF A URL". A bare four-digit number in
+#: a path is a coincidence waiting to happen -- a product name, an SKU, a
+#: pagination offset. A year segment followed immediately by a valid month
+#: segment is a publishing convention, and the publisher chose it. Measured
+#: 2026-09-11: Point B publishes every article under `/Insights/Articles/
+#: YYYY/MM/`, and reading only metadata put that company on the evidence-gap
+#: page while its own URLs carried the dates.
+#:
+#: The day is not taken even when a third segment looks like one: month
+#: precision is what the convention actually asserts, so the first of the
+#: month is used and the page never claims a day it was not told.
+_URL_DATE = re.compile(r"/((?:19|20)\d{2})/(0[1-9]|1[0-2])(?:/|$)")
+
+
+def _date_from_url(url: str) -> Optional[_dt.date]:
+    found = _URL_DATE.search(str(url or ""))
+    if not found:
+        return None
+    try:
+        return _dt.date(int(found.group(1)), int(found.group(2)), 1)
+    except ValueError:
+        return None
+
+
+def dated_records(documents: Sequence[dict]) -> Tuple[DatedRecord, ...]:
+    """Everything the run retrieved that carries a PUBLISHER-ASSERTED date.
+
+    The date comes from `published_date` -- the schema.org / OpenGraph date
+    the publisher put on the page -- and from nowhere else. Not from the URL,
+    not from the first four digits that look like a year in the body, and
+    above all NOT from when we fetched it: retrieval time is the one date
+    that is always available and never means anything about the company.
+
+    De-duplicated by (date, url) and returned oldest first.
+    """
+    out, seen = [], set()
+    for document in documents or ():
+        if not isinstance(document, dict):
+            continue
+        url_early = str(document.get("final_url")
+                        or document.get("original_url") or "")
+        raw = str(document.get("published_date") or "").strip()
+        when = _date(raw[:10]) if raw else None
+        origin = "metadata"
+        if when is None:
+            # Metadata first, the publisher's own URL convention second.
+            when = _date_from_url(url_early)
+            origin = "url_path"
+        if when is None:
+            continue
+        # A publisher date in the future is a template placeholder or a
+        # scheduled post, not evidence of something that has happened.
+        if when > _dt.date.today():
+            continue
+        url = str(document.get("final_url") or document.get("original_url")
+                  or "")
+        key = (when, url)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(DatedRecord(
+            date=when, title=_clean(document.get("title") or ""), url=url,
+            kind=str(document.get("source_type") or "page"),
+            source_class=str(document.get("source_class") or ""),
+            date_source=origin))
+    return tuple(sorted(out, key=lambda r: r.date))
+
+
+def rewind_level(timeline=None, records: Sequence[DatedRecord] = ()) -> str:
+    """Which of the three rewinds this company's evidence supports.
+
+    Read in order of strength, and each rung is decided by what EXISTS rather
+    than by what kind of company this is. A private company with a rich dated
+    record outranks a listed one whose filings we failed to retrieve, which
+    is the correct ordering: the page is about evidence, not status.
+    """
+    if timeline is not None and getattr(timeline, "available", False):
+        return LEVEL_SERIES
+    if len(records or ()) >= MIN_BOUNDED_POINTS:
+        return LEVEL_BOUNDED
+    return LEVEL_GAP
+
+
+@dataclasses.dataclass(frozen=True)
+class BoundedStop:
+    """One date in a bounded rewind, with the wall held at that date."""
+    date: str
+    label: str
+    record_then: str            #: what had been published by this date
+    knowable: str               #: what a reader could have established
+    unknowable: str             #: what no one could have known yet
+    later: str                  #: what followed -- AFTER the wall, labelled
+    count_before: int = 0
+    count_after: int = 0
+
+
+@dataclasses.dataclass(frozen=True)
+class BoundedRewind:
+    """§I LEVEL B. A rewind with no chart, and no pretence of one."""
+    company: str
+    level: str = LEVEL_BOUNDED
+    stops: Tuple[BoundedStop, ...] = ()
+    span: str = ""
+    coverage_note: str = ""
+    open_question: str = ""
+    what_would_upgrade: str = ""
+
+    @property
+    def available(self) -> bool:
+        return bool(self.stops)
+
+
+def bounded_rewind(*, company: str, records: Sequence[DatedRecord],
+                   profile=None, max_points: int = 6) -> BoundedRewind:
+    """Walk the company's own dated record. Never raises.
+
+    THE VINTAGE WALL IS THE SAME WALL. At each stop, `record_then` and
+    `knowable` are built only from records dated on or before that stop, and
+    everything after it goes in `later`, which is the one field allowed to
+    use hindsight and is labelled as such on the page. That is the same
+    contract `build()` holds for filings; it is restated here because a
+    second surface with its own wall is a second chance to get it wrong.
+    """
+    records = tuple(sorted(records or (), key=lambda r: r.date))
+    if len(records) < MIN_BOUNDED_POINTS:
+        return BoundedRewind(company=company, coverage_note=(
+            f"No document retrieved for {company} carried a date its "
+            f"publisher had asserted, so there is no sequence to walk."
+            if not records else
+            f"One dated document was retrieved for {company}, and a rewind "
+            f"needs at least {MIN_BOUNDED_POINTS}: with a single date there "
+            f"is no earlier position to stand in."))
+    dates = [r.date for r in records]
+    # Every distinct date, newest-last, thinned to `max_points` by keeping
+    # the ends and spreading the middle. No date is interpolated.
+    distinct = sorted(dict.fromkeys(dates))
+    if len(distinct) > max_points:
+        step = (len(distinct) - 1) / float(max_points - 1)
+        distinct = [distinct[int(round(i * step))]
+                    for i in range(max_points)]
+        distinct = sorted(dict.fromkeys(distinct))
+    stops = []
+    for when in distinct:
+        before = [r for r in records if r.date <= when]
+        after = [r for r in records if r.date > when]
+        titles = _join([r.title for r in before[-3:] if r.title][:3])
+        stops.append(BoundedStop(
+            date=when.isoformat(),
+            label=when.strftime("%B %Y"),
+            record_then=_stop(
+                f"By {when.strftime('%B %Y')}, {len(before)} dated page(s) "
+                f"published by {company} had been retrieved"
+                + (f", most recently {titles}" if titles else "")),
+            knowable=_stop(
+                f"A reader on this date could establish what {company} said "
+                f"it did and who it said it served, from material the "
+                f"company had published by then"),
+            unknowable=_stop(
+                f"Nothing published after {when.strftime('%B %Y')} was "
+                f"available: {len(after)} of the dated page(s) retrieved "
+                f"here did not exist yet"
+                if after else
+                f"This is the most recent dated material retrieved, so "
+                f"there is no later record to withhold"),
+            later=_stop(
+                f"{len(after)} dated page(s) followed this date"
+                if after else "Nothing retrieved is dated after this point"),
+            count_before=len(before), count_after=len(after)))
+    span = f"{records[0].iso} to {records[-1].iso}"
+    return BoundedRewind(
+        company=company, stops=tuple(stops), span=span,
+        coverage_note=_stop(
+            f"{len(records)} dated document(s) span {span}. These are pages "
+            f"{company} published with a date on them, not a financial "
+            f"series — the path of the business is not drawn here because no "
+            f"reported figures were retrieved to draw it from"),
+        open_question=_stop(
+            f"What {company} was optimising for across this period cannot be "
+            f"settled from dated pages alone; it needs reported results or a "
+            f"dated statement of its own targets"),
+        what_would_upgrade=(
+            "three or more years of reported revenue and operating result, "
+            "or any dated filing series for this entity"))
