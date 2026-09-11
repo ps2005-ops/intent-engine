@@ -209,6 +209,27 @@ PROOFS = [
         expect_failure_contains="assert",
     ),
     Proof(
+        label="the abstention claims more than it means, over a "
+              "recommendation rendered below it",
+        path=SRC / "adaptive" / "render.py",
+        find="'<p>Which of these is live for this management, or which way '",
+        replace="'<p>What this management should actually do. Knowing what '",
+        target="tests/test_adaptive_guards.py::"
+               "test_an_abstention_does_not_contradict_the_recommendation"
+               "_below_it",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="a newsletter call to action is quoted as evidence",
+        path=(SRC / "strategic_intelligence" / "evidence_text.py"),
+        find='    "stay informed", "stay up-to-date", "stay up to date", '
+             '"never miss",',
+        replace="",
+        target="tests/test_adaptive_guards.py::"
+               "test_a_newsletter_call_to_action_is_not_evidence",
+        expect_failure_contains="assert",
+    ),
+    Proof(
         label="the subject is extracted as its own critical dependency",
         path=SRC / "adaptive" / "profile.py",
         find="        if not _is_the_subject(phrase, company))",

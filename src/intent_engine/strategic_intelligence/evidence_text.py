@@ -231,6 +231,12 @@ _NAVIGATION = (
     "log in", "select your country", "change region", "view all",
     "see all", "load more", "next page", "previous page", "search results",
     "no results found", "click here", "read more", "learn more",
+    # The subscribe idiom. Every one of these is a complete, terminated
+    # sentence, so only a marker can refuse it -- and each carries "our",
+    # which is what separates a call to action from a company saying that
+    # its customers sign up for something.
+    "stay informed", "stay up-to-date", "stay up to date", "never miss",
+    "subscribe to our", "sign up for our", "join our newsletter",
 )
 _INDEX_MARKERS = (
     "a featured collection", "featured collection of", "collection of the "

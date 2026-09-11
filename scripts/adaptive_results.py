@@ -83,7 +83,12 @@ def gates(row: dict) -> dict:
         "identity": ok(identity_ok),
         "company_profile": ok(profile_ok),
         "decision_map": ok(map_ok, abstain=not map_ok and abstaining),
-        "strategic_lens": ok(lens_ok, abstain=abstaining),
+        # ABSTAIN ONLY WHEN THE GATE ITSELF DID NOT PASS. Every other
+        # gate here reads `not X_ok and abstaining`; this one did not,
+        # so a company with a correct, defensible lens was recorded as
+        # abstaining ON THE LENS -- understating the result it was
+        # built to measure.
+        "strategic_lens": ok(lens_ok, abstain=abstaining and not lens_ok),
         "differentiation": ok(diff_ok),
         "causal_chain": ok(chain_ok, abstain=not chain_ok and abstaining),
         "evidence": ok(evidence_ok),

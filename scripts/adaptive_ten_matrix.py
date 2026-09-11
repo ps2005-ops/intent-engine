@@ -196,7 +196,12 @@ def qualify(name, domain, *, with_qa=True, verbose=True) -> dict:
         return row
 
     began = time.monotonic()
-    fields = {"csrf": token, "company": name, "consent": "on"}
+    # THE FIELD NAME THE FORM POSTS. `/analyze` reads `company_name`; this
+    # harness posted `company`, which that handler never looks at -- so every
+    # run opened on the WEBSITE alone and the typed-name path, which is what a
+    # customer actually uses, was never exercised. Sending less than the real
+    # form does is bypassing the customer flow just as surely as sending more.
+    fields = {"csrf": token, "company_name": name, "consent": "on"}
     if domain:
         fields["website"] = domain
     st, html, url, _t, _h = _req(op, "/analyze", fields, timeout=180)
@@ -298,6 +303,13 @@ def qualify(name, domain, *, with_qa=True, verbose=True) -> dict:
     # product published rather than re-derived, and so a run that reached
     # nothing can be told apart from a run whose sources refused it.
     row["evidence_text"] = visible(pages.get("evidence", ""))[:6000]
+    # THE RENDERED PAGE ITSELF. Self-contained, so the UI sweep measures what
+    # the server actually served rather than a second run of it.
+    ui_dir = ROOT / "reports" / "ui"
+    ui_dir.mkdir(parents=True, exist_ok=True)
+    slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+    (ui_dir / f"{slug}.html").write_text(intro, encoding="utf-8")
+    row["ui_html"] = f"reports/ui/{slug}.html"
 
     # identity, read off the page rather than off our own telemetry
     row["identity_on_page"] = bool(

@@ -477,3 +477,55 @@ def test_a_consultancy_is_read_as_services_from_its_own_words():
             "services team also offers consulting services for onboarding.")
     assert classify_from_evidence(saas).model_class == "SUBSCRIPTION_SOFTWARE"
 
+def test_an_abstention_does_not_contradict_the_recommendation_below_it():
+    """MEASURED LIVE (Highspot, be5fde12). One page said both
+
+        "What we cannot yet conclude -- What this management should actually
+         do."
+
+    and, one screen down, "What we recommend -- Move on pricing and
+    packaging...". The founder layer's reading comes from the economics of the
+    business-model class and is badged BOUNDED; the adaptive layer's refusal
+    is about evidence on THIS company. The abstention has to say which it
+    means, because the page does not stop at the abstention.
+    """
+    from intent_engine.adaptive import render as ar
+
+    class _Map:
+        has_reading = False
+        evidence_limitation = "not enough independent material"
+        what_would_unlock_a_decision = "a dated third-party account"
+        state = "POTENTIAL_DOMAINS"
+
+    class _Adaptive:
+        opportunity_map = _Map()
+        profile = None
+        lens_selection = None
+
+    html = ar.bounded_block("Highspot", _Adaptive())
+    assert "What we cannot yet conclude" in html
+    # It must scope the refusal to THIS RUN's evidence...
+    assert "this run" in html, html
+    # ...and must not make the unqualified claim that contradicts a
+    # recommendation rendered further down the same page.
+    assert "What this management should actually do." not in html, html
+
+def test_a_newsletter_call_to_action_is_not_evidence():
+    """MEASURED LIVE (Highspot, be5fde12). Under "The evidence this rests on",
+    one of three quotations was "Stay informed on our sales enablement
+    innovation." -- a complete, terminated sentence, which is why sentence
+    snapping kept it and only a marker can refuse it."""
+    from intent_engine.strategic_intelligence.evidence_text import (
+        furniture_reason,
+    )
+    for cta in ("Stay informed on our sales enablement innovation.",
+                "Stay up-to-date on all of the news in sales and marketing.",
+                "Subscribe to our monthly revenue operations newsletter."):
+        assert furniture_reason(cta), cta
+
+    # POSITIVE CONTROL: a real first-party statement is still evidence, or
+    # the marker list has simply been made to refuse prose.
+    assert not furniture_reason(
+        "Highspot is the sales enablement platform that increases the "
+        "performance of revenue teams across every customer conversation.")
+

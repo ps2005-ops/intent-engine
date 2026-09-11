@@ -330,11 +330,17 @@ def bounded_block(company: str, adaptive) -> str:
         out.append('<span class="ad-label">The lens this points to</span>'
                    f'<p>{_e(sel.primary_name)} — {_e(sel.why_selected)}</p>')
 
+    # SCOPED, BECAUSE THE PAGE DOES NOT STOP HERE. A bounded run still
+    # carries the founder layer's class-economics direction further down,
+    # badged BOUNDED. An unqualified "we cannot say what management should
+    # do" above a "what we recommend" below is one run saying two things.
     out.append('<span class="ad-label">What we cannot yet conclude</span>'
-               '<p>What this management should actually do. Knowing what '
-               'kind of business this is tells us which decisions tend to '
-               'matter for a business like it; it does not tell us which one '
-               'is live here, or which way it should go.</p>')
+               '<p>Which of these is live for this management, or which way '
+               'it should go. Knowing what kind of business this is tells us '
+               'which decisions tend to matter for a business like it — and '
+               'any direction stated elsewhere on this page rests on that, '
+               'not on anything this run established about this company in '
+               'particular.</p>')
     if m.evidence_limitation:
         out.append('<span class="ad-label">Why not</span>'
                    f'<p>{_e(m.evidence_limitation)}</p>')
