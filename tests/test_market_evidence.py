@@ -36,7 +36,19 @@ from intent_engine.market.opportunity import (
 # retrieval-dated observations they relied on are future-dated relative to a
 # past `as_of`, and are now correctly dropped. The past-`as_of` behaviour is
 # covered explicitly by the two leakage tests at the end of this file.
-AS_OF = _date.today().isoformat()
+def _as_of() -> str:
+    """Today, read WHEN THE TEST RUNS rather than when the module is imported.
+
+    Captured at import time this makes the suite unable to run across
+    midnight. MEASURED: a full guard started 2026-09-10 23:58:04 and finished
+    2026-09-11 00:22:37; `AS_OF` was bound to the 10th at collection, the
+    adapter dated its evidence the 11th, and `refresh_company` -- which drops
+    future-dated evidence as leakage -- correctly discarded all of it. Two
+    tests then failed for having no evidence, and both passed when re-run
+    minutes later on the same tree, which is the signature of a clock and not
+    of a defect.
+    """
+    return _date.today().isoformat()
 
 
 class _Company:
@@ -64,7 +76,7 @@ def research():
 def test_the_adapter_returns_real_dated_evidence(research):
     """The placeholder returned `{"evidence": [], "thesis": ""}` — every field
     empty. This is the assertion that Stage 1 is actually operational."""
-    out = research(_Company(), AS_OF)
+    out = research(_Company(), _as_of())
     assert out["evidence"], "no evidence collected — Stage 1 is still empty"
     for row in out["evidence"]:
         assert row["summary"].strip(), "an evidence row with no content"
@@ -76,14 +88,14 @@ def test_the_adapter_returns_real_dated_evidence(research):
 def test_no_evidence_is_dated_after_the_run(research):
     """`refresh_company` drops future-dated evidence as leakage. Emitting it
     would mean the adapter is manufacturing work for that check to undo."""
-    out = research(_Company(), AS_OF)
-    assert all(row["published_at"][:10] <= AS_OF for row in out["evidence"])
+    out = research(_Company(), _as_of())
+    assert all(row["published_at"][:10] <= _as_of() for row in out["evidence"])
 
 
 def test_a_company_with_no_website_is_reported_not_crashed(research):
     class _NoSite(_Company):
         website = ""
-    out = research(_NoSite(), AS_OF)
+    out = research(_NoSite(), _as_of())
     assert out["evidence"] == [] and out["skipped"]
 
 
@@ -101,7 +113,7 @@ def test_one_companys_failure_does_not_end_the_sweep():
     seen = []
     research = founder_intelligence_research_fn(
         ci, fi, on_error=lambda cid, exc: seen.append(cid))
-    out = research(_Company(), AS_OF)
+    out = research(_Company(), _as_of())
     assert out["evidence"] == []
     assert "error" in out or out.get("skipped")
 
@@ -112,10 +124,10 @@ def test_the_run_is_recorded_as_a_system_actor(research):
     tmp = __import__("pathlib").Path(tempfile.mkdtemp())
     ci, fi = _services(tmp)
     fn = founder_intelligence_research_fn(ci, fi)
-    fn(_Company(), AS_OF)
+    fn(_Company(), _as_of())
     run_id = ci.create_run(company_name=_Company.canonical_name,
                            website=_Company.website, user_id=SYSTEM_ACTOR,
-                           as_of=AS_OF, actor_type="system")["run_id"]
+                           as_of=_as_of(), actor_type="system")["run_id"]
     rows = ci.store.for_run(run_id)
     created = [r for r in rows if r.event_type == "ci.run_created"]
     approved = [r for r in rows if r.event_type == "ci.approval_recorded"]
@@ -130,7 +142,7 @@ def test_the_webapp_flow_is_still_recorded_as_human(tmp_path):
     ci = CompanyIngestionService(tmp_path / "ci.jsonl",
                                  transport=fixture_transport, resolver=False)
     run_id = ci.create_run(company_name="Brightlake", website=FIXTURE_BASE,
-                           user_id="u-1", as_of=AS_OF)["run_id"]
+                           user_id="u-1", as_of=_as_of())["run_id"]
     rows = [r for r in ci.store.for_run(run_id)
             if r.event_type == "ci.run_created"]
     assert rows and rows[0].actor_type == "human"
@@ -148,13 +160,13 @@ def test_evidence_moves_the_company_past_the_first_gate(research):
     from intent_engine.market.daily import _report_for
 
     company = _Company()
-    empty = classify(company, _report_for({"thesis": ""}, []), as_of=AS_OF)
+    empty = classify(company, _report_for({"thesis": ""}, []), as_of=_as_of())
     assert empty.classification == "NO_TRADE"
     assert NO_STRATEGIC_READING in empty.blocked_by
     assert empty.quality == 0.0
 
-    out = research(company, AS_OF)
-    real = classify(company, _report_for(out, out["evidence"]), as_of=AS_OF)
+    out = research(company, _as_of())
+    real = classify(company, _report_for(out, out["evidence"]), as_of=_as_of())
 
     # The gate moved: "we could retrieve nothing" is no longer the answer.
     assert NO_STRATEGIC_READING not in real.blocked_by, \
@@ -243,8 +255,8 @@ def test_an_outside_source_reaches_the_reasoner_end_to_end():
         strategic_priorities = []
         tradable_instrument = "SHOP"
 
-    out = founder_intelligence_research_fn(ci, fi, max_sources=8)(_Pub(), AS_OF)
-    opp = classify(_Pub(), _report_for(out, out["evidence"]), as_of=AS_OF)
+    out = founder_intelligence_research_fn(ci, fi, max_sources=8)(_Pub(), _as_of())
+    opp = classify(_Pub(), _report_for(out, out["evidence"]), as_of=_as_of())
 
     assert opp.independent_source, \
         "no outside source survived to the reasoner"

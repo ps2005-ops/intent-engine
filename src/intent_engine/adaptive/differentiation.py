@@ -38,6 +38,10 @@ page for every company in a cohort and looked fine on each one.
 """
 from __future__ import annotations
 
+from intent_engine.adaptive.spans import (
+    dedupe_passages as _dedupe_passages,
+)
+
 import dataclasses
 import difflib
 import re
@@ -275,7 +279,10 @@ def build_differentiation(*, company: str, profile=None, lens_selection=None,
         generic_interpretation=generic,
         company_specific_difference=difference,
         decision_implication=implication,
-        evidence=tuple(dict.fromkeys(e for e in evidence if e))[:4],
+        # `dict.fromkeys` is EXACT-string dedup, and three producers quote
+        # the same sentence with three different budgets, so one passage
+        # arrives as two strings. See `spans.dedupe_passages`.
+        evidence=_dedupe_passages(e for e in evidence if e)[:4],
         carried_by=tuple(dict.fromkeys(carried)),
         specificity=round(specificity, 3),
         flagged=flagged, flag_reason=reason)

@@ -212,6 +212,14 @@ _A11Y_CSS = """
 outline:3px solid #1d4ed8;outline-offset:2px}
 img,svg,video,table{max-width:100%}
 pre,code{overflow-x:auto;max-width:100%}
+/* A LONG URL IS ONE WORD. `max-width` and `overflow-x` do nothing to
+   an INLINE <code>, which is why the retrieval-failure page -- the
+   one that names every source it tried and why each was refused --
+   pushed 85px off a 375px screen. Provenance is never hidden or
+   truncated to fit; it wraps. `anywhere` breaks a token only when it
+   cannot fit, so ordinary text keeps its normal breaks. */
+code,.src,.prov{overflow-wrap:anywhere;word-break:break-word}
+a[href]{overflow-wrap:anywhere}
 @media (max-width:600px){
 body{font-size:16px}
 main{padding-left:14px;padding-right:14px}
@@ -522,6 +530,15 @@ def _language_note(inputs: dict) -> str:
 
 
 _CONSTANT_SHAPED = re.compile(r"^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+$")
+
+
+def _sc_company_key(name: str) -> str:
+    """The strategic-contract key for a company name, or "" if unavailable."""
+    try:
+        from intent_engine.external_intel import strategic_contract as _sc
+        return _sc.company_key(name) or ""
+    except Exception:                                        # noqa: BLE001
+        return ""
 
 
 class WebApp:
@@ -864,6 +881,15 @@ class WebApp:
         # ranked decision map, all of one visitor's company.
         self._request.adaptive = {}
         self._request.published = {}
+        # THE CANONICAL PROFILE/SELECTION, cleared for exactly the same
+        # reason. It carries one visitor's business model, industry code and
+        # decision archetype, and every surface in the request now reads it --
+        # so a memo left behind would not merely leak, it would be
+        # AUTHORITATIVE for the next visitor's page. Omitting this line is how
+        # a repair for one contradiction introduced a worse one: three
+        # existing tests failed in batch and passed alone, which is the
+        # signature of a memo outliving its request.
+        self._request.canonical_selection = {}
         if (self.config.env == "production"
                 and environ.get("HTTP_HOST", "").split(":")[0]
                 not in self.config.trusted_hosts):
@@ -5335,7 +5361,9 @@ class WebApp:
                     as_of=as_of, status=FC.BLOCKED_DATA)
             ci_in = self.classification_inputs(run_id, name)
             from intent_engine.executive import company_profile as CPF
-            profile = CPF.profile_for(
+            canonical = self._canonical_selection(
+                run_id, name, str(meta.get("domain") or ""))
+            profile = getattr(canonical, "profile", None) or CPF.profile_for(
                 company_id, name=name,
                 domain=str(meta.get("domain") or ""),
                 registrant=ci_in.get("registrant"),
@@ -5867,8 +5895,14 @@ class WebApp:
             company_key(name or str(meta.get("domain") or "") or run_id),
             name=name, domain=str(meta.get("domain") or ""))
         dossier = DossierStore(self._runtime_root).latest(key)
-        decision = self._executive_read(dossier) if dossier is not None \
-            else None
+        # THE SAME ANSWER /intro USES. Without this the X-Ray composes its own
+        # profile from manifest and registrant alone and contradicts the
+        # primary screen for every privately held company.
+        canonical = self._canonical_selection(
+            run_id, name, str(meta.get("domain") or ""))
+        decision = self._executive_read(
+            dossier, profile=getattr(canonical, "profile", None)) \
+            if dossier is not None else None
         if decision is None:
             # A RUN THAT RETRIEVED NOTHING IS NOT A FAULT IN THE PRODUCT.
             # This answered "Something went wrong on our side ... This is a
@@ -6023,6 +6057,12 @@ class WebApp:
         try:
             read = SR.compose(
                 company=company, domain=domain, dossier=dossier,
+                # THE CANONICAL SELECTION. `compose` builds its own when this
+                # is None, which is a SECOND resolution of the one question
+                # this run already answered. Passing it is what makes the
+                # strategic read, the X-Ray and /intro agree by construction
+                # rather than by two code paths happening to match.
+                selection=self._canonical_selection(run_id, company, domain),
                 run_decision=run_decision, observations=observations,
                 documents=documents, own_words=own_words,
                 own_words_source=own_source,
@@ -6064,6 +6104,81 @@ class WebApp:
         except Exception:                                   # noqa: BLE001
             _LOG.exception("strategic_read_correction_failed run=%s", run_id)
             return read
+
+    def _canonical_profile_inputs(self, run_id, name="", domain=""):
+        """Every input `profile_for` has three rungs for, gathered once.
+
+        MEASURED LIVE (807a4143). Seven of ten companies rendered
+        "It is a subscription software business" on /intro and
+        "What kind of business this is has not been established" on /xray, and
+        the correlation with the model's SOURCE was exact: every company
+        classified at rung 3 -- the company's own published account -- carried
+        the contradiction, and the one public company, which resolves at rung
+        2, did not. Rung 3 fires ONLY when the caller passes `published_text`,
+        and six call sites resolved a profile while four of them did not pass
+        it. Six resolutions of one question is five too many.
+        """
+        ci_in = self.classification_inputs(run_id, name)
+        return {"registrant": ci_in.get("registrant"),
+                "evidence_text": ci_in.get("evidence_text") or "",
+                "published_text": self._subject_published_text(run_id)}
+
+    def _canonical_selection(self, run_id, name="", domain=""):
+        """THE analysis selection for this run. One per run, one profile.
+
+        Every surface that needs to know what kind of business this is reads
+        THIS, so the question is answered once. Memoised per REQUEST on the
+        thread-local for the same reason the adaptive memo is: worker threads
+        are reused, and a memo on `self` would project one visitor's company
+        into another's page.
+
+        Returns None only if the selector itself raises, and a caller that
+        gets None falls back to whatever it did before -- a canonical answer
+        that is unavailable must not take the surface down with it.
+        """
+        memo = getattr(self._request, "canonical_selection", None)
+        if memo is None:
+            memo = self._request.canonical_selection = {}
+        key = (run_id, name)
+        if key in memo:
+            return memo[key]
+        selection = None
+        try:
+            from intent_engine.executive import company_profile as CPF
+            from intent_engine.executive.analysis_selection import select
+            meta = self.ci.run_meta(run_id) or {}
+            resolved = name or str(meta.get("company_name") or "")
+            resolved_domain = domain or str(meta.get("domain") or "")
+            inputs = self._canonical_profile_inputs(run_id, resolved, domain)
+            # THE PROFILE IS RESOLVED HERE, THROUGH THE MODULE THAT OWNS THE
+            # RUNGS, and then handed to `select` rather than resolved again
+            # inside it. Two reasons, and the second is the one that matters:
+            #
+            #  * there is exactly ONE call to `profile_for` per run, which is
+            #    the whole point of this producer; and
+            #  * `company_profile.profile_for` is the seam the rest of the
+            #    codebase treats as authoritative -- `analysis_selection`
+            #    binds the name at import, so resolving inside it puts the
+            #    canonical answer somewhere no other caller can see or
+            #    substitute. Routing through the owner keeps one resolution
+            #    AND keeps it at the documented seam.
+            profile = CPF.profile_for(
+                _sc_company_key(resolved) or run_id,
+                name=resolved, domain=resolved_domain,
+                registrant=inputs["registrant"],
+                evidence_text=inputs["evidence_text"],
+                published_text=inputs["published_text"])
+            selection = select(
+                _sc_company_key(resolved) or run_id,
+                name=resolved, domain=resolved_domain,
+                profile=profile,
+                registrant=inputs["registrant"],
+                evidence_text=inputs["evidence_text"],
+                published_text=inputs["published_text"])
+        except Exception:                                    # noqa: BLE001
+            _LOG.exception("canonical_selection_failed run=%s", run_id)
+        memo[key] = selection
+        return selection
 
     def _subject_published_text(self, run_id) -> str:
         """This company's OWN published material, filings and pages alike.
@@ -6120,7 +6235,39 @@ class WebApp:
         # `classification_inputs["evidence_text"]`, which resolves ownership
         # against the filer's CIK before returning anything. Two classes here
         # plus one CIK-verified body is the whole subject-owned set.
-        owned, other = [], []
+        # THE COMPANY'S OWN DESCRIPTIVE TEXT, NOT ONLY AN ARBITRARY EXCERPT.
+        #
+        # MEASURED LIVE (807a4143): Point B returned UNKNOWN having retrieved
+        # EIGHT of its own pages including /About, because this corpus was
+        # built from observation EXCERPTS -- spans selected for other purposes
+        # -- and none of them happened to contain the sentence its About page
+        # leads with. Slalom escaped the identical seam only because its
+        # excerpt happened to carry "consulting services". One seam produced a
+        # pass and a failure in one cohort, which is luck, not classification.
+        #
+        # A retrieved document carries `meta_description`: the company's own
+        # one-sentence account of itself, structured rather than sampled, and
+        # the single most classifying string most companies publish. It is put
+        # FIRST because `_self_description` takes the first match it finds,
+        # then the titles, then the bodies. Same ownership rule as before --
+        # subject-owned classes only, never concatenated with anyone else's.
+        lead, owned, other = [], [], []
+        for doc in self._retrieved_documents(run_id):
+            if not isinstance(doc, dict):
+                continue
+            if doc.get("source_class") not in ("company_owned",
+                                               "executive_statement"):
+                continue
+            meta_description = str(doc.get("meta_description") or "").strip()
+            if meta_description:
+                lead.append(meta_description)
+            doc_title = str(doc.get("title") or "").strip()
+            if doc_title:
+                lead.append(doc_title)
+            body_text = str(doc.get("text_content") or "")
+            if body_text:
+                owned.append(body_text[:20_000])
+
         for o in observations:
             excerpt = str(o.get("excerpt") or "")
             title = str(o.get("source_title") or "")
@@ -6138,7 +6285,7 @@ class WebApp:
                 run_id).get("evidence_text") or "")
         except Exception:                                     # noqa: BLE001
             filings = ""
-        subject = "\n".join([t for t in ([filings] + owned) if t])
+        subject = "\n".join([t for t in ([filings] + lead + owned) if t])
         if subject.strip():
             text = subject[:200_000]
         else:
@@ -6190,10 +6337,18 @@ class WebApp:
         body = self._subject_published_text(run_id)
         try:
             from intent_engine.executive.company_profile import profile_for
-            ip = profile_for(name=name, domain=domain,
-                             registrant=ci_in.get("registrant"),
-                             evidence_text=ci_in.get("evidence_text") or "",
-                             published_text=body)
+            # THE CANONICAL ANSWER FIRST. This call site already passed
+            # `published_text` and so already agreed with itself -- but it
+            # agreed by resolving the question a second time with the same
+            # inputs, which is a coincidence the type system does not
+            # enforce. Reading the canonical selection makes /intro and
+            # /xray the same answer rather than two answers that match.
+            canonical = self._canonical_selection(run_id, name, domain)
+            ip = getattr(canonical, "profile", None) or profile_for(
+                name=name, domain=domain,
+                registrant=ci_in.get("registrant"),
+                evidence_text=ci_in.get("evidence_text") or "",
+                published_text=body)
         except Exception:                                     # noqa: BLE001
             ip = None
         analysis = self._analyst_analysis(run_id)
@@ -6466,9 +6621,11 @@ class WebApp:
             from intent_engine.executive.analysis_selection import select
             meta = self.ci.run_meta(run_id) or {}
             ci_in = self.classification_inputs(run_id, name)
-            selection = select(name=name, domain=str(meta.get("domain") or ""),
-                               registrant=ci_in["registrant"],
-                               evidence_text=ci_in["evidence_text"])
+            selection = self._canonical_selection(
+                run_id, name, str(meta.get("domain") or "")) or select(
+                name=name, domain=str(meta.get("domain") or ""),
+                registrant=ci_in["registrant"],
+                evidence_text=ci_in["evidence_text"])
             profile = selection.profile
         except Exception:                                   # noqa: BLE001
             pass
@@ -6646,10 +6803,11 @@ class WebApp:
             from intent_engine.executive.analysis_selection import select
             meta = self.ci.run_meta(run_id) or {}
             ci_in = self.classification_inputs(run_id, name)
-            read_selection = select(name=name,
-                                    domain=str(meta.get("domain") or ""),
-                                    registrant=ci_in["registrant"],
-                                    evidence_text=ci_in["evidence_text"])
+            read_selection = self._canonical_selection(
+                run_id, name, str(meta.get("domain") or "")) or select(
+                name=name, domain=str(meta.get("domain") or ""),
+                registrant=ci_in["registrant"],
+                evidence_text=ci_in["evidence_text"])
             profile = read_selection.profile
         except Exception:                                   # noqa: BLE001
             pass
@@ -7926,7 +8084,7 @@ class WebApp:
         cache[cid] = out
         return out
 
-    def _ceo_questions(self, dossier) -> dict:
+    def _ceo_questions(self, dossier, profile=None) -> dict:
         """Every required CEO question, answered by projecting the decision.
 
         A failure is a STATE. An empty list would read as "this company has
@@ -7936,7 +8094,8 @@ class WebApp:
         try:
             from intent_engine.executive import ceo_questions as _Q
             from intent_engine.executive.decision_synthesis import compose
-            decision = compose(dossier, registrant=self._registrant(dossier))
+            decision = compose(dossier, registrant=self._registrant(dossier),
+                               profile=profile)
             return {"contract": _Q.CONTRACT,
                     "answers": [_Q.answer(q, decision).as_dict()
                                 for q in _Q.REQUIRED_QUESTIONS]}
@@ -7944,7 +8103,7 @@ class WebApp:
             return {"state": "CEO_QUESTIONS_UNAVAILABLE",
                     "reason": f"the answers could not be composed: {exc}"}
 
-    def _executive_read(self, dossier):
+    def _executive_read(self, dossier, profile=None):
         """Compose the FounderDecision for one dossier. No model call.
 
         Composed HERE rather than inside `demo_dossier.views` because the
@@ -7969,7 +8128,8 @@ class WebApp:
             previous = self._demo_dossier_store().previous(
                 dossier.company_id, before=dossier.dossier_version)
             return compose(dossier, previous=previous,
-                           registrant=self._registrant(dossier)).as_dict()
+                           registrant=self._registrant(dossier),
+                           profile=profile).as_dict()
         except Exception:                                   # noqa: BLE001
             _LOG.warning("executive read not composed for %s",
                          dossier.company_id)

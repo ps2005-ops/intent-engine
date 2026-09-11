@@ -241,6 +241,84 @@ PROOFS = [
         expect_failure_contains="assert",
     ),
     Proof(
+        label="the decision composer resolves its own profile instead of "
+              "the run's canonical one",
+        path=SRC / "executive" / "decision_synthesis.py",
+        find="    selection = _select(dossier, hidden, registrant, "
+             "profile=profile)",
+        replace="    selection = _select(dossier, hidden, registrant)",
+        target="tests/test_adaptive_guards.py::"
+               "test_one_run_resolves_one_profile_for_every_surface",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="the X-Ray stops reading the canonical selection",
+        path=SRC / "webapp" / "app.py",
+        find="        canonical = self._canonical_selection(\n"
+             "            run_id, name, str(meta.get(\"domain\") or \"\"))",
+        replace="        canonical = None",
+        target="tests/test_adaptive_guards.py::"
+               "test_one_run_resolves_one_profile_for_every_surface",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="the subject corpus goes back to excerpts only",
+        path=SRC / "webapp" / "app.py",
+        find='        subject = "\\n".join([t for t in ([filings] + lead + owned) if t])',
+        replace='        subject = "\\n".join([t for t in ([filings] + owned) if t])',
+        target="tests/test_adaptive_guards.py::"
+               "test_the_subject_corpus_leads_with_the_company_own_description",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="a company describing itself through its product is not read "
+              "as a self-description",
+        path=SRC / "adaptive" / "profile.py",
+        find='    r"\\b{name}(?:\'s|\\u2019s)\\s+"',
+        replace='    r"\\bNEVERMATCHES{name}(?:\'s|\\u2019s)\\s+"',
+        target="tests/test_adaptive_guards.py::"
+               "test_a_company_describing_itself_through_its_product_is_a_"
+               "self_description",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="the no-chain state borrows the decision-grade heading",
+        path=SRC / "adaptive" / "render.py",
+        find='        C.NO_CHAIN: "No supported chain yet",',
+        replace="",
+        target="tests/test_adaptive_guards.py::"
+               "test_the_chain_heading_states_the_epistemic_state",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="a bullet fragment is quoted as a sentence",
+        path=SRC / "adaptive" / "spans.py",
+        find="    if text[0] in _BULLETS:\n        return False",
+        replace="    if False:\n        return False",
+        target="tests/test_adaptive_guards.py::"
+               "test_a_bullet_fragment_is_never_quoted_as_a_sentence",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="the same passage is quoted twice at two different lengths",
+        path=SRC / "adaptive" / "spans.py",
+        find="            if key.startswith(existing_key) or existing_key."
+             "startswith(key):",
+        replace="            if key == existing_key:",
+        target="tests/test_adaptive_guards.py::"
+               "test_the_same_passage_is_never_quoted_twice",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="long provenance URLs stop wrapping and overflow the page",
+        path=SRC / "webapp" / "app.py",
+        find="code,.src,.prov{overflow-wrap:anywhere;word-break:break-word}",
+        replace="code,.src,.prov{}",
+        target="tests/test_adaptive_guards.py::"
+               "test_long_provenance_urls_wrap_rather_than_overflow",
+        expect_failure_contains="assert",
+    ),
+    Proof(
         label="the subject is extracted as its own critical dependency",
         path=SRC / "adaptive" / "profile.py",
         find="        if not _is_the_subject(phrase, company))",
@@ -252,10 +330,8 @@ PROOFS = [
     Proof(
         label="a quoted passage is cut by arithmetic and begins mid-word",
         path=SRC / "adaptive" / "spans.py",
-        find="        if offset <= target < offset + len(sentence):\n"
-             "            return trim_to_word(clean, max_chars)",
-        replace="        if offset <= target < offset + len(sentence):\n"
-                "            return _word_snapped(body, start, end, "
+        find="            chosen = trim_to_word(clean, max_chars)",
+        replace="            chosen = _word_snapped(body, start, end, "
                 "max_chars)[3:]",
         target="tests/test_adaptive_guards.py::"
                "test_a_quoted_passage_never_begins_or_ends_mid_word",
@@ -264,8 +340,8 @@ PROOFS = [
     Proof(
         label="a quoted passage is truncated by arithmetic and ends mid-word",
         path=SRC / "adaptive" / "spans.py",
-        find="            return trim_to_word(clean, max_chars)",
-        replace="            return clean[:max_chars]",
+        find="            chosen = trim_to_word(clean, max_chars)",
+        replace="            chosen = clean[:max_chars]",
         target="tests/test_adaptive_guards.py::"
                "test_a_quoted_passage_never_begins_or_ends_mid_word",
         expect_failure_contains="assert",

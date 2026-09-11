@@ -30,6 +30,86 @@ WINDOW = 600
 MAX_CHARS = 300
 
 
+#: Glyphs a list uses to mark an item. A passage that OPENS with one is the
+#: tail of a list, not a sentence.
+_BULLETS = "\u2022\u25cf\u25aa\u00b7\u2023\u2043-\u2013\u2014*"
+
+
+def is_quotable(passage: str) -> bool:
+    """Can this stand on a page as a quotation, on its own?
+
+    MEASURED LIVE (ZoomInfo, 807a4143). The page carried:
+
+        "\u2022We experience competition from other companies and technologies
+         that allow businesses to gather and aggregate sales, marketing,
+         recruiting, and other data, and we may in the future face competition
+         from prominent large-language-model (LLM) providers and generative AI
+         companies,"
+
+    A bullet glyph at the front and a comma at the back: the middle of one
+    item of a risk-factor list, quoted as though it were a sentence. Both ends
+    are the same fault -- a passage lifted out of a structure that carried its
+    meaning.
+
+    A caller that gets False renders a PARAPHRASE with its citation instead,
+    which is the existing behaviour for a span that found only furniture.
+    """
+    text = " ".join(str(passage or "").split())
+    if len(text) < 30:
+        return False
+    if text[0] in _BULLETS:
+        return False
+    # A PASSAGE THAT BEGINS MID-SENTENCE. The live defect this module was
+    # built for read "omers are transforming GTM performance" -- the tail of
+    # "customers". `quote_around` snaps to sentences, but the fallback path
+    # and a corpus with no sentence punctuation can still hand back a
+    # fragment, and the two ends are the same fault.
+    #
+    # A lowercase FIRST LETTER is only a fragment when the whole first word is
+    # lowercase: "iPhone", "eBay" and "openAI" are how those companies write
+    # their own names, and refusing them would delete real first-party
+    # evidence to catch a formatting artifact.
+    first = text.split(" ", 1)[0]
+    if first[:1].islower() and first.islower():
+        return False
+    # a quotation may be elided, but it may not simply stop mid-clause
+    if text[-1] not in ".!?\u2026" and not text.endswith('."'):
+        return False
+    return True
+
+
+def dedupe_passages(passages):
+    """Distinct passages, keeping the most complete form of each.
+
+    MEASURED LIVE (ZoomInfo, 807a4143): the same sentence appeared twice
+    under "The evidence this rests on". The existing guard was
+    `dict.fromkeys`, which is EXACT-string dedup -- and the two copies were
+    not exactly equal, because three producers quote with three different
+    `max_chars` (240, 280, 300). The same passage cut at two lengths is two
+    strings and one quotation.
+
+    So sameness is decided by prefix after normalisation, in both directions,
+    and the longer form wins. Elision markers are stripped before comparing,
+    or "... selling \u2026" and "... selling, training" never match.
+    """
+    kept = []
+    for raw in passages:
+        text = " ".join(str(raw or "").split())
+        if not text:
+            continue
+        key = text.rstrip(" \u2026.").casefold()
+        replaced = False
+        for index, (existing_key, existing_text) in enumerate(kept):
+            if key.startswith(existing_key) or existing_key.startswith(key):
+                if len(text) > len(existing_text):
+                    kept[index] = (key, text)
+                replaced = True
+                break
+        if not replaced:
+            kept.append((key, text))
+    return tuple(text for _key, text in kept)
+
+
 def trim_to_word(text: str, max_chars: int) -> str:
     """Shorten to `max_chars` without ending mid-word.
 
@@ -90,17 +170,23 @@ def quote_around(text: str, start: int, end: int,
     best_distance = None
     for offset, sentence in split_sentences(window):
         clean = " ".join(str(sentence).split())
+        # A LIST ITEM IS A SENTENCE WITH A GLYPH IN FRONT OF IT. Dropping the
+        # marker keeps the item; keeping the marker makes every list item
+        # unquotable and throws away real evidence.
+        clean = clean.lstrip(_BULLETS + " ").strip()
         if len(clean) < 30 or furniture_reason(clean):
             continue
         # the sentence the match is INSIDE wins outright
         if offset <= target < offset + len(sentence):
-            return trim_to_word(clean, max_chars)
+            chosen = trim_to_word(clean, max_chars)
+            return chosen if is_quotable(chosen) else ""
         distance = abs(offset - target)
         if best_distance is None or distance < best_distance:
             best, best_distance = clean, distance
     if best is None:
         return ""
-    return trim_to_word(best, max_chars)
+    chosen = trim_to_word(best, max_chars)
+    return chosen if is_quotable(chosen) else ""
 
 
 def _word_snapped(body: str, start: int, end: int, max_chars: int) -> str:

@@ -481,7 +481,7 @@ def _facts(dossier, hidden: str):
             "AVAILABLE", "STALE"))
 
 
-def _select(dossier, hidden: str, registrant=None):
+def _select(dossier, hidden: str, registrant=None, profile=None):
     """This company's analysis selection, or None if it cannot be made.
 
     Never raises into `compose`: a missing manifest must degrade the reading,
@@ -495,10 +495,34 @@ def _select(dossier, hidden: str, registrant=None):
     """
     try:
         from intent_engine.executive import analysis_selection as AS
+        # THE CANONICAL PROFILE FILLS A GAP; IT NEVER OVERRIDES.
+        #
+        # `profile_for` consults the company's own published account ONLY
+        # where the validation manifest and the regulator's industry code
+        # both refused -- that is the documented rung order, and this seam
+        # has to obey it too. So: let this surface resolve the way it always
+        # has, and substitute the run's canonical answer only if that came
+        # back unclassified.
+        #
+        # An earlier version of this repair passed the canonical profile
+        # unconditionally, and `test_the_live_xray_says_what_the_dossier_xray
+        # _says` caught the cost: for a company the manifest DOES classify,
+        # the live X-Ray and the dossier X-Ray started asking two different
+        # decision questions. Overriding a better-sourced answer to remove a
+        # contradiction just moves the contradiction somewhere else.
+        own = AS.select(dossier.company_id,
+                        name=dossier.canonical_name or "",
+                        facts=_facts(dossier, hidden),
+                        registrant=registrant)
+        if getattr(getattr(own, "profile", None), "known", False):
+            return own
+        if profile is None or not getattr(profile, "known", False):
+            return own
         return AS.select(dossier.company_id,
                          name=dossier.canonical_name or "",
                          facts=_facts(dossier, hidden),
-                         registrant=registrant)
+                         registrant=registrant,
+                         profile=profile)
     except Exception:                                       # noqa: BLE001
         return None
 
@@ -597,7 +621,8 @@ def _recommendation(standing: str, selection, facts) -> tuple:
 
 def compose(dossier, *, previous: Optional[Any] = None,
             prior_decision: Optional[Any] = None,
-            registrant: Optional[dict] = None) -> FounderDecision:
+            registrant: Optional[dict] = None,
+            profile: Optional[Any] = None) -> FounderDecision:
     """Build one FounderDecision from one company demo dossier.
 
     ZERO MODEL CALLS. Verified by a break proof, not by intent.
@@ -616,7 +641,22 @@ def compose(dossier, *, previous: Optional[Any] = None,
     causal_status, causal_note = _causal_status(dossier)
     economic_state, economic_context = _economic(dossier)
     gaps, mdrs, vois, guardrails = _route_refusal(dossier, causal_status)
-    selection = _select(dossier, hidden, registrant)
+    # THE CANONICAL PROFILE, WHEN THE CALLER HAS ONE -- AND ONLY THE PROFILE.
+    #
+    # `_select` is handed a dossier, which carries no run-scoped evidence, so
+    # for a private company it resolves UNKNOWN and the X-Ray prints "what
+    # kind of business this is has not been established" beside an /intro
+    # that established it.
+    #
+    # An earlier version of this repair passed the whole SELECTION instead,
+    # and `test_the_live_xray_says_what_the_dossier_xray_says` caught what
+    # that cost: the archetype and the decision question are scored from the
+    # DOSSIER's `RecordFacts`, which a run-scoped selection does not carry, so
+    # the live X-Ray and the dossier X-Ray started asking two different
+    # questions about one company. Moving a contradiction is not repairing
+    # it. The profile is the thing that was inconsistent; the facts belong to
+    # the dossier and stay with it.
+    selection = _select(dossier, hidden, registrant, profile=profile)
 
     evidence_block = _block(dossier, "evidence")
     monitoring = []

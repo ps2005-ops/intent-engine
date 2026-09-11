@@ -568,3 +568,270 @@ def test_one_run_resolves_one_business_model_on_every_surface():
     assert "published_text=" in src, (
         "the strategic read resolves a second profile for the same run")
 
+def test_one_run_resolves_one_profile_for_every_surface():
+    """MEASURED LIVE (807a4143): seven of ten companies said
+
+        /intro  "It is a subscription software business, read from its own
+                 account of how it is paid"
+        /xray   "What kind of business this is has not been established"
+
+    and the correlation with the model's SOURCE was exact -- every company
+    classified at rung 3 carried it, the one public company at rung 2 did
+    not. Six call sites resolved a profile and four never passed
+    `published_text`, so rung 3 was unreachable from four of them.
+
+    The repair is a canonical run-scoped selection every surface reads. This
+    asserts the PRODUCERS agree, and that the consumers take the canonical
+    answer when one is offered.
+    """
+    import inspect
+
+    from intent_engine.webapp import app as webapp_app
+
+    # 1. THE PRODUCER EXISTS AND GATHERS ALL THREE RUNGS' INPUTS.
+    src = inspect.getsource(webapp_app.WebApp._canonical_profile_inputs)
+    for rung in ("registrant", "evidence_text", "published_text"):
+        assert rung in src, rung
+
+    # 2. EVERY CONSUMER READS IT. Read from the running code rather than by
+    # grepping prose: a grep over comments matches the sentence explaining
+    # the rule instead of the call that obeys it.
+    for method, what in (
+            (webapp_app.WebApp._run_xray, "the X-Ray"),
+            (webapp_app.WebApp._compose_strategic_read, "the strategic read"),
+            (webapp_app.WebApp._adaptive, "the adaptive block"),
+            (webapp_app.WebApp._compose_founder_economic_context,
+             "the economic context")):
+        body = inspect.getsource(method)
+        assert "_canonical_selection" in body, what
+
+    # 3. THE DECISION COMPOSER ACCEPTS IT, so the X-Ray panel stops building
+    # its own profile from the manifest alone.
+    from intent_engine.executive import decision_synthesis as DS
+    # THE PROFILE, NOT THE WHOLE SELECTION. Passing the selection made the
+    # live X-Ray and the dossier X-Ray ask two different questions, because
+    # the archetype and the decision question are scored from the DOSSIER's
+    # RecordFacts. The profile was the inconsistent thing; the facts belong
+    # to the dossier.
+    assert "profile" in inspect.signature(DS.compose).parameters
+    assert "_select(dossier, hidden, registrant, profile=profile)" in (
+        inspect.getsource(DS.compose))
+
+
+def test_the_canonical_selection_reaches_rung_three():
+    """The producer must actually classify a private company.
+
+    A canonical answer that is canonically UNKNOWN would make every surface
+    agree and would fix nothing.
+    """
+    from intent_engine.executive.analysis_selection import select
+    owned = ("Point B is a management consulting firm that specializes in "
+             "leveraging technology to unlock human potential.")
+    without = select(name="Point B", domain="pointb.com")
+    with_text = select(name="Point B", domain="pointb.com",
+                       published_text=owned)
+    assert not without.profile.known
+    assert with_text.profile.known
+    assert with_text.profile.business_model_class == (
+        "PEOPLE_OR_ROUTE_BASED_SERVICES")
+
+def test_the_subject_corpus_leads_with_the_company_own_description():
+    """MEASURED LIVE (Point B, 807a4143): UNKNOWN after retrieving EIGHT of
+    its own pages including /About, because the corpus was built from
+    observation EXCERPTS and none happened to carry the sentence its About
+    page leads with. A retrieved document carries `meta_description` -- the
+    company's own one-sentence account of itself, structured rather than
+    sampled -- and the corpus ignored it.
+    """
+    import inspect
+
+    from intent_engine.webapp import app as webapp_app
+    src = inspect.getsource(webapp_app.WebApp._subject_published_text)
+    assert "meta_description" in src
+    assert "_retrieved_documents" in src
+    # the lead must be joined BEFORE the bodies, or the first self-description
+    # match is still whichever excerpt happened to come first
+    assert "[filings] + lead + owned" in src
+
+
+def test_a_company_describing_itself_through_its_product_is_a_self_description():
+    """Druva writes "Druva's AI-powered, cloud-native SaaS platform delivers
+    data security..." -- a possessive, so the "X is a Y" form never matched
+    and Druva was one of two companies with no self-description at all."""
+    from intent_engine.adaptive.profile import _self_description
+    got = _self_description(
+        "Druva\u2019s AI-powered, cloud-native SaaS platform delivers data "
+        "security, identity resilience and cyber recovery.", "Druva")
+    assert got and "delivers data security" in got[0]
+
+    # NEGATIVE CONTROLS: a possessive about the company is not the company's
+    # account of what it is.
+    assert not _self_description(
+        "Acme\u2019s customers say the product transformed their business.",
+        "Acme")
+    assert not _self_description(
+        "Acme\u2019s press releases are available in the newsroom.", "Acme")
+
+
+def test_the_chain_heading_states_the_epistemic_state():
+    """MEASURED LIVE (Point B, 807a4143): the body said "No chain is shown, of
+    either kind" under the heading "From the change to the decision". The
+    heading is the part a scanning reader actually reads."""
+    import html
+    import re
+
+    from intent_engine.adaptive import causal as C
+    from intent_engine.adaptive import render as ar
+
+    class _Chain:
+        def __init__(self, kind):
+            self.kind, self.links, self.reason = kind, (), "nothing to follow"
+
+    class _Adaptive:
+        def __init__(self, kind):
+            self.causal_chain = _Chain(kind)
+
+    def heading_for(kind):
+        out = ar.causal_chain(_Adaptive(kind))
+        return html.unescape(re.search(r"<h2[^>]*>(.*?)</h2>", out).group(1))
+
+    assert heading_for(C.DECISION_CHAIN) == "From the change to the decision"
+    assert heading_for(C.INVESTIGATION_CHAIN) == (
+        "What would be worth investigating")
+    no_chain = heading_for(C.NO_CHAIN)
+    assert no_chain != "From the change to the decision"
+    assert "no supported chain" in no_chain.lower()
+
+
+def test_a_bullet_fragment_is_never_quoted_as_a_sentence():
+    """MEASURED LIVE (ZoomInfo, 807a4143). The page carried a risk-factor list
+    item quoted as evidence: a bullet glyph at the front, a comma at the back,
+    the middle of one item of a list."""
+    from intent_engine.adaptive.spans import is_quotable, quote_around
+    # THE FIXTURE MUST ISOLATE THE BULLET RULE. An earlier version used the
+    # live string, which ALSO ends on a comma -- so the terminal-punctuation
+    # rule refused it whether or not the bullet rule existed, and the break
+    # proof ran NOT_CAUGHT. This one is well-formed at every other point, so
+    # only the leading glyph can decide it.
+    assert not is_quotable(
+        "\u2022ZoomInfo is a global leader in modern go-to-market software, "
+        "data, and intelligence for revenue teams.")
+    # and the live string, which is refused at BOTH ends
+    assert not is_quotable(
+        "\u2022We experience competition from other companies and "
+        "technologies that allow businesses to gather data,")
+    assert not is_quotable(
+        "and we may in the future face competition from LLM providers,")
+    # A PASSAGE THAT BEGINS MID-SENTENCE is the same fault at the other end.
+    assert not is_quotable(
+        "etherlands New Zealand United Kingdom United States Careers.")
+    # ...but a lowercase BRAND is how the company writes its own name, and
+    # refusing it would delete real first-party evidence.
+    assert is_quotable(
+        "iPhone integrations let teams move data between systems quickly.")
+    assert is_quotable(
+        "eBay is a global commerce leader connecting millions of buyers.")
+
+    # POSITIVE CONTROL: a list item that IS a whole statement stays quotable
+    # once its marker is dropped, or this guard just deletes real evidence.
+    assert is_quotable(
+        "ZoomInfo is a global leader in modern go-to-market software, data, "
+        "and intelligence for sales and marketing teams.")
+    text = ("Our platform matters. \u2022 ZoomInfo is a global leader in "
+            "modern go-to-market software and intelligence for revenue "
+            "teams everywhere. Another line follows here.")
+    i = text.index("global leader")
+    got = quote_around(text, i, i + 13)
+    assert got and got[0] not in "\u2022-*"
+
+
+def test_the_same_passage_is_never_quoted_twice():
+    """MEASURED LIVE (ZoomInfo, 807a4143): one sentence rendered twice. The
+    guard was `dict.fromkeys` -- exact-string dedup -- and three producers
+    quote with three different budgets (240, 280, 300), so one passage
+    arrives as two strings."""
+    from intent_engine.adaptive.spans import dedupe_passages
+    short = ("Many of our customers use our integrations to access our data "
+             "from within, or send data to, CRM, marketing automation")
+    long_ = short + ", applicant tracking and other systems."
+    got = dedupe_passages([short, long_, "A different sentence entirely."])
+    assert len(got) == 2, got
+    # the MORE COMPLETE form survives
+    assert long_ in got
+
+
+def test_long_provenance_urls_wrap_rather_than_overflow():
+    """MEASURED LIVE (Monte Carlo Data, 807a4143): the retrieval-failure page
+    -- the one naming every source it tried and why each was refused -- pushed
+    85px off a 375px screen. `max-width` and `overflow-x` do nothing to an
+    INLINE <code>."""
+    from intent_engine.webapp import app as webapp_app
+    css = webapp_app.BASE_CSS if hasattr(webapp_app, "BASE_CSS") else ""
+    if not css:
+        import inspect
+        css = inspect.getsource(webapp_app)
+    assert "overflow-wrap:anywhere" in css
+    # provenance is wrapped, never hidden
+    assert "code,.src,.prov{overflow-wrap:anywhere" in css
+
+def test_the_canonical_profile_fills_a_gap_and_never_overrides():
+    """`profile_for` consults the company's own published account ONLY where
+    the manifest and the industry code both refused. This seam has to obey
+    the same order.
+
+    Passing the canonical profile unconditionally made the live X-Ray and the
+    dossier X-Ray ask two different decision questions for a company the
+    manifest DOES classify -- overriding a better-sourced answer to remove a
+    contradiction only moves it.
+    """
+    from intent_engine.executive import decision_synthesis as DS
+    from intent_engine.executive.company_profile import (
+        CompanyIntelligenceProfile,
+    )
+
+    class _Dossier:
+        company_id = "acme"
+        canonical_name = "Acme"
+        market_block = {}
+        blocks = ()
+
+    rung3 = CompanyIntelligenceProfile(
+        company_id="acme", company_name="Acme", known=True,
+        business_model_class="PEOPLE_OR_ROUTE_BASED_SERVICES")
+
+    own = DS._select(_Dossier(), "", None)
+    got = DS._select(_Dossier(), "", None, profile=rung3)
+    if getattr(getattr(own, "profile", None), "known", False):
+        # a surface that already had an answer keeps its own
+        assert got.profile.business_model_class == (
+            own.profile.business_model_class)
+    else:
+        # and an unclassified one takes the run's canonical answer
+        assert got.profile.business_model_class == (
+            "PEOPLE_OR_ROUTE_BASED_SERVICES")
+
+
+def test_every_per_request_memo_is_cleared_for_the_next_visitor():
+    """Worker threads are reused, so a memo left on the thread-local is the
+    PREVIOUS visitor's company.
+
+    The canonical selection memo was added without a reset line, and three
+    existing tests failed in batch while passing alone -- the signature of a
+    memo outliving its request. This asserts every memo assigned on
+    `self._request` anywhere in the module is also cleared in the per-request
+    reset, so the next one cannot be forgotten silently.
+    """
+    import inspect
+    import re
+
+    from intent_engine.webapp import app as webapp_app
+    src = inspect.getsource(webapp_app)
+    assigned = set(re.findall(r"self\._request\.([a-z_]+)\s*=", src))
+    # `claim` is assigned None rather than a container; both count as cleared.
+    cleared = set(re.findall(
+        r"self\._request\.([a-z_]+)\s*=\s*(?:\{\}|\[\]|None)\n", src))
+    missing = sorted(assigned - cleared)
+    assert not missing, (
+        "these per-request memos are never reset, so they survive into the "
+        f"next visitor's request: {missing}")
+

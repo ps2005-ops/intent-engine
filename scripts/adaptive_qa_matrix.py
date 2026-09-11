@@ -39,6 +39,65 @@ def tokens_for(name: str):
     return out or [name]
 
 
+#: Page furniture that surrounds every answer. Counting it as answer length
+#: is how "60/60 substantive" was reported for answers of one sentence.
+CHROME = (r"Home · Your analyses · Guest demo session Leave demo",
+          r"Ask a follow-up.*$", r"Suggested:.*$", r"Other views.*$")
+
+#: A STATED LIMITATION IS A VALID ANSWER when the evidence cannot support a
+#: fuller one. Written as the STRUCTURE the product uses rather than as a list
+#: of sentences: `founder_brief/qa.py` says "No falsifier has been recorded",
+#: "No open uncertainty has been recorded for this company", "Nothing is
+#: currently preregistered to watch", "This particular question is not
+#: answerable from what this run retrieved", "revenue growth is not disclosed
+#: at the granularity the decision needs". Matching phrases would mean
+#: re-listing every one of those and mis-scoring the next one somebody writes;
+#: matching the form scores the property.
+LIMITATION = re.compile(
+    r"\b(?:no|nothing|not|none)\b[^.]{0,90}?\b("
+    r"established|recorded|selected|retrieved|disclosed|answerable|"
+    r"preregistered|compared|available|put forward|checked|supported|"
+    r"invent|evidence|independent|sufficient)\b", re.I)
+
+
+def answer_body(text: str, company: str, question: str) -> str:
+    """The answer with the page removed from around it."""
+    body = text or ""
+    for rx in CHROME:
+        body = re.sub(rx, " ", body, flags=re.S)
+    body = body.replace(question, " ").replace(company, " ")
+    return " ".join(body.split())
+
+
+def is_valid(body: str, status: int, company: str, raw: str = "") -> tuple:
+    """(valid, why). Semantic validity, never a raw word count.
+
+    A concise, evidence-aware refusal PASSES: on a run that retrieved nothing,
+    "there is not enough public evidence to answer that confidently" is the
+    correct answer and a long one would be a fabrication.
+    """
+    if status != 200:
+        return False, f"status {status}"
+    if not body:
+        return False, "empty"
+    low = body.lower()
+    if len(body.split()) >= 40:
+        return True, "substantive"
+    if LIMITATION.search(body):
+        return True, "states its limitation in the product's own form"
+    # COMPANY-SPECIFICITY IS TESTED ON THE RAW TEXT, because `answer_body`
+    # strips the company name out -- testing the stripped body for the name it
+    # just removed is a check that can only ever fail. Measured: it marked a
+    # 27-word answer invalid that reads "the company's filings carry this, so
+    # it is stated under legal obligation rather than in marketing -- but no
+    # outside account has tested whether it is working".
+    named = company.split()[0].lower() in (raw or body).lower()
+    if named and len(body.split()) >= 15:
+        return True, "short, specific and grounded in this company"
+    return False, (f"neither substantive nor a stated limitation "
+                   f"({len(body.split())}w)")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--matrix", default="reports/adaptive_ten_matrix.json")
@@ -56,8 +115,8 @@ def main() -> int:
              "Six substantive questions per company through the page's own "
              "`/conversation` form, then one contextual follow-up that only "
              "makes sense if the previous answer was retained.", "",
-             "| Company | answered | >=60 words | names itself | names another "
-             "company | follow-up |", "|" + "---|" * 6]
+             "| Company | answered | valid (semantic) | names itself | names "
+             "another company | follow-up |", "|" + "---|" * 6]
 
     tot_answered = tot_long = tot_specific = tot_leak = tot_follow = 0
     leak_detail = []
@@ -68,7 +127,12 @@ def main() -> int:
             continue
         qa = r.get("qa") or []
         answered = sum(1 for x in qa if x.get("status") == 200)
-        long_ = sum(1 for x in qa if x.get("words", 0) >= 60)
+        bodies = [answer_body(x.get("text", ""), name, x.get("q", ""))
+                  for x in qa]
+        verdicts = [is_valid(b, x.get("status", 0), name,
+                             raw=x.get("text", ""))
+                    for b, x in zip(bodies, qa)]
+        long_ = sum(1 for ok, _why in verdicts if ok)
         mine = tokens_for(name)
         specific = sum(1 for x in qa
                        if any(re.search(re.escape(t), x.get("text", ""), re.I)
@@ -96,7 +160,7 @@ def main() -> int:
     n = len([c for c in TEN if c in rows])
     lines += ["", "### Totals", "", "```",
               f"ANSWERED:                 {tot_answered}/{6 * n}",
-              f"SUBSTANTIVE (>=60 words): {tot_long}/{6 * n}",
+              f"VALID (semantic):         {tot_long}/{6 * n}",
               f"COMPANY-SPECIFIC:         {tot_specific}/{6 * n}",
               f"FOLLOW-UP CONTEXT:        {tot_follow}/{n}",
               f"CROSS-COMPANY LEAKAGE:    {tot_leak}", "```"]

@@ -295,6 +295,12 @@ def opportunities(adaptive) -> str:
             f'<p>{_e(m.reason)}</p></section>')
 
 
+#: The provenance marker meaning "this run read it in this company own
+#: material". No rung below may promote a class prior into a
+#: company-specific fact, so every fallback is checked against it.
+SUBJECT_PROV = "SUBJECT_EVIDENCE"
+
+
 def bounded_block(company: str, adaptive) -> str:
     """What we know, what we cannot yet conclude, and what would change that.
 
@@ -314,6 +320,9 @@ def bounded_block(company: str, adaptive) -> str:
            f'cannot say about {_e(company)}</h2>']
 
     out.append('<span class="ad-label">What we know</span><ul>')
+    # How many entries existed before any company-specific fact, so the
+    # fallback rungs fire only when the rungs above them found nothing.
+    before_facts = len(out)
     if said is not None and said.value:
         out.append(f'<li>{_e(said.value)}</li>')
     model = str(getattr(p, "business_model_class", "") or "")
@@ -324,6 +333,45 @@ def bounded_block(company: str, adaptive) -> str:
     for fact in (tuple(getattr(p, "critical_dependencies", ()) or ())[:2]):
         out.append(f'<li>It names {_e(fact.value)} as something it depends '
                    f'on.</li>')
+
+    # THE FALLBACK HIERARCHY, AND WHY IT NEEDS MORE THAN ONE RUNG.
+    #
+    # MEASURED LIVE (807a4143): Cyera and Druva were the only two companies
+    # whose run produced no self-description, so this block fell back to the
+    # class prior and the lens. Both are subscription software and both route
+    # to a data lens, so their blocks scored 0.927 similarity -- the cohort's
+    # only genericity collapse. The cause was not a template. It was a
+    # hierarchy exactly one rung deep.
+    #
+    # Every rung below is EVIDENCE-BACKED and provenance-checked: something
+    # this run read in this company own material, never a sentence composed
+    # to make two companies look different. Where the evidence genuinely says
+    # the same thing about two companies, this block says the same thing --
+    # which is the correct outcome and is what the pairwise test asserts.
+    if len(out) <= before_facts:
+        for fact in (getattr(p, "strategic_assets", ()) or ())[:2]:
+            if (getattr(fact, "value", "")
+                    and getattr(fact, "provenance", "") == SUBJECT_PROV):
+                out.append(f'<li>It claims {_e(fact.value)} as its own.</li>')
+        job = getattr(p, "customer_job", None)
+        if (getattr(job, "value", "")
+                and getattr(job, "provenance", "") == SUBJECT_PROV):
+            out.append(f'<li>The job it says it does for a customer: '
+                       f'{_e(job.value)}</li>')
+        tech = getattr(p, "technology_exposure", None)
+        if (getattr(tech, "value", "")
+                and getattr(tech, "provenance", "") == SUBJECT_PROV):
+            out.append(f'<li>{_e(tech.value)}</li>')
+        # LAST RUNG: the words this company uses that the LENS did not
+        # supply. `carried_by` is what the differentiation layer found was
+        # company-specific, which is the one list here that cannot be a
+        # class prior by construction.
+        carried = [str(w) for w in (getattr(
+            getattr(adaptive, "differentiation", None), "carried_by", ())
+            or ()) if str(w)][:4]
+        if carried:
+            out.append('<li>What this run read as specific to it: '
+                       + _e(", ".join(carried)) + '.</li>')
     out.append('</ul>')
 
     if sel is not None and sel.primary_name:
@@ -357,10 +405,21 @@ def causal_chain(adaptive) -> str:
     if c is None:
         return ""
     from intent_engine.adaptive import causal as C
-    investigating = getattr(c, "kind", "") == C.INVESTIGATION_CHAIN
-    heading = ("What would be worth investigating" if investigating
-               else "From the change to the decision")
-    out = [f'<section class="{"ad-bounded" if investigating else ""}" '
+    kind = getattr(c, "kind", "")
+    investigating = kind == C.INVESTIGATION_CHAIN
+    # THREE STATES, THREE HEADINGS. MEASURED LIVE (807a4143, Point B): the
+    # body said "No chain is shown, of either kind ... nothing to follow and
+    # nothing to ask about that would not be a guess" underneath the heading
+    # "From the change to the decision". The body was right and the heading
+    # promised settled causality, which is the two-way branch this layer
+    # replaced everywhere else and had left standing here. A heading is the
+    # part a reader scanning the page actually reads.
+    heading = {
+        C.INVESTIGATION_CHAIN: "What would be worth investigating",
+        C.NO_CHAIN: "No supported chain yet",
+    }.get(kind, "From the change to the decision")
+    bounded = kind in (C.INVESTIGATION_CHAIN, C.NO_CHAIN)
+    out = [f'<section class="{"ad-bounded" if bounded else ""}" '
            f'aria-labelledby="ad-chain-h">',
            f'<h2 id="ad-chain-h">{heading}</h2>']
     if investigating:

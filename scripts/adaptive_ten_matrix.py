@@ -308,6 +308,17 @@ def qualify(name, domain, *, with_qa=True, verbose=True) -> dict:
     # what kind of business this is. Only a contradiction when the profile IS
     # available -- a run that genuinely could not classify the company is
     # right to say so on both surfaces.
+    # CANONICAL PROFILE CONSISTENCY, across every surface that states a
+    # model rather than across the two where the defect was first seen.
+    try:
+        from adaptive_profile_consistency import probe as _profile_probe
+        consistency = _profile_probe(run_id, opener=op)
+    except Exception as exc:                                 # noqa: BLE001
+        consistency = {"contradictions": [f"probe failed: {exc}"]}
+    row["profile_consistency"] = consistency
+    for line in (consistency.get("contradictions") or ())[:4]:
+        note("PRODUCT_DEFECT", f"profile surface contradiction: {line}")
+
     xray_text = visible(pages.get("xray", ""))
     row["xray_says_unclassified"] = (
         "has not been established" in xray_text
@@ -404,6 +415,22 @@ def qualify(name, domain, *, with_qa=True, verbose=True) -> dict:
     row["quote_count"] = len(quotes)
     bad = [q for q in quotes if _span_is_broken(q)]
     row["broken_quotes"] = bad[:6]
+    # THE SAME PASSAGE TWICE. Measured live on ZoomInfo at 807a4143. Compared
+    # prefix-wise after normalisation, because three producers quote at three
+    # different budgets and one passage arrives as two strings -- which is
+    # exactly why exact-string dedup did not catch it in the product either.
+    dupes, seen = [], []
+    for q in quotes:
+        key = " ".join(q.split()).rstrip(" \u2026.").casefold()
+        if any(key.startswith(k) or k.startswith(key) for k in seen):
+            dupes.append(q[:120])
+        else:
+            seen.append(key)
+    row["duplicate_quotes"] = dupes[:4]
+    if dupes:
+        note("PRODUCT_DEFECT",
+             f"{len(dupes)} evidence passage(s) rendered more than once: "
+             f"{dupes[:2]}")
     if bad:
         note("PRODUCT_DEFECT",
              f"{len(bad)} quotation(s) start or end mid-word, or are "

@@ -184,6 +184,20 @@ _SELF_PATTERNS = (
     r"([a-z][^.;:]{{8,150}}?)(?=[.;:]|\s+(?:and we|and our)\b)",
     r"\b{name}\s+(?:helps|enables|gives|delivers|provides|powers)\s+"
     r"([a-z][^.;:]{{8,150}}?)(?=[.;:])",
+    # THE POSSESSIVE FORM. A company that describes itself THROUGH its own
+    # product is still describing itself, and it is a very common way to do
+    # it: "Druva's AI-powered, cloud-native SaaS platform delivers data
+    # security, identity resilience and cyber recovery." Measured live at
+    # 807a4143, Druva was one of only two companies with no self-description
+    # at all, and the pair collapsed to 0.927 similarity as a result.
+    #
+    # A descriptive VERB is required rather than matching every possessive,
+    # because "Druva's customers say ..." is a testimonial and "Druva's
+    # press releases" is furniture -- both are possessives about the company
+    # and neither is the company's account of what it is.
+    r"\b{name}(?:'s|\u2019s)\s+"
+    r"([a-z][^.;:]{{2,90}}?\s+(?:delivers|provides|powers|helps|enables)\s+"
+    r"[^.;:]{{8,120}}?)(?=[.;:])",
 )
 
 
