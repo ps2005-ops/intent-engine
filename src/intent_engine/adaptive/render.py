@@ -21,6 +21,8 @@ a heading, in document order.
 """
 from __future__ import annotations
 
+import re
+
 import html
 from typing import Optional
 
@@ -565,6 +567,35 @@ def value_block(company: str, adaptive) -> str:
     return "".join(out)
 
 
+def _one_quote_per_passage(html: str) -> str:
+    """The same sentence may be the best evidence for two sections. It is
+    still ONE quotation on the page.
+
+    MEASURED LIVE (Highspot, 7e6f3c9c): "Highspot helps enablement teams scale
+    their impact with AI that identifies skill gaps..." rendered under the
+    lens block AND under "the evidence this rests on". Deduping inside each
+    producer could not see it, because neither producer rendered it twice --
+    the PAGE did. So the rule lives where the page is assembled, and it uses
+    the same prefix comparison `spans.dedupe_passages` uses, because three
+    producers quote at three different budgets and the two copies are not
+    byte-equal.
+    """
+    seen = []
+
+    def keep(match):
+        text = " ".join(re.sub(r"<[^>]+>", " ", match.group(1)).split())
+        key = text.rstrip(" \u2026.").casefold()
+        if not key:
+            return match.group(0)
+        if len(key) >= 12 and any(key.startswith(k) or k.startswith(key)
+                                  for k in seen):
+            return ""
+        seen.append(key)
+        return match.group(0)
+
+    return re.sub(r'<p class="ad-quote">(.*?)</p>', keep, html, flags=re.S)
+
+
 def block(company: str, run_id: str, adaptive, *, role_id: str = "ceo",
           base: str = "", csrf: str = "") -> str:
     """The whole adaptive block, in the order the composer put it in.
@@ -601,4 +632,4 @@ def block(company: str, run_id: str, adaptive, *, role_id: str = "ceo",
         run_id, adaptive, current=role_id, base=base, csrf=csrf,
         lens_selection=getattr(adaptive, "lens_selection", None)))
     parts.append(value_block(company, adaptive))
-    return "".join(p for p in parts if p)
+    return _one_quote_per_passage("".join(p for p in parts if p))

@@ -835,3 +835,118 @@ def test_every_per_request_memo_is_cleared_for_the_next_visitor():
         "these per-request memos are never reset, so they survive into the "
         f"next visitor's request: {missing}")
 
+def test_one_quotation_per_passage_on_the_whole_page():
+    """MEASURED LIVE (Highspot, 7e6f3c9c). "Highspot helps enablement teams
+    scale their impact with AI..." rendered under the lens block AND under
+    "the evidence this rests on".
+
+    Neither producer rendered it twice -- the PAGE did -- so deduping inside
+    each producer could not see it.
+    """
+    from intent_engine.adaptive.render import _one_quote_per_passage
+    same = ("Highspot helps enablement teams scale their impact with AI "
+            "that identifies skill gaps and personalizes training.")
+    html = (f'<section><p class="ad-quote">{same}</p></section>'
+            f'<section><p class="ad-quote">{same}</p></section>'
+            f'<section><p class="ad-quote">A different sentence entirely, '
+            f'long enough to count as its own passage.</p></section>')
+    out = _one_quote_per_passage(html)
+    assert out.count('class="ad-quote"') == 2, out
+    assert "A different sentence entirely" in out
+
+    # THE TWO COPIES ARE NOT BYTE-EQUAL in production: three producers quote
+    # at three budgets, so one arrives truncated.
+    short = same[:80]
+    html2 = (f'<section><p class="ad-quote">{short}</p></section>'
+             f'<section><p class="ad-quote">{same}</p></section>')
+    assert _one_quote_per_passage(html2).count('class="ad-quote"') == 1
+
+
+def test_the_peer_set_absence_does_not_contradict_an_established_model():
+    """MEASURED LIVE (Highspot, 7e6f3c9c): the X-Ray printed "What this
+    business is: SUBSCRIPTION_SOFTWARE" and, two blocks later, "this
+    company's business model is not classified here".
+
+    Both sentences were true -- the second is about the peer universe -- and
+    the page contradicted itself, which is the only thing a reader sees.
+    """
+    from intent_engine.founder_brief.xray import _competitor_body
+    known = _competitor_body({"competitors": (),
+                              "company_profile": {"known": True}})
+    assert "business model is not classified" not in known, known
+    assert "validation universe" in known
+
+    # ...and when the model genuinely is unknown, the honest reason stands.
+    unknown = _competitor_body({"competitors": (),
+                                "company_profile": {"known": False}})
+    assert "business model is not classified" in unknown
+
+def test_every_evidence_producer_quotes_through_the_selector():
+    """MEASURED LIVE (ZoomInfo, 7e6f3c9c). After `quote_around` learned to
+    refuse a passage opening with a bullet glyph, the page STILL carried
+
+        "\u2022We experience competition from other companies ... and
+         generative AI companies,"
+
+    because two producers in `profile.py` never called it: they cut a span
+    with `[^.]*KEYWORD[^.]*.` and truncated it at 280 characters -- a regex
+    window and an arithmetic cut, which is the pair `spans.py` exists to
+    replace. A selector three of five producers use is a convention, not a
+    canon.
+    """
+    from intent_engine.adaptive.profile import build_profile
+    from intent_engine.adaptive.spans import is_quotable
+
+    body = ("ZoomInfo is a global leader in modern go-to-market software. "
+            "\u2022We experience competition from other companies and "
+            "technologies that allow businesses to gather and aggregate "
+            "sales, marketing, recruiting, and other data, and we may in the "
+            "future face competition from prominent large-language-model "
+            "(LLM) providers and generative AI companies, "
+            "Our platform uses AI and machine learning to enrich records. "
+            "We maintain our proprietary data graph across many contacts.")
+    p = build_profile(company="ZoomInfo", domain="zoominfo.com",
+                      evidence_text=body)
+
+    quoted = [getattr(getattr(p, "technology_exposure", None), "evidence", "")]
+    quoted += [f.evidence for f in (getattr(p, "strategic_assets", ()) or ())]
+    quoted = [q for q in quoted if q]
+    assert quoted, "no producer emitted evidence at all"
+    for q in quoted:
+        assert q[0] not in "\u2022\u25cf\u25aa\u00b7*-", q
+        assert is_quotable(q), q
+
+def test_a_self_description_is_not_refused_for_being_slightly_long():
+    """MEASURED LIVE (Cyera, 7e6f3c9c). Its own meta description reads
+
+        "Cyera is an AI-native data security platform that helps enterprises
+         discover, classify, govern, and protect sensitive data across cloud,
+         SaaS, on-prem, and AI environments."
+
+    which is 159 characters after "is an", against a capture capped at 150.
+    It was refused for being NINE CHARACTERS too long -- and Cyera was then
+    one of the two companies whose bounded block fell back to the class prior
+    and scored 0.927 similarity with Druva.
+    """
+    from intent_engine.adaptive.profile import _SELF_MAX, _self_description
+
+    cyera = ("Cyera is an AI-native data security platform that helps "
+             "enterprises discover, classify, govern, and protect sensitive "
+             "data across cloud, SaaS, on-prem, and AI environments.")
+    got = _self_description(cyera, "Cyera")
+    assert got, "a 159-character self-description was refused"
+    assert "AI-native data security platform" in got[0]
+
+    # THE CAP STILL EXISTS. An unbounded run of non-terminating text is a
+    # paragraph, not a sentence, and quoting one back is how a page fills
+    # with somebody's whole homepage.
+    runaway = "Acme is a " + ("very " * 200) + "long thing."
+    assert _SELF_MAX < 400
+    assert not _self_description(runaway, "Acme")
+
+    # AND A META DESCRIPTION THAT IS NOT A SELF-DESCRIPTION IS STILL REFUSED,
+    # or the cap change would simply have made the matcher less careful.
+    veeam = ("Discover cyber resilient solutions for AI and data. See risk "
+             "reduced and recovery assured.")
+    assert not _self_description(veeam, "Veeam")
+

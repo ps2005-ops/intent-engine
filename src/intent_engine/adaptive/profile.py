@@ -179,11 +179,26 @@ _DEPENDENCY_PATTERNS = (
 #:
 #: The company's OWN NAME is the anchor, which is what keeps this from
 #: matching a rival's self-description sitting in the same corpus.
+#: HOW LONG A SELF-DESCRIPTION IS ALLOWED TO BE.
+#:
+#: MEASURED LIVE (Cyera, 7e6f3c9c). Its own meta description reads "Cyera is
+#: an AI-native data security platform that helps enterprises discover,
+#: classify, govern, and protect sensitive data across cloud, SaaS, on-prem,
+#: and AI environments." -- 159 characters after "is an", against a cap of
+#: 150. It was refused for being NINE CHARACTERS too long, and Cyera was then
+#: one of the two companies whose bounded block fell back to the class prior
+#: and collapsed to 0.927 similarity with Druva.
+#:
+#: A cap is still needed -- an unbounded run of non-terminating text is a
+#: paragraph, not a sentence -- but it should sit above the length companies
+#: actually write, and the renderer trims quotations for display anyway.
+_SELF_MAX = 240
+
 _SELF_PATTERNS = (
     r"\b{name}\s+(?:is|are)\s+(?:the|a|an)\s+"
-    r"([a-z][^.;:]{{8,150}}?)(?=[.;:]|\s+(?:and we|and our)\b)",
+    r"([a-z][^.;:]{{8,%d}}?)(?=[.;:]|\s+(?:and we|and our)\b)" % _SELF_MAX,
     r"\b{name}\s+(?:helps|enables|gives|delivers|provides|powers)\s+"
-    r"([a-z][^.;:]{{8,150}}?)(?=[.;:])",
+    r"([a-z][^.;:]{{8,%d}}?)(?=[.;:])" % _SELF_MAX,
     # THE POSSESSIVE FORM. A company that describes itself THROUGH its own
     # product is still describing itself, and it is a very common way to do
     # it: "Druva's AI-powered, cloud-native SaaS platform delivers data
@@ -197,7 +212,7 @@ _SELF_PATTERNS = (
     # and neither is the company's account of what it is.
     r"\b{name}(?:'s|\u2019s)\s+"
     r"([a-z][^.;:]{{2,90}}?\s+(?:delivers|provides|powers|helps|enables)\s+"
-    r"[^.;:]{{8,120}}?)(?=[.;:])",
+    r"[^.;:]{{8,150}}?)(?=[.;:])",
 )
 
 
@@ -710,31 +725,43 @@ def build_profile(*, company: str, domain: str = "",
         # services team" is the subject talking about itself.
         if not _is_the_subject(phrase, company))
 
+    # EVERY PRODUCER QUOTES THROUGH THE SAME SELECTOR.
+    #
+    # MEASURED LIVE (ZoomInfo, 7e6f3c9c). After `quote_around` learned to
+    # refuse a passage that opens with a bullet glyph, the page STILL carried
+    #
+    #     "\u2022We experience competition from other companies ... and
+    #      generative AI companies,"
+    #
+    # because these two producers never called it. They cut a span with
+    # `[^.]*KEYWORD[^.]*\.` and truncated it at 280 characters -- a regex
+    # window and an arithmetic cut, which is the exact pair `spans.py` exists
+    # to replace. A canonical selector that three of five producers use is
+    # not canonical; it is a convention.
+    from intent_engine.adaptive.spans import quote_around as _quote
+
     data_assets = ()
-    if re.search(r"\b(?:our|proprietary)\s+(?:data|dataset|database|index|"
-                 r"graph|corpus)\b", body, re.I):
-        m = re.search(r"[^.]*\b(?:our|proprietary)\s+(?:data|dataset|"
-                      r"database|index|graph|corpus)\b[^.]*\.", body, re.I)
+    _data_hit = re.search(r"\b(?:our|proprietary)\s+(?:data|dataset|"
+                          r"database|index|graph|corpus)\b", body, re.I)
+    if _data_hit:
         data_assets = (Fact(
             value="a proprietary data asset this company claims as its own",
             provenance=SUBJECT_EVIDENCE,
             basis="this company describes a dataset it owns",
-            evidence=" ".join((m.group(0) if m else "").split())[:280]),)
+            evidence=_quote(body, _data_hit.start(), _data_hit.end(),
+                            max_chars=280)),)
 
+    _ai_hit = re.search(r"\b(?:artificial intelligence|machine learning|"
+                        r"\bAI\b|generative)\b", body)
     technology_exposure = (
         Fact(value=("this company's own material describes its product in "
                     "terms of AI or machine learning, so a change in what "
                     "those systems can do reaches its offer directly"),
              provenance=SUBJECT_EVIDENCE,
              basis="this company describes its own product in AI terms",
-             evidence=" ".join(
-                 (re.search(r"[^.]*\b(?:artificial intelligence|machine "
-                            r"learning|\bAI\b|generative)\b[^.]*\.", body)
-                  or re.match("", "")).group(0).split() if re.search(
-                     r"\b(?:artificial intelligence|machine learning|\bAI\b|"
-                     r"generative)\b", body) else [])[:280])
-        if re.search(r"\b(?:artificial intelligence|machine learning|\bAI\b|"
-                     r"generative)\b", body)
+             evidence=_quote(body, _ai_hit.start(), _ai_hit.end(),
+                             max_chars=280))
+        if _ai_hit
         else _unknown("this company's material does not describe its product "
                       "in terms of AI, so no direct technology exposure is "
                       "asserted"))

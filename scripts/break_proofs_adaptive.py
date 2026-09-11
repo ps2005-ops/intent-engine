@@ -319,6 +319,46 @@ PROOFS = [
         expect_failure_contains="assert",
     ),
     Proof(
+        label="the same passage is quoted twice in two different sections",
+        path=SRC / "adaptive" / "render.py",
+        find='    return _one_quote_per_passage("".join(p for p in parts if p))',
+        replace='    return "".join(p for p in parts if p)',
+        target="tests/test_adaptive_guards.py::"
+               "test_one_quotation_per_passage_on_the_whole_page",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="the peer-set absence blames the business model again",
+        path=SRC / "founder_brief" / "xray.py",
+        find='        known = bool((d.get("company_profile") or {}).get("known"))',
+        replace="        known = False",
+        target="tests/test_adaptive_guards.py::"
+               "test_the_peer_set_absence_does_not_contradict_an_established_"
+               "model",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="an evidence producer cuts its own span instead of using the "
+              "selector",
+        path=SRC / "adaptive" / "profile.py",
+        find="             evidence=_quote(body, _ai_hit.start(), "
+             "_ai_hit.end(),\n                             max_chars=280))",
+        replace="             evidence=\" \".join("
+                "body[_ai_hit.start()-120:_ai_hit.end()+160].split())[:280])",
+        target="tests/test_adaptive_guards.py::"
+               "test_every_evidence_producer_quotes_through_the_selector",
+        expect_failure_contains="assert",
+    ),
+    Proof(
+        label="a self-description is refused for being slightly too long",
+        path=SRC / "adaptive" / "profile.py",
+        find="_SELF_MAX = 240",
+        replace="_SELF_MAX = 150",
+        target="tests/test_adaptive_guards.py::"
+               "test_a_self_description_is_not_refused_for_being_slightly_long",
+        expect_failure_contains="assert",
+    ),
+    Proof(
         label="the subject is extracted as its own critical dependency",
         path=SRC / "adaptive" / "profile.py",
         find="        if not _is_the_subject(phrase, company))",

@@ -228,10 +228,24 @@ def _competitor_body(d: dict) -> str:
             f'<p class="m">{_e(c.get("why", ""))}</p></li>' for c in peers)
         parts.append(f'<ul class="rowlist">{rows}</ul>')
     else:
-        parts.append(_absent("No competitor set was selected: this company's "
-                             "business model is not classified here, so peers "
-                             "cannot be chosen by what they actually compete "
-                             "on."))
+        # SAY WHAT IS ACTUALLY MISSING. Peers are chosen from the
+        # validation universe, and this sentence blamed the BUSINESS MODEL
+        # for their absence. That was accurate only while an unclassified
+        # company was the only company without peers -- now that the model
+        # is read from a company's own published account, the X-Ray printed
+        # "What this business is: SUBSCRIPTION_SOFTWARE" and, two blocks
+        # later, "this company's business model is not classified here".
+        # Both sentences were true and the page contradicted itself, which
+        # is the only thing a reader can see.
+        known = bool((d.get("company_profile") or {}).get("known"))
+        parts.append(_absent(
+            "No competitor set was selected: this company is not in the "
+            "validation universe peers are drawn from, so a peer cannot be "
+            "chosen by what it actually competes on."
+            if known else
+            "No competitor set was selected: this company's business model "
+            "is not classified here, so peers cannot be chosen by what they "
+            "actually compete on."))
     moves = d.get("adversary") or ()
     if moves:
         parts.append("<h2>If we move, what do they do</h2>")
