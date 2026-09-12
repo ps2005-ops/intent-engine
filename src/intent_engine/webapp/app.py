@@ -6902,9 +6902,18 @@ class WebApp:
         if not subject or not self._xbrl_allowed():
             return ""
         try:
+            # Same refusal as every other door: a curated non-filer is not a
+            # company whose CIK we go looking for by name.
+            from intent_engine.company_ingestion.entities import declared_cik
+            _curated = declared_cik(company_name=subject)
+            if _curated == "":
+                return ""
             from intent_engine.company_ingestion.edgar import resolve_cik
-            found = resolve_cik(subject, transport=self._transport,
-                                resolver=self._resolver)
+            found = ({"cik": int(_curated.lstrip("0") or "0"),
+                      "cik10": f"{int(_curated.lstrip('0') or '0'):010d}",
+                      "title": subject} if _curated else
+                     resolve_cik(subject, transport=self._transport,
+                                 resolver=self._resolver))
         except Exception:                                   # noqa: BLE001
             return ""
         if not found:
@@ -8339,7 +8348,16 @@ class WebApp:
         try:
             from intent_engine.company_ingestion.edgar import (
                 registrant_classification, resolve_cik)
-            resolved = resolve_cik(name)
+            from intent_engine.company_ingestion.entities import declared_cik
+            _curated = declared_cik(company_name=name)
+            if _curated == "":
+                # Curated and not a filer: classifying it from somebody
+                # else's SIC code is how a consultancy became PHARMA.
+                cache[cid] = {}
+                return {}
+            resolved = ({"cik": int(_curated.lstrip("0") or "0"),
+                         "cik10": f"{int(_curated.lstrip('0') or '0'):010d}",
+                         "title": name} if _curated else resolve_cik(name))
             if resolved:
                 out = registrant_classification(resolved) or {}
         except Exception:                                   # noqa: BLE001

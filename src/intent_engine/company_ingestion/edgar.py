@@ -625,8 +625,31 @@ def propose_edgar_candidates(*, company_name, ticker=None, transport=None,
             resolved = {"cik": int(digits), "cik10": f"{int(digits):010d}",
                         "title": company_name, "ticker": ticker or ""}
         else:
-            resolved = resolve_cik(company_name, ticker=ticker,
-                                   transport=transport, resolver=resolver)
+            # A CURATED IDENTITY THAT DECLARES NO CIK IS AN ANSWER.
+            #
+            # This docstring already warns that "a second resolution that
+            # lands on a different registrant would attribute one company's
+            # filings to another". It did. MEASURED on Adastra: with no CIK
+            # supplied, `resolve_cik("Adastra Corporation")` returned ADASTRA
+            # HOLDINGS LTD. -- a cannabis company -- and its Form 20-F was
+            # retrieved and read as a Toronto consultancy's own evidence.
+            #
+            # Closing the earlier doors is what routed the run here: making
+            # `subject_cik` return "" for a non-filer is exactly what sends
+            # this call down the `else` branch. So the refusal is asked for
+            # once, centrally, and honoured at every door.
+            from intent_engine.company_ingestion.entities import declared_cik
+            curated = declared_cik(company_name=company_name)
+            if curated == "":
+                return []
+            if curated:
+                digits = curated.lstrip("0") or "0"
+                resolved = {"cik": int(digits),
+                            "cik10": f"{int(digits):010d}",
+                            "title": company_name, "ticker": ticker or ""}
+            else:
+                resolved = resolve_cik(company_name, ticker=ticker,
+                                       transport=transport, resolver=resolver)
         if not resolved:
             return []
         return filing_candidates(resolved, transport=transport,

@@ -36,6 +36,9 @@ SUGGEST = ROOT / "src/intent_engine/company_ingestion/suggest.py"
 SEL = ROOT / "src/intent_engine/executive/analysis_selection.py"
 SVC = ROOT / "src/intent_engine/company_ingestion/service.py"
 DSY = ROOT / "src/intent_engine/executive/decision_synthesis.py"
+EDG = ROOT / "src/intent_engine/company_ingestion/edgar.py"
+ENT = ROOT / "src/intent_engine/company_ingestion/entities.py"
+N = "tests/test_a_curated_non_filer_is_never_fuzzy_resolved.py"
 X = "tests/test_the_xray_composer_sees_the_company_record.py"
 C = "tests/test_the_class_prior_is_not_the_decision.py"
 M = "tests/test_two_companies_are_not_merged_into_one.py"
@@ -640,6 +643,49 @@ PROOFS = [
                 "                        evidence_text=evidence_text,",
         target=f"{X}::test_the_dossier_facts_still_belong_to_the_dossier",
         expect_failure_contains="assert"),
+    # --- P0: one company's filings may not become another's evidence --------
+    Proof(
+        label="58. the retrieval door fuzzy-resolves a curated non-filer again",
+        path=EDG,
+        find="            curated = declared_cik(company_name=company_name)\n"
+             '            if curated == "":\n'
+             "                return []",
+        replace="            curated = None",
+        target=f"{N}::test_the_consultancy_retrieves_no_filings_at_all",
+        expect_failure_contains="was fuzzy-resolved into the SEC register"),
+
+    Proof(
+        label="59. the refusal also silences a real filer's own filings",
+        path=EDG,
+        find='            if curated == "":\n'
+             "                return []\n"
+             "            if curated:",
+        replace='            if curated is not None:\n'
+                "                return []\n"
+                "            if curated:",
+        target=f"{N}::test_a_curated_filer_still_retrieves_its_own_filings",
+        expect_failure_contains="lost its filings"),
+
+    Proof(
+        label="60. 'not curated' and 'not a filer' stop being different answers",
+        path=ENT,
+        find="    if profile is None:\n"
+             "        return None\n"
+             '    return str(getattr(profile, "sec_cik", "") or "").strip()',
+        replace="    if profile is None:\n"
+                '        return ""\n'
+                '    return str(getattr(profile, "sec_cik", "") or "").strip()',
+        target=f"{N}::test_an_uncatalogued_company_answers_none",
+        expect_failure_contains="assert"),
+
+    Proof(
+        label="61. a webapp door stops consulting the authority",
+        path=APP,
+        find="            from intent_engine.company_ingestion.entities import declared_cik\n"
+             "            _curated = declared_cik(company_name=subject)",
+        replace="            _curated = None",
+        target=f"{N}::test_the_webapp_doors_consult_it_too[_filer_cik]",
+        expect_failure_contains="without asking whether a curated identity"),
 ]
 
 
