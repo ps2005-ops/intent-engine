@@ -53,6 +53,24 @@ _LITERAL_NONE = re.compile(
     r"|(?<![A-Za-z])None\s*(?:[\]\),]|$)")
 _SPINNER = re.compile(r"(still working|analysing|analyzing|please wait|"
                       r"loading)", re.I)
+#: A SERIALISED PYTHON OBJECT ON A CUSTOMER SURFACE.
+#:
+#: The scan reported "raw enums 0, internal engineering language 0" on cohort
+#: A while SEVEN of fourteen companies printed this inside their LEVEL B
+#: economic sentence:
+#:
+#:   recorded consumer demand {'as_of': '2026-06-01', 'direction': 'UP',
+#:   'node_id': 'panel:PCEC96:2026-06-01', 'standing': 'OBSERVED', ...}
+#:
+#: Neither `_ENUM` nor `_INTERNAL` looks for dict or list syntax, so the
+#: worst textual defect in the cohort was invisible to the instrument that
+#: exists to find textual defects. A rubric that reads the wrong shape
+#: reports zero.
+_PY_REPR = re.compile(r"\{'[A-Za-z_][A-Za-z0-9_]*':"          # {'key':
+                      r"|\{\"[A-Za-z_][A-Za-z0-9_]*\":"      # {"key":
+                      r"|<[a-z_]+\.[A-Za-z_]+ object at 0x"   # <mod.Cls object
+                      r"|\bdict_(?:keys|values|items)\("
+                      r"|\bOrderedDict\(")
 
 
 def _visible(raw: str) -> str:
@@ -67,6 +85,7 @@ def scan_html(raw: str, *, terminal: bool = True) -> dict:
     enums = sorted({m for m in _ENUM.findall(text)})
     internal = sorted({m.lower() for m in _INTERNAL.findall(text)})
     nones = sorted({m for m in _LITERAL_NONE.findall(text)})
+    reprs = sorted({m[:60] for m in _PY_REPR.findall(text)})
     # The longest token that cannot be broken: the real overflow risk at 375px.
     tokens = [t for t in re.findall(r"\S+", text) if len(t) > 24]
     longest = max((len(t) for t in tokens), default=0)
@@ -78,6 +97,7 @@ def scan_html(raw: str, *, terminal: bool = True) -> dict:
     longs = [p for p in paras if len(p) > 120]
     dupes = len(longs) - len(set(longs))
     return {"chars": len(text), "raw_enums": enums, "internal": internal,
+            "python_reprs": reprs,
             "literal_none": nones, "longest_token": longest,
             "stale_spinner": spinner, "has_nav": nav,
             "duplicate_paragraphs": dupes,
@@ -271,6 +291,46 @@ MEASURE_JS = r"""
 """
 
 
+#: ONE PASS PER THEME, NOT EIGHTY NAVIGATIONS.
+#:
+#: Each company's harness page already embeds its surfaces at all five
+#: widths, so the remaining work is to visit forty of them twice. Driving
+#: that as eighty navigations is how a matrix quietly becomes a sample when
+#: someone gets tired. This page walks them itself -- same origin, same
+#: bytes, `contentWindow.__M()` on each -- and exposes the whole result on
+#: `window.__ALL`, so the browser is asked twice: once light, once dark.
+_DRIVER = """<!doctype html><meta charset=utf-8><title>All widths x themes</title>
+<style>body{{margin:0;font:12px system-ui}}#s{{padding:8px;font:12px monospace}}
+iframe{{border:0;width:100%;height:1200px}}</style>
+<div id=s>idle</div><iframe id=f></iframe>
+<script>
+const SLUGS = {slugs};
+window.__ALL = null;
+async function run() {{
+  const out = [], f = document.getElementById('f'), s = document.getElementById('s');
+  for (const slug of SLUGS) {{
+    s.textContent = 'measuring ' + slug + '  (' + (out.length + 1) + '/' + SLUGS.length + ')';
+    await new Promise(res => {{ f.onload = res; f.src = slug + '.matrix.html'; }});
+    await new Promise(r => setTimeout(r, {settle}));
+    let m;
+    try {{ m = f.contentWindow.__M(); }}
+    catch (e) {{ m = {{error: String(e)}}; }}
+    m.slug = slug;
+    out.push(m);
+  }}
+  window.__ALL = out;
+  s.textContent = 'DONE ' + out.length;
+}}
+run();
+</script>"""
+
+
+def write_driver(root, slugs, settle_ms: int = 1800) -> str:
+    (root / "all.matrix.html").write_text(
+        _DRIVER.format(slugs=json.dumps(slugs), settle=settle_ms))
+    return "all.matrix.html"
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--state", default="reports/next40_state.json")
@@ -327,6 +387,7 @@ def main() -> int:
     (root / "index.json").write_text(json.dumps(summary, indent=1))
     bad = {c: {s: v for s, v in d["text"].items()
                if v["raw_enums"] or v["internal"] or v["literal_none"]
+               or v.get("python_reprs")
                or v["stale_spinner"] or v["duplicate_paragraphs"]
                or not v["has_nav"]}
            for c, d in summary.items()}
@@ -337,9 +398,16 @@ def main() -> int:
         for s, d in v.items():
             print(f"  {c} /{s}: enums={d['raw_enums'][:3]} "
                   f"internal={d['internal'][:2]} none={d['literal_none'][:2]} "
+                  f"reprs={d.get('python_reprs', [])[:1]} "
                   f"spinner={d['stale_spinner']} dupes={d['duplicate_paragraphs']} "
                   f"nav={d['has_nav']}")
+    slugs = sorted({re.sub(r"[^a-z0-9]+", "-",
+                           str(r.get("company") or "").lower()).strip("-")
+                    for r in state.get("rows", {}).values()
+                    if r.get("capture_files")})
+    write_driver(root, slugs)
     print(f"\nharness pages in {root}")
+    print(f"driver: all.matrix.html over {len(slugs)} companies")
     return 0
 
 

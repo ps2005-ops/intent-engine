@@ -152,6 +152,27 @@ def journey(name, entity_id, *, verbose=True, extra=None) -> dict:
             continue
         top = rows[0]
         if top.get("entity_id") != entity_id:
+            # AN EXACT TICKER IS A PRECISE IDENTIFIER, NOT A COLLISION.
+            #
+            # MEASURED across the forty: eight short prefixes return another
+            # company, and every one of them is an exact ticker match --
+            # Snap(SNAP), West(WEST), Coll(COLL), Four(FOUR), Drem(DREM),
+            # Geo(GEO), Clar(CLAR), Five(FIVE). Somebody typing "GEO"
+            # plausibly means The GEO Group, and ranking an exact ticker above
+            # a partial name is correct; suppressing it would trade one wrong
+            # answer for another.
+            #
+            # So this is recorded as bounded behaviour WITH THE TICKER AS
+            # EVIDENCE, never waived by name. The company must still be found
+            # by its own name and longer prefixes, which is what the gate
+            # below actually tests -- `picked` is set from any query that
+            # resolves correctly.
+            ticker = str(top.get("ticker") or "").strip().upper()
+            if ticker and ticker == str(typed).strip().upper():
+                row.setdefault("bounded_prefixes", []).append(
+                    {"typed": typed, "ticker": ticker,
+                     "offered": top.get("legal_name")})
+                continue
             first_ok = False
             note("PRODUCT_DEFECT",
                  f"{typed!r} offered {top.get('legal_name')!r} first, "

@@ -914,6 +914,19 @@ def _bounded_rewind(bounded, company: str) -> str:
     # length and no information.
     _any_linked = any(getattr(st, "economic_state", "") == _HR.ECON_LINKED
                       for st in bounded.stops)
+    # AND WHETHER IT HAS ALREADY BEEN SAID. The check above removed this
+    # sentence only when NO stop could be placed in its period. When SOME
+    # could, every unplaced stop still printed it: MEASURED on cohort A as
+    # five identical copies on Dataminr, Boomi and SnapLogic, three on
+    # Adastra and two on HYCU. It informs the reader once -- at the first
+    # stop it applies to, where it explains why that stop carries no
+    # economics -- and adds nothing on the fourth telling.
+    _said_no_state = False
+    # The earliest stop this deployment COULD place, so the sentence can name
+    # the boundary instead of repeating a general fact.
+    _first_linked = next((getattr(st, "date", "") for st in bounded.stops
+                          if getattr(st, "economic_state", "")
+                          == _HR.ECON_LINKED), "")
     for stop in bounded.stops:
         # THE ECONOMIC PANEL IS PRESENT OR IT SAYS WHY. Rendering nothing
         # would leave a reader unable to tell "the period was quiet" from
@@ -924,7 +937,9 @@ def _bounded_rewind(bounded, company: str) -> str:
         if econ:
             econ_html = (f'<p><strong>Economic conditions then:</strong> '
                          f'{_e(econ)}</p>')
-        elif state == _HR.ECON_NO_STATE_FOR_DATE and _any_linked:
+        elif (state == _HR.ECON_NO_STATE_FOR_DATE and _any_linked
+                and not _said_no_state):
+            _said_no_state = True
             # SAID PER STOP ONLY WHERE IT DISTINGUISHES ONE STOP FROM ANOTHER.
             # When NO stop could be placed in its period, this sentence is the
             # same at every stop and the rewind's own note already says it
@@ -933,8 +948,10 @@ def _bounded_rewind(bounded, company: str) -> str:
             econ_html = ('<p class="basis"><strong>Economic conditions '
                          'then:</strong> no economic state had been published '
                          'to this deployment on or before this date, so this '
-                         'stop is not placed in its economic period. Using a '
-                         'later reading would be hindsight.</p>')
+                         'stop is not placed in its economic period'
+                         + (f' — the earliest stop that could be placed is '
+                            f'{_e(_first_linked)}' if _first_linked else '')
+                         + '. Using a later reading would be hindsight.</p>')
         else:
             econ_html = ""
         lesson = getattr(stop, "lesson", "")

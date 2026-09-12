@@ -223,10 +223,39 @@ def _competitor_body(d: dict) -> str:
     parts = []
     peers = d.get("competitors") or ()
     if peers:
-        rows = "".join(
-            f'<li><p class="h">{_e(c.get("name", ""))}</p>'
-            f'<p class="m">{_e(c.get("why", ""))}</p></li>' for c in peers)
-        parts.append(f'<ul class="rowlist">{rows}</ul>')
+        # ONE RATIONALE STATED ONCE, FOR THE PEERS THAT SHARE IT.
+        #
+        # MEASURED on cohort A: Rubrik and Commvault were both given
+        # 37signals LLC, Adobe Inc. and AgileBits Inc. under "Competitors,
+        # and what they would do", each row carrying the identical sentence
+        # "operates the same business model ... in the same sector ...". Five
+        # rows, one reason, and a heading that claims more than the reason
+        # supports: the basis is a shared classification, not an observed
+        # rivalry, and nothing in the analysis says these firms compete with
+        # this one.
+        #
+        # So peers are GROUPED BY THEIR BASIS and the basis is stated once.
+        # The names are kept -- they are real same-class peers and a reader
+        # may want them -- and what is removed is the per-row repetition and
+        # the implied ranking. A rationale that genuinely differs from its
+        # neighbours is still rendered on its own row.
+        groups = {}
+        for c in peers:
+            groups.setdefault(str(c.get("why", "")), []).append(
+                str(c.get("name", "")))
+        rows = []
+        for why, names in groups.items():
+            if len(names) == 1:
+                rows.append(f'<li><p class="h">{_e(names[0])}</p>'
+                            f'<p class="m">{_e(why)}</p></li>')
+                continue
+            rows.append(
+                f'<li><p class="h">{_e(", ".join(names))}</p>'
+                f'<p class="m">{_e(why)} — the same reason for each of these '
+                f'{len(names)}, so they are listed together rather than '
+                f'ranked: no source in this analysis states that any of them '
+                f'competes with this company.</p></li>')
+        parts.append(f'<ul class="rowlist">{"".join(rows)}</ul>')
     else:
         # SAY WHAT IS ACTUALLY MISSING. Peers are chosen from the
         # validation universe, and this sentence blamed the BUSINESS MODEL
@@ -637,7 +666,10 @@ def render(decision: dict, *, company: str = "", stamp: str = "",
         _section("What changed since last time", "the second look",
                  _second_iteration_body(d, labels=labels)),
         _section("Competitors, and what they would do",
-                 f'{len(d.get("competitors") or ())} selected',
+                 # "5 selected" implied a selection by rivalry. The count is
+                 # kept and the BASIS is named, because the peers are chosen
+                 # by shared economics from the validation universe.
+                 f'{len(d.get("competitors") or ())} same-class peer(s)',
                  _competitor_body(d)),
         _section("If we act, what follows",
                  f'{len(d.get("scenarios") or ())} branches',

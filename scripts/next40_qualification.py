@@ -34,6 +34,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import pathlib
 import re
 import statistics
@@ -44,6 +45,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 ROOT = HERE.parent
 
+import next40_owner as OWNER                                     # noqa: E402
 import public_journey_ten as PJT                                  # noqa: E402
 from perf_progressive_matrix import _req, visible                 # noqa: E402
 
@@ -121,6 +123,10 @@ def load_state() -> dict:
 
 def save_state(state: dict) -> None:
     STATE.parent.mkdir(parents=True, exist_ok=True)
+    # THE CLAIM IS REFRESHED BY THE WRITE ITSELF, so a runner that is waiting
+    # out a quota window keeps its ownership and one that has died loses it.
+    OWNER.beat(OWNER.session_id())
+    state["owner"] = OWNER.read().get("session")
     tmp = STATE.with_suffix(".tmp")
     tmp.write_text(json.dumps(state, indent=1, sort_keys=True))
     tmp.replace(STATE)
@@ -209,6 +215,73 @@ def _generalization(run_id, row, surfaces) -> dict:
     why = re.search(r"[Ww]hy this decision\s*(.{20,400}?)(?:\.\s|$)", xray)
     if why:
         out["why_primary_won"] = " ".join(why.group(1).split())[:300]
+    # THE CONTRIBUTIONS, READ OFF THE PAGE'S OWN REASON.
+    #
+    # `/runs/<id>/adaptive.json` does not expose `selection.considered`, so
+    # the JSON attempt below returns nothing and `contributions` came back
+    # empty on a run whose X-Ray states its reasoning in full. The reason
+    # panel is the product's own account of what decided the question, and it
+    # names both the force and the terms:
+    #
+    #   "... is on the list because this company's own record discusses it:
+    #    carrier, freight, logistics; ... in 9 distinct terms ...
+    #    It was ranked above pricing on the same evidence"
+    #
+    # Parsed from the RENDERED page, which is also the thing a customer reads,
+    # so a claim here cannot outrun what the product actually says.
+    # THE WINNER'S OWN REASON, AND NOTHING ELSE ON THE PAGE.
+    #
+    # The X-Ray states "own record discusses this decision in N distinct
+    # terms" for EVERY candidate it weighed, under "Decisions we considered
+    # and did not select". Scanning the whole page therefore attributed a
+    # REJECTED candidate's evidence to the WINNER: Cohesity's Pricing
+    # decision was recorded with three supply-chain terms it never claimed,
+    # and HYCU's with the terms of the decision it was ranked above. Five of
+    # fourteen cohort-A companies would have been reported evidence-led when
+    # the page says the class prior chose them.
+    #
+    # `<p class="k">Why this decision</p>` is the winner's own anchor in the
+    # markup, so the reason is read from there and the search is bounded to it.
+    raw = surfaces.get("xray", {}).get("html", "") or ""
+    panel = re.search(
+        r'<p class="k">Why this decision</p>\s*<p[^>]*>(.*?)</p>', raw,
+        re.S)
+    why_text = " ".join(visible(panel.group(1)).split()) if panel else ""
+    out["why_this_decision"] = why_text
+    out["decision_force"] = (
+        "POSTURE_LED" if ("which is decided by" in why_text
+                          or "operating posture has been identified"
+                          in why_text) else
+        "ECON_LED" if "conditions reach this business" in why_text else
+        "EVIDENCE_LED" if "is not a standing decision for a" in why_text else
+        "CLASS_PRIOR_REINFORCED_BY_EVIDENCE"
+        if "own record discusses this decision in" in why_text else
+        "CLASS_PRIOR_ONLY"
+        if "is a standing decision for this business model" in why_text else
+        "NO_DECISION")
+    terms = re.search(r"own record discusses (?:this decision )?in (\d+) "
+                      r"distinct terms? \(([^)]*)\)", why_text)
+    contrib = {}
+    if terms:
+        groups = terms.groups()
+        contrib = {
+            "evidence": int(groups[0]) if groups[0].isdigit() else None,
+            "evidence_terms": [t.strip() for t in groups[-1].split(",")
+                               if t.strip()],
+            "class_prior_only": False,
+        }
+    elif "is a standing decision for this business model" in why_text:
+        contrib = {"evidence": 0, "evidence_terms": [],
+                   "class_prior_only": True}
+    if "measured" in why_text and "conditions reach this business" in why_text:
+        contrib["econ"] = True
+        contrib["class_prior_only"] = False
+    if contrib:
+        out["contributions"] = contrib
+    ranked = re.search(r"ranked above ([a-z ]+?) on the same evidence",
+                       why_text)
+    if ranked:
+        out["ranked_above"] = ranked.group(1).strip()
     # The itemised contributions, where the run exposes them.
     try:
         st, body, _u, _t, _h = _req(
@@ -219,7 +292,8 @@ def _generalization(run_id, row, surfaces) -> dict:
         considered = sel.get("considered") or []
         if considered:
             out["archetype"] = considered[0].get("archetype")
-            out["contributions"] = considered[0].get("contributions") or {}
+            if considered[0].get("contributions"):
+                out["contributions"] = considered[0]["contributions"]
             out["top_3"] = [c.get("archetype") for c in considered[:3]]
     except Exception:                                        # noqa: BLE001
         pass
@@ -432,6 +506,14 @@ def main() -> int:
                     help="on a quota refusal, wait out the window and resume")
     args = ap.parse_args()
 
+    # ONE WRITER. Claimed before anything is read, so a refusal costs nothing
+    # and a race cannot start.
+    session = OWNER.session_id()
+    owner = OWNER.claim(session,
+                        force=os.environ.get("NEXT40_FORCE_OWNER") == "1")
+    print(f"owner {owner['session']} pid {owner['pid']}"
+          + (f" (took over from {owner['previous_session']})"
+             if owner.get("previous_session") else ""), flush=True)
     sha = _sha()
     state = load_state()
     state["live_sha"] = sha
@@ -487,6 +569,23 @@ def main() -> int:
                   f"waiting {wait}", flush=True)
             time.sleep(60 * wait)
             spent = 0
+            # AND RETRY THE COMPANY THAT WAS REFUSED.
+            #
+            # MEASURED on cohort A: Dataiku hit the ceiling, the runner waited
+            # out the window correctly -- and then continued to Commvault,
+            # because the `for` loop had already advanced past it. A refusal
+            # is not a result, so the company was left QUOTA_DEFERRED and
+            # needed a whole second invocation to pick up. `done()` already
+            # treats that state as unfinished, which is why nothing was lost;
+            # this just stops a wasted pass.
+            print(f"   retrying {name} now the window has cleared", flush=True)
+            row = run_one(n, name, eid, prefixes, category, sha)
+            if row.get("run_id"):
+                spent += 1
+            state["rows"][key] = row
+            save_state(state)
+            print(f"   {row['final_class']:38s} core={row.get('core_s')}s "
+                  f"hist={row.get('history_level','?')}", flush=True)
     rows = [state["rows"][str(n)] for (n, *_r) in targets
             if str(n) in state["rows"]]
     cores = [r["core_s"] for r in rows if r.get("core_s")]

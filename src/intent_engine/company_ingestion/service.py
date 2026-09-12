@@ -1236,6 +1236,21 @@ class CompanyIngestionService:
                     "share of the interactive budget",
                     cap_s=self._OPTIONAL_DISCOVERY_CAP_S)
                 candidates = candidates + (_tp or [])
+                # AN ABANDONED SEARCH IS OURS TO OWN, NOT THE COMPANY'S.
+                #
+                # `_bounded_result` cancels the future when no budget is left
+                # and abandons the wait when the optional cap expires. Either
+                # way the producer inside it never ran to completion, so it
+                # wrote no account -- and an absent account classifies as
+                # NEVER_STARTED, which the drawer renders as "no search was
+                # run". MEASURED on cohort A: project44's page said exactly
+                # that about a search that had been dispatched.
+                #
+                # Recorded only when the producer left nothing, so a late
+                # arrival that DID write its own real account always wins.
+                if _tp is None and run_id:
+                    self._record_abandoned_discovery(
+                        run_id, meta.get("company_name", ""))
         finally:
             # NOT `wait=True`. Bounding the joins above and then
             # blocking here on the same futures would give the
@@ -3259,6 +3274,34 @@ class CompanyIngestionService:
         DISCOVERY_NOT_RUN. An empty dict is not a measured zero.
         """
         return dict(getattr(self, "_discovery_reports", {}).get(run_id) or {})
+
+    def _record_abandoned_discovery(self, run_id: str, company: str) -> None:
+        """Say that a dispatched search was abandoned, and why.
+
+        The one thing this may never do is overwrite a real account: the
+        worker thread is not cancellable once it has started, so it may still
+        be in flight and may still write what it actually found.
+        """
+        from intent_engine.company_ingestion import relevance as _R
+        if not hasattr(self, "_discovery_reports"):
+            self._discovery_reports = {}
+        if self._discovery_reports.get(run_id):
+            return
+        self._discovery_reports[run_id] = {
+            "contract": "third_party_discovery.v1",
+            "channel": "edgar_full_text_search",
+            "query": company,
+            "candidates": [],
+            "coverage": _R.DISCOVERY_NOT_RUN,
+            "channels_attempted": ["edgar_full_text_search"],
+            "channels_successful": [],
+            "hits_total": 0, "candidates_considered": 0,
+            "candidates_fetched": 0, "rejected": [],
+            "rejection_reasons": {_R.SEARCH_BUDGET_SPENT: 1},
+            "independent_relevant_origins": 0,
+            "budget_exhausted": True,
+            "wait_abandoned": True,
+        }
 
     def _third_party_filing_candidates(self, meta, run_id: str = "") -> list:
         """Filings by OTHER registrants naming this company. Never raises."""

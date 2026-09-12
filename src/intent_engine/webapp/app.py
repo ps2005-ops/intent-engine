@@ -7718,6 +7718,70 @@ class WebApp:
             return raw.replace("_", " ").lower()
         return raw
 
+    #: What each search state says in the reader's words, for the header
+    #: that printed the coverage GRADE and therefore claimed no search had run
+    #: whenever no grade could be earned.
+    _PLAIN_SEARCH_STATE = {
+        "NEVER_STARTED": "no search was run",
+        "INTERACTIVE_BUDGET_SPENT": "started, then abandoned on our time "
+                                    "budget",
+        "DISCOVERY_BLOCKED": "blocked — sources refused automated access",
+        "SEARCH_RAN_WITH_RESULTS": "searched, with results",
+        "SEARCH_RAN_WITH_NO_RESULTS": "searched, and the record is empty",
+    }
+
+    #: Why a candidate or a channel was set aside, in the reader's words.
+    #: EVERY REASON THE PRODUCER CAN WRITE, not only the ones cohort A
+    #: happened to print. `third_party_filings` emits fifteen distinct keys
+    #: and the drawer rendered whichever arrived; mapping only the observed
+    #: ones leaves the next reader to meet "no filer cik".
+    _REJECTION_ENGLISH = {
+        "CHANNEL_ERROR": "the channel did not answer",
+        "DISCOVERY_RAISED": "the search itself failed",
+        "DUPLICATE_ORIGIN": "already counted from the same origin",
+        "IRRELEVANT": "did not say enough about this company",
+        "NOT_INDEPENDENT": "not independent of this company",
+        "INTERACTIVE_BUDGET_SPENT": "we ran out of time to assess it",
+        "TOO_OLD": "older than this reading's window",
+        "TOO_LARGE": "larger than we will fetch",
+        "SUBJECT_OWN_FILING": "filed by this company itself, so not an "
+                              "independent source",
+        "SUBJECT_OWN_FILING_BY_NAME": "filed by this company itself, so not "
+                                      "an independent source",
+        "NON_SUBSTANTIVE_FORM": "a form that carries no substantive "
+                                "disclosure",
+        "NO_FILER_CIK": "the filing named no registrant we could identify",
+        "NO_FILER_NAME": "the filing named no registrant we could identify",
+        "OUTSIDE_RECENCY_WINDOW": "older than the window this reading covers",
+        "FETCH_NOT_AVAILABLE": "we could not fetch it to read it",
+        "UNMEASURABLE": "we could not measure how much it says about this "
+                        "company",
+        "UNVERIFIED": "we could not verify it",
+        "WEAKLY_RELEVANT": "too weakly related to count",
+        "CONTEXTUALLY_RELEVANT": "background context rather than support",
+        "DIRECTLY_RELEVANT": "directly about this company",
+        "INDEPENDENT_OF_SUBJECT": "independent of this company",
+    }
+
+    @classmethod
+    def _rejection_english(cls, key) -> str:
+        """The reason, never the exception class that produced it."""
+        raw = str(key or "").strip()
+        head = raw.split(":", 1)[0]
+        if head in cls._REJECTION_ENGLISH:
+            return cls._REJECTION_ENGLISH[head]
+        return cls._plain_state(head) or head.replace("_", " ").lower()
+
+    @classmethod
+    def _coverage_phrase(cls, coverage, search_state) -> str:
+        """The coverage grade, or what happened when no grade was earned."""
+        from intent_engine.company_ingestion import relevance as _REL
+        if str(coverage or "") == _REL.DISCOVERY_NOT_RUN and search_state:
+            phrase = cls._PLAIN_SEARCH_STATE.get(str(search_state))
+            if phrase:
+                return phrase
+        return cls._plain_state(coverage)
+
     @staticmethod
     def _discovery_detail(discovery: dict) -> str:
         """How hard we looked, in the buyer's words rather than ours.
@@ -7752,10 +7816,24 @@ class WebApp:
                     'That is a gap in our record, not a finding about the '
                     'company.</p>')
         if state == _REL.SEARCH_BUDGET_SPENT:
-            bits = ['<p class="none">We did not search for independent '
-                    'sources on this analysis: the interactive time budget '
-                    'was already spent when that stage was reached. Sources '
-                    'naming this company may well exist; we did not look.</p>']
+            # TWO WAYS THE BUDGET ENDS A SEARCH, AND THEY ARE NOT THE SAME
+            # SENTENCE. It can be gone before the stage is reached -- nothing
+            # was dispatched -- or it can run out while we wait for a channel
+            # that WAS dispatched. Saying "we did not look" about the second
+            # is false, and it is the case cohort A actually produced.
+            if (discovery or {}).get("wait_abandoned") or attempted:
+                bits = ['<p class="none">We started an independent-source '
+                        'search for this analysis and stopped waiting for it '
+                        'when the interactive time budget ran out, so we have '
+                        'no result from it either way. Sources naming this '
+                        'company may well exist; we did not wait to find '
+                        'out.</p>']
+            else:
+                bits = ['<p class="none">We did not search for independent '
+                        'sources on this analysis: the interactive time '
+                        'budget was already spent when that stage was '
+                        'reached. Sources naming this company may well '
+                        'exist; we did not look.</p>']
         elif state == _REL.SEARCH_BLOCKED:
             bits = [f'<p class="none">We tried {len(attempted) or 1} '
                     f'independent channel(s) and could not reach any of them, '
@@ -7792,8 +7870,16 @@ class WebApp:
                         'candidates remain that we have not assessed.</p>')
         reasons = (discovery or {}).get("rejection_reasons") or {}
         if isinstance(reasons, dict) and reasons:
+            # AN EXCEPTION CLASS IS NOT A REASON A READER CAN ACT ON.
+            #
+            # These keys carry the failure's own type after a colon --
+            # "CHANNEL_ERROR:HTTPError", "DISCOVERY_RAISED:TimeoutError" --
+            # and the generic transform lowercased it into the sentence:
+            # MEASURED on Nasuni's live /evidence as "channel error:
+            # httperror: 1". It is the only internal token to reach a
+            # customer surface across all 107 surfaces of cohort A.
             listed = " · ".join(
-                f"{_e(str(k).replace('_', ' ').lower())}: {int(v)}"
+                f"{_e(WebApp._rejection_english(k))}: {int(v)}"
                 for k, v in sorted(reasons.items())[:8])
             bits.append(f'<p class="none">Set aside — {listed}</p>')
         return "".join(bits)
@@ -7897,8 +7983,18 @@ class WebApp:
             f'about it to support the reading.</p>'
             + (f'<p>{_e(reading["statement"])}</p>' if reading["statement"]
                else "")
+            # THE HEADER STATES WHAT HAPPENED TO THE SEARCH, NOT THE GRADE
+            # OF A SEARCH THAT DID NOT FINISH. `coverage` is a QUALITY grade,
+            # and its DISCOVERY_NOT_RUN reads "no search was run" -- true only
+            # when none was dispatched. A search abandoned on our time budget,
+            # and a source list reused from a run whose account we did not
+            # keep, both carry that grade while a search demonstrably
+            # happened. So when no grade was earned the header reports the
+            # STATE, which is the same answer `_discovery_detail` spells out
+            # directly below it.
             + f'<p class="none">Search coverage: '
-              f'{_e(self._plain_state(reading["coverage"]))} · reading: '
+              f'{_e(self._coverage_phrase(reading["coverage"], _search_state))}'
+              f' · reading: '
               f'{_e(self._plain_state(reading["reading"]))}</p>'
             + self._discovery_detail(discovery)
             + '</section>')

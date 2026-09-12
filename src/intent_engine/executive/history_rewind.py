@@ -986,11 +986,33 @@ def _bounded_lesson(company: str, before: Sequence[DatedRecord],
     """
     gained = [k for k in _kinds_of(after) if k not in _kinds_of(before)]
     if gained:
+        # NAME THE PAGE THAT CAME LATER, not only the kind.
+        #
+        # MEASURED on cohort A: the kinds a company has yet to publish change
+        # slowly, so this branch returned one identical sentence for four of
+        # Cohesity's five stops, three of project44's and three of Boomi's.
+        # The repair applied earlier reached only the cadence branch below;
+        # this is the same defect in the sibling, and the first page of the
+        # missing kind is what actually differs stop to stop.
+        # AND HOW FAR AWAY IT WAS. Naming the page alone is still one
+        # sentence for every stop that precedes it -- three stops before a
+        # company's first customer page all "await Customer one". The WAIT is
+        # what differs stop to stop, and it is also the more useful fact: a
+        # reader at this date was five days from that material, or ninety.
+        awaited = [r for r in after
+                   if _kinds_of([r]) and _kinds_of([r])[0] in gained]
+        first_later = _titles_of(awaited[:1], 1)
+        here = before[-1].date if before else None
+        wait = ((awaited[0].date - here).days
+                if awaited and here is not None else 0)
         return _stop(f"What {company} had not yet put on the record by this "
                      f"date is as telling as what it had: its "
                      f"{_join([g.replace('_', ' ') for g in gained])} "
-                     f"material came later, so a reader here could not have "
-                     f"judged it on that")
+                     f"material came later"
+                     + (f", beginning with {first_later}" if first_later
+                        else "")
+                     + (f" {wait} day(s) after this stop" if wait else "")
+                     + ", so a reader here could not have judged it on that")
     if not after:
         return _stop(f"This is the end of {company}'s dated record as "
                      f"retrieved, so everything a reader can check about its "
@@ -1010,13 +1032,51 @@ def _bounded_lesson(company: str, before: Sequence[DatedRecord],
             + ", and none of them opened a subject it had not already "
               "covered, so the change here is cadence rather than direction")
     if since:
+        # SAME INVARIANT AS THE CADENCE BRANCH ABOVE: two stops that added the
+        # same NUMBER of pages produce one sentence twice, and the titles are
+        # what differ.
+        which = _titles_of(since, 1)
         return _stop(
-            f"The {len(since)} page(s) added by this date stayed within "
-            f"subjects {company} was already publishing on, so this stop "
-            f"marks continuity rather than a turn")
-    return _stop(f"{company} published nothing new by this date that the "
-                 f"previous stop had not already shown, so the record itself "
-                 f"is the evidence of a pause")
+            f"The {len(since)} page(s) added by this date"
+            + (f" ({which})" if which else "")
+            + f" stayed within subjects {company} was already publishing on, "
+              f"so this stop marks continuity rather than a turn")
+    # NOTHING ARRIVED AT ALL. The quiet itself is the finding, and its LENGTH
+    # is what distinguishes one quiet stop from another.
+    return _stop(f"{company} published nothing"
+                 + (f" in the {gap_days} day(s) before this date"
+                    if gap_days else " new by this date")
+                 + " that the previous stop had not already shown, so the "
+                   "record itself is the evidence of a pause")
+
+
+def _condition_english(kind: str, reading) -> str:
+    """One measured condition, in the reader's words.
+
+    WHY THIS EXISTS. The list was built with `str(v)`, and `v` is the signal
+    record -- so the LEVEL B history page printed a Python dict at the reader:
+    "recorded consumer demand {'as_of': '2026-06-01', 'direction': 'UP',
+    'node_id': 'panel:PCEC96:2026-06-01', 'standing': 'OBSERVED', ...}".
+    MEASURED on project44's and Nasuni's live history pages.
+
+    Says the same things the webapp's economic answers say -- kind, direction,
+    level -- so the two surfaces describe one world in one vocabulary.
+    """
+    name = str(kind or "").replace("_", " ")
+    if not isinstance(reading, dict):
+        return f"{name} {reading}".strip()
+    direction = {"UP": "up", "DOWN": "down", "FLAT": "flat"}.get(
+        str(reading.get("direction") or "").upper(), "")
+    value, unit = reading.get("value"), str(reading.get("unit") or "")
+    level = ""
+    if value is not None:
+        level = f"at {value:g}" if isinstance(value, (int, float)) \
+            else f"at {value}"
+        if unit and unit not in ("index",):
+            level += f" {unit.replace('_', ' ')}"
+    as_of = str(reading.get("as_of") or "")
+    return " ".join(x for x in (name, direction, level,
+                                f"as at {as_of}" if as_of else "") if x)
 
 
 def _economic_then(econ_at, when: _dt.date, company: str) -> tuple:
@@ -1045,8 +1105,9 @@ def _economic_then(econ_at, when: _dt.date, company: str) -> tuple:
     conditions = getattr(context, "conditions", None) or {}
     shocks = tuple(getattr(context, "shocks", ()) or ())
     area = str(getattr(context, "area", "") or "the economy")
-    named = _join([f"{str(k).replace('_', ' ')} {str(v)}"
-                   for k, v in sorted(conditions.items())[:3]])
+    named = _join([_condition_english(k, v)
+                   for k, v in sorted(conditions.items())[:3]
+                   if not isinstance(v, dict) or v.get("known")])
     said = [f"The economic state published for {area} as at "
             f"{as_of or when.isoformat()}"]
     if named:

@@ -46,6 +46,7 @@ real answer, and it is the honest one.
 from __future__ import annotations
 
 import dataclasses
+import re
 from typing import Optional, Tuple
 
 from intent_engine.executive.company_profile import (UNKNOWN,
@@ -414,46 +415,71 @@ _ARCHETYPE_EVIDENCE = {
     "PRICING": ("list price", "price increase", "discounting", "repricing",
                 "pricing model", "per-seat", "consumption pricing",
                 "price realisation", "price realization"),
-    "CAPACITY": ("capacity expansion", "data centre", "data center",
-                 "utilisation", "utilization", "provisioning", "throughput",
-                 "capacity commitment", "footprint expansion"),
-    "PRODUCTIZATION": ("general availability", "product launch", "roadmap",
-                       "new module", "packaging", "bundled", "we launched",
-                       "now available"),
+    "CAPACITY": ("capacity expansion", "capacity commitment",
+                 "capacity constraint", "footprint expansion",
+                 "utilisation rate", "utilization rate", "overprovisioned",
+                 "under-utilised", "under-utilized",
+                 "add capacity", "capacity headroom"),
+    "PRODUCTIZATION": ("general availability", "product launch",
+                       "we launched", "new module", "repackaged",
+                       "packaging change", "bundling change",
+                       "unbundled", "sunset the", "end of life"),
     "MARKET_ENTRY": ("new market", "expansion into", "we entered",
                      "market entry", "first customer in", "localisation",
                      "localization", "opened an office"),
-    "CUSTOMER_SEGMENT": ("mid-market", "enterprise segment", "upmarket",
-                         "target customer", "ideal customer",
-                         "segment focus", "we serve"),
+    "CUSTOMER_SEGMENT": ("moved upmarket", "moved downmarket", "upmarket",
+                         "mid-market push", "enterprise segment",
+                         "segment focus", "stopped serving",
+                         "account concentration", "customer concentration"),
     "RETENTION": ("net revenue retention", "churn", "renewal rate",
                   "customer retention", "expansion revenue", "upsell"),
     "CAPITAL_ALLOCATION": ("capital allocation", "free cash flow",
-                           "buyback", "dividend", "funding round",
-                           "series b", "series c", "series d",
-                           "raised", "investment in"),
-    "SALES_MOTION": ("go-to-market", "sales motion", "channel partner",
-                     "reseller", "partner programme", "partner program",
-                     "product-led growth", "self-serve"),
+                           "buyback", "share repurchase", "dividend",
+                           "funding round", "series b", "series c",
+                           "series d", "raised a round",
+                           "capital expenditure"),
+    # MEASURED on cohort A: "go-to-market" and "channel partner" are on
+    # almost every B2B page ever published, and two hits of them moved
+    # SALES_MOTION above the class prior for three unrelated companies --
+    # a supply-chain planner, an event-intelligence firm and a storage
+    # vendor all received "how the product is sold, and by whom". A phrase
+    # earns a place here by showing the company DECIDING how it sells, not
+    # by showing that it sells.
+    "SALES_MOTION": ("channel conflict", "partner-led", "partner led",
+                     "channel dependence", "route to market",
+                     "route-to-market", "direct sales force",
+                     "sales capacity", "sales productivity",
+                     "quota capacity", "partner concentration",
+                     "reseller margin", "reseller economics",
+                     "customer acquisition cost", "cac payback",
+                     "payback period", "land and expand",
+                     "sales cycle lengthened", "shift to direct",
+                     "shift to channel"),
     "SUPPLY_CHAIN": ("supply chain", "freight", "shipment", "carrier",
-                     "logistics", "tariff", "customs", "port",
-                     "supplier", "procurement"),
+                     "logistics", "tariff", "customs", "seaport",
+                     "supplier", "procurement", "lead time"),
     "COST_STRUCTURE": ("cost structure", "restructuring", "headcount",
                        "layoff", "operating leverage", "cost reduction",
                        "gross margin"),
     "M&A": ("acquisition of", "we acquired", "merger", "divestiture",
             "acquired by", "combination with"),
-    "REGULATORY_RESPONSE": ("regulation", "compliance", "gdpr", "hipaa",
-                            "sec rule", "regulatory", "audit requirement",
-                            "data residency", "sovereignty"),
-    "COMPETITIVE_RESPONSE": ("versus", "compared to", "migrate from",
-                             "switch from", "alternative to", "competitor",
-                             "displace"),
+    "REGULATORY_RESPONSE": ("new regulation", "regulatory change",
+                            "regulatory approval", "compliance obligation",
+                            "audit requirement", "data residency",
+                            "data sovereignty", "sec rule",
+                            "enforcement action", "consent decree",
+                            "regulatory deadline"),
+    "COMPETITIVE_RESPONSE": ("migrate from", "switch from",
+                             "alternative to", "displace", "displaced",
+                             "win rate against", "competitive displacement",
+                             "rip and replace"),
     "INVENTORY": ("inventory", "stock levels", "working capital",
                   "days of supply", "safety stock"),
-    "R&D_ROADMAP": ("research and development", "clinical", "trial",
+    "R&D_ROADMAP": ("research and development", "clinical trial",
+                    "clinical programme", "clinical program",
                     "pipeline programme", "pipeline program",
-                    "development programme", "development program"),
+                    "development programme", "development program",
+                    "phase iii", "phase ii"),
 }
 
 #: How many DISTINCT phrases a company's own record must carry before its
@@ -492,6 +518,45 @@ def _evidence_bonus(hits: int) -> int:
                                   _EVIDENCE_SCALE_CAP)
 
 
+#: Phrases matched as WHOLE WORDS, never as substrings.
+#:
+#: MEASURED on cohort A: "support" and "reporting" -- two of the commonest
+#: words in enterprise prose -- contain "port", so Cohesity's page told the
+#: reader that its own record discusses "logistics, port, supply chain" when
+#: the word "port" never appears in it. "industrial" contains "trial" the
+#: same way. That is a false statement about a company's record, and it also
+#: inflated the hit count that decides which decision wins.
+#:
+#: A phrase boundary, not `\b` on the whole string: "per-seat" and
+#: "go-to-market" end in word characters but contain punctuation, and `\b`
+#: around the whole phrase is still correct for those. What matters is that
+#: neither END of the phrase may sit inside a longer word.
+_BOUNDARY = {}
+
+
+def _says(text: str, phrase: str) -> bool:
+    """Does this record use this phrase as its own word(s)?
+
+    A NECESSARY-CONDITION PREFILTER, because the boundary is not free.
+    MEASURED on a 0.79MB record with the full 142-phrase table: the plain
+    substring scan cost 43ms/MB and the bounded scan 1381ms/MB -- 32x, or
+    ~2.8 seconds on a realistic 2MB record, on every call, on a path that
+    composes twice per run. That is a worse defect than the one the boundary
+    fixes.
+    
+    A phrase cannot appear as a WORD unless it appears as a SUBSTRING, so the
+    cheap test runs first and the regex only adjudicates the small set that
+    passes it. Same answer, and the ~90% that miss never touch the engine.
+    """
+    if phrase not in text:
+        return False
+    pattern = _BOUNDARY.get(phrase)
+    if pattern is None:
+        pattern = _BOUNDARY[phrase] = re.compile(
+            r"(?<![0-9a-z])" + re.escape(phrase) + r"(?![0-9a-z])")
+    return bool(pattern.search(text))
+
+
 def _evidence_archetypes(own_text: str) -> dict:
     """Which decisions this company's OWN record shows it facing.
 
@@ -504,7 +569,7 @@ def _evidence_archetypes(own_text: str) -> dict:
         return {}
     found = {}
     for archetype, phrases in _ARCHETYPE_EVIDENCE.items():
-        hit = tuple(sorted({p for p in phrases if p in text}))
+        hit = tuple(sorted({p for p in phrases if _says(text, p)}))
         if len(hit) >= _EVIDENCE_MIN_HITS:
             found[archetype] = (len(hit), hit)
     return found

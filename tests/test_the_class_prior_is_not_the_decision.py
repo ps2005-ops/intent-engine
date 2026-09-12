@@ -35,10 +35,31 @@ SOFTWARE = "subscription software platform " * 40
 FREIGHT = ("supply chain visibility. shipment tracking across carrier "
            "networks. tariff and customs delays. freight volumes. logistics. "
            "procurement and supplier data. ") * 8
-REGULATED = ("regulation and compliance drive demand. gdpr, hipaa and data "
-             "residency. regulatory audit requirement. sovereignty. ") * 8
-GTM = ("go-to-market motion. channel partner and reseller programme. "
-       "product-led growth and self-serve. sales motion. ") * 8
+#: A COMPANY FACING A REGULATOR, not a company with a trust page.
+#:
+#: The first version of this fixture read "regulation and compliance drive
+#: demand. gdpr, hipaa and data residency. regulatory audit requirement.
+#: sovereignty." Every one of those phrases is on the trust page of every
+#: enterprise-software company alive, and cohort A proved it: Boomi, an
+#: integration platform, was handed "how to respond to what the regulator has
+#: done" on compliance, gdpr and hipaa. The fixture was demonstrating that
+#: the evidence path works using text that cannot distinguish one company
+#: from another, so it demonstrated the defect instead.
+REGULATED = ("a new regulation takes effect next year and the regulatory "
+             "deadline is fixed. we are preparing for the compliance "
+             "obligation and the audit requirement. data residency and data "
+             "sovereignty rules change what we may sell. an enforcement "
+             "action against a peer set the precedent. ") * 8
+#: A COMPANY DECIDING HOW IT SELLS, not a company that has a sales team.
+#:
+#: Same correction. "go-to-market motion. channel partner and reseller
+#: programme. product-led growth and self-serve." is marketing copy, and on
+#: cohort A two hits of it moved SALES_MOTION above the class prior for a
+#: supply-chain planner, an event-intelligence firm and a storage vendor.
+GTM = ("we are shifting to a partner-led route to market. channel conflict "
+       "with our direct sales force is managed by quota capacity rules. "
+       "reseller margin and partner concentration are reviewed each quarter, "
+       "and customer acquisition cost and payback period both improved. ") * 8
 PRICED = ("list price and discounting. our pricing model moved to consumption "
           "pricing. per-seat plans remain. price increase announced. ") * 8
 PLAIN = "a software platform for teams to work better together. " * 20
@@ -102,8 +123,15 @@ def test_an_off_menu_decision_can_outrank_the_class_prior(profile):
     # one hit left it green. RETENTION and SALES_MOTION sit second and third
     # on the software menu, close enough that one hit would flip them.
     "our churn was discussed at the board. ",
-    "our go-to-market is evolving. ",
-    "we have a channel partner. ",
+    # PHRASES THAT ARE STILL IN THE TABLE. The earlier list used "our
+    # go-to-market is evolving" and "we have a channel partner", and once
+    # those stopped being evidence at all this test passed without exercising
+    # the gate -- a test that cannot fail. Both are replaced by single
+    # mentions of phrases the repaired table DOES count, so one hit still has
+    # to be refused on the gate rather than on the vocabulary.
+    "we are reviewing our route to market. ",
+    "channel conflict came up once. ",
+    "a price increase was mentioned in passing. ",
 ])
 def test_one_passing_mention_does_not_move_the_menu(profile, mention):
     """The applicability gate. Every company mentions churn somewhere, and a

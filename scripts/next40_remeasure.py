@@ -127,6 +127,35 @@ def main() -> int:
                 r"argues against|counter-evidence|counterevidence|set aside",
                 evt, re.I)),
         }
+        # §7 STRATEGIC GENERALIZATION, re-derived from the X-Ray's own reason.
+        # The page states which force chose the decision and names the terms;
+        # parsing the rendered page means the record can never claim more than
+        # the product actually said.
+        xr = (row.get("decision_text") or {}).get("xray") or visible(
+            surfaces.get("xray", {}).get("html", "") or "")
+        gen = dict(row.get("generalization") or {})
+        terms = re.search(r"own record discusses (?:this decision )?in (\d+) "
+                          r"distinct terms? \(([^)]*)\)", xr)
+        if terms:
+            gen["contributions"] = {
+                "evidence": int(terms.group(1)),
+                "evidence_terms": [t.strip() for t in
+                                   terms.group(2).split(",") if t.strip()],
+                "class_prior_only": False}
+        elif "standing decision for this business model" in xr:
+            gen["contributions"] = {"evidence": 0, "evidence_terms": [],
+                                    "class_prior_only": True}
+        q = re.search(r"For [^:]{1,80}:\s*(.{15,190}?\?)", xr)
+        if q:
+            gen["decision_question"] = " ".join(q.group(1).split())
+        lab = re.search(r"\b([A-Z][a-z]+(?: [a-z]+)?) decision\b", xr)
+        if lab:
+            gen["archetype_label"] = lab.group(1)
+        ranked = re.search(r"ranked above ([a-z ]+?) on the same evidence", xr)
+        if ranked:
+            gen["ranked_above"] = ranked.group(1).strip()
+        if gen:
+            row["generalization"] = gen
         if before != {"history": row["history"],
                       "discovery": row["discovery"]}:
             changed.append(row.get("company"))

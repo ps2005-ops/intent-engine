@@ -532,10 +532,23 @@ def search_state(report) -> str:
     successful = list(report.get("channels_successful") or [])
     reasons = report.get("rejection_reasons")
     reasons = reasons if isinstance(reasons, dict) else {}
-    # Nothing was tried, and the report says why: the interactive budget was
-    # already spent. Distinct from NEVER_STARTED, which has no producer at all.
-    if not attempted and (report.get("budget_exhausted")
-                          or SEARCH_BUDGET_SPENT in reasons):
+    # THE BUDGET IS THE CAUSE WHETHER OR NOT A CHANNEL WAS DISPATCHED.
+    #
+    # This required `not attempted`, so it covered only the case where the
+    # budget was gone BEFORE the stage was reached. The other case -- a
+    # channel dispatched and then abandoned because the budget ran out while
+    # we waited -- wrote no account at all and was classified NEVER_STARTED,
+    # which renders as "no search was run" about a search that was started.
+    # MEASURED on cohort A: project44, the one company of fourteen to lose
+    # the race.
+    #
+    # A producer that NAMES the budget as its reason is believed, because it
+    # is the only party that knows; `budget_exhausted` alone still requires
+    # `not attempted`, since a SUCCESSFUL search sets that flag when it stops
+    # at its reading budget with candidates left over.
+    if SEARCH_BUDGET_SPENT in reasons:
+        return SEARCH_BUDGET_SPENT
+    if not attempted and report.get("budget_exhausted"):
         return SEARCH_BUDGET_SPENT
     if str(report.get("coverage") or "") == DISCOVERY_BLOCKED:
         return SEARCH_BLOCKED
