@@ -218,13 +218,26 @@ def test_the_page_renders_the_economic_panel():
 
 
 def test_the_page_says_why_a_period_has_no_economy():
+    """THE PROPERTY, NOT THE PLACEMENT.
+
+    This originally asserted the per-stop sentence ("...would be hindsight")
+    appeared when no economy could be read. That sentence is now printed once
+    for the rewind instead of once per stop, because when NOT ONE stop can be
+    placed it is identical everywhere -- Cohesity printed it five times.
+
+    What must remain true is the reason the assertion existed: a reader has to
+    be able to tell a gap in OUR record from a quiet period in the company's.
+    That is asserted here, and the per-stop line keeps its own test for the
+    case where it actually distinguishes one stop from another.
+    """
     a = HR.bounded_rewind(company="Rubrik", records=SECURITY,
                           econ_at=lambda d: None)
     html = _html(a)
-    assert "no economic state had been published" in html.lower()
-    assert "would be hindsight" in html.lower(), (
-        "the page omitted the economic panel silently, so a reader cannot "
-        "tell a quiet period from a gap in our record")
+    assert "no economic state had been published" in html.lower(), (
+        "the page omitted the economic panel silently")
+    assert "not a judgement that the period was uneventful" in html.lower(), (
+        "the absence was stated without saying whose absence it is, so a "
+        "reader cannot tell a gap in our record from a quiet period")
 
 
 def test_the_page_carries_the_state_machine_readably():
@@ -250,3 +263,127 @@ def test_the_history_page_actually_passes_an_economic_reader():
     assert "as_of=" in src, (
         "the reader the page passes is not date-bound, so it would hand every "
         "stop the CURRENT economic state")
+
+
+# --- the collapse INSIDE one company ----------------------------------------
+#
+# MEASURED LIVE on Cohesity, cohort A, run on 1b0d803c. Its six dated pages
+# span seven weeks (2026-07-10 to 2026-08-27) and all classify as the same
+# kind, and the rewind rendered:
+#
+#     July 2026 · July 2026 · July 2026 · August 2026 · August 2026
+#     "What was knowable then: ..."  IDENTICAL at all five stops
+#     "What this teaches ...: ..."   IDENTICAL at four of five
+#     SEVEN duplicated long paragraphs on one page
+#
+# Two separate faults. The LABEL used month precision, so three distinct dates
+# printed the same heading and the page read as broken. And `knowable` and
+# `lesson` were derived from the SET OF KINDS, which rarely changes between
+# two adjacent dates -- so a company whose pages share a kind got one sentence
+# five times. That is the template collapse §19 refuses, arriving inside a
+# single company rather than across two.
+
+COMPRESSED = _records([
+    ("2026-07-10", "Data Cloud platform", "page"),
+    ("2026-07-17", "Resources", "page"),
+    ("2026-07-24", "Investor Relations", "page"),
+    ("2026-08-05", "Cyber resilience", "page"),
+    ("2026-08-27", "Newsroom", "page"),
+])
+
+
+def test_stops_in_one_month_do_not_share_a_heading():
+    rewind = HR.bounded_rewind(company="Cohesity, Inc.", records=COMPRESSED)
+    labels = [s.label for s in rewind.stops]
+    assert len(set(labels)) == len(labels), (
+        f"two stops share a heading, so a reader cannot tell them apart: "
+        f"{labels}")
+
+
+def test_a_day_is_only_claimed_where_a_publisher_asserted_one():
+    """`_URL_DATE` extracts MONTH precision deliberately -- a dated path
+    segment asserts the month, not the day. Making a heading unique by
+    inventing a day would trade a confusing page for a false one."""
+    from_url = tuple(
+        HR.DatedRecord(date=_dt.date.fromisoformat(d), title=t,
+                       url=f"https://x.com/insights/{d[:4]}/{d[5:7]}/{t}",
+                       kind="newsroom", date_source="url_path")
+        for d, t in (("2026-07-01", "a"), ("2026-07-08", "b"),
+                     ("2026-07-22", "c")))
+    rewind = HR.bounded_rewind(company="Acme", records=from_url)
+    labels = [s.label for s in rewind.stops]
+    assert len(set(labels)) == len(labels), labels
+    for label in labels:
+        assert not re.match(r"^\d{1,2} ", label), (
+            f"{label!r} claims a day for a date whose publisher asserted only "
+            f"a month")
+
+
+def test_every_stop_says_something_the_others_do_not():
+    rewind = HR.bounded_rewind(company="Cohesity, Inc.", records=COMPRESSED)
+    for field in ("knowable", "lesson", "record_then"):
+        values = [getattr(s, field) for s in rewind.stops]
+        assert len(set(values)) == len(values), (
+            f"{field} is identical on "
+            f"{len(values) - len(set(values)) + 1} stops, so the walk repeats "
+            f"itself: {values[0][:120]!r}")
+
+
+def test_the_page_carries_no_repeated_paragraph():
+    """The §17 check, stated where the content is produced rather than only
+    where it is scanned."""
+    import collections
+    rewind = HR.bounded_rewind(company="Cohesity, Inc.", records=COMPRESSED)
+    html_out = _html(rewind, "Cohesity, Inc.")
+    paras = [" ".join(re.sub(r"<[^>]+>", " ", p).split())
+             for p in re.findall(r"<p[^>]*>(.*?)</p>", html_out,
+                                 re.S | re.I)]
+    longs = [p for p in paras if len(p) > 120]
+    repeated = [t for t, n in collections.Counter(longs).items() if n > 1]
+    assert not repeated, (
+        f"{len(repeated)} paragraph(s) printed more than once: "
+        f"{repeated[0][:160]!r}")
+
+
+def test_the_unplaceable_economy_is_stated_once_not_at_every_stop():
+    """When NOT ONE stop could be placed in its period, the sentence is the
+    same everywhere and the rewind's own note already says it. Cohesity
+    printed it five times."""
+    rewind = HR.bounded_rewind(company="Cohesity, Inc.", records=COMPRESSED,
+                               econ_at=lambda d: None)
+    html_out = _html(rewind, "Cohesity, Inc.")
+    assert html_out.lower().count("not placed in its economic period") == 0, (
+        "the per-stop economic line was repeated on a rewind where it "
+        "distinguishes nothing")
+    assert "no economic state had been published" in html_out.lower(), (
+        "and then the fact was not stated at all, which is worse")
+
+
+def test_the_per_stop_economy_is_kept_when_it_DOES_distinguish():
+    """THE POSITIVE CONTROL. Suppressing the line unconditionally would hide a
+    real difference between an early stop and a later one."""
+    rewind = HR.bounded_rewind(company="Cohesity, Inc.", records=COMPRESSED,
+                               econ_at=_econ_from("2026-07-20"))
+    assert rewind.economic_links, "the fixture linked no stop at all"
+    html_out = _html(rewind, "Cohesity, Inc.")
+    assert "not placed in its economic period" in html_out.lower(), (
+        "a stop that genuinely could not be placed was silently dropped from "
+        "a rewind where other stops WERE placed")
+
+
+def test_a_stop_reports_what_arrived_since_the_previous_one():
+    rewind = HR.bounded_rewind(company="Cohesity, Inc.", records=COMPRESSED)
+    later = " ".join(s.knowable for s in rewind.stops[1:])
+    assert "could not have seen at the previous stop" in later, (
+        "no stop says what it added, so the walk is a series of standing "
+        "positions rather than a record of change")
+
+
+def test_what_arrived_since_never_crosses_the_wall():
+    """`since` must contain only records dated on or before its own stop."""
+    rewind = HR.bounded_rewind(company="Cohesity, Inc.", records=COMPRESSED)
+    for stop in rewind.stops:
+        for record in COMPRESSED:
+            if record.iso in stop.knowable and record.iso > stop.date:
+                raise AssertionError(
+                    f"stop {stop.date} names {record.iso}, which is after it")

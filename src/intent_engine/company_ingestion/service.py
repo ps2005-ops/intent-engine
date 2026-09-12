@@ -3057,6 +3057,37 @@ class CompanyIngestionService:
         # and caches nothing, which is the right answer for something that
         # owns no lifetime.
         name = str((meta or {}).get("company_name") or "")
+        # A CURATED IDENTITY THAT DECLARES NO CIK IS AN ANSWER, NOT A GAP.
+        #
+        # MEASURED on Adastra, cohort A, 1b0d803c. Adastra Corporation is a
+        # Toronto data consultancy and files with no US regulator, so the
+        # catalog declares no `sec_cik`. `meta["cik"]` was therefore empty and
+        # this fell through to `resolve_cik("Adastra Corporation")` -- a fuzzy
+        # match over the SEC ticker table, which returned ADASTRA HOLDINGS
+        # LTD., an unrelated Canadian cannabis company. Its SIC code is
+        # pharmaceutical preparations, so the consultancy was classified
+        # PHARMA and its X-Ray asked management "which development programmes
+        # to fund and which to stop", with watch metrics naming approved
+        # indications, prescriptions and exclusivity runway.
+        #
+        # The docstring above already warns that re-resolving by name "is
+        # fuzzy and could return a DIFFERENT registrant" -- but the guard only
+        # stopped the lookup OVERRIDING a known CIK. It did nothing about
+        # resolving a wrong one where none was known, which is the ordinary
+        # case for every private company.
+        #
+        # The registry is consulted first and is authoritative BOTH WAYS: a
+        # profile carrying a CIK supplies it, and a profile carrying none says
+        # this company is not a filer we know of. Guessing past that is how
+        # one company's filings become another's evidence.
+        try:
+            from intent_engine.company_ingestion import entities as _E
+            profile = _E.resolve_entity(company_name=name).profile
+        except Exception:                                   # noqa: BLE001
+            profile = None
+        if profile is not None:
+            declared = str(getattr(profile, "sec_cik", "") or "").strip()
+            return declared
         memo = getattr(self, "_subject_cik_cache", None)
         if memo is None:
             memo = {}

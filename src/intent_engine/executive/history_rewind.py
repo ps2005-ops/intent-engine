@@ -870,6 +870,31 @@ def _titles_of(records: Sequence[DatedRecord], limit: int = 3) -> str:
     return _join(out)
 
 
+def _stop_label(when: _dt.date, records: Sequence[DatedRecord],
+                same_month: bool) -> str:
+    """How a stop names its own date.
+
+    MEASURED on Cohesity, whose six dated pages span 2026-07-10 to 2026-08-27:
+    the rewind rendered five stops headed "July 2026, July 2026, July 2026,
+    August 2026, August 2026". The dates differ; the LABEL collapsed them, and
+    three identical headings read as a broken page.
+
+    The day is added ONLY where a publisher asserted one. `_URL_DATE` extracts
+    month precision on purpose -- a dated path segment asserts the month, not
+    the day -- so a URL-derived stop keeps its month and is separated by its
+    position instead. Inventing a day to make a heading unique would trade a
+    confusing page for a false one.
+    """
+    if not same_month:
+        return when.strftime("%B %Y")
+    asserted = any(r.date == when and r.date_source == "metadata"
+                   for r in records)
+    if asserted:
+        return when.strftime("%-d %B %Y") if hasattr(when, "strftime") \
+            else when.isoformat()
+    return f"{when.strftime('%B %Y')} (week {((when.day - 1) // 7) + 1})"
+
+
 def _record_then(company: str, before: Sequence[DatedRecord],
                  when: _dt.date) -> str:
     """What this company had actually said by this date -- not how many pages.
@@ -889,21 +914,37 @@ def _record_then(company: str, before: Sequence[DatedRecord],
     return _stop(", ".join(bits))
 
 
-def _bounded_knowable(company: str, before: Sequence[DatedRecord]) -> str:
-    """What a reader ON THIS DATE could establish, from these kinds of page.
+def _bounded_knowable(company: str, before: Sequence[DatedRecord],
+                      since: Sequence[DatedRecord] = ()) -> str:
+    """What a reader ON THIS DATE could establish, and what was new about it.
 
-    Derived from the kinds the company had actually published by then, so a
-    record of three press releases does not claim a reader could establish
-    pricing.
+    STOP-RELATIVE, BECAUSE A REWIND IS ABOUT CHANGE. A first version derived
+    this from the SET OF KINDS on record, and kinds rarely change between two
+    adjacent dates: measured on Cohesity, whose six pages all classified as
+    the same kind, all five stops rendered the identical sentence. Five cards
+    saying the same thing is the template collapse this page exists to avoid,
+    arriving inside a single company instead of across two.
+
+    So the sentence names what the stop ADDED -- the pages that had appeared
+    since the previous stop, by their own titles -- and falls back to the
+    standing position only at the first stop, where nothing has changed yet
+    because there is no earlier stop to change from.
     """
     kinds = _kinds_of(before)
     learns = [_KNOWABLE_BY_KIND[k] for k in kinds if k in _KNOWABLE_BY_KIND]
-    if not learns:
+    standing = (_join(learns) if learns else "")
+    new_titles = _titles_of(since, 2)
+    if since and new_titles:
+        return _stop(
+            f"By this date {company} had added {len(since)} page(s) a reader "
+            f"could not have seen at the previous stop -- {new_titles} -- so "
+            f"what is newly establishable here is whatever those state"
+            + (f", on top of {standing}" if standing else ""))
+    if not standing:
         return _stop(f"Nothing on {company}'s record by this date states "
                      f"what it sold or who it served")
-    return _stop(f"A reader on this date could establish {_join(learns)} -- "
-                 f"all of it from material {company} had itself published "
-                 f"by then")
+    return _stop(f"A reader on this date could establish {standing} -- all of "
+                 f"it from material {company} had itself published by then")
 
 
 def _bounded_unknowable(company: str, before: Sequence[DatedRecord],
@@ -929,12 +970,19 @@ def _bounded_unknowable(company: str, before: Sequence[DatedRecord],
 
 
 def _bounded_lesson(company: str, before: Sequence[DatedRecord],
-                    after: Sequence[DatedRecord]) -> str:
+                    after: Sequence[DatedRecord],
+                    since: Sequence[DatedRecord] = (),
+                    gap_days: int = 0) -> str:
     """What this stop teaches, read off the shape of the record itself.
 
     DESCRIPTIVE, NOT CONCLUDED. It says what the company's own publishing
-    shows; it does not rate the strategy, because a page count is not
-    evidence about whether a strategy worked.
+    shows; it does not rate the strategy, because a page count is not evidence
+    about whether a strategy worked.
+
+    Like `_bounded_knowable`, it is stop-relative. Keyed only on which KINDS
+    were still to come, it returned one sentence for four of Cohesity's five
+    stops -- true of each, and useless as a walk, because a reader learns
+    nothing from being told the same thing four times.
     """
     gained = [k for k in _kinds_of(after) if k not in _kinds_of(before)]
     if gained:
@@ -947,9 +995,28 @@ def _bounded_lesson(company: str, before: Sequence[DatedRecord],
         return _stop(f"This is the end of {company}'s dated record as "
                      f"retrieved, so everything a reader can check about its "
                      f"current position rests on material up to this point")
-    return _stop(f"{company}'s record at this date already covered the same "
-                 f"ground it would continue to publish on, so what changed "
-                 f"afterwards was the detail rather than the subject")
+    # NOTHING NEW IN KIND. What is left to say is about PACE and VOLUME, and
+    # those differ stop to stop even when the subject matter does not.
+    if since and gap_days:
+        # NAME WHAT ARRIVED. Two stops can share a pace -- one page, seven days
+        # -- and then the sentence is true twice and informative once. The
+        # page's own title is what actually differs, and it costs nothing to
+        # say.
+        which = _titles_of(since, 1)
+        return _stop(
+            f"{company} put {len(since)} page(s) on the record in the "
+            f"{gap_days} day(s) before this date"
+            + (f" ({which})" if which else "")
+            + ", and none of them opened a subject it had not already "
+              "covered, so the change here is cadence rather than direction")
+    if since:
+        return _stop(
+            f"The {len(since)} page(s) added by this date stayed within "
+            f"subjects {company} was already publishing on, so this stop "
+            f"marks continuity rather than a turn")
+    return _stop(f"{company} published nothing new by this date that the "
+                 f"previous stop had not already shown, so the record itself "
+                 f"is the evidence of a pause")
 
 
 def _economic_then(econ_at, when: _dt.date, company: str) -> tuple:
@@ -1024,18 +1091,29 @@ def bounded_rewind(*, company: str, records: Sequence[DatedRecord],
                     for i in range(max_points)]
         distinct = sorted(dict.fromkeys(distinct))
     stops = []
+    # Which stops share a month with another stop: only those need a finer
+    # label, and only those pay for it.
+    _months = [d.strftime("%Y-%m") for d in distinct]
+    _crowded = {d for d in distinct
+                if _months.count(d.strftime("%Y-%m")) > 1}
+    _previous = None
     for when in distinct:
         before = [r for r in records if r.date <= when]
         after = [r for r in records if r.date > when]
+        # What arrived since the PREVIOUS stop. Entirely on this side of the
+        # wall: every record in it is dated on or before `when`.
+        since = ([r for r in records if _previous < r.date <= when]
+                 if _previous is not None else [])
+        gap = (when - _previous).days if _previous is not None else 0
         # EVERY FIELD BELOW IS READ OFF THIS COMPANY'S OWN RECORD. The version
         # this replaces substituted two counts into two fixed sentences, so
         # every LEVEL B company's rewind was the same page.
         economic_then, economic_state = _economic_then(econ_at, when, company)
         stops.append(BoundedStop(
             date=when.isoformat(),
-            label=when.strftime("%B %Y"),
+            label=_stop_label(when, records, when in _crowded),
             record_then=_record_then(company, before, when),
-            knowable=_bounded_knowable(company, before),
+            knowable=_bounded_knowable(company, before, since),
             unknowable=_bounded_unknowable(company, before, after, when),
             later=_stop(
                 f"{len(after)} dated page(s) followed this date"
@@ -1044,7 +1122,9 @@ def bounded_rewind(*, company: str, records: Sequence[DatedRecord],
                 if after else "Nothing retrieved is dated after this point"),
             count_before=len(before), count_after=len(after),
             economic_then=economic_then, economic_state=economic_state,
-            lesson=_bounded_lesson(company, before, after)))
+            lesson=_bounded_lesson(company, before, after, since,
+                                   gap)))
+        _previous = when
     span = f"{records[0].iso} to {records[-1].iso}"
     linked = sum(1 for st in stops if st.economic_state == ECON_LINKED)
     return BoundedRewind(

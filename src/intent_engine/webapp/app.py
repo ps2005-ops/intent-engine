@@ -220,6 +220,16 @@ pre,code{overflow-x:auto;max-width:100%}
    cannot fit, so ordinary text keeps its normal breaks. */
 code,.src,.prov{overflow-wrap:anywhere;word-break:break-word}
 a[href]{overflow-wrap:anywhere}
+/* AND THE SAME IS TRUE OF A QUOTE, FOR A STRONGER REASON. <q> and
+   <blockquote> exist to hold text THIS PRODUCT DID NOT WRITE, so their
+   contents have no shape we control. MEASURED on Workato at 375px: an
+   evidence quote carried "HRMarketingITSalesFinanceProductEngineering." --
+   forty-four characters with no space, which is Workato's own nav menu
+   scraped without separators -- and pushed the page 22px wide. A company
+   whose site happens to render a menu that way is not a company whose
+   analysis should overflow a phone, and every one of the forty draws its
+   quotes from pages we do not control. */
+q,blockquote{overflow-wrap:anywhere;word-break:break-word}
 @media (max-width:600px){
 body{font-size:16px}
 main{padding-left:14px;padding-right:14px}

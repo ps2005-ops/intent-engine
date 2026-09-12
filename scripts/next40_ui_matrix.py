@@ -21,6 +21,7 @@ CSS, so a saved page lays out as the served one did.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import html as _html
 import json
 import pathlib
@@ -40,7 +41,16 @@ _INTERNAL = re.compile(
     r"\b(traceback|stacktrace|nonetype|dataclass|kwargs|null pointer|"
     r"not implemented|todo|fixme|assertion|httperror|json decode|"
     r"keyerror|attributeerror|typeerror)\b", re.I)
-_LITERAL_NONE = re.compile(r"(?<![A-Za-z])(None|null|nan|undefined)(?![A-Za-z])")
+#: A LEAKED PYTHON VALUE, NOT THE ENGLISH WORD. "None" also opens a sentence --
+#: Rubrik's /full says "None of them is a claim, and none is a forecast" -- and
+#: flagging that reports correct prose as a defect. A leak appears where a
+#: VALUE would: after a colon, an equals sign, inside brackets, or standing
+#: alone as a field's content. `nan`/`undefined`/`null` have no English use and
+#: are matched anywhere.
+_LITERAL_NONE = re.compile(
+    r"(?<![A-Za-z])(?:null|nan|undefined)(?![A-Za-z])"
+    r"|(?:[:=]\s*|[\[\(]\s*|\|\s*)None(?![A-Za-z])"
+    r"|(?<![A-Za-z])None\s*(?:[\]\),]|$)")
 _SPINNER = re.compile(r"(still working|analysing|analyzing|please wait|"
                       r"loading)", re.I)
 
@@ -75,6 +85,73 @@ def scan_html(raw: str, *, terminal: bool = True) -> dict:
             if tokens else ""}
 
 
+#: The measurement, served as a file so a driver calls `window.__M()` rather
+#: than re-sending the whole function for every page and theme.
+_MEASURE_FILE = """
+window.__M = (function () {
+  const srgb = c => { c /= 255; return c <= 0.03928 ? c / 12.92
+      : Math.pow((c + 0.055) / 1.055, 2.4); };
+  const lum = r => 0.2126*srgb(r[0]) + 0.7152*srgb(r[1]) + 0.0722*srgb(r[2]);
+  const parse = s => { const m = (s || "").match(/rgba?\\(([^)]+)\\)/);
+    if (!m) return null; const p = m[1].split(",").map(parseFloat);
+    if (p.length > 3 && p[3] === 0) return null; return [p[0], p[1], p[2]]; };
+  const bgOf = el => { let n = el;
+    while (n && n.nodeType === 1) {
+      const c = parse(getComputedStyle(n).backgroundColor);
+      if (c) return c; n = n.parentElement; }
+    return parse(getComputedStyle(el.ownerDocument.body).backgroundColor)
+           || [255, 255, 255]; };
+  // Visually hidden text is not a contrast defect: the `.sr` pattern hides a
+  // screen-reader label at 1x1 with clip, and its colour matching its parent
+  // is the mechanism of hiding it, not a bug.
+  const hid = (cs, r) => (r.width <= 1 || r.height <= 1 ||
+    cs.clip === "rect(0px, 0px, 0px, 0px)" || cs.clipPath === "inset(50%)" ||
+    parseFloat(cs.opacity) === 0 || cs.visibility === "hidden" ||
+    cs.display === "none");
+  return function () {
+    let fails = 0, checked = 0, over = 0, frames = 0, hidden = 0;
+    const bad = [];
+    for (const f of document.querySelectorAll("iframe")) {
+      let d; try { d = f.contentDocument; } catch (e) { continue; }
+      if (!d || !d.body) continue;
+      frames++;
+      const cw = f.clientWidth || +f.dataset.width;
+      const sw = Math.max(d.documentElement.scrollWidth, d.body.scrollWidth);
+      if (sw - cw > 1) { over++;
+        bad.push({t: "overflow", s: f.dataset.surface, w: f.dataset.width,
+                  px: sw - cw}); }
+      for (const el of d.body.querySelectorAll(
+          "p,li,h1,h2,h3,h4,span,td,th,a,strong,em,blockquote,dt,dd")) {
+        const t = (el.textContent || "").trim();
+        if (!t || t.length < 3) continue;
+        if (el.children.length && !Array.from(el.childNodes).some(
+            n => n.nodeType === 3 && n.textContent.trim())) continue;
+        const cs = getComputedStyle(el), r = el.getBoundingClientRect();
+        if (hid(cs, r)) { hidden++; continue; }
+        const fg = parse(cs.color); if (!fg) continue;
+        const bg = bgOf(el);
+        const L1 = lum(fg), L2 = lum(bg);
+        const ra = (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05);
+        const sz = parseFloat(cs.fontSize) || 16;
+        const bo = (parseInt(cs.fontWeight, 10) || 400) >= 700;
+        const need = (sz >= 24 || (bo && sz >= 18.66)) ? 3.0 : 4.5;
+        checked++;
+        if (ra < need) { fails++;
+          if (bad.length < 6) bad.push({t: "contrast", s: f.dataset.surface,
+            w: f.dataset.width, ra: Math.round(ra * 100) / 100,
+            cls: (el.className || "").toString().slice(0, 20),
+            text: t.slice(0, 30)}); } } }
+    const one = document.querySelector("iframe");
+    return {title: document.title,
+            dark: matchMedia("(prefers-color-scheme: dark)").matches,
+            bodyBg: one ? getComputedStyle(one.contentDocument.body)
+                          .backgroundColor : "",
+            frames, overflow: over, checked, hidden, contrast: fails, bad};
+  };
+})();
+"""
+
+
 def harness_page(company: str, captures: dict) -> str:
     """One page embedding one company's surfaces at all five widths."""
     frames = []
@@ -89,6 +166,7 @@ def harness_page(company: str, captures: dict) -> str:
     return (
         "<!doctype html><meta charset=utf-8>"
         f"<title>{_html.escape(company)} UI matrix</title>"
+        '<script src="measure.js"></script>'
         "<style>body{margin:0;font:12px system-ui}"
         ".cell{display:inline-block;vertical-align:top;margin:4px}"
         ".lab{margin:0 0 2px;font:11px/1.2 monospace;color:#666}"
@@ -118,7 +196,8 @@ MEASURE_JS = r"""
       if (c) return c;
       n = n.parentElement;
     }
-    return [255,255,255];
+    const b = parse(getComputedStyle(el.ownerDocument.body).backgroundColor);
+    return b || [255,255,255];
   };
   const out = [];
   for (const f of document.querySelectorAll("iframe")) {
@@ -154,7 +233,18 @@ MEASURE_JS = r"""
           && !Array.from(el.childNodes).some(n=>n.nodeType===3
               && n.textContent.trim())) continue;
       const cs = getComputedStyle(el);
-      if (cs.visibility==="hidden" || cs.display==="none") continue;
+      const rect = el.getBoundingClientRect();
+      // VISUALLY HIDDEN TEXT IS NOT A CONTRAST DEFECT, and measuring it
+      // manufactures one. The `.sr` pattern gives a screen reader a label and
+      // hides it at 1x1 with `clip`; its colour matching its parent exactly is
+      // the MECHANISM of hiding it. Measured on Rubrik: 35 "failures", every
+      // one a 1x1 span at contrast 1.00, and 0 once they are excluded.
+      if (cs.visibility==="hidden" || cs.display==="none" ||
+          parseFloat(cs.opacity)===0 ||
+          rect.width<=1 || rect.height<=1 ||
+          cs.clip==="rect(0px, 0px, 0px, 0px)" || cs.clipPath==="inset(50%)") {
+        continue;
+      }
       const fg = parse(cs.color); if (!fg) continue;
       const bg = bgOf(el);
       const L1 = lum(fg), L2 = lum(bg);
@@ -196,12 +286,26 @@ def main() -> int:
         # The journey already wrote these; reading them back keeps the one
         # copy of each page rather than a second one inside the state file.
         written = dict(row.get("capture_files") or {})
-        caps = {}
+        caps, seen_bytes, aliases = {}, {}, {}
         for name, fname in list(written.items()):
             try:
-                caps[name] = (root / fname).read_text()
+                body = (root / fname).read_text()
             except OSError:
                 written.pop(name, None)
+                continue
+            # ONE PAGE, MEASURED ONCE. `/runs/<id>`, `/runs/<id>/intro` and
+            # `/runs/<id>/sources` all resolve to the same narrative on a
+            # TERMINAL run -- `_sources_page` redirects once sources are
+            # approved, and the harness follows redirects. Measuring the same
+            # bytes three times triples every count taken over the set and
+            # would have reported one repeated paragraph as three.
+            digest = hashlib.sha256(body.encode()).hexdigest()
+            if digest in seen_bytes:
+                aliases.setdefault(seen_bytes[digest], []).append(name)
+                written.pop(name, None)
+                continue
+            seen_bytes[digest] = name
+            caps[name] = body
         if not caps:
             continue
         (root / f"{slug}.matrix.html").write_text(
@@ -209,8 +313,17 @@ def main() -> int:
         summary[company] = {
             "n": row.get("n"), "slug": slug,
             "harness": f"{slug}.matrix.html",
+            # Which routes resolved to the same bytes, kept because "three
+            # surfaces are identical" is a fact worth being able to check.
+            "route_aliases": aliases,
             "text": {name: scan_html(raw) for name, raw in caps.items()},
         }
+    # The measurement travels WITH the harness pages, so driving the matrix is
+    # one call per page instead of re-sending the whole function each time.
+    (root / "measure.js").write_text(
+        "window.__M=(()=>{" + MEASURE_JS.strip().removeprefix("(() => {")
+        .removesuffix("})()") + "\n})();\n"
+        if False else _MEASURE_FILE)
     (root / "index.json").write_text(json.dumps(summary, indent=1))
     bad = {c: {s: v for s, v in d["text"].items()
                if v["raw_enums"] or v["internal"] or v["literal_none"]

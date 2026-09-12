@@ -175,3 +175,71 @@ def test_every_one_of_the_forty_is_offered_exactly_once():
         assert len(same) == 1, (
             f"{profile.entity_id} is offered {len(same)} times for its own "
             f"name: {[(r.legal_name, r.entity_id) for r in got]}")
+
+
+# --- the same collision, one layer deeper -----------------------------------
+
+def test_a_curated_company_with_no_cik_is_not_resolved_by_a_fuzzy_name_match():
+    """MEASURED on Adastra, cohort A, 1b0d803c -- AFTER the suggestion merge
+    was repaired.
+
+    The picker no longer hands the consultancy the cannabis company's CIK, but
+    the RUN resolves its own subject CIK separately: `subject_cik` falls back
+    to `resolve_cik(company_name)`, a fuzzy match over the SEC ticker table,
+    whenever `meta["cik"]` is empty -- which is every private company. For
+    "Adastra Corporation" that returned ADASTRA HOLDINGS LTD., whose SIC code
+    is pharmaceutical preparations, so a Toronto data consultancy was
+    classified PHARMA and its X-Ray asked management which development
+    programmes to fund, with watch metrics naming approved indications,
+    prescriptions and exclusivity runway.
+
+    One collision, three doors: the suggestion merge, and this. A curated
+    profile that declares no CIK is stating the company is not a filer we know
+    of, and that is an answer."""
+    from intent_engine.company_ingestion import entities as E
+    profile = E.resolve_entity(company_name="Adastra Corporation").profile
+    assert profile is not None, "the curated consultancy no longer resolves"
+    assert profile.sec_cik == "", (
+        f"the consultancy declares CIK {profile.sec_cik!r}; it files with no "
+        f"US regulator")
+    assert profile.entity_id == "adastra"
+
+
+def test_a_curated_filer_still_supplies_its_cik():
+    """POSITIVE CONTROL. Suppressing the fuzzy lookup must not cost a real
+    filer its EDGAR route -- rubrik.com answers 403 to every path, so its
+    filings are the ONLY evidence it has."""
+    from intent_engine.company_ingestion import entities as E
+    for name, cik in (("Rubrik, Inc.", "0001943896"),
+                      ("Commvault Systems, Inc.", "0001169561"),
+                      ("FiscalNote Holdings, Inc.", "0001823466")):
+        profile = E.resolve_entity(company_name=name).profile
+        assert profile is not None and profile.sec_cik == cik, name
+
+
+def test_subject_cik_consults_the_registry_before_guessing():
+    """The repair must be ON the path. A registry lookup that `subject_cik`
+    never performs leaves the fuzzy fallback deciding, which is the defect."""
+    import inspect
+
+    from intent_engine.company_ingestion.service import CompanyIngestionService
+    src = inspect.getsource(CompanyIngestionService.subject_cik)
+    assert "resolve_entity" in src, (
+        "subject_cik still resolves an unknown CIK by fuzzy name match "
+        "without asking the curated registry first")
+    # Compared against the CALL SITE, not the first mention: the docstring
+    # discusses `resolve_cik` by name several lines above the code that runs
+    # it, so a text-position check on the bare word measures prose.
+    call = src.index("from intent_engine.company_ingestion.edgar import "
+                     "resolve_cik")
+    assert src.index("resolve_entity") < call, (
+        "the registry is consulted AFTER the fuzzy lookup, so the guess wins")
+
+
+def test_an_uncatalogued_company_still_falls_back():
+    """A company the registry has never heard of must keep the existing
+    behaviour: the fallback exists because it is the only way a domain-entry
+    run finds its filer at all."""
+    from intent_engine.company_ingestion import entities as E
+    assert E.resolve_entity(
+        company_name="Nonexistent Widgets Ltd").profile is None

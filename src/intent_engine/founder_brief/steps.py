@@ -909,6 +909,11 @@ def _bounded_rewind(bounded, company: str) -> str:
     out.append('</div>')
     out.append('<h2>The dated record, in order</h2>')
     out.append('<div class="hcards">')
+    # Whether the economic panel DISTINGUISHES stops. If not a single stop
+    # could be placed in its period, repeating that fact on every card adds
+    # length and no information.
+    _any_linked = any(getattr(st, "economic_state", "") == _HR.ECON_LINKED
+                      for st in bounded.stops)
     for stop in bounded.stops:
         # THE ECONOMIC PANEL IS PRESENT OR IT SAYS WHY. Rendering nothing
         # would leave a reader unable to tell "the period was quiet" from
@@ -919,7 +924,12 @@ def _bounded_rewind(bounded, company: str) -> str:
         if econ:
             econ_html = (f'<p><strong>Economic conditions then:</strong> '
                          f'{_e(econ)}</p>')
-        elif state == _HR.ECON_NO_STATE_FOR_DATE:
+        elif state == _HR.ECON_NO_STATE_FOR_DATE and _any_linked:
+            # SAID PER STOP ONLY WHERE IT DISTINGUISHES ONE STOP FROM ANOTHER.
+            # When NO stop could be placed in its period, this sentence is the
+            # same at every stop and the rewind's own note already says it
+            # once: Cohesity printed it five times, which is padding on the
+            # page whose whole argument is that it does not pad.
             econ_html = ('<p class="basis"><strong>Economic conditions '
                          'then:</strong> no economic state had been published '
                          'to this deployment on or before this date, so this '

@@ -378,7 +378,139 @@ def _posture(hidden_state: str) -> str:
 _POSTURE_WEIGHT = 8
 
 
-def _score_archetypes(profile, facts: RecordFacts):
+#: WHAT A COMPANY FACING EACH DECISION PUTS ON ITS OWN RECORD.
+#:
+#: WHY THIS TABLE EXISTS. MEASURED across cohort A on 1b0d803c: SEVEN of nine
+#: companies were handed the identical central question --
+#:
+#:     "what to charge, and for what, without losing more customer count
+#:      than the price gains?"
+#:
+#: -- with the identical watch metrics, across four unrelated categories. A
+#: freight-visibility company, a data-protection company, an integration
+#: platform and an event-intelligence company were all told their decision was
+#: a pricing decision about seats per customer.
+#:
+#: The cause is structural, not a bad rule. `_score_archetypes` ranks the menu
+#: by the MODEL CLASS's own ordering, then adjusts by live economic channels
+#: and identified posture. For a private company with neither, nothing
+#: company-specific reaches the ordering at all, so the class prior IS the
+#: answer -- and every SUBSCRIPTION_SOFTWARE company gets whatever sits first
+#: on the software menu. `select` already receives the company's own text and
+#: spent it entirely on classification: its words decided WHAT KIND of
+#: business it is and then played no part in WHICH DECISION it faces.
+#:
+#: So the menu still comes from the model -- a bank does not choose between
+#: inventory and certification -- and the ORDER may now be moved by the
+#: subject's own record, which is what this module's docstring already
+#: claimed it did.
+#:
+#: THE PHRASES ARE DECISION-BEARING, NOT TOPICAL. "price" appears on every
+#: SaaS page ever written; "list price", "discounting" and "price increase"
+#: appear when a company is actually deciding what to charge. A topical word
+#: would reorder the menu for every company and reproduce the collapse with
+#: extra steps.
+_ARCHETYPE_EVIDENCE = {
+    "PRICING": ("list price", "price increase", "discounting", "repricing",
+                "pricing model", "per-seat", "consumption pricing",
+                "price realisation", "price realization"),
+    "CAPACITY": ("capacity expansion", "data centre", "data center",
+                 "utilisation", "utilization", "provisioning", "throughput",
+                 "capacity commitment", "footprint expansion"),
+    "PRODUCTIZATION": ("general availability", "product launch", "roadmap",
+                       "new module", "packaging", "bundled", "we launched",
+                       "now available"),
+    "MARKET_ENTRY": ("new market", "expansion into", "we entered",
+                     "market entry", "first customer in", "localisation",
+                     "localization", "opened an office"),
+    "CUSTOMER_SEGMENT": ("mid-market", "enterprise segment", "upmarket",
+                         "target customer", "ideal customer",
+                         "segment focus", "we serve"),
+    "RETENTION": ("net revenue retention", "churn", "renewal rate",
+                  "customer retention", "expansion revenue", "upsell"),
+    "CAPITAL_ALLOCATION": ("capital allocation", "free cash flow",
+                           "buyback", "dividend", "funding round",
+                           "series b", "series c", "series d",
+                           "raised", "investment in"),
+    "SALES_MOTION": ("go-to-market", "sales motion", "channel partner",
+                     "reseller", "partner programme", "partner program",
+                     "product-led growth", "self-serve"),
+    "SUPPLY_CHAIN": ("supply chain", "freight", "shipment", "carrier",
+                     "logistics", "tariff", "customs", "port",
+                     "supplier", "procurement"),
+    "COST_STRUCTURE": ("cost structure", "restructuring", "headcount",
+                       "layoff", "operating leverage", "cost reduction",
+                       "gross margin"),
+    "M&A": ("acquisition of", "we acquired", "merger", "divestiture",
+            "acquired by", "combination with"),
+    "REGULATORY_RESPONSE": ("regulation", "compliance", "gdpr", "hipaa",
+                            "sec rule", "regulatory", "audit requirement",
+                            "data residency", "sovereignty"),
+    "COMPETITIVE_RESPONSE": ("versus", "compared to", "migrate from",
+                             "switch from", "alternative to", "competitor",
+                             "displace"),
+    "INVENTORY": ("inventory", "stock levels", "working capital",
+                  "days of supply", "safety stock"),
+    "R&D_ROADMAP": ("research and development", "clinical", "trial",
+                    "pipeline programme", "pipeline program",
+                    "development programme", "development program"),
+}
+
+#: How many DISTINCT phrases a company's own record must carry before its
+#: evidence may move an archetype up the menu.
+#:
+#: Two, not one. One incidental phrase is a coincidence -- every company
+#: mentions "regulation" somewhere -- and a menu reordered by a coincidence is
+#: the same defect with more steps. Requiring two distinct phrases is the
+#: applicability gate a pattern library needs before it fires.
+_EVIDENCE_MIN_HITS = 2
+
+#: What two hits are worth, and how much more weight more of them carry.
+#:
+#: THE FLOOR IS BELOW THE LIVE-CHANNEL BONUS (4) on purpose: a measured
+#: economic condition reaching this business is stronger evidence than the
+#: company having written about a subject, and must still win at the margin.
+#:
+#: BUT IT HAS TO BE ABLE TO OUTRANK THE CLASS PRIOR, or the whole path is
+#: unreachable for the decisions that matter most. Measured with a flat +3: a
+#: freight record naming shipment, carrier, customs, tariff, logistics, supply
+#: chain and procurement -- SEVEN distinct terms -- still lost to PRICING,
+#: because SUPPLY_CHAIN is not on the software menu and so starts at zero
+#: against a five-deep standing list. A company whose entire published record
+#: is about moving freight is not facing a seat-pricing decision, and an
+#: evidence path that cannot say so is decoration.
+#:
+#: So the bonus SCALES with how much of the record points one way. Two terms
+#: is a mention and cannot displace the class prior; seven is what the company
+#: is about and can. The cap stops one repetitive page from running away.
+_EVIDENCE_WEIGHT = 3
+_EVIDENCE_SCALE_CAP = 4
+
+
+def _evidence_bonus(hits: int) -> int:
+    return _EVIDENCE_WEIGHT + min(max(hits - _EVIDENCE_MIN_HITS, 0),
+                                  _EVIDENCE_SCALE_CAP)
+
+
+def _evidence_archetypes(own_text: str) -> dict:
+    """Which decisions this company's OWN record shows it facing.
+
+    Returns {archetype: (hits, phrases)} for archetypes clearing the gate.
+    Never raises and returns nothing for an empty record, which is the honest
+    answer when a company published nothing we could read.
+    """
+    text = " ".join(str(own_text or "").lower().split())
+    if len(text) < 200:
+        return {}
+    found = {}
+    for archetype, phrases in _ARCHETYPE_EVIDENCE.items():
+        hit = tuple(sorted({p for p in phrases if p in text}))
+        if len(hit) >= _EVIDENCE_MIN_HITS:
+            found[archetype] = (len(hit), hit)
+    return found
+
+
+def _score_archetypes(profile, facts: RecordFacts, own_text: str = ""):
     """Rank this business's decision archetypes against what is known.
 
     The MENU comes from the business model -- a bank does not choose between
@@ -404,14 +536,35 @@ def _score_archetypes(profile, facts: RecordFacts):
     # the posture bonus), so they win only on the strength of the observation
     # and never merely by being unusual.
     posture = _posture(facts.hidden_state)
+    shown = _evidence_archetypes(own_text)
     added = tuple(a for a in _POSTURE_FAVOURS.get(posture, ())
                   if a not in standing and a in _ARCHETYPE_SUBJECT)
-    menu = standing + added
+    # AND BY WHAT THE COMPANY'S OWN RECORD SHOWS IT FACING. Same rule as the
+    # posture additions above: it enters BELOW every standing archetype, so it
+    # wins on the strength of the evidence and never merely by being unusual.
+    from_record = tuple(a for a in shown
+                        if a not in standing and a not in added
+                        and a in _ARCHETYPE_SUBJECT)
+    menu = standing + added + from_record
     for position, archetype in enumerate(menu):
         # BASE: the model class's own ordering. For a commodity producer
         # capital allocation leads; for a software company pricing does.
         score = (len(standing) - position) if position < len(standing) else 0
-        if archetype in added:
+        # WHAT MOVED THIS ARCHETYPE, ITEMISED. Without it a cohort cannot tell
+        # "these companies genuinely look alike" from "the class prior won
+        # again", which is the distinction that took seven identical X-Rays to
+        # notice. The four sources are reported separately and never summed
+        # into one opaque number.
+        contrib = {"class_prior": score, "evidence": 0, "econ": 0,
+                   "posture": 0, "causal": 0}
+        if archetype in from_record:
+            hits, phrases = shown[archetype]
+            reasons_extra = (
+                f"this is not a standing decision for a "
+                f"{profile.business_model_class.replace('_', ' ').lower()} "
+                f"business, and is on the list because this company's own "
+                f"record discusses it: {', '.join(phrases[:3])}")
+        elif archetype in added:
             reasons_extra = (
                 f"this is not a standing decision for a "
                 f"{profile.business_model_class.replace('_', ' ').lower()} "
@@ -425,12 +578,28 @@ def _score_archetypes(profile, facts: RecordFacts):
         for channel in sorted(live_channels):
             if archetype in _CHANNEL_FAVOURS.get(channel, ()):
                 score += 4
+                contrib["econ"] += 4
                 reasons.append(
                     f"measured {channel.replace('_', ' ').lower()} conditions "
                     f"reach this business and bear directly on it")
+        # THE SUBJECT'S OWN RECORD, ORDERING ITS OWN MENU. Without this the
+        # base score is the model class's ordering and nothing else, so every
+        # company sharing a class receives the same central question -- which
+        # is what seven of nine cohort-A companies did.
+        if archetype in shown:
+            hits, phrases = shown[archetype]
+            score += _evidence_bonus(hits)
+            contrib["evidence"] += _evidence_bonus(hits)
+            contrib["evidence_terms"] = list(phrases[:6])
+            reasons.append(
+                f"this company's own record discusses this decision in "
+                f"{hits} distinct terms ({', '.join(phrases[:3])}), which is "
+                f"evidence it is facing it rather than an assumption from "
+                f"its business model")
         if posture:
             if archetype in _POSTURE_FAVOURS.get(posture, ()):
                 score += _POSTURE_WEIGHT
+                contrib["posture"] += _POSTURE_WEIGHT
                 english = _POSTURE_ENGLISH.get(
                     posture, "in an identified operating posture")
                 reasons.append(
@@ -456,8 +625,16 @@ def _score_archetypes(profile, facts: RecordFacts):
             reasons.append("a causal question has been resolved, so an acting "
                            "decision is better supported than an "
                            "information-gathering one")
+            contrib["causal"] = contrib.get("causal", 0) or 1
+        # A decision is CLASS_PRIOR_ONLY when nothing but the model class's
+        # own menu ordering put it where it is. Recorded per archetype so the
+        # cohort-level detector reads a measurement rather than re-deriving
+        # one from prose.
+        contrib["class_prior_only"] = not any(
+            contrib[k] for k in ("evidence", "econ", "posture", "causal"))
         rows.append({"archetype": archetype, "score": score,
                      "subject": _ARCHETYPE_SUBJECT.get(archetype, archetype),
+                     "contributions": contrib,
                      "why": "; ".join(reasons)})
     rows.sort(key=lambda r: (-r["score"], r["archetype"]))
     return tuple(rows)
@@ -817,7 +994,13 @@ def select(company_id: str = "", *, name: str = "", domain: str = "",
                               manifest=manifest, registrant=registrant,
                               evidence_text=evidence_text,
                               published_text=published_text)
-    considered = _score_archetypes(profile, facts) if profile.known else ()
+    # THE COMPANY'S OWN WORDS REACH THE ORDERING, NOT ONLY THE
+    # CLASSIFICATION. `evidence_text` is its filing text and `published_text`
+    # its wider published material; both were already accepted here and spent
+    # entirely on deciding WHAT KIND of business this is.
+    _own = " ".join(t for t in (evidence_text, published_text) if t)
+    considered = (_score_archetypes(profile, facts, own_text=_own)
+                  if profile.known else ())
     archetype = considered[0]["archetype"] if considered else UNKNOWN
     why = (considered[0]["why"] if considered else
            (profile.profile_limitation or

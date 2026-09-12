@@ -33,6 +33,10 @@ APP = ROOT / "src/intent_engine/webapp/app.py"
 CATALOG = ROOT / "src/intent_engine/company_ingestion/catalog.py"
 HIST = ROOT / "src/intent_engine/executive/history_rewind.py"
 SUGGEST = ROOT / "src/intent_engine/company_ingestion/suggest.py"
+SEL = ROOT / "src/intent_engine/executive/analysis_selection.py"
+SVC = ROOT / "src/intent_engine/company_ingestion/service.py"
+C = "tests/test_the_class_prior_is_not_the_decision.py"
+M = "tests/test_two_companies_are_not_merged_into_one.py"
 STEPS = ROOT / "src/intent_engine/founder_brief/steps.py"
 L = "tests/test_level_b_is_not_one_page_for_every_company.py"
 T = "tests/test_a_reused_source_list_keeps_its_search.py"
@@ -330,12 +334,20 @@ PROOFS = [
         expect_failure_contains="assert"),
 
     Proof(
-        label="28. the missing economic panel is omitted silently",
+        # RETARGETED. The original anchor was the per-stop branch, which now
+        # reads `... and _any_linked` -- proofs 42 and 43 cover that branch
+        # from both sides. What this one must protect is the REWIND-LEVEL
+        # note, which is where the fact moved to when it stopped being
+        # repeated at every stop.
+        label="28. the page drops the rewind's own economic note",
         path=STEPS,
-        find="        elif state == _HR.ECON_NO_STATE_FOR_DATE:",
-        replace="        elif False:",
+        find='    if getattr(bounded, "economic_note", ""):\n'
+             "        out.append(f'<p class=\"basis\">"
+             "{_e(bounded.economic_note)}</p>')",
+        replace="    if False:\n"
+                "        pass",
         target=f"{L}::test_the_page_says_why_a_period_has_no_economy",
-        expect_failure_contains="assert"),
+        expect_failure_contains="omitted the economic panel silently"),
 
     Proof(
         label="29. the page stops passing a date-bound economic reader",
@@ -434,10 +446,161 @@ PROOFS = [
         target="tests/test_two_companies_are_not_merged_into_one.py::"
                "test_one_company_from_two_sources_is_still_offered_once",
         expect_failure_contains="was offered"),
+    # --- LEVEL B must not collapse INSIDE one company -----------------------
+    Proof(
+        label="38. stops in one month share a heading again",
+        path=HIST,
+        find="            label=_stop_label(when, records, when in _crowded),",
+        replace='            label=when.strftime("%B %Y"),',
+        target=f"{L}::test_stops_in_one_month_do_not_share_a_heading",
+        expect_failure_contains="cannot tell them apart"),
+
+    Proof(
+        label="39. a day is invented for a URL-dated record",
+        path=HIST,
+        find='    asserted = any(r.date == when and r.date_source == "metadata"\n'
+             "                   for r in records)",
+        replace="    asserted = True",
+        target=f"{L}::"
+               "test_a_day_is_only_claimed_where_a_publisher_asserted_one",
+        expect_failure_contains="claims a day"),
+
+    Proof(
+        label="40. knowable goes back to the set of kinds",
+        path=HIST,
+        find="    new_titles = _titles_of(since, 2)\n"
+             "    if since and new_titles:",
+        replace="    new_titles = _titles_of(since, 2)\n"
+                "    if False:",
+        target=f"{L}::test_every_stop_says_something_the_others_do_not",
+        expect_failure_contains="is identical on"),
+
+    Proof(
+        label="41. the lesson stops reading what arrived since",
+        path=HIST,
+        find="    if since and gap_days:",
+        replace="    if False:",
+        target=f"{L}::test_the_page_carries_no_repeated_paragraph",
+        expect_failure_contains="printed more than once"),
+
+    Proof(
+        label="42. the unplaceable economy is repeated at every stop",
+        path=STEPS,
+        find="        elif state == _HR.ECON_NO_STATE_FOR_DATE and _any_linked:",
+        replace="        elif state == _HR.ECON_NO_STATE_FOR_DATE:",
+        target=f"{L}::"
+               "test_the_unplaceable_economy_is_stated_once_not_at_every_stop",
+        expect_failure_contains="repeated on a rewind"),
+
+    Proof(
+        label="43. a real per-stop economic difference is suppressed",
+        path=STEPS,
+        find="        elif state == _HR.ECON_NO_STATE_FOR_DATE and _any_linked:",
+        replace="        elif False:",
+        target=f"{L}::"
+               "test_the_per_stop_economy_is_kept_when_it_DOES_distinguish",
+        expect_failure_contains="silently dropped"),
+    # --- text we did not write may not widen the page -----------------------
+    Proof(
+        label="44. a quote stops wrapping and one token widens the phone",
+        path=APP,
+        find="q,blockquote{overflow-wrap:anywhere;word-break:break-word}",
+        replace="q,blockquote{overflow-wrap:normal}",
+        target="tests/test_a_quote_cannot_widen_the_page.py::"
+               "test_a_quote_wraps_a_token_it_cannot_break",
+        expect_failure_contains="assert"),
+
+    Proof(
+        label="45. the quote rule replaces the code/link rule instead of "
+              "joining it",
+        path=APP,
+        find="code,.src,.prov{overflow-wrap:anywhere;word-break:break-word}\n"
+             "a[href]{overflow-wrap:anywhere}",
+        replace="a[href]{overflow-wrap:anywhere}",
+        target="tests/test_a_quote_cannot_widen_the_page.py::"
+               "test_the_rule_still_covers_code_and_links",
+        expect_failure_contains="assert"),
+    # --- the class prior must not be the decision ---------------------------
+    Proof(
+        label="46. the company's own record stops reaching the ordering",
+        path=SEL,
+        find="    considered = (_score_archetypes(profile, facts, own_text=_own)\n"
+             "                  if profile.known else ())",
+        replace="    considered = (_score_archetypes(profile, facts)\n"
+                "                  if profile.known else ())",
+        target=f"{C}::test_select_passes_the_company_s_own_text_to_the_ordering",
+        expect_failure_contains="class prior decides"),
+
+    Proof(
+        label="47. evidence no longer moves the menu at all",
+        path=SEL,
+        find="            score += _evidence_bonus(hits)",
+        replace="            score += 0",
+        target=f"{C}::"
+               "test_two_companies_of_one_class_can_reach_different_decisions",
+        expect_failure_contains="received the same decision"),
+
+    Proof(
+        label="48. an off-menu decision can never outrank the class prior",
+        path=SEL,
+        find="_EVIDENCE_SCALE_CAP = 4",
+        replace="_EVIDENCE_SCALE_CAP = 0",
+        target=f"{C}::test_an_off_menu_decision_can_outrank_the_class_prior",
+        expect_failure_contains="assert"),
+
+    Proof(
+        label="49. one passing mention reorders the whole menu",
+        path=SEL,
+        find="_EVIDENCE_MIN_HITS = 2",
+        replace="_EVIDENCE_MIN_HITS = 1",
+        target=f"{C}::test_one_passing_mention_does_not_move_the_menu",
+        # The assertion now names the offending phrase between "incidental
+        # phrase" and "reordered", so the old contiguous expectation matched
+        # nothing and the harness correctly reported WRONG_REASON.
+        expect_failure_contains="a single incidental phrase"),
+
+    Proof(
+        label="50. a bare mention outweighs a measured economic channel",
+        path=SEL,
+        find="_EVIDENCE_WEIGHT = 3",
+        replace="_EVIDENCE_WEIGHT = 9",
+        target=f"{C}::"
+               "test_a_measured_economic_channel_still_outweighs_a_bare_mention",
+        expect_failure_contains="assert"),
+
+    # --- and the fuzzy CIK that classified a consultancy as pharma ----------
+    Proof(
+        label="51. subject_cik guesses past a curated identity again",
+        path=SVC,
+        # THE LOOKUP ITSELF, not the branch that reads it. Removing only the
+        # branch left `resolve_entity` in the source, so the structural test
+        # -- which asks whether the registry is consulted -- stayed green and
+        # the harness correctly reported NOT_CAUGHT.
+        find="            from intent_engine.company_ingestion import entities as _E\n"
+             "            profile = _E.resolve_entity(company_name=name).profile",
+        replace="            profile = None",
+        target=f"{M}::test_subject_cik_consults_the_registry_before_guessing",
+        expect_failure_contains="without asking the curated registry"),
+    Proof(
+        label="52. a class-prior-only decision stops declaring itself",
+        path=SEL,
+        find='        contrib["class_prior_only"] = not any(\n'
+             '            contrib[k] for k in ("evidence", "econ", "posture", "causal"))',
+        replace='        contrib["class_prior_only"] = False',
+        target=f"{C}::test_a_class_prior_only_decision_is_labelled_as_one",
+        expect_failure_contains="was not marked as such"),
+
+    Proof(
+        label="53. the winning terms are no longer named",
+        path=SEL,
+        find='            contrib["evidence_terms"] = list(phrases[:6])',
+        replace='            contrib["evidence_terms"] = []',
+        target=f"{C}::test_an_evidence_led_decision_names_the_terms",
+        expect_failure_contains="assert"),
 ]
 
 
 if __name__ == "__main__":
     sys.exit(run_all(
         PROOFS,
-        title="DISCOVERY + CATALOG + LEVEL B + FILER CIK + ONE IDENTITY"))
+        title="DISCOVERY + CATALOG + LEVEL B + IDENTITY + DECISION SELECTION"))

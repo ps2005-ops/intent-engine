@@ -186,8 +186,54 @@ def _retrieval_limitation(row, surfaces) -> bool:
     return True
 
 
+def _generalization(run_id, row, surfaces) -> dict:
+    """§7. Which force chose this company's decision, and what it was.
+
+    Read from the run's own composed selection where the surface exposes it,
+    and from the rendered X-Ray otherwise. Never invented: a company whose
+    page does not state its decision gets an empty record, which is the
+    honest answer and is what a missing field should look like.
+    """
+    xray = visible(surfaces.get("xray", {}).get("html", "") or "")
+    out = {}
+    m = re.search(r"(\b[A-Z][a-z]+(?: [a-z]+)?) decision\b", xray)
+    if m:
+        out["archetype_label"] = m.group(1)
+    q = re.search(r"For [^:]{1,80}:\s*(.{15,200}?\?)", xray)
+    if q:
+        out["decision_question"] = " ".join(q.group(1).split())
+    w = re.findall(r"revenue at a business of this kind moves with "
+                   r"([a-z ,]+?)(?:\.|revenue|$)", xray)
+    if w:
+        out["watch_metrics"] = sorted({x.strip() for x in w if x.strip()})
+    why = re.search(r"[Ww]hy this decision\s*(.{20,400}?)(?:\.\s|$)", xray)
+    if why:
+        out["why_primary_won"] = " ".join(why.group(1).split())[:300]
+    # The itemised contributions, where the run exposes them.
+    try:
+        st, body, _u, _t, _h = _req(
+            op_holder[0], f"/runs/{run_id}/adaptive.json", timeout=45) \
+            if op_holder else (0, "", "", 0, {})
+        data = json.loads(body) if st == 200 else {}
+        sel = (data.get("selection") or {}) if isinstance(data, dict) else {}
+        considered = sel.get("considered") or []
+        if considered:
+            out["archetype"] = considered[0].get("archetype")
+            out["contributions"] = considered[0].get("contributions") or {}
+            out["top_3"] = [c.get("archetype") for c in considered[:3]]
+    except Exception:                                        # noqa: BLE001
+        pass
+    return out
+
+
+#: Set by `_measure` so `_generalization` can reuse the authenticated session
+#: rather than opening one the ownership guard would refuse.
+op_holder = []
+
+
 def _measure(op, run_id, row, surfaces):
     """Everything §10-§19 needs that the ten-company gates did not read."""
+    op_holder[:] = [op]
     # --- §14 DISCOVERY. The state is machine-readable on /evidence now, and
     # the prose is kept beside it so a wording change cannot silently pass.
     ev = surfaces.get("evidence", {}).get("html", "") or ""
@@ -208,20 +254,68 @@ def _measure(op, run_id, row, surfaces):
     hist_html = surfaces.get("history", {}).get("html", "") or ""
     hist = visible(hist_html)
     dates = sorted(set(re.findall(r"\b(20[0-2]\d-[01]\d-[0-3]\d)\b", hist)))
-    spans = re.search(r"(\d+) dated document\(s\) span", hist)
+    # EACH LEVEL COUNTS ITS OWN KIND OF RECORD, AND SAYS SO IN ITS OWN WORDS.
+    # LEVEL B walks "dated document(s)" -- pages the company published. LEVEL A
+    # walks "dated filing(s)" -- a regulator's forms, which is deliberately a
+    # different noun (`history_rewind.DatedRecord` exists precisely so an About
+    # page is never described as a filing). Matching only the LEVEL B wording
+    # read Rubrik's count as null on a page that says 32.
+    # EACH LEVEL COUNTS ITS OWN RECORD IN ITS OWN WORDS, and all three must
+    # yield §12's DATED_DOCUMENT_COUNT:
+    #   A  "32 dated filing(s) span 2024-04-01 to 2026-09-01"
+    #   B  "6 dated document(s) span 2026-07-10 to 2026-08-27"
+    #   C  "One dated document was retrieved for Alation, Inc."
+    # Matching only one of them read two of the three as null on pages that
+    # state the number plainly.
+    _WORDS = {"no": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
+              "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10}
+    spans = re.search(
+        r"(\d+) dated (?:document|filing|record)\(s\) span", hist)
+    if spans:
+        dated_documents = int(spans.group(1))
+    else:
+        m2 = re.search(
+            r"\b(\d+|no|one|two|three|four|five|six|seven|eight|nine|ten) "
+            r"dated (?:document|filing|record)s?\b", hist, re.I)
+        dated_documents = (
+            (int(m2.group(1)) if m2.group(1).isdigit()
+             else _WORDS.get(m2.group(1).lower()))
+            if m2 else None)
     econ_states = re.findall(r'data-econ-state="([^"]*)"', hist_html)
     row["history"] = {
         "level": row.get("history_level"),
-        "dated_documents": int(spans.group(1)) if spans else None,
+        "dated_documents": dated_documents,
         "earliest": dates[0] if dates else None,
         "latest": dates[-1] if dates else None,
         "financial_series": row.get("history_level") == "A",
         "econ_states": {s: econ_states.count(s) for s in set(econ_states)},
         "economic_links": sum(1 for s in econ_states
                               if s == "ECONOMIC_CONTEXT_LINKED"),
-        "hindsight_wall": ("PRESENT" if "not available then" in hist.lower()
-                           else "ABSENT"),
+        # THE WALL IS THE SAME WALL, WORDED FOR THE SURFACE IT GUARDS. LEVEL B
+        # labels a field "(hindsight, not available then)"; LEVEL A states it
+        # about the chart -- "Nothing modelled at a date can see a filing made
+        # after it." Checking only the first reported ABSENT on a page whose
+        # wall is intact, which would have read as a product defect.
+        # A WALL GUARDS A WALK. LEVEL C walks no dates -- it states that the record is
+        # too thin to rewind -- so there is no "then" for later evidence to leak into,
+        # and reporting ABSENT there would read as a missing guard rather than an
+        # inapplicable one.
+        "hindsight_wall": ("NOT_APPLICABLE"
+                           if row.get("history_level") == "C" else
+                           "PRESENT" if any(
+            phrase in hist.lower() for phrase in (
+                "not available then", "can see a filing made after it",
+                "had not happened yet", "after it, because that part"))
+            else "ABSENT"),
         "stops": len(econ_states),
+        # LEVEL A's evidence is the chart itself: three series and the year
+        # selectors a reader can actually move. Recorded so "financial series
+        # available" is a measurement rather than an inference from the level.
+        "series_lines": sum(1 for m in ("ln-actual", "ln-expect", "ln-counter")
+                            if m in hist_html),
+        "chart_years": sorted(set(re.findall(r">(20\d\d)<", hist_html))),
+        "timeline_points": (lambda m: int(m.group(1)) if m else None)(
+            re.search(r"timeline has (\d+) point", hist)),
     }
     # --- §7 the surfaces the ten-company harness did not open.
     #     `result` is the run's OWN page and it is where the economic context
@@ -252,6 +346,11 @@ def _measure(op, run_id, row, surfaces):
             re.I)),
         "chars": len(blob),
     }
+    # --- §7 STRATEGIC GENERALIZATION, read off the X-Ray's own panel.
+    #     What decided this company's question, itemised, so a cohort can tell
+    #     a genuine similarity from the class prior winning again.
+    row["generalization"] = _generalization(run_id, row, surfaces)
+
     # --- §19 the corpus template collapse is measured from. Kept, not judged
     # here: a single company cannot be compared with itself.
     row["decision_text"] = {
