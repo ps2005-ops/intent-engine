@@ -614,8 +614,27 @@ def test_one_run_resolves_one_profile_for_every_surface():
     # RecordFacts. The profile was the inconsistent thing; the facts belong
     # to the dossier.
     assert "profile" in inspect.signature(DS.compose).parameters
-    assert "_select(dossier, hidden, registrant, profile=profile)" in (
-        inspect.getsource(DS.compose))
+    # ASSERTED AS A PROPERTY, NOT AS A CALL SPELLING.
+    #
+    # This pinned the exact string
+    # `_select(dossier, hidden, registrant, profile=profile)`, which made it a
+    # spelling test: adding a legitimate argument to that call broke it while
+    # everything it protects stayed true. What matters is that the PROFILE
+    # crosses and the whole SELECTION does not, and that the archetype is
+    # still scored from the dossier's own facts.
+    compose_src = inspect.getsource(DS.compose)
+    select_src = inspect.getsource(DS._select)
+    assert "_select(dossier, hidden, registrant" in compose_src, (
+        "compose no longer resolves the selection from the dossier")
+    assert "profile=profile" in compose_src, (
+        "the canonical profile no longer reaches the decision composer")
+    assert "selection=selection" not in compose_src, (
+        "the whole selection is being passed across the seam again, which is "
+        "what made the live X-Ray and the dossier X-Ray ask two different "
+        "questions about one company")
+    assert select_src.count("facts=_facts(dossier, hidden)") == 2, (
+        "the archetype is no longer scored from the DOSSIER's own facts in "
+        "both selection branches")
 
 
 def test_the_canonical_selection_reaches_rung_three():

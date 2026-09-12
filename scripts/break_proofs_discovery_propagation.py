@@ -35,6 +35,8 @@ HIST = ROOT / "src/intent_engine/executive/history_rewind.py"
 SUGGEST = ROOT / "src/intent_engine/company_ingestion/suggest.py"
 SEL = ROOT / "src/intent_engine/executive/analysis_selection.py"
 SVC = ROOT / "src/intent_engine/company_ingestion/service.py"
+DSY = ROOT / "src/intent_engine/executive/decision_synthesis.py"
+X = "tests/test_the_xray_composer_sees_the_company_record.py"
 C = "tests/test_the_class_prior_is_not_the_decision.py"
 M = "tests/test_two_companies_are_not_merged_into_one.py"
 STEPS = ROOT / "src/intent_engine/founder_brief/steps.py"
@@ -596,6 +598,47 @@ PROOFS = [
         find='            contrib["evidence_terms"] = list(phrases[:6])',
         replace='            contrib["evidence_terms"] = []',
         target=f"{C}::test_an_evidence_led_decision_names_the_terms",
+        expect_failure_contains="assert"),
+    # --- the composer the X-Ray actually renders ----------------------------
+    Proof(
+        label="54. compose stops forwarding the company's own record",
+        path=DSY,
+        find="    selection = _select(dossier, hidden, registrant, profile=profile,\n"
+             "                        evidence_text=evidence_text,\n"
+             "                        published_text=published_text)",
+        replace="    selection = _select(dossier, hidden, registrant, profile=profile)",
+        target=f"{X}::test_compose_forwards_the_record_to_the_selector",
+        expect_failure_contains="assert"),
+
+    Proof(
+        label="55. only one of the two selection branches carries it",
+        path=DSY,
+        find="                         profile=profile,\n"
+             "                         evidence_text=evidence_text,\n"
+             "                         published_text=published_text)",
+        replace="                         profile=profile)",
+        target=f"{X}::test_the_selector_hands_it_to_analysis_selection",
+        expect_failure_contains="only one of the two selection branches"),
+
+    Proof(
+        label="56. the X-Ray stops supplying the run's own record",
+        path=APP,
+        find="            own=self._canonical_profile_inputs(\n"
+             '                run_id, name, str(meta.get("domain") or ""))) \\',
+        replace="            own=None) \\",
+        target=f"{X}::test_the_xray_supplies_it",
+        expect_failure_contains="without the run's own record"),
+
+    Proof(
+        label="57. the dossier's own facts stop scoring the archetype",
+        path=DSY,
+        find="                        facts=_facts(dossier, hidden),\n"
+             "                        registrant=registrant,\n"
+             "                        evidence_text=evidence_text,",
+        replace="                        facts=None,\n"
+                "                        registrant=registrant,\n"
+                "                        evidence_text=evidence_text,",
+        target=f"{X}::test_the_dossier_facts_still_belong_to_the_dossier",
         expect_failure_contains="assert"),
 ]
 

@@ -481,7 +481,8 @@ def _facts(dossier, hidden: str):
             "AVAILABLE", "STALE"))
 
 
-def _select(dossier, hidden: str, registrant=None, profile=None):
+def _select(dossier, hidden: str, registrant=None, profile=None,
+            evidence_text: str = "", published_text: str = ""):
     """This company's analysis selection, or None if it cannot be made.
 
     Never raises into `compose`: a missing manifest must degrade the reading,
@@ -510,10 +511,27 @@ def _select(dossier, hidden: str, registrant=None, profile=None):
         # the live X-Ray and the dossier X-Ray started asking two different
         # decision questions. Overriding a better-sourced answer to remove a
         # contradiction just moves the contradiction somewhere else.
+        # THE SUBJECT'S OWN RECORD, WHICH ORDERS ITS MENU.
+        #
+        # TWO COMPOSERS, AND THE FIELD WENT TO THE OTHER ONE -- again. The
+        # evidence-led archetype ordering was added to `select`, and
+        # `_canonical_selection` supplies it, but the X-Ray renders THIS
+        # composer and it called `select` with name, facts and registrant
+        # only. MEASURED on the deployed repair: project44's own pages carry
+        # NINE distinct supply-chain terms -- enough to outrank a five-deep
+        # class prior -- and its X-Ray still asked a seat-pricing question,
+        # because the text never crossed this call.
+        #
+        # This is the same shape as `registrant` directly above it: an input
+        # the CALLER resolves, because this function makes no network call.
+        # The dossier's facts still belong to the dossier, which is the
+        # distinction the comment in `compose` protects.
         own = AS.select(dossier.company_id,
                         name=dossier.canonical_name or "",
                         facts=_facts(dossier, hidden),
-                        registrant=registrant)
+                        registrant=registrant,
+                        evidence_text=evidence_text,
+                        published_text=published_text)
         if getattr(getattr(own, "profile", None), "known", False):
             return own
         if profile is None or not getattr(profile, "known", False):
@@ -522,7 +540,9 @@ def _select(dossier, hidden: str, registrant=None, profile=None):
                          name=dossier.canonical_name or "",
                          facts=_facts(dossier, hidden),
                          registrant=registrant,
-                         profile=profile)
+                         profile=profile,
+                         evidence_text=evidence_text,
+                         published_text=published_text)
     except Exception:                                       # noqa: BLE001
         return None
 
@@ -622,7 +642,9 @@ def _recommendation(standing: str, selection, facts) -> tuple:
 def compose(dossier, *, previous: Optional[Any] = None,
             prior_decision: Optional[Any] = None,
             registrant: Optional[dict] = None,
-            profile: Optional[Any] = None) -> FounderDecision:
+            profile: Optional[Any] = None,
+            evidence_text: str = "",
+            published_text: str = "") -> FounderDecision:
     """Build one FounderDecision from one company demo dossier.
 
     ZERO MODEL CALLS. Verified by a break proof, not by intent.
@@ -656,7 +678,9 @@ def compose(dossier, *, previous: Optional[Any] = None,
     # questions about one company. Moving a contradiction is not repairing
     # it. The profile is the thing that was inconsistent; the facts belong to
     # the dossier and stay with it.
-    selection = _select(dossier, hidden, registrant, profile=profile)
+    selection = _select(dossier, hidden, registrant, profile=profile,
+                        evidence_text=evidence_text,
+                        published_text=published_text)
 
     evidence_block = _block(dossier, "evidence")
     monitoring = []

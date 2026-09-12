@@ -6030,7 +6030,9 @@ class WebApp:
         canonical = self._canonical_selection(
             run_id, name, str(meta.get("domain") or ""))
         decision = self._executive_read(
-            dossier, profile=getattr(canonical, "profile", None)) \
+            dossier, profile=getattr(canonical, "profile", None),
+            own=self._canonical_profile_inputs(
+                run_id, name, str(meta.get("domain") or ""))) \
             if dossier is not None else None
         if decision is None:
             # A RUN THAT RETRIEVED NOTHING IS NOT A FAULT IN THE PRODUCT.
@@ -8364,7 +8366,7 @@ class WebApp:
             return {"state": "CEO_QUESTIONS_UNAVAILABLE",
                     "reason": f"the answers could not be composed: {exc}"}
 
-    def _executive_read(self, dossier, profile=None):
+    def _executive_read(self, dossier, profile=None, own=None):
         """Compose the FounderDecision for one dossier. No model call.
 
         Composed HERE rather than inside `demo_dossier.views` because the
@@ -8388,9 +8390,19 @@ class WebApp:
             # feature -- and it stayed green because None is a legal value.
             previous = self._demo_dossier_store().previous(
                 dossier.company_id, before=dossier.dossier_version)
+            # THE RUN'S OWN RECORD, WHERE THE CALLER HAS ONE. A dossier
+            # carries no run-scoped evidence, so without this the archetype
+            # ordering falls back to the business model's menu for every
+            # privately held company -- which is the collapse this batch
+            # exists to repair, arriving through the composer the X-Ray
+            # actually renders.
+            own = own or {}
             return compose(dossier, previous=previous,
                            registrant=self._registrant(dossier),
-                           profile=profile).as_dict()
+                           profile=profile,
+                           evidence_text=own.get("evidence_text", ""),
+                           published_text=own.get("published_text",
+                                                  "")).as_dict()
         except Exception:                                   # noqa: BLE001
             _LOG.warning("executive read not composed for %s",
                          dossier.company_id)
