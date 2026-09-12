@@ -35,7 +35,14 @@ SAME_MODEL = [
      "REGULATORY_RESPONSE"),
     ("salesforce", "Salesforce, Inc.", "CAPITAL_CONSTRAINED",
      "CAPITAL_ALLOCATION"),
-    ("workday", "Workday, Inc.", "EXPANDING", "CAPACITY"),
+    # MARKET_ENTRY, not CAPACITY. `_POSTURE_FAVOURS["EXPANDING"]` is
+    # ("MARKET_ENTRY", "CAPACITY") -- market entry is the authored FIRST
+    # preference for a company that is expanding. Both score 8 and the old
+    # expectation was satisfied only because the sort ended on the archetype
+    # NAME and "CAPACITY" sorts before "MARKET_ENTRY". Once ties stopped
+    # being decided by dictionary order, the map's own ordering decided, and
+    # this row was pinning the alphabet rather than the posture.
+    ("workday", "Workday, Inc.", "EXPANDING", "MARKET_ENTRY"),
 ]
 
 
@@ -43,6 +50,13 @@ SAME_MODEL = [
 def test_the_posture_selects_the_archetype(cid, name, posture, expected):
     sel = AS.select(cid, name=name,
                     facts=F(evidence=20, beliefs=3, hidden_state=posture))
+    # THE PROPERTY, stated so it cannot be satisfied by a tie-break accident:
+    # the winner must be one the POSTURE favours, and must not be the class
+    # prior this test exists to stop everything collapsing into.
+    favoured = AS._POSTURE_FAVOURS.get(posture, ())
+    assert sel.archetype in favoured, (
+        f"{posture} selected {sel.archetype}, which the posture map does not "
+        f"favour at all: {favoured}")
     assert sel.archetype == expected
 
 

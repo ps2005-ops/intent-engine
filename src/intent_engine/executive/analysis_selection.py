@@ -431,13 +431,25 @@ _ARCHETYPE_EVIDENCE = {
                          "mid-market push", "enterprise segment",
                          "segment focus", "stopped serving",
                          "account concentration", "customer concentration"),
-    "RETENTION": ("net revenue retention", "churn", "renewal rate",
-                  "customer retention", "expansion revenue", "upsell"),
-    "CAPITAL_ALLOCATION": ("capital allocation", "free cash flow",
-                           "buyback", "share repurchase", "dividend",
+    # A DISCLOSED METRIC IS NOT A DECISION. "net revenue retention",
+    # "churn", "renewal rate" and "expansion revenue" are numbers a
+    # subscription filer must report; they say the company MEASURES
+    # retention, not that it is deciding what to spend on it. RETENTION
+    # stays second on the software menu, so it remains reachable by the
+    # class prior without any evidence at all.
+    "RETENTION": ("customer retention", "retention programme",
+                  "retention program", "customer success investment",
+                  "renewal risk", "churn increased", "churn reduction",
+                  "win-back", "upsell motion"),
+    # MEASURED on a 10-K's ordinary register: "free cash flow", "dividend"
+    # and "capital expenditure" are mandatory line items and fired three
+    # hits on text where nothing was being decided.
+    "CAPITAL_ALLOCATION": ("capital allocation", "buyback",
+                           "share repurchase", "repurchase programme",
+                           "repurchase program", "initiated a dividend",
+                           "increased the dividend", "suspended the dividend",
                            "funding round", "series b", "series c",
-                           "series d", "raised a round",
-                           "capital expenditure"),
+                           "series d", "raised a round"),
     # MEASURED on cohort A: "go-to-market" and "channel partner" are on
     # almost every B2B page ever published, and two hits of them moved
     # SALES_MOTION above the class prior for three unrelated companies --
@@ -458,11 +470,21 @@ _ARCHETYPE_EVIDENCE = {
     "SUPPLY_CHAIN": ("supply chain", "freight", "shipment", "carrier",
                      "logistics", "tariff", "customs", "seaport",
                      "supplier", "procurement", "lead time"),
-    "COST_STRUCTURE": ("cost structure", "restructuring", "headcount",
-                       "layoff", "operating leverage", "cost reduction",
-                       "gross margin"),
-    "M&A": ("acquisition of", "we acquired", "merger", "divestiture",
-            "acquired by", "combination with"),
+    # "gross margin", "headcount" and "operating leverage" are what a
+    # filing REPORTS; "restructuring" and "reduction in force" are what a
+    # company DOES.
+    "COST_STRUCTURE": ("cost structure", "restructuring",
+                       "restructuring charge", "layoff",
+                       "reduction in force", "workforce reduction",
+                       "cost reduction", "cost programme", "cost program"),
+    # THE ONE THAT SHIPPED. Rubrik, a LEVEL A filer with 32 filings, was
+    # handed "what to buy or sell, and at what price" on "acquired by,
+    # acquisition of, combination with" -- the exact wording of an ASC 805
+    # business-combination note, which is in essentially every 10-K.
+    "M&A": ("announced the acquisition", "agreed to acquire",
+            "definitive agreement", "we acquired", "merger agreement",
+            "divestiture of", "divested", "tender offer",
+            "letter of intent"),
     "REGULATORY_RESPONSE": ("new regulation", "regulatory change",
                             "regulatory approval", "compliance obligation",
                             "audit requirement", "data residency",
@@ -701,7 +723,27 @@ def _score_archetypes(profile, facts: RecordFacts, own_text: str = ""):
                      "subject": _ARCHETYPE_SUBJECT.get(archetype, archetype),
                      "contributions": contrib,
                      "why": "; ".join(reasons)})
-    rows.sort(key=lambda r: (-r["score"], r["archetype"]))
+    # A TIE IS NOT EVIDENCE OUTRANKING THE PRIOR.
+    #
+    # The key was (-score, archetype), so two archetypes on the same score
+    # were separated by DICTIONARY ORDER of the enum name. MEASURED live:
+    # Rubrik's PRICING (class prior, base 5) tied M&A (off-menu, evidence 5)
+    # and lost because "M&A" sorts before "PRICING" -- the alphabet chose the
+    # company's central decision. The same tie went the other way for HYCU,
+    # whose REGULATORY_RESPONSE tied PRICING at 5 and lost because "P" < "R".
+    #
+    # The menu is what this KIND of business normally decides and is the
+    # better-founded default; §2 asks that a company's own record win where
+    # it is SUFFICIENTLY distinguishing, and equal is not more. So on a tie
+    # the standing menu holds, in its own order, and an off-menu archetype
+    # must strictly exceed it to displace it. The name remains only as a
+    # deterministic last resort.
+    order = {a: i for i, a in enumerate(menu)}
+    standing_set = set(standing)
+    rows.sort(key=lambda r: (-r["score"],
+                             0 if r["archetype"] in standing_set else 1,
+                             order.get(r["archetype"], len(menu)),
+                             r["archetype"]))
     return tuple(rows)
 
 

@@ -45,6 +45,8 @@ V = "tests/test_category_vocabulary_is_not_a_decision.py"
 A = "tests/test_an_abandoned_search_is_ours_to_own.py"
 S = "tests/test_a_stop_teaches_something_of_its_own.py"
 P = "tests/test_peers_share_one_stated_basis.py"
+FR = "tests/test_a_filing_reports_what_a_company_decides.py"
+POST = "tests/test_posture_selects_the_decision.py"
 
 PROOFS = [
     # --- P1-3 the evidence semantics ---------------------------------------
@@ -131,6 +133,75 @@ PROOFS = [
         target="tests/test_the_class_prior_is_not_the_decision.py"
                "::test_the_decision_follows_the_company_s_own_record",
         expect_failure_contains="assert"),
+
+    # --- the filing register, and the tie the alphabet was deciding -------
+    Proof(
+        label="29. M&A goes back to accounting-note wording",
+        path=SEL,
+        find='    "M&A": ("announced the acquisition", "agreed to acquire",',
+        replace='    "M&A": ("acquisition of", "acquired by", "combination with",',
+        target=f"{FR}::test_an_ordinary_filing_paragraph_decides_nothing",
+        expect_failure_contains="M&A"),
+
+    Proof(
+        label="30. retention counts a disclosed metric as a decision",
+        path=SEL,
+        find='    "RETENTION": ("customer retention", "retention programme",',
+        replace='    "RETENTION": ("net revenue retention", "churn", "renewal rate",',
+        target=f"{FR}::test_an_ordinary_filing_paragraph_decides_nothing",
+        expect_failure_contains="RETENTION"),
+
+    Proof(
+        label="31. cost structure counts a reported line item",
+        path=SEL,
+        find='    "COST_STRUCTURE": ("cost structure", "restructuring",\n'
+             '                       "restructuring charge", "layoff",',
+        replace='    "COST_STRUCTURE": ("cost structure", "gross margin",\n'
+                '                       "operating leverage", "headcount",',
+        target=f"{FR}::test_an_ordinary_filing_paragraph_decides_nothing",
+        expect_failure_contains="COST_STRUCTURE"),
+
+    Proof(
+        label="32. capital allocation counts a mandatory disclosure",
+        path=SEL,
+        find='    "CAPITAL_ALLOCATION": ("capital allocation", "buyback",',
+        replace='    "CAPITAL_ALLOCATION": ("capital allocation", "free cash flow",\n'
+                '                           "dividend", "capital expenditure", "buyback",',
+        target=f"{FR}::test_an_ordinary_filing_paragraph_decides_nothing",
+        expect_failure_contains="CAPITAL_ALLOCATION"),
+
+    Proof(
+        label="33. the tie goes back to the alphabet",
+        path=SEL,
+        find="    order = {a: i for i, a in enumerate(menu)}\n"
+             "    standing_set = set(standing)\n"
+             '    rows.sort(key=lambda r: (-r["score"],\n'
+             '                             0 if r["archetype"] in standing_set else 1,\n'
+             '                             order.get(r["archetype"], len(menu)),\n'
+             '                             r["archetype"]))',
+        replace='    rows.sort(key=lambda r: (-r["score"], r["archetype"]))',
+        target=f"{FR}::test_an_off_menu_archetype_that_only_ties_does_not_displace_the_prior",
+        expect_failure_contains="displaced the class prior"),
+
+    Proof(
+        label="34. an off-menu archetype can no longer displace at all",
+        path=SEL,
+        find='    rows.sort(key=lambda r: (-r["score"],\n'
+             '                             0 if r["archetype"] in standing_set else 1,',
+        replace='    rows.sort(key=lambda r: (0 if r["archetype"] in standing_set else 1,\n'
+                '                             -r["score"],',
+        target=f"{FR}::test_an_off_menu_archetype_that_strictly_exceeds_still_wins",
+        expect_failure_contains="assert"),
+
+    Proof(
+        label="35. the posture stops selecting from its own map",
+        path=SEL,
+        find='            if archetype in _POSTURE_FAVOURS.get(posture, ()):\n'
+             "                score += _POSTURE_WEIGHT",
+        replace='            if archetype in ():\n'
+                "                score += _POSTURE_WEIGHT",
+        target=f"{POST}::test_the_posture_selects_the_archetype",
+        expect_failure_contains="does not favour at all"),
 
     # --- P1-2 the discovery state -----------------------------------------
     Proof(
