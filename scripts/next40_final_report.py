@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import pathlib
+import re
 import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -109,6 +110,9 @@ def build(analysis, state, findings, invariants) -> dict:
         "core_p90": _pct([r.get("core_s") for r in rows], 90),
         "core_max": max([r.get("core_s") or 0 for r in rows] or [0]),
         "unexpected_429": 0, "unexpected_5xx": 0, "endless_spinner": 0,
+        "explained_high_similarities": s.get("explained_high_similarities"),
+        "unexplained_template_collapses": s.get(
+            "unexplained_template_collapses"),
     }
     return {"contract": "next40_final.v1", "sha": analysis.get("sha"),
             "cohorts_run": sorted({r["cohort"] for r in rows}),
@@ -129,8 +133,38 @@ def main() -> int:
     findings = _load("reports/next40_findings.json", {})
     invariants = {c: _load(f"reports/next40_invariants_{c}.json")
                   for c in ("A", "B", "C")}
+    # THE TEN DIMENSIONS, JOINED ONTO EACH ROW. The matrix is the artifact a
+    # reader checks a claim against, so the per-company verdicts belong in it
+    # rather than only in a summary.
+    ten = _load("reports/next40_ten_dimensions.json", {})
+    by_company = {c["company"]: c for c in (ten.get("companies") or [])}
     doc = build(analysis, state, findings,
                 {k: v for k, v in invariants.items() if v})
+    ui_w = _load("reports/next40_ui_widths.json", {})
+    for r in doc["rows"]:
+        t = by_company.get(r["company"]) or {}
+        r["dimensions"] = t.get("dimensions")
+        r["dimension_evidence"] = t.get("why")
+        r["qualification_10_of_10"] = t.get("qualification_10_of_10")
+        w = ui_w.get(re.sub(r"[^a-z0-9]+", "-",
+                            r["company"].lower()).strip("-")) or {}
+        r["widths"] = w.get("widths")
+        r["themes"] = sorted(set(w.get("themes") or []))
+        r["overflow"] = w.get("overflow")
+        r["contrast_failures"] = w.get("contrast")
+    doc["totals"]["qualification_10_of_10"] = sum(
+        1 for r in doc["rows"] if r.get("qualification_10_of_10"))
+    doc["totals"]["dimension_totals"] = {}
+    for name in ("IDENTITY", "EVIDENCE_PROVENANCE", "COMPANY_UNDERSTANDING",
+                 "ECONOMIC_INTELLIGENCE", "STRATEGIC_DECISION", "HISTORY",
+                 "DISCOVERY", "QA_ROLE", "UI", "EXECUTIVE_USEFULNESS"):
+        ok = sum(1 for r in doc["rows"]
+                 if (r.get("dimensions") or {}).get(name) in
+                 ("PASS", "PASS_BOUNDED"))
+        doc["totals"]["dimension_totals"][name] = f"{ok}/{len(doc['rows'])}"
+    doc["totals"]["total_overflow"] = ui_w.get("total_overflow")
+    doc["totals"]["total_contrast"] = ui_w.get("total_contrast")
+    doc["totals"]["ui_elements_checked"] = ui_w.get("total_elements_checked")
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "40_company_qualification_matrix.json").write_text(
         json.dumps(doc, indent=1))

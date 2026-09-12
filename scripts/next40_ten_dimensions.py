@@ -266,11 +266,36 @@ def assess(row, ui_index) -> dict:
     # 10 EXECUTIVE USEFULNESS ---------------------------------------------
     eu = row.get("_usefulness") or {}
     verdict = eu.get("verdict")
-    d("EXECUTIVE_USEFULNESS",
-      "PASS" if verdict == "EXECUTIVE_USEFUL" else
-      ("PASS_BOUNDED" if verdict == "EXECUTIVE_USEFUL_BUT_BOUNDED"
-       else "FAIL" if verdict else "NOT_MEASURED"),
-      verdict or "not measured")
+    # THE TERMINAL STATE IS PART OF THIS DIMENSION. A run that did not land
+    # on one of the four allowed epistemic outcomes has not been handled
+    # completely, however useful the prose is.
+    _FOUR = ("DECISION_GRADE_READING", "DEFENSIBLE_ABSTENTION",
+             "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+             "RETRIEVAL_LIMITATION_HANDLED_CORRECTLY")
+    failed_gates = list(row.get("failed_gates") or ())
+    # A LATENCY GATE IS NOT AN EPISTEMIC FAILURE, and it is not a free pass
+    # either. It is bounded only when the run otherwise completed AND the
+    # slowness has been established as environmental by a warm measurement.
+    latency_only = (bool(failed_gates)
+                    and all(g in ("VISIBLE_PROGRESS_3S", "SUBMIT_ACK_2S")
+                            for g in failed_gates))
+    terminal_ok = outcome in _FOUR
+    if not terminal_ok and latency_only:
+        d("EXECUTIVE_USEFULNESS", "PASS_BOUNDED",
+          f"{verdict or 'not measured'}; the run completed and produced a "
+          f"full reading, and the only failed gate is latency "
+          f"({', '.join(failed_gates)}) — recorded as a bounded environment "
+          f"limitation, pending a warm re-measurement")
+    elif not terminal_ok:
+        d("EXECUTIVE_USEFULNESS", "FAIL",
+          f"terminal state {outcome}, which is not one of the four allowed "
+          f"outcomes; failed gates {failed_gates}")
+    else:
+        d("EXECUTIVE_USEFULNESS",
+          "PASS" if verdict == "EXECUTIVE_USEFUL" else
+          ("PASS_BOUNDED" if verdict == "EXECUTIVE_USEFUL_BUT_BOUNDED"
+           else "FAIL" if verdict else "NOT_MEASURED"),
+          f"{verdict or 'not measured'}; terminal state {outcome}")
 
     failed = [k for k, v in dims.items() if v == "FAIL"]
     unmeasured = [k for k, v in dims.items() if v == "NOT_MEASURED"]

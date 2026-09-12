@@ -6965,7 +6965,14 @@ class WebApp:
             except Exception:                               # noqa: BLE001
                 filings = ()
         if not filings:
-            filings = HR.filings_from_documents(documents)
+            # THE FALLBACK NEEDS THE SAME IDENTITY THE CIK PATH HAS.
+            #
+            # Passing the subject's CIK is what keeps another registrant's
+            # filings out of this company's dated record. `cik` is empty for
+            # a non-filer, and the fallback then contributes nothing -- which
+            # is correct: a company that files nothing has no regulatory
+            # record, and the page already says so in its own words.
+            filings = HR.filings_from_documents(documents, subject_cik=cik)
         read_selection = None
         profile = None
         try:

@@ -46,6 +46,7 @@ A = "tests/test_an_abandoned_search_is_ours_to_own.py"
 S = "tests/test_a_stop_teaches_something_of_its_own.py"
 P = "tests/test_peers_share_one_stated_basis.py"
 FR = "tests/test_a_filing_reports_what_a_company_decides.py"
+TL = "tests/test_a_timeline_walks_only_its_own_filings.py"
 POST = "tests/test_posture_selects_the_decision.py"
 
 PROOFS = [
@@ -202,6 +203,33 @@ PROOFS = [
                 "                score += _POSTURE_WEIGHT",
         target=f"{POST}::test_the_posture_selects_the_archetype",
         expect_failure_contains="does not favour at all"),
+
+    # --- the timeline may only walk the subject's own filings -------------
+    Proof(
+        label="36. the timeline takes any sec.gov document again",
+        path=HIST,
+        find="        filer = filing_author(url)\n"
+             "        if not want or not filer or filer != want:\n"
+             "            continue",
+        replace="        pass",
+        target=f"{TL}::test_a_non_filer_gets_no_regulatory_timeline",
+        expect_failure_contains="assert"),
+
+    Proof(
+        label="37. a non-filer is handed whatever was retrieved",
+        path=HIST,
+        find="        if not want or not filer or filer != want:",
+        replace="        if filer and want and filer != want:",
+        target=f"{TL}::test_a_non_filer_gets_no_regulatory_timeline",
+        expect_failure_contains="assert"),
+
+    Proof(
+        label="38. the call site stops passing the subject's identity",
+        path=APP,
+        find="filings = HR.filings_from_documents(documents, subject_cik=cik)",
+        replace="filings = HR.filings_from_documents(documents)",
+        target=f"{TL}::test_the_call_site_passes_the_subject_cik",
+        expect_failure_contains="without the subject's identity"),
 
     # --- P1-2 the discovery state -----------------------------------------
     Proof(

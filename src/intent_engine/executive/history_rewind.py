@@ -274,20 +274,43 @@ def filings_from_submissions(payload: dict, *, limit: int = 60
     return tuple(sorted(out, key=lambda f: f.date))
 
 
-def filings_from_documents(documents: Sequence[dict]) -> Tuple[Filing, ...]:
-    """Fallback: the dated filings THIS RUN retrieved.
+def filings_from_documents(documents: Sequence[dict],
+                          *, subject_cik: str = "") -> Tuple[Filing, ...]:
+    """Fallback: the dated filings THIS RUN retrieved *for this company*.
 
-    Always available, and always small -- a run retrieves two or three
-    filings, which is a two-or-three-point timeline. That is a real timeline
-    and the coverage note says how short it is, which is better than a rich
-    one built from dates nobody read.
+    ONLY THE SUBJECT'S OWN FILINGS. This accepted any retrieved document
+    whose URL contained "sec.gov", and the independent-source search
+    deliberately retrieves filings by OTHER registrants that NAME the
+    subject. So a company's "dated regulatory record" was built out of other
+    companies' filings, under a page that says it "establishes when this
+    company said what".
+
+    MEASURED on the deployed preview: West Monroe Partners -- a private
+    consultancy with no CIK at all -- was given a two-point timeline built
+    from 10-Ks filed by CIK 1736035 and CIK 1803498. project44, Dataminr and
+    Boomi each carried one filing belonging to somebody else. The evidence
+    drawer had it right the whole time: it labels those sources "SEC filer
+    1803498", because provenance separates author from subject. The timeline
+    did not ask.
+
+    A company that files nothing has no regulatory record, so an empty
+    `subject_cik` accepts NO filing rather than whatever happened to be
+    retrieved. That is the same authority `declared_cik` already holds for
+    retrieval: "curated, and not a filer" is an answer, not a gap.
     """
+    from intent_engine.company_ingestion.independence import filing_author
+
+    want = str(subject_cik or "").lstrip("0")
     out = []
     for document in documents or ():
         if not isinstance(document, dict):
             continue
         url = str(document.get("final_url") or document.get("url") or "")
         if "sec.gov" not in url:
+            continue
+        # WHO FILED IT, not who served it.
+        filer = filing_author(url)
+        if not want or not filer or filer != want:
             continue
         filing = document.get("filing")
         form = str((filing or {}).get("form") or "") if isinstance(

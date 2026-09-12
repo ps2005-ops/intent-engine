@@ -127,6 +127,24 @@ def _force(why: str, has_decision: bool):
     return "UNCLASSIFIED"
 
 
+def _dated_documents(row, slug):
+    """The count the history page states, including the LEVEL C zero.
+
+    The runner recorded None where the page says "No document retrieved for X
+    carried a date" -- a real number, stated plainly, read as a missing
+    measurement.
+    """
+    h = row.get("history") or {}
+    known = h.get("dated_documents")
+    if known is not None:
+        return known
+    text = " ".join(visible(_cap(slug, "history")).split())
+    if re.search(r"No document retrieved for .{0,90}?carried a date", text):
+        return 0
+    m = re.search(r"(\d+) dated (?:document|filing|record)", text)
+    return int(m.group(1)) if m else None
+
+
 def analyse(row, priors) -> dict:
     slug = _slug(row.get("company"))
     xray = _cap(slug, "xray")
@@ -177,7 +195,7 @@ def analyse(row, priors) -> dict:
         "ack_s": row.get("submit_ack_s"), "visible_s":
             row.get("visible_progress_s"), "core_s": row.get("core_s"),
         "history_level": row.get("history_level"),
-        "history_documents": h.get("dated_documents"),
+        "history_documents": _dated_documents(row, slug),
         "hindsight_wall": h.get("hindsight_wall"),
         "economic_links": h.get("economic_links"),
         "stops": h.get("stops"),

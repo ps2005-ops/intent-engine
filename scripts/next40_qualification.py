@@ -343,9 +343,18 @@ def _measure(op, run_id, row, surfaces):
     # state the number plainly.
     _WORDS = {"no": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
               "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10}
+    # LEVEL C HAS A THIRD WORDING, AND IT MEANS ZERO.
+    #
+    # "No document retrieved for X carried a date its publisher had asserted"
+    # states a count of 0 without using the phrase "dated document" at all,
+    # so both patterns below missed it and the matrix recorded None -- a
+    # missing measurement where the page states the number plainly. MEASURED
+    # on Workato and Guidehouse.
     spans = re.search(
         r"(\d+) dated (?:document|filing|record)\(s\) span", hist)
-    if spans:
+    if re.search(r"No document retrieved for .{0,90}?carried a date", hist):
+        dated_documents = 0
+    elif spans:
         dated_documents = int(spans.group(1))
     else:
         m2 = re.search(
