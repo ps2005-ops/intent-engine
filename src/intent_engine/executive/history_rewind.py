@@ -647,6 +647,49 @@ LEVEL_TITLES = {
     LEVEL_GAP: "what the dated record does not yet support",
 }
 
+# --- WHETHER A STOP COULD BE GIVEN ITS ECONOMIC WEATHER ----------------------
+#
+# WHY A STATE AND NOT A BLANK. A LEVEL B rewind walked the company's own dates
+# and said, at every stop, the same two sentences with the counts swapped:
+# "By <month>, N dated page(s) ... had been retrieved" and "A reader on this
+# date could establish what <company> said it did and who it said it served".
+# Those sentences are true of every company that has ever published a web
+# page, which makes them a template rather than a rewind -- and a template is
+# exactly what §19 refuses.
+#
+# Two things are wrong with it and they are separate. The first is that the
+# company's OWN record was summarised as a count instead of being read. The
+# second is that the economic world the company was operating in at that date
+# was not consulted at all: measured 2026-09-11, this module contained one
+# occurrence of the string "econom", in a docstring.
+#
+# The economic read is vintage-safe BY CONSTRUCTION, not by promise:
+# `econ_at` is handed a date and must return the state published on or before
+# it. A deployment that published no state by that date gets
+# ECON_NO_STATE_FOR_DATE and the page SAYS SO -- which is the honest answer
+# and the one §11 asks for, rather than today's weather presented as 2019's.
+ECON_LINKED = "ECONOMIC_CONTEXT_LINKED"
+ECON_NO_STATE_FOR_DATE = "NO_ECONOMIC_STATE_PUBLISHED_FOR_THIS_DATE"
+ECON_NOT_ATTEMPTED = "ECONOMIC_CONTEXT_NOT_ATTEMPTED"
+ECON_STATES = (ECON_LINKED, ECON_NO_STATE_FOR_DATE, ECON_NOT_ATTEMPTED)
+
+#: What a published page of each kind lets a reader establish. The VALUE is
+#: what the reader learns, so a company whose record is three newsroom posts
+#: gets a different sentence from one whose record is a pricing page and a
+#: customer list -- which is the point, and is derived from its own evidence
+#: rather than asserted about it.
+_KNOWABLE_BY_KIND = {
+    "corporate": "how it described itself and what it claimed to be for",
+    "segment": "what it said it sold and to whom",
+    "customers": "who it was willing to name as a customer",
+    "pricing": "how it said it charged, which is the clearest statement a "
+               "company makes about who it is built for",
+    "newsroom": "what it chose to announce, and therefore what it wanted "
+                "read as progress",
+    "page": "what it had published about itself",
+}
+
+
 #: Two dated points is the floor for a REWIND. One date is a fact about a
 #: document, not a path: there is no "before" to stand in and no "after" to
 #: have been surprised by, so a one-point page would be a rewind in name.
@@ -776,6 +819,12 @@ class BoundedStop:
     later: str                  #: what followed -- AFTER the wall, labelled
     count_before: int = 0
     count_after: int = 0
+    #: The economic world as it was PUBLISHED ON OR BEFORE this date. Empty
+    #: when no state had been published by then; never today's state.
+    economic_then: str = ""
+    economic_state: str = ECON_NOT_ATTEMPTED
+    #: What this stop teaches about the company, read off its own record.
+    lesson: str = ""
 
 
 @dataclasses.dataclass(frozen=True)
@@ -788,14 +837,165 @@ class BoundedRewind:
     coverage_note: str = ""
     open_question: str = ""
     what_would_upgrade: str = ""
+    #: How many stops carry a vintage-safe economic reading, and what that
+    #: means. Zero is a legitimate, stated outcome.
+    economic_links: int = 0
+    economic_note: str = ""
 
     @property
     def available(self) -> bool:
         return bool(self.stops)
 
 
+def _kinds_of(records: Sequence[DatedRecord]) -> List[str]:
+    """The kinds of page present, in a stable order. Never invented."""
+    order = ("corporate", "segment", "customers", "pricing", "newsroom",
+             "page")
+    present = {str(r.kind or "page").lower() for r in records}
+    return [k for k in order if k in present]
+
+
+def _titles_of(records: Sequence[DatedRecord], limit: int = 3) -> str:
+    """The company's OWN words for its own pages."""
+    seen, out = set(), []
+    for record in reversed(list(records)):
+        title = " ".join(str(record.title or "").split())
+        key = title.lower()
+        if not title or key in seen:
+            continue
+        seen.add(key)
+        out.append(title if len(title) <= 70 else title[:67] + "...")
+        if len(out) >= limit:
+            break
+    return _join(out)
+
+
+def _record_then(company: str, before: Sequence[DatedRecord],
+                 when: _dt.date) -> str:
+    """What this company had actually said by this date -- not how many pages.
+
+    Reads the titles and the kinds on record. A count alone is the same
+    sentence for every company in the world.
+    """
+    month = when.strftime("%B %Y")
+    titles = _titles_of(before)
+    kinds = _kinds_of(before)
+    bits = [f"By {month}, {company}'s own dated record ran to "
+            f"{len(before)} page(s)"]
+    if kinds:
+        bits.append("covering " + _join([k.replace("_", " ") for k in kinds]))
+    if titles:
+        bits.append(f"most recently {titles}")
+    return _stop(", ".join(bits))
+
+
+def _bounded_knowable(company: str, before: Sequence[DatedRecord]) -> str:
+    """What a reader ON THIS DATE could establish, from these kinds of page.
+
+    Derived from the kinds the company had actually published by then, so a
+    record of three press releases does not claim a reader could establish
+    pricing.
+    """
+    kinds = _kinds_of(before)
+    learns = [_KNOWABLE_BY_KIND[k] for k in kinds if k in _KNOWABLE_BY_KIND]
+    if not learns:
+        return _stop(f"Nothing on {company}'s record by this date states "
+                     f"what it sold or who it served")
+    return _stop(f"A reader on this date could establish {_join(learns)} -- "
+                 f"all of it from material {company} had itself published "
+                 f"by then")
+
+
+def _bounded_unknowable(company: str, before: Sequence[DatedRecord],
+                        after: Sequence[DatedRecord], when: _dt.date) -> str:
+    """What was withheld. Named by KIND, never by a later title.
+
+    The kinds not yet on record are the honest statement of the gap: saying
+    WHICH later page existed would put a fact from after the wall inside the
+    field whose job is to hold the wall. That belongs in `later`, which is
+    labelled as hindsight.
+    """
+    month = when.strftime("%B %Y")
+    if not after:
+        return _stop(f"This is the most recent dated material retrieved for "
+                     f"{company}, so there is no later record being withheld")
+        # (unreachable fall-through kept explicit for the reader)
+    missing = [k for k in _kinds_of(after) if k not in _kinds_of(before)]
+    extra = (f", including the first {_join(missing)} page(s) it would publish"
+             if missing else "")
+    return _stop(f"Nothing {company} published after {month} was available: "
+                 f"{len(after)} of the dated page(s) read here did not exist "
+                 f"yet{extra}")
+
+
+def _bounded_lesson(company: str, before: Sequence[DatedRecord],
+                    after: Sequence[DatedRecord]) -> str:
+    """What this stop teaches, read off the shape of the record itself.
+
+    DESCRIPTIVE, NOT CONCLUDED. It says what the company's own publishing
+    shows; it does not rate the strategy, because a page count is not
+    evidence about whether a strategy worked.
+    """
+    gained = [k for k in _kinds_of(after) if k not in _kinds_of(before)]
+    if gained:
+        return _stop(f"What {company} had not yet put on the record by this "
+                     f"date is as telling as what it had: its "
+                     f"{_join([g.replace('_', ' ') for g in gained])} "
+                     f"material came later, so a reader here could not have "
+                     f"judged it on that")
+    if not after:
+        return _stop(f"This is the end of {company}'s dated record as "
+                     f"retrieved, so everything a reader can check about its "
+                     f"current position rests on material up to this point")
+    return _stop(f"{company}'s record at this date already covered the same "
+                 f"ground it would continue to publish on, so what changed "
+                 f"afterwards was the detail rather than the subject")
+
+
+def _economic_then(econ_at, when: _dt.date, company: str) -> tuple:
+    """The economic world AS PUBLISHED ON OR BEFORE `when`. Never raises.
+
+    `econ_at` is injected rather than imported so this module keeps no
+    dependency on the economic store, and so a test can prove the wall holds
+    without publishing one.
+
+    THE WALL IS CHECKED HERE TOO. A reader that returned a state dated AFTER
+    the stop would leak hindsight into the one page whose entire promise is
+    that it does not, so a late state is refused rather than rendered.
+    """
+    if econ_at is None:
+        return "", ECON_NOT_ATTEMPTED
+    try:
+        context = econ_at(when.isoformat())
+    except Exception:                                      # noqa: BLE001
+        return "", ECON_NO_STATE_FOR_DATE
+    if context is None or not getattr(context, "available", False):
+        return "", ECON_NO_STATE_FOR_DATE
+    as_of = str(getattr(context, "as_of", "") or "")
+    if as_of and as_of > when.isoformat():
+        # The reader handed back a LATER state. Refused: see above.
+        return "", ECON_NO_STATE_FOR_DATE
+    conditions = getattr(context, "conditions", None) or {}
+    shocks = tuple(getattr(context, "shocks", ()) or ())
+    area = str(getattr(context, "area", "") or "the economy")
+    named = _join([f"{str(k).replace('_', ' ')} {str(v)}"
+                   for k, v in sorted(conditions.items())[:3]])
+    said = [f"The economic state published for {area} as at "
+            f"{as_of or when.isoformat()}"]
+    if named:
+        said.append(f"recorded {named}")
+    if shocks:
+        said.append(f"with {len(shocks)} named shock(s) on the record")
+    if not named and not shocks:
+        said.append("carried no condition this rewind can read")
+    return (_stop(", ".join(said)
+                  + f". Nothing published after {when.isoformat()} was used"),
+            ECON_LINKED)
+
+
 def bounded_rewind(*, company: str, records: Sequence[DatedRecord],
-                   profile=None, max_points: int = 6) -> BoundedRewind:
+                   profile=None, max_points: int = 6,
+                   econ_at=None) -> BoundedRewind:
     """Walk the company's own dated record. Never raises.
 
     THE VINTAGE WALL IS THE SAME WALL. At each stop, `record_then` and
@@ -827,30 +1027,26 @@ def bounded_rewind(*, company: str, records: Sequence[DatedRecord],
     for when in distinct:
         before = [r for r in records if r.date <= when]
         after = [r for r in records if r.date > when]
-        titles = _join([r.title for r in before[-3:] if r.title][:3])
+        # EVERY FIELD BELOW IS READ OFF THIS COMPANY'S OWN RECORD. The version
+        # this replaces substituted two counts into two fixed sentences, so
+        # every LEVEL B company's rewind was the same page.
+        economic_then, economic_state = _economic_then(econ_at, when, company)
         stops.append(BoundedStop(
             date=when.isoformat(),
             label=when.strftime("%B %Y"),
-            record_then=_stop(
-                f"By {when.strftime('%B %Y')}, {len(before)} dated page(s) "
-                f"published by {company} had been retrieved"
-                + (f", most recently {titles}" if titles else "")),
-            knowable=_stop(
-                f"A reader on this date could establish what {company} said "
-                f"it did and who it said it served, from material the "
-                f"company had published by then"),
-            unknowable=_stop(
-                f"Nothing published after {when.strftime('%B %Y')} was "
-                f"available: {len(after)} of the dated page(s) retrieved "
-                f"here did not exist yet"
-                if after else
-                f"This is the most recent dated material retrieved, so "
-                f"there is no later record to withhold"),
+            record_then=_record_then(company, before, when),
+            knowable=_bounded_knowable(company, before),
+            unknowable=_bounded_unknowable(company, before, after, when),
             later=_stop(
                 f"{len(after)} dated page(s) followed this date"
+                + (f", beginning with {_titles_of(after[:1], 1)}"
+                   if after and _titles_of(after[:1], 1) else "")
                 if after else "Nothing retrieved is dated after this point"),
-            count_before=len(before), count_after=len(after)))
+            count_before=len(before), count_after=len(after),
+            economic_then=economic_then, economic_state=economic_state,
+            lesson=_bounded_lesson(company, before, after)))
     span = f"{records[0].iso} to {records[-1].iso}"
+    linked = sum(1 for st in stops if st.economic_state == ECON_LINKED)
     return BoundedRewind(
         company=company, stops=tuple(stops), span=span,
         coverage_note=_stop(
@@ -862,6 +1058,16 @@ def bounded_rewind(*, company: str, records: Sequence[DatedRecord],
             f"What {company} was optimising for across this period cannot be "
             f"settled from dated pages alone; it needs reported results or a "
             f"dated statement of its own targets"),
+        economic_links=linked,
+        economic_note=(
+            f"{linked} of {len(stops)} stop(s) could be placed beside the "
+            f"economic state published at the time."
+            if linked else
+            "No economic state had been published to this deployment on or "
+            "before any of these dates, so none of the stops is placed "
+            "beside the economic conditions of its period. That is a gap in "
+            "what this deployment has recorded, not a judgement that the "
+            "period was uneventful."),
         what_would_upgrade=(
             "three or more years of reported revenue and operating result, "
             "or any dated filing series for this entity"))

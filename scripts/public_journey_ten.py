@@ -109,7 +109,17 @@ def _quotes(html):
                        re.S | re.I)]
 
 
-def journey(name, entity_id, *, verbose=True) -> dict:
+def journey(name, entity_id, *, verbose=True, extra=None) -> dict:
+    """`extra(op, run_id, row, surfaces)` runs AFTER the gates are measured and
+    BEFORE they are scored, on the SAME authenticated session.
+
+    WHY A HOOK AND NOT A SECOND PASS. `/runs/<id>/*` is ownership-guarded, so a
+    follow-up probe from a fresh session is correctly refused -- measured: a
+    separate reader got the no-such-run page and reported it as a product
+    defect. The expensive half of this function is the analysis, and every
+    additional read is free, so a caller that needs more measurements takes
+    them here rather than paying for a second run.
+    """
     op, _jar = _opener()
     row = {"company": name, "entity_id": entity_id, "defects": [],
            "gates": {}, "autocomplete_ms": [], "result": ""}
@@ -217,6 +227,13 @@ def journey(name, entity_id, *, verbose=True) -> dict:
         if "too many" in low or "limit reached" in low or st == 429:
             note("INFRASTRUCTURE", f"HTTP {st}: demo quota refused the run")
             row["result"] = "INFRASTRUCTURE"
+            # THE PAGE STATES ITS OWN RETRY WINDOW, so a caller waits exactly
+            # that long instead of guessing an hour. Measured on the live
+            # refusal: "You can try again in about 41 minutes."
+            _m = re.search(r"try again in (?:about )?(\d+)\s*minute", low)
+            row["retry_after_min"] = (
+                int(_m.group(1)) if _m else
+                1 if "under a minute" in low else None)
         else:
             note("PRODUCT_DEFECT",
                  f"submit produced no run (status {st}): {visible(html)[:180]}")
@@ -422,6 +439,15 @@ def journey(name, entity_id, *, verbose=True) -> dict:
     else:
         row["gates"]["ROLE_VIEWS"] = True   # bounded run: not applicable
 
+    if extra is not None:
+        try:
+            extra(op, run_id, row, surfaces)
+        except Exception as exc:                             # noqa: BLE001
+            # AN INSTRUMENT THAT FAILS MUST NOT FAIL THE COMPANY. A harness
+            # bug reported as a product defect is how four analyses were spent
+            # on a lowercase header name.
+            row.setdefault("instrument_errors", []).append(
+                f"{type(exc).__name__}: {exc}")
     failed = [k for k, v in row["gates"].items() if not v]
     row["result"] = "PASS" if not failed else "PRODUCT_DEFECT"
     row["failed_gates"] = failed

@@ -816,13 +816,91 @@ class CompanyIngestionService:
                          idempotency_key=f"ci-cand:{run_id}:{candidate_id}")
         return self.store.candidates(run_id)
 
-    def _write_snapshot(self, run_id, meta, candidates) -> bool:
+    def _restore_discovery_for_stored(self, run_id) -> dict:
+        """Re-find the snapshot behind an already-stored reused source list.
+
+        Never raises and never guesses: a run whose identity cannot be resolved
+        keeps the honest empty account.
+        """
+        try:
+            meta = self.run_meta(run_id) or {}
+            key = _company_key(meta.get("company_name", ""),
+                               cik=str(meta.get("cik") or ""),
+                               domain=str(meta.get("domain") or ""))
+            snap = self.snapshots.get(key)
+            if snap is None or not self._snapshot_is_for(snap, meta):
+                return {}
+            return self._reuse_discovery_account(run_id, snap)
+        except Exception:                                 # noqa: BLE001
+            return {}
+
+    def _reuse_discovery_account(self, run_id, snap) -> dict:
+        """Carry the snapshot's search account onto a run that reused its list.
+
+        THE CLAIM AND ITS OWNER. "This source list was found by a search that
+        read 47 filings" is true of the list, so it travels with the list --
+        but it is NOT a claim that this analysis searched anything, and the
+        reader is owed that difference. `reused_from_snapshot` marks it and
+        `searched_on` keeps the ORIGINAL date, so a surface can say "searched
+        on the 9th, reused today" instead of implying a fresh search.
+
+        Restored at the REUSE SITES rather than inside `discovery_report`,
+        which would attach this account to any run whose company happens to
+        have a snapshot -- including one that never consumed it. That is an
+        attribution error, and a quieter one than the defect it would fix.
+
+        Returns what was restored, so a caller can tell "nothing recorded"
+        from "an older snapshot carried no account".
+        """
+        from intent_engine.company_ingestion import relevance as _REL
+        account = {}
+        try:
+            prov = getattr(snap, "provenance", None) or {}
+            stored = prov.get("discovery_coverage")
+            if isinstance(stored, dict) and stored:
+                account = dict(stored)
+                account["reused_from_snapshot"] = True
+            else:
+                # A SOURCE LIST WHOSE SEARCH WE DID NOT RECORD. Written by a
+                # build older than this repair. "No search was run" would be
+                # false -- one ran, we just kept no account of it -- so the
+                # absence is stated as ours, with no coverage grade claimed.
+                account = {
+                    "contract": "third_party_discovery.v1",
+                    "coverage": _REL.DISCOVERY_NOT_RUN,
+                    "channels_attempted": [], "channels_successful": [],
+                    "hits_total": 0, "candidates_considered": 0,
+                    "candidates_fetched": 0, "rejection_reasons": {},
+                    "independent_relevant_origins": 0,
+                    "budget_exhausted": False,
+                    "reused_from_snapshot": True,
+                    "account_unavailable": True,
+                }
+            if run_id:
+                if not hasattr(self, "_discovery_reports"):
+                    self._discovery_reports = {}
+                self._discovery_reports[run_id] = account
+        except Exception:                                 # noqa: BLE001
+            # A missing account costs the drawer a sentence, never the run.
+            return {}
+        return account
+
+    def _write_snapshot(self, run_id, meta, candidates,
+                        discovery=None) -> bool:
         """Record what this cold run learned about where the sources are.
 
         STORES THE INDEX, NOT THE EVIDENCE. What goes in is the URL, its class
         and -- where the run established one -- its filing identity. What the
         document MEANT is recomputed every run from current evidence and the
         current economic state, which is why nothing here is a conclusion.
+
+        AND HOW THE INDEX WAS FOUND. The search that produced this source list
+        is a property OF THE LIST, not of the run that happened to perform it,
+        so it belongs beside the list. Without it a warm run inherits the
+        sources and loses the only account of how hard anyone looked for them:
+        MEASURED cold-then-warm, a cold run recorded DISCOVERY_EXHAUSTED over
+        47 hits, the snapshot carried none of it, and the warm run's provenance
+        drawer said "no search was run" -- about a search that had run.
         """
         try:
             key = _company_key(meta.get("company_name", ""),
@@ -848,7 +926,17 @@ class CompanyIngestionService:
                 cik=str(meta.get("cik") or ""),
                 domains=tuple(d for d in [str(meta.get("domain") or "")] if d),
                 sources=sources,
-                provenance={"run_id": run_id, "discovery": "cold"},
+                provenance={
+                    "run_id": run_id, "discovery": "cold",
+                    # Carried under the EXISTING provenance dict rather than as
+                    # a new column: `SnapshotStore.get` refuses any file whose
+                    # `schema` differs, so a new top-level field would discard
+                    # every snapshot already on disk and make all of them cold
+                    # again -- paying a latency regression to ship a legibility
+                    # fix. Absent on an older snapshot, and absent is not zero.
+                    **({"discovery_coverage": dict(discovery)}
+                       if isinstance(discovery, dict) and discovery else {}),
+                },
                 created_at=(existing.created_at if existing else now),
                 refreshed_at=now)
             return self.snapshots.put(snap)
@@ -869,6 +957,16 @@ class CompanyIngestionService:
         """
         stored = self.store.candidates(run_id)
         if stored:
+            # AN IN-MEMORY ACCOUNT DOES NOT SURVIVE A RESTART, and this
+            # deployment restarts on every push. When the candidates on record
+            # were reused from a snapshot, the account is recoverable from that
+            # same snapshot -- and only then: cold-discovered candidates whose
+            # report was lost have no honest substitute, and inventing one
+            # would credit this run with a search it cannot evidence.
+            if not self.discovery_report(run_id) and any(
+                    c.get("discovery_method") == "snapshot_reuse"
+                    for c in stored):
+                self._restore_discovery_for_stored(run_id)
             return stored
         meta = self.run_meta(run_id)
         if meta is None:
@@ -927,6 +1025,11 @@ class CompanyIngestionService:
                 self._identity_for(run_id, meta)
                 reused = self._candidates_from_snapshot(run_id, snap, domain)
                 if reused:
+                    # THE SEARCH TRAVELS WITH THE LIST. Skipping discovery is
+                    # the point of a warm run; reporting that nobody ever
+                    # searched is not, and that is what this path did for every
+                    # re-analysed company on the preview.
+                    self._reuse_discovery_account(run_id, snap)
                     self._append(
                         "ci.snapshot_reused", run_id=run_id, domain=domain,
                         payload={"mode": "WARM",
@@ -1235,7 +1338,8 @@ class CompanyIngestionService:
         # discovery would teach the next run that this company has no sources.
         stored_candidates = self.store.candidates(run_id)
         if stored_candidates:
-            self._write_snapshot(run_id, meta, stored_candidates)
+            self._write_snapshot(run_id, meta, stored_candidates,
+                                 discovery=self.discovery_report(run_id))
         return stored_candidates
 
     def retrieval_plan(self, run_id: str) -> dict:

@@ -275,6 +275,12 @@ _DISCOVERY_BLOCK = {
     "candidates_considered": ..., "candidates_fetched": ...,
     "rejection_reasons": ..., "independent_relevant_origins": ...,
     "budget_exhausted": ..., "searched_on": ...,
+    # THE DERIVED STATE AND THE TWO FACTS THAT QUALIFY IT. A coverage grade
+    # cannot say whether this analysis searched or inherited a search, and a
+    # reader who cannot tell those apart cannot judge how current the answer
+    # is. Unknown to an older producer, which is why they are additive.
+    "search_state": ..., "reused_from_snapshot": ...,
+    "account_unavailable": ...,
 }
 
 FOUNDER_ALLOWED: Dict[str, Any] = {

@@ -296,6 +296,895 @@ CATALOG: tuple = (
             ("https://www.pointb.com/contact", _CORPORATE, "contact", _S),
         ),
     },
+    # --- THE NEXT FORTY (Founder Target 50, #1-40) -------------------------
+    #
+    # MEASURED LIVE 2026-09-11 on b4db855b, `/api/companies?q=<name>`, before
+    # a single analysis was spent: 33 of the 40 returned NOTHING AT ALL, and
+    # of the seven that returned a row, TWO WERE THE WRONG COMPANY --
+    #
+    #   Clari    -> "Clarivate Plc" and "Claritev Corp", because the typed
+    #               word is a prefix of both. Neither is Clari.
+    #   Adastra  -> "Adastra Holdings Ltd.", a Canadian cannabis company,
+    #               not the Toronto data consultancy.
+    #
+    # A wrong suggestion is worse than none: the only row on screen gets
+    # accepted, and the product then writes a confident report about an
+    # unrelated business. Same failure as Sigma/Point B above, at scale.
+    #
+    # EVERY URL BELOW WAS FETCHED THROUGH `safe_fetch` ON 2026-09-11 AND
+    # RETURNED 200 WITH CONTENT OF ITS OWN. None was guessed: each came from
+    # the publisher's own homepage links or its own sitemap, and each was then
+    # checked to differ from that publisher's homepage. That second check is
+    # not ceremony -- credera.com is a single-page app that answers HTTP 200
+    # with its shell for ANY path, including /sitemap.xml, so "it fetched" is
+    # not evidence a page exists, and five shell copies would have been read
+    # as five sources.
+    #
+    # THREE ENTRIES CARRY NO SOURCES ON PURPOSE. rubrik.com, 6sense.com and
+    # fiscalnote.com answered HTTP 403 to every path including robots.txt. A
+    # refused host is not a company that publishes nothing, and writing down
+    # URLs we could not read would turn our 403 into its silence. Rubrik and
+    # FiscalNote file with the SEC, so their evidence arrives that way.
+    {
+        "entity_id": "rubrik",
+        "legal_name": "Rubrik, Inc.",
+        "common_name": "Rubrik",
+        "country": "United States",
+        "primary_domain": "rubrik.com",
+        "aliases": ("rubrik", "rubrik inc"),
+        "listings": (("NYSE", "RBRK"),),
+        "sec_cik": "0001943896",
+        "sec_relationship": "US domestic filer: Form 10-K annual, 10-Q quarterly.",
+        "ambiguity_notes": (
+            "rubrik.com refused this product's fetcher with HTTP 403 on every "
+            "path including robots.txt when checked on 2026-09-11, so no "
+            "company-owned page is listed. Its SEC filings remain reachable."
+        ),
+        "sources": (
+            ("https://www.rubrik.com", _CORPORATE,
+             "home — refused our reader (HTTP 403)", _P),
+        ),
+    },
+    {
+        "entity_id": "cohesity",
+        "legal_name": "Cohesity, Inc.",
+        "common_name": "Cohesity",
+        "country": "United States",
+        "primary_domain": "cohesity.com",
+        "aliases": ("cohesity", "cohesity inc"),
+        "ambiguity_notes": (
+            "Combined with Veritas' data protection business in 2024; the "
+            "Veritas brand may appear in its own material."
+        ),
+        "sources": (
+            ("https://www.cohesity.com/company", _CORPORATE,
+             "about", _P),
+            ("https://www.cohesity.com/platform", _SEGMENT,
+             "platform", _P),
+            ("https://www.cohesity.com/customers", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.cohesity.com/resources", _NEWSROOM,
+             "news", _S),
+            ("https://www.cohesity.com/company/investor-relations", _CORPORATE,
+             "investors", _S),
+        ),
+    },
+    {
+        "entity_id": "project44",
+        "legal_name": "project44, Inc.",
+        "common_name": "project44",
+        "country": "United States",
+        "primary_domain": "project44.com",
+        "aliases": ("project44", "project 44", "p44", "project44 inc"),
+        "ambiguity_notes": (
+            "Written lower-case by the company. \"Project 44\" and \"p44\" reach "
+            "the same entity."
+        ),
+        "sources": (
+            ("https://www.project44.com/company", _CORPORATE,
+             "about", _P),
+            ("https://www.project44.com/platform", _SEGMENT,
+             "platform", _P),
+            ("https://www.project44.com/customer-stories", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.project44.com/blog", _NEWSROOM,
+             "news", _S),
+            ("https://www.project44.com/company/leadership", _CORPORATE,
+             "leadership", _S),
+        ),
+    },
+    {
+        "entity_id": "kinaxis",
+        "legal_name": "Kinaxis Inc.",
+        "common_name": "Kinaxis",
+        "country": "Canada",
+        "primary_domain": "kinaxis.com",
+        "aliases": ("kinaxis", "kinaxis inc"),
+        "listings": (("TSX", "KXS"),),
+        "ambiguity_notes": (
+            "Listed in Toronto, not on a US exchange, so the SEC registrant "
+            "table does not carry it."
+        ),
+        "sources": (
+            ("https://www.kinaxis.com/en/about", _CORPORATE,
+             "about", _P),
+            ("https://www.kinaxis.com/en/solutions", _SEGMENT,
+             "platform", _P),
+            ("https://www.kinaxis.com/en/customers", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.kinaxis.com/en/resources", _NEWSROOM,
+             "news", _S),
+            ("https://www.kinaxis.com/en/leadership", _CORPORATE,
+             "leadership", _S),
+        ),
+    },
+    {
+        "entity_id": "alation",
+        "legal_name": "Alation, Inc.",
+        "common_name": "Alation",
+        "country": "United States",
+        "primary_domain": "alation.com",
+        "aliases": ("alation", "alation inc"),
+        "sources": (
+            ("https://www.alation.com/our-story", _CORPORATE,
+             "about", _P),
+            ("https://www.alation.com/customers", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.alation.com/blog", _NEWSROOM,
+             "news", _S),
+            ("https://www.alation.com/careers", _CORPORATE,
+             "careers", _S),
+        ),
+    },
+    {
+        "entity_id": "workato",
+        "legal_name": "Workato, Inc.",
+        "common_name": "Workato",
+        "country": "United States",
+        "primary_domain": "workato.com",
+        "aliases": ("workato", "workato inc"),
+        "sources": (
+            ("https://www.workato.com/platform", _SEGMENT,
+             "platform", _P),
+            ("https://www.workato.com/customers", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.workato.com/resources", _NEWSROOM,
+             "news", _S),
+            ("https://www.workato.com/pricing", _PRICING,
+             "pricing", _P),
+            ("https://www.workato.com/careers", _CORPORATE,
+             "careers", _S),
+        ),
+    },
+    {
+        "entity_id": "dataminr",
+        "legal_name": "Dataminr, Inc.",
+        "common_name": "Dataminr",
+        "country": "United States",
+        "primary_domain": "dataminr.com",
+        "aliases": ("dataminr", "dataminr inc"),
+        "sources": (
+            ("https://www.dataminr.com/company", _CORPORATE,
+             "about", _P),
+            ("https://www.dataminr.com/company/customers", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.dataminr.com/resources", _NEWSROOM,
+             "news", _S),
+            ("https://www.dataminr.com/company/leadership", _CORPORATE,
+             "leadership", _S),
+            ("https://www.dataminr.com/company/careers", _CORPORATE,
+             "careers", _S),
+        ),
+    },
+    {
+        "entity_id": "adastra",
+        "legal_name": "Adastra Corporation",
+        "common_name": "Adastra",
+        "country": "Canada",
+        "primary_domain": "adastracorp.com",
+        "aliases": ("adastra", "adastra corporation", "adastra corp"),
+        "ambiguity_notes": (
+            "\"Adastra\" also matches Adastra Holdings Ltd. in the SEC register, "
+            "an unrelated Canadian cannabis company. Both are offered; this "
+            "entry is the Toronto data and analytics consultancy."
+        ),
+        "sources": (
+            ("https://adastracorp.com/who-we-are", _CORPORATE,
+             "about", _P),
+            ("https://adastracorp.com/services", _SEGMENT,
+             "platform", _P),
+            ("https://adastracorp.com/resources", _NEWSROOM,
+             "news", _S),
+            ("https://adastracorp.com/leadership", _CORPORATE,
+             "leadership", _S),
+            ("https://adastracorp.com/careers", _CORPORATE,
+             "careers", _S),
+        ),
+    },
+    {
+        "entity_id": "hycu",
+        "legal_name": "HYCU, Inc.",
+        "common_name": "HYCU",
+        "country": "United States",
+        "primary_domain": "hycu.com",
+        "aliases": ("hycu", "hycu inc"),
+        "sources": (
+            ("https://www.hycu.com/company", _CORPORATE,
+             "about", _P),
+            ("https://www.hycu.com/platform", _SEGMENT,
+             "platform", _P),
+            ("https://www.hycu.com/customers", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.hycu.com/resources", _NEWSROOM,
+             "news", _S),
+            ("https://www.hycu.com/pricing", _PRICING,
+             "pricing", _P),
+        ),
+    },
+    {
+        "entity_id": "nasuni",
+        "legal_name": "Nasuni Corporation",
+        "common_name": "Nasuni",
+        "country": "United States",
+        "primary_domain": "nasuni.com",
+        "aliases": ("nasuni", "nasuni corporation"),
+        "sources": (
+            ("https://www.nasuni.com/about-us", _CORPORATE,
+             "about", _P),
+            ("https://www.nasuni.com/product", _SEGMENT,
+             "platform", _P),
+            ("https://www.nasuni.com/customers", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.nasuni.com/about-us/news", _NEWSROOM,
+             "news", _S),
+            ("https://www.nasuni.com/pricing", _PRICING,
+             "pricing", _P),
+        ),
+    },
+    {
+        "entity_id": "dataiku",
+        "legal_name": "Dataiku, Inc.",
+        "common_name": "Dataiku",
+        "country": "United States",
+        "primary_domain": "dataiku.com",
+        "aliases": ("dataiku", "dataiku inc"),
+        "ambiguity_notes": (
+            "Founded in France; operates from New York."
+        ),
+        "sources": (
+            ("https://www.dataiku.com/company", _CORPORATE,
+             "about", _P),
+            ("https://www.dataiku.com/product", _SEGMENT,
+             "platform", _P),
+            ("https://www.dataiku.com/company/customers", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.dataiku.com/blog", _NEWSROOM,
+             "news", _S),
+            ("https://www.dataiku.com/company/careers", _CORPORATE,
+             "careers", _S),
+        ),
+    },
+    {
+        "entity_id": "commvault",
+        "legal_name": "Commvault Systems, Inc.",
+        "common_name": "Commvault",
+        "country": "United States",
+        "primary_domain": "commvault.com",
+        "aliases": ("commvault", "commvault systems"),
+        "listings": (("NASDAQ", "CVLT"),),
+        "sec_cik": "0001169561",
+        "sec_relationship": "US domestic filer: Form 10-K annual, 10-Q quarterly.",
+        "sources": (
+            ("https://www.commvault.com/about-us", _CORPORATE,
+             "about", _P),
+            ("https://www.commvault.com/platform", _SEGMENT,
+             "platform", _P),
+            ("https://www.commvault.com/customers", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.commvault.com/resources", _NEWSROOM,
+             "news", _S),
+            ("https://www.commvault.com/about-us/leadership", _CORPORATE,
+             "leadership", _S),
+        ),
+    },
+    {
+        "entity_id": "boomi",
+        "legal_name": "Boomi, LP",
+        "common_name": "Boomi",
+        "country": "United States",
+        "primary_domain": "boomi.com",
+        "aliases": ("boomi", "boomi lp"),
+        "ambiguity_notes": (
+            "Divested from Dell Technologies in 2021 and operates "
+            "independently."
+        ),
+        "sources": (
+            ("https://www.boomi.com/company", _CORPORATE,
+             "about", _P),
+            ("https://www.boomi.com/platform", _SEGMENT,
+             "platform", _P),
+            ("https://www.boomi.com/customers", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.boomi.com/resources", _NEWSROOM,
+             "news", _S),
+            ("https://www.boomi.com/pricing", _PRICING,
+             "pricing", _P),
+        ),
+    },
+    {
+        "entity_id": "snaplogic",
+        "legal_name": "SnapLogic, Inc.",
+        "common_name": "SnapLogic",
+        "country": "United States",
+        "primary_domain": "snaplogic.com",
+        "aliases": ("snaplogic", "snap logic", "snaplogic inc"),
+        "sources": (
+            ("https://www.snaplogic.com/company", _CORPORATE,
+             "about", _P),
+            ("https://www.snaplogic.com/products", _SEGMENT,
+             "platform", _P),
+            ("https://www.snaplogic.com/customers", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.snaplogic.com/resources", _NEWSROOM,
+             "news", _S),
+            ("https://www.snaplogic.com/pricing", _PRICING,
+             "pricing", _P),
+        ),
+    },
+    {
+        "entity_id": "west_monroe",
+        "legal_name": "West Monroe Partners, LLC",
+        "common_name": "West Monroe",
+        "country": "United States",
+        "primary_domain": "westmonroe.com",
+        "aliases": ("west monroe", "west monroe partners", "westmonroe"),
+        "sources": (
+            ("https://www.westmonroe.com/about", _CORPORATE,
+             "about", _P),
+            ("https://www.westmonroe.com/insights", _NEWSROOM,
+             "news", _S),
+            ("https://www.westmonroe.com/careers", _CORPORATE,
+             "careers", _S),
+        ),
+    },
+    {
+        "entity_id": "guidehouse",
+        "legal_name": "Guidehouse Inc.",
+        "common_name": "Guidehouse",
+        "country": "United States",
+        "primary_domain": "guidehouse.com",
+        "aliases": ("guidehouse", "guidehouse inc"),
+        "sources": (
+            ("https://www.guidehouse.com/about", _CORPORATE,
+             "about", _P),
+            ("https://www.guidehouse.com/services", _SEGMENT,
+             "platform", _P),
+            ("https://www.guidehouse.com/insights", _NEWSROOM,
+             "news", _S),
+            ("https://www.guidehouse.com/careers", _CORPORATE,
+             "careers", _S),
+        ),
+    },
+    {
+        "entity_id": "collibra",
+        "legal_name": "Collibra NV",
+        "common_name": "Collibra",
+        "country": "Belgium",
+        "primary_domain": "collibra.com",
+        "aliases": ("collibra", "collibra nv"),
+        "ambiguity_notes": (
+            "Belgian company; its largest office is in New York."
+        ),
+        "sources": (
+            ("https://www.collibra.com/company/who-we-are", _CORPORATE,
+             "about", _P),
+            ("https://www.collibra.com/customer-stories", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.collibra.com/blog", _NEWSROOM,
+             "news", _S),
+            ("https://www.collibra.com/company/leadership", _CORPORATE,
+             "leadership", _S),
+            ("https://www.collibra.com/company/careers", _CORPORATE,
+             "careers", _S),
+        ),
+    },
+    {
+        "entity_id": "airbyte",
+        "legal_name": "Airbyte, Inc.",
+        "common_name": "Airbyte",
+        "country": "United States",
+        "primary_domain": "airbyte.com",
+        "aliases": ("airbyte", "airbyte inc"),
+        "sources": (
+            ("https://www.airbyte.com/company/about-us", _CORPORATE,
+             "about", _P),
+            ("https://www.airbyte.com/success-stories", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.airbyte.com/blog", _NEWSROOM,
+             "news", _S),
+            ("https://www.airbyte.com/pricing", _PRICING,
+             "pricing", _P),
+            ("https://www.airbyte.com/company/careers", _CORPORATE,
+             "careers", _S),
+        ),
+    },
+    {
+        "entity_id": "onetrust",
+        "legal_name": "OneTrust, LLC",
+        "common_name": "OneTrust",
+        "country": "United States",
+        "primary_domain": "onetrust.com",
+        "aliases": ("onetrust", "one trust", "onetrust llc"),
+        "sources": (
+            ("https://www.onetrust.com/content/onetrust/us/en/about-us", _CORPORATE,
+             "about", _P),
+            ("https://www.onetrust.com/solutions", _SEGMENT,
+             "platform", _P),
+            ("https://www.onetrust.com/content/onetrust/us/en/customers", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.onetrust.com/content/onetrust/us/en/resources", _NEWSROOM,
+             "news", _S),
+            ("https://www.onetrust.com/content/onetrust/us/en/pricing", _PRICING,
+             "pricing", _P),
+        ),
+    },
+    {
+        "entity_id": "samsara",
+        "legal_name": "Samsara Inc.",
+        "common_name": "Samsara",
+        "country": "United States",
+        "primary_domain": "samsara.com",
+        "aliases": ("samsara", "samsara inc"),
+        "listings": (("NYSE", "IOT"),),
+        "sec_cik": "0001642896",
+        "sec_relationship": "US domestic filer: Form 10-K annual, 10-Q quarterly.",
+        "ambiguity_notes": (
+            "Trades as IOT. Not Samsara Vision or any similarly named private "
+            "firm."
+        ),
+        "sources": (
+            ("https://www.samsara.com/company/about", _CORPORATE,
+             "about", _P),
+            ("https://www.samsara.com/products/platform", _SEGMENT,
+             "platform", _P),
+            ("https://www.samsara.com/resources/customers", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.samsara.com/resources", _NEWSROOM,
+             "news", _S),
+            ("https://www.samsara.com/resources/plans", _PRICING,
+             "pricing", _P),
+        ),
+    },
+    {
+        "entity_id": "fourkites",
+        "legal_name": "FourKites, Inc.",
+        "common_name": "FourKites",
+        "country": "United States",
+        "primary_domain": "fourkites.ai",
+        "aliases": ("fourkites", "four kites", "fourkites inc"),
+        "ambiguity_notes": (
+            "The canonical domain is fourkites.ai: fourkites.com redirects "
+            "there, and this product's fetcher refuses a redirect that leaves "
+            "the approved domain, so the .com form cannot be used as the entry "
+            "point."
+        ),
+        "sources": (
+            ("https://www.fourkites.ai/company/about", _CORPORATE,
+             "about", _P),
+            ("https://www.fourkites.ai/platform", _SEGMENT,
+             "platform", _P),
+            ("https://www.fourkites.ai/case-studies", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.fourkites.ai/newsroom", _NEWSROOM,
+             "news", _S),
+            ("https://www.fourkites.ai/company/leadership", _CORPORATE,
+             "leadership", _S),
+        ),
+    },
+    {
+        "entity_id": "descartes",
+        "legal_name": "The Descartes Systems Group Inc.",
+        "common_name": "Descartes Systems",
+        "country": "Canada",
+        "primary_domain": "descartes.com",
+        "aliases": ("descartes", "descartes systems", "descartes systems group"),
+        "listings": (("NASDAQ", "DSGX"), ("TSX", "DSG")),
+        "sec_cik": "0001050140",
+        "sec_relationship": "Canadian issuer filing with the SEC: Form 40-F annual.",
+        "sources": (
+            ("https://www.descartes.com/who-we-are", _CORPORATE,
+             "about", _P),
+            ("https://www.descartes.com/solutions", _SEGMENT,
+             "platform", _P),
+            ("https://www.descartes.com/resources", _NEWSROOM,
+             "news", _S),
+            ("https://www.descartes.com/who-we-are/investor-relations", _CORPORATE,
+             "investors", _S),
+            ("https://www.descartes.com/who-we-are/leadership", _CORPORATE,
+             "leadership", _S),
+        ),
+    },
+    {
+        "entity_id": "o9_solutions",
+        "legal_name": "o9 Solutions, Inc.",
+        "common_name": "o9 Solutions",
+        "country": "United States",
+        "primary_domain": "o9solutions.com",
+        "aliases": ("o9", "o9 solutions", "o9solutions"),
+        "ambiguity_notes": (
+            "\"o9\" alone is the name the company uses."
+        ),
+        "sources": (
+            ("https://www.o9solutions.com/about", _CORPORATE,
+             "about", _P),
+            ("https://www.o9solutions.com/solutions", _SEGMENT,
+             "platform", _P),
+            ("https://www.o9solutions.com/resources", _NEWSROOM,
+             "news", _S),
+            ("https://www.o9solutions.com/careers", _CORPORATE,
+             "careers", _S),
+        ),
+    },
+    {
+        "entity_id": "thoughtspot",
+        "legal_name": "ThoughtSpot, Inc.",
+        "common_name": "ThoughtSpot",
+        "country": "United States",
+        "primary_domain": "thoughtspot.com",
+        "aliases": ("thoughtspot", "thought spot"),
+        "sources": (
+            ("https://www.thoughtspot.com/solutions", _SEGMENT,
+             "platform", _P),
+            ("https://www.thoughtspot.com/customers", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.thoughtspot.com/resources", _NEWSROOM,
+             "news", _S),
+            ("https://www.thoughtspot.com/pricing", _PRICING,
+             "pricing", _P),
+            ("https://www.thoughtspot.com/team", _CORPORATE,
+             "leadership", _S),
+        ),
+    },
+    {
+        "entity_id": "starburst",
+        "legal_name": "Starburst Data, Inc.",
+        "common_name": "Starburst",
+        "country": "United States",
+        "primary_domain": "starburst.io",
+        "aliases": ("starburst", "starburst data"),
+        "ambiguity_notes": (
+            "Canonical domain is starburst.io, not a .com."
+        ),
+        "sources": (
+            ("https://www.starburst.io/about", _CORPORATE,
+             "about", _P),
+            ("https://www.starburst.io/customers", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.starburst.io/resources", _NEWSROOM,
+             "news", _S),
+            ("https://www.starburst.io/pricing", _PRICING,
+             "pricing", _P),
+            ("https://www.starburst.io/careers", _CORPORATE,
+             "careers", _S),
+        ),
+    },
+    {
+        "entity_id": "dremio",
+        "legal_name": "Dremio Corporation",
+        "common_name": "Dremio",
+        "country": "United States",
+        "primary_domain": "dremio.com",
+        "aliases": ("dremio", "dremio corporation"),
+        "sources": (
+            ("https://www.dremio.com/about", _CORPORATE,
+             "about", _P),
+            ("https://www.dremio.com/platform", _SEGMENT,
+             "platform", _P),
+            ("https://www.dremio.com/customers", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.dremio.com/newsroom", _NEWSROOM,
+             "news", _S),
+            ("https://www.dremio.com/pricing", _PRICING,
+             "pricing", _P),
+        ),
+    },
+    {
+        "entity_id": "denodo",
+        "legal_name": "Denodo Technologies, Inc.",
+        "common_name": "Denodo",
+        "country": "United States",
+        "primary_domain": "denodo.com",
+        "aliases": ("denodo", "denodo technologies"),
+        "ambiguity_notes": (
+            "Spanish origin; US operations from Palo Alto."
+        ),
+        "sources": (
+            ("https://www.denodo.com/en/denodo-platform/overview", _CORPORATE,
+             "about", _P),
+            ("https://www.denodo.com/en/company/customers", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.denodo.com/en/resources", _NEWSROOM,
+             "news", _S),
+            ("https://www.denodo.com/en/about-us/leadership", _CORPORATE,
+             "leadership", _S),
+            ("https://www.denodo.com/en/company/careers", _CORPORATE,
+             "careers", _S),
+        ),
+    },
+    {
+        "entity_id": "geotab",
+        "legal_name": "Geotab Inc.",
+        "common_name": "Geotab",
+        "country": "Canada",
+        "primary_domain": "geotab.com",
+        "aliases": ("geotab", "geotab inc"),
+        "sources": (
+            ("https://www.geotab.com/partners/overview", _CORPORATE,
+             "about", _P),
+            ("https://www.geotab.com/success-stories", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.geotab.com/blog", _NEWSROOM,
+             "news", _S),
+            ("https://www.geotab.com/about/leadership", _CORPORATE,
+             "leadership", _S),
+        ),
+    },
+    {
+        "entity_id": "clari",
+        "legal_name": "Clari Inc.",
+        "common_name": "Clari",
+        "country": "United States",
+        "primary_domain": "clari.com",
+        "aliases": ("clari", "clari inc"),
+        "ambiguity_notes": (
+            "\"Clari\" in the SEC register returns only Clarivate Plc and "
+            "Claritev Corp, neither of which is this company: the typed word is "
+            "a prefix of both. All are offered; this entry is the "
+            "revenue-platform company."
+        ),
+        "sources": (
+            ("https://www.clari.com/about", _CORPORATE,
+             "about", _P),
+            ("https://www.clari.com/resources/customer-stories", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.clari.com/blog", _NEWSROOM,
+             "news", _S),
+            ("https://www.clari.com/pricing", _PRICING,
+             "pricing", _P),
+            ("https://www.clari.com/careers", _CORPORATE,
+             "careers", _S),
+        ),
+    },
+    {
+        "entity_id": "6sense",
+        "legal_name": "6sense Insights, Inc.",
+        "common_name": "6sense",
+        "country": "United States",
+        "primary_domain": "6sense.com",
+        "aliases": ("6sense", "6 sense", "6sense insights"),
+        "ambiguity_notes": (
+            "6sense.com refused this product's fetcher with HTTP 403 on every "
+            "path including robots.txt when checked on 2026-09-11, so no "
+            "company-owned page is listed."
+        ),
+        "sources": (
+            ("https://www.6sense.com", _CORPORATE,
+             "home — refused our reader (HTTP 403)", _P),
+        ),
+    },
+    {
+        "entity_id": "gong",
+        "legal_name": "Gong.io, Inc.",
+        "common_name": "Gong",
+        "country": "United States",
+        "primary_domain": "gong.io",
+        "aliases": ("gong", "gong io", "gong.io"),
+        "ambiguity_notes": (
+            "Canonical domain is gong.io."
+        ),
+        "sources": (
+            ("https://www.gong.io/about", _CORPORATE,
+             "about", _P),
+            ("https://www.gong.io/platform", _SEGMENT,
+             "platform", _P),
+            ("https://www.gong.io/case-studies", _CUSTOMERS,
+             "customers", _S),
+            ("https://gong.io/press", _NEWSROOM,
+             "news", _S),
+            ("https://www.gong.io/pricing", _PRICING,
+             "pricing", _P),
+        ),
+    },
+    {
+        "entity_id": "alphasense",
+        "legal_name": "AlphaSense, Inc.",
+        "common_name": "AlphaSense",
+        "country": "United States",
+        "primary_domain": "alpha-sense.com",
+        "aliases": ("alphasense", "alpha sense", "alpha-sense"),
+        "ambiguity_notes": (
+            "Canonical domain is alpha-sense.com, with the hyphen."
+        ),
+        "sources": (
+            ("https://www.alpha-sense.com/about", _CORPORATE,
+             "about", _P),
+            ("https://www.alpha-sense.com/platform", _SEGMENT,
+             "platform", _P),
+            ("https://www.alpha-sense.com/resources", _NEWSROOM,
+             "news", _S),
+            ("https://www.alpha-sense.com/pricing", _PRICING,
+             "pricing", _P),
+            ("https://www.alpha-sense.com/careers", _CORPORATE,
+             "careers", _S),
+        ),
+    },
+    {
+        "entity_id": "fiscalnote",
+        "legal_name": "FiscalNote Holdings, Inc.",
+        "common_name": "FiscalNote",
+        "country": "United States",
+        "primary_domain": "fiscalnote.com",
+        "aliases": ("fiscalnote", "fiscal note"),
+        "listings": (("NYSE", "NOTE"),),
+        "sec_cik": "0001823466",
+        "sec_relationship": "US domestic filer: Form 10-K annual, 10-Q quarterly.",
+        "ambiguity_notes": (
+            "fiscalnote.com refused this product's fetcher with HTTP 403 on "
+            "every path including robots.txt when checked on 2026-09-11, so no "
+            "company-owned page is listed. Its SEC filings remain reachable."
+        ),
+        "sources": (
+            ("https://www.fiscalnote.com", _CORPORATE,
+             "home — refused our reader (HTTP 403)", _P),
+        ),
+    },
+    {
+        "entity_id": "recorded_future",
+        "legal_name": "Recorded Future, Inc.",
+        "common_name": "Recorded Future",
+        "country": "United States",
+        "primary_domain": "recordedfuture.com",
+        "aliases": ("recorded future", "recordedfuture"),
+        "ambiguity_notes": (
+            "Acquired by Mastercard in 2024 and operated as a subsidiary; "
+            "material published by Mastercard about it is a parent's account, "
+            "not its own."
+        ),
+        "sources": (
+            ("https://www.recordedfuture.com/solutions-overview", _SEGMENT,
+             "platform", _P),
+            ("https://www.recordedfuture.com/products/cyber-operations", _SEGMENT,
+             "products", _P),
+            ("https://www.recordedfuture.com/research/intelligence-reports", _NEWSROOM,
+             "research", _S),
+            ("https://www.recordedfuture.com/blog", _NEWSROOM,
+             "news", _S),
+            ("https://www.recordedfuture.com/careers", _CORPORATE,
+             "careers", _S),
+        ),
+    },
+    {
+        "entity_id": "prewave",
+        "legal_name": "Prewave GmbH",
+        "common_name": "Prewave",
+        "country": "Austria",
+        "primary_domain": "prewave.com",
+        "aliases": ("prewave", "prewave gmbh"),
+        "sources": (
+            ("https://www.prewave.com/company/our-story", _CORPORATE,
+             "about", _P),
+            ("https://www.prewave.com/resources/blog", _NEWSROOM,
+             "news", _S),
+            ("https://www.prewave.com/company/careers", _CORPORATE,
+             "careers", _S),
+        ),
+    },
+    {
+        "entity_id": "protiviti",
+        "legal_name": "Protiviti Inc.",
+        "common_name": "Protiviti",
+        "country": "United States",
+        "primary_domain": "protiviti.com",
+        "aliases": ("protiviti", "protiviti inc"),
+        "ambiguity_notes": (
+            "A subsidiary of Robert Half Inc. (NYSE: RHI); Robert Half's "
+            "filings describe Protiviti as a segment and are a parent's account "
+            "of it."
+        ),
+        "sources": (
+            ("https://www.protiviti.com/ca-en/about-us", _CORPORATE,
+             "about", _P),
+            ("https://www.protiviti.com/ca-en/insights", _NEWSROOM,
+             "news", _S),
+            ("https://www.protiviti.com/ca-en/leadership", _CORPORATE,
+             "leadership", _S),
+            ("https://www.protiviti.com/ca-en/careers", _CORPORATE,
+             "careers", _S),
+        ),
+    },
+    {
+        "entity_id": "credera",
+        "legal_name": "Credera",
+        "common_name": "Credera",
+        "country": "United States",
+        "primary_domain": "credera.com",
+        "aliases": ("credera",),
+        "ambiguity_notes": (
+            "An Omnicom company. The site is a single-page app that returns its "
+            "shell with HTTP 200 for any path, so the pages listed here were "
+            "taken from its own sitemap and each was confirmed to return "
+            "content different from the homepage."
+        ),
+        "sources": (
+            ("https://www.credera.com/about-us", _CORPORATE,
+             "about", _P),
+            ("https://www.credera.com/about-us/company-history", _CORPORATE,
+             "history", _P),
+            ("https://www.credera.com/about-us/client-success", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.credera.com/insights", _NEWSROOM,
+             "insights", _S),
+        ),
+    },
+    {
+        "entity_id": "long_view",
+        "legal_name": "Long View Systems Corporation",
+        "common_name": "Long View Systems",
+        "country": "Canada",
+        "primary_domain": "longviewsystems.com",
+        "aliases": ("long view", "long view systems", "longview", "longview systems"),
+        "sources": (
+            ("https://www.longviewsystems.com/about-us", _CORPORATE,
+             "about", _P),
+            ("https://www.longviewsystems.com/blog", _NEWSROOM,
+             "news", _S),
+            ("https://www.longviewsystems.com/careers", _CORPORATE,
+             "careers", _S),
+        ),
+    },
+    {
+        "entity_id": "celigo",
+        "legal_name": "Celigo, Inc.",
+        "common_name": "Celigo",
+        "country": "United States",
+        "primary_domain": "celigo.com",
+        "aliases": ("celigo", "celigo inc"),
+        "sources": (
+            ("https://www.celigo.com/about-us", _CORPORATE,
+             "about", _P),
+            ("https://www.celigo.com/platform", _SEGMENT,
+             "platform", _P),
+            ("https://www.celigo.com/customer-stories", _CUSTOMERS,
+             "customers", _S),
+            ("https://www.celigo.com/blog", _NEWSROOM,
+             "news", _S),
+            ("https://www.celigo.com/platform/pricing", _PRICING,
+             "pricing", _P),
+        ),
+    },
+    {
+        "entity_id": "fivetran",
+        "legal_name": "Fivetran, Inc.",
+        "common_name": "Fivetran",
+        "country": "United States",
+        "primary_domain": "fivetran.com",
+        "aliases": ("fivetran", "fivetran inc", "dbt", "dbt labs", "fivetran dbt labs", "fivetran / dbt labs"),
+        "ambiguity_notes": (
+            "Fivetran and dbt Labs are one company: dbt Labs' own site states "
+            "\"Fivetran and dbt are one company\" (read 2026-09-11). Typing "
+            "either name reaches this entry. getdbt.com is deliberately NOT "
+            "listed as a source: a catalogued URL must sit on the identity's "
+            "own declared domain, and routing a second brand's host through "
+            "this entry would break the rule that a curated source is this "
+            "company speaking as the entity it was filed as."
+        ),
+        "sources": (
+            ("https://www.fivetran.com/about", _CORPORATE,
+             "about", _P),
+            ("https://www.fivetran.com/platform", _SEGMENT,
+             "platform", _P),
+        ),
+    },
 )
 
 

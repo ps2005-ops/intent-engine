@@ -479,6 +479,78 @@ FAILED_TO_FIND = "FAILED_TO_FIND"
 HAVE_INDEPENDENT = "HAVE_INDEPENDENT"
 
 
+# --- WHAT THE SEARCH DID, AS ONE DERIVED STATE -------------------------------
+#
+# WHY A SECOND VOCABULARY. `DISCOVERY_*` above grades how THOROUGH a search
+# was, and it cannot express the two absences that matter most to a reader:
+# "we never looked" and "we looked and the channel refused us". Both arrive
+# here as DISCOVERY_NOT_RUN / DISCOVERY_BLOCKED plus a flag on a different
+# field, so every surface that wanted the distinction re-derived it from the
+# report's internals -- and the provenance drawer derived it WRONG, printing
+# "no search was run" over a search that had run and been reused.
+#
+# MEASURED 2026-09-11, cold then warm against the real `discover()`: a cold
+# run recorded DISCOVERY_EXHAUSTED / 47 hits / 1 independent origin, the
+# snapshot it wrote persisted none of it, and the warm run that reused that
+# snapshot's sources reported `{}` -- which every consumer reads as "no
+# producer ran". The account was not missing; it was never carried.
+#
+# This is the ONE place the question is settled, so a surface renders a state
+# rather than inventing a gloss on a count.
+SEARCH_RAN_WITH_RESULTS = "SEARCH_RAN_WITH_RESULTS"
+SEARCH_RAN_WITH_NO_RESULTS = "SEARCH_RAN_WITH_NO_RESULTS"
+SEARCH_BLOCKED = "DISCOVERY_BLOCKED"
+SEARCH_BUDGET_SPENT = "INTERACTIVE_BUDGET_SPENT"
+SEARCH_NEVER_STARTED = "NEVER_STARTED"
+
+SEARCH_STATES = (SEARCH_RAN_WITH_RESULTS, SEARCH_RAN_WITH_NO_RESULTS,
+                 SEARCH_BLOCKED, SEARCH_BUDGET_SPENT, SEARCH_NEVER_STARTED)
+
+#: States in which a search demonstrably executed. A zero origin count under
+#: any of these is a finding about availability; under the others it is a fact
+#: about us.
+SEARCH_DID_RUN = frozenset({SEARCH_RAN_WITH_RESULTS,
+                            SEARCH_RAN_WITH_NO_RESULTS})
+
+
+def search_state(report) -> str:
+    """Which of the five things happened to the independent-source search.
+
+    Reads only the report a producer wrote. An absent report is
+    NEVER_STARTED -- never "no results", which would be a claim about the
+    company made out of our own silence.
+
+    Precedence is deliberate and is about CAUSE, not severity: a budget spent
+    before any channel was tried is why nothing was attempted, and a channel
+    attempted-but-never-reached is why nothing was found. Asking "did it
+    return rows?" before either would report a retrieval failure as an
+    empty result.
+    """
+    if not isinstance(report, dict) or not report:
+        return SEARCH_NEVER_STARTED
+    attempted = list(report.get("channels_attempted") or [])
+    successful = list(report.get("channels_successful") or [])
+    reasons = report.get("rejection_reasons")
+    reasons = reasons if isinstance(reasons, dict) else {}
+    # Nothing was tried, and the report says why: the interactive budget was
+    # already spent. Distinct from NEVER_STARTED, which has no producer at all.
+    if not attempted and (report.get("budget_exhausted")
+                          or SEARCH_BUDGET_SPENT in reasons):
+        return SEARCH_BUDGET_SPENT
+    if str(report.get("coverage") or "") == DISCOVERY_BLOCKED:
+        return SEARCH_BLOCKED
+    # Tried every channel and reached none. Substantively blocked, whatever
+    # the coverage grade says, and reporting it as "no results" would credit
+    # our own unreachability to the company's absence from the record.
+    if attempted and not successful:
+        return SEARCH_BLOCKED
+    if successful:
+        return (SEARCH_RAN_WITH_RESULTS
+                if int(report.get("hits_total") or 0) > 0
+                else SEARCH_RAN_WITH_NO_RESULTS)
+    return SEARCH_NEVER_STARTED
+
+
 def zero_reading(*, independent_relevant: int, coverage: str,
                  channels_attempted: int = 0,
                  channels_successful: int = 0) -> dict:

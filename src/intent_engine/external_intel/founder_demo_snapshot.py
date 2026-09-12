@@ -229,6 +229,7 @@ def _discovery_block(discovery: Any) -> Any:
     and a bridge that ships an unselected company's name is publishing a fact
     about someone who is not the subject.
     """
+    from intent_engine.company_ingestion import relevance as _REL
     if not isinstance(discovery, dict) or not discovery:
         return None
     reasons = discovery.get("rejection_reasons")
@@ -248,6 +249,20 @@ def _discovery_block(discovery: Any) -> Any:
             discovery.get("independent_relevant_origins") or 0),
         "budget_exhausted": bool(discovery.get("budget_exhausted")),
         "searched_on": str(discovery.get("searched_on") or ""),
+        # WHICH OF THE FIVE THINGS HAPPENED, settled once. Every surface used
+        # to re-derive this from the counts, and the provenance drawer derived
+        # it wrong: a coverage grade of DISCOVERY_NOT_RUN reads identically
+        # whether no producer ran or the interactive budget was spent before
+        # one could, and those are different facts with different repairs.
+        "search_state": _REL.search_state(discovery),
+        # WHETHER THIS ANALYSIS SEARCHED, OR INHERITED A SEARCH. A warm run
+        # reuses a source list and deliberately does not search again; saying
+        # so is the difference between an honest "searched on the 9th" and an
+        # implied "searched just now".
+        "reused_from_snapshot": bool(discovery.get("reused_from_snapshot")),
+        # A reused list whose own search was never recorded. The absence is
+        # OURS, and a coverage grade must not be claimed over it.
+        "account_unavailable": bool(discovery.get("account_unavailable")),
     }
 
 

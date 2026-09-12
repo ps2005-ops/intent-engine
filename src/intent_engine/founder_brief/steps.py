@@ -897,24 +897,56 @@ def _bounded_rewind(bounded, company: str) -> str:
     """
     if bounded is None or not getattr(bounded, "available", False):
         return ""
+    from intent_engine.executive import history_rewind as _HR
     out = ['<div class="readbox">',
            '<h2>What we can actually reconstruct</h2>',
-           f'<p class="q">{_e(bounded.coverage_note)}</p>',
-           '</div>']
+           f'<p class="q">{_e(bounded.coverage_note)}</p>']
+    # WHETHER THE PERIODS COULD BE PLACED IN THEIR OWN ECONOMY, stated up
+    # front. A rewind that silently omits the economic weather reads as a
+    # claim that the weather did not matter.
+    if getattr(bounded, "economic_note", ""):
+        out.append(f'<p class="basis">{_e(bounded.economic_note)}</p>')
+    out.append('</div>')
     out.append('<h2>The dated record, in order</h2>')
     out.append('<div class="hcards">')
     for stop in bounded.stops:
+        # THE ECONOMIC PANEL IS PRESENT OR IT SAYS WHY. Rendering nothing
+        # would leave a reader unable to tell "the period was quiet" from
+        # "we never looked it up", which is the same confusion the discovery
+        # drawer was repaired for.
+        econ = getattr(stop, "economic_then", "")
+        state = getattr(stop, "economic_state", "")
+        if econ:
+            econ_html = (f'<p><strong>Economic conditions then:</strong> '
+                         f'{_e(econ)}</p>')
+        elif state == _HR.ECON_NO_STATE_FOR_DATE:
+            econ_html = ('<p class="basis"><strong>Economic conditions '
+                         'then:</strong> no economic state had been published '
+                         'to this deployment on or before this date, so this '
+                         'stop is not placed in its economic period. Using a '
+                         'later reading would be hindsight.</p>')
+        else:
+            econ_html = ""
+        lesson = getattr(stop, "lesson", "")
+        lesson_html = (f'<p><strong>What this teaches about the '
+                       f'strategy:</strong> {_e(lesson)}</p>' if lesson
+                       else "")
         out.append(
-            f'<article class="obs"><h3>{_e(stop.label)}'
+            f'<article class="obs" data-econ-state="{_e(state)}">'
+            f'<h3>{_e(stop.label)}'
             f'<span class="basis">observed</span></h3>'
-            f'<p>{_e(stop.record_then)}</p>'
-            f'<p><strong>What was knowable then:</strong> '
-            f'{_e(stop.knowable)}</p>'
-            f'<p><strong>What was not yet knowable:</strong> '
-            f'{_e(stop.unknowable)}</p>'
-            f'<p class="basis"><strong>After this date '
-            f'(hindsight, not available then):</strong> '
-            f'{_e(stop.later)}</p></article>')
+            f'<p><strong>What the company said then:</strong> '
+            f'{_e(stop.record_then)}</p>'
+            + econ_html
+            + f'<p><strong>What was knowable then:</strong> '
+              f'{_e(stop.knowable)}</p>'
+              f'<p><strong>What was not yet knowable:</strong> '
+              f'{_e(stop.unknowable)}</p>'
+            + f'<p class="basis"><strong>What happened later '
+              f'(hindsight, not available then):</strong> '
+              f'{_e(stop.later)}</p>'
+            + lesson_html
+            + '</article>')
     out.append('</div>')
     out.append('<div class="readbox">')
     out.append('<h2>The strategic question this leaves open</h2>')

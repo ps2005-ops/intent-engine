@@ -1,0 +1,405 @@
+#!/usr/bin/env python3
+"""The next forty, through the public journey, in resumable cohorts (§1-§27).
+
+WHAT THIS IS NOT. It is not a second harness. `public_journey_ten.journey`
+carries every instrument correction the previous qualification paid for -- the
+lowercase `location` header, the falsy-zero `submit_ack`, the `cso` role id,
+per-page duplicate counting, the profile-consistency rule that does not demand
+string equality -- and it is reused verbatim. This module adds what forty
+companies need that ten did not:
+
+    RESUMABILITY      one row per company on disk; a restart resumes at the
+                      first incomplete company rather than re-running forty
+    QUOTA             ten analyses per IP per rolling hour is the binding
+                      constraint. Not capacity: four concurrent slots exist,
+                      but a pipeline cannot spend more than ten an hour, so
+                      submitting sequentially and waiting out the window uses
+                      the quota optimally AND never manufactures a capacity
+                      refusal to report.
+    FREE MEASUREMENT  every `/runs/<id>/*` read costs nothing, so discovery
+                      state, the history level's own numbers, the X-Ray and
+                      the role views are taken on the SAME session inside the
+                      one paid run.
+    DIFFERENTIATION   each company's decision text is kept so cohorts can be
+                      compared for template collapse (§19) without re-running.
+
+WHY SEQUENTIAL IS THE PIPELINE. §4 asks for a pipeline rather than a burst and
+warns against faking capacity. With a ten-per-hour IP ceiling the queue is
+never the limit: four concurrent analyses would finish in under two minutes and
+then wait fifty-eight. Sequential submission is therefore the same throughput
+with none of the capacity refusals, and it keeps one failure attributable to
+one company.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import pathlib
+import re
+import statistics
+import sys
+import time
+
+HERE = pathlib.Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+ROOT = HERE.parent
+
+import public_journey_ten as PJT                                  # noqa: E402
+from perf_progressive_matrix import _req, visible                 # noqa: E402
+
+# (n, typed name, entity_id, prefixes a person stops at, category)
+FORTY = [
+ (1, "Rubrik", "rubrik", ["Rub", "rubrik", "RUBRIK"], "DATA_SECURITY"),
+ (2, "Cohesity", "cohesity", ["Coh", "cohesity"], "DATA_SECURITY"),
+ (3, "project44", "project44", ["proj", "project44", "Project 44"],
+  "SUPPLY_CHAIN"),
+ (4, "Kinaxis", "kinaxis", ["Kin", "kinaxis"], "PLANNING"),
+ (5, "Alation", "alation", ["Ala", "alation"], "DATA_AI_INFRA"),
+ (6, "Workato", "workato", ["Work", "workato"], "AUTOMATION"),
+ (7, "Dataminr", "dataminr", ["Datamin", "dataminr"], "EXTERNAL_INTEL"),
+ (8, "Adastra", "adastra", ["Adas", "adastra"], "CONSULTING"),
+ (9, "HYCU", "hycu", ["HYC", "hycu"], "DATA_SECURITY"),
+ (10, "Nasuni", "nasuni", ["Nas", "nasuni"], "DATA_SECURITY"),
+ (11, "Dataiku", "dataiku", ["Dataik", "dataiku"], "DATA_AI_INFRA"),
+ (12, "Commvault", "commvault", ["Comm", "commvault"], "DATA_SECURITY"),
+ (13, "Boomi", "boomi", ["Boo", "boomi"], "AUTOMATION"),
+ (14, "SnapLogic", "snaplogic", ["Snap", "snaplogic"], "AUTOMATION"),
+ (15, "West Monroe", "west_monroe", ["West", "west monroe"], "CONSULTING"),
+ (16, "Guidehouse", "guidehouse", ["Guide", "guidehouse"], "CONSULTING"),
+ (17, "Collibra", "collibra", ["Coll", "collibra"], "DATA_AI_INFRA"),
+ (18, "Airbyte", "airbyte", ["Airb", "airbyte"], "DATA_AI_INFRA"),
+ (19, "OneTrust", "onetrust", ["OneT", "onetrust"], "DATA_AI_INFRA"),
+ (20, "Samsara", "samsara", ["Sams", "samsara"], "SUPPLY_CHAIN"),
+ (21, "FourKites", "fourkites", ["Four", "fourkites"], "SUPPLY_CHAIN"),
+ (22, "Descartes Systems", "descartes", ["Desc", "descartes"],
+  "SUPPLY_CHAIN"),
+ (23, "o9 Solutions", "o9_solutions", ["o9", "o9 solutions"], "PLANNING"),
+ (24, "ThoughtSpot", "thoughtspot", ["Thought", "thoughtspot"], "ANALYTICS"),
+ (25, "Starburst", "starburst", ["Starb", "starburst"], "DATA_AI_INFRA"),
+ (26, "Dremio", "dremio", ["Drem", "dremio"], "DATA_AI_INFRA"),
+ (27, "Denodo", "denodo", ["Deno", "denodo"], "DATA_AI_INFRA"),
+ (28, "Geotab", "geotab", ["Geo", "geotab"], "SUPPLY_CHAIN"),
+ (29, "Clari", "clari", ["Clar", "clari"], "GTM"),
+ (30, "6sense", "6sense", ["6se", "6sense", "6 sense"], "GTM"),
+ (31, "Gong", "gong", ["Gon", "gong"], "GTM"),
+ (32, "AlphaSense", "alphasense", ["Alpha", "alphasense"], "EXTERNAL_INTEL"),
+ (33, "FiscalNote", "fiscalnote", ["Fiscal", "fiscalnote"], "EXTERNAL_INTEL"),
+ (34, "Recorded Future", "recorded_future", ["Recorded", "recorded future"],
+  "EXTERNAL_INTEL"),
+ (35, "Prewave", "prewave", ["Prew", "prewave"], "EXTERNAL_INTEL"),
+ (36, "Protiviti", "protiviti", ["Prot", "protiviti"], "CONSULTING"),
+ (37, "Credera", "credera", ["Cred", "credera"], "CONSULTING"),
+ (38, "Long View Systems", "long_view", ["Long View", "long view systems"],
+  "CONSULTING"),
+ (39, "Celigo", "celigo", ["Cel", "celigo"], "AUTOMATION"),
+ (40, "Fivetran", "fivetran", ["Five", "fivetran", "dbt Labs"],
+  "DATA_AI_INFRA"),
+]
+COHORTS = {"A": range(1, 15), "B": range(15, 28), "C": range(28, 41)}
+STATE = ROOT / "reports/next40_state.json"
+
+#: The §10 questions, asked of every company. Deliberately NOT company-specific
+#: -- the point is whether the ANSWERS are.
+QUESTIONS = [
+    "What is the most important strategic implication for this company?",
+    "What evidence supports it?",
+    "What evidence argues against it?",
+    "What is the weakest assumption in that reading?",
+    "What would change the recommendation or posture?",
+    "What should management investigate next?",
+]
+
+
+# --- state ------------------------------------------------------------------
+
+def load_state() -> dict:
+    try:
+        return json.loads(STATE.read_text())
+    except Exception:                                        # noqa: BLE001
+        return {"contract": "next40_state.v1", "rows": {}}
+
+
+def save_state(state: dict) -> None:
+    STATE.parent.mkdir(parents=True, exist_ok=True)
+    tmp = STATE.with_suffix(".tmp")
+    tmp.write_text(json.dumps(state, indent=1, sort_keys=True))
+    tmp.replace(STATE)
+
+
+def done(row) -> bool:
+    """A company is finished when it reached a terminal CLASS on THIS sha."""
+    return bool(row) and bool(row.get("final_class")) \
+        and row.get("final_class") != "QUOTA_DEFERRED"
+
+
+# --- the free measurements, taken on the paid session -----------------------
+
+#: What the product's own failure page says. Matched on its sentences, not on
+#: a status code: the page answers 200 because it is a real page, and it is the
+#: CORRECT page for a company whose sources could not be retrieved.
+_COULD_NOT_COMPLETE = "this analysis could not be completed"
+
+
+def _retrieval_limitation(row, surfaces) -> bool:
+    """Is this a correctly-handled retrieval limit rather than a defect? (§8)
+
+    WHY THIS EXISTS AND WHY IT IS NOT A LOOPHOLE. Three of the forty answer
+    HTTP 403 from their own domain to every path including robots.txt, and one
+    of those files with no regulator anywhere. For that company the product
+    CANNOT produce a reading, and the right behaviour is to say so -- §8 names
+    that outcome explicitly.
+
+    Scoring it against the full-analysis gates would report a correct refusal
+    as a product defect. So the inapplicable gates are neutralised AND
+    REPLACED, never merely dropped: a gate set that a bounded run passes by
+    having nothing in it would be a test that cannot fail. Every gate below
+    has to be earned by something the page actually says.
+    """
+    intro = visible(surfaces.get("intro", {}).get("html", "") or "")
+    result = visible(surfaces.get("result", {}).get("html", "") or "")
+    page = (intro + " " + result).lower()
+    if _COULD_NOT_COMPLETE not in page:
+        return False
+    row["bounded_page"] = True
+    # THE HONESTY GATES, which are the whole product claim in this state.
+    row["gates"]["FAILURE_IS_NAMED"] = True
+    row["gates"]["FAILURE_NOT_BLAMED_ON_THE_COMPANY"] = (
+        "not evidence that anything is missing in the real world" in page)
+    row["gates"]["FAILURE_ASSERTS_NO_READING"] = (
+        "we do not invent one" in page)
+    row["gates"]["FAILURE_SAYS_WHAT_HAPPENED_TO_EACH_SOURCE"] = (
+        "what happened to each source" in page or "what was read" in page)
+    row["gates"]["FAILURE_OFFERS_A_RETRY"] = bool(
+        re.search(r"try again|retry|add a source|paste", page))
+    # The gates a run with no report cannot satisfy, neutralised WITH A REASON
+    # recorded beside each one so this can never read as a silent pass.
+    row["neutralised_gates"] = {}
+    for gate in ("HISTORY_REWIND", "HISTORY_USEFUL", "QA_VALID",
+                 "FOLLOWUP_CONTEXT", "EVIDENCE_NO_DUPLICATES",
+                 "EVIDENCE_NO_BROKEN_SPANS", "PROFILE_CONSISTENCY",
+                 "ROLE_VIEWS", "XRAY_RENDERS"):
+        if gate in row["gates"] and not row["gates"][gate]:
+            row["neutralised_gates"][gate] = (
+                "the run produced no report, so this gate has nothing to "
+                "measure; the FAILURE_* gates above are what replace it")
+            row["gates"][gate] = True
+    return True
+
+
+def _measure(op, run_id, row, surfaces):
+    """Everything §10-§19 needs that the ten-company gates did not read."""
+    # --- §14 DISCOVERY. The state is machine-readable on /evidence now, and
+    # the prose is kept beside it so a wording change cannot silently pass.
+    ev = surfaces.get("evidence", {}).get("html", "") or ""
+    m = re.search(r'data-search-state="([^"]*)"', ev)
+    origins = re.search(r'data-independent-origins="(\d+)"', ev)
+    text = visible(ev)
+    row["discovery"] = {
+        "search_state": m.group(1) if m else "ATTRIBUTE_ABSENT",
+        "independent_origins": int(origins.group(1)) if origins else None,
+        "says_no_search": "no discovery run is recorded" in text.lower(),
+        "reused": "reused the source list" in text.lower(),
+        "hits": (lambda q: int(q.group(1)) if q else None)(
+            re.search(r"found (\d+) filing", text)),
+        "read_in_full": (lambda q: int(q.group(1)) if q else None)(
+            re.search(r"read (\d+) in full", text)),
+    }
+    # --- §12 HISTORY. The level's OWN numbers, not a guess from the prose.
+    hist_html = surfaces.get("history", {}).get("html", "") or ""
+    hist = visible(hist_html)
+    dates = sorted(set(re.findall(r"\b(20[0-2]\d-[01]\d-[0-3]\d)\b", hist)))
+    spans = re.search(r"(\d+) dated document\(s\) span", hist)
+    econ_states = re.findall(r'data-econ-state="([^"]*)"', hist_html)
+    row["history"] = {
+        "level": row.get("history_level"),
+        "dated_documents": int(spans.group(1)) if spans else None,
+        "earliest": dates[0] if dates else None,
+        "latest": dates[-1] if dates else None,
+        "financial_series": row.get("history_level") == "A",
+        "econ_states": {s: econ_states.count(s) for s in set(econ_states)},
+        "economic_links": sum(1 for s in econ_states
+                              if s == "ECONOMIC_CONTEXT_LINKED"),
+        "hindsight_wall": ("PRESENT" if "not available then" in hist.lower()
+                           else "ABSENT"),
+        "stops": len(econ_states),
+    }
+    # --- §7 the surfaces the ten-company harness did not open.
+    #     `result` is the run's OWN page and it is where the economic context
+    #     is rendered (`_strategic_run_page` passes `econ=`), so a harness that
+    #     reads only /brief and /full measures economic intelligence on two
+    #     surfaces that may not carry it.
+    for key, path in (("result", f"/runs/{run_id}"),
+                      ("xray", f"/runs/{run_id}/xray"),
+                      ("slides", f"/runs/{run_id}/slides")):
+        st, body, _u, _t, _h = _req(op, path, timeout=90)
+        surfaces[key] = {"status": st, "html": body}
+        row.setdefault("surface_status", {})[key] = st
+    xray = visible(surfaces["xray"]["html"])
+    row["xray_chars"] = len(xray)
+    row["gates"]["XRAY_RENDERS"] = surfaces["xray"]["status"] < 400
+    # --- §10 ECONOMIC INTELLIGENCE: is it about THIS company's engine?
+    full = visible(surfaces.get("full", {}).get("html", "") or "")
+    brief = visible(surfaces.get("brief", {}).get("html", "") or "")
+    result = visible(surfaces.get("result", {}).get("html", "") or "")
+    blob = " ".join((result, brief, full, xray))
+    row["econ_intel"] = {
+        "mentions_transmission": bool(re.search(
+            r"transmission|passes through|flows through|exposed to", blob, re.I)),
+        "names_a_mechanism": bool(re.search(
+            r"because|which means|so that|drives|depends on", blob, re.I)),
+        "names_a_falsifier": bool(re.search(
+            r"would falsify|would change|argues against|contradict", blob,
+            re.I)),
+        "chars": len(blob),
+    }
+    # --- §19 the corpus template collapse is measured from. Kept, not judged
+    # here: a single company cannot be compared with itself.
+    row["decision_text"] = {
+        "brief": brief[:6000], "full": full[:9000], "xray": xray[:6000],
+    }
+    # --- §16 the role views, kept for cross-company comparison
+    row["role_text"] = {}
+    for role in ("ceo", "cso"):
+        st, body, _u, _t, _h = _req(
+            op, f"/runs/{run_id}/intro?role={role}", timeout=60)
+        row["role_text"][role] = visible(body)[:5000]
+    # --- §17 THE CAPTURES, WRITTEN TO DISK RATHER THAN INTO THE STATE FILE.
+    # Six surfaces x forty companies is ~10MB of HTML, and a state file that
+    # size is re-read and rewritten after every company. The UI matrix reads
+    # these files; the state row carries only their names.
+    slug = re.sub(r"[^a-z0-9]+", "-", str(row.get("company", "")).lower())
+    out = ROOT / "reports/next40_ui"
+    out.mkdir(parents=True, exist_ok=True)
+    row["capture_files"] = {}
+    for key in ("result", "intro", "brief", "full", "history", "evidence",
+                "xray", "sources", "story"):
+        body = (surfaces.get(key) or {}).get("html")
+        if not body:
+            continue
+        path = out / f"{slug.strip('-')}-{key}.html"
+        path.write_text(body)
+        row["capture_files"][key] = path.name
+    # LAST, because it needs `result` and every surface above it.
+    row["retrieval_limited"] = _retrieval_limitation(row, surfaces)
+
+
+# --- one company ------------------------------------------------------------
+
+def run_one(n, name, entity_id, prefixes, category, sha) -> dict:
+    PJT.PREFIXES[name] = prefixes
+    PJT.QUESTIONS[:] = QUESTIONS
+    began = time.time()
+    try:
+        row = PJT.journey(name, entity_id, extra=_measure)
+    except Exception as exc:                                 # noqa: BLE001
+        row = {"company": name, "result": "INSTRUMENT_DEFECT",
+               "defects": [{"kind": "INSTRUMENT_DEFECT",
+                            "detail": f"{type(exc).__name__}: {exc}"}]}
+    row.update(n=n, category=category, live_sha=sha,
+               wall_s=round(time.time() - began, 1))
+    # §8 the four allowed epistemic outcomes, decided from what the run did
+    res = row.get("result")
+    if res == "PASS":
+        hist = row.get("history_level")
+        origins = (row.get("discovery") or {}).get("independent_origins") or 0
+        row["final_class"] = (
+            "RETRIEVAL_LIMITATION_HANDLED_CORRECTLY"
+            if row.get("retrieval_limited") else
+            "DECISION_GRADE_READING" if origins > 0 else
+            "DEFENSIBLE_ABSTENTION" if hist in ("A", "B") else
+            "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY")
+    elif res == "INFRASTRUCTURE":
+        row["final_class"] = "QUOTA_DEFERRED"
+    else:
+        row["final_class"] = res or "UNKNOWN"
+    return row
+
+
+def _sha():
+    st, body, _u, _t, _h = _req(PJT._opener()[0], "/version")
+    try:
+        return json.loads(body).get("commit", "")
+    except Exception:                                        # noqa: BLE001
+        return ""
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--cohort", default="A", choices=sorted(COHORTS))
+    ap.add_argument("--only", type=int, action="append", default=None)
+    ap.add_argument("--max", type=int, default=99,
+                    help="stop after this many paid analyses this invocation")
+    ap.add_argument("--wait-quota", action="store_true",
+                    help="on a quota refusal, wait out the window and resume")
+    args = ap.parse_args()
+
+    sha = _sha()
+    state = load_state()
+    state["live_sha"] = sha
+    print(f"base {PJT.BASE}\nlive {sha[:12]}\ncohort {args.cohort}", flush=True)
+
+    targets = [r for r in FORTY
+               if (args.only and r[0] in args.only)
+               or (not args.only and r[0] in COHORTS[args.cohort])]
+    spent, deferred = 0, []
+    for (n, name, eid, prefixes, category) in targets:
+        key = str(n)
+        if done(state["rows"].get(key)) and \
+                state["rows"][key].get("live_sha") == sha:
+            print(f"{n:02d} {name:20s} SKIP (done on this sha)", flush=True)
+            continue
+        if spent >= args.max:
+            deferred.append(name)
+            continue
+        print(f"\n== {n:02d} {name}", flush=True)
+        row = run_one(n, name, eid, prefixes, category, sha)
+        # ONLY AN ADMITTED ANALYSIS SPENDS A SLOT. A company refused at the
+        # identity gate never reaches `/analyze`, so counting it would make the
+        # runner believe the hour's budget was gone when none of it was used --
+        # and the dry run against the pre-catalog build did exactly that,
+        # reporting spent=2 for two companies that submitted nothing.
+        if row.get("run_id"):
+            spent += 1
+        state["rows"][key] = row
+        save_state(state)
+        d = row.get("discovery") or {}
+        h = row.get("history") or {}
+        print(f"   {row['final_class']:38s} core={row.get('core_s')}s "
+              f"hist={row.get('history_level','?')}/"
+              f"{h.get('dated_documents','?')}doc "
+              f"search={d.get('search_state','?')} "
+              f"orig={d.get('independent_origins')} "
+              f"qa={(row.get('qa') or {}).get('answered','?')}/6", flush=True)
+        for defect in (row.get("defects") or ())[:6]:
+            print(f"      - {defect['kind']}: {defect['detail'][:140]}",
+                  flush=True)
+        if row["final_class"] == "QUOTA_DEFERRED":
+            if not args.wait_quota:
+                print("   quota refused; rerun to resume", flush=True)
+                break
+            # THE REFUSAL NAMES ITS OWN WINDOW. A blind hour wastes up to
+            # fifty-nine minutes per window, and over four windows that is
+            # most of an evening; a window read off the page is exact. A
+            # minute of slack is added because the limit is a ROLLING hour and
+            # the boundary is the first hit, not this one.
+            wait = row.get("retry_after_min")
+            wait = (int(wait) + 1) if wait else 61
+            print(f"   quota refused; the page says {wait - 1} min, "
+                  f"waiting {wait}", flush=True)
+            time.sleep(60 * wait)
+            spent = 0
+    rows = [state["rows"][str(n)] for (n, *_r) in targets
+            if str(n) in state["rows"]]
+    cores = [r["core_s"] for r in rows if r.get("core_s")]
+    passed = sum(1 for r in rows if r.get("result") == "PASS")
+    print(f"\nCOHORT {args.cohort}: {passed}/{len(rows)} PASS  "
+          f"spent={spent}  deferred={deferred}")
+    if cores:
+        print(f"CORE p50 {statistics.median(cores):.1f}s  "
+              f"p90 {sorted(cores)[max(0,int(len(cores)*0.9)-1)]:.1f}s  "
+              f"max {max(cores):.1f}s")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

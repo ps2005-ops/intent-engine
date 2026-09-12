@@ -6683,8 +6683,19 @@ class WebApp:
         bounded = None
         if sim is None or not getattr(sim, "available", False):
             records = HR.dated_records(self._retrieved_documents(run_id))
+            # THE ECONOMIC READER, INJECTED AND VINTAGE-BOUND.
+            #
+            # `as_of` makes `econ_context.load` return the state published ON
+            # OR BEFORE that date, so each stop is placed in its own period
+            # and never in today's. Passing it is the whole repair: the
+            # parameter defaults to None, and a default left in place is how
+            # this product has shipped an inert feature before.
+            def _econ_at(iso_date, _root=self._runtime_root):
+                from intent_engine.external_intel import econ_context as _EC
+                return _EC.load(_root, as_of=iso_date)
+
             bounded = HR.bounded_rewind(company=timeline.company or name,
-                                        records=records)
+                                        records=records, econ_at=_econ_at)
             level = (HR.LEVEL_BOUNDED if bounded.available else HR.LEVEL_GAP)
         else:
             level = HR.LEVEL_SERIES
@@ -7696,21 +7707,69 @@ class WebApp:
         actually read. Absent when no producer ran -- inventing a number here
         would be worse than the silence it replaces.
         """
-        if not discovery:
-            return ('<p class="none">No discovery run is recorded for this '
-                    'analysis, so how hard we searched is unknown.</p>')
-        considered = int(discovery.get("candidates_considered") or 0)
-        fetched = int(discovery.get("candidates_fetched") or 0)
-        hits = int(discovery.get("hits_total") or 0)
-        channels = discovery.get("channels_successful") or []
-        bits = [f'<p class="none">We searched {len(channels) or 0} '
-                f'independent channel(s), found {hits} filing(s) naming this '
-                f'company, judged {considered} of them worth reading, and '
-                f'read {fetched} in full.</p>']
-        if discovery.get("budget_exhausted"):
+        from intent_engine.company_ingestion import relevance as _REL
+        # FIVE OUTCOMES, AND THEY ARE NOT INTERCHANGEABLE. "We never looked",
+        # "we ran out of time before looking", "we looked and were refused",
+        # "we looked and there is nothing", and "we looked and here is what we
+        # found" licence five different readings of the same zero. This page
+        # printed the first sentence for all five.
+        #
+        # The state is read from the producer where it crossed and re-derived
+        # otherwise, so an older dossier renders correctly without a migration
+        # and there is still only ONE implementation of the question.
+        state = str((discovery or {}).get("search_state") or "") or \
+            _REL.search_state(discovery)
+        considered = int((discovery or {}).get("candidates_considered") or 0)
+        fetched = int((discovery or {}).get("candidates_fetched") or 0)
+        hits = int((discovery or {}).get("hits_total") or 0)
+        channels = (discovery or {}).get("channels_successful") or []
+        attempted = (discovery or {}).get("channels_attempted") or []
+        if state == _REL.SEARCH_NEVER_STARTED and not (discovery or {}).get(
+                "reused_from_snapshot"):
+            return ('<p class="none">No independent-source search is recorded '
+                    'for this analysis, so how hard we searched is unknown. '
+                    'That is a gap in our record, not a finding about the '
+                    'company.</p>')
+        if state == _REL.SEARCH_BUDGET_SPENT:
+            bits = ['<p class="none">We did not search for independent '
+                    'sources on this analysis: the interactive time budget '
+                    'was already spent when that stage was reached. Sources '
+                    'naming this company may well exist; we did not look.</p>']
+        elif state == _REL.SEARCH_BLOCKED:
+            bits = [f'<p class="none">We tried {len(attempted) or 1} '
+                    f'independent channel(s) and could not reach any of them, '
+                    f'so nothing was searched. A zero here is our limit, not '
+                    f'this company&rsquo;s public record.</p>']
+        elif state == _REL.SEARCH_RAN_WITH_NO_RESULTS:
+            bits = [f'<p class="none">We searched {len(channels) or 0} '
+                    f'independent channel(s) and found no filing by another '
+                    f'registrant naming this company. The search ran; the '
+                    f'record is empty.</p>']
+        else:
+            bits = [f'<p class="none">We searched {len(channels) or 0} '
+                    f'independent channel(s), found {hits} filing(s) naming '
+                    f'this company, judged {considered} of them worth '
+                    f'reading, and read {fetched} in full.</p>']
+        # WHOSE SEARCH THIS WAS. A warm analysis reuses a source list on
+        # purpose and searches nothing; presenting its inherited coverage
+        # without the date would imply a search that did not happen today.
+        if (discovery or {}).get("reused_from_snapshot"):
+            when = str((discovery or {}).get("searched_on") or "")
+            if (discovery or {}).get("account_unavailable"):
+                bits = ['<p class="none">This analysis reused a source list '
+                        'discovered for an earlier run of the same company. '
+                        'How hard that earlier search worked was not recorded, '
+                        'so we claim no coverage for it.</p>']
+            else:
+                bits.append(
+                    '<p class="none">This analysis reused the source list '
+                    + (f'found on {_e(when)}' if when else 'found earlier')
+                    + ' and searched nothing again.</p>')
+        if (discovery or {}).get("budget_exhausted") and \
+                state != _REL.SEARCH_BUDGET_SPENT:
             bits.append('<p class="none">We stopped at our reading budget, so '
                         'candidates remain that we have not assessed.</p>')
-        reasons = discovery.get("rejection_reasons") or {}
+        reasons = (discovery or {}).get("rejection_reasons") or {}
         if isinstance(reasons, dict) and reasons:
             listed = " · ".join(
                 f"{_e(str(k).replace('_', ' ').lower())}: {int(v)}"
@@ -7756,19 +7815,33 @@ class WebApp:
 
         state = str(provenance.get("state") or "")
         records = provenance.get("records") or []
+        # TWO DIFFERENT ABSENCES, AND THIS PAGE USED TO SHOW ONLY ONE. A
+        # missing source PROJECTION and a missing SEARCH are separate facts:
+        # a run can search three channels, read six filings and still fail to
+        # build a provenance projection, and this branch reported that as
+        # though nothing had been looked for. The search account is read
+        # before the early return so every evidence page answers "how hard did
+        # you look?" -- which is the question the page exists to answer.
+        _disc = founder.get("discovery_coverage")
+        _disc = _disc if isinstance(_disc, dict) else {}
         if not records:
             # An absent projection is a fact about us. Saying "no sources"
             # would be a claim about the company.
             reason = str(provenance.get("reason") or
                          "This analysis carries no source projection.")
+            _st = str(_disc.get("search_state") or "") or \
+                REL.search_state(_disc)
             return self._html(self._page(company, (
                 f'<p class="eyebrow">Why this reading exists</p>'
                 f'<h1>{_e(company)}</h1>{nav}'
-                f'<section class="card"><h2>No sources are attached</h2>'
+                f'<section class="card" data-search-state="{_e(_st)}" '
+                f'data-independent-origins="0">'
+                f'<h2>No sources are attached</h2>'
                 f'<p>{_e(reason)}</p>'
                 f'<p class="none">State: '
-                f'{_e(state or "PROVENANCE_UNAVAILABLE")}'
-                f'</p></section>'), None, ""))
+                f'{_e(state or "PROVENANCE_UNAVAILABLE")}</p>'
+                + self._discovery_detail(_disc)
+                + f'</section>'), None, ""))
 
         supporting = [r for r in records if r.get("independence_bearing")]
         set_aside = [r for r in records
@@ -7788,8 +7861,16 @@ class WebApp:
             coverage=str(discovery.get("coverage") or REL.DISCOVERY_NOT_RUN),
             channels_attempted=len(discovery.get("channels_attempted") or []),
             channels_successful=len(discovery.get("channels_successful") or []))
+        # THE STATE, MACHINE-READABLE BESIDE THE PROSE. A qualification run
+        # that classifies forty companies by pattern-matching this paragraph
+        # will invent defects the moment the wording changes; the attribute is
+        # the same answer the sentence is built from, so the two cannot drift.
+        _search_state = str(discovery.get("search_state") or "") or \
+            REL.search_state(discovery)
         headline = (
-            f'<section class="card"><h2>Independent support</h2>'
+            f'<section class="card" data-search-state="{_e(_search_state)}" '
+            f'data-independent-origins="{len(supporting)}"><h2>Independent '
+            f'support</h2>'
             f'<p><strong>{len(supporting)}</strong> of {len(records)} '
             f'source(s) are both independent of {_e(company)} and say enough '
             f'about it to support the reading.</p>'

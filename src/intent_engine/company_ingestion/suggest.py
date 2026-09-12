@@ -196,9 +196,63 @@ def _from_registry(typed: str) -> List[Suggestion]:
             country=getattr(profile, "country", "") or "",
             domain=getattr(profile, "primary_domain", "") or "",
             entity_id=getattr(profile, "entity_id", "") or "",
-            ticker=str(getattr(profile, "ticker", "") or ""),
+            # THE REGISTRY'S OWN CIK AND TICKER, WHICH NEVER CROSSED.
+            #
+            # `EntityProfile` carries `sec_cik` and `listings`; this read
+            # `profile.ticker`, which does not exist, and asked for no CIK at
+            # all. So a catalogued filer reached the customer with neither.
+            #
+            # MEASURED on the five public companies in the next forty --
+            # Rubrik, Commvault, Samsara, Descartes, FiscalNote -- every one
+            # returned `cik=""` from the registry. Live they still showed a
+            # CIK, because the SEC registrant row supplies one and the merge
+            # fills the gap, and that is exactly what made this invisible:
+            # the identity was being carried by the one source that is a
+            # network fetch. Rubrik's and FiscalNote's own sites answer 403 to
+            # every path, so on any request where that ~1MB table did not load
+            # they would have lost the only evidence route they have, and the
+            # page would have reported two public filers as companies that
+            # publish nothing.
+            #
+            # This is the defect that dropped a confirmed pick's CIK before,
+            # one layer earlier: the regulator's identifier is declared in the
+            # catalog and has to survive to the row the customer picks.
+            cik=str(getattr(profile, "sec_cik", "") or ""),
+            ticker=_registry_ticker(profile),
+            # PUBLIC WHEN A SOURCE SAYS SO, AND OTHERWISE SILENT.
+            #
+            # A declared exchange listing or SEC identifier IS a source saying
+            # the company is public. Absence of one is NOT a source saying it
+            # is private -- it is absence, and this field's own contract is
+            # "where a source says so". So an unlisted entry stays empty and
+            # the surface says nothing about it, rather than asserting PRIVATE
+            # about a company that might simply be listed somewhere this
+            # catalog has not recorded.
+            listing=("PUBLIC" if (getattr(profile, "listings", ())
+                                  or getattr(profile, "sec_cik", "")) else ""),
             source=REGISTRY, match=best))
     return out
+
+
+def _registry_ticker(profile) -> str:
+    """The ticker a curated entry declares, from `listings`.
+
+    A multinational is listed more than once and the FIRST listing is the
+    primary one, so it is taken rather than whichever happened to sort last.
+    `ticker` is still honoured when a profile defines one, because the two
+    registry entries that predate `listings` use it.
+    """
+    direct = str(getattr(profile, "ticker", "") or "").strip()
+    if direct:
+        return direct
+    for listing in (getattr(profile, "listings", ()) or ()):
+        try:
+            _exchange, symbol = listing
+        except (TypeError, ValueError):
+            continue
+        if str(symbol or "").strip():
+            return str(symbol).strip()
+    return ""
 
 
 def _registry_profiles(module) -> Sequence:
