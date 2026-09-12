@@ -119,6 +119,71 @@ def _words(text: str) -> List[str]:
     return out
 
 
+#: LEGAL FORM ONLY. Note what is deliberately ABSENT: "group", "holdings" and
+#: "holding". Those are part of a company's NAME, not its legal form, and
+#: treating them as furniture makes two different companies one.
+#:
+#: MEASURED LIVE 2026-09-11 on 17b6b08f. The dedupe key was
+#: `" ".join(_words(legal_name))`, and `_words` strips `_SUFFIXES`, which
+#: contains both "corporation" and "holdings". So:
+#:
+#:     "Adastra Corporation"    -> "adastra"
+#:     "Adastra Holdings Ltd."  -> "adastra"
+#:
+#: One key, and the curated Toronto data consultancy was merged with Adastra
+#: Holdings Ltd., an unrelated Canadian cannabis company in the SEC register.
+#: The consultancy's suggestion row came back carrying CIK 1891512 and ticker
+#: XTXXF -- and a confirmed pick posts that CIK, so the run would have opened
+#: on the consultancy's name and retrieved the cannabis company's filings as
+#: its evidence.
+#:
+#: This is the wrong-company failure arriving through the one door the catalog
+#: exists to close, which is why the merge gets its own key instead of sharing
+#: the one `_match` uses: loosening a MATCH is how autocomplete stays usable,
+#: and loosening an IDENTITY is how two companies become one.
+_LEGAL_FORMS = frozenset({
+    "inc", "inc.", "incorporated", "corp", "corp.", "corporation", "co",
+    "co.", "company", "ltd", "ltd.", "limited", "plc", "llc", "lp", "nv",
+    "n.v.", "sa", "s.a.", "ag", "se", "the", "&", "and",
+})
+
+
+def identity_key(name: str) -> str:
+    """The key two rows must share before they can be the same company."""
+    out = []
+    for raw in str(name or "").lower().replace(",", " ").split():
+        word = raw.strip(".,&").translate(_IN_WORD_PUNCTUATION)
+        if word and word not in _LEGAL_FORMS:
+            out.append(word)
+    return " ".join(out)
+
+
+def _contradicts(a, b) -> bool:
+    """Do two rows carry identifiers that say they are DIFFERENT companies?
+
+    Only fields BOTH rows carry are compared: the whole value of the merge is
+    that a registry row with a domain and a registrant row with a CIK complete
+    each other, and absence is not disagreement.
+
+    `entity_id` IS DELIBERATELY NOT COMPARED. It is a source's own naming
+    convention, not a shared identifier: the curated catalog files Descartes as
+    `descartes` and the validation manifest files the same company as
+    `descartes-systems`, and comparing the two as strings split one company
+    into two rows the moment this check was added. Comparing ids across sources
+    has produced a false identity collision in this codebase before; only an
+    identifier with meaning OUTSIDE the source that wrote it can say two rows
+    are different companies.
+    """
+    for field in ("cik", "domain"):
+        left = str(getattr(a, field, "") or "").strip().lower()
+        right = str(getattr(b, field, "") or "").strip().lower()
+        if field == "cik":
+            left, right = left.lstrip("0"), right.lstrip("0")
+        if left and right and left != right:
+            return True
+    return False
+
+
 def _initialism(text: str) -> str:
     return "".join(w[0] for w in _words(text))
 
@@ -487,10 +552,17 @@ def suggest(typed: str, *, limit: int = 8, allow_registrant: bool = True,
     merged: Dict[str, Suggestion] = {}
     for row in sorted(rows, key=lambda r: (r.match,
                                            SOURCE_RANK.get(r.source, 9))):
-        key = " ".join(_words(row.legal_name))
+        key = identity_key(row.legal_name)
         held = merged.get(key)
         if held is None:
             merged[key] = row
+            continue
+        # A SHARED KEY IS NOT PROOF OF ONE COMPANY. Two rows that disagree on a
+        # CIK, a domain or a registry id are two companies however alike their
+        # names read, and merging them would hand one company's regulator
+        # identifier to the other.
+        if _contradicts(held, row):
+            merged[f"{key}#{row.source}:{row.cik or row.domain or row.legal_name}"] = row
             continue
         merged[key] = dataclasses.replace(
             held,

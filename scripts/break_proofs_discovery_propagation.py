@@ -375,10 +375,69 @@ PROOFS = [
         target="tests/test_company_catalog_identity.py::"
                "test_a_private_company_invents_neither",
         expect_failure_contains="acquired a CIK from nowhere"),
+    # --- two companies must not become one ---------------------------------
+    Proof(
+        label="33. the merge key strips a NAME word and fuses two companies",
+        path=SUGGEST,
+        find='    "n.v.", "sa", "s.a.", "ag", "se", "the", "&", "and",\n'
+             "})\n"
+             "\n"
+             "\n"
+             "def identity_key(name: str) -> str:",
+        replace='    "n.v.", "sa", "s.a.", "ag", "se", "the", "&", "and",\n'
+                '    "group", "holdings", "holding",\n'
+                "})\n"
+                "\n"
+                "\n"
+                "def identity_key(name: str) -> str:",
+        target="tests/test_two_companies_are_not_merged_into_one.py::"
+               "test_two_different_companies_do_not_share_an_identity_key"
+               "[Adastra Corporation-Adastra Holdings Ltd.]",
+        expect_failure_contains="both reduce to"),
+
+    Proof(
+        label="34. the merge goes back to the matcher's lossy key",
+        path=SUGGEST,
+        find="        key = identity_key(row.legal_name)",
+        replace='        key = " ".join(_words(row.legal_name))',
+        target="tests/test_two_companies_are_not_merged_into_one.py::"
+               "test_the_consultancy_does_not_inherit_the_cannabis_company_s_cik",
+        expect_failure_contains="belongs to"),
+
+    Proof(
+        label="35. contradicting CIKs are merged anyway",
+        path=SUGGEST,
+        find="        if _contradicts(held, row):",
+        replace="        if False:",
+        target="tests/test_two_companies_are_not_merged_into_one.py::"
+               "test_rows_that_disagree_on_a_cik_are_not_merged",
+        expect_failure_contains="were merged into one"),
+
+    Proof(
+        label="36. a source's own id convention splits one company in two",
+        path=SUGGEST,
+        find='    for field in ("cik", "domain"):',
+        replace='    for field in ("cik", "domain", "entity_id"):',
+        target="tests/test_two_companies_are_not_merged_into_one.py::"
+               "test_a_source_s_own_id_convention_is_not_treated_as_disagreement",
+        expect_failure_contains="split in two"),
+
+    Proof(
+        label="37. the merge stops merging and one company is offered twice",
+        path=SUGGEST,
+        find="        if _contradicts(held, row):\n"
+             '            merged[f"{key}#{row.source}:'
+             '{row.cik or row.domain or row.legal_name}"] = row\n'
+             "            continue",
+        replace='        merged[f"{key}#{row.source}"] = row\n'
+                "        continue",
+        target="tests/test_two_companies_are_not_merged_into_one.py::"
+               "test_one_company_from_two_sources_is_still_offered_once",
+        expect_failure_contains="was offered"),
 ]
 
 
 if __name__ == "__main__":
     sys.exit(run_all(
         PROOFS,
-        title="DISCOVERY ACCOUNT + IDENTITY CATALOG + LEVEL B + FILER CIK"))
+        title="DISCOVERY + CATALOG + LEVEL B + FILER CIK + ONE IDENTITY"))
