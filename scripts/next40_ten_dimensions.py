@@ -210,13 +210,24 @@ def assess(row, ui_index) -> dict:
     sents = [s.strip() for s in re.split(r"(?<=[.?])\s+", hist_text)
              if len(s.strip()) > 60]
     repeats = len(sents) - len(set(sents))
-    d("HISTORY",
-      "FAIL" if leaked or wall == "ABSENT" else
-      ("PASS" if level in ("A", "B") and not repeats else
-       "PASS_BOUNDED"),
-      f"LEVEL {level} over {docs} dated record(s), hindsight wall {wall}"
-      + (f"; {repeats} repeated passage(s)" if repeats else "")
-      + ("; RAW PYTHON OBJECT ON THE PAGE" if leaked else ""))
+    # A RUN THAT PRODUCED NO REPORT HAS NO HISTORY, AND THAT IS CORRECT.
+    # 6sense's own site answers 401/403 on every path, so the product showed
+    # its bounded failure page instead of a rewind. Failing the history
+    # dimension there would be marking a correct refusal as a defect.
+    if row.get("bounded_page"):
+        d("HISTORY", "PASS_BOUNDED",
+          "no report was produced — the site refused automated access — so "
+          "there is no dated record to rewind, and the page says so instead "
+          "of drawing an empty frame")
+    else:
+        d("HISTORY",
+          "FAIL" if leaked or wall == "ABSENT" else
+          ("PASS" if level in ("A", "B") and not repeats else
+           "PASS_BOUNDED"),
+          f"LEVEL {level} over {docs} dated record(s), hindsight wall "
+          f"{wall}"
+          + (f"; {repeats} repeated passage(s)" if repeats else "")
+          + ("; RAW PYTHON OBJECT ON THE PAGE" if leaked else ""))
 
     # 7 DISCOVERY ----------------------------------------------------------
     state = disc.get("search_state")

@@ -55,6 +55,18 @@ CLASSES = {
 
 
 def classify(finding) -> str:
+    # AN EXPLICIT CLASSIFICATION WINS. A harness defect and a product defect
+    # are different results, and the convergence curve is about the PRODUCT:
+    # counting my own measurement bugs as systemic product findings would
+    # make the curve say something it has no right to say.
+    stated = str(finding.get("classification") or "").strip().upper()
+    if stated == "HARNESS_DEFECT":
+        return "INSTRUMENT_DEFECT"
+    named = str(finding.get("defect_class_stated") or "").strip().upper()
+    if named in CLASSES:
+        return named
+    if stated == "ENVIRONMENT_LIMITATION":
+        return "ENVIRONMENT"
     blob = " ".join(str(finding.get(k, "")) for k in
                     ("title", "root_cause", "evidence")).lower()
     best, score = "UNCLASSIFIED", 0
@@ -68,7 +80,7 @@ def classify(finding) -> str:
 #: A finding whose repair is about ONE company or ONE run rather than a kind
 #: of company. Named explicitly: guessing systemic-vs-local from wording is
 #: how a convergence curve gets manufactured.
-_LOCAL = {"ENVIRONMENT"}
+_LOCAL = {"ENVIRONMENT", "INSTRUMENT_DEFECT"}
 
 
 def main() -> int:

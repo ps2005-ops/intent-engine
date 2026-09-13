@@ -305,6 +305,23 @@ PROOFS = [
         target=f"{A}::test_every_reason_the_producer_can_write_has_english",
         expect_failure_contains="no English for"),
 
+    Proof(
+        label="39. the empty-provenance page prints the raw constant again",
+        path=APP,
+        find="f'{_e(self._plain_state(state) or \"no provenance to show\")}'",
+        replace="f'{_e(state or \"PROVENANCE_UNAVAILABLE\")}'",
+        target=f"{A}::test_the_evidence_page_does_not_print_the_bare_constant",
+        expect_failure_contains="prints the constant instead of words"),
+
+    Proof(
+        label="40. the drawer's own test stops requiring plain words",
+        path=APP,
+        find="f'{_e(self._plain_state(state) or \"no provenance to show\")}'",
+        replace="f'{_e(state or \"PROVENANCE_UNAVAILABLE\")}'",
+        target="tests/test_evidence_drawer.py"
+               "::test_an_absent_projection_is_a_state_not_no_sources",
+        expect_failure_contains="printed at the reader"),
+
     # --- P1-7 the leaked dict ---------------------------------------------
     Proof(
         label="12. the economic condition is rendered with str() again",

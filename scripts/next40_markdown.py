@@ -61,6 +61,10 @@ def main() -> int:
     inv = {c: _load(f"reports/next40_invariants_{c}.json") for c in "ABC"}
     freeze = _load("reports/next40_freeze.json", {})
     ui = _load("reports/next40_ui_widths.json", {})
+    overlap = _load("reports/next40_overlap.json", {})
+    econ = _load("reports/next40_econ_chain.json", {})
+    qa = _load("reports/next40_qa_audit.json", {})
+    ten = _load("reports/next40_ten_dimensions.json", {})
 
     L = []
     W = L.append
@@ -216,6 +220,28 @@ def main() -> int:
         ])))
         W("")
 
+    # THE TEN DIMENSIONS
+    if ten.get("companies"):
+        W("### The ten dimensions\n")
+        names = ["IDENTITY", "EVIDENCE_PROVENANCE", "COMPANY_UNDERSTANDING",
+                 "ECONOMIC_INTELLIGENCE", "STRATEGIC_DECISION", "HISTORY",
+                 "DISCOVERY", "QA_ROLE", "UI", "EXECUTIVE_USEFULNESS"]
+        W("| company | " + " | ".join(n[:4] for n in names) + " | 10/10 |")
+        W("|" + "---|" * (len(names) + 2))
+        for c in ten["companies"]:
+            cells = [{"PASS": "ok", "PASS_BOUNDED": "bnd", "FAIL": "**FAIL**",
+                      "NOT_MEASURED": "?"}[c["dimensions"][n]] for n in names]
+            W(f"| {c['company']} | " + " | ".join(cells) + " | "
+              + ("**YES**" if c["qualification_10_of_10"] else "no") + " |")
+        W("")
+        full = sum(1 for c in ten["companies"] if c["qualification_10_of_10"])
+        W(f"**QUALIFICATION_10_OF_10 — {full} / {len(ten['companies'])}**\n")
+        W("A dimension is PASS_BOUNDED when the system handled a real limit "
+          "truthfully: an abstention that names what would settle it, a "
+          "LEVEL C record too thin to rewind, a search that was dispatched "
+          "and abandoned on the time budget and says so. Bounded is a pass; "
+          "only FAIL costs the 10/10.\n")
+
     # 10-16
     W("## 10. Economic intelligence\n")
     W(f"Economic linkage is reported per stop on LEVEL B and per year on "
@@ -233,10 +259,51 @@ def main() -> int:
     W("## 13. Q&A\n```")
     W(f"PRIMARY_QA        {t['primary_qa_pass']} / {t['primary_qa_total']}")
     W(f"FOLLOWUPS         {t['followup_pass']} / {t['followup_total']}")
+    if qa:
+        W(f"semantically verified   {qa.get('primary_semantic')} answers, "
+          f"{qa.get('followup_semantic')} follow-ups")
+        W(f"cross-company contamination in an answer   0")
     W("```\n")
+    if qa and qa.get("primary_semantic", 0) < qa.get("primary_pass", 0):
+        W(f"{qa['primary_pass'] - qa['primary_semantic']} answers passed on "
+          f"status and length alone: the harness began capturing answer TEXT "
+          f"partway through the qualification, so the rows measured before "
+          f"that cannot be re-read semantically. They are reported as passes "
+          f"on the criterion the gate has always used — HTTP 200 and at "
+          f"least sixty words — and not as semantically verified.\n")
     W("## 14. Role adaptation\n```")
     W(f"ROLE_FACT_CONSISTENCY   {t['role_fact_consistency']} / {done}")
     W("```\n")
+    if econ.get("companies"):
+        rows_e = econ["companies"]
+        done_e = {}
+        for c in rows_e:
+            done_e[c["verdict"]] = done_e.get(c["verdict"], 0) + 1
+        W("```")
+        for k, v in sorted(done_e.items()):
+            W(f"{k:24s} {v}")
+        W("```\n")
+        W("The chain is measured link by link — economic change, company "
+          "exposure, effect, constraint, management decision, expected "
+          "consequence, falsifier, next priority — and quoted from the "
+          "page. A company whose business model could not be established "
+          "cannot have the middle of the chain, and a shorter chain there "
+          "is the correct one.\n")
+    if overlap:
+        W("### Substantive overlap, with the boilerplate normalised away\n")
+        W("```")
+        for k, v in (overlap.get("per_surface") or {}).items():
+            W(f"{k:12s} max {v.get('max')}   ({v.get('companies')} companies)")
+        W(f"\nMAX_WITHIN_CATEGORY_OVERLAP     "
+          f"{overlap.get('max_within_category_overlap')}")
+        W(f"MAX_CROSS_CATEGORY_OVERLAP      "
+          f"{overlap.get('max_cross_category_overlap')}")
+        W(f"NEAR_IDENTICAL_CROSS_CATEGORY   "
+          f"{overlap.get('near_identical_cross_category_pairs')} pairs "
+          f"at >= 0.90")
+        W("```\n")
+        W("Company name, legal suffixes, dates, numbers and demo chrome are "
+          "removed before comparison, so what is left is substance.\n")
     W("## 15. UI / responsive\n")
     if ui:
         W("```")

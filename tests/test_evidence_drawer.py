@@ -164,8 +164,17 @@ def test_an_absent_projection_is_a_state_not_no_sources(app):
            reason="no documents were retrieved for this company")
     status, body = Client(app).get("/demo-dossiers/cloudflare/evidence")
     assert status.startswith("200")
-    assert "PROVENANCE_UNAVAILABLE" in body
+    # THE STATE, IN THE READER'S WORDS. This asserted the raw constant was in
+    # the body, which pinned the implementation rather than the property --
+    # and the constant reached a customer on 6sense's live /evidence, whose
+    # site refuses automated access so no sources exist to attach. The
+    # property is that the page reports the MISSING PROJECTION and does not
+    # turn it into a claim that the company has no sources.
+    assert "PROVENANCE_UNAVAILABLE" not in body, \
+        "the internal constant is printed at the reader"
+    assert "provenance unavailable" in body.lower()
     assert "no documents were retrieved" in body
+    assert "no sources exist" not in body.lower()
 
 
 def test_an_unknown_company_says_which_absence_it_is(app):

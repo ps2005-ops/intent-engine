@@ -191,6 +191,11 @@ def analyse(row, priors) -> dict:
     return {
         "n": row.get("n"), "company": row.get("company"),
         "category": row.get("category"), "outcome": row.get("final_class"),
+        # Carried so every downstream reader can tell a run that produced no
+        # report from one that produced a thin one. Without it, four separate
+        # checks marked a correct refusal as a failure.
+        "bounded_page": bool(row.get("bounded_page")),
+        "live_sha": row.get("live_sha"),
         "failed_gates": row.get("failed_gates") or [],
         "ack_s": row.get("submit_ack_s"), "visible_s":
             row.get("visible_progress_s"), "core_s": row.get("core_s"),
@@ -307,6 +312,39 @@ def _pct(vals, p):
 
 # --- §3 explained similarity vs unexplained collapse ------------------------
 
+_NORM_CHROME = re.compile(
+    r"home · your analyses|guest demo session|leave demo|strategic "
+    r"intelligence|executive x-ray|history rewind|introduction", re.I)
+
+
+def _norm_bag(company):
+    """The substance of a company's X-Ray, with the trivia removed."""
+    p = UI / f"{_slug(company)}-xray.html"
+    if not p.exists():
+        return set()
+    text = " ".join(visible(p.read_text()).split()).lower()
+    text = _NORM_CHROME.sub(" ", text)
+    for part in re.split(r"[^a-z0-9]+", company.lower()):
+        if len(part) > 2:
+            text = text.replace(part, " ")
+    text = re.sub(r"\b(inc|llc|ltd|corp|corporation|nv|lp|plc)\b", " ", text)
+    text = re.sub(r"\d[\d,.%$-]*", " ", text)
+    return {w for w in re.findall(r"[a-z]{4,}", text)}
+
+
+def _identical_pairs(companies, floor=0.98):
+    """Pairs whose readings are the same reading, not merely alike."""
+    bags = {c: _norm_bag(c) for c in companies}
+    bags = {c: b for c, b in bags.items() if len(b) > 40}
+    out = []
+    for a, b in itertools.combinations(sorted(bags), 2):
+        j = len(bags[a] & bags[b]) / max(1, len(bags[a] | bags[b]))
+        if j >= floor:
+            out.append((round(j, 3), a, b))
+    out.sort(reverse=True)
+    return out
+
+
 def classify_similarity(rows, question, companies) -> dict:
     """Why these companies share a question, and whether that is honest.
 
@@ -357,8 +395,33 @@ def classify_similarity(rows, question, companies) -> dict:
                               + (f" on {', '.join(r['evidence_terms'])}"
                                  if r["evidence_terms"] else "")
                               for r in mine))
+    # EXPLAINED IS ABOUT WHY THEY SHARE A QUESTION. IT IS NOT A CLAIM THAT
+    # THE REST OF THE READING DIFFERS.
+    #
+    # MEASURED across the forty, after normalising away company name, legal
+    # suffixes, dates, numbers and demo chrome: several X-Ray pairs score a
+    # Jaccard of 1.000 — Airbyte and Clari, Airbyte and SnapLogic, Dremio and
+    # Recorded Future. Those are not similar pages, they are the same page
+    # with a different name in it. The similarity is honestly EXPLAINED (one
+    # business model, an evidence-poor record, and the page says the class
+    # prior chose the question) and the reading is still not company-specific.
+    #
+    # Reporting only EXPLAINED would let a reader infer differentiation that
+    # is not there, so the identical case is named separately.
+    identical = _identical_pairs(companies)
+    if verdict == "EXPLAINED_SIMILARITY" and identical:
+        verdict = "EXPLAINED_QUESTION_IDENTICAL_READING"
+        reason += (f". But their readings are not merely similar: "
+                   f"{len(identical)} pair(s) score >= 0.98 substantive "
+                   f"overlap after the company name, dates and numbers are "
+                   f"removed — e.g. "
+                   + "; ".join(f"{a} / {b} at {j}"
+                               for j, a, b in identical[:3])
+                   + ". The question is explained; the reading is not "
+                     "company-specific")
     return {"question": question, "companies": list(companies),
             "verdict": verdict, "reason": reason,
+            "identical_pairs": identical,
             "model_classes": sorted(str(c) for c in classes),
             "forces": sorted(forces),
             "shared_evidence_terms": sorted(shared_terms)}
@@ -455,6 +518,11 @@ def main() -> int:
     summary["unexplained_template_collapses"] = sum(
         1 for s in summary["similarities"]
         if s["verdict"] == "UNEXPLAINED_COLLAPSE")
+    summary["explained_but_identical_readings"] = sum(
+        1 for s in summary["similarities"]
+        if s["verdict"] == "EXPLAINED_QUESTION_IDENTICAL_READING")
+    summary["identical_reading_pairs"] = sum(
+        len(s.get("identical_pairs") or ()) for s in summary["similarities"])
     for r in rows:
         r["executive_usefulness"] = executive_usefulness(r)
         r.pop("xray_text", None)

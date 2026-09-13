@@ -241,3 +241,28 @@ def test_the_mapped_english_never_reads_as_a_constant():
         assert said == said.lower() or said[0].isupper() is False, key
         assert "_" not in said, key
         assert said.strip(), key
+
+
+# --- and no constant on the page that has to earn trust --------------------
+
+def test_the_provenance_state_is_rendered_in_words():
+    """MEASURED on 6sense's live /evidence: "State: PROVENANCE_UNAVAILABLE".
+
+    6sense's own site answers 401/403 on every path, so the run produced no
+    report and the evidence page said so — correctly — and then printed the
+    internal constant beside it. One raw enum across forty companies, on the
+    page whose entire job is to make a hostile reader trust the evidence.
+    """
+    said = WebApp._plain_state("PROVENANCE_UNAVAILABLE")
+    assert said
+    assert "_" not in said
+    assert said == said.lower()
+
+
+def test_the_evidence_page_does_not_print_the_bare_constant():
+    import inspect
+
+    src = inspect.getsource(WebApp)
+    assert 'f\'{_e(state or "PROVENANCE_UNAVAILABLE")}</p>\'' not in src, \
+        "the empty-provenance page prints the constant instead of words"
+    assert "_e(self._plain_state(state) or \"no provenance to show\")" in src

@@ -410,8 +410,13 @@ def journey(name, entity_id, *, verbose=True, extra=None) -> dict:
         ok = st == 200 and len(text.split()) >= 60
         answered += bool(ok)
         answers.append(text)
+        # THE ANSWER ITSELF, so "240/240" can be a semantic count rather
+        # than a tally of HTTP 200s. Without the text nothing downstream can
+        # check that an answer is about THIS company, cites THIS run, and is
+        # not a generic paragraph that would fit any subject.
         qa_detail.append({"q": question, "status": st,
-                          "words": len(text.split())})
+                          "words": len(text.split()),
+                          "text": text[:2400]})
         qtoken = _csrf(body) or qtoken
     st, body, _u, _t, _h = _req(
         op, f"/runs/{run_id}/conversation",
@@ -422,7 +427,8 @@ def journey(name, entity_id, *, verbose=True, extra=None) -> dict:
     follow_ok = (st == 200 and len(follow.split()) >= 60 and not replay)
     row["qa"] = {"answered": answered, "of": len(QUESTIONS),
                  "followup": follow_ok, "followup_replay": replay,
-                 "followup_words": len(follow.split()), "detail": qa_detail}
+                 "followup_words": len(follow.split()),
+                 "followup_text": follow[:2400], "detail": qa_detail}
     gate("QA_VALID", answered == len(QUESTIONS),
          f"{answered}/{len(QUESTIONS)} answered")
     gate("FOLLOWUP_CONTEXT", follow_ok,

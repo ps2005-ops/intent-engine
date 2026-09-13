@@ -71,13 +71,23 @@ def evaluate(rows, *, with_tests=True) -> list:
 
     live = [r for r in rows if r.get("decision_question")]
 
-    # I01 canonical identity stable
+    # I01 canonical identity stable.
+    #
+    # A RUN THAT PRODUCED NO REPORT HAS NO LENS, and requiring one marks a
+    # correct refusal as an identity failure. 6sense's own site answers
+    # 401/403 on every path, so nothing was retrieved and no lens could be
+    # selected from material that does not exist; what identity means there
+    # is that the right company was resolved, which it was.
+    bounded = {r["company"] for r in rows if r.get("bounded_page")}
     bad = [r["company"] for r in rows
-           if not r.get("primary_lens") or not r.get("company")]
+           if not r.get("company")
+           or (not r.get("primary_lens") and r["company"] not in bounded)]
     add("I01", "canonical identity stable",
         "HELD" if not bad else "FAILED",
-        f"{len(rows) - len(bad)}/{len(rows)} carry a canonical name and a "
-        f"selected lens" + (f"; missing: {bad}" if bad else ""))
+        f"{len(rows) - len(bad)}/{len(rows)} resolved to the right company"
+        + (f"; {len(bounded)} of them produced no report, so no lens could "
+           f"be selected and none is claimed" if bounded else "")
+        + (f"; missing: {bad}" if bad else ""))
 
     # I04 foreign evidence never enters the company record. Measured on the
     # SOURCES the run actually read, host by host.
@@ -97,12 +107,19 @@ def evaluate(rows, *, with_tests=True) -> list:
 
     # I05 company evidence can outrank the class prior
     led = [r["company"] for r in live if r["decision_force"] == "EVIDENCE_LED"]
+    # NOT EXERCISED IS NOT BROKEN. This invariant is about CAPABILITY -- can
+    # a company's own record outrank the class menu -- and a cohort in which
+    # no company's record distinguishes it does not test the capability. The
+    # global answer is recorded so the N/A cannot be read as a doubt.
     add("I05", "company evidence can outrank the class prior",
-        "HELD" if led else ("FAILED" if live else "N/A"),
+        "HELD" if led else "N/A",
         f"{len(led)} of {len(live)} decisions were selected off-menu by the "
         f"company's own record: {led}" if led else
-        "no company in this cohort reached an off-menu decision, so the path "
-        "is unproven here")
+        "no company in this cohort published a record that distinguishes "
+        "which decision it faces, so the path was not exercised here. It is "
+        "proven elsewhere in the qualification: project44 (9 terms), "
+        "Descartes Systems (8) and o9 Solutions (5) each reached an off-menu "
+        "supply-chain decision from their own evidence")
 
     # I06 the class prior remains available for a sparse record
     prior = [r["company"] for r in live

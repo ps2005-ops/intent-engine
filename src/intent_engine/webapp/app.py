@@ -7952,8 +7952,15 @@ class WebApp:
                 f'data-independent-origins="0">'
                 f'<h2>No sources are attached</h2>'
                 f'<p>{_e(reason)}</p>'
+                # THE STATE IN THE READER'S WORDS, like every other state
+                # on this page. MEASURED on 6sense's live /evidence, whose
+                # own site answers 401/403 on every path: "State:
+                # PROVENANCE_UNAVAILABLE" — the one raw constant left on a
+                # customer surface across forty companies, on the page whose
+                # entire job is to make a hostile reader trust the evidence.
                 f'<p class="none">State: '
-                f'{_e(state or "PROVENANCE_UNAVAILABLE")}</p>'
+                f'{_e(self._plain_state(state) or "no provenance to show")}'
+                f'</p>'
                 + self._discovery_detail(_disc)
                 + f'</section>'), None, ""))
 

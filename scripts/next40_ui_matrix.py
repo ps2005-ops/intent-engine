@@ -79,11 +79,22 @@ def _visible(raw: str) -> str:
     return " ".join(_html.unescape(re.sub(r"<[^>]+>", " ", body)).split())
 
 
+#: What the SOURCE said, not what we said. An evidence excerpt is the
+#: company's own words, and a company is entitled to its own vocabulary:
+#: Dremio's page quotes Apache Polaris privileges named TABLE_READ_DATA and
+#: TABLE_WRITE_DATA, and the enum detector read them as a constant WE had
+#: leaked. Scanning our own prose for our own leakage means excluding the
+#: passages we are quoting — the dict repr this scan exists to catch was in
+#: our sentence, not in a quotation, so nothing it must find is hidden.
+_QUOTED = re.compile(r"<(blockquote|q)\b[^>]*>.*?</\1>", re.S | re.I)
+
+
 def scan_html(raw: str, *, terminal: bool = True) -> dict:
     """Every textual defect §17 names. Returns counts AND the evidence."""
     text = _visible(raw)
-    enums = sorted({m for m in _ENUM.findall(text)})
-    internal = sorted({m.lower() for m in _INTERNAL.findall(text)})
+    ours = _visible(_QUOTED.sub(" ", raw or ""))
+    enums = sorted({m for m in _ENUM.findall(ours)})
+    internal = sorted({m.lower() for m in _INTERNAL.findall(ours)})
     nones = sorted({m for m in _LITERAL_NONE.findall(text)})
     reprs = sorted({m[:60] for m in _PY_REPR.findall(text)})
     # The longest token that cannot be broken: the real overflow risk at 375px.

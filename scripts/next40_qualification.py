@@ -175,8 +175,18 @@ def _retrieval_limitation(row, surfaces) -> bool:
         "we do not invent one" in page)
     row["gates"]["FAILURE_SAYS_WHAT_HAPPENED_TO_EACH_SOURCE"] = (
         "what happened to each source" in page or "what was read" in page)
+    # THE AFFORDANCE, NOT ITS WORDING. This grepped for
+    # "try again|retry|add a source|paste" and 6sense's bounded page offers
+    # a retry the product words as "Look again for the missing evidence" --
+    # so a real, working affordance was reported as absent and cost the run
+    # its terminal classification. What makes it a retry is the form that
+    # posts to /runs/<id>/retry; the sentence on the button is the product's
+    # to choose.
+    raw_pages = (surfaces.get("intro", {}).get("html", "") or "") + \
+        (surfaces.get("result", {}).get("html", "") or "")
     row["gates"]["FAILURE_OFFERS_A_RETRY"] = bool(
-        re.search(r"try again|retry|add a source|paste", page))
+        re.search(r'action="[^"]*/retry"', raw_pages)
+        or re.search(r"try again|retry|add a source|paste|look again", page))
     # The gates a run with no report cannot satisfy, neutralised WITH A REASON
     # recorded beside each one so this can never read as a silent pass.
     row["neutralised_gates"] = {}
