@@ -1,0 +1,154 @@
+{
+  "company": "The Coca-Cola Company",
+  "deployed_sha": "dc17a9d",
+  "captured_at": "2026-08-21T14:29:26Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JBM2V8TWVRR4BWH28WQY1Z",
+      "chars": 6356,
+      "html_chars": 33092,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JBM2V8TWVRR4BWH28WQY1Z/intro",
+      "chars": 4980,
+      "html_chars": 30515,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JBM2V8TWVRR4BWH28WQY1Z/slides",
+      "chars": 5847,
+      "html_chars": 52237,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JBM2V8TWVRR4BWH28WQY1Z/full",
+      "chars": 6356,
+      "html_chars": 33092,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JBM2V8TWVRR4BWH28WQY1Z/story",
+      "chars": 4296,
+      "html_chars": 33820,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JBM2V8TWVRR4BWH28WQY1Z/history",
+      "chars": 5868,
+      "html_chars": 35918,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JBM2V8TWVRR4BWH28WQY1Z/connect",
+      "chars": 3870,
+      "html_chars": 28751,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JBM2V8TWVRR4BWH28WQY1Z",
+      "chars": 6356,
+      "html_chars": 33092,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JBM2V8TWVRR4BWH28WQY1Z/evidence",
+      "chars": 5199,
+      "html_chars": 22241,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JBM2V8TWVRR4BWH28WQY1Z/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JBM2V8TWVRR4BWH28WQY1Z/brief",
+      "chars": 16690,
+      "html_chars": 52178,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing The Coca-Cola Company KO \u00b7 coca-colacompany.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company",
+      "status": 200,
+      "html_bytes": 17026
+    },
+    {
+      "t": 27.1,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing The Coca-Cola Company KO \u00b7 coca-colacompany.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current compan",
+      "status": 200,
+      "html_bytes": 17022
+    },
+    {
+      "t": 79.3,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17022,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JBM2V8TWVRR4BWH28WQY1Z/progress",
+      "head": ""
+    },
+    {
+      "t": 141.6,
+      "text": "The Coca-Cola Company \u2014 the decision Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo The Coca-Cola Company Explore The Coca-Cola Company's full beverage portfolio, from sparkling drinks to juices, coffee, and hydration and more. The answer Across the public record for The Coca-Cola Company, the",
+      "status": 200,
+      "html_bytes": 33155
+    }
+  ],
+  "process_before": {
+    "boot_id": "9890b2f49d944a8a",
+    "started_at": 1787319148.8228748,
+    "uptime_seconds": 3417.8
+  },
+  "run_id": "01M0JBM2V8TWVRR4BWH28WQY1Z",
+  "status": "READY",
+  "seconds": 142,
+  "first_useful": 142,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 2.41,
+    "intro": 9.4,
+    "slides": 7.19,
+    "full": 2.43,
+    "story": 5.94,
+    "history": 0.19,
+    "connect": 4.43
+  },
+  "evidence_gate": "compose=7 usable=7 families=customers|identity|investor|product|strategy|talent stored=7 attempt=2 dropped=0/0/0/0",
+  "outcome": "FULL_ANALYSIS",
+  "outcome_by_route": {
+    "run": "FULL_ANALYSIS",
+    "intro": "FULL_ANALYSIS",
+    "slides": "FULL_ANALYSIS",
+    "full": "FULL_ANALYSIS",
+    "story": "FULL_ANALYSIS",
+    "history": "FULL_ANALYSIS",
+    "connect": "FULL_ANALYSIS"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": [
+    "GET /runs/01M0JBM2V8TWVRR4BWH28WQY1Z/progress: timeout",
+    "GET /runs/01M0JBM2V8TWVRR4BWH28WQY1Z/progress: timeout"
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "company": "Meta Platforms, Inc.",
+  "deployed_sha": "b0050e3",
+  "run_id": "01M0J2REJPX54FJBBE85B22A5K",
+  "analysis_seconds": 335,
+  "stage_transitions": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Meta Platforms, Inc. META \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Conn",
+      "status": 200,
+      "html_bytes": 17003
+    },
+    {
+      "t": 25.8,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Meta Platforms, Inc. META \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Connec",
+      "status": 200,
+      "html_bytes": 16999
+    },
+    {
+      "t": 77.2,
+      "text": "",
+      "status": 0,
+      "html_bytes": 16999,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J2REJPX54FJBBE85B22A5K/progress",
+      "head": ""
+    },
+    {
+      "t": 334.8,
+      "text": "Meta Platforms, Inc. \u2014 the decision Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. Meta Platforms, Inc. sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. The answer Across the publ",
+      "status": 200,
+      "html_bytes": 33138
+    }
+  ],
+  "route_seconds": {
+    "run": 11.86,
+    "intro": 15.61,
+    "slides": 15.65,
+    "full": 2.45,
+    "story": 7.59,
+    "history": 0.27,
+    "connect": 5.83
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "4dfba762a3d64a55",
+    "started_at": 1787313249.7337387,
+    "uptime_seconds": 19.8
+  },
+  "process_after": {
+    "boot_id": "4dfba762a3d64a55",
+    "started_at": 1787313249.7337387,
+    "uptime_seconds": 573.4
+  },
+  "errors": [
+    "GET /runs/01M0J2REJPX54FJBBE85B22A5K/progress: timeout",
+    "GET /runs/01M0J2REJPX54FJBBE85B22A5K/progress: timeout",
+    "GET /runs/01M0J2REJPX54FJBBE85B22A5K/progress: timeout",
+    "GET /runs/01M0J2REJPX54FJBBE85B22A5K/progress: timeout",
+    "GET /runs/01M0J2REJPX54FJBBE85B22A5K/progress: timeout"
+  ]
+}

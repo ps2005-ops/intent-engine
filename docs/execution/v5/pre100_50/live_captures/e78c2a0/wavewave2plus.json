@@ -1,0 +1,36 @@
+[
+  {
+    "company": "Meta Platforms, Inc.",
+    "deployed_sha": "e78c2a0",
+    "status": "FAILED",
+    "run_id": "01M0J16W0QCQE9DMMVYTJYJV4T",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/e78c2a0/meta_platforms_inc",
+    "process_before": {
+      "boot_id": "b511e8cc18ab4e22",
+      "started_at": 1787311623.6873696,
+      "uptime_seconds": 21.7
+    },
+    "entry_domain": "",
+    "seconds": 349,
+    "first_useful": null,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J16W0QCQE9DMMVYTJYJV4T/progress"
+  },
+  {
+    "company": "Adobe Inc.",
+    "deployed_sha": "e78c2a0",
+    "status": "FAILED",
+    "run_id": "01M0J1JH5C2ZFK3KKQH6PT4CMV",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/e78c2a0/adobe_inc",
+    "process_before": {
+      "boot_id": "b511e8cc18ab4e22",
+      "started_at": 1787311623.6873696,
+      "uptime_seconds": 397.0
+    },
+    "entry_domain": "adobe.com",
+    "seconds": 465,
+    "first_useful": null,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J1JH5C2ZFK3KKQH6PT4CMV/progress"
+  }
+]

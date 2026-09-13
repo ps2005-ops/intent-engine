@@ -1,0 +1,18 @@
+{
+ "contract": "v3_performance.v1",
+ "as_of": "2026-08-08",
+ "stages_ms": {
+  "falsifier propose+validate": 0.0042,
+  "falsifier research question": 0.0002,
+  "response watch open": 0.0024,
+  "research priority + routing": 0.0039,
+  "dependency extract (filing-sized)": 0.1084,
+  "evidence trust assess": 0.0018,
+  "bottleneck detect (22 stages)": 0.0075,
+  "retention audit": 0.0037,
+  "relationship reload from disk": 0.0636
+ },
+ "total_ms": 0.1957,
+ "largest_new_cost": "dependency extraction over filing-sized text",
+ "note": "every closure-run addition is in-memory work on already-retrieved text. The one cost that scales with history is relationships() re-reading the ledger, recorded in wave 11 and unchanged; a store with thousands of edges would want the fold cached."
+}

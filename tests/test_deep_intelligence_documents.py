@@ -40,12 +40,14 @@ from intent_engine.strategic_intelligence.decision import (
 from tests.test_scrollable_narrative import _brief, _narrative, _report
 
 
-def _dossier(report=None, company="Shopify", decision=None, market=None):
+def _dossier(report=None, company="Shopify", decision=None, market=None,
+             modeled_market=None):
     report = report if report is not None else _report(company)
     decision = decision or decision_of(report)
     story = _narrative(report, company, decision)
     return D.build_dossier(company=company, report=report, decision=decision,
-                           narrative=story, market=market)
+                           narrative=story, market=market,
+                           modeled_market=modeled_market)
 
 
 def _text(markup: str) -> str:
@@ -73,7 +75,8 @@ def _served(tmp_path):
     from tests.test_strategic_intelligence import _strategic_webapp_run
     app, client, run_id = _strategic_webapp_run(tmp_path)
     out = {}
-    for label, path in (("narrative", ""), ("brief", "/brief"),
+    for label, path in (("narrative", "/answer"),
+                        ("brief", "/brief"),
                         ("full", "/full")):
         _, _, body = client.request("GET", f"/runs/{run_id}{path}")
         out[label] = body
@@ -142,7 +145,9 @@ def test_no_deep_surface_reaches_its_own_conclusion(tmp_path):
     app, client, run_id = _strategic_webapp_run(tmp_path)
     report = app._real_result(run_id)["strategic_report"]
     decision = decision_of(report)
-    for path in ("", "/brief", "/full"):
+    # "" IS NO LONGER A PAGE: the default route redirects into step 1 of the
+    # six-step story. The surfaces under test are the same three documents.
+    for path in ("/intro", "/brief", "/full"):
         _, _, body = client.request("GET", f"/runs/{run_id}{path}")
         text = _text(body)
         withholding = "cleared the evidence bar" in text or \
@@ -160,7 +165,9 @@ def test_the_recommendation_is_the_same_on_every_surface(tmp_path):
     if not decision.recommended_next_move:
         pytest.skip("this run recommends no move")
     stem = decision.recommended_next_move[:40]
-    for path in ("", "/brief", "/full"):
+    # "" IS NO LONGER A PAGE: the default route redirects into step 1 of the
+    # six-step story. The surfaces under test are the same three documents.
+    for path in ("/intro", "/brief", "/full"):
         _, _, body = client.request("GET", f"/runs/{run_id}{path}")
         assert stem in _text(body), path
 
@@ -212,6 +219,19 @@ def test_the_brief_does_not_restate_the_narrative(tmp_path):
     # the answer -- that is what makes the memo readable on its own.
     below = dossier_body.split('id="operating_model"')[-1]
     below = below.split('<nav class="deeper"')[0]
+    # NAVIGATION IS CHROME, NOT ANALYSIS. The secondary nav is deliberately
+    # identical on every surface that carries it -- that is what makes it
+    # navigable -- so comparing it against itself proves nothing and fails
+    # for the one reason this test does not care about.
+    below = re.sub(r"(?s)<nav\b.*?</nav>", " ", below)
+    # THE FOLLOW-UP BOX IS A CONTROL, NOT ANALYSIS -- the same reasoning as
+    # the nav above. It is mounted from ONE declaration onto every report
+    # surface precisely so a reader who has learned it in one place has
+    # learned it everywhere, which means its suggested questions are
+    # identical by construction. Comparing that against itself fails for the
+    # one reason this test does not care about: the question "What should I
+    # do next?" is not a restatement of the narrative's argument.
+    below = re.sub(r'(?s)<section class="ui-controls".*?</section>', " ", below)
     # The approval notice is a CONSENT notice, not analysis. It belongs
     # wherever artefacts are offered, on every surface that offers them.
     echoed = [ln for ln in _text(below).splitlines()
@@ -246,10 +266,41 @@ def test_every_missing_evidence_family_states_what_it_costs(tmp_path):
 
 
 def test_missing_market_data_is_a_limitation_not_a_zero():
+    """MIGRATED BY INTENT, NOT BY WORDING.
+
+    This asserted the exact sentence "No market snapshot has been
+    published..." — which was the dead end §14 removed. The INTENT of the
+    test is that an absent market series must be reported as a limitation
+    and must never become a number, and that intent is unchanged and is what
+    is asserted now. Pinning the old sentence would have made the test a
+    guard against the repair.
+    """
     book = _dossier(market=None)
     text = _text(_rendered(book, D.BRIEF))
-    assert "No market snapshot has been published" in text
+    assert "No published price or estimate series was retrieved" in text
+    assert "What would resolve it" in text
     assert "0%" not in text and "$0" not in text
+
+
+def test_a_modelled_expectation_replaces_the_absence_and_says_it_is_modelled():
+    """§15. The next rung, and its label.
+
+    Two assertions, and the second matters more than the first: a modelled
+    figure that reaches a reader without the word MODELLED beside it is
+    indistinguishable from a retrieved one, and that is the failure the whole
+    resolution ladder exists to prevent.
+    """
+    from intent_engine.executive import resolution as R
+    modeled = R.modeled(
+        "What does the record imply?",
+        "The bar its next years have to clear is about 20% a year.",
+        derivation="7 filed financial years through 2025")
+    book = _dossier(market=None, modeled_market=modeled)
+    text = _text(_rendered(book, D.BRIEF))
+    assert "MODELLED MARKET EXPECTATION" in text
+    assert "not a retrieved analyst consensus" in text or \
+        "20% a year" in text
+    assert "consensus estimate" not in text.lower()
 
 
 def test_an_unavailable_market_snapshot_never_becomes_a_number():
@@ -284,8 +335,15 @@ def test_competitor_absence_explains_what_it_costs_the_decision():
                                 if o.get("source_class") == "company_owned"])
     book = _dossier(report=report)
     text = _text(_rendered(book, D.BRIEF))
-    assert "No competitor's own account was retrieved" in text
-    assert "the risk the evidence cannot price" in text
+    # WHAT IT COSTS THE DECISION IS STILL SAID -- and it is now said as what
+    # is MISSING from the read rather than as what the fetcher did. §13
+    # forbids "No competitor's own account was retrieved for this run" on a
+    # primary surface: it answers a question about retrieval in the section a
+    # reader opened to learn about their market.
+    assert "no rival's own account to check it against" in text
+    assert "the risk this evidence cannot price" in text
+    assert "What would improve it" in text
+    assert "was retrieved for this run" not in text
 
 
 # --- 5. the machinery never reaches the reader --------------------------------
@@ -311,7 +369,15 @@ def test_no_internal_vocabulary_or_taxonomy_in_either_document(tmp_path):
                 assert source_class not in low, (label, source_class)
         for state in (DECISION_READY, INVESTIGATION_REQUIRED, WITHHELD):
             assert state not in text, (label, state)
-        assert "→" not in text, label
+        # AN ARROW IS INTERNAL NOTATION IN PROSE AND AN AFFORDANCE IN A
+        # CONTROL. This forbids "observation → hypothesis → decision" reaching
+        # a reader, which is right; it must not forbid the "Next →" button,
+        # which is the only way through the six-step story. So the navigation
+        # is excluded and the document text is checked exactly as before.
+        prose = re.sub(r"(?s)<nav\b.*?</nav>", " ", body)
+        prose = re.sub(r"Next →|← Back|← Leave|← Previous|Next ⟶", " ",
+                       _text(prose))
+        assert "→" not in prose, label
         assert not re.search(r"qualifying signal", low), label
 
 
@@ -418,8 +484,9 @@ def test_break_a_gap_names_a_family_the_run_actually_retrieved():
     from intent_engine.strategic_intelligence.shopify_fixture import (
         shopify_observations,
     )
-    report = build_strategic_report(company_name="Shopify",
-                                    observations=shopify_observations())
+    report = build_strategic_report(
+        company_name="Shopify", observations=shopify_observations(),
+        business_model="SUBSCRIPTION_SOFTWARE")
     retrieved = {o.source_class for o in report.observations}
     for gap in report.evidence_gaps:
         if "has corroborated this yet" not in gap:

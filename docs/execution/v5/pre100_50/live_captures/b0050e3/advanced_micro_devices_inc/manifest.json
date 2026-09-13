@@ -1,0 +1,138 @@
+{
+  "company": "Advanced Micro Devices, Inc.",
+  "deployed_sha": "b0050e3",
+  "captured_at": "2026-08-21T12:14:42Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3XCRHPYMQNY80AVYD69ZV",
+      "chars": 2201,
+      "html_chars": 18046,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3XCRHPYMQNY80AVYD69ZV/intro",
+      "chars": 4526,
+      "html_chars": 29778,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3XCRHPYMQNY80AVYD69ZV",
+      "chars": 2201,
+      "html_chars": 18046,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3XCRHPYMQNY80AVYD69ZV/full",
+      "chars": 2201,
+      "html_chars": 18046,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3XCRHPYMQNY80AVYD69ZV/story",
+      "chars": 5090,
+      "html_chars": 34743,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3XCRHPYMQNY80AVYD69ZV/history",
+      "chars": 28167,
+      "html_chars": 104555,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3XCRHPYMQNY80AVYD69ZV/connect",
+      "chars": 3877,
+      "html_chars": 28788,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3XCRHPYMQNY80AVYD69ZV",
+      "chars": 2201,
+      "html_chars": 18046,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3XCRHPYMQNY80AVYD69ZV/evidence",
+      "chars": 3314,
+      "html_chars": 19116,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3XCRHPYMQNY80AVYD69ZV/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3XCRHPYMQNY80AVYD69ZV/brief",
+      "chars": 15198,
+      "html_chars": 47665,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Advanced Micro Devices, Inc. AMD \u00b7 amd.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evid",
+      "status": 200,
+      "html_bytes": 17021
+    },
+    {
+      "t": 51.6,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Advanced Micro Devices, Inc. AMD \u00b7 amd.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evi",
+      "status": 200,
+      "html_bytes": 17017
+    },
+    {
+      "t": 87.7,
+      "text": "Limited analysis of Advanced Micro Devices, Inc. Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of Advanced Micro Devices, Inc. There is not enough public evidence to build a briefing on this company. Rather than show a briefing that looks complete and is not, here is exactly ",
+      "status": 200,
+      "html_bytes": 18084
+    }
+  ],
+  "process_before": {
+    "boot_id": "a66b8bb687154bfa",
+    "started_at": 1787314134.5251167,
+    "uptime_seconds": 348.2
+  },
+  "run_id": "01M0J3XCRHPYMQNY80AVYD69ZV",
+  "status": "READY",
+  "seconds": 88,
+  "first_useful": 88,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 3.23,
+    "intro": 11.37,
+    "slides": 3.5,
+    "full": 3.4,
+    "story": 7.01,
+    "history": 0.24,
+    "connect": 4.85
+  },
+  "evidence_gate": "compose=3 usable=3 families=investor stored=3 attempt=3",
+  "outcome": "TRUE_EVIDENCE_SCARCITY",
+  "outcome_by_route": {
+    "run": "TRUE_EVIDENCE_SCARCITY",
+    "intro": "TRUE_EVIDENCE_SCARCITY",
+    "slides": "TRUE_EVIDENCE_SCARCITY",
+    "full": "TRUE_EVIDENCE_SCARCITY",
+    "story": "TRUE_EVIDENCE_SCARCITY",
+    "history": "TRUE_EVIDENCE_SCARCITY",
+    "connect": "TRUE_EVIDENCE_SCARCITY"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": []
+}

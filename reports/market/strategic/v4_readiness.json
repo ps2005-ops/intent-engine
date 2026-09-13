@@ -1,0 +1,215 @@
+{
+ "contract": "v4_readiness.v1",
+ "as_of": "2026-08-08",
+ "scorecard": {
+  "contract": "v4_readiness.v1",
+  "axes": 20,
+  "missing_axes": [],
+  "axes_without_a_measured_reason": [],
+  "by_status": {
+   "PASS": 3,
+   "PARTIAL": 10,
+   "BLOCKED_DATA": 1,
+   "UNMEASURABLE": 1,
+   "NO": 5
+  },
+  "blocking": [
+   "DEMAND_CHAIN",
+   "SECOND_ORDER_EFFECTS",
+   "SCENARIOS",
+   "INTERNAL_COMPANY_MODEL",
+   "FOUNDER_CONSUMPTION"
+  ],
+  "executable_remaining": [
+   "MACRO_STATE",
+   "COMPANY_EXPOSURE",
+   "CAUSAL_TRANSMISSION",
+   "MULTI_HOP_REASONING",
+   "DEMAND_CHAIN",
+   "EXPECTATIONS",
+   "REGIME_AWARENESS",
+   "SECOND_ORDER_EFFECTS",
+   "COUNTERFACTUALS",
+   "SCENARIOS",
+   "INTERNAL_COMPANY_MODEL",
+   "ACTIVE_RESEARCH",
+   "CALIBRATION",
+   "FOUNDER_CONSUMPTION",
+   "META_LEARNING"
+  ],
+  "detail": [
+   {
+    "axis": "MACRO_STATE",
+    "status": "PARTIAL",
+    "reason": "canonical contract built, ingested live and PERSISTED: 24 monthly observations in the ledger, MARKET_RATE OBSERVED and moving UP; 16 of 17 conditions remain UNKNOWN because one keyless publisher covers one condition",
+    "evidence": {
+     "conditions": 17,
+     "observed": 1,
+     "unknown": 16,
+     "ledger_rows": 24,
+     "blocked_by": "keyless source coverage; FRED needs an owner key"
+    }
+   },
+   {
+    "axis": "TEMPORAL_TRUTH",
+    "status": "PASS",
+    "reason": "reference period, publication and retrieval kept separate and enforced by the constructor; revisions APPEND with supersedes; as_known_at proven live \u2014 as of today the state reads June, not July, because July's release has not happened",
+    "evidence": {
+     "proofs": 12,
+     "publication_basis": "PUBLISHER|ASSUMED_LAG, erring late"
+    }
+   },
+   {
+    "axis": "COMPANY_EXPOSURE",
+    "status": "PARTIAL",
+    "reason": "26 companies profiled across 10 dimensions; 3 rated (1 OBSERVED from a filing, 2 INFERRED from reporting), 257 UNKNOWN \u2014 the honest reading of a press-release corpus. Sector inference raises rather than populating it",
+    "evidence": {
+     "companies": 26,
+     "rated": 3,
+     "unknown": 257,
+     "blocked_by": "corpus is headlines, not risk-factor sections"
+    }
+   },
+   {
+    "axis": "CAUSAL_TRANSMISSION",
+    "status": "PARTIAL",
+    "reason": "2 dated falsifiable hypotheses proposed from live evidence with provenance to both the series and the company's own words; all HYPOTHESIZED, 0 tested, because no preregistered outcome is due until 2027-05-05",
+    "evidence": {
+     "hypotheses": 2,
+     "tested": 0,
+     "every_one_falsifiable": true
+    }
+   },
+   {
+    "axis": "MULTI_HOP_REASONING",
+    "status": "PARTIAL",
+    "reason": "the economic chain runs 7 nodes with weakest-link standing and names its own weakest link (MARGIN->GUIDANCE, 'no evidence for MARGIN'); anchoring the top moved known nodes 4->5 and correctly did NOT promote any link",
+    "evidence": {
+     "known_nodes": 5,
+     "unknown_nodes": 2,
+     "links": {
+      "UNKNOWN": 4,
+      "HYPOTHESIZED": 2
+     }
+    }
+   },
+   {
+    "axis": "SUPPLY_CHAIN",
+    "status": "BLOCKED_DATA",
+    "reason": "SUPPLIES/DEPENDS_ON measured and returning 0: no document in the corpus names a counterparty, which is an outcome rather than a missing capability",
+    "evidence": {
+     "carried_from": "V3",
+     "found": 0
+    }
+   },
+   {
+    "axis": "DEMAND_CHAIN",
+    "status": "NO",
+    "reason": "not built this session",
+    "evidence": {}
+   },
+   {
+    "axis": "EXPECTATIONS",
+    "status": "PARTIAL",
+    "reason": "V3 preregistration/reconciliation is durable and running; the LEVEL/CHANGE distinction exists in macro_state, but market/analyst expectation baselines and SURPRISE are not modelled",
+    "evidence": {
+     "level_change": true,
+     "surprise": false
+    }
+   },
+   {
+    "axis": "REGIME_AWARENESS",
+    "status": "PARTIAL",
+    "reason": "the precondition was closed \u2014 macro history is now persisted, so a regime change is observable in principle for the first time; no detector reads that history yet",
+    "evidence": {
+     "history_rows": 24,
+     "detector": false
+    }
+   },
+   {
+    "axis": "SECOND_ORDER_EFFECTS",
+    "status": "NO",
+    "reason": "not built this session",
+    "evidence": {}
+   },
+   {
+    "axis": "COUNTERFACTUALS",
+    "status": "PARTIAL",
+    "reason": "V3 counterfactual memory runs every cycle and is now persisted in the report for the first time; not extended into scenario reasoning",
+    "evidence": {
+     "carried_from": "V3"
+    }
+   },
+   {
+    "axis": "SCENARIOS",
+    "status": "NO",
+    "reason": "not built this session",
+    "evidence": {}
+   },
+   {
+    "axis": "INTERNAL_COMPANY_MODEL",
+    "status": "NO",
+    "reason": "not built this session",
+    "evidence": {}
+   },
+   {
+    "axis": "ACTIVE_RESEARCH",
+    "status": "PARTIAL",
+    "reason": "V3 VOI and research priorities run and are now persisted; not yet extended to discriminate between competing causal explanations",
+    "evidence": {
+     "carried_from": "V3"
+    }
+   },
+   {
+    "axis": "CALIBRATION",
+    "status": "PARTIAL",
+    "reason": "belief and expectation calibration resolve at 0.667 over an effective sample of 9; transmission calibration is UNMEASURABLE because nothing is due yet",
+    "evidence": {
+     "belief": 0.667,
+     "transmission_tested": 0
+    }
+   },
+   {
+    "axis": "ECONOMIC_MEMORY",
+    "status": "PASS",
+    "reason": "macro observations are a durable record kind, idempotent on a content id, revisions kept alongside originals; 24 rows survive a fresh process",
+    "evidence": {
+     "record_kind": "macro_observation",
+     "rows": 24
+    }
+   },
+   {
+    "axis": "FOUNDER_CONSUMPTION",
+    "status": "NO",
+    "reason": "no V4 economic object crosses the dossier bridge yet; the founder side consumes V3 trust only",
+    "evidence": {}
+   },
+   {
+    "axis": "FOUNDER_DECISION_VALUE",
+    "status": "UNMEASURABLE",
+    "reason": "unmeasurable by construction until FOUNDER_CONSUMPTION exists; measuring it now would be measuring nothing",
+    "evidence": {}
+   },
+   {
+    "axis": "META_LEARNING",
+    "status": "PARTIAL",
+    "reason": "THE BIG OBSERVABILITY REPAIR: the entire causal layer \u2014 chain, calibration, counterfactual memory, world model, VOI, maturity \u2014 was computed every cycle and dropped from the persisted report, so none of it had a history. Now persisted as a bounded projection; the learning channels do not yet separate V4 economic gain from V3",
+    "evidence": {
+     "persisted": true,
+     "channels_split": false
+    }
+   },
+   {
+    "axis": "PRODUCT_RELIABILITY",
+    "status": "PASS",
+    "reason": "market suite 4618 passed / 14 skipped / EXIT=0 with V4 wired into the live cycle; two production-equivalent cycles ran green end to end and PAPER stayed enforced",
+    "evidence": {
+     "suite": 4618,
+     "cycles": 2,
+     "paper": true
+    }
+   }
+  ],
+  "note": "statuses are counted, not averaged. V4 asks whether an axis is POPULATED and CONSUMED, not whether a contract for it exists."
+ }
+}

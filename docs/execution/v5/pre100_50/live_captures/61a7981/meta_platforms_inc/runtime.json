@@ -1,0 +1,60 @@
+{
+  "company": "Meta Platforms, Inc.",
+  "deployed_sha": "61a7981",
+  "run_id": "01M0K68MZS4QQB1440H71HYRYJ",
+  "analysis_seconds": 344,
+  "stage_transitions": [
+    {
+      "t": 3.4,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Meta Platforms, Inc. META \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Conn",
+      "status": 200,
+      "html_bytes": 17003
+    },
+    {
+      "t": 76.4,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17004,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "cf-cache-status": "DYNAMIC",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K68MZS4QQB1440H71HYRYJ/progress",
+      "head": ""
+    },
+    {
+      "t": 344.2,
+      "text": "Meta Platforms, Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Meta Platforms, Inc. META \u00b7 SEC CIK 1326801 Meta Platforms, Inc. is a software platform business that runs on attention resold to advertisers: revenue is an auction price per impression, so nothing ",
+      "status": 200,
+      "html_bytes": 31600
+    }
+  ],
+  "route_seconds": {
+    "run": 36.21,
+    "intro": 29.52,
+    "slides": 40.88,
+    "full": 86.71,
+    "story": 38.49,
+    "history": 4.02,
+    "connect": 20.96
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "193067c66f6744a2",
+    "started_at": 1787350461.0625536,
+    "uptime_seconds": 40.4
+  },
+  "process_after": {
+    "boot_id": "193067c66f6744a2",
+    "started_at": 1787350461.0625536,
+    "uptime_seconds": 1172.1
+  },
+  "errors": [
+    "GET /runs/01M0K68MZS4QQB1440H71HYRYJ/progress: timeout",
+    "GET /runs/01M0K68MZS4QQB1440H71HYRYJ/progress: timeout",
+    "GET /runs/01M0K68MZS4QQB1440H71HYRYJ/progress: timeout",
+    "GET /runs/01M0K68MZS4QQB1440H71HYRYJ/progress: timeout",
+    "GET /runs/01M0K68MZS4QQB1440H71HYRYJ/progress: timeout"
+  ]
+}

@@ -1,0 +1,268 @@
+{
+  "base": "https://intent-engine-preview-bridge.onrender.com",
+  "live_commit": "807a414361b0fbc1999b4595e875c67e2a20524a",
+  "rows": [
+    {
+      "company": "Monte Carlo Data",
+      "domain": "https://www.montecarlodata.com",
+      "result": "PRODUCT_DEFECT",
+      "defects": [
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "why-this-company missing from /intro"
+        },
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "lens block missing from /intro"
+        },
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "role switch missing from /intro"
+        },
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "value block missing from /intro"
+        },
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "a bounded run rendered no potential decision domains"
+        },
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "potential domains are not labelled 'not current recommendations'"
+        },
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "a bounded run rendered no investigation chain"
+        },
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "a bounded run does not say what it cannot conclude"
+        },
+        {
+          "kind": "EXPECTED_ABSTENTION",
+          "detail": "no lens selected: No strategic lens was selected. This company's published material does not say clearly enough what decision it serves -- the strongest reading, Enterprise Data & AI Strategy, scored 0.0 against the 4 "
+        },
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "CEO and Strategy render identically"
+        }
+      ],
+      "instrument_notes": [],
+      "run_id": "01M2731PQNR3X3D3FTQJX0738B",
+      "core_s": 6.3,
+      "telemetry": {
+        "contract": "adaptive_intelligence.v1",
+        "company": "Monte Carlo Data",
+        "company_profile_status": "PROFILE_SPARSE",
+        "company_profile_source": "NONE",
+        "business_model_source": "NOT_ESTABLISHED",
+        "business_model_source_words": "not enough evidence to classify confidently",
+        "business_model_alternatives": [],
+        "profile_available": false,
+        "lens_available": false,
+        "decision_reading_available": false,
+        "decision_map_state": "NOTHING",
+        "causal_chain_kind": "NO_CHAIN",
+        "potential_domains": [],
+        "evidence_limitation": "what kind of business this is was not established",
+        "what_would_unlock_a_decision": "one page or filing stating what this company sells and how it is paid",
+        "business_model": "UNKNOWN",
+        "business_model_confidence": "none",
+        "business_model_evidence": "",
+        "business_model_reason": "no subject-owned text was retrieved, so this company's own account of how it is paid could not be read",
+        "customer_job": "",
+        "customer_job_provenance": "NOT_ESTABLISHED",
+        "strategic_assets": [],
+        "critical_dependencies": [],
+        "company_specificity_score": 0.059,
+        "company_specific_fields": [
+          "identity"
+        ],
+        "decision_opportunity_count": 0,
+        "decision_opportunities_considered": 0,
+        "decision_opportunities_withheld": [],
+        "top_decision_domain": "",
+        "top_decision_owner": "",
+        "top_decision_priority": 0.0,
+        "top_decision_components": {},
+        "primary_lens": "",
+        "primary_lens_name": "",
+        "lens_confidence": "none",
+        "secondary_lenses": [],
+        "lens_selection_reasons": "No strategic lens was selected. This company's published material does not say clearly enough what decision it serves -- the strongest reading, Enterprise Data & AI Strategy, scored 0.0 against the 4 needed. The reading below is therefore the general one, and it is labelled as such rather than dressed as a company-specific finding.",
+        "lens_refusals": [],
+        "causal_chain_nodes": 0,
+        "causal_chain_evidence_coverage": 0.0,
+        "causal_chain_stopped_because": "neither a mechanism nor a lens was established",
+        "genericity_flags": 1,
+        "differentiation_carried_by": [],
+        "differentiation_flagged": true,
+        "differentiation_flag_reason": "Nothing company-specific was established, so there is no difference to state. What is above is the general reading and it is labelled as one -- writing it again in this company's name would be the template this section exists to detect.",
+        "counterevidence_present": false,
+        "information_priority": "",
+        "abstention_reason": "No decision reading and no decision domains. This company's own published material did not say clearly enough what it is for, so there is no basis even for saying which decisions would matter.",
+        "role_lens": "ceo",
+        "role_module_order": [
+          "strategic_thesis",
+          "why_this_is_different",
+          "decision_opportunity_map",
+          "what_would_change_our_mind",
+          "evidence",
+          "provenance",
+          "strategic_lens",
+          "information_priority",
+          "learning_state",
+          "ask_intent_engine"
+        ],
+        "role_promoted": [
+          "decision_opportunity_map",
+          "what_would_change_our_mind",
+          "evidence",
+          "provenance"
+        ],
+        "composition_modules": [
+          "strategic_thesis",
+          "why_this_is_different",
+          "strategic_lens",
+          "decision_opportunity_map",
+          "information_priority",
+          "what_would_change_our_mind",
+          "learning_state",
+          "evidence",
+          "provenance",
+          "ask_intent_engine"
+        ],
+        "composition_excluded": [
+          "executive_change",
+          "causal_chain",
+          "decision_delta",
+          "economic_exposure",
+          "market_belief",
+          "customer_signals",
+          "competitive_response",
+          "supply_chain_exposure",
+          "financial_sensitivity",
+          "data_ai_exposure",
+          "regulatory_exposure",
+          "client_portfolio",
+          "operational_intelligence",
+          "contradictions",
+          "alternative_interpretation",
+          "scenario_comparison"
+        ],
+        "composition_explained": 1,
+        "reasoning_provenance": "business model UNKNOWN from none; executive priorities the levers a business of this kind has, since the evidence raised no decision of its own",
+        "errors": [],
+        "run_id": "01M2731PQNR3X3D3FTQJX0738B"
+      },
+      "resolved_identity": "Monte Carlo Data",
+      "business_model": "UNKNOWN",
+      "profile_source": "NONE",
+      "specificity": 0.059,
+      "primary_lens": "",
+      "secondary_lenses": [],
+      "lens_confidence": "none",
+      "decision_opportunity_count": 0,
+      "top_decision_domain": "",
+      "top_decision_priority": 0.0,
+      "causal_chain_nodes": 0,
+      "causal_evidence_coverage": 0.0,
+      "genericity_flags": 1,
+      "differentiation_carried_by": [],
+      "abstention_reason": "No decision reading and no decision domains. This company's own published material did not say clearly enough what it is for, so there is no basis even for saying which decisions would matter.",
+      "profile_available": false,
+      "lens_available": false,
+      "decision_reading_available": false,
+      "decision_map_state": "NOTHING",
+      "causal_chain_kind": "NO_CHAIN",
+      "potential_domains": [],
+      "evidence_limitation": "what kind of business this is was not established",
+      "what_would_unlock": "one page or filing stating what this company sells and how it is paid",
+      "intro_status": 200,
+      "intro_chars": 20860,
+      "brief_status": 200,
+      "brief_chars": 32675,
+      "full_status": 200,
+      "full_chars": 20860,
+      "xray_status": 200,
+      "xray_chars": 26103,
+      "evidence_status": 200,
+      "evidence_chars": 14833,
+      "answer_status": 200,
+      "answer_chars": 20860,
+      "surface_s": 26.5,
+      "intro_words": 428,
+      "sections": {},
+      "evidence_text": "Monte Carlo Data Home \u00b7 Log in Why this reading exists Monte Carlo Data X-Ray \u00b7 Full analysis \u00b7 Presentation \u00b7 Decision history No sources are attached no documents were retrieved for this company, so there is nothing to attribute State: PROVENANCE_UNAVAILABLE",
+      "xray_says_unclassified": true,
+      "profile_contradiction": false,
+      "ui_html": "reports/ui/monte-carlo-data.html",
+      "identity_on_page": true,
+      "leaks": [],
+      "has_why_different": false,
+      "has_lens_block": false,
+      "has_role_switch": false,
+      "has_value_block": false,
+      "has_decision_map": false,
+      "has_causal_chain": false,
+      "has_potential_domains": false,
+      "has_not_a_recommendation": false,
+      "has_investigation_chain": false,
+      "has_bounded_block": false,
+      "quotes": [],
+      "quote_count": 0,
+      "broken_quotes": [],
+      "headline_is_generic": false,
+      "lens_matches_expectation": true,
+      "role_ceo_status": 200,
+      "role_cso_status": 200,
+      "role_views_differ": false,
+      "role_facts_identical": true,
+      "qa": [
+        {
+          "q": "Why does this matter for this company specifically?",
+          "status": 200,
+          "words": 97,
+          "text": "Why does this matter for this company specifically? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Monte Carlo Data Why does this matter for this company specifically? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What evidence most supports this reading?",
+          "status": 200,
+          "words": 130,
+          "text": "What evidence most supports this reading? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Monte Carlo Data What evidence most supports this reading? There is not enough public evidence to answer that confidently. Evidence Strongest. No independent source was found; everything rests on the company's own material. Weakest. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What would have to be true for this to be wrong?",
+          "status": 200,
+          "words": 139,
+          "text": "What would have to be true for this to be wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Monte Carlo Data What would have to be true for this to be wrong? That was the whole of it: \u201cThere is not enough public evidence to answer that confidently.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What should management monitor next?",
+          "status": 200,
+          "words": 90,
+          "text": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Monte Carlo Data What should management monitor next? Nothing is currently preregistered to watch for this company. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "Which decision here is the most urgent, and why that one?",
+          "status": 200,
+          "words": 138,
+          "text": "Which decision here is the most urgent, and why that one? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Monte Carlo Data Which decision here is the most urgent, and why that one? That was the whole of it: \u201cNothing is currently preregistered to watch for this company.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What is the biggest uncertainty in this analysis?",
+          "status": 200,
+          "words": 96,
+          "text": "What is the biggest uncertainty in this analysis? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Monte Carlo Data What is the biggest uncertainty in this analysis? No open uncertainty has been recorded for this company. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        }
+      ],
+      "qa_ok": 6,
+      "qa_company_specific": 6,
+      "followup_words": 140,
+      "followup_is_replay": false,
+      "followup_pass": true,
+      "wall_s": 111.1
+    }
+  ]
+}

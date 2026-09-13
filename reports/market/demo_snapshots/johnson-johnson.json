@@ -1,0 +1,150 @@
+{
+  "adversary_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "this subsystem did not run for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "analysis_id": "republish-2026-08-14",
+  "availability": "AVAILABLE",
+  "belief_refs": {
+    "count": 7,
+    "ids": [
+      "bel_62e9918236d48d89",
+      "bel_5d1114b876c802f6",
+      "bel_5e8341f3ce6cf529",
+      "bel_2c959fe80f7b40a5",
+      "bel_5bb370f29af8cc37",
+      "bel_2480701daebb266f",
+      "bel_3457d755e5d9f91c"
+    ],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "canonical_name": "Johnson & Johnson",
+  "causal_question_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "causal_result_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "company_id": "johnson-johnson",
+  "contract_version": "market_demo_snapshot.v1",
+  "contradiction_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "this subsystem did not run for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "coverage_state": "FIELD_UNAVAILABLE",
+  "demand_state_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "this subsystem did not run for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "economic_state_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "the economy is measured and none of it reaches this company: no exposure this company's own evidence establishes transmits a measured condition",
+    "state": "AVAILABLE"
+  },
+  "evidence_cutoff": "2026-08-14",
+  "evidence_independence_state": "UNAVAILABLE",
+  "evidence_reference_ids": {
+    "count": 9,
+    "ids": [
+      "ev_11fe8cd66ccc1570",
+      "ev_55eaa70735d7d048",
+      "ev_6d3b0d6ec2300029",
+      "ev_a4bf96c6d17558b6",
+      "ev_a7bc99b676afc369",
+      "ev_c53528562fa0b22d",
+      "ev_cf749b4d88243f6f",
+      "ev_f7e6188b454ae23a",
+      "ev_ffb7bd73de3c9e96"
+    ],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "evidence_summary": {
+    "note": "evidence was not summarised for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "expectation_refs": {
+    "count": 7,
+    "ids": [
+      "exp_5fdc3e3fb33bb200",
+      "exp_cdea6e7e76dc8f3e",
+      "exp_454d4121134b6c67",
+      "exp_9f477096d158e618",
+      "exp_7011de9922f1d413",
+      "exp_3830002e4c776997",
+      "exp_e1e775bc4bad3ce0"
+    ],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "generated_at": "2026-08-14",
+  "hidden_state_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "1 hidden state(s) were tracked and none is identified: the posterior is uniform, so no posture is distinguishable from the prior. The subsystem ran and observed nothing that moved it",
+    "state": "AVAILABLE",
+    "unidentified": 1
+  },
+  "known_at": "2026-08-14",
+  "learning_summary": {
+    "note": "learning health was not summarised for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "market_population": "REAL_MARKET",
+  "market_run_id": "republish-2026-08-14",
+  "provenance_summary": {
+    "as_of": "2026-08-14",
+    "note": "market runtime provenance",
+    "state": "AVAILABLE",
+    "value": "9b01ff1b10d3554a343c4cba63923a46373a8215"
+  },
+  "reconciliation_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "replay_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "this subsystem did not run for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "runtime_sha": "9b01ff1b10d3554a343c4cba63923a46373a8215",
+  "snapshot_id": "ms-2fb80133b3a257338ffb",
+  "source_health_summary": {
+    "note": "source health was not summarised for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "subject_names": [
+    "Johnson & Johnson",
+    "johnson_johnson"
+  ],
+  "thesis_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "thesis_revision_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "unavailable_reason": ""
+}

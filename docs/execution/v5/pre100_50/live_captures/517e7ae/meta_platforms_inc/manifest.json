@@ -1,0 +1,106 @@
+{
+  "company": "Meta Platforms, Inc.",
+  "deployed_sha": "517e7ae",
+  "captured_at": "2026-08-21T06:04:01Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HEPPFB7X6GV1NDPRQ53G70",
+      "chars": 6234,
+      "html_chars": 33080
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HEPPFB7X6GV1NDPRQ53G70/intro",
+      "chars": 5965,
+      "html_chars": 31530
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HEPPFB7X6GV1NDPRQ53G70/slides",
+      "chars": 5792,
+      "html_chars": 49666
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HEPPFB7X6GV1NDPRQ53G70/full",
+      "chars": 747,
+      "html_chars": 15401
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HEPPFB7X6GV1NDPRQ53G70/story",
+      "chars": 4530,
+      "html_chars": 34050
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HEPPFB7X6GV1NDPRQ53G70/history",
+      "chars": 29234,
+      "html_chars": 104830
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HEPPFB7X6GV1NDPRQ53G70/connect",
+      "chars": 4074,
+      "html_chars": 28980
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HEPPFB7X6GV1NDPRQ53G70",
+      "chars": 6234,
+      "html_chars": 33080
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HEPPFB7X6GV1NDPRQ53G70/evidence",
+      "chars": 6455,
+      "html_chars": 23756
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HEPPFB7X6GV1NDPRQ53G70/report",
+      "chars": 307,
+      "html_chars": 14888
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HEPPFB7X6GV1NDPRQ53G70/brief",
+      "chars": 16137,
+      "html_chars": 48962
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Meta Platforms, Inc. META \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Conn",
+      "status": 200,
+      "html_bytes": 17003
+    },
+    {
+      "t": 181.7,
+      "text": "Meta Platforms, Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Meta Platforms, Inc. META \u00b7 SEC CIK 0001326801 Meta Platforms, Inc. is a software platform business that runs on attention resold to advertisers: revenue is an auction price per impression, so nothi",
+      "status": 200,
+      "html_bytes": 31603
+    }
+  ],
+  "process_before": {
+    "boot_id": "3ccb24afe5f84b46",
+    "started_at": 1787292210.1996582,
+    "uptime_seconds": 31.1
+  },
+  "run_id": "01M0HEPPFB7X6GV1NDPRQ53G70",
+  "status": "READY",
+  "seconds": 182,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 5.63,
+    "intro": 6.64,
+    "slides": 7.61,
+    "full": 0.17,
+    "story": 6.62,
+    "history": 0.55,
+    "connect": 4.55
+  },
+  "errors": []
+}

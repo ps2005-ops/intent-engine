@@ -1,0 +1,295 @@
+{
+  "company": "Caterpillar Inc.",
+  "cik": "18230",
+  "ticker": "CAT",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GDTG9A6CEJRW6XR7T1GGXV/intro",
+      "chars": 5434,
+      "title": "Caterpillar Inc. \u2014 introduction",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 0,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GDTG9A6CEJRW6XR7T1GGXV/intro",
+      "chars": 5434,
+      "title": "Caterpillar Inc. \u2014 introduction",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 0,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GDTG9A6CEJRW6XR7T1GGXV/slides",
+      "chars": 6292,
+      "title": "Caterpillar Inc. \u2014 presentation",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 0,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GDTG9A6CEJRW6XR7T1GGXV/full",
+      "chars": 23442,
+      "title": "Strategic Intelligence \u2014 Caterpillar Inc.",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [
+          "no competitor"
+        ],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 4,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GDTG9A6CEJRW6XR7T1GGXV/story",
+      "chars": 4197,
+      "title": "Caterpillar Inc. \u2014 the full story",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": []
+      },
+      "charts": 0,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GDTG9A6CEJRW6XR7T1GGXV/history",
+      "chars": 29240,
+      "title": "Caterpillar Inc. \u2014 history rewind",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 24,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GDTG9A6CEJRW6XR7T1GGXV/connect",
+      "chars": 3909,
+      "title": "Caterpillar Inc. \u2014 connect your company",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 0,
+      "nav_next": false,
+      "nav_back": false
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GDTG9A6CEJRW6XR7T1GGXV/intro",
+      "chars": 5434,
+      "title": "Caterpillar Inc. \u2014 introduction",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 0,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GDTG9A6CEJRW6XR7T1GGXV/report",
+      "chars": 307,
+      "title": "Executive report preview",
+      "names_company": false,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": []
+      },
+      "charts": 0,
+      "nav_next": false,
+      "nav_back": true
+    },
+    "answer": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GDTG9A6CEJRW6XR7T1GGXV/answer",
+      "chars": 7256,
+      "title": "Caterpillar Inc. \u2014 the decision",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": []
+      },
+      "charts": 0,
+      "nav_next": false,
+      "nav_back": false
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GDTG9A6CEJRW6XR7T1GGXV/evidence",
+      "chars": 6433,
+      "title": "Caterpillar Inc.",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": []
+      },
+      "charts": 0,
+      "nav_next": false,
+      "nav_back": false
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GDTG9A6CEJRW6XR7T1GGXV/brief",
+      "chars": 17412,
+      "title": "Caterpillar Inc. \u2014 executive brief",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [
+          "no competitor"
+        ],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 4,
+      "nav_next": false,
+      "nav_back": false
+    },
+    "dashboard": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GDTG9A6CEJRW6XR7T1GGXV/dashboard",
+      "chars": 9709,
+      "title": "Caterpillar Inc. \u2014 intelligence",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": []
+      },
+      "charts": 4,
+      "nav_next": false,
+      "nav_back": false
+    }
+  },
+  "progress": [
+    {
+      "poll": 0,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Caterpillar Inc. CAT \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecting macro and industry conditions to come Mapping competitors to come Stress-testing the strategic rea"
+    },
+    {
+      "poll": 1,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Caterpillar Inc. CAT \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecting macro and industry conditions to come Mapping competitors to come Stress-testing the strategic rea"
+    },
+    {
+      "poll": 2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Caterpillar Inc. CAT \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecting macro and industry conditions to come Mapping competitors to come Stress-testing the strategic rea"
+    },
+    {
+      "poll": 3,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Caterpillar Inc. CAT \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecting macro and industry conditions to come Mapping competitors to come Stress-testing the strategic rea"
+    },
+    {
+      "poll": 12,
+      "text": ""
+    },
+    {
+      "poll": 24,
+      "text": ""
+    }
+  ],
+  "run_id": "01M0GDTG9A6CEJRW6XR7T1GGXV",
+  "seconds": 260,
+  "auto_advanced": true,
+  "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GDTG9A6CEJRW6XR7T1GGXV/intro",
+  "qa": {
+    "What should management do?": {
+      "status": 200,
+      "text": "What should management do? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Caterpillar Inc. What should management do? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "Why now?": {
+      "status": 200,
+      "text": "Why now? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Caterpillar Inc. Why now? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What's the biggest risk?": {
+      "status": 200,
+      "text": "What's the biggest risk? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Caterpillar Inc. What's the biggest risk? Utilisation, order books and take-or-pay terms are not public. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What would prove this wrong?": {
+      "status": 200,
+      "text": "What would prove this wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Caterpillar Inc. What would prove this wrong? The strongest case against it: mainly the open evidence gaps below. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "Who's the real competitor?": {
+      "status": 200,
+      "text": "Who's the real competitor? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Caterpillar Inc. Who's the real competitor? CAE Inc.: operates the same business model (manufacture and aftermarket) in the same sector (industrial), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR; Deere & Company: operates the same business model (manufacture and aftermarket) in the same sector (industrial), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR; GE Aerospace: operates the same business model (manufacture and aftermarket) in the same sector (industrial), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What does the market believe?": {
+      "status": 200,
+      "text": "What does the market believe? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Caterpillar Inc. What does the market believe? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What's the weakest assumption?": {
+      "status": 200,
+      "text": "What's the weakest assumption? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Caterpillar Inc. What's the weakest assumption? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence). Evidence Strongest. 2026-08-20: Caterpillar Inc. sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. Weakest. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What impossible hypothesis should we test?": {
+      "status": 200,
+      "text": "What impossible hypothesis should we test? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Caterpillar Inc. What impossible hypothesis should we test? The decision this most affects: Whether a supply commitment should be treated as fixed or renegotiable. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What should we measure next?": {
+      "status": 200,
+      "text": "What should we measure next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Caterpillar Inc. What should we measure next? The decision this most affects: Whether a supply commitment should be treated as fixed or renegotiable. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What would you tell the board?": {
+      "status": 200,
+      "text": "What would you tell the board? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Caterpillar Inc. What would you tell the board? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    }
+  },
+  "transport_errors": []
+}

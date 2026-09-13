@@ -1,0 +1,415 @@
+{
+  "frozen": {
+    "contract": "breaker_wave_baseline.v1",
+    "label": "zero_anthropic",
+    "runtime_sha": "20291b56c1460229e14e031df2b75254cfba7bbc",
+    "runtime_tree_dirty": false,
+    "manifest_version": "1.0.0",
+    "dossier_contract_version": "company_demo_dossier.v1",
+    "analyst": {
+      "configured": false,
+      "key_in_env": false,
+      "detail": "ANTHROPIC_API_KEY is not set in this environment"
+    },
+    "max_approved_sources": 14,
+    "started_at": "2026-08-14T05:15:59.843612+00:00",
+    "cohort": [
+      "cloudflare",
+      "advanced-micro-devices",
+      "boeing",
+      "bank-of-america",
+      "alimentation-couche-tard",
+      "agnico-eagle-mines",
+      "bce",
+      "stripe",
+      "mckinsey",
+      "johnson-and-johnson"
+    ],
+    "finished_at": "2026-08-14T05:16:19.990966+00:00"
+  },
+  "runtime_root": "/var/folders/9h/11c66kl14ssds_w88hg7w5_c0000gn/T/breaker-wave-bo0uo6z0",
+  "cohort_summary": {
+    "companies": 1,
+    "independence_measured_for": 1,
+    "retrieval": {
+      "attempted": 14,
+      "successful_documents": 10,
+      "retrieval_yield": 0.7143,
+      "failure_types": {
+        "http_status": 3,
+        "too_large": 1
+      },
+      "http_status_counts": {
+        "HTTP 403": 3
+      },
+      "fetch_seconds": 8.9
+    },
+    "evidence": {
+      "documents": 10,
+      "observations": 0,
+      "observations_per_document": 0.0,
+      "observations_state": {
+        "state": "MEASURED",
+        "companies_with_usable_report": 1,
+        "of": 1
+      }
+    },
+    "independence": {
+      "independent_documents": 1,
+      "duplicate_documents": 0,
+      "republications": 0,
+      "company_self_reports": 1,
+      "unknown_lineage": 0,
+      "independent_document_share": 0.1,
+      "mean_source_concentration": 0.8,
+      "seconds_per_independent_document": 8.9
+    },
+    "learning_conversion": {
+      "state": "MEASURED",
+      "reason": "",
+      "attribution_states": {
+        "MEASURED": 1
+      },
+      "companies_measured": 1,
+      "of": 1,
+      "evidence_rows": 10,
+      "effect_producing_evidence_rows": 0,
+      "independent_effect_producing_evidence_rows": 0,
+      "zero_effect_evidence_rows": 10,
+      "learning_conversion": 0.0
+    },
+    "high_activity_low_learning": {
+      "detected": false,
+      "status": "UNMEASURABLE",
+      "reason": "10 document(s) across 1 measured compan(ies) is too little volume for the share to mean anything",
+      "belief_arm": "UNMEASURABLE"
+    }
+  },
+  "results": [
+    {
+      "company_id": "cloudflare",
+      "canonical_name": "Cloudflare, Inc.",
+      "domain": "cloudflare.com",
+      "country": "USA",
+      "sector": "SOFTWARE_PLATFORM",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PUBLIC",
+      "entity_type": "OPERATING_COMPANY",
+      "coverage_expectation": "HIGH_COVERAGE",
+      "breaker_dimensions": [
+        "baseline_operating_company"
+      ],
+      "started_at": "2026-08-14T05:15:59.850986+00:00",
+      "runtime_sha": "20291b56c1460229e14e031df2b75254cfba7bbc",
+      "manifest_version": "1.0.0",
+      "analyst_configured": false,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": false,
+        "key_present": false,
+        "error": "ANTHROPIC_API_KEY is not set in this environment"
+      },
+      "run_id": "01KZZB5MJ4WKTRZ5Y7ZTDG0C4K",
+      "discovery_seconds": 4.35,
+      "candidates_discovered": 52,
+      "candidates_approved": 14,
+      "fetch_seconds": 8.91,
+      "compose_seconds": 6.78,
+      "identity": {
+        "requested_name": "Cloudflare, Inc.",
+        "requested_domain": "cloudflare.com",
+        "resolved_company_name": "Cloudflare, Inc.",
+        "resolved_domain": "cloudflare.com",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "NORMAL",
+        "parent_company_id": null,
+        "report_subject": "Cloudflare, Inc."
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 10,
+        "failed": 4,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "http_status": 3,
+          "too_large": 1
+        },
+        "http_status_counts": {
+          "HTTP 403": 3
+        },
+        "failure_messages": [
+          "HTTP 403",
+          "response exceeded 2000000 bytes"
+        ],
+        "retryable_failures": 0,
+        "families": [
+          "commercial",
+          "customers",
+          "identity",
+          "investor",
+          "product",
+          "strategy",
+          "talent"
+        ],
+        "family_counts": {
+          "identity": 1,
+          "investor": 2,
+          "customers": 1,
+          "strategy": 1,
+          "commercial": 1,
+          "talent": 1,
+          "product": 3
+        },
+        "missing_core": [],
+        "evidence_report_state": "EVIDENCE_REPORT_READY"
+      },
+      "evidence": {
+        "documents_retrieved": 10,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 10,
+        "evidence_independence_state": "MEASURED",
+        "independence": {
+          "contract": "evidence_independence.v1",
+          "state": "MEASURED",
+          "evidence_count": 10,
+          "independent_evidence_count": 1,
+          "source_family_count": 2,
+          "primary_source_count": 1,
+          "company_self_report_count": 1,
+          "independent_external_count": 0,
+          "unknown_lineage_count": 0,
+          "duplicate_document_count": 0,
+          "same_origin_count": 8,
+          "republication_count": 0,
+          "concentration_ratio": 0.8,
+          "distinct_observation_count": 2,
+          "corroboration_state": "PARTIALLY_INDEPENDENT",
+          "corroboration_reason": "exactly one outside vantage point; a second independent origin is what would corroborate it",
+          "plain_statement": "Ten document(s) support this view, representing one independent origin.",
+          "independent_origins": [
+            "sec.gov/filer/1477333"
+          ],
+          "source_families": [
+            "cloudflare.com",
+            "sec.gov/filer/1477333"
+          ],
+          "contradicting_evidence_ids": [],
+          "lineage_counts": {
+            "COMPANY_SELF_REPORT": 1,
+            "REGULATOR_OR_PRIMARY_FILING": 1,
+            "SAME_ORIGIN": 8
+          }
+        },
+        "independence_rows": [
+          {
+            "index": 0,
+            "source_id": "src-5e7c83cd0717",
+            "url": "https://www.cloudflare.com/",
+            "origin_family": "cloudflare.com",
+            "source_class": "company_owned",
+            "lineage": "COMPANY_SELF_REPORT",
+            "anchor_index": null,
+            "independence_bearing": false
+          },
+          {
+            "index": 1,
+            "source_id": "src-f747efbfe52c",
+            "url": "https://www.sec.gov/Archives/edgar/data/1477333/000147733326000016/cloud-20251231.htm",
+            "origin_family": "sec.gov/filer/1477333",
+            "source_class": "investor_material",
+            "lineage": "REGULATOR_OR_PRIMARY_FILING",
+            "anchor_index": null,
+            "independence_bearing": true
+          },
+          {
+            "index": 2,
+            "source_id": "src-cc6710ce5a9f",
+            "url": "https://www.cloudflare.com/partners/",
+            "origin_family": "cloudflare.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 3,
+            "source_id": "src-380b21268763",
+            "url": "https://blog.cloudflare.com/",
+            "origin_family": "cloudflare.com",
+            "source_class": "executive_statement",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 4,
+            "source_id": "src-7f07af9cc917",
+            "url": "https://www.cloudflare.com/plans/",
+            "origin_family": "cloudflare.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 5,
+            "source_id": "src-321bd9616618",
+            "url": "https://www.cloudflare.com/careers/",
+            "origin_family": "cloudflare.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 6,
+            "source_id": "src-c46a0a9bd3cd",
+            "url": "https://www.sec.gov/Archives/edgar/data/1477333/000147733326000054/cloud-20260630.htm",
+            "origin_family": "sec.gov/filer/1477333",
+            "source_class": "investor_material",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 1,
+            "independence_bearing": false
+          },
+          {
+            "index": 7,
+            "source_id": "src-7299df54786e",
+            "url": "https://www.cloudflare.com/products/api-shield/",
+            "origin_family": "cloudflare.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 8,
+            "source_id": "src-835e85be99c5",
+            "url": "https://www.cloudflare.com/products/",
+            "origin_family": "cloudflare.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 9,
+            "source_id": "src-4e3e26188ad1",
+            "url": "https://www.cloudflare.com/products/d1/",
+            "origin_family": "cloudflare.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          }
+        ]
+      },
+      "learning": {
+        "contract": "learning_attribution.v1",
+        "attribution_state": "MEASURED",
+        "attribution_reason": "",
+        "evidence_rows": 10,
+        "eligible_evidence_rows": 10,
+        "effect_producing_evidence_rows": 0,
+        "independent_effect_producing_evidence_rows": 0,
+        "zero_effect_evidence_rows": 10,
+        "learning_conversion": 0.0,
+        "independent_learning_conversion": 0.0,
+        "knowledge_effects": 1,
+        "effects_by_type": {
+          "FIRST_OBSERVATION": 1
+        },
+        "changes": []
+      },
+      "intelligence": {
+        "strategic_report": "PRESENT",
+        "result_state": "EVIDENCE_LIMITED",
+        "result_state_detail": "No reasoning backend is configured, so no strategic conclusion is asserted. The evidence below was retrieved and verified; the patterns shown are structural scaffolds, not findings about this company.",
+        "reasoning_provenance": "pattern_library",
+        "strategic_analysis": "ABSENT",
+        "hypotheses": 0,
+        "shifts": 3,
+        "critic_findings": 0,
+        "readiness": true
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "cloudflare:2cf544954269099c",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "AVAILABLE",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-14",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_available": 1,
+        "founder_snapshots_read": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [],
+      "finished_at": "2026-08-14T05:16:19.990179+00:00",
+      "wall_seconds": 20.14
+    }
+  ]
+}

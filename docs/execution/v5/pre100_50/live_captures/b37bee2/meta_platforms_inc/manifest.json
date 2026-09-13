@@ -1,0 +1,43 @@
+{
+  "company": "Meta Platforms, Inc.",
+  "deployed_sha": "b37bee2",
+  "captured_at": "2026-08-21T09:56:13Z",
+  "routes": {},
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Meta Platforms, Inc. META \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Conn",
+      "status": 200,
+      "html_bytes": 17003
+    },
+    {
+      "t": 32.5,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Meta Platforms, Inc. META \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Connec",
+      "status": 200,
+      "html_bytes": 16999
+    },
+    {
+      "t": 218.8,
+      "text": "",
+      "status": 0,
+      "html_bytes": 16999,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HVZWAQAMC4ME4E7BZ80XB3/progress",
+      "head": ""
+    }
+  ],
+  "process_before": {
+    "boot_id": "1d80da0ebd18404e",
+    "started_at": 1787306143.9528165,
+    "uptime_seconds": 29.5
+  },
+  "run_id": "01M0HVZWAQAMC4ME4E7BZ80XB3",
+  "status": "FAILED",
+  "seconds": 219,
+  "first_useful": null,
+  "auto_advanced": true
+}

@@ -462,7 +462,12 @@ def test_anonymous_real_company_run_survives_restart(tmp_path):
     assert hdrs2.get("Location", "") != "/login"
     assert status.startswith("303")
     assert not hdrs2["Location"].endswith("/slides"), hdrs2["Location"]
-    status, _, body = c.request("GET", hdrs2["Location"])
+    # THE DEFAULT ROUTE IS NOW STEP 1 of the six-step story, so completion
+    # lands on a redirect into it. The property under test -- the finished run
+    # is reachable and renders -- is unchanged; it takes one more hop.
+    status, hdrs3, body = c.request("GET", hdrs2["Location"])
+    if status.startswith("303"):
+        status, _, body = c.request("GET", hdrs3["Location"])
     assert status == "200 OK"
     # the restored session is the same anonymous identity, still anonymous
     restored = app2.auth.session(c.sid())

@@ -1,0 +1,174 @@
+{
+  "company": "Honeywell International Inc.",
+  "deployed_sha": "743df06",
+  "captured_at": "2026-08-21T17:27:02Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JNSNBFCFMSV1FC1QE5AWQH",
+      "chars": 5668,
+      "html_chars": 32341,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JNSNBFCFMSV1FC1QE5AWQH/intro",
+      "chars": 5458,
+      "html_chars": 30993,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JNSNBFCFMSV1FC1QE5AWQH/slides",
+      "chars": 5884,
+      "html_chars": 52374,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JNSNBFCFMSV1FC1QE5AWQH/full",
+      "chars": 5668,
+      "html_chars": 32341,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JNSNBFCFMSV1FC1QE5AWQH/story",
+      "chars": 4402,
+      "html_chars": 33927,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JNSNBFCFMSV1FC1QE5AWQH/history",
+      "chars": 28597,
+      "html_chars": 109592,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JNSNBFCFMSV1FC1QE5AWQH/connect",
+      "chars": 3939,
+      "html_chars": 28850,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JNSNBFCFMSV1FC1QE5AWQH",
+      "chars": 5668,
+      "html_chars": 32341,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JNSNBFCFMSV1FC1QE5AWQH/evidence",
+      "chars": 7593,
+      "html_chars": 25660,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JNSNBFCFMSV1FC1QE5AWQH/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JNSNBFCFMSV1FC1QE5AWQH/brief",
+      "chars": 18195,
+      "html_chars": 52456,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 4.7,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Honeywell International Inc. HON \u00b7 honeywell.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current compan",
+      "status": 200,
+      "html_bytes": 17031
+    },
+    {
+      "t": 65.2,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17031,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "cf-cache-status": "DYNAMIC",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JNSNBFCFMSV1FC1QE5AWQH/progress",
+      "head": ""
+    },
+    {
+      "t": 147.9,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Honeywell International Inc. HON \u00b7 honeywell.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current compan",
+      "status": 200,
+      "html_bytes": 17031
+    },
+    {
+      "t": 199.4,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Honeywell International Inc. HON \u00b7 honeywell.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current compa",
+      "status": 200,
+      "html_bytes": 17026
+    },
+    {
+      "t": 263.2,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17025,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JNSNBFCFMSV1FC1QE5AWQH/progress",
+      "head": ""
+    },
+    {
+      "t": 274.3,
+      "text": "Honeywell International Inc. \u2014 the decision Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Honeywell International Inc. Honeywell International Inc. sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. Th",
+      "status": 200,
+      "html_bytes": 32397
+    }
+  ],
+  "process_before": {
+    "boot_id": "d7df6481c13e43c7",
+    "started_at": 1787326618.1855707,
+    "uptime_seconds": 6604.4
+  },
+  "run_id": "01M0JNSNBFCFMSV1FC1QE5AWQH",
+  "status": "READY",
+  "seconds": 274,
+  "first_useful": 274,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 3.05,
+    "intro": 9.81,
+    "slides": 7.28,
+    "full": 3.07,
+    "story": 6.14,
+    "history": 0.23,
+    "connect": 4.98
+  },
+  "evidence_gate": "compose=10 usable=10 families=customers|identity|investor|product|strategy|talent stored=10 attempt=2 failed=8/7 dropped=0/0/0/0",
+  "outcome": "FULL_ANALYSIS",
+  "outcome_by_route": {
+    "run": "FULL_ANALYSIS",
+    "intro": "FULL_ANALYSIS",
+    "slides": "FULL_ANALYSIS",
+    "full": "FULL_ANALYSIS",
+    "story": "FULL_ANALYSIS",
+    "history": "FULL_ANALYSIS",
+    "connect": "FULL_ANALYSIS"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": [
+    "GET /runs/01M0JNSNBFCFMSV1FC1QE5AWQH/progress: timeout",
+    "GET /runs/01M0JNSNBFCFMSV1FC1QE5AWQH/progress: timeout",
+    "GET /runs/01M0JNSNBFCFMSV1FC1QE5AWQH/progress: timeout"
+  ]
+}

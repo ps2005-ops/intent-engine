@@ -44,6 +44,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import asdict, dataclass, field
+from typing import Optional
 
 from intent_engine.strategic_intelligence import filing_hygiene as FH
 from intent_engine.strategic_intelligence.concrete import reads_as_taxonomy
@@ -197,12 +198,57 @@ def _mechanism_of(hypothesis) -> str:
     mechanism). It is one colon.
     """
     reasoning = _flat(_get(hypothesis, "reasoning"))
+    claim = ""
     if ":" in reasoning:
-        tail = reasoning.split(":", 1)[1].strip()
-        claim = _claim(tail)
-        if claim:
-            return claim
-    return _claim(reasoning) or _claim(_get(hypothesis, "statement"))
+        claim = _claim(reasoning.split(":", 1)[1].strip())
+    if not claim:
+        claim = _claim(reasoning) or _claim(_get(hypothesis, "statement"))
+    return claim
+
+
+def grounding_of(hypothesis) -> str:
+    """THIS company's own words, for a mechanism every company shares.
+
+    NOT APPENDED TO THE MECHANISM, and the reason is measured. Doing that
+    turned `test_no_sentence_is_printed_twice_in_either_document` red: the
+    Full Analysis ALREADY prints this quote, via `narrative.py`'s call to
+    `mechanism.because_line`, so grounding the mechanism string printed the
+    same sentence twice on the one surface that was already doing it right.
+    It also did nothing for the surface that was measured identical, because
+    the board answers route off topic, falsifier and recommendation — never
+    off the mechanism. A change that duplicated on one surface and did not
+    reach the other was not half a fix; it was neither half.
+
+    This is offered to callers that do NOT already show the quote. `qa.py` is
+    one: it had no access to the sentence at all.
+
+    MEASURED LIVE on 31e6138. Caterpillar and Exxon Mobil are DIFFERENT
+    business-model classes, render different business models on the page, and
+    answered EIGHT OF TEN board questions with the identical sentence —
+    "committing capital to capacity ahead of uncertain demand". Neither
+    qualifying is the defect; both genuinely commit capital to physical
+    capacity. The defect is that QUALIFYING WAS SUFFICIENT TO DETERMINE THE
+    WHOLE READING, because every field of the decision comes from the
+    pattern's static text with only `{company}` substituted.
+
+    The differentiation already existed and was thrown away here.
+    `reasoning._mechanism_evidence` captures, at the only point that still
+    knows which signal qualified, the sentence from THIS filer's document that
+    established the mechanism — and `decision.py`, the one object every
+    surface renders, never read it. Caterpillar's sentence is about dealer
+    inventory and backlog; Exxon's is about sanctioned projects and capex.
+    Same mechanism, different companies, and now different words.
+
+    This closes the produced-and-never-read half. It does NOT close the
+    template collapse itself: the topic, the alternatives, the falsifiers and
+    the implications are still the pattern's own text, so two companies
+    sharing a pattern still share those. See BATCH_A_FINAL_UI.md.
+    """
+    try:
+        from intent_engine.strategic_intelligence import mechanism as MECH
+        return MECH.because_line(hypothesis, limit=1)
+    except Exception:                                       # noqa: BLE001
+        return ""
 
 
 def _evidence_ids(hypothesis, kind: str) -> tuple:
@@ -317,6 +363,17 @@ class DecisionOption:
         return out
 
 
+#: What to call a subject whose name did not arrive. Never an empty string.
+SUBJECT_UNNAMED = "this company"
+
+#: Whether the decision knows who it is about. A surface may render the
+#: fallback wording, but it must be able to tell that it is a fallback --
+#: otherwise "this company" is indistinguishable from a company actually
+#: called that, and the gap stops being visible to anyone.
+IDENTITY_CANONICAL = "IDENTITY_CANONICAL"
+IDENTITY_MISSING = "IDENTITY_MISSING"
+
+
 @dataclass
 class FounderDecision:
     """What the analysis says a founder should do about what it found."""
@@ -335,8 +392,120 @@ class FounderDecision:
     what_each_result_would_favour: str = ""
     reconsider_when: str = ""
     verified: tuple = ()
+    #: WHOSE FILING MADE THIS TRUE. The pattern text is shared by every
+    #: company that qualifies; this is the sentence from THIS filer's own
+    #: document that qualified it. Carried on the decision because the
+    #: decision is the one object every surface renders, and Q&A -- the
+    #: surface measured identical for two different filers -- receives a
+    #: projected insight that never carried the hypothesis at all.
+    grounded_in: str = ""
     #: how the options were derived -- "topic" or "alternative". Internal.
     basis: str = ""
+
+    # --- the canonical market reading -------------------------------------
+    #
+    # ADDITIVE, AND DELIBERATELY ON THIS OBJECT RATHER THAN A SECOND ONE.
+    # There is one decision per company. A `FounderDecisionV2` beside this
+    # would give two surfaces two answers to "what do you recommend", and
+    # the whole point of the object is that they cannot disagree.
+    #
+    # Every field below is computable with ZERO model calls, from the market
+    # dossier. They default empty, so the existing report-derived
+    # construction is unchanged by their presence.
+    company: str = ""
+    decision_question: str = ""
+    #: WHY THIS QUESTION AND NOT ANOTHER. Added because the question used to
+    #: be a constant with a company name in it, so every company received the
+    #: same analysis and the reads came back 0.94-0.96 similar. A selected
+    #: question that cannot say why it was selected is indistinguishable from
+    #: a constant, so the reason travels with it.
+    why_this_question: str = ""
+    #: The decision archetype chosen (PRICING, CAPACITY, ...) and every
+    #: archetype considered with its score. Internal ordering, shown as
+    #: English on the surfaces.
+    decision_archetype: str = ""
+    archetypes_considered: tuple = ()
+    #: What kind of business this is -- `company_profile.as_dict()`, or None
+    #: when the company is not classified. Everything else on this object was
+    #: selected using it.
+    company_profile: Optional[dict] = None
+    #: The variables this business turns on, ranked, each with its reason.
+    signals: tuple = ()
+    #: economic factor -> mechanism -> business variable -> implication.
+    #: Only channels with an established mechanism into THIS business model.
+    economic_transmission: tuple = ()
+    #: Peers selected by business model and sector, each stating its basis.
+    competitors: tuple = ()
+    #: The one causal question this decision turns on, and why that one.
+    causal_question: str = ""
+    why_this_causal_question: str = ""
+    #: Historical regimes worth replaying for a business of this kind.
+    historical_dimensions: tuple = ()
+    historical_playback: tuple = ()
+    #: WHICH OF THE THREE HISTORY STATES this company is in, measured from the
+    #: archive. Empty means no assessment ran, and the surfaces then fall back
+    #: to their prior wording rather than inventing a state.
+    economic_history: dict = field(default_factory=dict)
+    #: WHAT THIS READING LEARNED AGAINST THE LAST ONE, as
+    #: `second_iteration.compare` measured it. Empty means no comparison was
+    #: attempted -- which is the honest state for a first analysis and for a
+    #: prior that failed the comparability wall. It is a FIELD rather than a
+    #: compose-time local for the same reason `company_name` is: the surfaces
+    #: read a decision rebuilt from its serialised form, and a delta that
+    #: lives only in a local argument cannot survive that trip, so every
+    #: surface would render "baseline" no matter how many times a company had
+    #: been read.
+    second_iteration: dict = field(default_factory=dict)
+    #: WHO THIS DECISION IS ABOUT, carried on the object rather than baked
+    #: into one sentence at compose time. It was only ever a local argument
+    #: used to build the withheld line, so a decision rebuilt from its own
+    #: serialised form had no subject at all and every surface had to guess.
+    company_name: str = ""
+    identity_state: str = IDENTITY_MISSING
+    current_read: str = ""
+    #: SUPPORTED / BOUNDED / UNMEASURABLE / REFUSED. Governs the WORDING the
+    #: executive read is allowed to use -- see `decision_synthesis`.
+    standing: str = ""
+    supporting_evidence_ids: tuple = ()
+    contradicting_evidence_ids: tuple = ()
+    #: Distinct ORIGINS, not documents. Fifteen syndicated copies of one
+    #: press release are one account, and a count that conflates them is the
+    #: single most misleading number an executive surface can show.
+    independent_origins: int = 0
+    economic_context: tuple = ()
+    economic_state: str = ""
+    hidden_state: str = ""
+    expectations: tuple = ()
+    reconciliations: tuple = ()
+    #: The causal state as the engine reported it -- an ESTIMATE state or a
+    #: named refusal. Never collapsed to "no effect".
+    causal_status: str = ""
+    causal_note: str = ""
+    historical_status: str = ""
+    thesis: str = ""
+    thesis_history: tuple = ()
+    adversary: tuple = ()
+    #: §5. Propositions this company's current framing rules out, each with
+    #: the economic mechanism that would make it true and the smallest
+    #: experiment that would settle it. Bounded, falsifiable, never asserted.
+    impossible_hypotheses: tuple = ()
+    scenarios: tuple = ()
+    assumptions: tuple = ()
+    information_gaps: tuple = ()
+    minimum_data_requests: tuple = ()
+    minimum_viable_experiments: tuple = ()
+    value_of_information: tuple = ()
+    guardrails: tuple = ()
+    kill_switches: tuple = ()
+    monitoring: tuple = ()
+    next_review: str = ""
+    what_changed: tuple = ()
+    what_changed_mind: tuple = ()
+    provenance: tuple = ()
+    #: Where this decision came from: the market dossier, the strategic
+    #: report, or both. An executive surface may show it; the point is that
+    #: "computed with no model call" is a fact about the answer, not a mode.
+    derived_from: str = ""
 
     @property
     def is_ready(self) -> bool:
@@ -360,8 +529,23 @@ class FounderDecision:
     def headline(self) -> str:
         """One sentence stating the decision. Never the topic."""
         if self.readiness == WITHHELD:
-            return ("No decision is put forward: the public record did not "
-                    "carry enough to read one from.")
+            # D27. SCOPED TO THIS RUN, because that is all this object knows.
+            #
+            # "No decision is put forward" is a claim about the SYSTEM, and
+            # this object only measures what one run retrieved. Live on
+            # 60397d8 the sources page led with "A supported reading of
+            # Cloudflare, Inc. exists and is set out on the Executive X-Ray"
+            # and then, six lines lower, "No decision is put forward: the
+            # public record did not carry enough to read one from" -- one page
+            # contradicting itself, because the lead consults the contract and
+            # this property cannot.
+            #
+            # Rewording rather than threading the contract into every section:
+            # this sentence is TRUE in both worlds. When nothing exists
+            # anywhere it still says the run put nothing forward; when a
+            # reading does exist it no longer denies it.
+            return ("This run puts no decision forward: what it retrieved did "
+                    "not carry enough to read one from.")
         # "versus", not "and". The founder-brief contract requires a decision
         # to name its alternative -- without one it is an instruction -- and
         # "the choice is between A and B" reads as a single compound thing.
@@ -404,10 +588,67 @@ class FounderDecision:
             "evidence_required": list(self.evidence_required),
             "what_each_result_would_favour": self.what_each_result_would_favour,
             "reconsider_when": self.reconsider_when,
-            "verified": list(self.verified), "basis": self.basis,
+            "verified": list(self.verified),
+            "grounded_in": self.grounded_in, "basis": self.basis,
             # derived, so a renderer never has to re-derive them and drift
             "headline": self.headline,
             "undecided_question": self.undecided_question,
+            # --- the market reading -------------------------------------
+            # EMITTED UNCONDITIONALLY, including when empty. A field that
+            # appears only once it is populated cannot be told apart, on the
+            # wire, from a producer too old to send it -- and a surface then
+            # has to guess which. Emitting the empty value states "computed,
+            # and there is nothing here".
+            "company": self.company,
+            "decision_question": self.decision_question,
+            "why_this_question": self.why_this_question,
+            "decision_archetype": self.decision_archetype,
+            "archetypes_considered": list(self.archetypes_considered),
+            "company_profile": self.company_profile,
+            "signals": list(self.signals),
+            "economic_transmission": list(self.economic_transmission),
+            "competitors": list(self.competitors),
+            "causal_question": self.causal_question,
+            "why_this_causal_question": self.why_this_causal_question,
+            "historical_dimensions": list(self.historical_dimensions),
+            "historical_playback": list(self.historical_playback),
+            "economic_history": dict(self.economic_history or {}),
+            "second_iteration": dict(self.second_iteration or {}),
+            "company_name": self.company_name,
+            "identity_state": self.identity_state,
+            "current_read": self.current_read,
+            "standing": self.standing,
+            "supporting_evidence_ids": list(self.supporting_evidence_ids),
+            "contradicting_evidence_ids": list(
+                self.contradicting_evidence_ids),
+            "independent_origins": self.independent_origins,
+            "economic_context": list(self.economic_context),
+            "economic_state": self.economic_state,
+            "hidden_state": self.hidden_state,
+            "expectations": list(self.expectations),
+            "reconciliations": list(self.reconciliations),
+            "causal_status": self.causal_status,
+            "causal_note": self.causal_note,
+            "historical_status": self.historical_status,
+            "thesis": self.thesis,
+            "thesis_history": list(self.thesis_history),
+            "adversary": list(self.adversary),
+            "impossible_hypotheses": list(self.impossible_hypotheses),
+            "scenarios": list(self.scenarios),
+            "assumptions": list(self.assumptions),
+            "information_gaps": list(self.information_gaps),
+            "minimum_data_requests": list(self.minimum_data_requests),
+            "minimum_viable_experiments": list(
+                self.minimum_viable_experiments),
+            "value_of_information": list(self.value_of_information),
+            "guardrails": list(self.guardrails),
+            "kill_switches": list(self.kill_switches),
+            "monitoring": list(self.monitoring),
+            "next_review": self.next_review,
+            "what_changed": list(self.what_changed),
+            "what_changed_mind": list(self.what_changed_mind),
+            "provenance": list(self.provenance),
+            "derived_from": self.derived_from,
         }
 
 
@@ -486,7 +727,67 @@ def decision_from_dict(data) -> FounderDecision:
         # Rehydration filters too: a decision serialised before this rule
         # existed still carries the cover page in its stored `verified`.
         verified=tuple(FH.executive_safe(data.get("verified") or ())),
-        basis=data.get("basis", ""))
+        basis=data.get("basis", ""),
+        # THE MARKET READING SURVIVES THE ROUND TRIP.
+        #
+        # It did not before: a decision serialised and rebuilt came back with
+        # no company, no question and no read, because this constructor was
+        # written before those fields existed and was never extended. Any
+        # surface reading a STORED decision therefore saw an empty market
+        # block and could only render the report-derived half -- the same
+        # class of defect as `stance`, immediately above, which reached a
+        # served page. Restored field by field, defaults unchanged, so a dict
+        # written by an older producer rebuilds exactly as it did.
+        company=data.get("company", ""),
+        decision_question=data.get("decision_question", ""),
+        why_this_question=data.get("why_this_question", ""),
+        decision_archetype=data.get("decision_archetype", ""),
+        archetypes_considered=tuple(data.get("archetypes_considered") or ()),
+        company_profile=data.get("company_profile"),
+        signals=tuple(data.get("signals") or ()),
+        economic_transmission=tuple(data.get("economic_transmission") or ()),
+        competitors=tuple(data.get("competitors") or ()),
+        causal_question=data.get("causal_question", ""),
+        why_this_causal_question=data.get("why_this_causal_question", ""),
+        historical_dimensions=tuple(data.get("historical_dimensions") or ()),
+        historical_playback=tuple(data.get("historical_playback") or ()),
+        economic_history=dict(data.get("economic_history") or {}),
+        second_iteration=dict(data.get("second_iteration") or {}),
+        company_name=str(data.get("company_name") or ""),
+        identity_state=str(data.get("identity_state") or IDENTITY_MISSING),
+        current_read=data.get("current_read", ""),
+        standing=data.get("standing", ""),
+        supporting_evidence_ids=tuple(data.get("supporting_evidence_ids")
+                                      or ()),
+        contradicting_evidence_ids=tuple(
+            data.get("contradicting_evidence_ids") or ()),
+        independent_origins=int(data.get("independent_origins") or 0),
+        economic_context=tuple(data.get("economic_context") or ()),
+        economic_state=data.get("economic_state", ""),
+        hidden_state=data.get("hidden_state", ""),
+        expectations=tuple(data.get("expectations") or ()),
+        reconciliations=tuple(data.get("reconciliations") or ()),
+        causal_status=data.get("causal_status", ""),
+        causal_note=data.get("causal_note", ""),
+        historical_status=data.get("historical_status", ""),
+        thesis=data.get("thesis", ""),
+        thesis_history=tuple(data.get("thesis_history") or ()),
+        adversary=tuple(data.get("adversary") or ()),
+        scenarios=tuple(data.get("scenarios") or ()),
+        assumptions=tuple(data.get("assumptions") or ()),
+        information_gaps=tuple(data.get("information_gaps") or ()),
+        minimum_data_requests=tuple(data.get("minimum_data_requests") or ()),
+        minimum_viable_experiments=tuple(
+            data.get("minimum_viable_experiments") or ()),
+        value_of_information=tuple(data.get("value_of_information") or ()),
+        guardrails=tuple(data.get("guardrails") or ()),
+        kill_switches=tuple(data.get("kill_switches") or ()),
+        monitoring=tuple(data.get("monitoring") or ()),
+        next_review=data.get("next_review", ""),
+        what_changed=tuple(data.get("what_changed") or ()),
+        what_changed_mind=tuple(data.get("what_changed_mind") or ()),
+        provenance=tuple(data.get("provenance") or ()),
+        derived_from=data.get("derived_from", ""))
 
 
 # --- composition --------------------------------------------------------------
@@ -663,6 +964,24 @@ def decide_across(company_name, hypotheses, blind_spots=(),
     return first
 
 
+def canonical_subject(company_name) -> str:
+    """The name every decision sentence uses, normalised ONCE.
+
+    THE CANONICAL CHOKEPOINT, and the reason this is here rather than at each
+    surface. Measured on the deployed product: Caterpillar's executive brief
+    opened "what has published is not enough to read a strategy from" -- the
+    single most-read line in the product, with a hole where the subject
+    belongs -- because an empty name reached the withheld sentence. Patching
+    that sentence would leave every other surface free to print the same hole
+    from the same input.
+
+    `compose_decision` builds the one decision object the X-Ray, the brief,
+    the deck and the Q&A all render, so normalising the subject here fixes all
+    of them at once and keeps a blank from ever becoming customer-visible.
+    """
+    return str(company_name or "").strip() or SUBJECT_UNNAMED
+
+
 def compose_decision(company_name, hypothesis, blind_spots=(),
                      evidence_gaps=(), verified=()) -> FounderDecision:
     """The one decision object every surface renders.
@@ -679,13 +998,25 @@ def compose_decision(company_name, hypothesis, blind_spots=(),
     # change, which is why this is filtered where every surface converges.
     verified = tuple(FH.executive_safe(
         _flat(v) for v in (verified or ()) if _flat(v)))
+    named = bool(str(company_name or "").strip())
+    company_name = canonical_subject(company_name)
+    identity = IDENTITY_CANONICAL if named else IDENTITY_MISSING
 
     if hypothesis is None:
         return FounderDecision(
             readiness=WITHHELD, verified=verified,
+            company_name=company_name, identity_state=identity,
             limitation=_flat(gaps[0]) if gaps else "",
-            unsafe_because=(f"What {company_name} has published is not enough "
-                            f"to read a strategy from."),
+            # SAY WHAT THIS PASS DID, NOT WHAT THE COMPANY DISCLOSED.
+            # "What X has published is not enough to read a strategy from"
+            # attributes a twelve-entry pattern library's miss to a public
+            # company's disclosure, and it is rendered on the surfaces a CEO
+            # reads first. The reading itself is composed elsewhere and is
+            # bounded rather than absent; this line is what THIS pass could
+            # not add to it.
+            unsafe_because=(f"No curated transition pattern matched "
+                            f"{company_name} in this pass, so nothing here "
+                            f"rests on one."),
             evidence_required=tuple(_flat(g) for g in gaps[:3]))
 
     topic = _flat(_first(_get(hypothesis, "decision_implications", [])))
@@ -723,6 +1054,7 @@ def compose_decision(company_name, hypothesis, blind_spots=(),
 
     decision = FounderDecision(
         topic=topic, mechanism=mechanism, options=options,
+        grounded_in=grounding_of(hypothesis),
         limitation=limitation, falsifier=falsifier, watch_items=watch_items,
         recommendation_reason=reason, verified=verified, basis=basis,
         evidence_required=tuple(_flat(g) for g in gaps[:3]) or (

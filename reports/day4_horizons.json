@@ -1,0 +1,107 @@
+[
+ {
+  "hypothesis": "report_drift.v1",
+  "horizon_days": 5,
+  "retire": "RETIRE \u2014 on baseline",
+  "accuracy": 0.5341,
+  "band": [
+   0.398,
+   0.602
+  ],
+  "naive_band": [
+   0.438,
+   0.562
+  ],
+  "verdict": "indistinguishable from 0.500",
+  "observations": 264,
+  "events": 264,
+  "windows": 96,
+  "n_eff": 96,
+  "design_effect": 2.75,
+  "confidence": "high"
+ },
+ {
+  "hypothesis": "event_drift.v1",
+  "horizon_days": 3,
+  "retire": "RETIRE \u2014 on baseline",
+  "accuracy": 0.4912,
+  "band": [
+   0.45,
+   0.55
+  ],
+  "naive_band": [
+   0.474,
+   0.526
+  ],
+  "verdict": "indistinguishable from 0.500",
+  "observations": 1529,
+  "events": 1402,
+  "windows": 400,
+  "n_eff": 400,
+  "design_effect": 3.82,
+  "confidence": "high"
+ },
+ {
+  "hypothesis": "insider_buy.v1",
+  "horizon_days": 90,
+  "retire": "RETIRE \u2014 unmeasurable",
+  "accuracy": 0.4809,
+  "band": [
+   -0.5,
+   1.5
+  ],
+  "naive_band": [
+   0.485,
+   0.515
+  ],
+  "verdict": "unmeasurable (n_eff=1 < 30, A-M5)",
+  "observations": 4352,
+  "events": 1806,
+  "windows": 1,
+  "n_eff": 1,
+  "design_effect": 4352.0,
+  "confidence": "low"
+ },
+ {
+  "hypothesis": "activist_stake.v1",
+  "horizon_days": 120,
+  "retire": "RETIRE \u2014 unmeasurable",
+  "accuracy": 0.5,
+  "band": [
+   -0.077,
+   1.077
+  ],
+  "naive_band": [
+   0.264,
+   0.736
+  ],
+  "verdict": "unmeasurable (n_eff=3 < 30, A-M5)",
+  "observations": 18,
+  "events": 18,
+  "windows": 3,
+  "n_eff": 3,
+  "design_effect": 6.0,
+  "confidence": "low"
+ },
+ {
+  "hypothesis": "proxy_drift.v1",
+  "horizon_days": 90,
+  "retire": "RETIRE \u2014 unmeasurable",
+  "accuracy": 0.5108,
+  "band": [
+   0.184,
+   0.816
+  ],
+  "naive_band": [
+   0.415,
+   0.585
+  ],
+  "verdict": "unmeasurable (n_eff=10 < 30, A-M5)",
+  "observations": 139,
+  "events": 137,
+  "windows": 10,
+  "n_eff": 10,
+  "design_effect": 13.9,
+  "confidence": "medium"
+ }
+]

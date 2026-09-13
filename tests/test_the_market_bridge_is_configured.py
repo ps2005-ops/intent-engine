@@ -1,0 +1,499 @@
+"""The market bridge: one configured root, four states that mean four things.
+
+The live defect this pins: the founder side read market snapshots from its
+OWN runtime root, so 26 published snapshots were invisible and every dossier
+said "no market snapshot has been published for this company" -- true of the
+directory it looked in, false of the deployment.
+"""
+from __future__ import annotations
+
+import json
+
+from intent_engine.demo_dossier import bridge as B
+from intent_engine.demo_dossier import transport as T
+
+CONTRACT = "market_demo_snapshot.v1"
+
+
+def _snapshot(company="acme-corp", *, cutoff="2026-08-13", **over):
+    payload = {
+        "contract_version": CONTRACT, "company_id": company,
+        "canonical_name": company, "snapshot_id": "ms-1",
+        "availability": "AVAILABLE", "unavailable_reason": "",
+        "generated_at": cutoff, "known_at": cutoff, "evidence_cutoff": cutoff,
+        "market_population": "REAL_MARKET",
+    }
+    payload.update(over)
+    return payload
+
+
+def _publish(root, payload, name=None):
+    d = root.joinpath(*T.MARKET_SNAPSHOT_DIR)
+    d.mkdir(parents=True, exist_ok=True)
+    p = d / f"{name or payload['company_id']}.json"
+    p.write_text(json.dumps(payload), encoding="utf-8")
+    return p
+
+
+# --- the four states, per company ------------------------------------------
+
+def test_a_published_current_snapshot_is_current(tmp_path):
+    _publish(tmp_path, _snapshot())
+    a = B.for_company("acme-corp", root=tmp_path, today="2026-08-14")
+    assert a.state == B.CURRENT
+    assert a.usable and a.snapshot is not None
+    assert a.company_id == "acme-corp"
+    assert a.schema == CONTRACT
+    assert a.generated_at == "2026-08-13"
+    assert a.digest and a.freshness_days == 1
+    assert str(tmp_path) in a.source_path
+
+
+def test_no_file_for_this_company_is_missing_not_invalid(tmp_path):
+    _publish(tmp_path, _snapshot("other-co"))
+    a = B.for_company("acme-corp", root=tmp_path, today="2026-08-14")
+    assert a.state == B.MISSING
+    assert not a.usable
+    assert "no snapshot" in a.reason.lower() or "published no" in a.reason
+
+
+def test_an_unparseable_file_is_invalid_and_never_usable(tmp_path):
+    d = tmp_path.joinpath(*T.MARKET_SNAPSHOT_DIR)
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "acme-corp.json").write_text("{not json", encoding="utf-8")
+    a = B.for_company("acme-corp", root=tmp_path, today="2026-08-14")
+    assert a.state == B.INVALID
+    assert not a.usable
+
+
+def test_an_old_snapshot_is_stale_and_still_readable(tmp_path):
+    _publish(tmp_path, _snapshot(cutoff="2026-01-01"))
+    a = B.for_company("acme-corp", root=tmp_path, today="2026-08-14")
+    assert a.state == B.STALE
+    # STALE content is real; its age is stated. This is the one non-CURRENT
+    # state whose payload a surface may still show.
+    assert a.usable and a.snapshot is not None
+    assert a.freshness_days > 21
+
+
+def test_a_snapshot_filed_under_another_company_is_invalid(tmp_path):
+    # The dangerous case: right filename, wrong contents. Showing this would
+    # attribute one company's market intelligence to another.
+    _publish(tmp_path, _snapshot("globex-inc"), name="acme-corp")
+    a = B.for_company("acme-corp", root=tmp_path, today="2026-08-14")
+    assert a.state == B.INVALID
+    assert not a.usable
+    assert "globex-inc" in a.reason
+
+
+def test_an_unreadable_contract_version_is_invalid(tmp_path):
+    _publish(tmp_path, _snapshot(contract_version="market_demo_snapshot.v99"))
+    a = B.for_company("acme-corp", root=tmp_path, today="2026-08-14")
+    assert a.state == B.INVALID
+    assert not a.usable
+
+
+def test_a_published_stated_absence_is_missing_not_current(tmp_path):
+    _publish(tmp_path, _snapshot(availability="UNAVAILABLE",
+                                 unavailable_reason="never analysed"))
+    a = B.for_company("acme-corp", root=tmp_path, today="2026-08-14")
+    assert a.state == B.MISSING
+    assert "never analysed" in a.reason
+
+
+# --- configuration ----------------------------------------------------------
+
+def test_an_unconfigured_bridge_is_missing_and_says_so(tmp_path):
+    # NEITHER source declares a root. `config_root` points at a directory
+    # with no config/preview.yaml, which is the state of a deployment that
+    # ships no declaration -- unreachable from this checkout, which does.
+    a = B.for_company("acme-corp", env={}, config_root=tmp_path,
+                      today="2026-08-14")
+    assert a.state == B.MISSING
+    assert a.configured is False
+    assert B.ENV_VAR in a.reason
+
+
+def test_the_root_comes_from_the_environment_and_is_not_guessed(tmp_path):
+    _publish(tmp_path, _snapshot())
+    a = B.for_company("acme-corp", env={B.ENV_VAR: str(tmp_path)},
+                      today="2026-08-14")
+    assert a.state == B.CURRENT
+
+
+def test_an_unset_root_never_falls_back_to_a_stale_fixture(tmp_path):
+    # A fallback would be a second system of record: the product would show
+    # market intelligence that no configured engine produced. Publishing into
+    # tmp_path and declaring nothing must not reach it.
+    _publish(tmp_path, _snapshot())
+    a = B.for_company("acme-corp", env={}, config_root=tmp_path / "nothing",
+                      today="2026-08-14")
+    assert a.snapshot is None
+
+
+# --- the startup reading ----------------------------------------------------
+
+def test_startup_reports_current_when_the_engine_is_publishing(tmp_path):
+    _publish(tmp_path, _snapshot("a"))
+    _publish(tmp_path, _snapshot("b", cutoff="2026-08-12"))
+    s = B.assess(root=tmp_path, today="2026-08-14")
+    assert s["state"] == B.CURRENT
+    assert s["snapshot_count"] == 2
+    # The NEWEST decides freshness, not an arbitrary file.
+    assert s["evidence_cutoff"] == "2026-08-13"
+    assert s["freshness_days"] == 1
+
+
+def test_startup_reports_stale_when_the_engine_stopped(tmp_path):
+    _publish(tmp_path, _snapshot("a", cutoff="2026-01-01"))
+    s = B.assess(root=tmp_path, today="2026-08-14")
+    assert s["state"] == B.STALE
+    assert "not running on this schedule" in s["reason"]
+
+
+def test_startup_distinguishes_unset_from_empty_from_unreadable(tmp_path):
+    unset = B.assess(env={}, config_root=tmp_path / "no-config",
+                     today="2026-08-14")
+    assert unset["state"] == B.MISSING and unset["configured"] is False
+
+    empty = tmp_path / "empty"
+    empty.joinpath(*T.MARKET_SNAPSHOT_DIR).mkdir(parents=True)
+    e = B.assess(root=empty, today="2026-08-14")
+    assert e["state"] == B.MISSING and e["configured"] is True
+
+    broken = tmp_path / "broken"
+    d = broken.joinpath(*T.MARKET_SNAPSHOT_DIR)
+    d.mkdir(parents=True)
+    (d / "x.json").write_text("{oops", encoding="utf-8")
+    b = B.assess(root=broken, today="2026-08-14")
+    # Files present and none readable is a CONTRACT BREAK, not an empty
+    # schedule -- the two need opposite repairs.
+    assert b["state"] == B.INVALID
+
+
+def test_startup_names_a_wrong_root_rather_than_reporting_empty(tmp_path):
+    s = B.assess(root=tmp_path / "nowhere", today="2026-08-14")
+    assert s["state"] == B.MISSING
+    assert "the root is" in s["reason"]
+
+
+# --- the digest -------------------------------------------------------------
+
+def test_the_digest_is_semantic_not_bytewise(tmp_path):
+    a = _snapshot()
+    reordered = dict(reversed(list(a.items())))
+    assert B._digest(a) == B._digest(reordered)
+
+
+def test_the_digest_changes_when_the_intelligence_changes(tmp_path):
+    assert B._digest(_snapshot()) != B._digest(_snapshot(cutoff="2026-08-12"))
+
+
+# ---------------------------------------------------------------------------
+# THE CROSSING. A bridge that resolves a path but whose payload the dossier
+# refuses is not a bridge -- an earlier batch silently refused 22 dossiers
+# over two unknown fields, and a refused dossier is indistinguishable from a
+# company never analysed.
+# ---------------------------------------------------------------------------
+
+def test_a_current_snapshot_crosses_into_a_dossier_with_no_unknown_fields(
+        tmp_path):
+    from intent_engine.demo_dossier import assemble, founder_unavailable
+    _publish(tmp_path, _snapshot(
+        belief_refs={"state": "AVAILABLE", "ids": ["b1"], "count": 1,
+                     "note": ""},
+        expectation_refs={"state": "AVAILABLE", "ids": ["x1"], "count": 1,
+                          "note": ""},
+        evidence_reference_ids={"state": "AVAILABLE", "ids": ["e1", "e2"],
+                                "count": 2, "note": ""}))
+    a = B.for_company("acme-corp", root=tmp_path, today="2026-08-14")
+    assert a.state == B.CURRENT
+    d = assemble(a.snapshot,
+                 founder_unavailable("no founder run", company_id="acme-corp"),
+                 cohort="", manifest_version="", now="2026-08-14",
+                 previous=None)
+    assert d.quality_block["unknown_fields"] == []
+    assert d.crossing_state == "MARKET_AVAILABLE_FOUNDER_UNAVAILABLE"
+    blocks = d.market_block["blocks"]
+    assert blocks["evidence"]["count"] == 2
+    assert blocks["expectations"]["ids"] == ["x1"]
+
+
+def test_an_unidentified_hidden_state_crosses_as_a_measured_zero(tmp_path):
+    # The market engine reports this for 22 of 26 live companies: a hidden
+    # state was tracked and its posterior is uniform. It must cross as "ran
+    # and identified nothing", never as an unknown field and never as absent.
+    _publish(tmp_path, _snapshot(hidden_state_refs={
+        "state": "AVAILABLE", "ids": [], "count": 0, "unidentified": 1,
+        "note": "1 hidden state(s) were tracked and none is identified: "
+                "the posterior is uniform"}))
+    from intent_engine.demo_dossier import assemble, founder_unavailable
+    a = B.for_company("acme-corp", root=tmp_path, today="2026-08-14")
+    d = assemble(a.snapshot,
+                 founder_unavailable("no founder run", company_id="acme-corp"),
+                 cohort="", manifest_version="", now="2026-08-14",
+                 previous=None)
+    assert d.quality_block["unknown_fields"] == []
+    block = d.market_block["blocks"]["hidden_states"]
+    assert block["state"] == "AVAILABLE"
+    assert block["is_measured_zero"] is True
+    assert "uniform" in block["note"]
+
+
+def test_an_invalid_snapshot_never_reaches_a_dossier(tmp_path):
+    _publish(tmp_path, _snapshot("globex-inc"), name="acme-corp")
+    a = B.for_company("acme-corp", root=tmp_path, today="2026-08-14")
+    assert a.snapshot is None or not a.usable
+
+
+# ---------------------------------------------------------------------------
+# THE OPERATOR SURFACE. A bridge state nobody can see is a bridge state
+# nobody will fix -- "no snapshot for this company" is the same sentence
+# whether the root is wrong, unset, or genuinely empty.
+# ---------------------------------------------------------------------------
+
+def _webapp(tmp_path):
+    from intent_engine.webapp.app import WebApp
+    from intent_engine.webapp.config import AppConfig
+    config = AppConfig(env="test", secret="s" * 40, demo_mode=True,
+                       web_store_path=tmp_path / "web.jsonl",
+                       fi_store_path=tmp_path / "fi.jsonl",
+                       ci_store_path=tmp_path / "ci.jsonl")
+    return WebApp(config, transport=lambda *a, **k: None, resolver=False)
+
+
+def test_readyz_states_the_market_bridge(tmp_path, monkeypatch):
+    market = tmp_path / "market"
+    _publish(market, _snapshot("acme-corp"))
+    monkeypatch.setenv(B.ENV_VAR, str(market))
+    state = _webapp(tmp_path)._market_bridge_state()
+    assert state["state"] in (B.CURRENT, B.STALE)
+    assert state["snapshot_count"] == 1
+    assert state["configured"] is True
+
+
+def test_readyz_says_when_no_market_engine_is_configured(tmp_path,
+                                                         monkeypatch):
+    # With the environment silent the SHIPPED declaration answers, and
+    # /readyz must say which source did.
+    monkeypatch.delenv(B.ENV_VAR, raising=False)
+    state = _webapp(tmp_path)._market_bridge_state()
+    assert state["config_source"] in (B.SOURCE_PREVIEW_CONFIG,
+                                      B.SOURCE_MISSING)
+    if state["config_source"] == B.SOURCE_MISSING:
+        assert state["state"] == B.MISSING
+        assert state["configured"] is False
+    else:
+        assert state["configured"] is True
+
+
+def test_a_failure_to_assess_is_not_reported_as_no_market_data(tmp_path,
+                                                               monkeypatch):
+    # MISSING is a claim about the market engine. A probe that could not run
+    # has made no such claim, and saying it had would send an operator to
+    # look at the wrong system.
+    app = _webapp(tmp_path)
+    import intent_engine.demo_dossier.bridge as _b
+
+    def _boom(**_kw):
+        raise RuntimeError("disk went away")
+    monkeypatch.setattr(_b, "assess", _boom)
+    state = app._market_bridge_state()
+    assert state["state"] == "MARKET_BRIDGE_UNASSESSED"
+    assert state["state"] != B.MISSING
+    assert "disk went away" in state["reason"]
+
+
+# ---------------------------------------------------------------------------
+# A REFUSAL IS NOT A ZERO, AND IT MUST CROSS TYPED.
+#
+# Every live causal block is PANEL_UNAVAILABLE. A surface that has to parse
+# the note to tell a refusal from an estimate will eventually render one as
+# the other.
+# ---------------------------------------------------------------------------
+
+def _dossier(tmp_path, **blocks):
+    from intent_engine.demo_dossier import assemble, founder_unavailable
+    _publish(tmp_path, _snapshot(**blocks))
+    a = B.for_company("acme-corp", root=tmp_path, today="2026-08-14")
+    assert a.state == B.CURRENT
+    return assemble(a.snapshot,
+                    founder_unavailable("no founder run",
+                                        company_id="acme-corp"),
+                    cohort="", manifest_version="", now="2026-08-14",
+                    previous=None)
+
+
+def test_a_causal_refusal_crosses_with_its_state_histogram(tmp_path):
+    d = _dossier(tmp_path, causal_result_refs={
+        "state": "AVAILABLE", "ids": ["r1", "r2"], "count": 2, "note": "",
+        "states": {"PANEL_UNAVAILABLE": 2}})
+    block = d.market_block["blocks"]["causal_results"]
+    assert block["states"] == {"PANEL_UNAVAILABLE": 2}
+    assert block["is_refusal"] is True
+    # It RAN and produced rows. Calling this a measured zero would say the
+    # engine looked and found no effect, which is a different claim.
+    assert block["is_measured_zero"] is False
+    assert d.quality_block["unknown_fields"] == []
+
+
+def test_an_estimate_is_not_read_as_a_refusal(tmp_path):
+    d = _dossier(tmp_path, causal_result_refs={
+        "state": "AVAILABLE", "ids": ["r1"], "count": 1, "note": "",
+        "states": {"ESTIMATE_SUPPORTED": 1}})
+    assert d.market_block["blocks"]["causal_results"]["is_refusal"] is False
+
+
+def test_a_mixed_block_is_not_wholly_a_refusal(tmp_path):
+    d = _dossier(tmp_path, causal_result_refs={
+        "state": "AVAILABLE", "ids": ["r1", "r2"], "count": 2, "note": "",
+        "states": {"ESTIMATE_BOUNDED": 1, "PANEL_UNAVAILABLE": 1}})
+    assert d.market_block["blocks"]["causal_results"]["is_refusal"] is False
+
+
+def test_an_unrecognised_state_degrades_to_refusal_never_to_an_estimate(
+        tmp_path):
+    # The safe direction. A refusal state added upstream that this side has
+    # never heard of must read as "no effect was estimated", never as one.
+    d = _dossier(tmp_path, causal_result_refs={
+        "state": "AVAILABLE", "ids": ["r1"], "count": 1, "note": "",
+        "states": {"SOME_NEW_UPSTREAM_REFUSAL": 1}})
+    assert d.market_block["blocks"]["causal_results"]["is_refusal"] is True
+
+
+def test_an_unidentified_hidden_state_crosses_its_count(tmp_path):
+    d = _dossier(tmp_path, hidden_state_refs={
+        "state": "AVAILABLE", "ids": [], "count": 0, "unidentified": 3,
+        "note": "3 tracked, none identified: the posterior is uniform"})
+    block = d.market_block["blocks"]["hidden_states"]
+    assert block["unidentified"] == 3
+    assert block["is_measured_zero"] is True
+    assert d.quality_block["unknown_fields"] == []
+
+
+def test_a_block_without_a_histogram_does_not_invent_one(tmp_path):
+    d = _dossier(tmp_path, causal_result_refs={
+        "state": "AVAILABLE", "ids": [], "count": 0, "note": ""})
+    block = d.market_block["blocks"]["causal_results"]
+    assert "states" not in block and "is_refusal" not in block
+
+
+# ---------------------------------------------------------------------------
+# THE DECLARED PREVIEW CONFIGURATION.
+#
+# `MARKET_SNAPSHOT_ROOT` carries no credential, and the preview service is
+# dashboard-configured rather than Blueprint-managed, so the value could only
+# ever be set by hand. A demo blocked on somebody retyping a literal is a
+# demo that stays blocked.
+# ---------------------------------------------------------------------------
+
+def _declare(root, value='"."'):
+    d = root / "config"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "preview.yaml").write_text(f"market_snapshot_root: {value}\n",
+                                    encoding="utf-8")
+
+
+def test_the_environment_wins_over_the_declared_config(tmp_path):
+    _declare(tmp_path)
+    assert B.config_source(env={B.ENV_VAR: "/somewhere"}) == B.SOURCE_ENV
+    assert str(B.configured_root(env={B.ENV_VAR: "/somewhere"})) == "/somewhere"
+
+
+def test_the_declared_config_is_used_when_the_environment_is_silent():
+    # The shipped declaration. This is what makes the preview work without a
+    # dashboard edit, and it must report WHERE the value came from.
+    assert B.config_source(env={}) == B.SOURCE_PREVIEW_CONFIG
+    assert B.configured_root(env={}) is not None
+
+
+def test_a_relative_declaration_resolves_against_the_repo_not_the_cwd(
+        tmp_path, monkeypatch):
+    # The property a cwd-relative read does not have: the same path whatever
+    # directory the service was started from.
+    _declare(tmp_path)
+    monkeypatch.chdir(tmp_path.parent)
+    first = B._preview_config_root(tmp_path)
+    sub = tmp_path / "elsewhere"
+    sub.mkdir()
+    monkeypatch.chdir(sub)
+    assert B._preview_config_root(tmp_path) == first
+
+
+def test_an_absent_declaration_is_missing_not_a_guess(tmp_path):
+    assert B._preview_config_root(tmp_path) is None
+
+
+def test_an_empty_declaration_is_missing_not_the_repo_root(tmp_path):
+    _declare(tmp_path, value='""')
+    assert B._preview_config_root(tmp_path) is None
+
+
+def test_a_commented_out_declaration_is_not_read(tmp_path):
+    d = tmp_path / "config"
+    d.mkdir(parents=True)
+    (d / "preview.yaml").write_text("# market_snapshot_root: \".\"\n",
+                                    encoding="utf-8")
+    assert B._preview_config_root(tmp_path) is None
+
+
+def test_neither_source_reports_missing_and_names_both(tmp_path):
+    s = B.assess(root=None, env={}, today="2026-08-14")
+    # The shipped config makes this CURRENT; the point under test is that the
+    # reading always states which declaration supplied it.
+    assert s["config_source"] in (B.SOURCE_ENV, B.SOURCE_PREVIEW_CONFIG,
+                                  B.SOURCE_MISSING)
+
+
+def test_the_shipped_declaration_makes_the_bridge_current():
+    # The end state this file exists for: no environment variable, no
+    # dashboard edit, and the deployment still reads its snapshots.
+    s = B.assess(env={}, today="2026-08-14")
+    assert s["state"] == B.CURRENT
+    assert s["configured"] is True
+    assert s["config_source"] == B.SOURCE_PREVIEW_CONFIG
+    assert s["snapshot_count"] >= 26
+    assert s["invalid_files"] == 0
+
+
+# ---------------------------------------------------------------------------
+# THE TWO SIDES KEY THE SAME COMPANY DIFFERENTLY.
+#
+# Found live: the founder files a dossier under its manifest id
+# (`cloudflare`); the market publishes under the legal-name key
+# (`cloudflare-inc`). The dossier read FOUNDER_AVAILABLE_MARKET_UNAVAILABLE
+# for a company whose snapshot was on disk.
+# ---------------------------------------------------------------------------
+
+def test_an_alias_key_finds_the_snapshot_the_primary_key_misses(tmp_path):
+    _publish(tmp_path, _snapshot("cloudflare-inc"))
+    missed = B.for_company("cloudflare", root=tmp_path, today="2026-08-14")
+    assert missed.state == B.MISSING
+    found = B.for_company("cloudflare", root=tmp_path,
+                          aliases=["cloudflare-inc"], today="2026-08-14")
+    assert found.state == B.CURRENT
+    assert found.snapshot.company_id == "cloudflare-inc"
+
+
+def test_trying_more_keys_never_joins_another_company(tmp_path):
+    # The identity check is PER CANDIDATE, not relaxed. An alias that names a
+    # different company's file must not attribute its intelligence here.
+    _publish(tmp_path, _snapshot("globex-inc"), name="acme-alias")
+    a = B.for_company("acme-corp", root=tmp_path, aliases=["acme-alias"],
+                      today="2026-08-14")
+    assert not a.usable
+
+
+def test_the_primary_key_wins_when_both_exist(tmp_path):
+    _publish(tmp_path, _snapshot("acme-corp", cutoff="2026-08-13"))
+    _publish(tmp_path, _snapshot("acme-inc", cutoff="2026-08-13"))
+    a = B.for_company("acme-corp", root=tmp_path, aliases=["acme-inc"],
+                      today="2026-08-14")
+    assert a.snapshot.company_id == "acme-corp"
+
+
+def test_no_alias_matching_still_reports_the_primary_key(tmp_path):
+    a = B.for_company("acme-corp", root=tmp_path, aliases=["acme-inc"],
+                      today="2026-08-14")
+    assert a.state == B.MISSING
+    assert "acme-corp" in a.reason

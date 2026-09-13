@@ -1,0 +1,110 @@
+{
+  "company": "Caterpillar Inc.",
+  "deployed_sha": "8397d67",
+  "captured_at": "2026-08-21T02:31:17Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2H3TBAMJF5A4B5JFQWF98/intro",
+      "chars": 5439,
+      "html_chars": 30974
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2H3TBAMJF5A4B5JFQWF98/intro",
+      "chars": 5439,
+      "html_chars": 30974
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2H3TBAMJF5A4B5JFQWF98/slides",
+      "chars": 6292,
+      "html_chars": 50316
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2H3TBAMJF5A4B5JFQWF98/full",
+      "chars": 23442,
+      "html_chars": 65322
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2H3TBAMJF5A4B5JFQWF98/story",
+      "chars": 4197,
+      "html_chars": 33710
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2H3TBAMJF5A4B5JFQWF98/history",
+      "chars": 29240,
+      "html_chars": 109410
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2H3TBAMJF5A4B5JFQWF98/connect",
+      "chars": 3909,
+      "html_chars": 28815
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2H3TBAMJF5A4B5JFQWF98/intro",
+      "chars": 5439,
+      "html_chars": 30974
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2H3TBAMJF5A4B5JFQWF98/evidence",
+      "chars": 6433,
+      "html_chars": 23685
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2H3TBAMJF5A4B5JFQWF98/report",
+      "chars": 307,
+      "html_chars": 14888
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2H3TBAMJF5A4B5JFQWF98/brief",
+      "chars": 17412,
+      "html_chars": 52117
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Caterpillar Inc. CAT \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connectin"
+    },
+    {
+      "t": 33.7,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Caterpillar Inc. CAT \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Connecting "
+    },
+    {
+      "t": 43.7,
+      "text": ""
+    },
+    {
+      "t": 252.3,
+      "text": "Caterpillar Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Caterpillar Inc. CAT \u00b7 USA \u00b7 SEC CIK 0000018230 Caterpillar Inc. is an industrial business that runs on sale of a long-lived manufactured product followed by a higher-margin service and parts stream ove"
+    }
+  ],
+  "process_before": {
+    "boot_id": "ea27804e556c4fcf",
+    "started_at": 1787278313.388944,
+    "uptime_seconds": 1164.2
+  },
+  "run_id": "01M0H2H3TBAMJF5A4B5JFQWF98",
+  "status": "READY",
+  "seconds": 252,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 11.79,
+    "intro": 6.26,
+    "slides": 12.93,
+    "full": 21.37,
+    "story": 9.63,
+    "history": 0.78,
+    "connect": 6.29
+  },
+  "errors": []
+}

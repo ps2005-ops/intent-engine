@@ -1,0 +1,50 @@
+[
+  {
+    "company": "NVIDIA Corporation",
+    "cik": "1045810",
+    "run_id": "01M09QNYZR20QBMNQ4Z8XSS206",
+    "seconds": 21,
+    "auto_advanced": false,
+    "landed_on": null,
+    "false_failure": true,
+    "steps": {
+      "intro": {
+        "status": 200,
+        "chars": 4555,
+        "absence": []
+      },
+      "slides": {
+        "status": 200,
+        "chars": 1113,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "full": {
+        "status": 200,
+        "chars": 1113,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "story": {
+        "status": 200,
+        "chars": 5017,
+        "absence": []
+      },
+      "history": {
+        "status": 200,
+        "chars": 28327,
+        "absence": []
+      },
+      "connect": {
+        "status": 200,
+        "chars": 3857,
+        "absence": []
+      }
+    },
+    "intro_head": "NVIDIA Corporation \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction NVIDIA Corporation NVDA \u00b7 USA \u00b7 SEC CIK 1045810 NVIDIA Corporation is a semiconductor business that runs on design and manufacture of a physical product sold into a capacity-constrained supply chain. Its position is contested most directly by Keeping the existing fleet running longer, Rental and used equipment in place of a new purchase and Automation absorbing the task itself. The strategic read The question worth arguing about is how much capacity to commit, and when, given that the commitment to manufacturing and foundry cost is made before the unit volume it is meant to serve? The decision in front of management is how much capacity to commit, and when, given that the commitment to manufacturing and foundry cost is made before the unit volume it is meant to serve? bounded Our read: Bou",
+    "position_sentence": "contested most directly by Keeping the existing fleet running longer, Rental and used equipment in place of a new purchase and Automation absorbing the task itself",
+    "model_sentence": "semiconductor | design and manufacture of a physical product sold into a capacity-constrained supply chain"
+  }
+]

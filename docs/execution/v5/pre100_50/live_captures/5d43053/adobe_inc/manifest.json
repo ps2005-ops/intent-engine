@@ -1,0 +1,135 @@
+{
+  "company": "Adobe Inc.",
+  "deployed_sha": "5d43053",
+  "captured_at": "2026-08-21T08:24:00Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPPZFJ84PYN4H0SKMJS25D/intro",
+      "chars": 5146,
+      "html_chars": 30701,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPPZFJ84PYN4H0SKMJS25D/intro",
+      "chars": 5146,
+      "html_chars": 30701,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPPZFJ84PYN4H0SKMJS25D/slides",
+      "chars": 6964,
+      "html_chars": 59751,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPPZFJ84PYN4H0SKMJS25D/full",
+      "chars": 26182,
+      "html_chars": 68741,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPPZFJ84PYN4H0SKMJS25D/story",
+      "chars": 5561,
+      "html_chars": 35387,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPPZFJ84PYN4H0SKMJS25D/history",
+      "chars": 28412,
+      "html_chars": 108506,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPPZFJ84PYN4H0SKMJS25D/connect",
+      "chars": 4024,
+      "html_chars": 28940,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPPZFJ84PYN4H0SKMJS25D/intro",
+      "chars": 5146,
+      "html_chars": 30701,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPPZFJ84PYN4H0SKMJS25D/evidence",
+      "chars": 6752,
+      "html_chars": 24795,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPPZFJ84PYN4H0SKMJS25D/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPPZFJ84PYN4H0SKMJS25D/brief",
+      "chars": 19672,
+      "html_chars": 54779,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.3,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Adobe Inc. ADBE \u00b7 adobe.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Co",
+      "status": 200,
+      "html_bytes": 17006
+    },
+    {
+      "t": 33.1,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Adobe Inc. ADBE \u00b7 adobe.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Conn",
+      "status": 200,
+      "html_bytes": 17002
+    },
+    {
+      "t": 228.5,
+      "text": "Adobe Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Adobe Inc. ADBE \u00b7 USA \u00b7 adobe.com \u00b7 SEC CIK 0000796343 Adobe Inc. is a software platform business that runs on recurring software subscription: revenue is contracted and renews, so the installed base carries ",
+      "status": 200,
+      "html_bytes": 30772
+    }
+  ],
+  "process_before": {
+    "boot_id": "1a03e19590ee4c01",
+    "started_at": 1787298504.401148,
+    "uptime_seconds": 2136.8
+  },
+  "run_id": "01M0HPPZFJ84PYN4H0SKMJS25D",
+  "status": "READY",
+  "seconds": 229,
+  "first_useful": 229,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 6.89,
+    "intro": 6.49,
+    "slides": 8.73,
+    "full": 13.77,
+    "story": 6.19,
+    "history": 0.28,
+    "connect": 5.11
+  },
+  "outcome": "FULL_ANALYSIS",
+  "outcome_by_route": {
+    "run": "FULL_ANALYSIS",
+    "intro": "FULL_ANALYSIS",
+    "slides": "FULL_ANALYSIS",
+    "full": "FULL_ANALYSIS",
+    "story": "FULL_ANALYSIS",
+    "history": "FULL_ANALYSIS",
+    "connect": "FULL_ANALYSIS"
+  },
+  "outcome_disagreement": [],
+  "errors": []
+}

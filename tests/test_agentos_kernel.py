@@ -81,10 +81,19 @@ def test_the_base_store_behaviour_is_intact(tmp_path):
     assert stable_id(store, "k1") == row.subject_id
     assert stable_id(store, "never-seen") != row.subject_id
 
+    # LOUD CORRUPTION, sharpened. Interior damage -- a malformed line with
+    # readable records after it -- still refuses, because dropping it would
+    # lose acknowledged history. A torn TAIL is repaired instead: on the
+    # deployed preview one half-written trailing line made the whole log
+    # unreadable and every request answered 500 for hours.
     path = tmp_path / "product.jsonl"
-    path.write_text(path.read_text() + "{not json\n")
+    good = path.read_text()
+    path.write_text("{not json\n" + good)
     with pytest.raises(ProductCorruptLogError):
         ProductStore(path).read_all()
+
+    path.write_text(good + "{not json\n")
+    assert len(ProductStore(path).read_all()) == 1
 
 
 def test_concurrent_appends_survive_through_the_base(tmp_path):

@@ -1,0 +1,36 @@
+{
+  "analyst_model": "claude-sonnet-5",
+  "backend_state": "CREDITS_EXHAUSTED",
+  "company_ids": [
+    "cloudflare",
+    "advanced-micro-devices",
+    "boeing",
+    "bank-of-america",
+    "alimentation-couche-tard",
+    "agnico-eagle-mines",
+    "bce",
+    "stripe",
+    "mckinsey",
+    "johnson-and-johnson"
+  ],
+  "contract": "breaker10_intelligence_baseline_id.v1",
+  "founder_sha": "ae438627315e3408a37d0bcb6459e3a0c7353a26",
+  "manifest_version": "1.0.0",
+  "market_sha": "fbcbaccdcd577ba2e962c6ef44fb1174423da91a",
+  "retrieval": {
+    "max_approved_sources": 14,
+    "max_candidates_shown": 32,
+    "max_homepage_links": 20,
+    "max_known_paths": 28,
+    "max_redirects": 5,
+    "user_agent": "FounderIntelligenceBot/1.1 (outside-in company analysis; approved-source retrieval)"
+  },
+  "schemas": {
+    "decision_impact": "decision_impact.v1",
+    "effect_producer": "effect_producer.v1",
+    "independence": "evidence_independence.v1",
+    "learning_attribution": "learning_attribution.v1"
+  },
+  "too_large_policy": "UNCHANGED since Batch 13; still the next retrieval lever",
+  "why": "Frozen BEFORE the wave so the before/after comparison is invalid if any of these silently changes. A result measured against a moved baseline measures the move."
+}

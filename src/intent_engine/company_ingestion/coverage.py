@@ -40,12 +40,61 @@ MAX_SINGLE_FAMILY_SHARE = 0.75
 CORE_FAMILIES = (IDENTITY, PRODUCT, CUSTOMERS, INVESTOR, STRATEGY)
 
 
+#: WHAT A FILING IS, BY ITS FORM. The venue is not the content.
+#:
+#: MEASURED across the 50-company gauntlet: twelve companies whose only
+#: reachable evidence was SEC EDGAR composed as `families=investor` -- ONE
+#: family, every time, whatever the filings actually said. One family can
+#: never reach MIN_FAMILIES_LIMITED = 2, so those runs could not have
+#: produced a report no matter how much was retrieved. The refusal was
+#: structural, and it was decided here, by a branch that read the venue and
+#: stopped.
+#:
+#: A 10-K opens with Item 1. Business -- the company's own account of what it
+#: is and does, which is exactly the `identity` family the readiness gate
+#: goes looking for. An 8-K is a material event the company chose to
+#: announce. A proxy is governance and compensation. Calling all three
+#: "investor material" describes where they were filed, not what a reader
+#: learns from them.
+#:
+#: THIS DOES NOT MANUFACTURE INDEPENDENCE. Every one of these is still
+#: company-authored, `independence.py` still scores it as such, and the
+#: evidence page still reports "0 of N sources are independent of this
+#: company". Breadth of CONTENT and independence of VOICE are two axes, and
+#: only the first one is read here.
+_FILING_FAMILY = {
+    # The annual report: Item 1 Business, Item 1A Risk Factors, MD&A.
+    "10-K": IDENTITY, "10-K/A": IDENTITY,
+    "20-F": IDENTITY, "20-F/A": IDENTITY, "40-F": IDENTITY,
+    # A material event the company announced.
+    "8-K": STRATEGY, "8-K/A": STRATEGY, "6-K": STRATEGY,
+    # Governance, board and compensation.
+    "DEF 14A": TALENT, "DEFA14A": TALENT, "DEF14A": TALENT,
+    # Quarterly financials are investor material in the ordinary sense.
+    "10-Q": INVESTOR, "10-Q/A": INVESTOR,
+}
+
+
+def filing_form(document: dict) -> str:
+    """The SEC form this document is, or "" when it is not a filing."""
+    filing = document.get("filing")
+    if isinstance(filing, dict):
+        return (filing.get("form") or "").upper().strip()
+    return ""
+
+
 def family_of(document: dict) -> str:
     """Map a retrieved document to its evidence family."""
     source_type = document.get("source_type", "")
     source_class = document.get("source_class", "company_owned")
     if source_class == "investor_material":
-        return INVESTOR
+        # An EXHIBIT is the business content the filing was wrapped around --
+        # an earnings release, a strategy deck -- and reads as the company
+        # saying where it is going.
+        title = (document.get("title") or "").lower()
+        if "exhibit" in title:
+            return STRATEGY
+        return _FILING_FAMILY.get(filing_form(document), INVESTOR)
     if source_class in ("customer_voice", "independent_reporting",
                         "competitor") or source_type == "pasted":
         return INDEPENDENT

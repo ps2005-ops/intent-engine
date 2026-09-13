@@ -1,0 +1,19 @@
+[
+  {
+    "company": "Advanced Micro Devices, Inc.",
+    "deployed_sha": "a22929c",
+    "status": "FAILED",
+    "run_id": "01M0JZHP9Z5KG0XCTF09RXZZA8",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/a22929c/advanced_micro_devices_inc",
+    "process_before": {
+      "boot_id": "460f73b07edf4631",
+      "started_at": 1787343427.880808,
+      "uptime_seconds": 29.4
+    },
+    "entry_domain": "amd.com",
+    "seconds": 90,
+    "first_useful": null,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JZHP9Z5KG0XCTF09RXZZA8/progress"
+  }
+]

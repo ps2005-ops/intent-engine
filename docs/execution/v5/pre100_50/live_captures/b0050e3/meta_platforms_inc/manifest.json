@@ -1,0 +1,157 @@
+{
+  "company": "Meta Platforms, Inc.",
+  "deployed_sha": "b0050e3",
+  "captured_at": "2026-08-21T11:54:29Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J2REJPX54FJBBE85B22A5K",
+      "chars": 6234,
+      "html_chars": 33080,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J2REJPX54FJBBE85B22A5K/intro",
+      "chars": 5965,
+      "html_chars": 31530,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J2REJPX54FJBBE85B22A5K/slides",
+      "chars": 5792,
+      "html_chars": 49666,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J2REJPX54FJBBE85B22A5K/full",
+      "chars": 6234,
+      "html_chars": 33080,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J2REJPX54FJBBE85B22A5K/story",
+      "chars": 4530,
+      "html_chars": 34050,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J2REJPX54FJBBE85B22A5K/history",
+      "chars": 29234,
+      "html_chars": 104830,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J2REJPX54FJBBE85B22A5K/connect",
+      "chars": 4074,
+      "html_chars": 28980,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J2REJPX54FJBBE85B22A5K",
+      "chars": 6234,
+      "html_chars": 33080,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J2REJPX54FJBBE85B22A5K/evidence",
+      "chars": 6455,
+      "html_chars": 23756,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J2REJPX54FJBBE85B22A5K/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J2REJPX54FJBBE85B22A5K/brief",
+      "chars": 20236,
+      "html_chars": 56193,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Meta Platforms, Inc. META \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Conn",
+      "status": 200,
+      "html_bytes": 17003
+    },
+    {
+      "t": 25.8,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Meta Platforms, Inc. META \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Connec",
+      "status": 200,
+      "html_bytes": 16999
+    },
+    {
+      "t": 77.2,
+      "text": "",
+      "status": 0,
+      "html_bytes": 16999,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J2REJPX54FJBBE85B22A5K/progress",
+      "head": ""
+    },
+    {
+      "t": 334.8,
+      "text": "Meta Platforms, Inc. \u2014 the decision Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. Meta Platforms, Inc. sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. The answer Across the publ",
+      "status": 200,
+      "html_bytes": 33138
+    }
+  ],
+  "process_before": {
+    "boot_id": "4dfba762a3d64a55",
+    "started_at": 1787313249.7337387,
+    "uptime_seconds": 19.8
+  },
+  "run_id": "01M0J2REJPX54FJBBE85B22A5K",
+  "status": "READY",
+  "seconds": 335,
+  "first_useful": 335,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 11.86,
+    "intro": 15.61,
+    "slides": 15.65,
+    "full": 2.45,
+    "story": 7.59,
+    "history": 0.27,
+    "connect": 5.83
+  },
+  "evidence_gate": "compose=7 usable=7 families=independent|investor stored=7 attempt=1",
+  "outcome": "FULL_ANALYSIS",
+  "outcome_by_route": {
+    "run": "FULL_ANALYSIS",
+    "intro": "FULL_ANALYSIS",
+    "slides": "FULL_ANALYSIS",
+    "full": "FULL_ANALYSIS",
+    "story": "FULL_ANALYSIS",
+    "history": "FULL_ANALYSIS",
+    "connect": "FULL_ANALYSIS"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": [
+    "GET /runs/01M0J2REJPX54FJBBE85B22A5K/progress: timeout",
+    "GET /runs/01M0J2REJPX54FJBBE85B22A5K/progress: timeout",
+    "GET /runs/01M0J2REJPX54FJBBE85B22A5K/progress: timeout",
+    "GET /runs/01M0J2REJPX54FJBBE85B22A5K/progress: timeout",
+    "GET /runs/01M0J2REJPX54FJBBE85B22A5K/progress: timeout"
+  ]
+}

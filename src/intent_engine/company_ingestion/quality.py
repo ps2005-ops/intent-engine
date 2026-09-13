@@ -145,27 +145,68 @@ def evidence_gaps(documents: list) -> dict:
               and (d.get("text_content") or "").strip()]
     coverage = assess_coverage(documents)
     families = coverage.get("families", [])
-    missing = []
+    # WHAT IS MISSING BY VENUE. This is the STOPPING condition and it is
+    # deliberately unchanged: it decides how many acquisition passes the run
+    # makes, and loosening it would make the product fetch LESS, which is the
+    # opposite of the repair.
+    venue_missing = []
     if not any(d.get("source_type") in ("homepage", "about") for d in usable):
-        missing.append("identity")
+        venue_missing.append("identity")
     if not any(d.get("source_type") == "product" for d in usable):
-        missing.append("product")
+        venue_missing.append("product")
     if not any(d.get("source_type") == "customers"
                or d.get("source_class") in ("customer_voice",
                                             "independent_reporting")
                for d in usable):
-        missing.append("customers")
+        venue_missing.append("customers")
     if not any(d.get("source_class") in ("executive_statement",
                                          "investor_material")
                or d.get("source_type") == "blog" for d in usable):
-        missing.append("strategy")
+        venue_missing.append("strategy")
     if not any(d.get("source_class") == "investor_material" for d in usable):
-        missing.append("investor")
+        venue_missing.append("investor")
     sufficient = (
-        not missing
+        not venue_missing
         and len(families) >= MIN_FAMILIES
         and coverage.get("dominant_share", 1.0) <= MAX_FAMILY_DOMINANCE)
-    return {"missing_families": missing, "families": families,
+
+    # WHAT IS MISSING BY ROLE, which is what the bounded retry budget should
+    # be SPENT on. These were the same list, and they are not the same
+    # question.
+    #
+    # `venue_missing` asks where a document was published; `families` (from
+    # `coverage.family_of`) asks what a reader learns from it -- and that is
+    # the view `readiness.assess_readiness`, the gate that decides whether a
+    # report may exist at all, actually consults.
+    #
+    # MEASURED 2026-09-03 on Advanced Micro Devices, whose own domain timed
+    # out and whose run fell back entirely to EDGAR: nine documents, five
+    # families, and `family_of` correctly reading the 10-K's Item 1 Business
+    # as `identity`. `venue_missing` still said ['identity', 'product'],
+    # because a 10-K is not a homepage -- so the four-source retry budget was
+    # about to be spent guessing `/about` and `/products` against a host that
+    # had just stopped answering, to fill a role the run already had.
+    #
+    # The ROLES are readiness's own: identity-or-product, direction, market.
+    # A role that is already covered is not hunted; a role that is genuinely
+    # empty is hunted first.
+    covered = set(families)
+    role_missing = []
+    if not covered & {"identity", "product"}:
+        role_missing += ["identity", "product"]
+    if not covered & {"customers", "independent", "commercial"}:
+        role_missing.append("customers")
+    if not covered & {"strategy", "investor"}:
+        role_missing += ["strategy", "investor"]
+    # Anything the venue view wants that the role view has NOT ruled out
+    # stays on the list, after the blocking roles. Nothing that used to be
+    # attempted stops being attempted -- the budget is simply spent on the
+    # gaps that can still refuse a report, in that order.
+    for family in venue_missing:
+        if family not in role_missing:
+            role_missing.append(family)
+    return {"missing_families": role_missing, "families": families,
+            "venue_missing": venue_missing,
             "document_count": len(usable), "sufficient": sufficient,
             "dominant_share": coverage.get("dominant_share", 0.0)}
 

@@ -1,0 +1,609 @@
+{
+  "base": "https://intent-engine-preview-bridge.onrender.com",
+  "contract": "live_econ_matrix.v1",
+  "label": "second",
+  "readyz": {
+    "market_bridge": {
+      "config_source": "PREVIEW_CONFIG",
+      "configured": true,
+      "digest": "cb9c2caee1b1efde",
+      "directory": "/opt/render/project/src/reports/market/demo_snapshots",
+      "evidence_cutoff": "2026-08-14",
+      "freshness_days": 14,
+      "generated_at": "2026-08-14",
+      "invalid_files": 0,
+      "reason": "",
+      "root": "/opt/render/project/src",
+      "schema": "market_demo_snapshot.v1",
+      "snapshot_count": 26,
+      "state": "MARKET_BRIDGE_CURRENT"
+    },
+    "runtime_root": "data",
+    "storage": {
+      "accepting_feedback": false,
+      "boot_count": 1,
+      "durability": "EPHEMERAL_LIKELY",
+      "separate_filesystem": false,
+      "writable": true
+    }
+  },
+  "rescored": "the two self-contradiction checks were scored against the whole joined page and are now scored against the economic section, which is the thing that would be contradicting itself",
+  "rows": [
+    {
+      "carried_csrf": true,
+      "company": "Walmart",
+      "domain": "walmart.com",
+      "econ_excerpt": "Economic impact What changed This run's own analysis produced no recommendation to compare against, so no economic change to it can be measured. The economic reading is shown; the decision delta is not claimed. The reading As of 2026-08-27 the shared economic state reads policy rate falling; financial conditions rising. How it reaches this company rates set the carry on the inventory in the stores and the hurdle on the store and distribution capital programme. The variable it moves here is the policy path that sets funding cost and demand. What to learn next How much of cost of funds and the hurdle rate on committed capital is already contracted, hedged or repriced. Economic reading as of 2026-08-27 (current, 1 days old). 3 forward prediction(s) are open and none has come due, so there is no accuracy record to quote yet. Macro and industry exposure US consumer price index (all urban cons",
+      "failures": [],
+      "ready": true,
+      "requests": [
+        {
+          "path": "/demo",
+          "seconds": 0.3,
+          "status": 200
+        },
+        {
+          "landed": "https://intent-engine-preview-bridge.onrender.com/runs/01M13KK4YS2DMN8GCRS5NA9KEY/progress",
+          "path": "/analyze",
+          "seconds": 5.1,
+          "status": 200
+        },
+        {
+          "chars": 30936,
+          "path": "/runs/01M13KK4YS2DMN8GCRS5NA9KEY",
+          "seconds": 307.6,
+          "status": 200
+        },
+        {
+          "chars": 60627,
+          "path": "/runs/01M13KK4YS2DMN8GCRS5NA9KEY/brief",
+          "seconds": 18.7,
+          "status": 200
+        },
+        {
+          "chars": 75898,
+          "path": "/runs/01M13KK4YS2DMN8GCRS5NA9KEY/full",
+          "seconds": 21.0,
+          "status": 200
+        }
+      ],
+      "run_id": "01M13KK4YS2DMN8GCRS5NA9KEY",
+      "score": {
+        "abstained": false,
+        "blocked_stated": false,
+        "cross_surface_contradiction": false,
+        "denies_exposure_then_shows_one": false,
+        "economic_section_present": true,
+        "internal_enums_leaked": [],
+        "pre_calibration_language": true,
+        "reading_called_unavailable": false,
+        "spoke": false,
+        "words": {
+          "": 883,
+          "/brief": 3699,
+          "/full": 4965
+        }
+      },
+      "seconds_to_read": 73.7,
+      "slowest_seconds": 307.6,
+      "state": "READ",
+      "timeouts": []
+    },
+    {
+      "carried_csrf": true,
+      "company": "Nike",
+      "domain": "nike.com",
+      "econ_excerpt": "Economic impact What changed This run's own analysis produced no recommendation to compare against, so no economic change to it can be measured. The economic reading is shown; the decision delta is not claimed. The reading As of 2026-08-27 the shared economic state reads policy rate falling; financial conditions rising. How it reaches this company rates reach household discretionary spending and the cost of carrying inventory through the channel. The variable it moves here is the policy path that sets funding cost and demand. What to learn next How much of cost of funds and the hurdle rate on committed capital is already contracted, hedged or repriced. Economic reading as of 2026-08-27 (current, 1 days old). 3 forward prediction(s) are open and none has come due, so there is no accuracy record to quote yet. Macro and industry exposure US consumer price index (all urban consumers) is risi",
+      "failures": [],
+      "ready": true,
+      "requests": [
+        {
+          "path": "/demo",
+          "seconds": 0.6,
+          "status": 200
+        },
+        {
+          "landed": "https://intent-engine-preview-bridge.onrender.com/runs/01M13M05MWNAMP6JDEVYZW2JAA/progress",
+          "path": "/analyze",
+          "seconds": 0.6,
+          "status": 200
+        },
+        {
+          "chars": 30152,
+          "path": "/runs/01M13M05MWNAMP6JDEVYZW2JAA",
+          "seconds": 288.1,
+          "status": 200
+        },
+        {
+          "chars": 55592,
+          "path": "/runs/01M13M05MWNAMP6JDEVYZW2JAA/brief",
+          "seconds": 46.0,
+          "status": 200
+        },
+        {
+          "chars": 69488,
+          "path": "/runs/01M13M05MWNAMP6JDEVYZW2JAA/full",
+          "seconds": 14.7,
+          "status": 200
+        }
+      ],
+      "run_id": "01M13M05MWNAMP6JDEVYZW2JAA",
+      "score": {
+        "abstained": false,
+        "blocked_stated": false,
+        "cross_surface_contradiction": false,
+        "denies_exposure_then_shows_one": false,
+        "economic_section_present": true,
+        "internal_enums_leaked": [],
+        "pre_calibration_language": true,
+        "reading_called_unavailable": false,
+        "spoke": false,
+        "words": {
+          "": 818,
+          "/brief": 3239,
+          "/full": 4540
+        }
+      },
+      "seconds_to_read": 235.5,
+      "slowest_seconds": 288.1,
+      "state": "READ",
+      "timeouts": []
+    },
+    {
+      "carried_csrf": true,
+      "company": "JPMorgan Chase",
+      "domain": "jpmorganchase.com",
+      "econ_excerpt": "Economic impact What changed This run's own analysis produced no recommendation to compare against, so no economic change to it can be measured. The economic reading is shown; the decision delta is not claimed. The reading As of 2026-08-27 the shared economic state reads policy rate falling. How it reaches this company rates move the cost of funds and the yield on assets at different speeds, so the spread \u2014 the primary revenue driver \u2014 reprices directly. The variable it moves here is net interest spread between assets and funding. What to learn next How much of net interest spread between assets and funding is already contracted, hedged or repriced. Economic reading as of 2026-08-27 (current, 1 days old). 3 forward prediction(s) are open and none has come due, so there is no accuracy record to quote yet. Macro and industry exposure Average interest rate on outstanding Treasury notes is r",
+      "failures": [],
+      "ready": true,
+      "requests": [
+        {
+          "path": "/demo",
+          "seconds": 0.4,
+          "status": 200
+        },
+        {
+          "landed": "https://intent-engine-preview-bridge.onrender.com/runs/01M13MJ15Y7VTTS3WV3C2VJASP/progress",
+          "path": "/analyze",
+          "seconds": 0.4,
+          "status": 200
+        },
+        {
+          "chars": 30027,
+          "path": "/runs/01M13MJ15Y7VTTS3WV3C2VJASP",
+          "seconds": 133.1,
+          "status": 200
+        },
+        {
+          "chars": 52149,
+          "path": "/runs/01M13MJ15Y7VTTS3WV3C2VJASP/brief",
+          "seconds": 28.0,
+          "status": 200
+        },
+        {
+          "chars": 63166,
+          "path": "/runs/01M13MJ15Y7VTTS3WV3C2VJASP/full",
+          "seconds": 25.5,
+          "status": 200
+        }
+      ],
+      "run_id": "01M13MJ15Y7VTTS3WV3C2VJASP",
+      "score": {
+        "abstained": false,
+        "blocked_stated": false,
+        "cross_surface_contradiction": false,
+        "denies_exposure_then_shows_one": false,
+        "economic_section_present": true,
+        "internal_enums_leaked": [],
+        "pre_calibration_language": true,
+        "reading_called_unavailable": false,
+        "spoke": false,
+        "words": {
+          "": 791,
+          "/brief": 2914,
+          "/full": 3808
+        }
+      },
+      "seconds_to_read": 56.1,
+      "slowest_seconds": 133.1,
+      "state": "READ",
+      "timeouts": []
+    },
+    {
+      "carried_csrf": true,
+      "company": "Visa",
+      "domain": "visa.com",
+      "econ_excerpt": "Economic impact Current economic conditions do not materially change the strategic recommendation for this company. policy rate were read against this company's own exposures and none of them moves adversely through a channel that reaches this business, so the recommendation is unchanged. Economic reading as of 2026-08-27 (current, 1 days old). 3 forward prediction(s) are open and none has come due, so there is no accuracy record to quote yet. Macro and industry exposure Average interest rate on outstanding Treasury notes is rising: 3.3 percent (from 3.1, +0.2), compared with the same month a year earlier. The company's customers or its own balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund. Dearer credit compresses customer budgets and lengthens payback on anything sold as an investment case, which shows up as l",
+      "failures": [],
+      "ready": true,
+      "requests": [
+        {
+          "path": "/demo",
+          "seconds": 0.3,
+          "status": 200
+        },
+        {
+          "landed": "https://intent-engine-preview-bridge.onrender.com/runs/01M13MSEZJBETHZZD1RCQQARDY/progress",
+          "path": "/analyze",
+          "seconds": 0.5,
+          "status": 200
+        },
+        {
+          "chars": 30656,
+          "path": "/runs/01M13MSEZJBETHZZD1RCQQARDY",
+          "seconds": 213.6,
+          "status": 200
+        },
+        {
+          "chars": 53435,
+          "path": "/runs/01M13MSEZJBETHZZD1RCQQARDY/brief",
+          "seconds": 12.8,
+          "status": 200
+        },
+        {
+          "chars": 71893,
+          "path": "/runs/01M13MSEZJBETHZZD1RCQQARDY/full",
+          "seconds": 12.1,
+          "status": 200
+        }
+      ],
+      "run_id": "01M13MSEZJBETHZZD1RCQQARDY",
+      "score": {
+        "abstained": true,
+        "blocked_stated": false,
+        "cross_surface_contradiction": false,
+        "denies_exposure_then_shows_one": false,
+        "economic_section_present": true,
+        "internal_enums_leaked": [],
+        "pre_calibration_language": true,
+        "reading_called_unavailable": false,
+        "spoke": false,
+        "words": {
+          "": 837,
+          "/brief": 3076,
+          "/full": 4832
+        }
+      },
+      "seconds_to_read": 82.4,
+      "slowest_seconds": 213.6,
+      "state": "READ",
+      "timeouts": []
+    },
+    {
+      "carried_csrf": true,
+      "company": "Caterpillar",
+      "domain": "caterpillar.com",
+      "econ_excerpt": "Economic impact What changed This company's own evidence establishes no exposure to any condition the shared economic state measures, so no economic reading is asserted for it. That is a gap in this company's exposure map, not a quiet economy. Economic reading as of 2026-08-27 (current, 1 days old). no forward prediction has come due, so there is no accuracy record to quote yet. What this has prepared for you Investigation plan The one bounded check that would settle this, with what each result would favour. Drafted here and nothing more. Nothing is sent, published, scheduled or shared without your explicit approval. What this was built from The company's own pages \u2014 none Executive statements \u2014 none Filings and investor material \u00b7 5 Customer evidence \u2014 none Another registrant's filing \u00b7 1 Independent reporting \u00b7 3 We could not read anything the company publishes about itself, so its own ",
+      "failures": [],
+      "ready": true,
+      "requests": [
+        {
+          "path": "/demo",
+          "seconds": 0.3,
+          "status": 200
+        },
+        {
+          "landed": "https://intent-engine-preview-bridge.onrender.com/runs/01M13N395N5P282K561BJB1DZ5/progress",
+          "path": "/analyze",
+          "seconds": 0.5,
+          "status": 200
+        },
+        {
+          "chars": 37,
+          "path": "/runs/01M13N395N5P282K561BJB1DZ5",
+          "seconds": 300.1,
+          "status": 0
+        },
+        {
+          "chars": 36563,
+          "path": "/runs/01M13N395N5P282K561BJB1DZ5/brief",
+          "seconds": 43.3,
+          "status": 200
+        },
+        {
+          "chars": 82211,
+          "path": "/runs/01M13N395N5P282K561BJB1DZ5/full",
+          "seconds": 210.4,
+          "status": 200
+        }
+      ],
+      "run_id": "01M13N395N5P282K561BJB1DZ5",
+      "score": {
+        "abstained": false,
+        "blocked_stated": false,
+        "cross_surface_contradiction": false,
+        "denies_exposure_then_shows_one": false,
+        "economic_section_present": true,
+        "internal_enums_leaked": [],
+        "pre_calibration_language": true,
+        "reading_called_unavailable": false,
+        "spoke": false,
+        "words": {
+          "": 6,
+          "/brief": 1646,
+          "/full": 5548
+        }
+      },
+      "seconds_to_read": 87.4,
+      "slowest_seconds": 300.1,
+      "state": "READ",
+      "timeouts": [
+        {
+          "chars": 37,
+          "path": "/runs/01M13N395N5P282K561BJB1DZ5",
+          "seconds": 300.1,
+          "status": 0
+        }
+      ]
+    },
+    {
+      "carried_csrf": true,
+      "company": "Meta Platforms",
+      "domain": "meta.com",
+      "econ_excerpt": "Economic impact What changed This run's own analysis produced no recommendation to compare against, so no economic change to it can be measured. The economic reading is shown; the decision delta is not claimed. What to learn next Whether policy rate reaches this business through a mechanism we have not established. Economic reading as of 2026-08-27 (current, 1 days old). 3 forward prediction(s) are open and none has come due, so there is no accuracy record to quote yet. Macro and industry exposure Average interest rate on outstanding Treasury notes is rising: 3.3 percent (from 3.1, +0.2), compared with the same month a year earlier. The company's customers or its own balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund. Dearer credit compresses customer budgets and lengthens payback on anything sold as an investmen",
+      "failures": [],
+      "ready": true,
+      "requests": [
+        {
+          "path": "/demo",
+          "seconds": 0.3,
+          "status": 200
+        },
+        {
+          "landed": "https://intent-engine-preview-bridge.onrender.com/runs/01M13NPW65JTJB0ZZGHMQMTG5P/progress",
+          "path": "/analyze",
+          "seconds": 0.5,
+          "status": 200
+        },
+        {
+          "chars": 29379,
+          "path": "/runs/01M13NPW65JTJB0ZZGHMQMTG5P",
+          "seconds": 216.2,
+          "status": 200
+        },
+        {
+          "chars": 51444,
+          "path": "/runs/01M13NPW65JTJB0ZZGHMQMTG5P/brief",
+          "seconds": 35.0,
+          "status": 200
+        },
+        {
+          "chars": 63332,
+          "path": "/runs/01M13NPW65JTJB0ZZGHMQMTG5P/full",
+          "seconds": 23.8,
+          "status": 200
+        }
+      ],
+      "run_id": "01M13NPW65JTJB0ZZGHMQMTG5P",
+      "score": {
+        "abstained": false,
+        "blocked_stated": false,
+        "cross_surface_contradiction": false,
+        "denies_exposure_then_shows_one": false,
+        "economic_section_present": true,
+        "internal_enums_leaked": [],
+        "pre_calibration_language": true,
+        "reading_called_unavailable": false,
+        "spoke": false,
+        "words": {
+          "": 639,
+          "/brief": 2565,
+          "/full": 3269
+        }
+      },
+      "seconds_to_read": 63.6,
+      "slowest_seconds": 216.2,
+      "state": "READ",
+      "timeouts": []
+    },
+    {
+      "carried_csrf": true,
+      "company": "NVIDIA",
+      "domain": "nvidia.com",
+      "econ_excerpt": "Economic impact What changed The current economic state changes 3 elements of this recommendation: information priority, top priority, top risks. The reading As of 2026-08-27 the shared economic state reads policy rate falling; financial conditions rising; industrial production rising. How it reaches this company rates set the hurdle on capacity commitments made years before the revenue they carry. The variable it moves here is the policy path that sets funding cost and demand. Changes top priority Consolidating checkout/identity/data rails may encroach on layers partners currently monetize. becomes cost of funds and the hurdle rate on committed capital because financial conditions is rising to 6.66 percentage points from 6.58 a year earlier (2025-08-21) (as of 2026-08-27, MORTGAGE30US, FRED (Federal Reserve Bank of St. Louis)). Changes top risks company:blind:0 becomes econ:financial_co",
+      "failures": [],
+      "ready": true,
+      "requests": [
+        {
+          "path": "/demo",
+          "seconds": 0.3,
+          "status": 200
+        },
+        {
+          "landed": "https://intent-engine-preview-bridge.onrender.com/runs/01M13P17W00BN0W1K4AHMJGR74/progress",
+          "path": "/analyze",
+          "seconds": 0.8,
+          "status": 200
+        },
+        {
+          "chars": 37,
+          "path": "/runs/01M13P17W00BN0W1K4AHMJGR74",
+          "seconds": 300.4,
+          "status": 0
+        },
+        {
+          "chars": 37166,
+          "path": "/runs/01M13P17W00BN0W1K4AHMJGR74/brief",
+          "seconds": 54.8,
+          "status": 200
+        },
+        {
+          "chars": 78216,
+          "path": "/runs/01M13P17W00BN0W1K4AHMJGR74/full",
+          "seconds": 14.7,
+          "status": 200
+        }
+      ],
+      "run_id": "01M13P17W00BN0W1K4AHMJGR74",
+      "score": {
+        "abstained": false,
+        "blocked_stated": false,
+        "cross_surface_contradiction": false,
+        "denies_exposure_then_shows_one": false,
+        "economic_section_present": true,
+        "internal_enums_leaked": [],
+        "pre_calibration_language": true,
+        "reading_called_unavailable": false,
+        "spoke": true,
+        "words": {
+          "": 6,
+          "/brief": 1655,
+          "/full": 5478
+        }
+      },
+      "seconds_to_read": 93.2,
+      "slowest_seconds": 300.4,
+      "state": "READ",
+      "timeouts": [
+        {
+          "chars": 37,
+          "path": "/runs/01M13P17W00BN0W1K4AHMJGR74",
+          "seconds": 300.4,
+          "status": 0
+        }
+      ]
+    },
+    {
+      "carried_csrf": true,
+      "company": "Salesforce",
+      "domain": "salesforce.com",
+      "econ_excerpt": "Economic impact What changed The current economic state changes 3 elements of this recommendation: information priority, top priority, top risks. The reading As of 2026-08-27 the shared economic state reads policy rate falling; financial conditions rising. How it reaches this company rates set the discount rate on customers' own investment cases, so higher rates lengthen procurement and slow new bookings without touching the contracted base. The variable it moves here is the policy path that sets funding cost and demand. Changes top priority demand capture at the storefront becomes cost of funds and the hurdle rate on committed capital because financial conditions is rising to 6.66 percentage points from 6.58 a year earlier (2025-08-21) (as of 2026-08-27, MORTGAGE30US, FRED (Federal Reserve Bank of St. Louis)). Changes top risks company:0 becomes econ:financial_conditions, company:0 beca",
+      "failures": [],
+      "ready": true,
+      "requests": [
+        {
+          "path": "/demo",
+          "seconds": 0.3,
+          "status": 200
+        },
+        {
+          "landed": "https://intent-engine-preview-bridge.onrender.com/runs/01M13PFD24FB0SFQXSVHJ95365/progress",
+          "path": "/analyze",
+          "seconds": 0.5,
+          "status": 200
+        },
+        {
+          "chars": 31467,
+          "path": "/runs/01M13PFD24FB0SFQXSVHJ95365",
+          "seconds": 273.4,
+          "status": 200
+        },
+        {
+          "chars": 63968,
+          "path": "/runs/01M13PFD24FB0SFQXSVHJ95365/brief",
+          "seconds": 31.3,
+          "status": 200
+        },
+        {
+          "chars": 85153,
+          "path": "/runs/01M13PFD24FB0SFQXSVHJ95365/full",
+          "seconds": 21.8,
+          "status": 200
+        }
+      ],
+      "run_id": "01M13PFD24FB0SFQXSVHJ95365",
+      "score": {
+        "abstained": false,
+        "blocked_stated": false,
+        "cross_surface_contradiction": false,
+        "denies_exposure_then_shows_one": false,
+        "economic_section_present": true,
+        "internal_enums_leaked": [],
+        "pre_calibration_language": true,
+        "reading_called_unavailable": false,
+        "spoke": true,
+        "words": {
+          "": 957,
+          "/brief": 4131,
+          "/full": 6141
+        }
+      },
+      "seconds_to_read": 51.3,
+      "slowest_seconds": 273.4,
+      "state": "READ",
+      "timeouts": []
+    },
+    {
+      "carried_csrf": true,
+      "company": "Union Pacific",
+      "domain": "up.com",
+      "econ_excerpt": "Economic impact What changed This run's own analysis produced no recommendation to compare against, so no economic change to it can be measured. The economic reading is shown; the decision delta is not claimed. The reading As of 2026-08-27 the shared economic state reads policy rate falling; financial conditions rising; industrial production rising. How it reaches this company the capital programme is debt-financed, so rates set the cost of the next asset and the hurdle every project must clear. The variable it moves here is the policy path that sets funding cost and demand. What to learn next How much of cost of funds and the hurdle rate on committed capital is already contracted, hedged or repriced. Economic reading as of 2026-08-27 (current, 1 days old). 3 forward prediction(s) are open and none has come due, so there is no accuracy record to quote yet. Macro and industry exposure Ave",
+      "failures": [],
+      "ready": true,
+      "requests": [
+        {
+          "path": "/demo",
+          "seconds": 0.3,
+          "status": 200
+        },
+        {
+          "landed": "https://intent-engine-preview-bridge.onrender.com/runs/01M13PTYR87TTMNYES6ZXH3PVD/progress",
+          "path": "/analyze",
+          "seconds": 0.5,
+          "status": 200
+        },
+        {
+          "chars": 31039,
+          "path": "/runs/01M13PTYR87TTMNYES6ZXH3PVD",
+          "seconds": 297.2,
+          "status": 200
+        },
+        {
+          "chars": 61864,
+          "path": "/runs/01M13PTYR87TTMNYES6ZXH3PVD/brief",
+          "seconds": 35.8,
+          "status": 200
+        },
+        {
+          "chars": 81267,
+          "path": "/runs/01M13PTYR87TTMNYES6ZXH3PVD/full",
+          "seconds": 31.0,
+          "status": 200
+        }
+      ],
+      "run_id": "01M13PTYR87TTMNYES6ZXH3PVD",
+      "score": {
+        "abstained": false,
+        "blocked_stated": false,
+        "cross_surface_contradiction": false,
+        "denies_exposure_then_shows_one": false,
+        "economic_section_present": true,
+        "internal_enums_leaked": [],
+        "pre_calibration_language": true,
+        "reading_called_unavailable": false,
+        "spoke": false,
+        "words": {
+          "": 901,
+          "/brief": 3879,
+          "/full": 5700
+        }
+      },
+      "seconds_to_read": 58.0,
+      "slowest_seconds": 297.2,
+      "state": "READ",
+      "timeouts": []
+    }
+  ],
+  "summary": {
+    "abstained": 1,
+    "attempted": 9,
+    "client_timeouts": 2,
+    "contradictions": 0,
+    "denies_then_shows_exposure": 0,
+    "enum_leaks": 0,
+    "http_failures": 0,
+    "read": 9,
+    "reading_called_unavailable": 0,
+    "section": 9,
+    "spoke": 2
+  },
+  "version": {
+    "app_version": "1.5.0-executive-intelligence",
+    "commit": "27064b93e6ff33e30aa47d5d0d8b28725ecdef94",
+    "process": {
+      "boot_id": "5263f8647cae487a",
+      "started_at": 1787901304.65698,
+      "uptime_seconds": 45.1
+    }
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "company": "Microsoft Corporation",
+  "deployed_sha": "f858d9e",
+  "captured_at": "2026-08-22T01:26:53Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KH7YVZM349D8Z7KB0N5TET/intro",
+      "chars": 5810,
+      "html_chars": 31355,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KH7YVZM349D8Z7KB0N5TET/intro",
+      "chars": 5810,
+      "html_chars": 31355,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KH7YVZM349D8Z7KB0N5TET/intro",
+      "chars": 5810,
+      "html_chars": 31355,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KH7YVZM349D8Z7KB0N5TET/full",
+      "chars": 21609,
+      "html_chars": 61405,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KH7YVZM349D8Z7KB0N5TET/story",
+      "chars": 4732,
+      "html_chars": 34272,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KH7YVZM349D8Z7KB0N5TET/history",
+      "chars": 28945,
+      "html_chars": 108905,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KH7YVZM349D8Z7KB0N5TET/connect",
+      "chars": 4282,
+      "html_chars": 29193,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KH7YVZM349D8Z7KB0N5TET/intro",
+      "chars": 5810,
+      "html_chars": 31355,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KH7YVZM349D8Z7KB0N5TET/evidence",
+      "chars": 6617,
+      "html_chars": 24352,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KH7YVZM349D8Z7KB0N5TET/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KH7YVZM349D8Z7KB0N5TET/brief",
+      "chars": 17368,
+      "html_chars": 50613,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Microsoft Corporation MSFT \u00b7 microsoft.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evid",
+      "status": 200,
+      "html_bytes": 17021
+    },
+    {
+      "t": 83.2,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17022,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "cf-cache-status": "DYNAMIC",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KH7YVZM349D8Z7KB0N5TET/progress",
+      "head": ""
+    },
+    {
+      "t": 110.2,
+      "text": "Microsoft Corporation \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Microsoft Corporation MSFT \u00b7 USA \u00b7 microsoft.com \u00b7 SEC CIK 789019 Microsoft Corporation is a software platform business that runs on an array of services, including cloud-based solutions that provi",
+      "status": 200,
+      "html_bytes": 31432
+    }
+  ],
+  "process_before": {
+    "boot_id": "09ebfe74fa56405b",
+    "started_at": 1787361572.2305908,
+    "uptime_seconds": 441.0
+  },
+  "run_id": "01M0KH7YVZM349D8Z7KB0N5TET",
+  "status": "READY",
+  "seconds": 110,
+  "first_useful": 110,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 13.59,
+    "intro": 12.45,
+    "slides": 13.66,
+    "full": 20.34,
+    "story": 10.21,
+    "history": 0.26,
+    "connect": 4.46
+  },
+  "evidence_gate": "compose=9 usable=9 families=customers|identity|investor|product|strategy stored=9 attempt=1 failed=9/8 dropped=0/0/0/0 unexplained=0 regated=no lang_rejected=-",
+  "outcome": "FULL_ANALYSIS",
+  "outcome_by_route": {
+    "run": "FULL_ANALYSIS_REFRESHING",
+    "intro": "FULL_ANALYSIS_REFRESHING",
+    "slides": "FULL_ANALYSIS_REFRESHING",
+    "full": "FULL_ANALYSIS_REFRESHING",
+    "story": "FULL_ANALYSIS",
+    "history": "FULL_ANALYSIS",
+    "connect": "FULL_ANALYSIS"
+  },
+  "outcome_disagreement": [
+    "FULL_ANALYSIS",
+    "FULL_ANALYSIS_REFRESHING"
+  ],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": [
+    "GET /runs/01M0KH7YVZM349D8Z7KB0N5TET/progress: timeout"
+  ]
+}

@@ -1,0 +1,29 @@
+# A. Company intelligence refresh — bounded pre-market research (weekdays).
+# Cron is UTC and deliberately approximate; the exchange calendar in code is the
+# real timing authority (DST-safe). Scheduled off the top of the hour.
+name: company-intelligence-refresh
+
+on:
+  schedule:
+    - cron: "43 10 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      as_of:
+        description: "Override trading date (YYYY-MM-DD); blank = today (NY)"
+        required: false
+
+concurrency:
+  group: company-intelligence-refresh
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  call:
+    uses: ./.github/workflows/_hosted-job.yml
+    secrets: inherit
+    with:
+      job: company-intelligence-refresh
+      as_of: ${{ github.event.inputs.as_of }}
+      timeout_minutes: 25

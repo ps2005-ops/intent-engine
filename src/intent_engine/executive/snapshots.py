@@ -86,7 +86,14 @@ def _versions(service) -> dict:
         )
         versions["prediction_version"] = PREDICTION_SCHEMA_VERSION
     except ImportError:                                     # pragma: no cover
-        versions["prediction_version"] = "prediction_ledger.v1"
+        # NOT the same string as the success path, deliberately. This handler
+        # used to supply "prediction_ledger.v1" -- exactly what the import
+        # returns -- and the imported name did not exist, so the fallback ran
+        # every time and nothing could tell. A snapshot is a provenance
+        # record; if the module that owns the schema cannot be read, the
+        # honest entry is that we do not know its version, not a confident
+        # restatement of one.
+        versions["prediction_version"] = "unknown"
     return versions
 
 

@@ -1,0 +1,57 @@
+{
+  "company": "NIKE, Inc.",
+  "deployed_sha": "743df06",
+  "run_id": "01M0JGKJV9529PPAXJ2DK2E8WB",
+  "analysis_seconds": 159,
+  "stage_transitions": [
+    {
+      "t": 0.3,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing NIKE, Inc. NKE \u00b7 nike.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Conn",
+      "status": 200,
+      "html_bytes": 17004
+    },
+    {
+      "t": 83.0,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17005,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JGKJV9529PPAXJ2DK2E8WB/progress",
+      "head": ""
+    },
+    {
+      "t": 159.0,
+      "text": "NIKE, Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction NIKE, Inc. NKE \u00b7 USA \u00b7 nike.com \u00b7 SEC CIK 0000320187 NIKE, Inc. is a consumer business that runs on branded product sold through retail and direct channels, where the brand carries pricing power the product a",
+      "status": 200,
+      "html_bytes": 29982
+    }
+  ],
+  "route_seconds": {
+    "run": 3.31,
+    "intro": 5.68,
+    "slides": 7.11,
+    "full": 2.19,
+    "story": 5.83,
+    "history": 0.26,
+    "connect": 4.2
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "d7df6481c13e43c7",
+    "started_at": 1787326618.1855707,
+    "uptime_seconds": 1172.9
+  },
+  "process_after": {
+    "boot_id": "d7df6481c13e43c7",
+    "started_at": 1787326618.1855707,
+    "uptime_seconds": 1500.0
+  },
+  "errors": [
+    "GET /runs/01M0JGKJV9529PPAXJ2DK2E8WB/progress: timeout",
+    "GET /runs/01M0JGKJV9529PPAXJ2DK2E8WB/progress: timeout"
+  ]
+}

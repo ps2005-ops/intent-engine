@@ -15,17 +15,63 @@ from __future__ import annotations
 MAX_RETRY_PASSES = 2              # at most two ADDITIONAL discovery passes
 MAX_NEW_SOURCES_PER_PASS = 4      # bounded extra retrievals per pass
 
+#: The company's own annual report. `coverage.family_of` reads a 10-K as
+#: `identity` -- Item 1. Business is the company's own account of what it is
+#: and what it sells -- which is precisely the role a homepage and a product
+#: page would have supplied.
+_ANNUAL_FORMS = ("10-K", "10-K/A", "20-F", "20-F/A", "40-F")
+
+
+def _subject_annual_report(candidate) -> bool:
+    """The subject's OWN annual filing, by form.
+
+    `investor_material` is the class the EDGAR adapter gives the subject's own
+    filings; a third party's filing naming the subject is
+    `independent_reporting` or `competitor`, so this cannot pick up someone
+    else's annual report and call it the subject's identity.
+    """
+    if candidate.get("source_class") != "investor_material":
+        return False
+    return str(candidate.get("form") or "").upper().strip() in _ANNUAL_FORMS
+
 # Which candidate shapes satisfy a missing evidence family. Ordered: the
 # earlier a matcher appears, the more directly it supplies that family.
 FAMILY_TARGETS = {
     "product": (
         lambda c: c["source_type"] == "product",
+        # THE ROLE-PRESERVING FALLBACK when the company's own site refuses.
+        # See `identity` below: the annual report describes the products.
+        _subject_annual_report,
         lambda c: "docs" in c["url"].lower() or "developer" in c["url"].lower(),
         lambda c: "product" in c["url"].lower()
         or "platform" in c["url"].lower(),
     ),
     "customers": (
         lambda c: c["source_type"] == "customers",
+        # AN ATTESTED THIRD PARTY, BEFORE A GUESSED COMPANY PAGE.
+        #
+        # The `independent` entry below is the only matcher that can select a
+        # filing by ANOTHER registrant naming the subject -- and it is
+        # unreachable: `quality.evidence_gaps` emits only identity, product,
+        # customers, strategy and investor, never "independent". So whenever
+        # the market/customer role was missing, the planner hunted for
+        # `/customers`, `/case-studies` and `/partners` on the subject's own
+        # domain -- guesses, and 404s for every company that is not a SaaS
+        # vendor -- while an EDGAR full-text hit naming the subject sat in the
+        # candidate list and could not be chosen by any code path.
+        #
+        # MEASURED 2026-09-03: `market_source` was the single most common
+        # unmet readiness check (3 of 4 sub-threshold companies), and the only
+        # other supplier of that role is three review-site URLs built by
+        # slugifying the company name, which answered 403 on 29 of 29
+        # attempts across the probe cohort.
+        #
+        # This ADDS a way to fill the role. It removes no matcher, admits no
+        # document that the relevance and ownership gates would not admit
+        # anyway, and keeps the established order: attested beats guessed.
+        lambda c: c.get("source_class") in ("customer_voice",
+                                            "independent_reporting",
+                                            "competitor"),
         lambda c: any(k in c["url"].lower() for k in
                       ("customer", "case-stud", "partner", "success",
                        "stories")),
@@ -43,6 +89,23 @@ FAMILY_TARGETS = {
     ),
     "identity": (
         lambda c: c["source_type"] in ("homepage", "about"),
+        # WHEN THE COMPANY'S OWN SITE WILL NOT ANSWER, THE REGULATOR STILL
+        # HOLDS ITS ACCOUNT OF ITSELF.
+        #
+        # Every matcher above and below this line looks for a page on the
+        # subject's own domain -- /about, /company, /leadership, /team. For a
+        # run whose website answered 403 seven times, those are the only
+        # things the retry budget could ever be spent on, and every one of
+        # them is another refusal. Measured 2026-09-03: eight companies whose
+        # sites refused, seven of them blocked on `official_identity_or_product`
+        # while holding five of the company's own SEC filings, and two retry
+        # passes each that planned six sources and gained nothing.
+        #
+        # This does not lower the bar: `family_of` ALREADY reads a 10-K as
+        # `identity`, so the document was always going to satisfy the role
+        # once retrieved. It simply becomes selectable when the website is
+        # the thing that is broken.
+        _subject_annual_report,
         lambda c: any(k in c["url"].lower() for k in
                       ("about", "company", "leadership", "team")),
     ),
@@ -55,7 +118,7 @@ FAMILY_TARGETS = {
 
 
 def plan_retry(*, missing_families, candidates, already_approved,
-               failed_urls, refusing_hosts=(),
+               failed_urls, refusing_hosts=(), memory=None,
                limit=MAX_NEW_SOURCES_PER_PASS) -> list:
     """Choose additional candidate ids that could supply the missing families.
 
@@ -75,6 +138,19 @@ def plan_retry(*, missing_families, candidates, already_approved,
     """
     approved = set(already_approved or ())
     failed = set(failed_urls or ())
+    # A URL THIS PRODUCT ALREADY WATCHED DIE IS NOT A SECOND CHANCE.
+    #
+    # `failed_urls` covers only THIS run. Measured across the probe cohort,
+    # the retry loop planned 27 additional sources for four companies and
+    # gained two documents: it was re-approving addresses that had returned
+    # 404 or 403 on previous runs, because nothing carried that forward. The
+    # retry budget is four sources per pass, so each one spent this way is a
+    # missing evidence family that stays missing.
+    if memory is not None:
+        from intent_engine.company_ingestion.acquisition_memory import ALLOW
+        failed = failed | {
+            c["url"] for c in candidates
+            if memory.verdict(c.get("url") or "")["verdict"] != ALLOW}
     refused = {h for h in (refusing_hosts or ()) if h}
     chosen: list = []
     seen = set(approved)

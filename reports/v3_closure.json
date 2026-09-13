@@ -1,0 +1,696 @@
+{
+  "as_of": "2026-08-27",
+  "blocked_priority": [
+    {
+      "accessible_here": false,
+      "affected_mechanisms": [],
+      "blocker": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+      "dimension": "commodities",
+      "expected_decision_value": 0,
+      "recommendation": "preserve the blocker; no series in this panel measures it and nothing in the product currently consumes it",
+      "series": []
+    },
+    {
+      "accessible_here": false,
+      "affected_mechanisms": [],
+      "blocker": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+      "dimension": "fx",
+      "expected_decision_value": 0,
+      "recommendation": "preserve the blocker; no series in this panel measures it and nothing in the product currently consumes it",
+      "series": []
+    },
+    {
+      "accessible_here": false,
+      "affected_mechanisms": [],
+      "blocker": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+      "dimension": "liquidity",
+      "expected_decision_value": 0,
+      "recommendation": "preserve the blocker; no series in this panel measures it and nothing in the product currently consumes it",
+      "series": []
+    },
+    {
+      "accessible_here": false,
+      "affected_mechanisms": [],
+      "blocker": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+      "dimension": "positioning",
+      "expected_decision_value": 0,
+      "recommendation": "preserve the blocker; no series in this panel measures it and nothing in the product currently consumes it",
+      "series": []
+    },
+    {
+      "accessible_here": false,
+      "affected_mechanisms": [],
+      "blocker": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+      "dimension": "real_rates",
+      "expected_decision_value": 0,
+      "recommendation": "preserve the blocker; no series in this panel measures it and nothing in the product currently consumes it",
+      "series": []
+    },
+    {
+      "accessible_here": false,
+      "affected_mechanisms": [],
+      "blocker": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+      "dimension": "volatility",
+      "expected_decision_value": 0,
+      "recommendation": "preserve the blocker; no series in this panel measures it and nothing in the product currently consumes it",
+      "series": []
+    }
+  ],
+  "code_sha": "e41e38dc",
+  "contract": "v3_closure.v1",
+  "dimensions": {
+    "as_of": "2026-08-27",
+    "by_value": {
+      "BLOCKED": 6,
+      "LIVE_CONTEXT_ONLY": 6,
+      "LIVE_DECISION_RELEVANT": 3,
+      "LIVE_UNPROVEN_VALUE": 2
+    },
+    "dimensions": 17,
+    "rows": [
+      {
+        "acquisition": "BLOCKED",
+        "as_of": "",
+        "company_consumers": 0,
+        "consumer": [
+          "EconomicState"
+        ],
+        "deltas_produced": 0,
+        "dimension": "commodities",
+        "freshness_days": null,
+        "note": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+        "persisted": false,
+        "producer": "",
+        "relations_supported": 0,
+        "series": [],
+        "source": "",
+        "standing": "UNKNOWN",
+        "uncertainty": "",
+        "value": "BLOCKED"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-08-26",
+        "company_consumers": 3,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 0,
+        "dimension": "credit",
+        "freshness_days": 1,
+        "note": "from ['BAA10Y', 'AAA10Y', 'BAA', 'DRCCLACBS', 'CORCACBS']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 0,
+        "series": [
+          "BAA10Y",
+          "AAA10Y",
+          "BAA",
+          "DRCCLACBS",
+          "CORCACBS"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "5 of 5 series readable",
+        "value": "LIVE_CONTEXT_ONLY"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-08-26",
+        "company_consumers": 1,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 1,
+        "dimension": "funding",
+        "freshness_days": 1,
+        "note": "from ['T10Y3M']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 0,
+        "series": [
+          "T10Y3M"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "1 of 1 series readable",
+        "value": "LIVE_DECISION_RELEVANT"
+      },
+      {
+        "acquisition": "BLOCKED",
+        "as_of": "",
+        "company_consumers": 0,
+        "consumer": [
+          "EconomicState"
+        ],
+        "deltas_produced": 0,
+        "dimension": "fx",
+        "freshness_days": null,
+        "note": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+        "persisted": false,
+        "producer": "",
+        "relations_supported": 0,
+        "series": [],
+        "source": "",
+        "standing": "UNKNOWN",
+        "uncertainty": "",
+        "value": "BLOCKED"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-06-01",
+        "company_consumers": 6,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 0,
+        "dimension": "growth",
+        "freshness_days": 87,
+        "note": "from ['INDPRO', 'PCEC96']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 0,
+        "series": [
+          "INDPRO",
+          "PCEC96"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "2 of 2 series readable",
+        "value": "LIVE_CONTEXT_ONLY"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-06-01",
+        "company_consumers": 0,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 0,
+        "dimension": "household_balance_sheet",
+        "freshness_days": 87,
+        "note": "from ['PSAVERT', 'REVOLSL', 'TDSP']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 0,
+        "series": [
+          "PSAVERT",
+          "REVOLSL",
+          "TDSP"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "3 of 3 series readable",
+        "value": "LIVE_UNPROVEN_VALUE"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-08-20",
+        "company_consumers": 3,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 3,
+        "dimension": "housing",
+        "freshness_days": 7,
+        "note": "from ['HOUST', 'PERMIT', 'MORTGAGE30US', 'HSN1F']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 1,
+        "series": [
+          "HOUST",
+          "PERMIT",
+          "MORTGAGE30US",
+          "HSN1F"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "4 of 4 series readable",
+        "value": "LIVE_DECISION_RELEVANT"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-07-01",
+        "company_consumers": 1,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 0,
+        "dimension": "inflation",
+        "freshness_days": 57,
+        "note": "from ['CPIAUCSL']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 0,
+        "series": [
+          "CPIAUCSL"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "1 of 1 series readable",
+        "value": "LIVE_CONTEXT_ONLY"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-07-01",
+        "company_consumers": 4,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 0,
+        "dimension": "labour",
+        "freshness_days": 57,
+        "note": "from ['UNRATE', 'U6RATE', 'EMRATIO', 'CIVPART', 'UEMP15OV']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 0,
+        "series": [
+          "UNRATE",
+          "U6RATE",
+          "EMRATIO",
+          "CIVPART",
+          "UEMP15OV"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "5 of 5 series readable",
+        "value": "LIVE_CONTEXT_ONLY"
+      },
+      {
+        "acquisition": "BLOCKED",
+        "as_of": "",
+        "company_consumers": 0,
+        "consumer": [
+          "EconomicState"
+        ],
+        "deltas_produced": 0,
+        "dimension": "liquidity",
+        "freshness_days": null,
+        "note": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+        "persisted": false,
+        "producer": "",
+        "relations_supported": 0,
+        "series": [],
+        "source": "",
+        "standing": "UNKNOWN",
+        "uncertainty": "",
+        "value": "BLOCKED"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-08-25",
+        "company_consumers": 3,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 0,
+        "dimension": "policy_rates",
+        "freshness_days": 2,
+        "note": "from ['DFF']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 0,
+        "series": [
+          "DFF"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "1 of 1 series readable",
+        "value": "LIVE_CONTEXT_ONLY"
+      },
+      {
+        "acquisition": "BLOCKED",
+        "as_of": "",
+        "company_consumers": 0,
+        "consumer": [
+          "EconomicState"
+        ],
+        "deltas_produced": 0,
+        "dimension": "positioning",
+        "freshness_days": null,
+        "note": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+        "persisted": false,
+        "producer": "",
+        "relations_supported": 0,
+        "series": [],
+        "source": "",
+        "standing": "UNKNOWN",
+        "uncertainty": "",
+        "value": "BLOCKED"
+      },
+      {
+        "acquisition": "BLOCKED",
+        "as_of": "",
+        "company_consumers": 0,
+        "consumer": [
+          "EconomicState"
+        ],
+        "deltas_produced": 0,
+        "dimension": "real_rates",
+        "freshness_days": null,
+        "note": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+        "persisted": false,
+        "producer": "",
+        "relations_supported": 0,
+        "series": [],
+        "source": "",
+        "standing": "UNKNOWN",
+        "uncertainty": "",
+        "value": "BLOCKED"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-08-26",
+        "company_consumers": 3,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 0,
+        "dimension": "risk_appetite",
+        "freshness_days": 1,
+        "note": "from ['BAA10Y']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 0,
+        "series": [
+          "BAA10Y"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "1 of 1 series readable",
+        "value": "LIVE_CONTEXT_ONLY"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-06-01",
+        "company_consumers": 0,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 0,
+        "dimension": "sentiment",
+        "freshness_days": 87,
+        "note": "from ['UMCSENT', 'MICH']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 0,
+        "series": [
+          "UMCSENT",
+          "MICH"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "2 of 2 series readable",
+        "value": "LIVE_UNPROVEN_VALUE"
+      },
+      {
+        "acquisition": "BLOCKED",
+        "as_of": "",
+        "company_consumers": 0,
+        "consumer": [
+          "EconomicState"
+        ],
+        "deltas_produced": 0,
+        "dimension": "volatility",
+        "freshness_days": null,
+        "note": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+        "persisted": false,
+        "producer": "",
+        "relations_supported": 0,
+        "series": [],
+        "source": "",
+        "standing": "UNKNOWN",
+        "uncertainty": "",
+        "value": "BLOCKED"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-08-26",
+        "company_consumers": 1,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 1,
+        "dimension": "yield_curve",
+        "freshness_days": 1,
+        "note": "from ['DGS2', 'DGS10', 'T10Y3M']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 0,
+        "series": [
+          "DGS2",
+          "DGS10",
+          "T10Y3M"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "3 of 3 series readable",
+        "value": "LIVE_DECISION_RELEVANT"
+      }
+    ]
+  },
+  "learning": {
+    "as_of": "2026-08-27",
+    "decision_value": {
+      "abstained": 35,
+      "attributed": 25,
+      "cases": 60,
+      "damage": 0,
+      "damage_by_kind": {},
+      "damage_kinds_declared": 11,
+      "damage_kinds_with_a_detector": 11,
+      "material": 25,
+      "negative_control": "PASS"
+    },
+    "expectations": {
+      "calibration_status": "PRE_CALIBRATION",
+      "real_open": 13,
+      "real_resolved": 0,
+      "rehearsal_isolated": true,
+      "why": "no real prediction has reached its horizon; calibration with an empty denominator is the claim this programme exists to not make"
+    },
+    "product_parity": {
+      "cases": 60,
+      "explained": 8,
+      "identical": 52,
+      "unexplained": 0
+    },
+    "relations": {
+      "by_state": {
+        "CANDIDATE": 5,
+        "SUPPORTED_PREDICTIVE": 1
+      },
+      "evaluated": 6,
+      "not_tested_because_driver_did_not_move": 5,
+      "not_tested_because_lag_pending": 0
+    }
+  },
+  "reconciliation": {
+    "checked": 4,
+    "problems": [],
+    "reconciles": true
+  },
+  "relations": {
+    "as_of": "2026-08-27",
+    "by_state": {
+      "CANDIDATE": 5,
+      "SUPPORTED_PREDICTIVE": 1
+    },
+    "relations": 6,
+    "rows": [
+      {
+        "counterevidence": "the target moved against the sign",
+        "days_since_source_move": 2,
+        "direction_correct": false,
+        "evidence": "both series in the panel, daily, never revised",
+        "falsifier": "the mortgage rate moves opposite to the policy rate over two consecutive quarters",
+        "lag_days": 30,
+        "last_evaluated": "2026-08-27",
+        "lineage": [
+          "panel:DFF",
+          "panel:MORTGAGE30US"
+        ],
+        "mechanism": "the policy rate sets the front of the curve and mortgage pricing follows the long end with a spread that widens under funding stress",
+        "next_eligible_evaluation": "2026-09-24",
+        "order": 1,
+        "regime": "ALL",
+        "relation": "DFF->MORTGAGE30US",
+        "sign": 1,
+        "source": "DFF",
+        "source_move": 0.0,
+        "source_moved": false,
+        "status": "CANDIDATE",
+        "target": "MORTGAGE30US",
+        "target_moved": true,
+        "uncertainty": "LOW",
+        "why_not_supported": "the driver did not move, so the relation was not tested \u2014 this is not a failure of the relation"
+      },
+      {
+        "counterevidence": "",
+        "days_since_source_move": 7,
+        "direction_correct": true,
+        "evidence": "panel, 1971-2026",
+        "falsifier": "permits rise through a 200bp mortgage-rate increase",
+        "lag_days": 120,
+        "last_evaluated": "2026-08-27",
+        "lineage": [
+          "panel:MORTGAGE30US",
+          "panel:PERMIT"
+        ],
+        "mechanism": "a higher mortgage rate raises the monthly payment on a given price, and builders pull permits before they pull starts",
+        "next_eligible_evaluation": "2026-12-18",
+        "order": 1,
+        "regime": "ALL",
+        "relation": "MORTGAGE30US->PERMIT",
+        "sign": -1,
+        "source": "MORTGAGE30US",
+        "source_move": 0.12,
+        "source_moved": true,
+        "status": "SUPPORTED_PREDICTIVE",
+        "target": "PERMIT",
+        "target_moved": true,
+        "uncertainty": "MEDIUM",
+        "why_not_supported": ""
+      },
+      {
+        "counterevidence": "the target moved against the sign",
+        "days_since_source_move": 87,
+        "direction_correct": false,
+        "evidence": "panel, 1960-2026",
+        "falsifier": "starts and permits diverge for a year",
+        "lag_days": 60,
+        "last_evaluated": "2026-08-27",
+        "lineage": [
+          "panel:PERMIT",
+          "panel:HOUST"
+        ],
+        "mechanism": "a permit is a committed intention to start; the gap between them is the builder's own timing",
+        "next_eligible_evaluation": "2026-08-27",
+        "order": 2,
+        "regime": "ALL",
+        "relation": "PERMIT->HOUST",
+        "sign": 1,
+        "source": "PERMIT",
+        "source_move": -0.01787,
+        "source_moved": false,
+        "status": "CANDIDATE",
+        "target": "HOUST",
+        "target_moved": true,
+        "uncertainty": "LOW",
+        "why_not_supported": "the driver did not move, so the relation was not tested \u2014 this is not a failure of the relation"
+      },
+      {
+        "counterevidence": "",
+        "days_since_source_move": 1,
+        "direction_correct": true,
+        "evidence": "panel, 1986-2026",
+        "falsifier": "industrial production accelerates through a 200bp spread widening",
+        "lag_days": 180,
+        "last_evaluated": "2026-08-27",
+        "lineage": [
+          "panel:BAA10Y",
+          "panel:INDPRO"
+        ],
+        "mechanism": "a wider credit spread raises the marginal cost of corporate financing, which shows up first in inventory and capex and then in output",
+        "next_eligible_evaluation": "2027-02-22",
+        "order": 2,
+        "regime": "ALL",
+        "relation": "BAA10Y->INDPRO",
+        "sign": -1,
+        "source": "BAA10Y",
+        "source_move": -0.01,
+        "source_moved": false,
+        "status": "CANDIDATE",
+        "target": "INDPRO",
+        "target_moved": false,
+        "uncertainty": "MEDIUM",
+        "why_not_supported": "the driver did not move, so the relation was not tested \u2014 this is not a failure of the relation"
+      },
+      {
+        "counterevidence": "the target moved against the sign",
+        "days_since_source_move": 1,
+        "direction_correct": false,
+        "evidence": "panel, 1982-2026",
+        "falsifier": "spreads narrow through a sustained inversion",
+        "lag_days": 180,
+        "last_evaluated": "2026-08-27",
+        "lineage": [
+          "panel:T10Y3M",
+          "panel:BAA10Y"
+        ],
+        "mechanism": "an inverted curve compresses bank net interest margin, lending standards tighten, and the credit spread widens",
+        "next_eligible_evaluation": "2027-02-22",
+        "order": 1,
+        "regime": "ALL",
+        "relation": "T10Y3M->BAA10Y",
+        "sign": -1,
+        "source": "T10Y3M",
+        "source_move": -0.02,
+        "source_moved": false,
+        "status": "CANDIDATE",
+        "target": "BAA10Y",
+        "target_moved": true,
+        "uncertainty": "MEDIUM",
+        "why_not_supported": "the driver did not move, so the relation was not tested \u2014 this is not a failure of the relation"
+      },
+      {
+        "counterevidence": "the target moved against the sign",
+        "days_since_source_move": 57,
+        "direction_correct": false,
+        "evidence": "panel, 1959-2026",
+        "falsifier": "real consumption rises through a 1pp unemployment increase",
+        "lag_days": 90,
+        "last_evaluated": "2026-08-27",
+        "lineage": [
+          "panel:UNRATE",
+          "panel:PCEC96"
+        ],
+        "mechanism": "employment is the household income channel; spending follows with a lag set by savings buffers",
+        "next_eligible_evaluation": "2026-09-29",
+        "order": 3,
+        "regime": "ALL",
+        "relation": "UNRATE->PCEC96",
+        "sign": -1,
+        "source": "UNRATE",
+        "source_move": 0.0,
+        "source_moved": false,
+        "status": "CANDIDATE",
+        "target": "PCEC96",
+        "target_moved": false,
+        "uncertainty": "MEDIUM",
+        "why_not_supported": "the driver did not move, so the relation was not tested \u2014 this is not a failure of the relation"
+      }
+    ],
+    "states_declared": [
+      "CANDIDATE",
+      "OBSERVED",
+      "SUPPORTED_PREDICTIVE",
+      "CANDIDATE_NOT_PROVEN",
+      "CONTRADICTED",
+      "RETIRED",
+      "PENDING_LAG"
+    ]
+  }
+}

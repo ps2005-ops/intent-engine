@@ -1,0 +1,94 @@
+{
+  "base": "https://intent-engine-preview-bridge.onrender.com",
+  "cohort": "tier1",
+  "cache_state": "cold",
+  "instance": {
+    "status": 200,
+    "seconds": 0.6,
+    "cold_start": false
+  },
+  "summary": {
+    "attempted": 1,
+    "counted": 1,
+    "refused": 0,
+    "succeeded": 0,
+    "success_rate": 0.0,
+    "p50": null,
+    "p90": null,
+    "p95": null,
+    "max": null,
+    "over_60s": [],
+    "no_result": [
+      "Apple Inc."
+    ]
+  },
+  "rows": [
+    {
+      "company": "Apple Inc.",
+      "domain": "apple.com",
+      "requests": [
+        {
+          "path": "/demo",
+          "status": 200,
+          "seconds": 1.49
+        },
+        {
+          "path": "/analyze",
+          "status": 200,
+          "seconds": 17.8,
+          "landed": "https://intent-engine-preview-bridge.onrender.com/runs/01M15CN388X4YM6R77VNK3T0MV/progress"
+        },
+        {
+          "path": "/runs/01M15CN388X4YM6R77VNK3T0MV",
+          "status": 0,
+          "seconds": 90.04,
+          "chars": 37
+        },
+        {
+          "path": "/runs/01M15CN388X4YM6R77VNK3T0MV/brief",
+          "status": 0,
+          "seconds": 90.04,
+          "chars": 37
+        }
+      ],
+      "bounded_gaps": [],
+      "error": "progress 0: timeout: The read operation timed out",
+      "run_id": "01M15CN388X4YM6R77VNK3T0MV",
+      "core_ready_seconds": null,
+      "complete_seconds": null,
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 21.4
+        }
+      ],
+      "polls": 24,
+      "poll_timings": [],
+      "slowest_stage": {
+        "stage": "Reading current company evidence",
+        "seconds": 241.3
+      },
+      "evidence_count": 0,
+      "economic_context": false,
+      "pages": {
+        "": {
+          "status": 0,
+          "chars": 37,
+          "seconds": 90.04,
+          "outcome": ""
+        },
+        "/brief": {
+          "status": 0,
+          "chars": 37,
+          "seconds": 90.04,
+          "outcome": ""
+        }
+      },
+      "outcome_header": "",
+      "status": "NO_RESULT",
+      "total_seconds": 262.7,
+      "cache_state": "cold",
+      "_warm": false
+    }
+  ]
+}

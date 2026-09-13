@@ -1,0 +1,47 @@
+{
+  "company": "Morgan Stanley",
+  "deployed_sha": "dc17a9d",
+  "run_id": "01M0J8QWGY1916F5HD830GXPAB",
+  "analysis_seconds": 36,
+  "stage_transitions": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Morgan Stanley MS \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecting m",
+      "status": 200,
+      "html_bytes": 16995
+    },
+    {
+      "t": 6.8,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Morgan Stanley MS \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Connecting mac",
+      "status": 200,
+      "html_bytes": 16990
+    },
+    {
+      "t": 36.3,
+      "text": "Limited analysis of Morgan Stanley Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of Morgan Stanley Some kinds of evidence are missing, and there are places left to look. Rather than show a briefing that looks complete and is not, here is exactly where it stands. What was foun",
+      "status": 200,
+      "html_bytes": 17195
+    }
+  ],
+  "route_seconds": {
+    "run": 2.49,
+    "intro": 11.84,
+    "slides": 3.05,
+    "full": 2.7,
+    "story": 5.84,
+    "history": 0.3,
+    "connect": 3.67
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "9890b2f49d944a8a",
+    "started_at": 1787319148.8228748,
+    "uptime_seconds": 394.2
+  },
+  "process_after": {
+    "boot_id": "9890b2f49d944a8a",
+    "started_at": 1787319148.8228748,
+    "uptime_seconds": 594.2
+  },
+  "errors": []
+}

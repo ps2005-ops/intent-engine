@@ -1,0 +1,248 @@
+contract: v4_release_matrix.v1
+recomputed_at: '2026-08-10'
+axes:
+  LEARNING_ACCELERATION:
+    status: PARTIAL
+    note: 'I-ACC-001 live. I-STA-001''s five stagnation checks are connected and projected; a field-name
+      defect in the wiring (impact instead of materiality) was found and fixed — it left FIRST_OBSERVATION
+      in the denominator and would have fired against 25 dossiers with no prior revision. Live proof pending
+      the cycle from ea8d35b.
+
+      '
+  SOURCE_HEALTH:
+    status: PASS
+    note: 'L-SRC-001, live at 8f14906. Source health is a persisted state per family per cycle with streak
+      and last_success, not a line in one report. A degraded source raises uncertainty and never weakens
+      the claim, proven by mutation. An unrecognised failure is UNCLASSIFIED with its message kept rather
+      than mapped onto the nearest known state. BLS has been 503 on every recorded cycle and is now visible
+      as a state. Staleness from expected cadence is recorded NOT_BUILT: nothing reads the field.
+
+      '
+  ADVERSARY_ENGINE:
+    status: PASS
+    note: 'L-ADV-001, LIVE at 5d80d21: 48 cases, by_standing {SPECULATIVE 48, GROUNDED 0, DEMONSTRATED
+      0}, actionable 0. That distribution is the acceptance criterion — the corpus names no counterparty''s
+      means or motive, so a run reporting GROUNDED cases would be the defect.
+
+      '
+  COLD_START:
+    status: PASS
+    note: 'L-CLD-001, Founder 2dbc31a. Measured first: one sentence covered six situations, including
+      a company nobody had looked at and a company whose sources went dark. Six coverage states now, each
+      with its own sentence and its own must-not-conclude; every state short of OBSERVED is ASSERT_NONE.
+      Every value carries its origin and a prior may not be spoken in the voice of an observation. LIVE
+      on 25 dossiers: 3 OBSERVED, 22 PARTIALLY_OBSERVED. 30 tests, 16/16 break proofs. NOT BUILT and recorded:
+      no streaming transport exists, so hydration is a state and provenance contract rather than a delivery
+      path.
+
+      '
+  EXTERNAL_DATA_SANITATION:
+    status: PASS
+    note: 'L-SAN-001, scoped by measurement. A tokenised AST guard fails on any model-client import or
+      call in src/intent_engine/market/ outside a declared-boundary allowlist, which is empty because
+      no such call exists; it reads the syntax tree because this package discusses LLM proposals in prose
+      and a grep would flag three innocent modules. Four injection payloads through the real translator:
+      none becomes evidence. PASS is bounded to this branch — the FOUNDER obligation is a recorded cross-repo
+      prerequisite, asserted by a test so a passing suite cannot be read as closing it.
+
+      '
+  INFORMATION_BARRIER:
+    status: PASS
+    note: 'L-TEN-001, market a5fcf60, for the V4-EXTERNAL scope only. The wall checked the right thing
+      and trusted the wrong type: a bare string, in an engine whose most plentiful strings are company
+      names parsed from documents. TenantScope carries the authority that established an identity; from_evidence
+      exists and RAISES; permitted_facts accepts nothing else, so the wall is kept by the signature. tenant_scope
+      is now the one production caller of internal_state. 26 tests, 11/11 break proofs. The internal Business
+      Graph half remains V4-I9 and is NOT covered by this PASS.
+
+      '
+  ANTITRUST_AIR_GAP:
+    status: PARTIAL
+    note: 'The company-scoped half is enforced and tested: a canary private fact for TENANT_A is unreachable
+      for TENANT_B through permitted_facts and through the join guard, seven injected identity shapes
+      each refuse or read only what they own, and no aggregate path exists. Retrieval-key, cache and embedding-store
+      collision need two live tenants and a shared retrieval layer; both remain V4-I10 and action-level
+      competition law remains V5.
+
+      '
+  DEMAND_INTELLIGENCE:
+    status: PARTIAL
+    note: 'E-DEM-002 closed at 5d80d21 and LIVE: demand_tension reports 0 tensions with rules_available
+      5 on the real corpus, which is the honest negative — BOOKINGS, BACKLOG, CANCELLATIONS and SHIPMENTS
+      are at zero companies, so no pair can have both sides measured. The rules fire in test. PARTIAL
+      is about the CORPUS, not the capability, and the gate is coverage rather than code.
+
+      '
+  EVIDENCE_EXTRACTION:
+    status: PARTIAL
+    note: 'E-DEM-001, repaired at 69a2438. The parser was discarding 79% of every filing: text was buffered
+      only inside a block-tag whitelist that had no <div>, and SEC filings write prose in <div>/<font>.
+      Measured on Caterpillar Q2 2026: 13,462 -> 33,742 characters, 30 -> 128 candidate sentences, 0 ->
+      5 demand sentences. PARTIAL not PASS: the sentences now reach the classifier and the classifier
+      still refuses the narrative ones, because no family carries orders, bookings or shipments as an
+      object. Coverage in the LEDGER changes only as new cycles ingest — the corpus already written was
+      extracted under the old parser and is not rewritten.
+
+      '
+  ECONOMIC_DATA:
+    status: PARTIAL
+    note: 15/30 macro conditions populated
+  TEMPORAL_VINTAGE_TRUTH:
+    status: PASS
+    note: 'D-REP-001. The wall raises rather than filtering; admission is by observation time, never occurrence,
+      so a fact that happened before T but was published after it stays invisible. leak_surface measures
+      how many rows an occurrence-time filter would have admitted. 19 tests.
+
+      '
+  COMPANY_EXPOSURES:
+    status: PARTIAL
+  DEMAND_CHAIN:
+    status: PARTIAL
+    note: 21/260 cells; corpus-bound, see BLK-DEMAND-CORPUS
+  SUPPLY_CHAIN:
+    status: BLOCKED_DATA
+    note: no named supplier edges
+  KNOWLEDGE_ATTRIBUTION:
+    status: PASS
+    note: session 3; 855 effects, 316/316 rows attributed
+  UNSUPERVISED_DISCOVERY:
+    status: PARTIAL
+    note: geometry good, downstream utility unmeasured
+  RESEARCH_OBSERVABILITY:
+    status: PARTIAL
+    note: 'Decisions are now written before the call and a live cycle produced 2 of them with full candidate
+      sets. Still PARTIAL, not PASS: both live outcomes were SUCCESS, so no NO_RESULT or FAILED row has
+      ever been observed in production. The rows this layer exists to preserve are unit-tested and unwitnessed.
+
+      '
+  ACTIVE_LEARNING:
+    status: BLOCKED_DATA
+    note: gated on A-RD-008
+  BANDIT_MATURITY:
+    status: BLOCKED_DATA
+    note: L0 interface only; no logged exploration
+  METHOD_VALIDATION:
+    status: PARTIAL
+    note: 'C-MET-002 and C-MET-004, live at 1b6c84c. Assumptions are TESTED rather than listed: 60 MethodAssumptionCheck
+      rows written and read back, every declared assumption answered for including UNTESTED, and a failed
+      critical assumption REFUSES the causal reading while retaining the descriptive estimate. The cycle
+      scores its own economy vintage-safely - 15 of 17 series, 45 evaluations, 0.09s - instead of relying
+      on one offline comparison. Result: every method that beat persistence came back BOUNDED or REFUSED
+      and NONE useful. Five short-series wins are bounded by a 30-prediction floor; AR1 on GLOBAL:CURRENCY
+      (519 points, skill 0.0043) is refused on a fitted coefficient of 0.9854. STILL PARTIAL: only the
+      three baselines are implemented and no formal causal method has been run (C-MET-003).'
+  CAUSAL_INFERENCE:
+    status: BLOCKED_DATA
+    note: 'C-MET-003 re-gated 2026-08-10 after its old gate was found to measure the wrong thing: macro_observations
+      >= 24 (satisfied 2347 times) is volume, while the acceptance asks for vintage safety. published_at
+      spans 26 distinct months; retrieved_at spans ONE. With one retrieval month there is no past t0,
+      so any episode selected today is selected from figures held only in revised form — outcome inspection
+      by construction. Architecture complete: method registry, assumption ledger (60 live rows, 3 critical
+      failures refusing the causal reading), vintage wall with five leak attacks refused. Gate macro_retrieval_months
+      >= 6, accruing on its own.
+
+      '
+  THESIS_REPLAY:
+    status: BLOCKED_DATA
+    note: 'D-REP-002. Capability built, tested (19) and leak-proofed (13 mutation proofs, all held first
+      pass). Empirical replay blocked on a MEASURED gate, macro_retrieval_months 1/6: all 2344 macro observations
+      were retrieved in one month while describing 2024-2026, so vintage.freeze admits zero rows at any
+      historical instant and select_episodes returns [] on the live corpus. leak_surface quantifies the
+      shortcut - filtering on published_at would admit 1572 unseen figures at 2026-01-01. Proven on a
+      fixture with real observation spread: 6 episodes, 5 outcomes right, 1 wrong, every verdict UNRESOLVED
+      because the transmission leg predicts a company observable the corpus lacks. Determinism proven
+      by flipping every value and getting identical selections. The gate clears as cycles run.'
+  MECHANISM_CALIBRATION:
+    status: PARTIAL
+  SECOND_ORDER:
+    status: PARTIAL
+  THIRD_ORDER:
+    status: BLOCKED_DATA
+    note: needs a named mediator
+  SCENARIOS:
+    status: PARTIAL
+  THESIS:
+    status: PARTIAL
+    note: 'G-THE-004, live at 1b6c84c. Identity is canonical: subject, area, question, exposures, conditions
+      and the mechanism''s catalogue key - never the claim, the date or the standing. 11 theses built
+      and 11 persisted (was 7 of 11: two economies moving one condition shared an id and the store silently
+      refused the duplicate). Reconciliation is one-to-one, compared 11 <= loaded 18, identity_collisions
+      0, and the revision chain is reloaded rather than rebuilt empty. STILL PARTIAL: no thesis has yet
+      MOVED. 0 strengthened, 0 weakened, 0 contested. classify() has run on real data and found nothing
+      to classify, which is the honest state and not a pass.'
+  PROOF:
+    status: PASS
+    note: 'H-CON-001. ProofPackage.status is capped by the standing of the thesis it proves, graded rather
+      than binary. The live defect it closed: a REFUTED thesis with two independent sources and a tested
+      falsifier reported VERIFIED, and presentation.py writes that into the deck appendix. evidential_status
+      survives the cap so the diagnostic is not lost. 26/26 break proofs.
+
+      '
+  FOUNDER:
+    status: PARTIAL
+  PRESENTATION:
+    status: PASS
+    note: 'H-CON-001. Every surface is adjudicated against one record by one wall, and no renderer may
+      independently upgrade a standing. Twelve record states are separated from the assertion ladder:
+      none is a point on it, none is interchangeable with another, and ranking ASSERT_NEGATIVE raises
+      a CategoryError rather than answering.
+
+      '
+  CEO_QA:
+    status: PASS
+    note: 'H-CON-001 consumer half. The certainty wall now moves with the record: its standing exemption
+      tested for values the field can never hold, so one fixed word list governed a tested reading and
+      an abandoned one alike. supported=True was hard-coded, so a refuted thesis came back as a supported
+      answer about the present. Both fixed; 16/16 break proofs.
+
+      '
+  DECISION_IMPACT:
+    status: PARTIAL
+    note: 'SPLIT, because the instrument and the result are different questions. CAPABILITY: PASS — graded
+      before/after with every negative control passing (identical grades NONE, wording-only is not MEANINGFUL,
+      new assumption is MEANINGFUL, changed recommendation is DECISION_CHANGING, unprovenanced gets no
+      credit, another company''s prior is not a prior), 39 tests. The comparability wall is now closed:
+      three evidence-window states with only SAME_EVIDENCE_WINDOW attributable, unrecorded never read
+      as matching, and attribution independent of change size. EMPIRICAL: BLOCKED_DATA — 25 rows, all
+      FIRST_OBSERVATION, comparable pairs 0. Gate comparable_founder_revision_pairs >= 1, self-clearing.
+
+      '
+  TRADING_ECONOMIC_SEPARATION:
+    status: PARTIAL
+  RETENTION:
+    status: PARTIAL
+  ADVERSARIAL:
+    status: PASS
+    note: 'J-ADV-001. 25 new attacks on the research-observability layer, 27 prior attacks retained. Every
+      new attack makes the engine look BETTER than it was, and does so by removing information rather
+      than adding a false claim — which is why this layer needed attacks distinct from the economic ones.
+
+      '
+  BREAK_PROOFS:
+    status: PASS
+    note: '54 proofs held this run across two repositories (26 market standing wall, 16 founder consumer,
+      12 adversary). Three NOT_CAUGHT verdicts were investigated rather than repointed and all three located
+      a real weakness: a dead middle rung in the forbidden-vocabulary ladder, a mutation site invisible
+      to its test, and a mutation targeting a branch its test never entered.
+
+      '
+  PERFORMANCE:
+    status: PARTIAL
+    note: 'Measured for the work added this run: method evaluation over the live ledger is 0.09s for 15
+      series and 45 evaluations, and thesis reconciliation is O(current) against a dict of priors. No
+      regression measured against a prior baseline because none was recorded; the >10% rule has nothing
+      to compare to yet, which is why this is PARTIAL rather than PASS.'
+  PAPER:
+    status: PASS
+    note: structurally enforced
+  PRODUCTION_SAFETY:
+    status: PASS
+    note: 119d345 untouched
+  LIVE_PROJECTION_REACHES_REPORT:
+    status: PARTIAL
+    note: 'Every V4 block added since is projected AND pinned by a test (tests/test_market_report_projections.py
+      asserts the keys each node''s acceptance depends on survive _knowledge_summary, that a zero is not
+      dropped as absent, and that a block''s error is projected rather than swallowed). This axis is why
+      A-RD-009 was caught: the delayed_reward block had no projection, so a NameError that fired on every
+      cycle had no surface anywhere and the node was marked COMPLETE. STILL PARTIAL until the remaining
+      V4 surfaces - replay, scenarios, CEO Q&A, DecisionImpact - exist to be projected.'

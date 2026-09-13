@@ -1,0 +1,174 @@
+{
+  "deployed": "4d1461ae",
+  "rows": [
+    {
+      "company": "Microsoft",
+      "analyze_status": 200,
+      "analyze_seconds": 0.8,
+      "run_id": "01M15FB4QC9NQC63RWDDHHRR9E",
+      "core_ready_seconds": 198.2,
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 1.1
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 35.1
+        }
+      ],
+      "progress_unreachable_polls": 2,
+      "pages": {
+        "": {
+          "status": 200,
+          "chars": 31450,
+          "seconds": 7.2
+        },
+        "/brief": {
+          "status": 200,
+          "chars": 57130,
+          "seconds": 13.5
+        }
+      },
+      "status": "COMPLETE",
+      "total_seconds": 218.8
+    },
+    {
+      "company": "Visa",
+      "analyze_status": 200,
+      "analyze_seconds": 0.8,
+      "run_id": "01M15FHTNF7G2G7TNHSKTXKW9J",
+      "core_ready_seconds": 176.2,
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 1.0
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 17.5
+        }
+      ],
+      "progress_unreachable_polls": 2,
+      "pages": {
+        "": {
+          "status": 200,
+          "chars": 30656,
+          "seconds": 7.4
+        },
+        "/brief": {
+          "status": 200,
+          "chars": 53218,
+          "seconds": 14.2
+        }
+      },
+      "status": "COMPLETE",
+      "total_seconds": 197.8
+    },
+    {
+      "company": "Walmart",
+      "analyze_status": 200,
+      "analyze_seconds": 0.5,
+      "run_id": "01M15FQW11JGFGGBQRH4VJFRK0",
+      "core_ready_seconds": 231.7,
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 0.7
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 35.3
+        }
+      ],
+      "progress_unreachable_polls": 3,
+      "pages": {
+        "": {
+          "status": 200,
+          "chars": 14772,
+          "seconds": 0.4
+        },
+        "/brief": {
+          "status": 200,
+          "chars": 14772,
+          "seconds": 0.4
+        }
+      },
+      "status": "COMPLETE",
+      "total_seconds": 232.5
+    },
+    {
+      "company": "Caterpillar",
+      "analyze_status": 200,
+      "analyze_seconds": 4.5,
+      "run_id": "01M179FCZRQSR21F4W34DTZ9FW",
+      "core_ready_seconds": 377.6,
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 4.8
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 30.0
+        }
+      ],
+      "progress_unreachable_polls": 4,
+      "pages": {
+        "": {
+          "status": 200,
+          "chars": 31061,
+          "seconds": 22.1
+        },
+        "/brief": {
+          "status": 200,
+          "chars": 64364,
+          "seconds": 16.3
+        }
+      },
+      "status": "COMPLETE",
+      "total_seconds": 416.1
+    },
+    {
+      "company": "NVIDIA",
+      "analyze_status": 200,
+      "analyze_seconds": 0.7,
+      "run_id": "01M179W3N931Q19N36ARNT5Q54",
+      "core_ready_seconds": 145.7,
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 1.0
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 35.0
+        }
+      ],
+      "progress_unreachable_polls": 1,
+      "pages": {
+        "": {
+          "status": 200,
+          "chars": 30146,
+          "seconds": 19.4
+        },
+        "/brief": {
+          "status": 200,
+          "chars": 57625,
+          "seconds": 37.0
+        }
+      },
+      "status": "COMPLETE",
+      "total_seconds": 202.1
+    }
+  ],
+  "summary": {
+    "attempted": 5,
+    "complete": 5,
+    "complete_late": 0,
+    "refused": 0,
+    "p50": 198.2,
+    "p90": 377.6,
+    "max": 377.6
+  }
+}

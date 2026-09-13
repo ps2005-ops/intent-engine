@@ -1,0 +1,41 @@
+{
+  "company": "Meta Platforms, Inc.",
+  "deployed_sha": "10d1620",
+  "run_id": "01M0HTC66AA2MFJB3GRVN27TZQ",
+  "analysis_seconds": 48,
+  "stage_transitions": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Meta Platforms, Inc. META \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Conn",
+      "status": 200,
+      "html_bytes": 17003
+    },
+    {
+      "t": 48.1,
+      "text": "Limited analysis of Meta Platforms, Inc. Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of Meta Platforms, Inc. Some kinds of evidence are missing, and there are places left to look. Rather than show a briefing that looks complete and is not, here is exactly where it stands. W",
+      "status": 200,
+      "html_bytes": 17368
+    }
+  ],
+  "route_seconds": {
+    "run": 7.02,
+    "intro": 34.49,
+    "slides": 12.4,
+    "full": 9.93,
+    "story": 16.79,
+    "history": 1.05,
+    "connect": 10.45
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "b79056db0dd34d53",
+    "started_at": 1787304446.6935825,
+    "uptime_seconds": 32.7
+  },
+  "process_after": {
+    "boot_id": "b79056db0dd34d53",
+    "started_at": 1787304446.6935825,
+    "uptime_seconds": 467.4
+  },
+  "errors": []
+}

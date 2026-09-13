@@ -1,0 +1,36 @@
+{
+ "contract": "context_recovery.v1",
+ "as_of": "2026-08-08",
+ "before": {
+  "UNKNOWN": 12,
+  "PARTIAL": 2,
+  "ESTABLISHED": 1
+ },
+ "after": {
+  "UNKNOWN": 12,
+  "PARTIAL": 2,
+  "ESTABLISHED": 1
+ },
+ "recovered": 0,
+ "why_zero": "14 of the 15 live actions come from two INDEX pages (7 actions each), and an index page's sentences are not context for one another. The one single-topic document carries one action whose sentence already stood alone.",
+ "what_the_first_attempt_did": "Before the index rule, context 'recovered' three actions. All three were leaks: 'Introducing JavaScript for Shopify Functions' took the workflow `checkout` from the entry above it, and another took the buyer 'Sidekick app extensionsApp store' \u2014 two navigation labels run together. A window widened until a buyer appears will always find one; on an index page it belongs to a different product.",
+ "located_next_constraint": {
+  "what": "the seven changelog ENTRY pages \u2014 the single-topic documents where context would work \u2014 produce ZERO actions, because the announcement is in the page TITLE and the action detector reads only body text",
+  "evidence": [
+   "Full-stack capabilities to power app analytics",
+   "Standard storefront events and actions now support cart attributes",
+   "WebMCP support for Liquid and Hydrogen storefronts",
+   "The orderCreate mutation now supports multiple tracking numbers for each fulfillment",
+   "Updated Built for Shopify requirements for Fulfillment services apps",
+   "Hydrogen developer preview update: July 30, 2026",
+   "New fields for cash management activities and drawers in POS"
+  ],
+  "grammar": "changelog titles are noun phrases and 'now supports' constructions: 'Full-stack capabilities to power app analytics', 'The orderCreate mutation now supports multiple tracking numbers', 'New fields for cash management activities'. None matches an announcement verb pattern.",
+  "not_shipped_because": "adding a title-grammar pattern family would be tuned on 7 positives with no negative corpus, and titles are the noisiest surface on a site \u2014 nav labels and section headers share the shape. Wave 9's lesson was to measure both sides first."
+ },
+ "documents_by_action_count": {
+  "https://www.shopify.com/updates": 7,
+  "https://shopify.dev/changelog": 7,
+  "https://www.salesforce.com/releases": 1
+ }
+}

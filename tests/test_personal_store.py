@@ -142,15 +142,36 @@ def test_append_is_idempotent(tmp_path):
     assert len(store.read_all()) == 1
 
 
-def test_corrupt_log_fails_loudly(tmp_path):
+def _one_personal_row(tmp_path):
     store = PersonalStore(tmp_path / "personal.jsonl")
     store.append(PersonalEvent(event_type="personal.session_opened",
                                actor_type="human", actor_id="f", source="cli",
                                session_id="S1", subject_id="S1"))
-    path = tmp_path / "personal.jsonl"
-    path.write_text(path.read_text() + "{bad\n")
+    return tmp_path / "personal.jsonl"
+
+
+def test_corrupt_log_fails_loudly(tmp_path):
+    """Corruption is still loud -- but only where dropping it would LOSE
+    history.
+
+    A malformed line with good records AFTER it is interior corruption of a
+    file that is only ever appended to: the damage is unbounded and refusing
+    to read is right. A malformed line with nothing readable after it is a
+    torn TAIL -- a write killed part-way, which on the deployed preview
+    bricked every request for hours because one bad byte made the whole log
+    unreadable. That case is repaired and recorded, not refused.
+    """
+    path = _one_personal_row(tmp_path)
+    path.write_text("{bad\n" + path.read_text())    # interior: records follow
     with pytest.raises(PersonalCorruptLogError):
         PersonalStore(path).read_all()
+
+
+def test_a_torn_tail_is_recovered_rather_than_bricking_the_log(tmp_path):
+    path = _one_personal_row(tmp_path)
+    before = len(PersonalStore(path).read_all())
+    path.write_text(path.read_text() + "{bad\n")        # tail: nothing after
+    assert len(PersonalStore(path).read_all()) == before
 
 
 # =============================================================================

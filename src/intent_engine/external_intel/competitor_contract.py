@@ -229,6 +229,20 @@ class Competitor:
     subject_stronger_where: str = ""
     decision_implication: str = ""
     limitation: str = ""
+    #: §3. WHAT THIS ENTITY IS, AND WHETHER A CUSTOMER COULD CHOOSE IT.
+    #
+    # `relationship` above says how the alternative takes the decision away
+    # ASSUMING it is one. These say whether it is one at all, and they exist
+    # because three live introductions named an index, a payer programme and
+    # a captive lender's rivals as the companies contesting the subject's
+    # market. Defaults keep every existing construction valid; the extractor
+    # fills them from `executive.competitive_qualification`.
+    qualification_state: str = ""
+    entity_type: str = ""
+    contest_owner: str = ""
+    focal_need: str = ""
+    substitution_mechanism: str = ""
+    routed_section: str = ""
 
     def __post_init__(self):
         if self.relationship not in RELATIONSHIPS:
@@ -267,7 +281,28 @@ class Competitor:
             "decision_implication": self.decision_implication,
             "limitation": self.limitation,
             "supports_conclusion": self.supports_conclusion,
+            "qualification_state": self.qualification_state,
+            "entity_type": self.entity_type,
+            "contest_owner": self.contest_owner,
+            "focal_need": self.focal_need,
+            "substitution_mechanism": self.substitution_mechanism,
+            "routed_section": self.routed_section,
         }
+
+    @property
+    def may_contest(self) -> bool:
+        """§3. May this fill a competitive claim on a customer-facing page?
+
+        An unqualified competitor — one built before this field existed, or
+        by a caller that does not run the qualification — keeps the old
+        behaviour, because the qualification is what narrows the claim and a
+        missing qualification is not evidence of anything.
+        """
+        from intent_engine.executive.competitive_qualification import (
+            MAY_CONTEST,
+        )
+        return (not self.qualification_state
+                or self.qualification_state in MAY_CONTEST)
 
 
 def corroborating(competitors: Sequence[Competitor]) -> List[Competitor]:

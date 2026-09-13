@@ -1,0 +1,30 @@
+{
+  "batch": 18,
+  "canonical_path": "strategic_intelligence.analyst.runner.default_client",
+  "checked_at": "2026-08-13T20:41:37+00:00",
+  "contract": "backend_preflight.v1",
+  "founder_sha": "914ebf3",
+  "manifest_version": "1.0.0",
+  "market_sha": "fbcbacc",
+  "model": "claude-sonnet-5",
+  "no_regression": {
+    "gate_counts_unchanged": true,
+    "wave30_gate_tests": 42
+  },
+  "owner_action_required": "Restore Anthropic account credit/balance. No engineering step can substitute for the canonical analyst backend.",
+  "probes_made": 1,
+  "production_sha": "cfd4c3b",
+  "provider_message": "Your credit balance is too low to access the Anthropic API.",
+  "provider_request_id": "req_011Ce1Pr4uUtPhro2JjbNZc5",
+  "re_probed": false,
+  "runtime_sha": "fbcbacc",
+  "state": "CREDITS_EXHAUSTED",
+  "wave_30": {
+    "blocked_external": 6,
+    "fail": 0,
+    "note": "all six blocks carry a producer verified to exist",
+    "pass": 12,
+    "verdict": "CLOSED"
+  },
+  "why_no_further_work": "Batch 17 proved every remaining Wave-30 criterion has a producer that exists, so credit is the only pre-execution blocker. Building further architecture against an unrunnable backend is what this stop prevents."
+}

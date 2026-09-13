@@ -9,3 +9,8 @@ Pillow==11.3.0
 faster-whisper==1.2.1
 requests==2.32.5
 pypdf==5.1.0
+PyYAML==6.0.3
+# Hosted-runtime Postgres backend. Optional at runtime (storage.durable falls
+# back to sqlite3 and imports this lazily), pinned here so CI resolves the same
+# driver every time. Mirrors the [postgres] extra in pyproject.toml.
+psycopg[binary]==3.2.3

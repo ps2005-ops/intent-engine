@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Intent Engine — lightweight health check.
+
+  WHY IT IS JUSTIFIED AND WHY IT IS CHEAP
+  Scheduled execution alone cannot detect its own absence. If launchd stops
+  firing the night cycle, the night cycle is not around to report that it
+  stopped. This job's only purpose is to notice that, and it does so by reading
+  run records off disk — no network, no research, no price fetch.
+
+  It runs HOURLY, not every few minutes. A busy loop would burn power to detect
+  a condition that changes at most twice a day, and it would make the log
+  useless by flooding it. The check writes a status line and exits nonzero when
+  a scheduled run has been missed, which launchd records.
+
+  SECRETS: none.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>{{LABEL}}</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>{{PYTHON}}</string>
+        <string>-m</string>
+        <string>intent_engine.market</string>
+        <string>status</string>
+        <string>--root</string>
+        <string>{{ROOT}}</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>{{REPO}}</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PYTHONPATH</key>
+        <string>{{REPO}}/src</string>
+        <key>TRADING_MODE</key>
+        <string>PAPER</string>
+        <key>PYTHONUNBUFFERED</key>
+        <string>1</string>
+        <key>TZ</key>
+        <string>America/Toronto</string>
+    </dict>
+
+    <key>StartInterval</key>
+    <integer>3600</integer>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>{{LOGDIR}}/health.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>{{LOGDIR}}/health.err.log</string>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+    <key>LowPriorityIO</key>
+    <true/>
+</dict>
+</plist>

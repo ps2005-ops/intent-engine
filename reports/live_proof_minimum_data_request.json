@@ -1,0 +1,80 @@
+{
+  "alpha_rows_persisted": 2,
+  "beta_rows_persisted": 1,
+  "cases": {
+    "MVE": "MVE_PROPOSED",
+    "cross_tenant": "MDR_ISSUED",
+    "injection": "MDR_ISSUED",
+    "narrow_request": "MDR_ISSUED",
+    "no_decision_value": [
+      "RESOLVES_NOTHING_UNRESOLVED",
+      "SAFER_SUBSTITUTE_SUFFICES"
+    ],
+    "privacy_substitute": [
+      [
+        "per-account exposure rows",
+        "cohort exposure share"
+      ]
+    ],
+    "sufficient_data": "NO_REQUEST_DATA_SUFFICIENT",
+    "unresolved": "UNRESOLVABLE"
+  },
+  "command": "PYTHONPATH=src python3 scripts/live_proof_minimum_data_request.py",
+  "contract": "live_proof_minimum_data_request.v1",
+  "decision_references": [
+    "mdr_290c507579f49f30"
+  ],
+  "declined": [
+    [
+      "internal metric inventory",
+      "RESOLVES_NOTHING_UNRESOLVED"
+    ],
+    [
+      "per-account exposure rows",
+      "SAFER_SUBSTITUTE_SUFFICES"
+    ]
+  ],
+  "experiment_parameterized": false,
+  "experiment_sentinels": [
+    "DURATION_UNRESOLVED",
+    "EXPOSURE_UNRESOLVED",
+    "KILL_THRESHOLD_UNRESOLVED"
+  ],
+  "failures": [],
+  "node": "D-MDR-001",
+  "population": "SYNTHETIC_ENTERPRISE",
+  "requested_fields": [
+    "cohort exposure share",
+    "metric-to-initiative linkage",
+    "current metric value"
+  ],
+  "runtime_sha": "bc03be06854591d6cadffa606daa6974cc910d11",
+  "sensitive_avoided": [
+    "per-account exposure rows"
+  ],
+  "substitutions": [
+    [
+      "per-account exposure rows",
+      "cohort exposure share"
+    ]
+  ],
+  "synthetic_world_id": "syn_498dc030ba37dca0",
+  "telemetry": {
+    "contract": "minimum_data_request_telemetry.v1",
+    "experiments_generated": 0,
+    "experiments_refused": 0,
+    "fields_declined_unnecessary": 6,
+    "fields_requested": 17,
+    "gaps_resolved": 17,
+    "gaps_still_open": 1,
+    "learning_class": "SYSTEM",
+    "requests_avoided_data_sufficient": 4,
+    "requests_avoided_no_decision_value": 0,
+    "requests_generated": 6,
+    "requests_refused_breadth": 0,
+    "sensitive_fields_avoided": 5,
+    "substitutes_used": 5
+  },
+  "transport": "real HTTP to wsgiref on 127.0.0.1:52598",
+  "verdict": "LIVE_VERIFIED"
+}
