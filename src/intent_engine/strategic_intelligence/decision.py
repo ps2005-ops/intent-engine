@@ -420,6 +420,16 @@ class FounderDecision:
     #: question that cannot say why it was selected is indistinguishable from
     #: a constant, so the reason travels with it.
     why_this_question: str = ""
+    #: WHY THIS COMPANY AND NOT ANY COMPANY LIKE IT. `why_this_question`
+    #: answers "why this decision"; it does not answer "why is this reading
+    #: not the same reading a competitor would get". On the frozen 40, 22
+    #: companies received one byte-identical decision question, each with a
+    #: perfectly truthful `why_this_question` beside it -- the reason was
+    #: sound and the reading was still everybody's. These three fields carry
+    #: the second question, which no surface could previously ask.
+    question_basis: Optional[dict] = None
+    strategic_delta: Optional[dict] = None
+    information_priorities: tuple = ()
     #: The decision archetype chosen (PRICING, CAPACITY, ...) and every
     #: archetype considered with its score. Internal ordering, shown as
     #: English on the surfaces.
@@ -602,6 +612,9 @@ class FounderDecision:
             "company": self.company,
             "decision_question": self.decision_question,
             "why_this_question": self.why_this_question,
+            "question_basis": self.question_basis,
+            "strategic_delta": self.strategic_delta,
+            "information_priorities": list(self.information_priorities or ()),
             "decision_archetype": self.decision_archetype,
             "archetypes_considered": list(self.archetypes_considered),
             "company_profile": self.company_profile,
@@ -741,6 +754,9 @@ def decision_from_dict(data) -> FounderDecision:
         company=data.get("company", ""),
         decision_question=data.get("decision_question", ""),
         why_this_question=data.get("why_this_question", ""),
+        question_basis=data.get("question_basis"),
+        strategic_delta=data.get("strategic_delta"),
+        information_priorities=tuple(data.get("information_priorities") or ()),
         decision_archetype=data.get("decision_archetype", ""),
         archetypes_considered=tuple(data.get("archetypes_considered") or ()),
         company_profile=data.get("company_profile"),

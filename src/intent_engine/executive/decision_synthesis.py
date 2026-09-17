@@ -740,6 +740,13 @@ def compose(dossier, *, previous: Optional[Any] = None,
             f"What should be concluded about {company} from the published "
             f"market record, and what would change it?"),
         why_this_question=getattr(selection, "why_this_question", ""),
+        question_basis=dict(getattr(selection, "question_basis", {}) or {}),
+        strategic_delta=(getattr(selection, "delta").as_dict()
+                         if getattr(selection, "delta", None) is not None
+                         else None),
+        information_priorities=tuple(
+            p.as_dict() for p in
+            (getattr(selection, "information_priorities", ()) or ())),
         decision_archetype=getattr(selection, "archetype", ""),
         archetypes_considered=tuple(
             getattr(selection, "considered", ()) or ()),

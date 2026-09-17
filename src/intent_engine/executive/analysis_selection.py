@@ -49,6 +49,8 @@ import dataclasses
 import re
 from typing import Optional, Tuple
 
+from intent_engine.executive import decision_object as _decision_object
+from intent_engine.executive import strategic_delta as _strategic_delta
 from intent_engine.executive.company_profile import (UNKNOWN,
                                                      CompanyIntelligenceProfile,
                                                      profile_for)
@@ -92,6 +94,19 @@ _ARCHETYPE_SUBJECT = {
     "INVENTORY": "how much inventory to carry through the cycle",
     "R&D_ROADMAP": "which development programmes to fund and which to stop",
 }
+
+#: Decisions whose OUTCOME depends on who the buyer is, so naming the buyer
+#: changes what the question asks rather than decorating it.
+#:
+#: Price elasticity is a property of the buyer, and what to build next is a
+#: property of who will use it -- so PRICING and PRODUCTIZATION are in.
+#: CAPITAL_ALLOCATION, COST_STRUCTURE, M&A and SUPPLY_CHAIN are out: naming
+#: a customer segment inside "where the next increment of capital goes" adds
+#: a noun and no meaning, which is the template-injection §8 forbids. The
+#: test for membership is whether a DIFFERENT buyer would give a different
+#: answer, never whether the sentence reads better.
+_BUYER_BEARS_ON = ("PRICING", "PRODUCTIZATION", "CUSTOMER_SEGMENT",
+                   "SALES_MOTION", "RETENTION", "MARKET_ENTRY")
 
 #: The management lever a scenario starts from, per archetype.
 _ARCHETYPE_LEVER = {
@@ -228,6 +243,10 @@ class AnalysisSelection:
     why_this_question: str = ""
     considered: Tuple[dict, ...] = ()       #: every archetype and its score
     decision_question: str = ""
+    decision_object: Optional[object] = None
+    question_basis: dict = dataclasses.field(default_factory=dict)
+    delta: Optional[object] = None
+    information_priorities: Tuple[object, ...] = ()
     signals: Tuple[Signal, ...] = ()
     transmission: Tuple[Transmission, ...] = ()
     no_exposure_reason: str = ""
@@ -248,6 +267,12 @@ class AnalysisSelection:
             "why_this_question": self.why_this_question,
             "considered": list(self.considered),
             "decision_question": self.decision_question,
+            "decision_object": (self.decision_object.as_dict()
+                                if self.decision_object is not None else None),
+            "question_basis": dict(self.question_basis or {}),
+            "delta": (self.delta.as_dict() if self.delta is not None else None),
+            "information_priorities": [p.as_dict()
+                                       for p in self.information_priorities],
             "signals": [s.as_dict() for s in self.signals],
             "transmission": [t.as_dict() for t in self.transmission],
             "no_exposure_reason": self.no_exposure_reason,
@@ -257,6 +282,16 @@ class AnalysisSelection:
             "adversary": [a.as_dict() for a in self.adversary],
             "scenarios": [s.as_dict() for s in self.scenarios],
         }
+
+
+@dataclasses.dataclass(frozen=True)
+class _Preview:
+    """The three fields the delta builder reads, before the full selection
+    exists. Passing a half-constructed `AnalysisSelection` is how a producer
+    comes to depend on a field that is not populated yet."""
+    archetype: str = ""
+    decision_question: str = ""
+    considered: Tuple[dict, ...] = ()
 
 
 @dataclasses.dataclass(frozen=True)
@@ -747,12 +782,30 @@ def _score_archetypes(profile, facts: RecordFacts, own_text: str = ""):
     return tuple(rows)
 
 
-def _decision_question(profile, archetype: str, facts: RecordFacts) -> str:
+def _decision_question(profile, archetype: str, facts: RecordFacts,
+                       objects=None) -> str:
     """The question, in this business's own variables.
 
     Composed from the archetype's subject and the driver the archetype acts
     on, so a pricing question at a bank names the spread and a pricing
     question at a consumer brand names promotional depth.
+
+    WHERE THE VARIABLES COME FROM, AND WHY IT CHANGED
+    -------------------------------------------------
+    The driver and cost slots used to be filled ONLY from
+    `_ECONOMICS[business_model_class]` -- a table keyed on the class. So the
+    question was `f(archetype, model_class)` and nothing else, and on the
+    frozen 40-company qualification 22 companies received one byte-identical
+    pricing question because all 22 share `primary_revenue_drivers[0] ==
+    "customer count"`. Four distinct questions across 33 companies is not a
+    reading of 33 companies.
+
+    `objects` is `decision_object.DecisionObject`: what THIS company said
+    about what a unit of its revenue is counted in and who decides to buy
+    it. Where it established something, that fills the slot; where it did
+    not, the class constant still fills it and `question_basis()` says which
+    happened. A slot filled by assumption that reads as though the company
+    told us is the one outcome forbidden here.
     """
     name = profile.company_name
     subject = _ARCHETYPE_SUBJECT.get(archetype, "")
@@ -763,6 +816,16 @@ def _decision_question(profile, archetype: str, facts: RecordFacts) -> str:
     costs = profile.primary_cost_drivers or ()
     driver = drivers[0] if drivers else "the revenue base"
     cost = costs[0] if costs else "the cost base"
+    unit = getattr(getattr(objects, "billing_unit", None), "value", "")
+    if getattr(getattr(objects, "billing_unit", None), "known", False):
+        driver = unit
+    buyer = getattr(getattr(objects, "buyer", None), "value", "")
+    if getattr(getattr(objects, "buyer", None), "known", False):
+        # The buyer sharpens the decisions that are ABOUT a buyer, and is
+        # left out of the ones that are not: a capital-allocation question
+        # does not become better by naming a customer segment.
+        if archetype in _BUYER_BEARS_ON:
+            driver = f"{driver} among {buyer}"
     tail = {
         "PRICING": f"without losing more {driver} than the price gains",
         # PHRASED TO AVOID SUBJECT-VERB AGREEMENT. The driver and cost slots
@@ -802,6 +865,61 @@ def _decision_question(profile, archetype: str, facts: RecordFacts) -> str:
     }.get(archetype, "")
     return (f"For {name}: {subject}, {tail}?" if tail
             else f"For {name}: {subject}?")
+
+
+def question_basis(profile, archetype: str, objects=None) -> dict:
+    """Which slots in the decision question the COMPANY filled, and which the
+    class prior filled.
+
+    This is the field that makes the repair auditable. Without it a reader
+    cannot tell a question that names this company's own billing unit from
+    one that names the class constant, and a cohort cannot measure whether
+    anything actually changed -- which is how 22 identical questions went
+    twenty-two times unnoticed.
+    """
+    unit = getattr(objects, "billing_unit", None)
+    buyer = getattr(objects, "buyer", None)
+    drivers = tuple(getattr(profile, "primary_revenue_drivers", ()) or ())
+    prior_driver = drivers[0] if drivers else "the revenue base"
+    from_company, from_prior = [], []
+    (from_company if getattr(unit, "known", False) else from_prior).append(
+        "the unit revenue is counted in")
+    uses_buyer = archetype in _BUYER_BEARS_ON
+    if uses_buyer:
+        (from_company if getattr(buyer, "known", False)
+         else from_prior).append("who decides to buy")
+    return {
+        "slots_from_company": tuple(from_company),
+        "slots_from_class_prior": tuple(from_prior),
+        "company_slot_count": len(from_company),
+        "billing_unit": getattr(unit, "value", ""),
+        "billing_unit_state": getattr(unit, "state", "NOT_ESTABLISHED"),
+        "billing_unit_quote": getattr(unit, "quote", ""),
+        "buyer": getattr(buyer, "value", ""),
+        "buyer_state": getattr(buyer, "state", "NOT_ESTABLISHED"),
+        "buyer_quote": getattr(buyer, "quote", ""),
+        "buyer_used": bool(uses_buyer),
+        "class_prior_driver": prior_driver,
+        "why": _basis_sentence(from_company, from_prior, objects, profile),
+    }
+
+
+def _basis_sentence(from_company, from_prior, objects, profile) -> str:
+    """One sentence a reader can act on, never a status code."""
+    unit = getattr(objects, "billing_unit", None)
+    model = str(getattr(profile, "business_model_class", "") or "").replace(
+        "_", " ").lower()
+    if from_company and getattr(unit, "known", False):
+        return (f"The question is measured in {unit.value}, which is what "
+                f"this company says it charges for -- not the unit a "
+                f"{model} business is assumed to charge for.")
+    if from_company:
+        return ("Part of this question is in this company's own terms; the "
+                "rest is what a business of this kind normally decides.")
+    reason = str(getattr(unit, "reason", "") or "")
+    return (f"Every variable in this question comes from what a {model} "
+            f"business normally decides, not from this company: "
+            f"{reason or 'it published nothing we could read on the point'}.")
 
 
 def _signals(profile, facts: RecordFacts) -> Tuple[Signal, ...]:
@@ -1120,8 +1238,36 @@ def select(company_id: str = "", *, name: str = "", domain: str = "",
         why = (f"{why}. It was ranked above "
                f"{considered[1]['archetype'].replace('_', ' ').lower()} on "
                f"the same evidence.")
+    # THE COMPANY'S OWN DECISION VARIABLES. Built from the same two texts
+    # the classifier already reads, so this adds no retrieval and no model
+    # call; it spends text that was previously used only to decide what KIND
+    # of business this is on deciding what the question is MEASURED IN.
+    objects = _decision_object.build(
+        company=profile.company_name or name or company_id,
+        evidence_text=evidence_text, published_text=published_text)
     transmission, no_exposure = _transmission(profile, facts, archetype)
     causal_question, why_causal = _causal(profile, archetype, facts)
+    # THE COMPARATOR IS A REAL SECOND STATE, not a placeholder. Running the
+    # same builder with `objects=None` is exactly "what would the class prior
+    # alone have said", so the delta measures the difference between two
+    # readings this code actually produces rather than against a constant.
+    question = _decision_question(profile, archetype, facts, objects)
+    prior_question = _decision_question(profile, archetype, facts, None)
+    _terms = ()
+    if considered:
+        _terms = tuple((considered[0].get("contributions") or {}).get(
+            "evidence_terms") or ())
+    delta = _strategic_delta.build_delta(
+        company=profile.company_name or name or company_id,
+        selection=_Preview(archetype=archetype, decision_question=question,
+                           considered=considered),
+        prior_question=prior_question, prior_archetype=archetype,
+        decision_object=objects, evidence_terms=_terms)
+    priorities = _strategic_delta.information_priorities(
+        company=profile.company_name or name or company_id,
+        selection=_Preview(archetype=archetype, decision_question=question,
+                           considered=considered),
+        decision_object=objects, delta=delta)
     return AnalysisSelection(
         company_id=profile.company_id or company_id,
         company_name=profile.company_name or name or company_id,
@@ -1129,7 +1275,11 @@ def select(company_id: str = "", *, name: str = "", domain: str = "",
         archetype=archetype,
         why_this_question=why,
         considered=considered,
-        decision_question=_decision_question(profile, archetype, facts),
+        decision_question=question,
+        decision_object=objects,
+        question_basis=question_basis(profile, archetype, objects),
+        delta=delta,
+        information_priorities=priorities,
         signals=_signals(profile, facts),
         transmission=transmission,
         no_exposure_reason=no_exposure,

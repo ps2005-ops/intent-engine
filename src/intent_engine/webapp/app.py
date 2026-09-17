@@ -1173,6 +1173,9 @@ class WebApp:
         if route == ("GET", "runs", 3) and parts[2] == "evidence":
             return self._with_ask(session, parts[1],
                                   self._run_evidence(session, parts[1]))
+        if route == ("GET", "runs", 3) and parts[2] == "learning":
+            return self._with_ask(session, parts[1],
+                                  self._run_learning(session, parts[1]))
         if route == ("GET", "runs", 3) and parts[2] == "slides":
             return self._with_ask(session, parts[1],
                                   self._slides_page(session, parts[1]))
@@ -5974,6 +5977,141 @@ class WebApp:
         except Exception:                                   # noqa: BLE001
             _LOG.warning("second iteration not composed for %s", run_id)
             return {}
+
+
+    def _rehearsal_documents(self, run_id):
+        """This run's DATED first-party text, for the learning rehearsal.
+
+        A rehearsal needs text AND a date on the same object. EDGAR's
+        submissions index carries dates with no bodies, and most retrieved
+        pages carry bodies with no date -- so the rehearsal is available for
+        exactly those companies whose record supplies both, and refuses with
+        a reason for the rest. §23 asks for it "where sufficient dated
+        evidence exists"; this is where that is decided, once, visibly.
+
+        `published_date` is what the PUBLISHER asserted. The retrieval time
+        is never substituted: when we read a page is not when it was
+        written, and conflating the two is how a rewind acquires a fake
+        timeline.
+        """
+        rows = []
+        for doc in self._retrieved_documents(run_id):
+            if not isinstance(doc, dict):
+                continue
+            if doc.get("source_class") not in ("company_owned",
+                                               "executive_statement",
+                                               "investor_material"):
+                continue
+            filing = doc.get("filing") if isinstance(doc.get("filing"),
+                                                     dict) else {}
+            when = (str(doc.get("published_date") or "").strip()
+                    or str(filing.get("filed") or "").strip())
+            text = str(doc.get("text_content") or "")
+            if not when or len(text) < 200:
+                continue
+            rows.append({"filed": when, "text": text[:60_000],
+                         "form": str(filing.get("form")
+                                     or doc.get("title") or "page"),
+                         "url": str(doc.get("final_url")
+                                    or doc.get("original_url") or "")})
+        return rows
+
+    def _run_rehearsal(self, run_id, name):
+        """The historical rehearsal for this run, memoised per request."""
+        memo = getattr(self._request, "rehearsal", None)
+        if memo is None:
+            memo = self._request.rehearsal = {}
+        if run_id in memo:
+            return memo[run_id]
+        from intent_engine.executive import learning_rehearsal as LR
+        from intent_engine.executive.analysis_selection import select
+        meta = self.ci.run_meta(run_id) or {}
+        domain = str(meta.get("domain") or "")
+        result = LR.rehearse(
+            company=name, documents=self._rehearsal_documents(run_id),
+            read=lambda text: select(name=name, domain=domain,
+                                     published_text=text, evidence_text=text))
+        memo[run_id] = result
+        return result
+
+    def _run_learning(self, session, run_id):
+        """What we believed, what we expected, and what changed (§27).
+
+        RESTRAINED ON PURPOSE. The four states are kept apart by badge and
+        never blended, because a rehearsal row that reads like a forward
+        result is worth less than no row at all: it would make the one claim
+        this product has never been entitled to make.
+        """
+        from intent_engine.executive import learning_rehearsal as LR
+        from intent_engine.founder_brief import xray as XR
+        if not self._owned(session, run_id):
+            return self._no_such_run(session, run_id)
+        if self.only_watchable(run_id):
+            return self._redirect(f"/runs/{run_id}/progress")
+        meta = self.ci.run_meta(run_id) or {}
+        name = str(meta.get("company_name") or "")
+        if not name and self.ci.store.run_state(run_id) in self.TERMINAL_STATES:
+            return self._failed_run_page(session, run_id)
+        r = self._run_rehearsal(run_id, name)
+        badge = ('<span class="chip">HISTORICAL REHEARSAL</span>'
+                 '<span class="chip">NOT FORWARD CALIBRATION</span>')
+        head = (f'<p class="eyebrow">Learning history</p><h1>{_e(name)}</h1>'
+                f'<p class="stamp">{badge}</p>')
+        note = (
+            '<p>Nothing on this page is a forward result. No expectation this '
+            'product recorded has yet been settled by something that happened '
+            'afterwards, so its calibration status is unchanged: '
+            '<strong>pre-calibration</strong>. What is shown is the same '
+            'reasoning run twice over this company&rsquo;s own record as it '
+            'stood on two past dates, to show whether the reading moves when '
+            'the evidence moves.</p>')
+        if not r.available:
+            body = (f'<div class="cell"><p class="k">No rehearsal</p>'
+                    f'<p>{_e(r.refused or "this run holds no dated record")}'
+                    f'</p><p class="none">A rehearsal needs this '
+                    f'company&rsquo;s own text carrying a publisher date, on '
+                    f'at least two different dates. Where that does not '
+                    f'exist we say so rather than split the record '
+                    f'anyway.</p></div>')
+            return self._html(self._page(
+                f"{name} — learning history",
+                f'{XR._CSS}<main class="xr">{head}{note}'
+                f'<div class="grid">{body}</div></main>',
+                session, session.get("csrf", "")))
+        d, rec = r.delta, r.reconciliation
+        open_badge = ('<span class="chip">OPEN EXPECTATION</span>'
+                      if rec.outcome == LR.UNRESOLVED else
+                      f'<span class="chip">{_e(rec.outcome)}</span>')
+        cells = [
+            ("What we believed", f"as the record stood on {_e(r.t0)}",
+             _e(r.belief.statement)),
+            ("Why", "the basis that reading rested on",
+             _e(r.belief.mechanism or "the class prior for this business")),
+            ("What we expected", f"recorded {_e(r.expectation.created_at)}, "
+                                 f"before any later document was read",
+             _e(r.expectation.expected_observation)),
+            ("What happened", f"{open_badge} by {_e(r.t1)}",
+             _e(rec.observation or "nothing further arrived")),
+            ("What changed", _e(d.change_type.replace("_", " ").lower()),
+             _e(rec.reason)),
+            ("How the reading changed", "before &rarr; after",
+             f"&ldquo;{_e(d.before_decision)}&rdquo;<br>&rarr; "
+             f"&ldquo;{_e(d.after_decision)}&rdquo;"),
+            ("What we are watching next", "the open question",
+             _e(d.after_priority or "nothing further is named as needed")),
+        ]
+        grid = "".join(
+            f'<div class="cell"><p class="k">{k}</p>'
+            f'<p class="none">{sub}</p><p>{v}</p></div>'
+            for k, sub, v in cells)
+        prov = (f'<p class="none">{_e(d.provenance)}. '
+                f'{r.documents_at_t0} document(s) were readable at the first '
+                f'date and {r.documents_at_t1} by the second.</p>')
+        return self._html(self._page(
+            f"{name} — learning history",
+            f'{XR._CSS}<main class="xr">{head}{note}'
+            f'<div class="grid">{grid}</div>{prov}</main>',
+            session, session.get("csrf", "")))
 
     def _run_xray(self, session, run_id):
         """The Executive X-Ray for a LIVE run — the customer's decision home.

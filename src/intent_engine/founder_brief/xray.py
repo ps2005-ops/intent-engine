@@ -138,6 +138,85 @@ def _section(title: str, sub: str, body: str, *, open_: bool = False) -> str:
 
 # --- the expandable sections ------------------------------------------------
 
+def _why_this_company_body(d: dict) -> str:
+    """Why this reading is this company's, and not everybody's (§12).
+
+    THE PANEL THAT WAS MISSING. "Why this decision" was always answered and
+    always truthfully; "why is this not the reading a competitor would get"
+    could not be asked, and on the frozen 40 that let 22 companies share one
+    byte-identical decision question, each with a sound reason beside it.
+
+    An ungrounded reading is shown as ungrounded. That is the point: the
+    honest page for a company we could not read says so and names what would
+    have to be learned, rather than reading confidently.
+    """
+    delta = d.get("strategic_delta") or {}
+    basis = d.get("question_basis") or {}
+    grounding = (delta.get("grounding") or {}) if isinstance(delta, dict) else {}
+    verdict = str(grounding.get("verdict") or "")
+    rows = []
+    if verdict == "GROUNDED":
+        rows.append("<p><strong>This reading is this company&rsquo;s.</strong> "
+                    + _e(str(grounding.get("reason", ""))) + "</p>")
+    elif verdict:
+        rows.append("<p><strong>This reading is not yet this "
+                    "company&rsquo;s.</strong> "
+                    + _e(str(grounding.get("reason", ""))) + "</p>")
+    if basis.get("why"):
+        rows.append("<p>" + _e(str(basis["why"])) + "</p>")
+    quote = ""
+    if basis.get("billing_unit") and basis.get("billing_unit_quote"):
+        quote = str(basis["billing_unit_quote"])
+    elif basis.get("buyer") and basis.get("buyer_quote"):
+        quote = str(basis["buyer_quote"])
+    if quote:
+        rows.append('<p class="none">It said so itself: &ldquo;'
+                    + _e(quote) + "&rdquo;</p>")
+    prior = str(delta.get("prior_question") or "")
+    final = str(delta.get("final_question") or "")
+    if prior and final and prior != final:
+        rows.append('<p class="none">Without reading this company at all, '
+                    "the question would have been: &ldquo;"
+                    + _e(prior) + "&rdquo;</p>")
+    if delta.get("why"):
+        rows.append("<p>" + _e(str(delta["why"])) + "</p>")
+    if not rows:
+        return ('<p class="none">Whether this reading is specific to this '
+                "company has not been measured for this run.</p>")
+    return "".join(rows)
+
+
+def _information_priority_body(d: dict) -> str:
+    """What to learn next, and what it would change (§14).
+
+    A good abstention tells an executive what to find out. The frozen 40 gave
+    29 companies a confident-sounding question composed entirely from their
+    category, and nothing to do about it.
+    """
+    rows = d.get("information_priorities") or ()
+    if not rows:
+        return ('<p class="none">Nothing further is named as needed for this '
+                "reading. Where a reading is already this company&rsquo;s "
+                "own, that is the expected answer.</p>")
+    out = []
+    for row in list(rows)[:4]:
+        if not isinstance(row, dict):
+            continue
+        out.append(
+            '<div class="cell"><p class="k">'
+            + _e(str(row.get("expected_information_value") or ""))
+            + " value</p><p><strong>"
+            + _e(str(row.get("question") or "")) + "</strong></p><p>"
+            + _e(str(row.get("why_it_matters") or ""))
+            + '</p><p class="none">Would change: '
+            + _e(str(row.get("which_decision_it_changes") or ""))
+            + ". Best source: "
+            + _e(str(row.get("best_source_type") or "")) + ".</p></div>")
+    if not out:
+        return '<p class="none">No information priority was composed.</p>'
+    return '<div class="grid">' + "".join(out) + "</div>"
+
+
 def _evidence_body(d: dict) -> str:
     supporting = list(d.get("supporting_evidence_ids") or ())
     contradicting = list(d.get("contradicting_evidence_ids") or ())
@@ -651,6 +730,12 @@ def render(decision: dict, *, company: str = "", stamp: str = "",
         grid += f'<p class="none">{_e(reason)}</p>'
 
     sections = "".join([
+        _section("Why this reading is this company's",
+                 "and not any company like it",
+                 _why_this_company_body(d)),
+        _section("What we would have to learn next",
+                 f'{len(d.get("information_priorities") or ())} priority(ies)',
+                 _information_priority_body(d)),
         _section("The evidence under this",
                  f'{len(d.get("supporting_evidence_ids") or ())} row(s)',
                  _evidence_body(d)),

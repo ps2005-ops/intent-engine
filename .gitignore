@@ -133,3 +133,7 @@ reports/market/replay/replay_*.json
 
 # Runtime agent ownership markers — never committed.
 .agent-lock/
+.venv_bootstrap_discard/
+reports/asi2/
+reports/asi25_ui/
+reports/next40_ui/
