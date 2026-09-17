@@ -150,8 +150,12 @@ def _v2(op, run_id, row, surfaces):
         "why_company_chars": len(why_company),
         # The two sentences that carry the claim, kept verbatim so a cohort
         # can compare them for collapse exactly as it compares questions.
-        "grounding_reason": _first(r"(?:company&rsquo;s\.|company's\.)\s*(.{20,400}?)(?:\s{2,}|$)",
-                                   why_company) or why_company[:400],
+        # `visible()` DECODES ENTITIES, so the rendered "&rsquo;" arrives as
+        # a curly apostrophe. Matching the entity spelling would have been a
+        # dead branch that silently fell through to the whole panel -- a
+        # measurement that always "works" and never measures what it names.
+        "grounding_reason": _first(
+            r"company[’']s\.\s*(.{20,400})", why_company) or why_company[:400],
         "measured_in": _first(r"question is measured in ([^,]{2,60}), which is",
                               why_company),
         "quoted_itself": "It said so itself" in why_company,

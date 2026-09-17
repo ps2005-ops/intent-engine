@@ -530,8 +530,8 @@ def bp11():
         DO = importlib.import_module(
             "intent_engine.executive.decision_object")
         obj = DO.build(company="Anyco",
-                       published_text="Built for the best experience on every "
-                                      "device. Trusted by our partners.")
+                       published_text="Anyco is built for the best experience "
+                                      "on every device, and we mean it.")
         if obj.buyer.known and "best" in obj.buyer.value.lower():
             raise AssertionError("clean code already read marketing copy")
 
@@ -544,10 +544,85 @@ def bp11():
     def check(t):
         DO = t.load("intent_engine.executive.decision_object")
         obj = DO.build(company="Anyco",
-                       published_text="Built for the best experience on every "
-                                      "device. Trusted by our partners.")
+                       published_text="Anyco is built for the best experience "
+                                      "on every device, and we mean it.")
         assert not (obj.buyer.known and "best" in obj.buyer.value.lower()), (
             f"marketing copy became a buyer: {obj.buyer.value!r}")
+    return run(p, mutate=mutate, check=check, control=control)
+
+
+# --- 13 the subject anchor on the buyer rules ------------------------------
+
+def bp13():
+    p = _p(name="13_buyer_read_from_a_foreign_subject",
+           description="a sentence about somebody else's tooling becomes who "
+                       "this company sells to, and the page calls it GROUNDED",
+           target_kind=BP.PRODUCER,
+           mutated_file="src/intent_engine/executive/decision_object.py",
+           mutated_symbol="_first_match.needs_subject",
+           guard_under_test="test_a_buyer_is_not_read_from_a_sentence_about_"
+                            "somebody_else",
+           production_call_path="tests/test_decision_is_measured_in_this_"
+                                "company_s_own_unit.py")
+    # The live fixture ("the rest of the group") is now refused by the
+    # ANAPHORIC guard as well, so it no longer isolates the subject anchor.
+    # This sentence has a foreign subject and a perfectly well-formed
+    # population as its object, so only the subject rule can refuse it.
+    text = ("The tools and infrastructure in this campaign are widely shared "
+            "and are used by ransomware operators, according to researchers.")
+
+    def control():
+        DO = importlib.import_module(
+            "intent_engine.executive.decision_object")
+        if DO.build(company="Arctic Wolf", published_text=text).buyer.known:
+            raise AssertionError("clean code already read a foreign subject")
+
+    def mutate(t):
+        return t.mutate("src/intent_engine/executive/decision_object.py",
+                        "            if needs_subject and not names_itself:",
+                        "            if False:")
+
+    def check(t):
+        DO = t.load("intent_engine.executive.decision_object")
+        obj = DO.build(company="Arctic Wolf", published_text=text)
+        assert not obj.buyer.known, (
+            f"a buyer was read from a sentence about somebody else: "
+            f"{obj.buyer.value!r}")
+    return run(p, mutate=mutate, check=check, control=control)
+
+
+# --- 14 the word boundaries under the subject anchor -----------------------
+
+def bp14():
+    p = _p(name="14_first_person_without_word_boundaries",
+           description='"we" matches inside "however", so every sentence on '
+                       "the internet names the company in the first person",
+           target_kind=BP.PRODUCER,
+           mutated_file="src/intent_engine/executive/decision_object.py",
+           mutated_symbol="_FIRST_PERSON",
+           guard_under_test="test_the_first_person_pattern_requires_word_"
+                            "boundaries",
+           production_call_path="tests/test_decision_is_measured_in_this_"
+                                "company_s_own_unit.py")
+
+    def control():
+        import re as _re
+        DO = importlib.import_module(
+            "intent_engine.executive.decision_object")
+        if _re.search(DO._subject_patterns("Acme"), "however"):
+            raise AssertionError("clean code already matches inside a word")
+
+    def mutate(t):
+        return t.mutate(
+            "src/intent_engine/executive/decision_object.py",
+            '_FIRST_PERSON = r"(?<![a-z])(?:we|our|ours|us)(?![a-z])"',
+            '_FIRST_PERSON = r"(?:we|our|ours|us)"')
+
+    def check(t):
+        import re as _re
+        DO = t.load("intent_engine.executive.decision_object")
+        assert not _re.search(DO._subject_patterns("Acme"), "however"), (
+            "the first-person pattern matched inside 'however'")
     return run(p, mutate=mutate, check=check, control=control)
 
 
@@ -589,7 +664,8 @@ def bp12():
 
 def main() -> int:
     proofs = [bp01(), bp02(), bp03(), bp04(), bp05(), bp06(),
-              bp07(), bp08(), bp09(), bp10(), bp11(), bp12()]
+              bp07(), bp08(), bp09(), bp10(), bp11(), bp12(),
+              bp13(), bp14()]
     rows = []
     for p in proofs:
         rows.append({"name": p.name, "verdict": p.verdict,

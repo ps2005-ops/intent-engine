@@ -202,3 +202,71 @@ def test_extraction_never_raises(name, text):
     """A slot that cannot be established is an answer, not an exception."""
     obj = DO.build(company=name, published_text=text)
     assert obj.contract == DO.CONTRACT
+
+
+# --- found live, on the deployed service ------------------------------------
+#
+# Everything below failed on a9ca9f8c against a real page. They are kept
+# apart from the offline cases above because the offline fixtures could not
+# have produced them: the defects needed a real company's real prose.
+
+def test_a_buyer_is_not_read_from_a_sentence_about_somebody_else():
+    """MEASURED LIVE on Arctic Wolf.
+
+    Its threat-research post about the Karakurt and Conti ransomware gangs
+    says "... the tools and infrastructure used by the rest of the group".
+    The product read "rest of the group" as who Arctic Wolf sells to, put it
+    in the central decision question, and marked the reading GROUNDED on it
+    -- a fabricated ground, which is worse than NAME_ONLY because it claims
+    a company-specificity it does not have.
+
+    "used by", "built for" and "designed for" describe SOMETHING. Which
+    something is decided by the rest of the sentence, so the sentence must
+    name this company.
+    """
+    obj = DO.build(company="Arctic Wolf", published_text=(
+        "However Karakurt is being run, it no doubt gains some advantage "
+        "with access to Conti resources such as access to victims or the "
+        "tools and infrastructure used by the rest of the group."))
+    assert not obj.buyer.known, (
+        f"a buyer was read from a sentence about a ransomware gang: "
+        f"{obj.buyer.value!r}")
+
+
+def test_the_first_person_pattern_requires_word_boundaries():
+    """"we" matched inside "ho-we-ver", so every sentence named the company.
+
+    This is the defect underneath the one above: without boundaries the
+    subject discipline is decorative, and it was decorative everywhere it
+    was used -- including the dependency rules, whose test passed only
+    because its fixtures happened to contain no "we", "our" or "us" as a
+    substring.
+    """
+    import re
+    pattern = re.compile(DO._subject_patterns("Acme"))
+    for decoy in ("however", "resources", "versus", "housing", "answer",
+                  "wetland", "trousers"):
+        assert not pattern.search(decoy), (
+            f"{decoy!r} was read as the company speaking in the first person")
+    for real in ("we build", "our platform", "acme sells"):
+        assert pattern.search(real), f"{real!r} was not recognised"
+
+
+def test_an_anaphoric_phrase_is_not_a_buyer():
+    """"the rest of the group" passes every word-level gate and names nobody.
+
+    Defence in depth behind the subject rule: a sentence that DOES name the
+    company can still contain one.
+    """
+    obj = DO.build(company="Acme", published_text=(
+        "Acme is built for the rest of the group, and we serve them daily."))
+    assert not obj.buyer.known, f"an anaphor became a buyer: {obj.buyer.value!r}"
+
+
+def test_a_real_buyer_in_a_company_naming_sentence_still_reads():
+    """The repair must not close the door it exists to keep open."""
+    obj = DO.build(company="Arctic Wolf", published_text=(
+        "Arctic Wolf is built for mid-market credit unions and regional "
+        "banks, and we serve them daily."))
+    assert obj.buyer.known, obj.buyer.reason
+    assert "credit unions" in obj.buyer.value

@@ -1,7 +1,7 @@
 {
   "contract": "break_proofs_asi2.v1",
-  "held": 12,
-  "total": 12,
+  "held": 14,
+  "total": 14,
   "proofs": [
     {
       "name": "01_subject_rule_dropped",
@@ -10,8 +10,8 @@
       "target_kind": "PRODUCER",
       "mutated_symbol": "_subject_patterns",
       "guard_under_test": "test_mentioning_a_thing_is_not_depending_on_it",
-      "bytes_before": 25648,
-      "bytes_after": 25617
+      "bytes_before": 28469,
+      "bytes_after": 28438
     },
     {
       "name": "02_hindsight_wall_removed",
@@ -100,8 +100,8 @@
       "target_kind": "PRODUCER",
       "mutated_symbol": "_GENERIC_BUYER",
       "guard_under_test": "test_a_buyer_that_names_everybody_is_refused",
-      "bytes_before": 25648,
-      "bytes_after": 25574
+      "bytes_before": 28469,
+      "bytes_after": 28395
     },
     {
       "name": "11_marketing_adjective_becomes_a_buyer",
@@ -110,8 +110,8 @@
       "target_kind": "PRODUCER",
       "mutated_symbol": "_EVALUATIVE",
       "guard_under_test": "test_marketing_adjectives_do_not_become_a_buyer",
-      "bytes_before": 25648,
-      "bytes_after": 25594
+      "bytes_before": 28469,
+      "bytes_after": 28415
     },
     {
       "name": "12_delta_compared_against_a_placeholder",
@@ -122,6 +122,26 @@
       "guard_under_test": "test_the_delta_comparator_is_a_real_second_reading",
       "bytes_before": 65773,
       "bytes_after": 65748
+    },
+    {
+      "name": "13_buyer_read_from_a_foreign_subject",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: a buyer was read from a sentence about somebody else: 'ransomware operators'",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "_first_match.needs_subject",
+      "guard_under_test": "test_a_buyer_is_not_read_from_a_sentence_about_somebody_else",
+      "bytes_before": 28469,
+      "bytes_after": 28440
+    },
+    {
+      "name": "14_first_person_without_word_boundaries",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: the first-person pattern matched inside 'however'",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "_FIRST_PERSON",
+      "guard_under_test": "test_the_first_person_pattern_requires_word_boundaries",
+      "bytes_before": 28469,
+      "bytes_after": 28450
     }
   ]
 }

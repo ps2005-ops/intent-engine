@@ -136,6 +136,16 @@ large small medium big little tiny huge growing modern today
 everywhere worldwide global globally across throughout around
 """.split())
 
+#: Nouns that point back at something rather than naming it. "the rest of
+#: the group" carries four words, passes every word-level gate, and names
+#: nobody -- it is an anaphor, and whatever it refers to is in a different
+#: sentence. Defence in depth behind the subject rule: even a sentence that
+#: DOES name the company can contain one.
+_PARTITIVE = frozenset("""
+rest remainder some many most few several all both each one any none
+others other half part portion majority minority handful number couple
+""".split())
+
 _STOP_SLOTS = _FILLER
 
 #: Page furniture: if a captured sentence carries one of these it is
@@ -148,8 +158,16 @@ _FURNITURE = (
 )
 
 #: The company as grammatical subject. Either first person or the company's
-#: own name in subject position. `{name}` is filled per company.
-_FIRST_PERSON = r"(?:we|our|us)"
+#: own name in subject position.
+#:
+#: THE WORD BOUNDARIES ARE THE WHOLE RULE. Without them "we" matches inside
+#: "ho-we-ver" and "us" inside "vers-us", so EVERY sentence on the internet
+#: names the company in the first person and the subject discipline is
+#: decorative. MEASURED LIVE on Arctic Wolf (a9ca9f8c): a threat-research
+#: post about the Karakurt and Conti ransomware gangs -- "However Karakurt
+#: is being run ... used by the rest of the group" -- was read as Arctic
+#: Wolf naming its own buyer, and the page said so to a reader.
+_FIRST_PERSON = r"(?<![a-z])(?:we|our|ours|us)(?![a-z])"
 
 #: Base verbs that take an object in "helps X <verb> Y". A greedy capture
 #: runs straight through them -- "development teams find and fix
@@ -363,6 +381,10 @@ def _acceptable(phrase: str, company: str, kind: str = "") -> str:
         # once the complement verb is cut. A buyer named in one singular word
         # is nearly always the tail of a heading; a real one-word buyer is a
         # plural population ("fleets", "developers", "hospitals").
+        if len(original) > 1 and original[0].lower() in _PARTITIVE \
+                and original[1].lower() == "of":
+            return ("the phrase points back at something named elsewhere "
+                    "rather than naming who buys")
         if len(original) == 1 and not original[0].lower().endswith("s"):
             return ("a buyer named in one singular word is a fragment, not a "
                     "population this company sells to")
@@ -412,20 +434,20 @@ def _billing_unit(text: str, company: str) -> Slot:
     subj = _subject_patterns(company)
     rules = (
         ("per-unit-pricing",
-         rf"\bpriced?\s+per\s+([a-z][a-z\-\s/&’']{{2,70}})"),
+         rf"\bpriced?\s+per\s+([a-z][a-z\-\s/&’']{{2,70}})", False),
         ("charged-per",
          rf"\b(?:charged|billed|charge|bill)\s+per\s+"
-         rf"([a-z][a-z\-\s/&’']{{2,70}})"),
+         rf"([a-z][a-z\-\s/&’']{{2,70}})", False),
         ("per-X-pricing",
-         rf"\bper[\s\-]([a-z][a-z\-\s/&’']{{2,40}})\s+pricing\b"),
+         rf"\bper[\s\-]([a-z][a-z\-\s/&’']{{2,40}})\s+pricing\b", False),
         ("X-based-pricing",
-         rf"\b([a-z][a-z\-\s/&’']{{2,40}})[\s\-]based\s+pricing\b"),
+         rf"\b([a-z][a-z\-\s/&’']{{2,40}})[\s\-]based\s+pricing\b", False),
         ("we-charge-for",
          rf"\b{subj}\s+(?:charge|bill|price)\s+(?:customers\s+)?"
-         rf"(?:for|by|on)\s+([a-z][a-z\-\s/&’']{{2,70}})"),
+         rf"(?:for|by|on)\s+([a-z][a-z\-\s/&’']{{2,70}})", False),
         ("pricing-is-based-on",
          rf"\bpricing\s+is\s+based\s+on\s+"
-         rf"(?:the\s+)?([a-z][a-z\-\s/&’']{{2,70}})"),
+         rf"(?:the\s+)?([a-z][a-z\-\s/&’']{{2,70}})", False),
     )
     return _first_match("BILLING_UNIT", text, company, rules,
                         missing=("this company does not state publicly what a "
@@ -438,25 +460,37 @@ def _billing_unit(text: str, company: str) -> Slot:
 def _buyer(text: str, company: str) -> Slot:
     """Who decides to pay. Not who benefits, and not who is mentioned."""
     subj = _subject_patterns(company)
+    # A RULE THAT DOES NOT NAME THE COMPANY CAN READ ANY SENTENCE ON THE
+    # PAGE. MEASURED LIVE on Arctic Wolf (a9ca9f8c): "used by the rest of the
+    # group" matched inside a THREAT-RESEARCH POST about the Karakurt and
+    # Conti ransomware gangs, and the product told a reader that "rest of the
+    # group" is who Arctic Wolf sells to -- and marked the reading GROUNDED
+    # on it. That is a fabricated ground, which is worse than NAME_ONLY,
+    # because it claims a company-specificity it does not have.
+    #
+    # It is the same subject/object confusion the positive controls were
+    # diagnosed with, reappearing through the three rules that did not carry
+    # the subject anchor. `needs_subject` makes the anchor a property of each
+    # rule rather than something a reader has to notice is missing.
     rules = (
         ("built-for",
          rf"\b(?:built|designed|made|purpose-built)\s+for\s+"
-         rf"([a-z][a-z\-\s/&’']{{3,70}})"),
+         rf"([a-z][a-z\-\s/&’']{{3,70}})", True),
         ("we-help",
          rf"\b{subj}\s+(?:help|helps|serve|serves|enable|enables)\s+"
-         rf"([a-z][a-z\-\s/&’']{{3,70}})"),
+         rf"([a-z][a-z\-\s/&’']{{3,70}})", False),
         ("our-customers-are",
          rf"\bour\s+(?:customers|clients|users)\s+(?:are|include)\s+"
-         rf"([a-z][a-z\-\s/&’']{{3,70}})"),
+         rf"([a-z][a-z\-\s/&’']{{3,70}})", False),
         ("used-by",
          rf"\b(?:used|trusted|chosen)\s+by\s+"
-         rf"([a-z][a-z\-\s/&’']{{3,70}})"),
+         rf"([a-z][a-z\-\s/&’']{{3,70}})", True),
         ("built-for-how",
          rf"\b(?:built|designed|made)\s+for\s+how\s+"
-         rf"([a-z][a-z\-\s/&’']{{3,70}})"),
+         rf"([a-z][a-z\-\s/&’']{{3,70}})", True),
         ("we-sell-to",
          rf"\b{subj}\s+(?:sell|sells|market|markets)\s+to\s+"
-         rf"([a-z][a-z\-\s/&’']{{3,70}})"),
+         rf"([a-z][a-z\-\s/&’']{{3,70}})", False),
     )
     return _first_match("BUYER", text, company, rules,
                         missing=("this company does not state publicly who "
@@ -510,13 +544,26 @@ def _dependencies(text: str, company: str, limit: int = 3):
 
 def _first_match(kind: str, text: str, company: str, rules,
                  *, missing: str, bad_values=frozenset()) -> Slot:
-    """First phrase clearing every gate, or an explicit refusal."""
+    """First phrase clearing every gate, or an explicit refusal.
+
+    A rule marked `needs_subject` may only read a sentence in which THIS
+    COMPANY names itself or speaks in the first person. Without that,
+    "used by ..." reads any sentence on the site -- including a security
+    vendor's threat research about somebody else's tooling.
+    """
     rejected = ""
+    subject = re.compile(_subject_patterns(company))
     for sentence in _sentences(text):
         if _is_furniture(sentence) or not _is_prose(sentence):
             continue
         low = sentence.lower()
-        for label, rule in rules:
+        names_itself = bool(subject.search(low))
+        for label, rule, needs_subject in rules:
+            if needs_subject and not names_itself:
+                rejected = rejected or (
+                    "the sentence it was found in does not mention this "
+                    "company, so it describes somebody else")
+                continue
             for match in re.finditer(rule, low):
                 phrase = _clean_phrase(
                     sentence[match.start(1):match.end(1)])
