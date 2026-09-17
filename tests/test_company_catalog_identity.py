@@ -385,8 +385,18 @@ def test_public_status_is_stated_only_where_a_source_says_so():
 
     So the assertion is asymmetric on purpose: the filers must read PUBLIC,
     and the rest must read EMPTY rather than PRIVATE."""
-    public = {"rubrik", "commvault", "samsara", "descartes", "fiscalnote",
-              "zoominfo", "kinaxis"}
+    # THE SET IS DERIVED, NOT LISTED.
+    #
+    # A literal roster pins an inventory rather than the property, so every
+    # new filer added to the catalog fails a test whose stated contract it
+    # actually satisfies -- which is what four new public rows did. The
+    # property is a relationship between two LAYERS: what the catalog row
+    # DECLARES, and what `suggest` shows a customer. Deriving the expectation
+    # from the declaration and comparing it against suggest's output tests
+    # exactly that, and keeps testing it for rows nobody has written yet.
+    public = {p.entity_id for p in CATALOG_REGISTRY
+              if p.listings or p.sec_cik}
+    assert public, "no catalog row declares a listing or a CIK"
     for profile in CATALOG_REGISTRY:
         row = suggest(profile.common_name, allow_registrant=False)[0]
         if profile.entity_id in public:

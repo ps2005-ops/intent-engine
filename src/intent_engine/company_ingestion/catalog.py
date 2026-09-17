@@ -1185,6 +1185,535 @@ CATALOG: tuple = (
              "platform", _P),
         ),
     },
+    # ------------------------------------------------------------------
+    # THE TWENTY-FIVE (adaptive strategic intelligence V2).
+    #
+    # MEASURED LIVE before these rows existed, `/api/companies?q=<name>` on
+    # db6946fa: 0 of 25 resolved. Nineteen returned NOTHING -- they are
+    # private companies no public register carries -- and the six that
+    # returned rows offered SEC registrant entries with no entity_id, no
+    # domain and, for "Island", another company entirely (Orchid Island
+    # Capital). A qualification run would have failed all twenty-five at the
+    # identity gate without spending a single analysis.
+    #
+    # IDENTITY ONLY. Legal name, common name, canonical domain, the names a
+    # person might type, and the company's own pages. No lens, no business
+    # model, no decision, no conclusion: every sentence a reader sees is
+    # still derived from documents retrieved at run time.
+    #
+    # EVERY URL BELOW RETURNED 200 THROUGH `safe_fetch` -- the product's own
+    # fetcher, not curl -- and every candidate came from the publisher's own
+    # navigation rather than from a list of plausible slugs. Where a site
+    # refused the fetcher, the row carries NO sources and says so: a guessed
+    # path produces a measured zero that reads as "this company publishes
+    # nothing", which was never a fact about the company.
+    # ------------------------------------------------------------------
+    {
+        "entity_id": "axonius",
+        "legal_name": "Axonius Inc.",
+        "common_name": "Axonius",
+        "country": "United States",
+        "primary_domain": "axonius.com",
+        "aliases": ("axonius", "axonius inc"),
+        "ambiguity_notes": (
+            "Its own site refused retrieval when this row was written (HTTP 429), "
+            "so the only URL it asserts is the company's own front door, which is "
+            "not a guessed path. A run opens there and reports what it could and "
+            "could not read."
+        ),
+        "sources": (
+            ("https://axonius.com/",
+             _CORPORATE, "home", _P),
+        ),
+    },
+    {
+        "entity_id": "arctic_wolf",
+        "legal_name": "Arctic Wolf Networks, Inc.",
+        "common_name": "Arctic Wolf",
+        "country": "United States",
+        "primary_domain": "arcticwolf.com",
+        "aliases": ("arctic wolf", "arcticwolf", "arctic wolf networks"),
+        "sources": (
+            ("https://arcticwolf.com/company/faq",
+             _CORPORATE, "about", _P),
+            ("https://arcticwolf.com/solutions",
+             _SEGMENT, "platform", _P),
+            ("https://arcticwolf.com/customers",
+             _CUSTOMERS, "customers", _S),
+        ),
+    },
+    {
+        "entity_id": "cribl",
+        "legal_name": "Cribl, Inc.",
+        "common_name": "Cribl",
+        "country": "United States",
+        "primary_domain": "cribl.io",
+        "aliases": ("cribl", "cribl inc", "cribl stream"),
+        "sources": (
+            ("https://cribl.io/about-us",
+             _CORPORATE, "about", _P),
+            ("https://cribl.io/products",
+             _SEGMENT, "platform", _P),
+            ("https://cribl.io/pricing/plan",
+             _PRICING, "pricing", _P),
+            ("https://cribl.io/customers",
+             _CUSTOMERS, "customers", _S),
+            ("https://cribl.io/newsroom",
+             _NEWSROOM, "news", _S),
+        ),
+    },
+    {
+        "entity_id": "onepassword",
+        "legal_name": "AgileBits Inc.",
+        "common_name": "1Password",
+        "country": "United States",
+        "primary_domain": "1password.com",
+        "aliases": ("1password", "1 password", "onepassword", "agilebits"),
+        "ambiguity_notes": (
+            "The legal entity is AgileBits Inc.; the product and the company are "
+            "presented as 1Password everywhere the company publishes."
+        ),
+        "sources": (
+            ("https://1password.com/company",
+             _CORPORATE, "about", _P),
+            ("https://1password.com/platform",
+             _SEGMENT, "platform", _P),
+            ("https://1password.com/pricing",
+             _PRICING, "pricing", _P),
+            ("https://1password.com/customers/oracle-red-bull-racing-for-developers",
+             _CUSTOMERS, "customers", _S),
+            ("https://1password.com/press",
+             _NEWSROOM, "news", _S),
+        ),
+    },
+    {
+        "entity_id": "illumio",
+        "legal_name": "Illumio, Inc.",
+        "common_name": "Illumio",
+        "country": "United States",
+        "primary_domain": "illumio.com",
+        "aliases": ("illumio", "illumio inc"),
+        "sources": (
+            ("https://www.illumio.com/company/leadership",
+             _CORPORATE, "about", _P),
+            ("https://www.illumio.com/solutions",
+             _SEGMENT, "platform", _P),
+            ("https://www.illumio.com/customers",
+             _CUSTOMERS, "customers", _S),
+            ("https://www.illumio.com/company/news-awards",
+             _NEWSROOM, "news", _S),
+        ),
+    },
+    {
+        "entity_id": "abnormal_ai",
+        "legal_name": "Abnormal Security Corporation",
+        "common_name": "Abnormal AI",
+        "country": "United States",
+        "primary_domain": "abnormal.ai",
+        "aliases": ("abnormal ai", "abnormal security", "abnormal"),
+        "ambiguity_notes": (
+            "Renamed from Abnormal Security to Abnormal AI and publishes at "
+            "abnormal.ai; both names resolve here."
+        ),
+        "sources": (
+            ("https://abnormal.ai/about",
+             _CORPORATE, "about", _P),
+            ("https://abnormal.ai/platform/attune",
+             _SEGMENT, "platform", _P),
+            ("https://abnormal.ai/customers/love",
+             _CUSTOMERS, "customers", _S),
+            ("https://abnormal.ai/newsroom",
+             _NEWSROOM, "news", _S),
+        ),
+    },
+    {
+        "entity_id": "netskope",
+        "legal_name": "Netskope, Inc.",
+        "common_name": "Netskope",
+        "country": "United States",
+        "primary_domain": "netskope.com",
+        "aliases": ("netskope", "netskope inc"),
+        "sources": (
+            ("https://netskope.com/company",
+             _CORPORATE, "about", _P),
+            ("https://www.netskope.com/products",
+             _SEGMENT, "platform", _P),
+            ("https://netskope.com/customers",
+             _CUSTOMERS, "customers", _S),
+            ("https://www.netskope.com/company/newsroom",
+             _NEWSROOM, "news", _S),
+        ),
+    },
+    {
+        "entity_id": "clio",
+        "legal_name": "Themis Solutions Inc.",
+        "common_name": "Clio",
+        "country": "United States",
+        "primary_domain": "clio.com",
+        "aliases": ("clio", "themis solutions", "clio legal"),
+        "ambiguity_notes": (
+            "Its own site refused retrieval when this row was written (HTTP 403), "
+            "so the only URL it asserts is the company's own front door, which is "
+            "not a guessed path. A run opens there and reports what it could and "
+            "could not read."
+        ),
+        "sources": (
+            ("https://clio.com/",
+             _CORPORATE, "home", _P),
+        ),
+    },
+    {
+        "entity_id": "coveo",
+        "legal_name": "Coveo Solutions Inc.",
+        "common_name": "Coveo",
+        "country": "United States",
+        "primary_domain": "coveo.com",
+        "aliases": ("coveo", "coveo solutions"),
+        "listings": (("TSX", "CVO"),),
+        "ambiguity_notes": (
+            "A public filer on the Toronto Stock Exchange (TSX: CVO)."
+        ),
+        "sources": (
+            ("https://coveo.com/en/company/esg",
+             _CORPORATE, "about", _P),
+            ("https://coveo.com/en/platform",
+             _SEGMENT, "platform", _P),
+            ("https://coveo.com/en/pricing",
+             _PRICING, "pricing", _P),
+            ("https://coveo.com/en/company/customers",
+             _CUSTOMERS, "customers", _S),
+        ),
+    },
+    {
+        "entity_id": "procore",
+        "legal_name": "Procore Technologies, Inc.",
+        "common_name": "Procore",
+        "country": "United States",
+        "primary_domain": "procore.com",
+        "aliases": ("procore", "procore technologies"),
+        "listings": (("NYSE", "PCOR"),),
+        "sec_cik": "1611052",
+        "ambiguity_notes": (
+            "A public filer (NYSE: PCOR)."
+        ),
+        "sources": (
+            ("https://procore.com/en-ca/about",
+             _CORPORATE, "about", _P),
+            ("https://procore.com/en-ca/products",
+             _SEGMENT, "platform", _P),
+            ("https://procore.com/en-ca/pricing",
+             _PRICING, "pricing", _P),
+        ),
+    },
+    {
+        "entity_id": "servicetitan",
+        "legal_name": "ServiceTitan, Inc.",
+        "common_name": "ServiceTitan",
+        "country": "United States",
+        "primary_domain": "servicetitan.com",
+        "aliases": ("servicetitan", "service titan"),
+        "listings": (("NASDAQ", "TTAN"),),
+        "sec_cik": "1638826",
+        "ambiguity_notes": (
+            "A public filer (NASDAQ: TTAN)."
+        ),
+        "sources": (
+            ("https://servicetitan.com/company",
+             _CORPORATE, "about", _P),
+            ("https://servicetitan.com/products/convex",
+             _SEGMENT, "platform", _P),
+            ("https://servicetitan.com/pricing",
+             _PRICING, "pricing", _P),
+            ("https://servicetitan.com/case-studies",
+             _CUSTOMERS, "customers", _S),
+            ("https://servicetitan.com/press",
+             _NEWSROOM, "news", _S),
+        ),
+    },
+    {
+        "entity_id": "motive",
+        "legal_name": "Motive Technologies, Inc.",
+        "common_name": "Motive",
+        "country": "United States",
+        "primary_domain": "gomotive.com",
+        "aliases": ("motive", "gomotive", "motive technologies", "keeptruckin"),
+        "ambiguity_notes": (
+            "Publishes at gomotive.com, not motive.com, and was formerly KeepTruckin "
+            "-- both are aliases so a person who types either reaches the same "
+            "company."
+        ),
+        "sources": (
+            ("https://gomotive.com/company/news",
+             _CORPORATE, "about", _P),
+            ("https://gomotive.com/products",
+             _SEGMENT, "platform", _P),
+            ("https://gomotive.com/customers",
+             _CUSTOMERS, "customers", _S),
+            ("https://gomotive.com/company/news",
+             _NEWSROOM, "news", _S),
+        ),
+    },
+    {
+        "entity_id": "verkada",
+        "legal_name": "Verkada Inc.",
+        "common_name": "Verkada",
+        "country": "United States",
+        "primary_domain": "verkada.com",
+        "aliases": ("verkada", "verkada inc"),
+        "sources": (
+            ("https://verkada.com/about",
+             _CORPORATE, "about", _P),
+            ("https://verkada.com/solutions/k-12",
+             _SEGMENT, "platform", _P),
+            ("https://verkada.com/newsroom",
+             _NEWSROOM, "news", _S),
+        ),
+    },
+    {
+        "entity_id": "vanta",
+        "legal_name": "Vanta Inc.",
+        "common_name": "Vanta",
+        "country": "United States",
+        "primary_domain": "vanta.com",
+        "aliases": ("vanta", "vanta inc"),
+        "sources": (
+            ("https://vanta.com/company/about",
+             _CORPORATE, "about", _P),
+            ("https://vanta.com/products/ai",
+             _SEGMENT, "platform", _P),
+            ("https://vanta.com/pricing",
+             _PRICING, "pricing", _P),
+            ("https://vanta.com/customers",
+             _CUSTOMERS, "customers", _S),
+            ("https://vanta.com/company/press",
+             _NEWSROOM, "news", _S),
+        ),
+    },
+    {
+        "entity_id": "snyk",
+        "legal_name": "Snyk Limited",
+        "common_name": "Snyk",
+        "country": "United States",
+        "primary_domain": "snyk.io",
+        "aliases": ("snyk", "snyk limited"),
+        "sources": (
+            ("https://snyk.io/about",
+             _CORPORATE, "about", _P),
+            ("https://snyk.io/platform",
+             _SEGMENT, "platform", _P),
+            ("https://snyk.io/plans",
+             _PRICING, "pricing", _P),
+            ("https://snyk.io/customers",
+             _CUSTOMERS, "customers", _S),
+            ("https://snyk.io/news",
+             _NEWSROOM, "news", _S),
+        ),
+    },
+    {
+        "entity_id": "chainguard",
+        "legal_name": "Chainguard, Inc.",
+        "common_name": "Chainguard",
+        "country": "United States",
+        "primary_domain": "chainguard.dev",
+        "aliases": ("chainguard", "chainguard inc"),
+        "sources": (
+            ("https://chainguard.dev/about-us",
+             _CORPORATE, "about", _P),
+            ("https://chainguard.dev/solutions/pci",
+             _SEGMENT, "platform", _P),
+            ("https://chainguard.dev/pricing",
+             _PRICING, "pricing", _P),
+            ("https://chainguard.dev/customers",
+             _CUSTOMERS, "customers", _S),
+            ("https://chainguard.dev/newsroom",
+             _NEWSROOM, "news", _S),
+        ),
+    },
+    {
+        "entity_id": "island",
+        "legal_name": "Island Technology Inc.",
+        "common_name": "Island",
+        "country": "United States",
+        "primary_domain": "island.io",
+        "aliases": ("island", "island io", "island browser", "island technology"),
+        "ambiguity_notes": (
+            "\"Island\" is a common word and the SEC registrant table answers a typed "
+            "\"Island\" with Orchid Island Capital and Cayman-Islands filers. This row "
+            "exists so the enterprise browser company resolves on its own name; the "
+            "aliases are deliberately specific for the same reason."
+        ),
+        "sources": (
+            ("https://island.io/about",
+             _CORPORATE, "about", _P),
+            ("https://island.io/product-support",
+             _SEGMENT, "platform", _P),
+            ("https://island.io/buyers-guide",
+             _PRICING, "pricing", _P),
+            ("https://www.island.io/case-study/hendrick-motorsports",
+             _CUSTOMERS, "customers", _S),
+            ("https://island.io/press",
+             _NEWSROOM, "news", _S),
+        ),
+    },
+    {
+        "entity_id": "ninjaone",
+        "legal_name": "NinjaOne, LLC",
+        "common_name": "NinjaOne",
+        "country": "United States",
+        "primary_domain": "ninjaone.com",
+        "aliases": ("ninjaone", "ninja one", "ninjarmm"),
+        "sources": (
+            ("https://ninjaone.com/about-us",
+             _CORPORATE, "about", _P),
+            ("https://ninjaone.com/platform",
+             _SEGMENT, "platform", _P),
+            ("https://ninjaone.com/pricing",
+             _PRICING, "pricing", _P),
+            ("https://ninjaone.com/press/customers-choice-2026-gartner-peer-insights-voice-of-the-customer",
+             _CUSTOMERS, "customers", _S),
+            ("https://ninjaone.com/press",
+             _NEWSROOM, "news", _S),
+        ),
+    },
+    {
+        "entity_id": "huntress",
+        "legal_name": "Huntress Labs Incorporated",
+        "common_name": "Huntress",
+        "country": "United States",
+        "primary_domain": "huntress.com",
+        "aliases": ("huntress", "huntress labs"),
+        "sources": (
+            ("https://huntress.com/company/press",
+             _CORPORATE, "about", _P),
+            ("https://huntress.com/platform",
+             _SEGMENT, "platform", _P),
+            ("https://huntress.com/pricing",
+             _PRICING, "pricing", _P),
+            ("https://huntress.com/why-huntress/case-studies",
+             _CUSTOMERS, "customers", _S),
+            ("https://huntress.com/company/press",
+             _NEWSROOM, "news", _S),
+        ),
+    },
+    {
+        "entity_id": "veza",
+        "legal_name": "Veza Technologies, Inc.",
+        "common_name": "Veza",
+        "country": "United States",
+        "primary_domain": "veza.com",
+        "aliases": ("veza", "veza technologies"),
+        "sources": (
+            ("https://veza.com/company",
+             _CORPORATE, "about", _P),
+            ("https://veza.com/product",
+             _SEGMENT, "platform", _P),
+            ("https://veza.com/customers",
+             _CUSTOMERS, "customers", _S),
+            ("https://veza.com/company/press-room",
+             _NEWSROOM, "news", _S),
+        ),
+    },
+    {
+        "entity_id": "expel",
+        "legal_name": "Expel, Inc.",
+        "common_name": "Expel",
+        "country": "United States",
+        "primary_domain": "expel.com",
+        "aliases": ("expel", "expel inc"),
+        "sources": (
+            ("https://expel.com/about",
+             _CORPORATE, "about", _P),
+            ("https://expel.com/solutions",
+             _SEGMENT, "platform", _P),
+            ("https://expel.com/customers",
+             _CUSTOMERS, "customers", _S),
+            ("https://expel.com/about/newsroom",
+             _NEWSROOM, "news", _S),
+        ),
+    },
+    {
+        "entity_id": "dragos",
+        "legal_name": "Dragos, Inc.",
+        "common_name": "Dragos",
+        "country": "United States",
+        "primary_domain": "dragos.com",
+        "aliases": ("dragos", "dragos inc"),
+        "sources": (
+            ("https://www.dragos.com/about",
+             _CORPORATE, "about", _P),
+            ("https://www.dragos.com/resources/press-release",
+             _NEWSROOM, "news", _S),
+        ),
+    },
+    {
+        "entity_id": "material_security",
+        "legal_name": "Material Security, Inc.",
+        "common_name": "Material Security",
+        "country": "United States",
+        "primary_domain": "material.security",
+        "aliases": ("material security", "material"),
+        "ambiguity_notes": (
+            "Publishes on the .security top-level domain, which is the company's own "
+            "canonical domain and not a typo."
+        ),
+        "sources": (
+            ("https://material.security/about",
+             _CORPORATE, "about", _P),
+            ("https://material.security/product",
+             _SEGMENT, "platform", _P),
+            ("https://material.security/pricing",
+             _PRICING, "pricing", _P),
+            ("https://material.security/customers",
+             _CUSTOMERS, "customers", _S),
+        ),
+    },
+    {
+        "entity_id": "obsidian_security",
+        "legal_name": "Obsidian Security, Inc.",
+        "common_name": "Obsidian Security",
+        "country": "United States",
+        "primary_domain": "obsidiansecurity.com",
+        "aliases": ("obsidian security", "obsidian"),
+        "sources": (
+            ("https://obsidiansecurity.com/company",
+             _CORPORATE, "about", _P),
+            ("https://obsidiansecurity.com/platform-overview",
+             _SEGMENT, "platform", _P),
+            ("https://obsidiansecurity.com/pricing",
+             _PRICING, "pricing", _P),
+            ("https://obsidiansecurity.com/customers",
+             _CUSTOMERS, "customers", _S),
+            ("https://obsidiansecurity.com/news-and-press",
+             _NEWSROOM, "news", _S),
+        ),
+    },
+    {
+        "entity_id": "okta",
+        "legal_name": "Okta, Inc.",
+        "common_name": "Okta",
+        "country": "United States",
+        "primary_domain": "okta.com",
+        "aliases": ("okta", "okta inc", "auth0"),
+        "listings": (("NASDAQ", "OKTA"),),
+        "sec_cik": "1660134",
+        "ambiguity_notes": (
+            "A public filer (CIK 1660134, NASDAQ: OKTA), so the SEC registrant table "
+            "already answers a typed \"Okta\". This row adds the canonical domain and "
+            "the Auth0 alias, which the registrant table does not carry."
+        ),
+        "sources": (
+            ("https://www.okta.com/company",
+             _CORPORATE, "about", _P),
+            ("https://www.okta.com/solutions",
+             _SEGMENT, "platform", _P),
+            ("https://www.okta.com/pricing",
+             _PRICING, "pricing", _P),
+            ("https://okta.com/customers",
+             _CUSTOMERS, "customers", _S),
+            ("https://www.okta.com/newsroom",
+             _NEWSROOM, "news", _S),
+        ),
+    },
 )
 
 

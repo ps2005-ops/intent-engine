@@ -115,9 +115,16 @@ def _section(html, heading):
     Scanning the whole page attributed a REJECTED candidate's evidence to the
     winner on five of fourteen companies in the forty. The same mistake is
     available here for every panel, so every read below is anchored.
+
+    THE MARKUP IS `<details><summary>`, NOT `<h2>`. A first version of this
+    matched a heading tag the X-Ray does not use, which would have returned
+    PANEL_ABSENT for all twenty-five companies -- a uniform defect, which is
+    always the instrument and never the product. `_section` in `xray.py` is
+    the authority for this shape.
     """
     m = re.search(
-        r"<h2[^>]*>\s*" + re.escape(heading) + r".*?</h2>(.*?)(?=<h2|</main>)",
+        r"<summary><span>" + re.escape(heading) + r"[^<]*</span>"
+        r".*?</summary>\s*<div class=\"body\">(.*?)</div></details>",
         html, re.S | re.I)
     return m.group(1) if m else ""
 
