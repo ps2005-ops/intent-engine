@@ -76,3 +76,31 @@ def test_the_dangling_trim_does_not_eat_a_whole_quote():
 def test_a_quote_that_fits_is_returned_unchanged():
     body = "Netskope secures data wherever it goes."
     assert spans.trim_to_word(body, 400) == body
+
+
+def test_the_display_chain_does_not_override_the_recognisable_name():
+    """MEASURED LIVE on 1Password, TWICE.
+
+    `name_entry.resolve` was repaired to carry the common name when the legal
+    name shares no word with it -- and every surface still read "AgileBits
+    Inc.", because `_founder_layers` derives its heading from the identity
+    record's canonical name and that chain wins. The repair shipped inert,
+    and only a second live run showed it.
+
+    This pins the helper rather than the chain: the chain encodes three
+    separate incidents and must not be reordered, so the recognisable name is
+    APPENDED after it rather than substituted into it.
+    """
+    from intent_engine.webapp.app import WebApp
+    fn = WebApp._recognisable_name
+
+    class _Stub:
+        pass
+
+    shown = fn(_Stub(), "AgileBits Inc.")
+    assert "1Password" in shown, shown
+    assert "AgileBits" in shown
+    # a name the registry does not carry passes through untouched
+    assert fn(_Stub(), "Some Unlisted Co") == "Some Unlisted Co"
+    # and a legal name that already carries the typed word is not decorated
+    assert fn(_Stub(), "Rubrik, Inc.") == "Rubrik, Inc."

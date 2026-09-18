@@ -4654,6 +4654,25 @@ class WebApp:
                 "website": meta.get("website", ""), "csrf": session["csrf"]}
         return self._analyze(session, form, remote, fresh=True)
 
+    def _recognisable_name(self, name: str) -> str:
+        """`name`, plus the common name when the registry knows a disjoint one.
+
+        A reader who typed "1Password" and is shown "AgileBits Inc." cannot
+        tell a correct legal name from the wrong company, and "wrong company"
+        is the one thing this product may never look like.
+        """
+        try:
+            from intent_engine.company_ingestion.entities import REGISTRY
+            from intent_engine.company_ingestion.name_entry import (
+                _recognisable,
+            )
+            for profile in REGISTRY:
+                if str(getattr(profile, "legal_name", "")) == str(name):
+                    return _recognisable(profile)
+        except Exception:                                    # noqa: BLE001
+            pass
+        return name
+
     def _founder_layers(self, run_id):
         """Everything the deeper layers need, built from ONE brief.
 
@@ -4703,6 +4722,17 @@ class WebApp:
                 or result.get("company")
                 or (self.ci.run_meta(run_id) or {}).get("company_name")
                 or "This company")
+        # THE NAME A READER TYPED, WHEN THE ONE WE CHOSE SHARES NO WORD WITH
+        # IT. `name_entry.resolve` already carries the common name for that
+        # case, and the chain above overrides it with the identity record's
+        # canonical name -- so the repair shipped inert and 1Password was
+        # still headed "AgileBits Inc." on every surface.
+        #
+        # ADDITIVE ONLY. The chain above encodes three separate incidents
+        # (an absent identity record, an empty report, a bounded run all
+        # collapsing onto a placeholder), so this never REPLACES the chosen
+        # name; it appends the recognisable one when the two are disjoint.
+        name = self._recognisable_name(name)
         brief = fb.build(company=name, mode=mode, report=report,
                          observations=observations, market=market)
         return brief, report, name
@@ -7252,6 +7282,17 @@ class WebApp:
                 or result.get("company")
                 or (self.ci.run_meta(run_id) or {}).get("company_name")
                 or "This company")
+        # THE NAME A READER TYPED, WHEN THE ONE WE CHOSE SHARES NO WORD WITH
+        # IT. `name_entry.resolve` already carries the common name for that
+        # case, and the chain above overrides it with the identity record's
+        # canonical name -- so the repair shipped inert and 1Password was
+        # still headed "AgileBits Inc." on every surface.
+        #
+        # ADDITIVE ONLY. The chain above encodes three separate incidents
+        # (an absent identity record, an empty report, a bounded run all
+        # collapsing onto a placeholder), so this never REPLACES the chosen
+        # name; it appends the recognisable one when the two are disjoint.
+        name = self._recognisable_name(name)
         brief = fb.build(company=name, mode=mode, report=report,
                          observations=observations, market=market)
 
