@@ -206,9 +206,57 @@ def _v2(op, run_id, row, surfaces):
         row.setdefault("capture_files", {})[key] = path.name
 
 
+#: The canonical sentence the product uses when a run retrieved nothing. It
+#: is the product being right, and three of the forty's gates read it as the
+#: product being wrong.
+_BOUNDED_RUN = "did not produce a report because no approved source"
+
+#: Gates whose premise is A REPORT. On a run that produced none, each one
+#: measures the absence of something that was never claimed:
+#:
+#:   PROFILE_CONSISTENCY  scrapes a company name and finds the failure
+#:                        headline, then reports "a surface names a different
+#:                        company: 'This analysis could not be completed'"
+#:   ROLE_VIEWS           reports "CEO and Strategy render identically on a
+#:                        run WITH A DECISION" -- there is no decision, and
+#:                        both roles correctly render the same honest page
+#:   HISTORY_REWIND       reports level=? because no document was retrieved
+#:
+#: MEASURED LIVE on Axonius, whose site rate-limits (HTTP 429). Its pages
+#: say so plainly and name the status per source. Reporting that as three
+#: product defects would be the instrument inventing findings, which is the
+#: failure a qualification harness exists not to have.
+_REPORT_PREMISED_GATES = ("PROFILE_CONSISTENCY", "ROLE_VIEWS",
+                          "HISTORY_REWIND")
+
+
+def _reclassify_bounded(row, surfaces):
+    """A gate whose premise is a report may not fail a run that has none."""
+    blob = " ".join(visible((surfaces.get(k) or {}).get("html", "") or "")
+                    for k in ("intro", "result", "xray"))
+    if _BOUNDED_RUN not in blob:
+        return False
+    moved = []
+    for defect in list(row.get("defects") or []):
+        detail = str(defect.get("detail") or "")
+        if any(g in detail for g in _REPORT_PREMISED_GATES):
+            defect["kind"] = "BOUNDED_RUN"
+            defect["reclassified"] = (
+                "this run retrieved no approved source, so it produced no "
+                "report; this gate measures a property of a report")
+            moved.append(detail.split(":")[0])
+    row["bounded_run"] = True
+    row["bounded_reclassified"] = moved
+    return True
+
+
 def _measure(op, run_id, row, surfaces):
     """The forty's measurement, then the V2 measurement on top of it."""
     _FORTY_MEASURE(op, run_id, row, surfaces)
+    try:
+        _reclassify_bounded(row, surfaces)
+    except Exception as exc:                                 # noqa: BLE001
+        row["bounded_reclassify_error"] = f"{type(exc).__name__}: {exc}"
     try:
         _v2(op, run_id, row, surfaces)
     except Exception as exc:                                 # noqa: BLE001

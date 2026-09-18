@@ -140,7 +140,33 @@ def trim_to_word(text: str, max_chars: int) -> str:
         # one unbroken token longer than the budget: there is no honest
         # way to shorten it, so quote nothing.
         return ""
-    return head[:cut].rstrip(" ,;:-") + " \u2026"
+    return _drop_dangling(head[:cut].rstrip(" ,;:-")) + " \u2026"
+
+
+#: Words that join a clause to the next one. A quote that ENDS on one was
+#: cut in the middle of an idea, and the reader is left holding a
+#: conjunction. MEASURED LIVE on Netskope (bbb75261):
+#:
+#:     "My job combines the usual CISO responsibilities alongside daily
+#:      self and"
+#:
+#: The cut was already at a word boundary, which is what `trim_to_word`
+#: promised; a word boundary is not a grammatical one. Same rule the
+#: decision-object extractor applies to a captured phrase, for the same
+#: reason.
+_DANGLING = frozenset("""
+and or but nor so yet for the a an of to with from by at in on as that which
+is are was were be been being has have had will would can could should may
+than then when while if unless because about into onto over under
+""".split())
+
+
+def _drop_dangling(text: str) -> str:
+    """Trim trailing joining words, so a quote ends on an idea."""
+    words = text.split()
+    while words and words[-1].lower().strip(",;:") in _DANGLING:
+        words.pop()
+    return " ".join(words)
 
 
 def quote_around(text: str, start: int, end: int,

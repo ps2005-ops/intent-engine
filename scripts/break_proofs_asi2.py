@@ -662,10 +662,87 @@ def bp12():
     return run(p, mutate=mutate, check=check, control=control)
 
 
+# --- 15/16: the two found live on the twenty-five --------------------------
+
+def bp15():
+    p = _p(name="15_unrecognisable_legal_name_shown_alone",
+           description="a person types 1Password and every heading reads "
+                       "AgileBits Inc., which shares no word with it",
+           target_kind=BP.RENDERER,
+           mutated_file="src/intent_engine/company_ingestion/name_entry.py",
+           mutated_symbol="resolve.company_name",
+           guard_under_test="test_a_legal_name_sharing_no_word_with_the_"
+                            "typed_name_carries_it",
+           production_call_path="tests/test_a_reader_can_tell_it_is_the_"
+                                "right_company.py")
+
+    def control():
+        NE = importlib.import_module(
+            "intent_engine.company_ingestion.name_entry")
+        E = importlib.import_module("intent_engine.company_ingestion.entities")
+        prof = next(x for x in E.REGISTRY if x.entity_id == "onepassword")
+        if "1Password" not in NE._recognisable(prof):
+            raise AssertionError("clean code already drops the typed name")
+
+    def mutate(t):
+        return t.mutate("src/intent_engine/company_ingestion/name_entry.py",
+                        "            EXACT_MATCH, company_name=_recognisable"
+                        "(profile),",
+                        "            EXACT_MATCH, company_name=profile."
+                        "legal_name,")
+
+    def check(t):
+        NE = t.load("intent_engine.company_ingestion.name_entry")
+        import inspect
+        src = inspect.getsource(NE.resolve)
+        assert "_recognisable(profile)" in src, (
+            "the run's display name is the bare legal name again")
+    return run(p, mutate=mutate, check=check, control=control)
+
+
+def bp16():
+    p = _p(name="16_quote_ends_on_a_joining_word",
+           description="a truncated quotation ends on 'and', so the reader is "
+                       "left holding a conjunction",
+           target_kind=BP.RENDERER,
+           mutated_file="src/intent_engine/adaptive/spans.py",
+           mutated_symbol="_drop_dangling",
+           guard_under_test="test_a_truncated_quote_does_not_end_on_a_"
+                            "joining_word",
+           production_call_path="tests/test_a_reader_can_tell_it_is_the_"
+                                "right_company.py")
+    body = ("Being CISO for a security technology vendor can be an "
+            "interesting position My job combines the usual CISO "
+            "responsibilities alongside daily self and team development "
+            "across every region we operate in")
+
+    def control():
+        SP = importlib.import_module("intent_engine.adaptive.spans")
+        out = SP.trim_to_word(body, 95).rstrip(" \u2026").rstrip()
+        if out.split()[-1].lower() in SP._DANGLING:
+            raise AssertionError("clean code already ends on a joining word")
+
+    def mutate(t):
+        # A SHORT, ESCAPE-FREE ANCHOR. The full return line carries an
+        # ellipsis escape, and matching it through two levels of quoting
+        # silently produced a pattern that never matched -- NOT_APPLIED
+        # reported as NOT_CAUGHT once the bytes did change elsewhere.
+        return t.mutate("src/intent_engine/adaptive/spans.py",
+                        "return _drop_dangling(head[:cut]",
+                        "return (head[:cut]")
+
+    def check(t):
+        SP = t.load("intent_engine.adaptive.spans")
+        out = SP.trim_to_word(body, 95).rstrip(" \u2026").rstrip()
+        last = out.split()[-1].lower().strip(",;:")
+        assert last not in SP._DANGLING, f"quote ends on {last!r}"
+    return run(p, mutate=mutate, check=check, control=control)
+
+
 def main() -> int:
     proofs = [bp01(), bp02(), bp03(), bp04(), bp05(), bp06(),
               bp07(), bp08(), bp09(), bp10(), bp11(), bp12(),
-              bp13(), bp14()]
+              bp13(), bp14(), bp15(), bp16()]
     rows = []
     for p in proofs:
         rows.append({"name": p.name, "verdict": p.verdict,

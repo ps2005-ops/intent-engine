@@ -31,6 +31,8 @@ company. Every domain here comes from a record.
 """
 from __future__ import annotations
 
+import re
+
 from typing import Any, Optional
 
 from intent_engine.company_ingestion.entities import (AMBIGUOUS, UNKNOWN,
@@ -191,6 +193,43 @@ def _registrant(company_name: str, enabled: bool = False,
     return found
 
 
+def _recognisable(profile) -> str:
+    """The legal name, plus the common name when they share nothing.
+
+    MEASURED LIVE on 1Password (bbb75261). A person typed "1Password" and
+    every heading on every surface read "AgileBits Inc." -- which is its
+    legal entity and is correct, and shares not one word with the name they
+    typed. The only clue the right company had been opened was the domain in
+    small type. A reader cannot tell a correct legal name from the wrong
+    company.
+
+    Most companies need nothing here: "Rubrik, Inc." and "The Descartes
+    Systems Group Inc." both carry the typed word already, so the condition
+    is a SHARED TOKEN and not a list of exceptions.
+    """
+    legal = str(getattr(profile, "legal_name", "") or "").strip()
+    common = str(getattr(profile, "common_name", "") or "").strip()
+    if not common or not legal:
+        return legal or common
+
+    def _tokens(text):
+        return {t for t in re.findall(r"[a-z0-9]+", text.lower())
+                if t not in _SUFFIXES and len(t) > 1}
+
+    if _tokens(legal) & _tokens(common):
+        return legal
+    return f"{legal} ({common})"
+
+
+#: Corporate form words, which every legal name shares and none of which
+#: makes a name recognisable.
+_SUFFIXES = frozenset("""
+inc inc. incorporated corp corp. corporation co co. company llc llp lp ltd
+ltd. limited plc gmbh ag sa nv bv ab as oy the group holdings holding
+technologies technology solutions systems software labs
+""".split())
+
+
 def resolve(company_name: str = "", website: str = "", *,
             allow_registrant: bool = False, transport=None,
             resolver=None) -> NameEntry:
@@ -217,7 +256,7 @@ def resolve(company_name: str = "", website: str = "", *,
     if entity.resolved:
         profile = entity.profile
         return NameEntry(
-            EXACT_MATCH, company_name=profile.legal_name,
+            EXACT_MATCH, company_name=_recognisable(profile),
             website=website or f"https://{profile.primary_domain}",
             country=getattr(profile, "country", ""),
             reason="matched the curated entity registry",
