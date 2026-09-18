@@ -270,3 +270,62 @@ def test_a_real_buyer_in_a_company_naming_sentence_still_reads():
         "banks, and we serve them daily."))
     assert obj.buyer.known, obj.buyer.reason
     assert "credit unions" in obj.buyer.value
+
+
+# --- a filing is a different register from a pricing page -------------------
+
+def test_a_price_per_share_in_an_equity_note_is_not_a_billing_unit():
+    """MEASURED LIVE on Netskope (bbb75261).
+
+    An equity-compensation note reading "...the price per share for the
+    total shares withheld to satisfy tax obligations..." produced a unit of
+    "share for the total shares withheld", and the central question asked
+    what to charge "without losing more share for the total shares withheld
+    than the price gains".
+
+    The billing rules were left unanchored on the reasoning that pricing
+    vocabulary is inherently first-party. That is true of a PRICING PAGE and
+    false of a FILING, where "price per X" occurs for reasons that have
+    nothing to do with what customers buy. A unit is a noun phrase; a
+    surviving preposition means the capture ran into a clause.
+    """
+    # THE SENTENCE ENDS WHERE THE LIVE ONE DID. Extended with "to satisfy
+    # tax obligations" the capture is ten words and the WORD CAP refuses it,
+    # so the fixture would pass with the preposition rule removed -- a test
+    # that cannot fail.
+    obj = DO.build(company="Netskope", published_text=(
+        "In connection with the vesting of restricted stock units, we "
+        "determined the price per share for the total shares withheld."))
+    assert not obj.billing_unit.known, (
+        f"an equity note became a billing unit: {obj.billing_unit.value!r}")
+
+
+def test_a_capitalised_defined_term_is_not_a_billing_unit():
+    """MEASURED LIVE on Coveo: "Entitlement" reached the central question.
+
+    A thing customers are charged for is written in lower case, like "seat"
+    or "endpoint". A capitalised single word in a filing is a defined term.
+    """
+    obj = DO.build(company="Coveo", published_text=(
+        "The Company recognises revenue from each Entitlement over the term "
+        "of the arrangement as described below."))
+    assert not obj.billing_unit.known, (
+        f"a defined term became a billing unit: {obj.billing_unit.value!r}")
+
+
+@pytest.mark.parametrize("company,text,want", [
+    ("Huntress", "Pricing is based on the number of endpoints you protect "
+                 "across the estate.", "endpoints"),
+    ("Cribl", "Our pricing is based on data volume ingested each day across "
+              "the fleet.", "data volume ingested"),
+    ("Verkada", "Verkada cameras are priced per camera, billed annually to "
+                "the customer.", "camera"),
+    ("Procore", "Pricing is based on annual construction volume put in "
+                "place.", "annual construction volume"),
+])
+def test_the_repair_keeps_every_unit_that_was_verified_on_a_real_page(
+        company, text, want):
+    """A repair that closes the door it exists to keep open is not a repair."""
+    obj = DO.build(company=company, published_text=text)
+    assert obj.billing_unit.known, obj.billing_unit.reason
+    assert want in obj.billing_unit.value, obj.billing_unit.value

@@ -310,7 +310,8 @@ def _clean_phrase(raw: str) -> str:
     phrase = re.sub(r"\s+per\s+(?:" + "|".join(sorted(_PER_TIME)) + r")$", "",
                     phrase, flags=re.I)
     phrase = re.sub(r"(?:\s+(?:with|of|for|to|and|in|on|at|by|from|a|an|the|"
-                    r"that|as|is|are))+$", "", phrase, flags=re.I)
+                    r"that|as|is|are|you|your|we|our|they|their|it|its))+$",
+                    "", phrase, flags=re.I)
     # English noun phrases are head-final, so a trailing prepositional
     # phrase is a modifier and not the thing named. Cutting it turns
     # "mid-market enterprises across north america" into its head and
@@ -355,6 +356,34 @@ def _acceptable(phrase: str, company: str, kind: str = "") -> str:
     # the next heading gave Vanta "center", from "Help center". Both are
     # Title Case where a common noun would not be, because both are headings
     # rather than sentences -- and a marketing page is mostly headings.
+    if kind == "BILLING_UNIT":
+        # A UNIT IS A COMMON NOUN IN PROSE, NOT A DEFINED TERM.
+        #
+        # MEASURED LIVE on Coveo (bbb75261): "Entitlement", capitalised
+        # mid-sentence, reached the central question as "without losing more
+        # Entitlement than the price gains". A capitalised single word in a
+        # filing is a defined term or a heading; a thing customers are
+        # charged for is written in lower case, like "seat" or "endpoint".
+        words = phrase.split()
+        if words and all(w[:1].isupper() for w in words) and len(words) <= 2:
+            return ("the phrase is a defined term or a heading rather than a "
+                    "unit customers are charged for")
+        # A UNIT IS A NOUN PHRASE, NOT A PREPOSITIONAL ONE.
+        #
+        # MEASURED LIVE on Netskope: an equity-compensation note reading
+        # "...the price per share for the total shares withheld..." produced
+        # a unit of "share for the total shares withheld", and the question
+        # asked what to charge "without losing more share for the total
+        # shares withheld than the price gains". A filing is a different
+        # register from a pricing page, and "price per X" occurs in it for
+        # reasons that have nothing to do with what customers buy.
+        #
+        # The leading "number/amount/volume of" form is stripped earlier, so
+        # a surviving preposition means the capture ran into a clause.
+        if re.search(r"(?<![a-z])(for|from|with|by|under|between|against)"
+                     r"(?![a-z])", phrase, re.I):
+            return ("the phrase runs into a clause, so it names a "
+                    "relationship rather than a unit")
     if kind == "BUYER":
         # A BUYER IS A WHO, NOT A WHAT.
         #

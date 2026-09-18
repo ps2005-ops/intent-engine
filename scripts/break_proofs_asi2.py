@@ -739,10 +739,49 @@ def bp16():
     return run(p, mutate=mutate, check=check, control=control)
 
 
+def bp17():
+    p = _p(name="17_filing_equity_note_becomes_a_billing_unit",
+           description='"the price per share for the total shares withheld" '
+                       "reaches the central decision question as a unit",
+           target_kind=BP.PRODUCER,
+           mutated_file="src/intent_engine/executive/decision_object.py",
+           mutated_symbol="_acceptable.BILLING_UNIT",
+           guard_under_test="test_a_price_per_share_in_an_equity_note_is_not_"
+                            "a_billing_unit",
+           production_call_path="tests/test_decision_is_measured_in_this_"
+                                "company_s_own_unit.py")
+    # Ends where the LIVE sentence did: extended, the capture is ten words
+    # and the word cap refuses it, so the proof would isolate the cap
+    # instead of the rule it names.
+    text = ("In connection with the vesting of restricted stock units, we "
+            "determined the price per share for the total shares withheld.")
+
+    def control():
+        DO = importlib.import_module(
+            "intent_engine.executive.decision_object")
+        if DO.build(company="Netskope",
+                    published_text=text).billing_unit.known:
+            raise AssertionError("clean code already reads the equity note")
+
+    def mutate(t):
+        return t.mutate(
+            "src/intent_engine/executive/decision_object.py",
+            '        if re.search(r"(?<![a-z])(for|from|with|by|under|between'
+            '|against)"',
+            '        if re.search(r"(?<![a-z])(zzznevermatches)"')
+
+    def check(t):
+        DO = t.load("intent_engine.executive.decision_object")
+        obj = DO.build(company="Netskope", published_text=text)
+        assert not obj.billing_unit.known, (
+            f"an equity note became a billing unit: {obj.billing_unit.value!r}")
+    return run(p, mutate=mutate, check=check, control=control)
+
+
 def main() -> int:
     proofs = [bp01(), bp02(), bp03(), bp04(), bp05(), bp06(),
               bp07(), bp08(), bp09(), bp10(), bp11(), bp12(),
-              bp13(), bp14(), bp15(), bp16()]
+              bp13(), bp14(), bp15(), bp16(), bp17()]
     rows = []
     for p in proofs:
         rows.append({"name": p.name, "verdict": p.verdict,
