@@ -1,0 +1,10 @@
+{
+  "cache_files": 6109,
+  "cache_mb": 49.3,
+  "classify_28_origins_seconds": 0.41,
+  "history_lookup_p50_ms": 1.052,
+  "history_lookup_p95_ms": 1.679,
+  "panel_file_mb": 46.5,
+  "panel_load_seconds": 0.82,
+  "peak_rss_mb": 220.0
+}

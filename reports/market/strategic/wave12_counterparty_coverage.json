@@ -1,0 +1,76 @@
+{
+ "contract": "counterparty_action_coverage.v1",
+ "as_of": "2026-08-08",
+ "coverage": [
+  {
+   "actor": "Salesforce",
+   "documents_attempted": 2,
+   "documents_retrieved": 2,
+   "actions_found": 2,
+   "actions_with_occurrence_date": 0,
+   "actions_with_publication_date": 1,
+   "actions_unknown_time": 1,
+   "competitive_objects_established": 0,
+   "source_families": [
+    "release_notes"
+   ],
+   "temporal_coverage_start": "2026-08-05",
+   "temporal_coverage_end": "2026-08-05",
+   "orderable_actions": 1,
+   "standing": "THIN"
+  },
+  {
+   "actor": "Adobe Commerce",
+   "documents_attempted": 1,
+   "documents_retrieved": 1,
+   "actions_found": 0,
+   "actions_with_occurrence_date": 0,
+   "actions_with_publication_date": 0,
+   "actions_unknown_time": 0,
+   "competitive_objects_established": 0,
+   "source_families": [
+    "release_notes"
+   ],
+   "temporal_coverage_start": "",
+   "temporal_coverage_end": "",
+   "orderable_actions": 0,
+   "standing": "NOT_OBSERVABLE"
+  },
+  {
+   "actor": "BigCommerce",
+   "documents_attempted": 2,
+   "documents_retrieved": 2,
+   "actions_found": 0,
+   "actions_with_occurrence_date": 0,
+   "actions_with_publication_date": 0,
+   "actions_unknown_time": 0,
+   "competitive_objects_established": 0,
+   "source_families": [
+    "release_notes"
+   ],
+   "temporal_coverage_start": "",
+   "temporal_coverage_end": "",
+   "orderable_actions": 0,
+   "standing": "NOT_OBSERVABLE"
+  },
+  {
+   "actor": "Shopify",
+   "documents_attempted": 1,
+   "documents_retrieved": 1,
+   "actions_found": 7,
+   "actions_with_occurrence_date": 4,
+   "actions_with_publication_date": 3,
+   "actions_unknown_time": 0,
+   "competitive_objects_established": 0,
+   "source_families": [
+    "release_notes"
+   ],
+   "temporal_coverage_start": "2026-06-05",
+   "temporal_coverage_end": "2026-07-21",
+   "orderable_actions": 7,
+   "standing": "OBSERVABLE"
+  }
+ ],
+ "verdict": "Shopify remains the only OBSERVABLE actor. Salesforce's press-release index yields ONE orderable action and it is a third party's (Missionforce) about national security, so it is not relevant to the enterprise-commerce rivalry. Adobe Commerce's release-note page is a table of contents. BigCommerce has no reachable dated surface.",
+ "consequence": "no two-sided timeline, therefore no candidate action->response sequence, therefore no interaction and no preregistration. The blocker is unchanged and is now measured per actor rather than asserted."
+}

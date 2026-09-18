@@ -1,0 +1,18 @@
+{
+  "company": "Caterpillar Inc.",
+  "deployed_sha": "f858d9e",
+  "captured_at": "2026-08-22T01:58:13Z",
+  "routes": {},
+  "progress": [],
+  "process_before": {
+    "boot_id": "09ebfe74fa56405b",
+    "started_at": 1787361572.2305908,
+    "uptime_seconds": 2321.5
+  },
+  "status": "FAILED",
+  "run_id": "",
+  "capture_path": "docs/execution/v5/pre100_50/live_captures/f858d9e/caterpillar_inc",
+  "entry_domain": "caterpillar.com",
+  "failure": "analyze did not open a run (HTTP 500)",
+  "entry_text": "Something went wrong on our side Something went wrong on our side What did work. Your request was received and the company you entered was recorded. What did not. The analysis did not complete. Why. This is a fault in the product, not in what you entered or in the company. What to do next. Run it again. If it keeps happening, the reference below identifies this run in our logs. Run a new analysis "
+}

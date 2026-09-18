@@ -1,0 +1,305 @@
+[
+  {
+    "company": "NVIDIA Corporation",
+    "deployed_sha": "b0050e3",
+    "status": "READY",
+    "run_id": "01M0J3JX94F5P4ZR1RV7YDSDW4",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/b0050e3/nvidia_corporation",
+    "process_before": {},
+    "entry_domain": "nvidia.com",
+    "seconds": 56,
+    "first_useful": 56,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3JX94F5P4ZR1RV7YDSDW4",
+    "outcome": "TRUE_EVIDENCE_SCARCITY",
+    "outcome_by_route": {
+      "run": "TRUE_EVIDENCE_SCARCITY",
+      "intro": "TRUE_EVIDENCE_SCARCITY",
+      "slides": "TRUE_EVIDENCE_SCARCITY",
+      "full": "TRUE_EVIDENCE_SCARCITY",
+      "story": "TRUE_EVIDENCE_SCARCITY",
+      "history": "TRUE_EVIDENCE_SCARCITY",
+      "connect": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "Advanced Micro Devices, Inc.",
+    "deployed_sha": "b0050e3",
+    "status": "READY",
+    "run_id": "01M0J3XCRHPYMQNY80AVYD69ZV",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/b0050e3/advanced_micro_devices_inc",
+    "process_before": {
+      "boot_id": "a66b8bb687154bfa",
+      "started_at": 1787314134.5251167,
+      "uptime_seconds": 348.2
+    },
+    "entry_domain": "amd.com",
+    "seconds": 88,
+    "first_useful": 88,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3XCRHPYMQNY80AVYD69ZV",
+    "outcome": "TRUE_EVIDENCE_SCARCITY",
+    "outcome_by_route": {
+      "run": "TRUE_EVIDENCE_SCARCITY",
+      "intro": "TRUE_EVIDENCE_SCARCITY",
+      "slides": "TRUE_EVIDENCE_SCARCITY",
+      "full": "TRUE_EVIDENCE_SCARCITY",
+      "story": "TRUE_EVIDENCE_SCARCITY",
+      "history": "TRUE_EVIDENCE_SCARCITY",
+      "connect": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "Intel Corporation",
+    "deployed_sha": "b0050e3",
+    "status": "READY",
+    "run_id": "01M0J48TG9RB1V6DMZA2ZHW9V9",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/b0050e3/intel_corporation",
+    "process_before": {
+      "boot_id": "a66b8bb687154bfa",
+      "started_at": 1787314134.5251167,
+      "uptime_seconds": 723.1
+    },
+    "entry_domain": "intel.com",
+    "seconds": 88,
+    "first_useful": 88,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J48TG9RB1V6DMZA2ZHW9V9",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0J48TG9RB1V6DMZA2ZHW9V9/progress: timeout"
+    ]
+  },
+  {
+    "company": "Broadcom Inc.",
+    "deployed_sha": "b0050e3",
+    "status": "READY",
+    "run_id": "01M0J4M8P6PRFFJ6VGH9BEFQ2Z",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/b0050e3/broadcom_inc",
+    "process_before": {
+      "boot_id": "a66b8bb687154bfa",
+      "started_at": 1787314134.5251167,
+      "uptime_seconds": 1098.0
+    },
+    "entry_domain": "broadcom.com",
+    "seconds": 217,
+    "first_useful": 217,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J4M8P6PRFFJ6VGH9BEFQ2Z/intro",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0J4M8P6PRFFJ6VGH9BEFQ2Z/progress: timeout",
+      "GET /runs/01M0J4M8P6PRFFJ6VGH9BEFQ2Z/progress: timeout",
+      "GET /runs/01M0J4M8P6PRFFJ6VGH9BEFQ2Z/progress: timeout"
+    ]
+  },
+  {
+    "company": "Micron Technology, Inc.",
+    "deployed_sha": "b0050e3",
+    "status": "READY",
+    "run_id": "01M0J514BBV2N3NP1N5J92WK83",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/b0050e3/micron_technology_inc",
+    "process_before": {
+      "boot_id": "a66b8bb687154bfa",
+      "started_at": 1787314134.5251167,
+      "uptime_seconds": 1519.6
+    },
+    "entry_domain": "micron.com",
+    "seconds": 155,
+    "first_useful": 155,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J514BBV2N3NP1N5J92WK83",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0J514BBV2N3NP1N5J92WK83/progress: timeout",
+      "GET /runs/01M0J514BBV2N3NP1N5J92WK83/progress: timeout"
+    ]
+  },
+  {
+    "company": "QUALCOMM Incorporated",
+    "deployed_sha": "b0050e3",
+    "status": "FAILED",
+    "run_id": "01M0J5CREQ4BSEPR3REX2WKWMY",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/b0050e3/qualcomm_incorporated",
+    "process_before": {
+      "boot_id": "a66b8bb687154bfa",
+      "started_at": 1787314134.5251167,
+      "uptime_seconds": 1894.7
+    },
+    "entry_domain": "",
+    "seconds": 355,
+    "first_useful": null,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J5CREQ4BSEPR3REX2WKWMY/progress"
+  },
+  {
+    "company": "Texas Instruments Incorporated",
+    "deployed_sha": "b0050e3",
+    "status": "READY",
+    "run_id": "01M0J5S1JPMWEY91PFAX4CVFXS",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/b0050e3/texas_instruments_incorporated",
+    "process_before": {
+      "boot_id": "a66b8bb687154bfa",
+      "started_at": 1787314134.5251167,
+      "uptime_seconds": 2270.0
+    },
+    "entry_domain": "ti.com",
+    "seconds": 282,
+    "first_useful": 282,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J5S1JPMWEY91PFAX4CVFXS",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0J5S1JPMWEY91PFAX4CVFXS/progress: timeout",
+      "GET /runs/01M0J5S1JPMWEY91PFAX4CVFXS/progress: timeout"
+    ]
+  },
+  {
+    "company": "Applied Materials, Inc.",
+    "deployed_sha": "b0050e3",
+    "status": "READY",
+    "run_id": "01M0J697R3A92CMMQYMAM7MFV0",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/b0050e3/applied_materials_inc",
+    "process_before": {
+      "boot_id": "a66b8bb687154bfa",
+      "started_at": 1787314134.5251167,
+      "uptime_seconds": 2833.8
+    },
+    "entry_domain": "appliedmaterials.com",
+    "seconds": 79,
+    "first_useful": 79,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J697R3A92CMMQYMAM7MFV0",
+    "outcome": "TRUE_EVIDENCE_SCARCITY",
+    "outcome_by_route": {
+      "run": "TRUE_EVIDENCE_SCARCITY",
+      "intro": "TRUE_EVIDENCE_SCARCITY",
+      "slides": "TRUE_EVIDENCE_SCARCITY",
+      "full": "TRUE_EVIDENCE_SCARCITY",
+      "story": "TRUE_EVIDENCE_SCARCITY",
+      "history": "TRUE_EVIDENCE_SCARCITY",
+      "connect": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "JPMorgan Chase & Co.",
+    "deployed_sha": "b0050e3",
+    "status": "READY",
+    "run_id": "01M0J6MP98PG9PJNHBM3834BGX",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/b0050e3/jpmorgan_chase_co",
+    "process_before": {
+      "boot_id": "a66b8bb687154bfa",
+      "started_at": 1787314134.5251167,
+      "uptime_seconds": 3208.9
+    },
+    "entry_domain": "jpmorganchase.com",
+    "seconds": 157,
+    "first_useful": 157,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J6MP98PG9PJNHBM3834BGX/intro",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0J6MP98PG9PJNHBM3834BGX/progress: timeout"
+    ]
+  },
+  {
+    "company": "Bank of America Corporation",
+    "deployed_sha": "b0050e3",
+    "status": "READY",
+    "run_id": "01M0J7049HQ4CXE8ZGW7S52GDW",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/b0050e3/bank_of_america_corporation",
+    "process_before": {
+      "boot_id": "a66b8bb687154bfa",
+      "started_at": 1787314134.5251167,
+      "uptime_seconds": 3583.8
+    },
+    "entry_domain": "bankofamerica.com",
+    "seconds": 166,
+    "first_useful": 166,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J7049HQ4CXE8ZGW7S52GDW/intro",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS_REFRESHING",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [
+      "FULL_ANALYSIS",
+      "FULL_ANALYSIS_REFRESHING"
+    ],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0J7049HQ4CXE8ZGW7S52GDW/progress: timeout",
+      "GET /runs/01M0J7049HQ4CXE8ZGW7S52GDW/progress: timeout"
+    ]
+  }
+]

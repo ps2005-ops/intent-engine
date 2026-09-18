@@ -413,8 +413,25 @@ _SHOPIFY = EntityProfile(
     ),
 )
 
+#: Hand-written entries above; curated catalog rows below.
+#:
+#: WHY THE CATALOG IS SPLICED IN HERE RATHER THAN KEPT SEPARATE. Three
+#: different consumers reach identity through this tuple -- `suggest` (via
+#: `_registry_profiles`), `resolve_entity` by name, and `_domain_match` by
+#: host. A catalog that only the suggestion list could see would offer a
+#: company the resolver then failed to open, which is a worse experience than
+#: not offering it. One registry, one answer, three readers.
+#:
+#: Imported lazily-but-eagerly at module import: the catalog imports
+#: EntityProfile and OfficialSource FROM here, so the import must come after
+#: both are defined. That is why it sits at the bottom of the module and not
+#: at the top with the others.
+from intent_engine.company_ingestion.catalog import (            # noqa: E402
+    CATALOG_REGISTRY as _CATALOG,
+)
+
 REGISTRY = (_SONY_GROUP, _SONY_INTERACTIVE, _SONY_ELECTRONICS, _PALANTIR,
-            _SHOPIFY)
+            _SHOPIFY) + _CATALOG
 
 
 def _by_id(entity_id: str):
@@ -477,6 +494,51 @@ def _name_match(profile: EntityProfile, name: str) -> str:
         if typed == _tokens(candidate):
             return "exact"
     return ""
+
+
+def declared_cik(company_name: str = "", website: str = ""):
+    """What a CURATED identity says this company's SEC CIK is.
+
+    Three answers, and the third is the one that matters:
+
+        "0001943896"  curated, and it files -- use this
+        ""            curated, and it does NOT file -- DO NOT GUESS
+        None          not curated -- the caller may resolve as it always has
+
+    WHY AN EMPTY STRING IS AN ANSWER AND NOT A GAP.
+    MEASURED on Adastra, cohort A, across three separate builds. Adastra
+    Corporation is a Toronto data and analytics consultancy that files with no
+    US regulator, and "Adastra" matches ADASTRA HOLDINGS LTD. in the SEC
+    register -- a Canadian cannabis company whose SIC code is pharmaceutical
+    preparations. Every layer that could not find a CIK fell back to a fuzzy
+    name match and found that company:
+
+      1. `suggest` merged the two rows          -> the picker offered its CIK
+      2. `subject_cik` fuzzy-resolved the name  -> PHARMA classification
+      3. `propose_edgar_candidates` did the same-> its Form 20-F was RETRIEVED
+                                                   and read as the consultancy's
+                                                   own evidence
+
+    Doors one and two were closed one at a time, and each repair routed the
+    run into the next door: making `subject_cik` return "" is precisely what
+    sent `propose_edgar_candidates` down its `else` branch. A defect with four
+    doors is not four defects, and closing them one per deploy is how three
+    builds in a row shipped with a cannabis company's filing under a
+    consultancy's name.
+
+    So the question is answered ONCE, here, and every door asks it. Forty-four
+    of the fifty curated entries declare no CIK, which is the measure of how
+    wide this is: each of them reaches a fuzzy resolver with an empty CIK.
+    """
+    try:
+        resolution = resolve_entity(company_name=company_name,
+                                    website=website)
+    except Exception:                                       # noqa: BLE001
+        return None
+    profile = getattr(resolution, "profile", None)
+    if profile is None:
+        return None
+    return str(getattr(profile, "sec_cik", "") or "").strip()
 
 
 def resolve_entity(*, company_name: str = "", website: str = "") \

@@ -11,6 +11,7 @@ from __future__ import annotations
 import re
 from functools import lru_cache
 
+from intent_engine.strategic_intelligence import evidence_text as ET
 from intent_engine.strategic_intelligence.records import StrategicObservation
 
 
@@ -32,7 +33,64 @@ def _phrase_pattern(phrase: str) -> "re.Pattern":
     return re.compile(r"(?<!\w)" + r"[\s\-/]+".join(parts) + r"(?!\w)", re.I)
 
 
+#: CASEFOLDED ONCE PER DOCUMENT, not once per phrase.
+#:
+#: MEASURED on a cold Apple analysis (reports/perf/apple_before.json): one run
+#: made 15,208 phrase scans across 866 MB of document text, and 13,821 of them
+#: -- 91% -- matched nothing at all. The scan itself was 9.4s of a 29.8s
+#: analysis: the single largest cost in the whole interactive path, larger
+#: than every network request combined.
+#:
+#: `maxsize` is small on purpose. Callers walk documents one at a time and
+#: make many consecutive calls against the same text, so a handful of entries
+#: already gives a near-perfect hit rate, and this holds whole filings in
+#: memory on a free instance with little of it.
+@lru_cache(maxsize=16)
+def _folded(text: str) -> str:
+    return text.casefold()
+
+
+@lru_cache(maxsize=8192)
+def _phrase_probe(phrase: str) -> tuple:
+    """The substrings that MUST all be present for `_phrase_pattern` to match.
+
+    WHY THIS IS SOUND, AND WHY IT IS CASEFOLD RATHER THAN LOWER.
+    `_phrase_pattern` joins the phrase's words with `[\s\-/]+` under `re.I`,
+    so every word appears literally in any text the pattern matches. Testing
+    for the longest word is therefore a NECESSARY condition: a text failing it
+    cannot match, and skipping it removes no evidence. This is a speed change
+    with no semantic content -- the phrases that DO occur are scanned exactly
+    as before, and the sentence returned is the same sentence.
+
+    `re.I` folds beyond `str.lower`: it matches ASCII "k" against U+212A
+    KELVIN SIGN and "s" against U+017F LATIN SMALL LETTER LONG S, neither of
+    which `lower()` normalises. `casefold()` does, so the probe cannot produce
+    a false negative on a document that uses them. Only ASCII words are used
+    as probes; anything else falls back to the full scan rather than reasoning
+    about a fold we have not checked.
+    """
+    words = [w.casefold() for w in phrase.split() if w.isascii()]
+    # Longest first: the most selective word rejects the document on the first
+    # test, so the common ones are usually never looked for at all. MEASURED:
+    # testing only the longest word left 4,440 scans standing (a phrase like
+    # "system of record" probes "record", which occurs in every filing) and
+    # 197 of them matched. Every word is independently necessary, so testing
+    # all of them is the same proof applied more than once.
+    return tuple(sorted(set(words), key=len, reverse=True))
+
+
+def _cannot_contain(text: str, phrase: str) -> bool:
+    """True when `phrase` provably does not occur in `text`."""
+    probes = _phrase_probe(phrase)
+    if not probes:
+        return False                      # nothing we can prove; scan it
+    folded = _folded(text)
+    return any(probe not in folded for probe in probes)
+
+
 def _has_phrase(text: str, phrase: str) -> bool:
+    if _cannot_contain(text, phrase):
+        return False
     return _phrase_pattern(phrase).search(text) is not None
 
 
@@ -119,7 +177,14 @@ def owned_match(text: str, phrases, company: str = ""):
 
     A demonstrably foreign subject is different, and is always rejected.
     """
+    folded_text = text or ""
     for phrase in phrases:
+        # THE SCAN IS SKIPPED ONLY WHEN IT PROVABLY CANNOT MATCH. See
+        # `_phrase_probe`: a phrase whose longest word is absent from the
+        # casefolded document cannot be matched by a pattern that requires
+        # that word literally. 91% of this loop's scans were of that kind.
+        if _cannot_contain(folded_text, phrase):
+            continue
         # BOUNDED. When every occurrence is somebody else's, the loop would
         # otherwise walk all of them — and a 10-K can repeat a phrase across
         # hundreds of risk-factor sentences, which is precisely the document
@@ -1011,6 +1076,69 @@ def _is_weak(excerpt: str, title: str, signals: list) -> bool:
 MIN_ANALYST_EXCERPT_CHARS = 120
 
 
+#: The classes in which a document SPEAKS FOR the subject. Derived from the
+#: vocabulary rather than hand-written, so a class added tomorrow belongs to
+#: neither set until somebody decides — the same reason the pattern library's
+#: applicability had to stop being a denylist.
+def _subject_speaking_classes():
+    from intent_engine.company_ingestion.records import (
+        INDEPENDENT_CLASSES, SOURCE_CLASSES,
+    )
+    return tuple(c for c in SOURCE_CLASSES if c not in INDEPENDENT_CLASSES)
+
+
+def _document_url(doc) -> str:
+    get = (doc.get if isinstance(doc, dict)
+           else lambda k, d=None, o=doc: getattr(o, k, d))
+    return str(get("final_url", "") or get("url", "") or "")
+
+
+def subject_documents(documents, *, subject_cik: str = "") -> list:
+    """The documents that may describe THIS company. One owner for the rule.
+
+    MEASURED LIVE on 0420fb0. JPMorgan's rendered page carried, under "How
+    the business actually works -> Distribution model", the sentence "Is
+    committing capital to capacity ahead of the demand for it" — attributed
+    to WELLS FARGO & COMPANY's 10-K. A signal detected in another bank's
+    filing became JPMorgan's own distribution model. The same run's evidence
+    also carried a blank-check SPAC whose 10-K opens "We are a blank check
+    company". Walmart's carried Ranpak, Ibotta and a 2023 BitNile filing.
+
+    A claim belongs to whoever made it. `strategic_read._named_rivals`
+    already carried this rule — it was repaired when Meta's introduction
+    named AT&T and Alphabet, which were the AUTHORS of third-party filings
+    the run had retrieved. The competitor producer was fixed and the
+    OBSERVATION producer, one level upstream and feeding the same report,
+    was not. One defect, two producers, one fixed.
+
+    Two rules, because one is not enough:
+
+      * a document in an INDEPENDENT class is another party's vantage by
+        definition, and must not describe the subject's own mechanics;
+      * a document filed under a DIFFERENT registrant's EDGAR path is not
+        this filer's, whatever class it was given — which is the rule that
+        catches a third-party 10-K classed as investor material.
+
+    This belongs to the producer, not to each call site, because a function
+    that builds a company's own mechanics should not silently accept
+    documents about other companies.
+    """
+    allowed = _subject_speaking_classes()
+    subject = (subject_cik or "").lstrip("0")
+    kept = []
+    for doc in documents or ():
+        get = (doc.get if isinstance(doc, dict)
+               else lambda k, d=None, o=doc: getattr(o, k, d))
+        source_class = str(get("source_class", "") or "")
+        if source_class and source_class not in allowed:
+            continue
+        url = str(get("final_url", "") or get("url", "") or "")
+        if subject and "/data/" in url and f"/data/{subject}/" not in url:
+            continue
+        kept.append(doc)
+    return kept
+
+
 def derive_analyst_evidence(documents, company: str = "") -> list:
     """Evidence for the grounded analyst -- every strategic page, signal or not.
 
@@ -1046,7 +1174,10 @@ def derive_analyst_evidence(documents, company: str = "") -> list:
         if page_kind(doc.get("final_url", ""), title) != "strategic":
             continue
 
-        body = (doc.get("text_content") or "").strip()
+        # ONE excerpt rule, shared with `derive_observations` below. Two
+        # derivations reading the same document must not disagree about what
+        # it says; they differ in what they admit, not in what they read.
+        body = ET.body_text(doc)
         # AN INDEPENDENT SOURCE STILL HAS TO SAY SOMETHING.
         #
         # Measured on the eighteen third-party filings this product accepts:
@@ -1065,7 +1196,7 @@ def derive_analyst_evidence(documents, company: str = "") -> list:
             verdict = assess(text=body, company_name=company or "")
             if not verdict.usable_as_support:
                 continue
-        excerpt = (body or doc.get("meta_description") or "").strip()
+        excerpt = ET.evidence_excerpt(doc)
         if len(excerpt) < MIN_ANALYST_EXCERPT_CHARS:
             continue
 
@@ -1092,7 +1223,7 @@ def derive_analyst_evidence(documents, company: str = "") -> list:
             directly_observed=True,
             signals=tuple(signals),
             source_class=source_class,
-            excerpt=excerpt[:1200],
+            excerpt=excerpt[:ET.EXCERPT_CHARS],
             source_title=title or source_class,
             origin=doc.get("final_url", ""),
             date=(doc.get("retrieved_at", "") or "")[:10],
@@ -1102,6 +1233,7 @@ def derive_analyst_evidence(documents, company: str = "") -> list:
             weak=weak,
             evidence_quality="weak" if weak else "strong"))
     return evidence
+
 
 
 def observation_sentence(subject: str, signal: str, label: str) -> str:
@@ -1118,8 +1250,24 @@ def observation_sentence(subject: str, signal: str, label: str) -> str:
     return f"{sentence}, {because}." if because else f"{sentence}."
 
 
-def derive_observations(documents, *, company: str = "") -> list:
+def derive_observations(documents, *, company: str = "",
+                        subject_cik: str = "",
+                        subject_only: bool = False,
+                        deadline=None) -> list:
     """Build StrategicObservations from retrieved ingestion documents.
+
+    OWNERSHIP IS ENFORCED WHERE THE CLAIM IS MADE, NOT HERE. Filtering
+    third-party documents out at this point was tried and is wrong: a
+    COMPLETE report requires at least one INDEPENDENT source class, that
+    coverage is computed from these observations, and dropping them made
+    every run fail the cross-source bar to fix a claim nobody had made yet.
+    A rival's filing is real evidence; it simply may not describe the
+    SUBJECT'S OWN mechanics. `model.build_mental_model` applies
+    `subject_documents`' rule to the observations that STATE a component,
+    while leaving those that CONTRADICT one alone.
+
+    `subject_only=True` is available for a caller that wants the documents
+    narrowed here instead.
 
     Deduplicates repeated pages, filters title-only / generic-marketing noise
     into weak evidence, and records a real strategic signal (not a page title)
@@ -1141,8 +1289,38 @@ def derive_observations(documents, *, company: str = "") -> list:
     run with documents but no strategic report should still render an
     evidence-grounded descriptive brief instead of redirecting to nothing.
     """
+    if subject_only:
+        documents = subject_documents(documents, subject_cik=subject_cik)
+    # WHOSE DOCUMENT IS THIS, decided at the only layer that still has the
+    # URL. `build_mental_model` sees observations and never a URL, and
+    # `source_class` cannot answer it -- see `records.subject_owned`.
+    owned_urls = {_document_url(d)
+                  for d in subject_documents(documents,
+                                             subject_cik=subject_cik)}
     observations, seen = [], set()
     for doc in documents:
+        # THE MAXIMUM IS A CONTRACT, AND THIS IS WHERE IT IS SPENT.
+        #
+        # MEASURED: this stage is 44s of a 107s cohort median, and it is a
+        # per-document loop over text -- so it is the one place in composition
+        # where stopping is both possible and meaningful. Amazon ran 141.1s
+        # against a declared 120s maximum with no terminal behaviour, which is
+        # the page telling the reader something untrue.
+        #
+        # STOPS BETWEEN DOCUMENTS, NEVER INSIDE ONE. A half-read document
+        # would produce an observation whose excerpt is not what the document
+        # says, and a wrong finding is worse than a missing one. What the
+        # reader gets is the observations that were complete, and a gap
+        # naming what was not read.
+        if deadline is not None and getattr(deadline, "expired", False):
+            try:
+                deadline.record_gap(
+                    "observations",
+                    f"{len(documents) - len(seen)} document(s) not read - "
+                    f"the interactive maximum was reached")
+            except Exception:                                 # noqa: BLE001
+                pass
+            break
         # collapse duplicate pages: same content hash or same normalized URL
         key = doc.get("content_hash") or _normalize_url(doc.get("final_url", ""))
         norm = _normalize_url(doc.get("final_url", ""))
@@ -1205,8 +1383,13 @@ def derive_observations(documents, *, company: str = "") -> list:
             excerpt, section = FS.best_excerpt(
                 body_text, form=(doc.get("filing") or {}).get("form", ""))
         if not excerpt:
-            excerpt = (doc.get("meta_description")
-                       or body_text[:280]).strip()
+            # THE MEASURED DEFECT this replaced read
+            #     (meta_description or text_content[:280])
+            # and it was production for every observation the engine made. A
+            # marketing page's meta_description IS its blurb; a filing's first
+            # 280 characters ARE its cover page. `evidence_excerpt` is the one
+            # body selector both derivations share.
+            excerpt = ET.evidence_excerpt(doc)
         else:
             excerpt = excerpt.strip()
         weak = _is_weak(excerpt, title, signals)
@@ -1253,6 +1436,7 @@ def derive_observations(documents, *, company: str = "") -> list:
                                             "strategic picture"),
             entity=entity,
             weak=weak,
+            subject_owned=_document_url(doc) in owned_urls,
             evidence_quality="weak" if weak else "strong"))
     return observations
 

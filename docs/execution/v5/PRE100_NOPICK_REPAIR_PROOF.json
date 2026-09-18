@@ -1,0 +1,176 @@
+[
+  {
+    "company": "Lowe's Companies",
+    "domain": "lowes.com",
+    "sector": "consumer / retail",
+    "picked": false,
+    "defects": [],
+    "error": "",
+    "suggest_ms": 215,
+    "typed_prefix": "lowe's",
+    "suggestions": [
+      "Lowes Companies Inc"
+    ],
+    "match_score": 0.5,
+    "autocomplete_found": true,
+    "chosen_identity": "Lowes Companies Inc",
+    "submitted_company": "Lowe's Companies",
+    "submitted_cik": "",
+    "confirmed_pick": false,
+    "submit_ack_s": 1.49,
+    "analyze_status": 200,
+    "run_id": "01M1PATPVHQSJEX2ZJV4SK5FEP",
+    "core_ready_s": 71.3,
+    "timer_shown": true,
+    "eta_shown": true,
+    "stages_seen": [
+      "Identifying the company",
+      "Reading current company",
+      "Connecting macro",
+      "Mapping competitors",
+      "Stress-testing",
+      "Building the executive"
+    ],
+    "ui_timer_at_core": "00:49",
+    "deep_ready_s": 84.7,
+    "strategic_qa_ready_s": 84.7,
+    "page_open_s": 11.34,
+    "brief_chars": 46905,
+    "leaks": [],
+    "names_company": true,
+    "foreign_companies": [],
+    "spinner_after_terminal": false,
+    "counter_markers": [
+      "where this sits against the alternatives"
+    ],
+    "counterevidence": "PRESENT",
+    "documents": 4,
+    "roles_filled": [
+      "direction",
+      "identity_or_product"
+    ],
+    "roles_missing": [
+      "market"
+    ],
+    "families": {
+      "identity": 2,
+      "investor": 1,
+      "strategy": 1
+    },
+    "sources": {
+      "discovered": 35,
+      "requested": 22,
+      "retrieved": 4,
+      "failed": 18,
+      "yield": 0.182,
+      "by_cause": {
+        "rate_limited": 0,
+        "refused": 18,
+        "not_found": 0,
+        "timed_out": 0,
+        "budget": 0,
+        "unreadable": 0,
+        "other": 0
+      },
+      "by_host": {
+        "lowes.com": 15,
+        "www.g2.com": 1,
+        "www.trustpilot.com": 1,
+        "www.capterra.com": 1
+      }
+    },
+    "abstention": "SOURCE_DIVERSITY_INSUFFICIENT",
+    "memory_skips": 108,
+    "cache_hits": 6,
+    "meta_cik": "",
+    "subject_cik": "60667",
+    "registrant_sic": "5211",
+    "business_model": "SCALE_RETAIL",
+    "eligible_patterns": [
+      "product_to_platform",
+      "human_to_agent_workflow",
+      "single_product_to_ecosystem",
+      "ecosystem_control_vs_openness",
+      "differentiator_commoditization",
+      "single_to_multi_segment",
+      "portfolio_run_as_one"
+    ],
+    "excluded_patterns": [
+      "buyer_concentration_exposure",
+      "capacity_ahead_of_demand",
+      "services_to_product",
+      "smb_wedge_to_enterprise",
+      "tool_to_system_of_record"
+    ],
+    "chosen_pattern": "",
+    "headline_thesis": "No curated transition pattern matched Lowe's Companies in this pass, so the reading below is not built from one.",
+    "mechanism": "",
+    "thesis_alternative": null,
+    "reason_chosen": "no pattern qualified on this run's observations",
+    "thesis_evidence": [],
+    "reasoning_provenance": "pattern_library",
+    "thesis_error": null,
+    "evidence_page": 200,
+    "provenance_has_sources": true,
+    "qa": [
+      {
+        "q": "What is the most important strategic implication?",
+        "status": 200,
+        "chars": 23138,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 15.5,
+        "answer_text": "What is the most important strategic implication? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Lowe&#x27;s Companies What is the most important strategic implication? A supported reading of Lowe&#x27;s Companies exists and is set out on the Executive X-Ray. This particular question is not answerable from what this run retrieved. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest evidence supporting that?",
+        "status": 200,
+        "chars": 23584,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 15.9,
+        "answer_text": "What is the strongest evidence supporting that? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Lowe&#x27;s Companies What is the strongest evidence supporting that? A supported reading of Lowe&#x27;s Companies exists and is set out on the Executive X-Ray. This particular question is not answerable from what this run retrieved. 2026-09-04: Lowe&#x27;s Companies sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What is the strongest argument against this conclusion?",
+        "status": 200,
+        "chars": 23600,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 15.5,
+        "answer_text": "What is the strongest argument against this conclusion? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Lowe&#x27;s Companies What is the strongest argument against this conclusion? A supported reading of Lowe&#x27;s Companies exists and is set out on the Executive X-Ray. This particular question is not answerable from what this run retrieved. 2026-09-04: Lowe&#x27;s Companies sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What would make this recommendation wrong?",
+        "status": 200,
+        "chars": 23050,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 17.2,
+        "answer_text": "What would make this recommendation wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Lowe&#x27;s Companies What would make this recommendation wrong? Hold this decision \u2014 what to charge, and for what \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "What should management monitor next?",
+        "status": 200,
+        "chars": 23140,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 16.9,
+        "answer_text": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Lowe&#x27;s Companies What should management monitor next? store and site traffic \u2014 revenue at a business of this kind moves with store and site traffic.; average ticket \u2014 revenue at a business of this kind moves with average ticket.; comparable sales \u2014 revenue at a business of this kind moves with comparable sales. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      {
+        "q": "Why does that matter most for this company specifically?",
+        "status": 200,
+        "chars": 23380,
+        "leaks": [],
+        "names_company": true,
+        "seconds": 16.6,
+        "answer_text": "Why does that matter most for this company specifically? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Lowe&#x27;s Companies Why does that matter most for this company specifically? That was the whole of it: \u201cstore and site traffic \u2014 revenue at a business of this kind moves with store and site traffic.; average ticket \u2014 revenue at a business of this kind moves with average ticket.; comparable sales \u2014 revenue at a business of this kind moves with comparable sales.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Ask a follow-up Your question Ask Suggested: What does this company do? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      }
+    ],
+    "context_retained": true,
+    "qa_ok": "6/6",
+    "result": "FULL_REPORT",
+    "index": 1
+  }
+]

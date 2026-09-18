@@ -1,0 +1,61 @@
+FORWARD
+    real_open                = 13 (1 opened this cycle from a SUPPORTED_PREDICTIVE relation; 5 relations skipped because they did not qualify)
+    real_resolved            = 0
+    rehearsal_resolved       = 36 (separate file, constant probabilities, never mixed into the real ladder)
+    calibration_status       = PRE_CALIBRATION
+
+WORLD MODEL
+    live_dimensions          = 11
+    decision_relevant        = 6
+    context_only             = 3
+    unproven_value           = 2
+    blocked_dimensions       = 6 — none blocked a material decision in 60 comparisons, so none was unblocked
+    relations_supported      = 1
+    relations_candidate      = 5 (driver did not move enough to make a prediction)
+    relations_pending_lag    = 0
+    relations_contradicted   = 0
+    the previous run reported 4 of 6 relations as non-firing with NO lag check. A mechanism that has not had time to fire has not failed.
+
+DECISION VALUE
+    rubric                   = 15f463e9e671cb03, frozen before any pair was scored; STRUCTURAL scoring only, no LLM judge
+    companies                = 10
+    regimes                  = 6 (chosen by asking the contemporaneous classifier, not from memory)
+    A/B comparisons          = 60
+    material DecisionDelta   = 24 (40%)
+    no_material_delta        = 36 (60%) — §15 counts abstention as a success
+    DecisionDamage           = 0
+    attributable_delta_rate  = 1.0
+    MATERIAL_BUT_UNATTRIBUTED= 0
+    negative_control         = PASS — the model speaks in some cases and abstains in others within every regime
+    material field movements = {"action": 24, "confidence": 24, "information_priority": 24, "scenario": 4, "top_priority": 14, "top_risks": 24}
+    SUPERSEDED               = the old DecisionDelta 10/10 is marked INVALID_COMPARATOR_FOR_PRODUCT_VALUE and is not reported as product evidence
+
+COMPANY
+    distinct channels        = 21 across 21 implications
+    CAVEAT: this measures that the AUTHORED channels are distinct — a floor against one paragraph under ten names, not evidence of derived reasoning.
+
+FOUNDER
+    economic_integration     = MEASURED — 24 material deltas, all attributable to a named panel reading and mechanism
+    human_state_integration  = REFUSED (FROZEN_CANDIDATE, 0 constructs promoted)
+    CEO_QA_consistency       = every answer grounded in the same evidence set: True
+    economic_History_Rewind  = 2 cases, every counterfactual labelled SCENARIO_ASSUMPTION
+    human_History_Rewind     = REFUSED
+
+LEARNING
+    drivers_moved            = 6 of 10
+    decisions_changed        = 24 of 60
+    false_discoveries_killed = 5 across the programme
+    stagnation_state         = LEGITIMATE_STABILITY
+        every producer advanced, evidence was considered, and decisions changed where the state bore on them
+    learning_quality         = decisions changed where the state bore on them and not elsewhere; 60% abstention is the evidence that the model is selective rather than loud
+
+LIVE
+    deployed_SHA             = NOT_ATTEMPTED
+    why                      = the modules this run built (worldmodel, founder_ab, forward_engine, forward_ledger, breakproof) are NOT imported by the webapp. `test_econ_core_is_neutral` forbids the econ core from importing either product, and nothing on a deployed path consumes them yet. Deploying would prove the existing surface still works, which is not the claim §31 asks for, and reporting LIVE_PROVEN from that would be false.
+    the wiring gap           = a founder surface that renders EconomicState, the A/B decision delta and the forward ledger status. That is the top-ranked next task and it is product work, not research.
+
+QUALITY
+    break_proofs             = 16/16 CAUGHT, 0 REFUSED_TAUTOLOGY, 0 NOT_CAUGHT, 0 UNRELIABLE
+    meta_breakproof_guard    = MACHINE-ENFORCED. Every proof declares mutated_symbol, guard_under_test and production_call_path; `Proof.validate()` REFUSES the proof if they are the same symbol, and `assert_call_path_exists` parses the call site rather than grepping it. Target kinds: {"CALL_SITE": 1, "CONSUMER": 2, "PERSISTENCE": 2, "PRODUCER": 10, "RENDERER": 1}.
+    SEV1                     = none
+    learning_SEV2            = the world model is not on a deployed path; measured product value is offline only

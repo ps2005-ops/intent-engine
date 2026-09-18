@@ -1,0 +1,109 @@
+{
+ "contract": "action_times.v2",
+ "as_of": "2026-08-08",
+ "before": {
+  "actions": 23,
+  "distinct_event_times": 1,
+  "orderable": 0,
+  "source": "event_time = document.retrieved_at"
+ },
+ "after": {
+  "contract": "occurrence_time.v1",
+  "actions": 7,
+  "by_standing": {
+   "DATE_ONLY": 4,
+   "INFERRED_FROM_PUBLICATION": 3
+  },
+  "orderable": 7,
+  "future_commitments": 0,
+  "distinct_orderable_dates": 4,
+  "note": "retrieved_at is provenance and is never promoted to an occurrence. A corpus whose distinct orderable dates number one is not a timeline."
+ },
+ "rows": [
+  {
+   "actor": "Shopify",
+   "span": "08.03Oxygen is now available on development storesHydrogen.",
+   "contract": "occurrence_time.v1",
+   "occurred_at": "",
+   "published_at": "2026-07-21",
+   "retrieved_at": "2026-08-08",
+   "standing": "INFERRED_FROM_PUBLICATION",
+   "is_future": false,
+   "orderable": true,
+   "evidence": "no date in the text; the publication date bounds it from above"
+  },
+  {
+   "actor": "Shopify",
+   "span": "07.30createdAt is now available on the Customer object in Sh",
+   "contract": "occurrence_time.v1",
+   "occurred_at": "",
+   "published_at": "2026-07-21",
+   "retrieved_at": "2026-08-08",
+   "standing": "INFERRED_FROM_PUBLICATION",
+   "is_future": false,
+   "orderable": true,
+   "evidence": "no date in the text; the publication date bounds it from above"
+  },
+  {
+   "actor": "Shopify",
+   "span": "07.01Market-driven shipping now available in feature preview",
+   "contract": "occurrence_time.v1",
+   "occurred_at": "2026-07-01",
+   "published_at": "2026-07-21",
+   "retrieved_at": "2026-08-08",
+   "standing": "DATE_ONLY",
+   "is_future": false,
+   "orderable": true,
+   "evidence": "07.01"
+  },
+  {
+   "actor": "Shopify",
+   "span": "07.01Draft order deposit fields are now available in the Gra",
+   "contract": "occurrence_time.v1",
+   "occurred_at": "2026-07-01",
+   "published_at": "2026-07-21",
+   "retrieved_at": "2026-08-08",
+   "standing": "DATE_ONLY",
+   "is_future": false,
+   "orderable": true,
+   "evidence": "07.01"
+  },
+  {
+   "actor": "Shopify",
+   "span": "06.17WhatsApp marketing consent now available in the Admin A",
+   "contract": "occurrence_time.v1",
+   "occurred_at": "2026-06-17",
+   "published_at": "2026-07-21",
+   "retrieved_at": "2026-08-08",
+   "standing": "DATE_ONLY",
+   "is_future": false,
+   "orderable": true,
+   "evidence": "06.17"
+  },
+  {
+   "actor": "Shopify",
+   "span": "06.05Local currency support gift cards now available in the ",
+   "contract": "occurrence_time.v1",
+   "occurred_at": "2026-06-05",
+   "published_at": "2026-07-21",
+   "retrieved_at": "2026-08-08",
+   "standing": "DATE_ONLY",
+   "is_future": false,
+   "orderable": true,
+   "evidence": "06.05"
+  },
+  {
+   "actor": "Shopify",
+   "span": "Next Generation Events now available in developer preview.",
+   "contract": "occurrence_time.v1",
+   "occurred_at": "",
+   "published_at": "2026-07-21",
+   "retrieved_at": "2026-08-08",
+   "standing": "INFERRED_FROM_PUBLICATION",
+   "is_future": false,
+   "orderable": true,
+   "evidence": "no date in the text; the publication date bounds it from above"
+  }
+ ],
+ "note": "the one 2025 date this produced before the ambiguity rule was a fabrication: the index page's modified_date is older than its own newest entry, so rolling the year back moved an August 2026 entry into 2025"
+}

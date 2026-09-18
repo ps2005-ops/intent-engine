@@ -1,0 +1,37 @@
+{
+  "company": "Adobe Inc.",
+  "deployed_sha": "e78c2a0",
+  "captured_at": "2026-08-21T11:33:40Z",
+  "routes": {},
+  "progress": [
+    {
+      "t": 1.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Adobe Inc. ADBE \u00b7 adobe.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Co",
+      "status": 200,
+      "html_bytes": 17007
+    },
+    {
+      "t": 191.3,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17010,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "cf-cache-status": "DYNAMIC",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J1JH5C2ZFK3KKQH6PT4CMV/progress",
+      "head": ""
+    }
+  ],
+  "process_before": {
+    "boot_id": "b511e8cc18ab4e22",
+    "started_at": 1787311623.6873696,
+    "uptime_seconds": 397.0
+  },
+  "run_id": "01M0J1JH5C2ZFK3KKQH6PT4CMV",
+  "status": "FAILED",
+  "seconds": 465,
+  "first_useful": null,
+  "auto_advanced": true
+}

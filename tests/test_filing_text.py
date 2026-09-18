@@ -133,12 +133,38 @@ def parsed(annual):
 
 # --- 1-2. the whole document is traversed, and it is materially bigger --------
 
-def test_the_old_parser_loses_a_div_based_filing(annual):
-    """The defect this module exists for, asserted rather than remembered."""
+def test_div_based_filing_prose_survives_both_parsers(annual):
+    """REWRITTEN AT THE UNIFICATION. Read the whole docstring before editing.
+
+    This was a NEGATIVE CONTROL: it asserted that the general page parser
+    LOSES a div-based filing, which is why `extract_filing_text` had to exist.
+    It can no longer fail in that form, and the reason is not a regression --
+    it is that the two lineages independently repaired the same defect from
+    opposite ends. The founder side wrote this extractor; the market side
+    added `div` and `section` to `parsing._BLOCK` after measuring that
+    Caterpillar's Q2 exhibit kept 13,462 of 64,547 characters and lost every
+    sentence of narrative.
+
+    Measured after the merge: 35,836 characters from the general parser
+    against 35,795 from the extractor. Keeping `len(new) > 5 * len(old)`
+    would be asserting that a fixed parser is still broken.
+
+    So the control is inverted to the property that actually matters and can
+    still fail: the MD&A prose of a div-laid-out filing must be recoverable,
+    by both paths. If either regresses to tag-limited extraction, this goes
+    red.
+    """
     old = parse_html(annual)["text"]
     new = FT.extract_filing_text(annual)["text"]
-    assert "Item 7" not in old or MDNA[:40] not in old
-    assert len(new) > 5 * len(old)
+    for name, text in (("parse_html", old), ("extract_filing_text", new)):
+        assert MDNA[:40] in text, (
+            f"{name} lost the MD&A prose of a div-based filing; this is the "
+            "defect both parsers were repaired for")
+    # And the extractor must not have become the WEAKER of the two while
+    # nobody was looking: it may not lose material the general parser keeps.
+    assert len(new) >= 0.9 * len(old), (
+        f"extract_filing_text kept {len(new)} characters where the general "
+        f"parser kept {len(old)}")
 
 
 def test_full_dom_is_traversed(annual):
@@ -151,12 +177,18 @@ def test_full_dom_is_traversed(annual):
 
 
 def test_span_only_prose_survives():
-    """No <p>, no <li>, no heading tags -- the exact shape that was lost."""
+    """No <p>, no <li>, no heading tags -- the exact shape that was lost.
+
+    The second assertion used to be `not in parse_html(...)`. See
+    `test_div_based_filing_prose_survives_both_parsers`: the general parser
+    was repaired independently on the market lineage, so requiring it to
+    still fail would be pinning a fixed defect open. Both must now keep it.
+    """
     html = "<html><body>" + _para(
         "The company sells a subscription platform to enterprise buyers and "
         "recognises that revenue over the contract term.") + "</body></html>"
     assert "subscription platform" in FT.extract_filing_text(html)["text"]
-    assert "subscription platform" not in parse_html(html)["text"]
+    assert "subscription platform" in parse_html(html)["text"]
 
 
 # --- 3-5. sections ------------------------------------------------------------

@@ -341,8 +341,12 @@ def test_result_html_follows_trust_sequence_and_is_accessible(run):
 
 
 def render_from_landing():
-    from intent_engine.founder_intelligence import render_landing_html
-    return render_landing_html()
+    # The labelled inputs live on the company-entry screen now; the landing
+    # page carries no form at all.
+    from intent_engine.founder_intelligence.presentation import (
+        render_company_entry_html,
+    )
+    return render_company_entry_html()
 
 
 # =============================================================================

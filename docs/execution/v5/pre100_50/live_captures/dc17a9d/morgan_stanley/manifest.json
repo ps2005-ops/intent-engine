@@ -1,0 +1,138 @@
+{
+  "company": "Morgan Stanley",
+  "deployed_sha": "dc17a9d",
+  "captured_at": "2026-08-21T13:39:02Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J8QWGY1916F5HD830GXPAB",
+      "chars": 1669,
+      "html_chars": 17115,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J8QWGY1916F5HD830GXPAB/intro",
+      "chars": 4599,
+      "html_chars": 29861,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J8QWGY1916F5HD830GXPAB",
+      "chars": 1669,
+      "html_chars": 17115,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J8QWGY1916F5HD830GXPAB/full",
+      "chars": 1669,
+      "html_chars": 17115,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J8QWGY1916F5HD830GXPAB/story",
+      "chars": 5226,
+      "html_chars": 34899,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J8QWGY1916F5HD830GXPAB/history",
+      "chars": 27794,
+      "html_chars": 108186,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J8QWGY1916F5HD830GXPAB/connect",
+      "chars": 3904,
+      "html_chars": 28810,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J8QWGY1916F5HD830GXPAB",
+      "chars": 1669,
+      "html_chars": 17115,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J8QWGY1916F5HD830GXPAB/evidence",
+      "chars": 3053,
+      "html_chars": 18807,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J8QWGY1916F5HD830GXPAB/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J8QWGY1916F5HD830GXPAB/brief",
+      "chars": 15808,
+      "html_chars": 48286,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Morgan Stanley MS \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecting m",
+      "status": 200,
+      "html_bytes": 16995
+    },
+    {
+      "t": 6.8,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Morgan Stanley MS \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Connecting mac",
+      "status": 200,
+      "html_bytes": 16990
+    },
+    {
+      "t": 36.3,
+      "text": "Limited analysis of Morgan Stanley Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of Morgan Stanley Some kinds of evidence are missing, and there are places left to look. Rather than show a briefing that looks complete and is not, here is exactly where it stands. What was foun",
+      "status": 200,
+      "html_bytes": 17195
+    }
+  ],
+  "process_before": {
+    "boot_id": "9890b2f49d944a8a",
+    "started_at": 1787319148.8228748,
+    "uptime_seconds": 394.2
+  },
+  "run_id": "01M0J8QWGY1916F5HD830GXPAB",
+  "status": "READY",
+  "seconds": 36,
+  "first_useful": 36,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 2.49,
+    "intro": 11.84,
+    "slides": 3.05,
+    "full": 2.7,
+    "story": 5.84,
+    "history": 0.3,
+    "connect": 3.67
+  },
+  "evidence_gate": "compose=3 usable=3 families=investor stored=3 attempt=1 dropped=0/0/0/0",
+  "outcome": "TRUE_EVIDENCE_SCARCITY",
+  "outcome_by_route": {
+    "run": "TRUE_EVIDENCE_SCARCITY",
+    "intro": "TRUE_EVIDENCE_SCARCITY",
+    "slides": "TRUE_EVIDENCE_SCARCITY",
+    "full": "TRUE_EVIDENCE_SCARCITY",
+    "story": "TRUE_EVIDENCE_SCARCITY",
+    "history": "TRUE_EVIDENCE_SCARCITY",
+    "connect": "TRUE_EVIDENCE_SCARCITY"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": []
+}

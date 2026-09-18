@@ -1,0 +1,60 @@
+POWER BEFORE  (V1, quarterly grid, 115 origins)
+    raw rows   = 500
+    origins    = 50
+    n_eff      = 35.04
+    episodes   = 5   (the registry's first correction said 1; that was counted by contiguity, which always returns 1 for consecutive origins. Re-counted against the same discovered phases as the V2 arms, V1's fifty origins span 2008-02 to 2020-05 and cover 5 phases.)
+    median MDE = 0.01615
+
+POWER AFTER   (V2 DEEP, monthly grid, 584 origins, 1978-2026)
+    raw rows   = 1430
+    origins    = 481
+    n_eff      = 127.15
+    episodes   = 15
+    median MDE = 0.00436
+    GAIN       = rows x2.86, effective origins x3.63, episodes x3.00, MDE down 73%
+    VERDICT    = INFORMATION_GAINED_EPISODES. The gain is real and it is in the currency that was scarce. It is x3, not the x15 a contiguity-counted V1 baseline would have shown.
+
+MONTHLY_PANEL          = BUILT. 27 series, 158586 cells, hash d6cbed966dd4ca55. 99436 cells carry a publisher vintage; 59150 carry today's value on a recorded revision measurement.
+HISTORICAL_DEPTH       = 1978-01 for the long block (7 base series, 2 behavioural), 1998-02 for the full block. Earliest ALFRED vintages measured per series: INDPRO 1960, UNRATE 1961, HOUST 1961, CPIAUCSL 1973, PCEC96 1980. The credit and JOLTS series have no vintage before 2011-2012, which is the binding limit on the behavioural block, not the origin grid.
+NETWORK_CALLS_RERUN    = 0 (verified twice; 1039 of 5556 requests served from cache on the acquisition run, 4505 fetched, 0 failed)
+
+V1_CORRECTED
+    delta              = -0.00948
+    row bootstrap      = [-0.02618, +0.00661]   (the stored interval)
+    clustered CI       = [-0.02586, +0.00643]   on 50 origins
+    episode-aware CI   = UNDEFINED — all origins fall in 1 contiguous block
+    the stored interval was NOT materially too narrow. Within-origin correlation of the paired differences is 0.005, so clustering cost almost nothing HERE. It cost a great deal on the INFLATION_SHOCK slice, which is why the estimator was still right to change.
+
+H3_GLOBAL_MONTHLY      = MODERN INSUFFICIENT_POWER | DEEP INSUFFICIENT_POWER
+H4_STRESS_CONDITIONAL  = MODERN INSUFFICIENT_POWER | DEEP INSUFFICIENT_POWER
+H5_EARLY_WARNING       = MODERN NOT_SUPPORTED | DEEP INSUFFICIENT_EPISODES
+H6_TRANSMISSION        = MODERN NOT_SUPPORTED | DEEP NOT_SUPPORTED
+
+CONSTRUCT VERDICTS (DEEP arm; MODERN in reports/v2_experiment.json)
+    financial_anxiety      INSUFFICIENT_POWER     delta=-0.00195
+    future_orientation     INSUFFICIENT_DATA      delta=-
+    perceived_control      INSUFFICIENT_DATA      delta=-
+    perceived_security     INSUFFICIENT_POWER     delta=-0.00504
+    risk_appetite          INSUFFICIENT_DATA      delta=-
+    time_horizon           INSUFFICIENT_DATA      delta=-
+
+FALSE_DISCOVERIES_KILLED = 4
+    1. INFLATION_SHOCK +0.171 -- 30 rows, 14 origins, one episode
+    2. CREDIT_STRESS +0.029 -- did not survive contemporaneous regime classification
+    3. two mechanisms SUPPORTED on the MODERN transmission test -- scored on families whose base model loses to a constant
+    4. 'the stored V1 interval is too narrow' -- measured, and it is not
+ASSUMPTIONS_RETIRED      = 4
+    1. 'the quarterly grid is the origin grid' -- it was a date-string pattern match that admitted 344 origins
+    2. 'stable over 2015-2024 means stable back to 1998' -- REVOLSL was redefined; 100% of observations differ by up to 105,016%
+    3. 'a relative change is the right transform' -- not for a rate that crosses zero
+    4. 'one model can be fitted across ten families' -- base rates run from 0.28 to 0.92
+
+HISTORICAL_EPISODES      = 10 discovered by the contemporaneous classifier over 1978-2026; coverage audit 8 of the 15 named windows found, 5 missed, 2 outside the origin reach
+REAL_FORWARD_OPENED      = 6 (3 replicated mechanisms x BASE and AUGMENTED)
+
+FOUNDER_INTEGRATION      = REFUSED
+WORLD_MODEL_EDGES_ADDED  = 12 (all OBSERVED; none PREDICTIVE, REGIME_CONDITIONAL, EARLY_WARNING or CAUSAL_SUPPORTED)
+WORLD_MODEL_EDGES_REFUSED= 8
+
+CALIBRATION_STATUS       = PRE_CALIBRATION (0 resolved forward predictions; 30 required). Every number above is HISTORICAL OUT-OF-SAMPLE PERFORMANCE.
+BREAK_PROOFS             = 13/13 CAUGHT, 0 NOT_CAUGHT, 0 NOT_APPLIED, 0 UNRELIABLE

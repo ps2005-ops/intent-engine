@@ -1,0 +1,112 @@
+{
+  "company": "Stripe, Inc.",
+  "deployed_sha": "49b6c3a",
+  "captured_at": "2026-08-21T05:43:40Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HDHD0WM2WZVJ5RY0E7FMXB/intro",
+      "chars": 5450,
+      "html_chars": 31003
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HDHD0WM2WZVJ5RY0E7FMXB/intro",
+      "chars": 5450,
+      "html_chars": 31003
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HDHD0WM2WZVJ5RY0E7FMXB/slides",
+      "chars": 7348,
+      "html_chars": 59951
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HDHD0WM2WZVJ5RY0E7FMXB/full",
+      "chars": 19805,
+      "html_chars": 55169
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HDHD0WM2WZVJ5RY0E7FMXB/story",
+      "chars": 5690,
+      "html_chars": 35501
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HDHD0WM2WZVJ5RY0E7FMXB/history",
+      "chars": 5459,
+      "html_chars": 35124
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HDHD0WM2WZVJ5RY0E7FMXB/connect",
+      "chars": 3956,
+      "html_chars": 28857
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HDHD0WM2WZVJ5RY0E7FMXB/intro",
+      "chars": 5450,
+      "html_chars": 31003
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HDHD0WM2WZVJ5RY0E7FMXB/evidence",
+      "chars": 8647,
+      "html_chars": 27315
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HDHD0WM2WZVJ5RY0E7FMXB/report",
+      "chars": 307,
+      "html_chars": 14888
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HDHD0WM2WZVJ5RY0E7FMXB/brief",
+      "chars": 12023,
+      "html_chars": 39751
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Loading what we already know. Analysing Stripe, Inc. stripe.com \u2014 not this company? Identifying the company done Loading prior intelligence working Reading current company evidence to come ",
+      "status": 200,
+      "html_bytes": 17007
+    },
+    {
+      "t": 39.3,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Loading what we already know. Analysing Stripe, Inc. stripe.com \u2014 not this company? Identifying the company done Loading prior intelligence working Reading current company evidence done Con",
+      "status": 200,
+      "html_bytes": 17002
+    },
+    {
+      "t": 243.8,
+      "text": "Stripe, Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Stripe, Inc. USA \u00b7 stripe.com Stripe, Inc. is a software platform business that runs on earnings from a balance sheet or from a transaction network \u2014 spread and fees on volume the firm intermediates. Its po",
+      "status": 200,
+      "html_bytes": 31072
+    }
+  ],
+  "process_before": {
+    "boot_id": "4ef1abc720dd4d9e",
+    "started_at": 1787289915.6651065,
+    "uptime_seconds": 1104.7
+  },
+  "run_id": "01M0HDHD0WM2WZVJ5RY0E7FMXB",
+  "status": "READY",
+  "seconds": 244,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 3.89,
+    "intro": 4.09,
+    "slides": 6.55,
+    "full": 10.94,
+    "story": 5.07,
+    "history": 0.19,
+    "connect": 2.66
+  },
+  "errors": []
+}

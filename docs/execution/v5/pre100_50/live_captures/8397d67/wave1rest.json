@@ -1,0 +1,156 @@
+[
+  {
+    "company": "Alphabet Inc.",
+    "deployed_sha": "8397d67",
+    "status": "READY",
+    "run_id": "01M0H8HGXESBBWPZKED863FFZE",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/8397d67/alphabet_inc",
+    "process_before": {
+      "boot_id": "777e281ac5714ef8",
+      "started_at": 1787285577.8327832,
+      "uptime_seconds": 204.8
+    },
+    "seconds": 152,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H8HGXESBBWPZKED863FFZE/intro",
+    "routes": 11,
+    "errors": [],
+    "qa_capture_valid": true,
+    "answers": 10,
+    "rejected": []
+  },
+  {
+    "company": "Microsoft Corporation",
+    "deployed_sha": "8397d67",
+    "status": "READY",
+    "run_id": "01M0H8WGT4D5DFBB41HXN9W0AZ",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/8397d67/microsoft_corporation",
+    "process_before": {
+      "boot_id": "777e281ac5714ef8",
+      "started_at": 1787285577.8327832,
+      "uptime_seconds": 564.9
+    },
+    "seconds": 195,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H8WGT4D5DFBB41HXN9W0AZ/intro",
+    "routes": 11,
+    "errors": [],
+    "qa_capture_valid": true,
+    "answers": 10,
+    "rejected": []
+  },
+  {
+    "company": "Amazon.com, Inc.",
+    "deployed_sha": "8397d67",
+    "status": "READY",
+    "run_id": "01M0H983N63Q3V1SWHVSJ6RP2Z",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/8397d67/amazon_com_inc",
+    "process_before": {
+      "boot_id": "777e281ac5714ef8",
+      "started_at": 1787285577.8327832,
+      "uptime_seconds": 944.8
+    },
+    "seconds": 297,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H983N63Q3V1SWHVSJ6RP2Z/intro",
+    "routes": 11,
+    "errors": [],
+    "qa_capture_valid": true,
+    "answers": 10,
+    "rejected": []
+  },
+  {
+    "company": "Salesforce, Inc.",
+    "deployed_sha": "8397d67",
+    "status": "READY",
+    "run_id": "01M0H9Q82E16C4ZFET1E3CJ9WC",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/8397d67/salesforce_inc",
+    "process_before": {
+      "boot_id": "777e281ac5714ef8",
+      "started_at": 1787285577.8327832,
+      "uptime_seconds": 1440.8
+    },
+    "seconds": 241,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H9Q82E16C4ZFET1E3CJ9WC/intro",
+    "routes": 11,
+    "errors": [],
+    "qa_capture_valid": true,
+    "answers": 10,
+    "rejected": []
+  },
+  {
+    "company": "Adobe Inc.",
+    "deployed_sha": "8397d67",
+    "status": "READY",
+    "run_id": "01M0HA4K4QRGXTM3Z5BY69Z63D",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/8397d67/adobe_inc",
+    "process_before": {
+      "boot_id": "777e281ac5714ef8",
+      "started_at": 1787285577.8327832,
+      "uptime_seconds": 1878.3
+    },
+    "seconds": 233,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HA4K4QRGXTM3Z5BY69Z63D/intro",
+    "routes": 11,
+    "errors": [],
+    "qa_capture_valid": true,
+    "answers": 10,
+    "rejected": []
+  },
+  {
+    "company": "ServiceNow, Inc.",
+    "deployed_sha": "8397d67",
+    "status": "READY",
+    "run_id": "01M0HAHDVDR0X0VKWQQN14ABYA",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/8397d67/servicenow_inc",
+    "process_before": {
+      "boot_id": "777e281ac5714ef8",
+      "started_at": 1787285577.8327832,
+      "uptime_seconds": 2298.7
+    },
+    "seconds": 21,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HAHDVDR0X0VKWQQN14ABYA",
+    "routes": 11,
+    "errors": [],
+    "qa_capture_valid": true,
+    "answers": 10,
+    "rejected": []
+  },
+  {
+    "company": "Shopify Inc.",
+    "deployed_sha": "8397d67",
+    "status": "READY",
+    "run_id": "01M0HAWDM42YV5PAPBHE2FGRP5",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/8397d67/shopify_inc",
+    "process_before": {
+      "boot_id": "777e281ac5714ef8",
+      "started_at": 1787285577.8327832,
+      "uptime_seconds": 2658.9
+    },
+    "seconds": 367,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HAWDM42YV5PAPBHE2FGRP5/intro",
+    "routes": 11,
+    "errors": [],
+    "qa_capture_valid": true,
+    "answers": 10,
+    "rejected": []
+  },
+  {
+    "company": "Stripe, Inc.",
+    "deployed_sha": "8397d67",
+    "status": "BLOCKED",
+    "run_id": "",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/8397d67/stripe_inc",
+    "process_before": {
+      "boot_id": "777e281ac5714ef8",
+      "started_at": 1787285577.8327832,
+      "uptime_seconds": 3222.1
+    },
+    "failure": "analyze did not open a run (HTTP 429)",
+    "entry_text": "Too many analyses for now Too many analyses for now What did work. Your session is active. What did not. This request was not carried out. Why. This preview limits how much one visitor can run, so it stays available to everyone. What to do next. Wait a little and try again. Run a new analysis Demo analysis limit reached for your network. You can try again in about 7 minutes. Analyses already runni"
+  }
+]

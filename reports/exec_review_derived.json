@@ -1,0 +1,343 @@
+{
+  "Highspot": {
+    "derived": {
+      "1. Correct company?": 1,
+      "2. Understands the business?": 1,
+      "3. Correct customer job (or bounded)?": 1,
+      "4. Strategic asset plausible (or bounded)?": 1,
+      "6. Why-this-company materially unique?": 1,
+      "7. Decision / potential domain present?": 1,
+      "8. Causal or investigation chain present?": 1,
+      "9. Evidence clean?": 1,
+      "10. Counterevidence or limitation visible?": 1,
+      "12. What-would-change-view present?": 1,
+      "13. Information priority present?": 1,
+      "14. CEO view renders?": 1,
+      "15. Strategy view renders?": 1,
+      "16. Q&A company-specific?": 1,
+      "17. Follow-up context retained?": 1,
+      "18. Uncertainty honest?": 1,
+      "19. UI executive-quality (no leaks, terminal)?": 1,
+      "20. Safe to show the real executive?": 0,
+      "5. Lens defensible?": null,
+      "11. \"So what?\" useful?": null
+    },
+    "derived_yes": 17,
+    "derived_total": 18,
+    "needs_reading": [
+      "5. Lens defensible?",
+      "11. \"So what?\" useful?"
+    ],
+    "no_reasons": [
+      "20. Safe to show the real executive? -> NO (from no PRODUCT_DEFECT on the page)"
+    ]
+  },
+  "BigID": {
+    "derived": {
+      "1. Correct company?": 1,
+      "2. Understands the business?": 1,
+      "3. Correct customer job (or bounded)?": 1,
+      "4. Strategic asset plausible (or bounded)?": 1,
+      "6. Why-this-company materially unique?": 1,
+      "7. Decision / potential domain present?": 1,
+      "8. Causal or investigation chain present?": 1,
+      "9. Evidence clean?": 1,
+      "10. Counterevidence or limitation visible?": 1,
+      "12. What-would-change-view present?": 1,
+      "13. Information priority present?": 1,
+      "14. CEO view renders?": 1,
+      "15. Strategy view renders?": 1,
+      "16. Q&A company-specific?": 1,
+      "17. Follow-up context retained?": 1,
+      "18. Uncertainty honest?": 1,
+      "19. UI executive-quality (no leaks, terminal)?": 1,
+      "20. Safe to show the real executive?": 0,
+      "5. Lens defensible?": null,
+      "11. \"So what?\" useful?": null
+    },
+    "derived_yes": 17,
+    "derived_total": 18,
+    "needs_reading": [
+      "5. Lens defensible?",
+      "11. \"So what?\" useful?"
+    ],
+    "no_reasons": [
+      "20. Safe to show the real executive? -> NO (from no PRODUCT_DEFECT on the page)"
+    ]
+  },
+  "Cyera": {
+    "derived": {
+      "1. Correct company?": 1,
+      "2. Understands the business?": 1,
+      "3. Correct customer job (or bounded)?": 1,
+      "4. Strategic asset plausible (or bounded)?": 1,
+      "6. Why-this-company materially unique?": 1,
+      "7. Decision / potential domain present?": 1,
+      "8. Causal or investigation chain present?": 1,
+      "9. Evidence clean?": 1,
+      "10. Counterevidence or limitation visible?": 1,
+      "12. What-would-change-view present?": 1,
+      "13. Information priority present?": 1,
+      "14. CEO view renders?": 1,
+      "15. Strategy view renders?": 1,
+      "16. Q&A company-specific?": 1,
+      "17. Follow-up context retained?": 1,
+      "18. Uncertainty honest?": 1,
+      "19. UI executive-quality (no leaks, terminal)?": 1,
+      "20. Safe to show the real executive?": 0,
+      "5. Lens defensible?": null,
+      "11. \"So what?\" useful?": null
+    },
+    "derived_yes": 17,
+    "derived_total": 18,
+    "needs_reading": [
+      "5. Lens defensible?",
+      "11. \"So what?\" useful?"
+    ],
+    "no_reasons": [
+      "20. Safe to show the real executive? -> NO (from no PRODUCT_DEFECT on the page)"
+    ]
+  },
+  "Monte Carlo Data": {
+    "derived": {
+      "1. Correct company?": 1,
+      "2. Understands the business?": 0,
+      "3. Correct customer job (or bounded)?": 1,
+      "4. Strategic asset plausible (or bounded)?": 1,
+      "6. Why-this-company materially unique?": 0,
+      "7. Decision / potential domain present?": 0,
+      "8. Causal or investigation chain present?": 0,
+      "9. Evidence clean?": 0,
+      "10. Counterevidence or limitation visible?": 1,
+      "12. What-would-change-view present?": 1,
+      "13. Information priority present?": 1,
+      "14. CEO view renders?": 1,
+      "15. Strategy view renders?": 0,
+      "16. Q&A company-specific?": 1,
+      "17. Follow-up context retained?": 1,
+      "18. Uncertainty honest?": 1,
+      "19. UI executive-quality (no leaks, terminal)?": 1,
+      "20. Safe to show the real executive?": 0,
+      "5. Lens defensible?": null,
+      "11. \"So what?\" useful?": null
+    },
+    "derived_yes": 11,
+    "derived_total": 18,
+    "needs_reading": [
+      "5. Lens defensible?",
+      "11. \"So what?\" useful?"
+    ],
+    "no_reasons": [
+      "2. Understands the business? -> NO (from business_model)",
+      "6. Why-this-company materially unique? -> NO (from has_why_different + differentiation_carried_by)",
+      "7. Decision / potential domain present? -> NO (from decision_opportunity_count | potential_domains)",
+      "8. Causal or investigation chain present? -> NO (from has_causal_chain | has_investigation_chain)",
+      "9. Evidence clean? -> NO (from quote_count + broken_quotes)",
+      "15. Strategy view renders? -> NO (from role_cso_status + role_views_differ + role_facts_identical)",
+      "20. Safe to show the real executive? -> NO (from no PRODUCT_DEFECT on the page)"
+    ]
+  },
+  "Veeam": {
+    "derived": {
+      "1. Correct company?": 1,
+      "2. Understands the business?": 1,
+      "3. Correct customer job (or bounded)?": 1,
+      "4. Strategic asset plausible (or bounded)?": 1,
+      "6. Why-this-company materially unique?": 1,
+      "7. Decision / potential domain present?": 1,
+      "8. Causal or investigation chain present?": 1,
+      "9. Evidence clean?": 1,
+      "10. Counterevidence or limitation visible?": 1,
+      "12. What-would-change-view present?": 1,
+      "13. Information priority present?": 1,
+      "14. CEO view renders?": 1,
+      "15. Strategy view renders?": 1,
+      "16. Q&A company-specific?": 1,
+      "17. Follow-up context retained?": 1,
+      "18. Uncertainty honest?": 1,
+      "19. UI executive-quality (no leaks, terminal)?": 1,
+      "20. Safe to show the real executive?": 0,
+      "5. Lens defensible?": null,
+      "11. \"So what?\" useful?": null
+    },
+    "derived_yes": 17,
+    "derived_total": 18,
+    "needs_reading": [
+      "5. Lens defensible?",
+      "11. \"So what?\" useful?"
+    ],
+    "no_reasons": [
+      "20. Safe to show the real executive? -> NO (from no PRODUCT_DEFECT on the page)"
+    ]
+  },
+  "Druva": {
+    "derived": {
+      "1. Correct company?": 1,
+      "2. Understands the business?": 1,
+      "3. Correct customer job (or bounded)?": 1,
+      "4. Strategic asset plausible (or bounded)?": 1,
+      "6. Why-this-company materially unique?": 1,
+      "7. Decision / potential domain present?": 1,
+      "8. Causal or investigation chain present?": 1,
+      "9. Evidence clean?": 1,
+      "10. Counterevidence or limitation visible?": 1,
+      "12. What-would-change-view present?": 1,
+      "13. Information priority present?": 1,
+      "14. CEO view renders?": 1,
+      "15. Strategy view renders?": 1,
+      "16. Q&A company-specific?": 1,
+      "17. Follow-up context retained?": 1,
+      "18. Uncertainty honest?": 1,
+      "19. UI executive-quality (no leaks, terminal)?": 1,
+      "20. Safe to show the real executive?": 0,
+      "5. Lens defensible?": null,
+      "11. \"So what?\" useful?": null
+    },
+    "derived_yes": 17,
+    "derived_total": 18,
+    "needs_reading": [
+      "5. Lens defensible?",
+      "11. \"So what?\" useful?"
+    ],
+    "no_reasons": [
+      "20. Safe to show the real executive? -> NO (from no PRODUCT_DEFECT on the page)"
+    ]
+  },
+  "Slalom": {
+    "derived": {
+      "1. Correct company?": 1,
+      "2. Understands the business?": 1,
+      "3. Correct customer job (or bounded)?": 1,
+      "4. Strategic asset plausible (or bounded)?": 1,
+      "6. Why-this-company materially unique?": 1,
+      "7. Decision / potential domain present?": 1,
+      "8. Causal or investigation chain present?": 1,
+      "9. Evidence clean?": 1,
+      "10. Counterevidence or limitation visible?": 1,
+      "12. What-would-change-view present?": 1,
+      "13. Information priority present?": 1,
+      "14. CEO view renders?": 1,
+      "15. Strategy view renders?": 1,
+      "16. Q&A company-specific?": 1,
+      "17. Follow-up context retained?": 1,
+      "18. Uncertainty honest?": 1,
+      "19. UI executive-quality (no leaks, terminal)?": 1,
+      "20. Safe to show the real executive?": 0,
+      "5. Lens defensible?": null,
+      "11. \"So what?\" useful?": null
+    },
+    "derived_yes": 17,
+    "derived_total": 18,
+    "needs_reading": [
+      "5. Lens defensible?",
+      "11. \"So what?\" useful?"
+    ],
+    "no_reasons": [
+      "20. Safe to show the real executive? -> NO (from no PRODUCT_DEFECT on the page)"
+    ]
+  },
+  "Sigma Computing": {
+    "derived": {
+      "1. Correct company?": 1,
+      "2. Understands the business?": 1,
+      "3. Correct customer job (or bounded)?": 1,
+      "4. Strategic asset plausible (or bounded)?": 1,
+      "6. Why-this-company materially unique?": 1,
+      "7. Decision / potential domain present?": 1,
+      "8. Causal or investigation chain present?": 1,
+      "9. Evidence clean?": 1,
+      "10. Counterevidence or limitation visible?": 1,
+      "12. What-would-change-view present?": 1,
+      "13. Information priority present?": 1,
+      "14. CEO view renders?": 1,
+      "15. Strategy view renders?": 1,
+      "16. Q&A company-specific?": 1,
+      "17. Follow-up context retained?": 1,
+      "18. Uncertainty honest?": 1,
+      "19. UI executive-quality (no leaks, terminal)?": 1,
+      "20. Safe to show the real executive?": 0,
+      "5. Lens defensible?": null,
+      "11. \"So what?\" useful?": null
+    },
+    "derived_yes": 17,
+    "derived_total": 18,
+    "needs_reading": [
+      "5. Lens defensible?",
+      "11. \"So what?\" useful?"
+    ],
+    "no_reasons": [
+      "20. Safe to show the real executive? -> NO (from no PRODUCT_DEFECT on the page)"
+    ]
+  },
+  "ZoomInfo": {
+    "derived": {
+      "1. Correct company?": 1,
+      "2. Understands the business?": 1,
+      "3. Correct customer job (or bounded)?": 1,
+      "4. Strategic asset plausible (or bounded)?": 1,
+      "6. Why-this-company materially unique?": 1,
+      "7. Decision / potential domain present?": 1,
+      "8. Causal or investigation chain present?": 1,
+      "9. Evidence clean?": 0,
+      "10. Counterevidence or limitation visible?": 1,
+      "12. What-would-change-view present?": 1,
+      "13. Information priority present?": 1,
+      "14. CEO view renders?": 1,
+      "15. Strategy view renders?": 1,
+      "16. Q&A company-specific?": 1,
+      "17. Follow-up context retained?": 1,
+      "18. Uncertainty honest?": 1,
+      "19. UI executive-quality (no leaks, terminal)?": 1,
+      "20. Safe to show the real executive?": 0,
+      "5. Lens defensible?": null,
+      "11. \"So what?\" useful?": null
+    },
+    "derived_yes": 16,
+    "derived_total": 18,
+    "needs_reading": [
+      "5. Lens defensible?",
+      "11. \"So what?\" useful?"
+    ],
+    "no_reasons": [
+      "9. Evidence clean? -> NO (from quote_count + broken_quotes)",
+      "20. Safe to show the real executive? -> NO (from no PRODUCT_DEFECT on the page)"
+    ]
+  },
+  "Point B": {
+    "derived": {
+      "1. Correct company?": 1,
+      "2. Understands the business?": 0,
+      "3. Correct customer job (or bounded)?": 1,
+      "4. Strategic asset plausible (or bounded)?": 1,
+      "6. Why-this-company materially unique?": 0,
+      "7. Decision / potential domain present?": 0,
+      "8. Causal or investigation chain present?": 1,
+      "9. Evidence clean?": 0,
+      "10. Counterevidence or limitation visible?": 1,
+      "12. What-would-change-view present?": 1,
+      "13. Information priority present?": 1,
+      "14. CEO view renders?": 1,
+      "15. Strategy view renders?": 1,
+      "16. Q&A company-specific?": 1,
+      "17. Follow-up context retained?": 1,
+      "18. Uncertainty honest?": 1,
+      "19. UI executive-quality (no leaks, terminal)?": 1,
+      "20. Safe to show the real executive?": 0,
+      "5. Lens defensible?": null,
+      "11. \"So what?\" useful?": null
+    },
+    "derived_yes": 13,
+    "derived_total": 18,
+    "needs_reading": [
+      "5. Lens defensible?",
+      "11. \"So what?\" useful?"
+    ],
+    "no_reasons": [
+      "2. Understands the business? -> NO (from business_model)",
+      "6. Why-this-company materially unique? -> NO (from has_why_different + differentiation_carried_by)",
+      "7. Decision / potential domain present? -> NO (from decision_opportunity_count | potential_domains)",
+      "9. Evidence clean? -> NO (from quote_count + broken_quotes)",
+      "20. Safe to show the real executive? -> NO (from no PRODUCT_DEFECT on the page)"
+    ]
+  }
+}

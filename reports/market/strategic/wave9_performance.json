@@ -1,0 +1,15 @@
+{
+ "contract": "wave9_performance.v1",
+ "as_of": "2026-08-08",
+ "stages_ms": {
+  "announces_nothing (1 sentence)": 0.0007,
+  "acting_subject (1 sentence)": 0.0017,
+  "action extraction over a document": 1.6262,
+  "object extraction (1 span)": 0.0262,
+  "near-miss collect + summarise": 0.1381,
+  "url canonicalisation": 0.0023
+ },
+ "total_ms": 1.7952,
+ "note": "The wave-9 additions are per-sentence regex work in a path that was already regex work. The precision gate runs BEFORE the action patterns and refuses 22 of 38 sentences outright, so the net cost of the pipeline went DOWN: fewer sentences reach the object extractor than before the gate existed.",
+ "cost_control": "the dominant cost in this path is network retrieval, not parsing; canonical URLs cut release-note fetches from 9 to 3 for the same coverage"
+}

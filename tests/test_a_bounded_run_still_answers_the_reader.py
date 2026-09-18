@@ -90,7 +90,14 @@ def test_the_bounded_position_is_stated_not_dropped(deck):
     bounded = [s for s in deck if s["kind"] == "investigation"]
     assert bounded, [s["kind"] for s in deck]
     text = " ".join(b["text"] for b in bounded[0]["bullets"])
-    assert "not enough to read a strategy from" in text
+    # THE SENTENCE CHANGED; THE PROPERTY DID NOT. It used to read "What X has
+    # published is not enough to read a strategy from" -- which blamed the
+    # company's disclosure for a twelve-entry pattern library's miss, and
+    # denied a reading the product now puts forward three clicks away. What
+    # this test asserts is that the bounded state is STATED rather than
+    # dropped, so that is what it now asserts.
+    assert "no curated transition pattern matched" in text.lower()
+    assert "not enough to read a strategy from" not in text.lower()
 
 
 def test_the_brief_carries_a_counterpoint_that_is_not_its_limitation(brief):

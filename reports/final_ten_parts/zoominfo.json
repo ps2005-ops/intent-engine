@@ -1,0 +1,295 @@
+{
+  "base": "https://intent-engine-preview-bridge.onrender.com",
+  "live_commit": "807a414361b0fbc1999b4595e875c67e2a20524a",
+  "rows": [
+    {
+      "company": "ZoomInfo",
+      "domain": "https://www.zoominfo.com",
+      "result": "PRODUCT_DEFECT",
+      "defects": [
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "1 quotation(s) start or end mid-word, or are navigation furniture: ['\u2022We experience competition from other companies and technologies that allow businesses to gather and aggregate sales, marketing, recruiting, and other data, and we may in the future face competition from prominent large-language-model (LLM) providers and generative AI companies,']"
+        }
+      ],
+      "instrument_notes": [],
+      "run_id": "01M2741P334P5JZ6Z7B1RR3EJV",
+      "core_s": 49.3,
+      "telemetry": {
+        "contract": "adaptive_intelligence.v1",
+        "company": "ZoomInfo",
+        "company_profile_status": "PROFILE_PARTIAL",
+        "company_profile_source": "SEC_SIC",
+        "business_model_source": "REGULATOR_INDUSTRY_CODE",
+        "business_model_source_words": "the industry code a regulator assigns this filer",
+        "business_model_alternatives": [],
+        "profile_available": true,
+        "lens_available": true,
+        "decision_reading_available": false,
+        "decision_map_state": "POTENTIAL_DOMAINS",
+        "causal_chain_kind": "INVESTIGATION_CHAIN",
+        "potential_domains": [
+          "how revenue is produced",
+          "what the sales organisation is asked to do",
+          "which assumption the plan rests on"
+        ],
+        "evidence_limitation": "the run did not retrieve enough independent material to test this company's own account of itself",
+        "what_would_unlock_a_decision": "a dated, third-party account of something this company has actually decided or changed -- a filing, a customer or competitor statement, or reporting that is not the company's own",
+        "business_model": "SUBSCRIPTION_SOFTWARE",
+        "business_model_confidence": "",
+        "business_model_evidence": "",
+        "business_model_reason": "",
+        "customer_job": "",
+        "customer_job_provenance": "NOT_ESTABLISHED",
+        "strategic_assets": [
+          "human-in-the-loop approach",
+          "technology",
+          "intellectual property"
+        ],
+        "critical_dependencies": [],
+        "company_specificity_score": 0.353,
+        "company_specific_fields": [
+          "identity",
+          "industry",
+          "self_description",
+          "technology_exposure",
+          "strategic_assets",
+          "data_assets"
+        ],
+        "decision_opportunity_count": 0,
+        "decision_opportunities_considered": 0,
+        "decision_opportunities_withheld": [],
+        "top_decision_domain": "",
+        "top_decision_owner": "",
+        "top_decision_priority": 0.0,
+        "top_decision_components": {},
+        "primary_lens": "revenue_gtm",
+        "primary_lens_name": "Revenue & Go-To-Market Strategy",
+        "lens_confidence": "moderate",
+        "secondary_lenses": [
+          "decision_execution",
+          "enterprise_data_ai"
+        ],
+        "lens_selection_reasons": "This company's own material is about \u201csales enablement\u201d, \u201csales cycle\u201d, \u201cgo to market\u201d, which is what revenue & go-to-market strategy reads. It scored 18.5 against 18.5 for the next eligible lens.",
+        "lens_refusals": [
+          "Regulatory & Risk Intelligence: scored 12.5 against 18.5, carried by sox, enforcement alone",
+          "Data Infrastructure & Decision Trust: scored 11.0 against 18.5, carried by data quality, business intelligence alone",
+          "Planning & Assumption Validation: scored 11.0 against 18.5, carried by forecast, assumptions alone",
+          "Market & Competitive Strategy: scored 7.5 against 18.5, carried by market intelligence, consolidation alone",
+          "Financial & Capital Allocation: scored 7.0 against 18.5, carried by share repurchase, balance sheet alone",
+          "Operational Intelligence: scored 5.5 against 18.5, carried by orchestration, automation alone"
+        ],
+        "causal_chain_nodes": 4,
+        "causal_chain_evidence_coverage": 0.25,
+        "causal_chain_stopped_because": "",
+        "genericity_flags": 0,
+        "differentiation_carried_by": [
+          "self_description",
+          "own_vocabulary",
+          "strategic_assets",
+          "technology_exposure"
+        ],
+        "differentiation_flagged": false,
+        "differentiation_flag_reason": "",
+        "counterevidence_present": false,
+        "information_priority": "",
+        "abstention_reason": "We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none.",
+        "role_lens": "ceo",
+        "role_module_order": [
+          "executive_change",
+          "strategic_thesis",
+          "why_this_is_different",
+          "decision_opportunity_map",
+          "causal_chain",
+          "what_would_change_our_mind",
+          "evidence",
+          "provenance",
+          "economic_exposure",
+          "strategic_lens",
+          "data_ai_exposure",
+          "information_priority",
+          "learning_state",
+          "ask_intent_engine"
+        ],
+        "role_promoted": [
+          "strategic_thesis",
+          "why_this_is_different",
+          "decision_opportunity_map",
+          "causal_chain",
+          "what_would_change_our_mind",
+          "evidence",
+          "provenance"
+        ],
+        "composition_modules": [
+          "executive_change",
+          "economic_exposure",
+          "strategic_thesis",
+          "why_this_is_different",
+          "strategic_lens",
+          "decision_opportunity_map",
+          "causal_chain",
+          "data_ai_exposure",
+          "information_priority",
+          "what_would_change_our_mind",
+          "learning_state",
+          "evidence",
+          "provenance",
+          "ask_intent_engine"
+        ],
+        "composition_excluded": [
+          "decision_delta",
+          "market_belief",
+          "customer_signals",
+          "competitive_response",
+          "supply_chain_exposure",
+          "financial_sensitivity",
+          "regulatory_exposure",
+          "client_portfolio",
+          "operational_intelligence",
+          "contradictions",
+          "alternative_interpretation",
+          "scenario_comparison"
+        ],
+        "composition_explained": 6,
+        "reasoning_provenance": "business model SUBSCRIPTION_SOFTWARE from sec sic; executive priorities the levers a business of this kind has, since the evidence raised no decision of its own",
+        "errors": [],
+        "run_id": "01M2741P334P5JZ6Z7B1RR3EJV"
+      },
+      "resolved_identity": "ZoomInfo",
+      "business_model": "SUBSCRIPTION_SOFTWARE",
+      "profile_source": "SEC_SIC",
+      "specificity": 0.353,
+      "primary_lens": "revenue_gtm",
+      "secondary_lenses": [
+        "decision_execution",
+        "enterprise_data_ai"
+      ],
+      "lens_confidence": "moderate",
+      "decision_opportunity_count": 0,
+      "top_decision_domain": "",
+      "top_decision_priority": 0.0,
+      "causal_chain_nodes": 4,
+      "causal_evidence_coverage": 0.25,
+      "genericity_flags": 0,
+      "differentiation_carried_by": [
+        "self_description",
+        "own_vocabulary",
+        "strategic_assets",
+        "technology_exposure"
+      ],
+      "abstention_reason": "We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none.",
+      "profile_available": true,
+      "lens_available": true,
+      "decision_reading_available": false,
+      "decision_map_state": "POTENTIAL_DOMAINS",
+      "causal_chain_kind": "INVESTIGATION_CHAIN",
+      "potential_domains": [
+        "how revenue is produced",
+        "what the sales organisation is asked to do",
+        "which assumption the plan rests on"
+      ],
+      "evidence_limitation": "the run did not retrieve enough independent material to test this company's own account of itself",
+      "what_would_unlock": "a dated, third-party account of something this company has actually decided or changed -- a filing, a customer or competitor statement, or reporting that is not the company's own",
+      "intro_status": 200,
+      "intro_chars": 49539,
+      "brief_status": 200,
+      "brief_chars": 60722,
+      "full_status": 200,
+      "full_chars": 72996,
+      "xray_status": 200,
+      "xray_chars": 36076,
+      "evidence_status": 200,
+      "evidence_chars": 21935,
+      "answer_status": 200,
+      "answer_chars": 30097,
+      "surface_s": 154.7,
+      "intro_words": 2268,
+      "sections": {
+        "why_this_company": "Why this analysis is different for ZoomInfo Generic interpretation A general reading of a company in this position would say that sales productivity matters and buyers have become more cautious. It would reason from the economics every subscription software business shares -- recurring software subscription: revenue is contracted and renews, so the installed base carries next period's revenue before any new sale. What is different here In its own words: \u201cZoomInfo is a global leader in modern go-to-market software, data, and intelligence for sales, marketing, operations, and recruiting teams\u201d -- which is narrower, and more specific, than the general reading above. The material it publishes is about sales enablement, sales cycle, go to market, pipeline -- its own terms, not ours. It names human-in-the-loop approach as its own. Decision consequence So what management has to weigh is How revenue is produced -- the decision area this company's own material points at, not a recommendation. Why Intent Engine reads it this way This company's own material is about \u201csales enablement\u201d, \u201csales cycle\u201d, \u201cgo to market\u201d, which is what revenue & go-to-market strategy reads. It scored 18.5 against 18.5 for the next eligible lens. The evidence this rests on ZoomInfo is a global leader in modern go-to-market software, data, and intelligence for sales, marketing, operations, and recruiting teams. This is accomplished through a combination of robust systems and processes leveraging AI, ML, and our proprietary human-in-the-loop approach. \u2022We experience competition from other companies and technologies that allow businesses to gather and aggregate sales, marketing, recruiting, and other data, and we may in the future face competition from prominent large-language-model (LLM) providers and generative AI companies, Many of our customers use our integrations to access our data from within, or send data to, CRM, marketing automation, applicant tracking, sales enablement, and other systems, including Salesforce, Marketo, HubSpot, Microsoft Dynamics, Oracle Sales Cloud \u2026",
+        "decision_or_domains": "Potential decision domains Areas this company model suggests are worth investigating \u2014 not current recommendations . We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none. 01 How revenue is produced It describes itself as a global leader in modern go-to-market software, data, and intelligence for sales, marketing, operations, and recruiting teams, which is what puts how revenue is produced in scope. Would sit with: CEO What would make this a recommendation a dated, first-party statement from this company about how revenue is produced, or a third-party account of it -- at present nothing in the retrieved record raises it 02 What the sales organisation is asked to do It describes itself as a global leader in modern go-to-market software, data, and intelligence for sales, marketing, operations, and recruiting teams, which is what puts what the sales organisation is asked to do in scope. Would sit with: CRO What would make this a recommendation a dated, first-party statement from this company about what the sales organisation is asked to do, or a third-party account of it -- at present nothing in the retrieved record raises it 03 Which assumption the plan rests on It describes itself as a global leader in modern go-to-market software, data, and intelligence for sales, marketing, operations, and recruiting teams, which is what puts which assumption the plan rests on in scope. Would sit with: CEO What would make this a recommendation a dated, first-party statement from this company about which assumption the plan rests on, or a third-party account of it -- at present nothing in the retrieved record raises it",
+        "chain": "What would be worth investigating A line of enquiry, not a causal claim. Nothing below asserts that one thing caused another. What we can see In its own words: \u201cZoomInfo is a global leader in modern go-to-market software, data, and intelligence for sales, marketing, operations, and recruiting teams\u201d evidenced How it could reach this company A subscription software business is reached through market rate, labor, reaching this one through what it sells: sales enablement, sales cycle inference What we would need to know A dated account, from someone other than this company, of something it has actually decided or changed, or anyone other than ZoomInfo writing about sales enablement or sales cycle. Nothing retrieved in this run carries one, which is why no mechanism is asserted above. open_question The decision it could bear on How revenue is produced -- the decision area this company's own material points at, not a recommendation. open_question This is an investigation, not a conclusion. No mechanism connecting an outside change to this company was established, so nothing below claims one.",
+        "bounded": "What we can and cannot say about ZoomInfo What we know ZoomInfo is a global leader in modern go-to-market software, data, and intelligence for sales, marketing, operations, and recruiting teams. It is a subscription software business, read from its own account of how it is paid. The lens this points to Revenue & Go-To-Market Strategy \u2014 This company's own material is about \u201csales enablement\u201d, \u201csales cycle\u201d, \u201cgo to market\u201d, which is what revenue & go-to-market strategy reads. It scored 18.5 against 18.5 for the next eligible lens. What we cannot yet conclude Which of these is live for this management, or which way it should go. Knowing what kind of business this is tells us which decisions tend to matter for a business like it \u2014 and any direction stated elsewhere on this page rests on that, not on anything this run established about this company in particular. Why not the run did not retrieve enough independent material to test this company's own account of itself What would unlock a decision a dated, third-party account of something this company has actually decided or changed -- a filing, a customer or competitor statement, or reporting that is not the company's own",
+        "lens": "The lens this analysis is using Revenue & Go-To-Market Strategy This company's own material is about \u201csales enablement\u201d, \u201csales cycle\u201d, \u201cgo to market\u201d, which is what revenue & go-to-market strategy reads. It scored 18.5 against 18.5 for the next eligible lens. Many of our customers use our integrations to access our data from within, or send data to, CRM, marketing automation, applicant tracking, sales enablement, and other systems, including Salesforce, Marketo, HubSpot, Microsoft Dynamics, Oracle Sales Cloud \u2026 What was considered and not selected Regulatory & Risk Intelligence: scored 12.5 against 18.5, carried by sox, enforcement alone Data Infrastructure & Decision Trust: scored 11.0 against 18.5, carried by data quality, business intelligence alone Planning & Assumption Validation: scored 11.0 against 18.5, carried by forecast, assumptions alone Market & Competitive Strategy: scored 7.5 against 18.5, carried by market intelligence, consolidation alone Financial & Capital Allocation: scored 7.0 against 18.5, carried by share repurchase, balance sheet alone Operational Intelligence: scored 5.5 against 18.5, carried by orchestration, automation alone",
+        "role": "Read this as Chief Executive Strategy Finance future Operations future Product future Revenue future Marketing future Risk & Security future Consultant / Advisor future Chief Executive reads executive change, strategic thesis, why this is different first because the decision in front of that reader is what to change, what it costs to wait, and what would make it the wrong call. Nothing below is removed or reworded; the order changes and the facts do not. What this reader would ask What would make this recommendation wrong? What is the largest assumption here? What does a competitor do about this first? What should I decide this quarter rather than this year? Which assumption in the revenue plan is load-bearing? What would a buyer do differently if this is right?",
+        "value": "Where Intent Engine could create value for ZoomInfo Current \u2014 external evidence only Monitoring the outside record for changes that reach this company through the mechanism above Testing the assumption the current plan rests on against what the record actually says Watching how revenue is produced Watching what the sales organisation is asked to do Provenance on every claim, so a disagreement is about the evidence rather than about the tool Future \u2014 with permissioned internal data not connected CRM and pipeline, to test whether the outside reading shows up in this company\u2019s own funnel Product usage and support, to see the same change from the customer side Finance, to attach a magnitude to an exposure that is currently directional Prior decisions, so a recommendation can be checked against what was already tried No return is claimed for any of this, because none has been measured."
+      },
+      "evidence_text": "ZoomInfo Home \u00b7 Log in Why this reading exists ZoomInfo X-Ray \u00b7 Full analysis \u00b7 Presentation \u00b7 Decision history Independent support 0 of 6 source(s) are both independent of ZoomInfo and say enough about it to support the reading. No independent source in this dossier supports the reading. That is a limit of what we retrieved, not evidence that no independent coverage exists. Search coverage: blocked \u2014 sources refused automated access \u00b7 reading: none retrieved \u2014 a limit of our search, not a finding about the company We searched 0 independent channel(s), found 0 filing(s) naming this company, judged 0 of them worth reading, and read 0 in full. Set aside \u2014 channel error:httperror: 1 Written by the company itself (6) Useful evidence, and often the best there is \u2014 but the company speaking about itself cannot corroborate itself. SEC 10-K (2026-02-12) A filing the company wrote about itself, hosted by the SEC Discusses the company directly UNITED STATES. SECURITIES AND EXCHANGE COMMISSION. Washington, D.C. 20549. FORM 10-K. (Mark One). \u2612 ANNUAL REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934. For the fiscal year ended December 31, 2025. or. \u2610 TRANSITION REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF\u2026 https://www.sec.gov/Archives/edgar/data/1794515/000179451526000012/zi-20251231.htm Author ZoomInfo Host www.sec.gov Subject ZoomInfo Retrieved 2026-09-11T02:16:58.867924+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself SEC 10-K (2025-02-25) A filing the company wrote about itself, hosted by the SEC Discusses the company directly UNITED STATES. SECURITIES AND EXCHANGE COMMISSION. Washington, D.C. 20549. FORM 10-K. (Mark One). \u2612 ANNUAL REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934. For the fiscal year ended December 31, 2024. or. \u2610 TRANSITION REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF\u2026 https://www.sec.gov/Archives/edgar/data/1794515/000179451525000045/zi-20241231.htm Author ZoomInfo Host www.sec.gov Subject ZoomInfo Retrieved 2026-09-11T02:17:01.870181+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself SEC 10-Q (2026-08-05) A filing the company wrote about itself, hosted by the SEC Discusses the company directly UNITED STATES. SECURITIES AND EXCHANGE COMMISSION. Washington, D.C. 20549. FORM 10-Q. \u2612 QUARTERLY REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934. For the quarterly period ended June 30, 2026. or. \u2610 TRANSITION REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934. F\u2026 https://www.sec.gov/Archives/edgar/data/1794515/000179451526000056/zi-20260630.htm Author ZoomInfo Host www.sec.gov Subject ZoomInfo Retrieved 2026-09-11T02:17:03.760139+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself Document A filing the company wrote about itself, hosted by the SEC Discusses the company directly EX-99.1 2 gtm-8kex991x20260805.htm EX-99.1. Exhibit 99.1. ZoomInfo Announces Second Quarter 2026 Financial Results. VANCOUVER, Wash., August 5, 2026 - ZoomInfo (NASDAQ: GTM), the all-in-one AI GTM platform, today announced its financial results for the second quarter ended June 30, 2026. \u201cOur native MCP integrations wi\u2026 https://www.sec.gov/Archives/edgar/data/1794515/000179451526000054/gtm-8kex991x20260805.ht Author ZoomInfo Host www.sec.gov Subject ZoomInfo Retrieved 2026-09-11T02:17:04.062480+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself SEC DEF 14A (2026-03-26) A filing the company wrote about itself, hosted by the SEC Discusses the company directly UNITED STATES. SECURITIES AND EXCHANGE COMMISSION. WASHINGTON, D.C. 20549. SCHEDULE 14A. Proxy Statement Pursuant to Section 14(a) of the. Securities Exchange Act of 1934. (Amendment No. ). Filed by the Registrant \u2612. Filed by a Party other than the Registrant \u2610. Check the appropriate box: \u2610 Preliminary Proxy Statement.\u2026 https://www.sec.gov/Archives/edgar/data/1794515/000179451526000020/zi-20260326.htm Author ZoomInfo Host www.sec.gov Subject ZoomInfo Retrieved 2026-09-11T02:17:06.262006+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself About Us | ZoomInfo The company's own account of itself Discusses the company directly Our mission is to create a world where every company has a clear view of their ideal prospects and how to connect with them. See why our customers love us. https://www.zoominfo.com/about Author ZoomInfo Host www.zoominfo.com Subject ZoomInfo Retrieved 2026-09-11T02:17:12.464515+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself",
+      "xray_says_unclassified": false,
+      "profile_contradiction": false,
+      "ui_html": "reports/ui/zoominfo.html",
+      "identity_on_page": true,
+      "leaks": [],
+      "has_why_different": true,
+      "has_lens_block": true,
+      "has_role_switch": true,
+      "has_value_block": true,
+      "has_decision_map": false,
+      "has_causal_chain": false,
+      "has_potential_domains": true,
+      "has_not_a_recommendation": true,
+      "has_investigation_chain": true,
+      "has_bounded_block": true,
+      "quotes": [
+        "ZoomInfo is a global leader in modern go-to-market software, data, and intelligence for sales, marketing, operations, and recruiting teams.",
+        "This is accomplished through a combination of robust systems and processes leveraging AI, ML, and our proprietary human-in-the-loop approach.",
+        "\u2022We experience competition from other companies and technologies that allow businesses to gather and aggregate sales, marketing, recruiting, and other data, and we may in the future face competition from prominent large-language-model (LLM) providers and generative AI companies,",
+        "Many of our customers use our integrations to access our data from within, or send data to, CRM, marketing automation, applicant tracking, sales enablement, and other systems, including Salesforce, Marketo, HubSpot, Microsoft Dynamics, Oracle Sales Cloud \u2026",
+        "Many of our customers use our integrations to access our data from within, or send data to, CRM, marketing automation, applicant tracking, sales enablement, and other systems, including Salesforce, Marketo, HubSpot, Microsoft Dynamics, Oracle Sales Cloud \u2026"
+      ],
+      "quote_count": 5,
+      "broken_quotes": [
+        "\u2022We experience competition from other companies and technologies that allow businesses to gather and aggregate sales, marketing, recruiting, and other data, and we may in the future face competition from prominent large-language-model (LLM) providers and generative AI companies,"
+      ],
+      "headline_is_generic": false,
+      "lens_matches_expectation": true,
+      "role_ceo_status": 200,
+      "role_cso_status": 200,
+      "role_views_differ": true,
+      "role_facts_identical": true,
+      "qa": [
+        {
+          "q": "Why does this matter for this company specifically?",
+          "status": 200,
+          "words": 118,
+          "text": "Why does this matter for this company specifically? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo ZoomInfo Why does this matter for this company specifically? A supported reading of ZoomInfo exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen it. This particular question is not answerable from what this run retrieved. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What evidence most supports this reading?",
+          "status": 200,
+          "words": 181,
+          "text": "What evidence most supports this reading? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo ZoomInfo What evidence most supports this reading? A supported reading of ZoomInfo exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen it. This particular question is not answerable from what this run retrieved. Evidence Strongest. 2026-09-11: ZoomInfo sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. Weakest. 2026-09-11: ZoomInfo positions itself as replacing several separate tools, so a customer who leaves later has to rebuild more than one workflow to do it. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What would have to be true for this to be wrong?",
+          "status": 200,
+          "words": 160,
+          "text": "What would have to be true for this to be wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo ZoomInfo What would have to be true for this to be wrong? That was the whole of it: \u201cA supported reading of ZoomInfo exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen it. This particular question is not answerable from what this run retrieved.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What should management monitor next?",
+          "status": 200,
+          "words": 128,
+          "text": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo ZoomInfo What should management monitor next? customer count \u2014 revenue at a business of this kind moves with customer count.; seats or usage per customer \u2014 revenue at a business of this kind moves with seats or usage per customer.; list and realised price \u2014 revenue at a business of this kind moves with list and realised price. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "Which decision here is the most urgent, and why that one?",
+          "status": 200,
+          "words": 176,
+          "text": "Which decision here is the most urgent, and why that one? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo ZoomInfo Which decision here is the most urgent, and why that one? That was the whole of it: \u201ccustomer count \u2014 revenue at a business of this kind moves with customer count.; seats or usage per customer \u2014 revenue at a business of this kind moves with seats or usage per customer.; list and realised price \u2014 revenue at a business of this kind moves with list and realised price.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What is the biggest uncertainty in this analysis?",
+          "status": 200,
+          "words": 109,
+          "text": "What is the biggest uncertainty in this analysis? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo ZoomInfo What is the biggest uncertainty in this analysis? the company's filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        }
+      ],
+      "qa_ok": 6,
+      "qa_company_specific": 6,
+      "followup_words": 153,
+      "followup_is_replay": false,
+      "followup_pass": true,
+      "wall_s": 339.5
+    }
+  ]
+}

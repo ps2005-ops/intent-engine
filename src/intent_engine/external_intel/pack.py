@@ -43,6 +43,11 @@ MARKET = "market"
 MACRO = "macro"
 COMPETITIVE = "competitive"
 STRATEGIC = "strategic"
+#: The shared economic state, read from the canonical core. Distinct from
+#: MACRO, which is this run's own reading of series the company's documents
+#: happened to name. ECONOMY is what the whole engine knows about the economy,
+#: and the company system's job against it is translation, not re-derivation.
+ECONOMY = "economy"
 
 
 @dataclass(frozen=True)
@@ -58,6 +63,13 @@ class ExternalContext:
     #: promised one. See `has_strategic` for why absence is silent here and
     #: loud for the other three families.
     strategic: Optional["StrategicIntel"] = None
+    #: The shared economic state (`econ_context.EconContext`), and the
+    #: quantities THIS company has evidenced exposure to. Both, because the
+    #: state alone would let a surface render conditions nobody established a
+    #: connection to -- which is the "interest rates affect technology
+    #: companies" sentence `macro_contract` exists to refuse.
+    economy: Optional[object] = None
+    economy_exposures: Tuple[str, ...] = ()
 
     # --- relevance ----------------------------------------------------------
     @property
@@ -71,6 +83,24 @@ class ExternalContext:
     @property
     def has_competitors(self) -> bool:
         return bool(corroborating(self.competitors))
+
+    @property
+    def has_economy(self) -> bool:
+        """Available AND touching something this company is exposed to.
+
+        The second half is the whole gate. A published economic state is
+        available on every run once a market engine exists, and rendering it
+        for a company with no evidenced exposure to any of it would put a
+        macro paragraph on four hundred analyses that could have been written
+        without reading any of them.
+        """
+        if not (self.economy is not None
+                and getattr(self.economy, "available", False)):
+            return False
+        from .econ_context import relevant_to
+        return any(r.get("measured") for r in
+                   relevant_to(self.economy,
+                               exposures=self.economy_exposures))
 
     @property
     def has_strategic(self) -> bool:
@@ -102,6 +132,8 @@ class ExternalContext:
             out.append(MACRO)
         if self.has_competitors:
             out.append(COMPETITIVE)
+        if self.has_economy:
+            out.append(ECONOMY)
         if self.has_strategic:
             out.append(STRATEGIC)
         return out
@@ -186,6 +218,29 @@ class ExternalContext:
                     and factor.observation.prior_value is not None):
                 add(factor.observation.current_value
                     - factor.observation.prior_value)
+        # A belief's confidence and a posture's weight are figures the
+        # strategic dossier PUBLISHES, exactly as the price payload publishes
+        # a period return. They are stored as probabilities and rendered as
+        # percentages, so both forms are grounded — otherwise the gate would
+        # flag "62% confidence" as an invented number and the honest way to
+        # satisfy it would be to stop stating the confidence at all, which is
+        # the opposite of what the gate is for.
+        if self.strategic and self.strategic.available:
+            def add_probability(value):
+                add(value)
+                try:
+                    add(round(float(value) * 100))
+                except (TypeError, ValueError):
+                    return
+            for belief in self.strategic.beliefs:
+                add_probability(belief.get("confidence"))
+            for posture in self.strategic.postures:
+                add_probability(posture.get("leading_probability"))
+                for alt in (posture.get("alternatives") or ()):
+                    add_probability(alt.get("probability"))
+                for moved in (posture.get("moved") or ()):
+                    add_probability(moved.get("from"))
+                    add_probability(moved.get("to"))
         return out
 
     def ungrounded_numbers(self, text: str) -> List[str]:
@@ -269,12 +324,15 @@ def build_context(*, market: Optional[MarketIntel] = None,
                   macro: Sequence[MacroFactor] = (),
                   competitors: Sequence[Competitor] = (),
                   strategic: Optional[StrategicIntel] = None,
+                  economy: Optional[object] = None,
+                  economy_exposures: Sequence[str] = (),
                   as_of: str = "") -> ExternalContext:
     return ExternalContext(
         market=market or absent("No market context was assembled for this "
                                 "run."),
         macro=tuple(macro or ()), competitors=tuple(competitors or ()),
-        strategic=strategic, as_of=as_of)
+        strategic=strategic, economy=economy,
+        economy_exposures=tuple(economy_exposures or ()), as_of=as_of)
 
 
 def _belief_blocks(intel: "StrategicIntel") -> List[dict]:
@@ -316,6 +374,15 @@ def _belief_blocks(intel: "StrategicIntel") -> List[dict]:
     graph = bgp.from_strategic_dossier(
         company_id=intel.company_id, company_label=intel.company_id,
         beliefs=beliefs, as_of=intel.as_of, dossier_revision=intel.as_of)
+
+    # The raw rows, indexed both ways the graph can name a belief: by the
+    # proposition it became a node label from, and by its ledger id.
+    _rows = {}
+    for _row in beliefs:
+        if _row.get("proposition"):
+            _rows[str(_row["proposition"])] = _row
+        if _row.get("belief_id"):
+            _rows[str(_row["belief_id"])] = _row
 
     out: List[dict] = []
     for node in graph.of_kind(HYPOTHESIS):
@@ -364,11 +431,36 @@ def _belief_blocks(intel: "StrategicIntel") -> List[dict]:
         if note:
             facts.append(note)
 
+        # A PRIOR AND A POSTERIOR MUST NOT READ THE SAME.
+        #
+        # DECLARED means the belief was opened by the evidence above and has
+        # never been moved by anything since, so its standing is an OPENING
+        # POSITION. Printed beside a belief that has survived three
+        # contradictions with no distinction, it invites the reader to credit
+        # an untested position with a track record. They are different claims.
+        #
+        # The row is looked up rather than read off the node because the graph
+        # projection carries the reading, not its revision history.
+        row = _rows.get(node.label) or _rows.get(
+            str(node.attrs.get("belief_id") or "")) or {}
+        declared = (str(row.get("update_method") or "").upper() == "DECLARED"
+                    or not row.get("direction_of_last_change"))
+
         limitations = list(node.attrs.get("limitations") or ())
         # Standing-specific, so evidence that was examined and found thin does
         # not get the same sentence as evidence nobody examined.
         if node.attrs.get("trust_limitation"):
             limitations.append(str(node.attrs["trust_limitation"]))
+        if declared:
+            facts.append("This belief was opened by the evidence above and "
+                         "has not yet been revised by anything since.")
+            limitations.append(
+                "The confidence is an opening position, not a tested one: no "
+                "later observation has moved it up or down.")
+        else:
+            facts.append(
+                f"Last revised {row.get('direction_of_last_change')} by "
+                f"{str(row.get('update_method') or '').lower()}.")
         limitations.append(
             "This is a reading the market-learning engine holds, not an "
             "established fact about the company, and it does not by itself "
@@ -416,6 +508,16 @@ def _strategic_blocks(intel: "StrategicIntel") -> List[dict]:
     explanations, so an inferred objective cannot be printed as a known
     motive — that is the difference between "Company B matched the price" and
     "Company B is buying share", and only the first one was observed.
+
+    BELIEFS WERE THE MISSING KIND, AND THEY ARE THE ONLY ONE PRODUCED
+    ----------------------------------------------------------------
+    Every kind above was rendered before beliefs were, and beliefs are what
+    the market engine actually emits: on the first real dossiers to cross this
+    boundary — Microsoft, Caterpillar, Shopify — `strategic_beliefs` was
+    populated and every other list was empty. So `has_strategic` reported True,
+    the section was declared relevant, and this function returned zero blocks.
+    A context that announces itself and then says nothing is worse than one
+    that stays silent, because the silence at least reads as absence.
     """
     out: List[dict] = _belief_blocks(intel)
     for row in intel.interactions:
@@ -546,6 +648,69 @@ def reasoning_pack(context: ExternalContext) -> dict:
     operating problem.
     """
     blocks = []
+    if context.has_economy:
+        from .econ_context import relevant_to, transmission_note
+        rows = [r for r in relevant_to(context.economy,
+                                       exposures=context.economy_exposures)]
+        facts = []
+        for row in rows:
+            if not row.get("measured"):
+                # NAMED, NOT DROPPED. "This company is exposed to real yields
+                # and the engine does not measure them" is a research
+                # priority; omitting it makes the company look less exposed
+                # than it is.
+                facts.append(
+                    f"{row['quantity'].replace('_', ' ')}: not measured by "
+                    f"the shared economic state ({row.get('reason', '')})")
+                continue
+            direction = str(row.get("direction", "")).upper()
+            unit = row.get("unit") and " " + row["unit"] or ""
+            value = ("" if row.get("value") is None
+                     else f"{row['value']:g}{unit}")
+            name = row["quantity"].replace("_", " ")
+            if direction == "NO_PRIOR":
+                # NEVER "broadly flat". There is no earlier observation, so
+                # the honest sentence says the level and says that no change
+                # is computable -- rendering it as flat is how an unmeasured
+                # economy reads as a calm one.
+                facts.append(
+                    f"{name} stands at {value} (as of {row.get('as_of', '')}, "
+                    f"{row.get('publisher', '')}); no earlier observation is "
+                    "held, so no change is computable")
+            else:
+                moving = {"UP": "rising", "DOWN": "falling"}.get(
+                    direction, "unchanged")
+                prior = row.get("prior_value")
+                move = ("" if prior is None
+                        else f" from {prior:g} on {row.get('prior_as_of', '')}")
+                facts.append(
+                    f"{name} is {moving} to {value}{move} "
+                    f"(as of {row.get('as_of', '')}, "
+                    f"{row.get('publisher', '')})")
+        blocks.append({
+            "context": ECONOMY,
+            "role": ("The economic state the whole engine holds, not this "
+                     "run's own reading of it. It says what the economy is "
+                     "doing; what that means for THIS company is the "
+                     "question the analysis answers, and this block does not "
+                     "answer it."),
+            "facts": facts,
+            "evidence_ids": [r.get("node_id") for r in rows
+                             if r.get("node_id")],
+            "as_of": getattr(context.economy, "as_of", ""),
+            "freshness": "",
+            "stale": False,
+            "limitations": [
+                "An economic condition moving is not evidence about this "
+                "company's operations. The connection is the exposure "
+                "mechanism, which is stated per quantity and rests on this "
+                "company's own retrieved evidence.",
+                "Conditions listed as not measured are gaps in the shared "
+                "state, not readings of zero.",
+            ],
+            "note": transmission_note(
+                context.economy, exposures=context.economy_exposures),
+        })
     payload = (context.market.payload or {}) if context.has_market else {}
     if context.has_market:
         facts = []

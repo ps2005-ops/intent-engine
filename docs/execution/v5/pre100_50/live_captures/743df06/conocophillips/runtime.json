@@ -1,0 +1,63 @@
+{
+  "company": "ConocoPhillips",
+  "deployed_sha": "743df06",
+  "run_id": "01M0JQV54FC0R5WAMYRR8P3VW0",
+  "analysis_seconds": 175,
+  "stage_transitions": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing ConocoPhillips COP \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecting ",
+      "status": 200,
+      "html_bytes": 16996
+    },
+    {
+      "t": 30.6,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing ConocoPhillips COP \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Connecting ma",
+      "status": 200,
+      "html_bytes": 16992
+    },
+    {
+      "t": 82.5,
+      "text": "",
+      "status": 0,
+      "html_bytes": 16992,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "cf-cache-status": "DYNAMIC",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JQV54FC0R5WAMYRR8P3VW0/progress",
+      "head": ""
+    },
+    {
+      "t": 175.2,
+      "text": "ConocoPhillips \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction ConocoPhillips COP \u00b7 SEC CIK 0001163165 ConocoPhillips is a materials energy business that runs on production of an undifferentiated output sold at a price the producer does not set. Its position is conte",
+      "status": 200,
+      "html_bytes": 30960
+    }
+  ],
+  "route_seconds": {
+    "run": 12.59,
+    "intro": 12.3,
+    "slides": 15.28,
+    "full": 19.92,
+    "story": 5.13,
+    "history": 0.43,
+    "connect": 3.32
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "d7df6481c13e43c7",
+    "started_at": 1787326618.1855707,
+    "uptime_seconds": 8761.6
+  },
+  "process_after": {
+    "boot_id": "d7df6481c13e43c7",
+    "started_at": 1787326618.1855707,
+    "uptime_seconds": 9250.8
+  },
+  "errors": [
+    "GET /runs/01M0JQV54FC0R5WAMYRR8P3VW0/progress: timeout",
+    "GET /runs/01M0JQV54FC0R5WAMYRR8P3VW0/progress: timeout"
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "company": "GE Aerospace",
+  "deployed_sha": "743df06",
+  "run_id": "01M0JPA049ACKQZ2Z1N241HVB9",
+  "analysis_seconds": 97,
+  "stage_transitions": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Loading what we already know. Analysing GE Aerospace geaerospace.com \u2014 not this company? Identifying the company done Loading prior intelligence working Reading current company evidence to ",
+      "status": 200,
+      "html_bytes": 17012
+    },
+    {
+      "t": 43.9,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Loading what we already know. Analysing GE Aerospace geaerospace.com \u2014 not this company? Identifying the company done Loading prior intelligence working Reading current company evidence don",
+      "status": 200,
+      "html_bytes": 17007
+    },
+    {
+      "t": 96.8,
+      "text": "GE Aerospace \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction GE Aerospace GE \u00b7 USA \u00b7 geaerospace.com \u00b7 SEC CIK 0000040545 GE Aerospace is an industrial business that runs on sale of a long-lived manufactured product followed by a higher-margin service and parts strea",
+      "status": 200,
+      "html_bytes": 30515
+    }
+  ],
+  "route_seconds": {
+    "run": 5.73,
+    "intro": 4.5,
+    "slides": 7.02,
+    "full": 12.21,
+    "story": 5.23,
+    "history": 0.26,
+    "connect": 3.31
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "d7df6481c13e43c7",
+    "started_at": 1787326618.1855707,
+    "uptime_seconds": 7152.3
+  },
+  "process_after": {
+    "boot_id": "d7df6481c13e43c7",
+    "started_at": 1787326618.1855707,
+    "uptime_seconds": 7412.4
+  },
+  "errors": []
+}

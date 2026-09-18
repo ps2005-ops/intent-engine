@@ -1,0 +1,36 @@
+00:11:07 deployed_sha=f8c183f
+00:11:07 universe=1 todo=1 per_window=10/3600s concurrency=2
+00:11:07 START Microsoft Corporation
+00:11:48 deployed_sha=f8c183f
+00:11:48 universe=6 todo=6 per_window=9/3600s concurrency=2
+00:11:48 START Meta Platforms, Inc.
+00:11:48 START Amazon.com, Inc.
+00:20:30 QUOTA reached on Microsoft Corporation; stopping the batch
+00:20:30 BATCH END captured=0 stopped=True
+00:27:31 deployed_sha=f8c183f
+00:27:31 universe=7 todo=7 per_window=10/3600s concurrency=2
+00:27:31 START Meta Platforms, Inc.
+00:27:31 START Microsoft Corporation
+00:28:40 ERROR Amazon.com, Inc.: FileNotFoundError: [Errno 2] No such file or directory: 'docs/execution/v5/pre100_50/live_captures/f8c183f/amazon_com_inc/qa.json'
+00:28:40 Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-prathamsharma/23c3037e-819f-4888-a494-f74f3c9a72bb/scratchpad/c50/scripts/pre100_convergence_batch.py", line 246, in worker
+    f"concurrency={args.concurrency}")
+  File "/private/tmp/claude-501/-Users-prathamsharma/23c3037e-819f-4888-a494-f74f3c9a72bb/scratchpad/c50/scripts/pre100_batch_journey.py", line 290, in run_company
+    referer=f"/runs/{run_id}/answer")
+FileNotFoundError: [Errno 2] No such file or directory: 'docs/execution/v5/pre100_50/live_captures/f8c183f/amazon_com_inc/qa.json'
+
+00:32:37 QUOTA reached on Meta Platforms, Inc.; stopping the batch
+00:32:37 BATCH END captured=0 stopped=True
+00:36:27 DONE  Meta Platforms, Inc. in 535s core_mean=2.6
+00:36:27 START Amazon.com, Inc.
+00:36:27 DONE  Amazon.com, Inc. in 1s core_mean=None
+00:36:27 START Cloudflare, Inc.
+00:36:28 DONE  Cloudflare, Inc. in 1s core_mean=None
+00:36:28 START JPMorgan Chase & Co.
+00:36:29 DONE  JPMorgan Chase & Co. in 1s core_mean=None
+00:36:29 START The Goldman Sachs Group, Inc.
+00:36:30 DONE  The Goldman Sachs Group, Inc. in 1s core_mean=None
+00:36:30 START Caterpillar Inc.
+00:36:31 DONE  Caterpillar Inc. in 1s core_mean=None
+00:37:19 DONE  Microsoft Corporation in 588s core_mean=2.6
+00:37:19 BATCH END captured=7 stopped=False

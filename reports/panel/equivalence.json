@@ -1,0 +1,229 @@
+{
+  "by_verdict": {
+    "DEFENSIBLE_PROXY": [
+      "UEMP15OV"
+    ],
+    "SAME_SERIES_NOT_A_PROXY": [
+      "UMCSENT1"
+    ],
+    "UNUSABLE": [
+      "UEMPMEAN"
+    ],
+    "WEAK_PROXY": [
+      "BAA10Y",
+      "AAA10Y",
+      "BAA",
+      "T10Y3M",
+      "UEMP15OV",
+      "UEMPMEAN"
+    ]
+  },
+  "contract": "econ_equivalence.v1",
+  "detail": [
+    {
+      "candidate": "BAA10Y",
+      "construct": "credit_stress",
+      "crisis_agreement": 0.3817,
+      "direction_agreement": 0.5106,
+      "expected_sign": 1,
+      "identical": false,
+      "incumbent": "DRCCLACBS",
+      "note": "crisis agreement computed on the origins the contemporaneous classifier read as stressed",
+      "overlap": 142,
+      "rank_correlation": 0.0422,
+      "span": [
+        "1991-01-01",
+        "2026-04-01"
+      ],
+      "splice_allowed": false,
+      "statement": "BAA10Y for DRCCLACBS (credit_stress): WEAK_PROXY on 142 overlapping periods. direction 0.51, rank +0.04, turning points 0.49, crisis 0.38. The weakest is rank at 0.04, and it is the weakest that decides. SPLICE REFUSED -- it enters as its own column.",
+      "turning_point_agreement": 0.4857,
+      "verdict": "WEAK_PROXY",
+      "weakest": "rank",
+      "weakest_score": 0.0422
+    },
+    {
+      "candidate": "AAA10Y",
+      "construct": "credit_stress",
+      "crisis_agreement": 0.329,
+      "direction_agreement": 0.5532,
+      "expected_sign": 1,
+      "identical": false,
+      "incumbent": "DRCCLACBS",
+      "note": "crisis agreement computed on the origins the contemporaneous classifier read as stressed",
+      "overlap": 142,
+      "rank_correlation": 0.0104,
+      "span": [
+        "1991-01-01",
+        "2026-04-01"
+      ],
+      "splice_allowed": false,
+      "statement": "AAA10Y for DRCCLACBS (credit_stress): WEAK_PROXY on 142 overlapping periods. direction 0.55, rank +0.01, turning points 0.45, crisis 0.33. The weakest is rank at 0.01, and it is the weakest that decides. SPLICE REFUSED -- it enters as its own column.",
+      "turning_point_agreement": 0.4478,
+      "verdict": "WEAK_PROXY",
+      "weakest": "rank",
+      "weakest_score": 0.0104
+    },
+    {
+      "candidate": "BAA",
+      "construct": "credit_stress",
+      "crisis_agreement": 0.8274,
+      "direction_agreement": 0.5957,
+      "expected_sign": 1,
+      "identical": false,
+      "incumbent": "DRCCLACBS",
+      "note": "crisis agreement computed on the origins the contemporaneous classifier read as stressed",
+      "overlap": 142,
+      "rank_correlation": 0.8271,
+      "span": [
+        "1991-01-01",
+        "2026-04-01"
+      ],
+      "splice_allowed": false,
+      "statement": "BAA for DRCCLACBS (credit_stress): WEAK_PROXY on 142 overlapping periods. direction 0.60, rank +0.83, turning points 0.59, crisis 0.83. The weakest is turning_point at 0.59, and it is the weakest that decides. SPLICE REFUSED -- it enters as its own column.",
+      "turning_point_agreement": 0.5902,
+      "verdict": "WEAK_PROXY",
+      "weakest": "turning_point",
+      "weakest_score": 0.5902
+    },
+    {
+      "candidate": "T10Y3M",
+      "construct": "financial_conditions",
+      "crisis_agreement": 0.5604,
+      "direction_agreement": 0.5556,
+      "expected_sign": -1,
+      "identical": false,
+      "incumbent": "BAMLH0A0HYM2",
+      "note": "crisis agreement computed on the origins the contemporaneous classifier read as stressed",
+      "overlap": 37,
+      "rank_correlation": 0.6683,
+      "span": [
+        "2023-08-01",
+        "2026-08-01"
+      ],
+      "splice_allowed": false,
+      "statement": "T10Y3M for BAMLH0A0HYM2 (financial_conditions): WEAK_PROXY on 37 overlapping periods. direction 0.56, rank +0.67, turning points 0.95, crisis 0.56. The weakest is direction at 0.56, and it is the weakest that decides. SPLICE REFUSED -- it enters as its own column.",
+      "turning_point_agreement": 0.9474,
+      "verdict": "WEAK_PROXY",
+      "weakest": "direction",
+      "weakest_score": 0.5556
+    },
+    {
+      "candidate": "UMCSENT1",
+      "construct": "survey_expectation",
+      "crisis_agreement": 1.0,
+      "direction_agreement": 1.0,
+      "expected_sign": 1,
+      "identical": true,
+      "incumbent": "UMCSENT",
+      "note": "too few stressed periods in the overlap; crisis agreement falls back to the rank correlation, which is the weaker claim",
+      "overlap": 92,
+      "rank_correlation": 1.0,
+      "span": [
+        "1952-11-01",
+        "1977-11-01"
+      ],
+      "splice_allowed": false,
+      "statement": "UMCSENT1 for UMCSENT (survey_expectation): SAME_SERIES_NOT_A_PROXY on 92 overlapping periods. direction 1.00, rank +1.00, turning points 1.00, crisis 1.00. The weakest is direction at 1.00, and it is the weakest that decides. IT IS THE SAME SERIES under another id, so it carries no new information.",
+      "turning_point_agreement": 1.0,
+      "verdict": "SAME_SERIES_NOT_A_PROXY",
+      "weakest": "direction",
+      "weakest_score": 1.0
+    },
+    {
+      "candidate": "UEMPMEAN",
+      "construct": "labour_mobility",
+      "crisis_agreement": 0.0,
+      "direction_agreement": 0.5082,
+      "expected_sign": -1,
+      "identical": false,
+      "incumbent": "JTSQUR",
+      "note": "crisis agreement computed on the origins the contemporaneous classifier read as stressed",
+      "overlap": 306,
+      "rank_correlation": 0.3581,
+      "span": [
+        "2000-12-01",
+        "2026-06-01"
+      ],
+      "splice_allowed": false,
+      "statement": "UEMPMEAN for JTSQUR (labour_mobility): UNUSABLE on 306 overlapping periods. direction 0.51, rank +0.36, turning points 0.58, crisis 0.00. The weakest is crisis at 0.00, and it is the weakest that decides. SPLICE REFUSED -- it enters as its own column.",
+      "turning_point_agreement": 0.5816,
+      "verdict": "UNUSABLE",
+      "weakest": "crisis",
+      "weakest_score": 0.0
+    },
+    {
+      "candidate": "UEMP15OV",
+      "construct": "labour_mobility",
+      "crisis_agreement": 0.5119,
+      "direction_agreement": 0.518,
+      "expected_sign": -1,
+      "identical": false,
+      "incumbent": "JTSQUR",
+      "note": "crisis agreement computed on the origins the contemporaneous classifier read as stressed",
+      "overlap": 306,
+      "rank_correlation": 0.7434,
+      "span": [
+        "2000-12-01",
+        "2026-06-01"
+      ],
+      "splice_allowed": false,
+      "statement": "UEMP15OV for JTSQUR (labour_mobility): WEAK_PROXY on 306 overlapping periods. direction 0.52, rank +0.74, turning points 0.57, crisis 0.51. The weakest is crisis at 0.51, and it is the weakest that decides. SPLICE REFUSED -- it enters as its own column.",
+      "turning_point_agreement": 0.5735,
+      "verdict": "WEAK_PROXY",
+      "weakest": "crisis",
+      "weakest_score": 0.5119
+    },
+    {
+      "candidate": "UEMPMEAN",
+      "construct": "underemployment",
+      "crisis_agreement": 0.1671,
+      "direction_agreement": 0.5064,
+      "expected_sign": 1,
+      "identical": false,
+      "incumbent": "U6RATE",
+      "note": "crisis agreement computed on the origins the contemporaneous classifier read as stressed",
+      "overlap": 390,
+      "rank_correlation": 0.4413,
+      "span": [
+        "1994-01-01",
+        "2026-07-01"
+      ],
+      "splice_allowed": false,
+      "statement": "UEMPMEAN for U6RATE (underemployment): WEAK_PROXY on 390 overlapping periods. direction 0.51, rank +0.44, turning points 0.65, crisis 0.17. The weakest is crisis at 0.17, and it is the weakest that decides. SPLICE REFUSED -- it enters as its own column.",
+      "turning_point_agreement": 0.6543,
+      "verdict": "WEAK_PROXY",
+      "weakest": "crisis",
+      "weakest_score": 0.1671
+    },
+    {
+      "candidate": "UEMP15OV",
+      "construct": "underemployment",
+      "crisis_agreement": 0.8151,
+      "direction_agreement": 0.6093,
+      "expected_sign": 1,
+      "identical": false,
+      "incumbent": "U6RATE",
+      "note": "crisis agreement computed on the origins the contemporaneous classifier read as stressed",
+      "overlap": 390,
+      "rank_correlation": 0.8326,
+      "span": [
+        "1994-01-01",
+        "2026-07-01"
+      ],
+      "splice_allowed": false,
+      "statement": "UEMP15OV for U6RATE (underemployment): DEFENSIBLE_PROXY on 390 overlapping periods. direction 0.61, rank +0.83, turning points 0.68, crisis 0.82. The weakest is direction at 0.61, and it is the weakest that decides. SPLICE REFUSED -- it enters as its own column.",
+      "turning_point_agreement": 0.6848,
+      "verdict": "DEFENSIBLE_PROXY",
+      "weakest": "direction",
+      "weakest_score": 0.6093
+    }
+  ],
+  "splice_allowed": [],
+  "tested": 9,
+  "thresholds": {
+    "direct": 0.75,
+    "min_overlap": 24,
+    "proxy": 0.6
+  }
+}

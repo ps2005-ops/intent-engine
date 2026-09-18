@@ -1,0 +1,20 @@
+[
+  {
+    "company": "Walmart Inc.",
+    "captured": true,
+    "run_id": "01M0A3V3WD241EXMB68REC3FHJ",
+    "seconds": 14,
+    "auto_advanced": false,
+    "claimed_failure": true,
+    "blocked_external": true
+  },
+  {
+    "company": "NVIDIA Corporation",
+    "captured": true,
+    "run_id": "01M0A497T8C1CPWSZCM5D3AZV6",
+    "seconds": 12,
+    "auto_advanced": false,
+    "claimed_failure": true,
+    "blocked_external": true
+  }
+]

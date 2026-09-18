@@ -1,0 +1,594 @@
+{
+ "contract": "near_miss_corpus.v1",
+ "as_of": "2026-08-08",
+ "summary": {
+  "contract": "near_miss.v1",
+  "near_misses": 37,
+  "adjudicated": 37,
+  "unadjudicated": 0,
+  "by_cluster": {
+   "NO_BUYER": 5,
+   "NO_PRODUCT": 1,
+   "NO_WHAT_OR_WHO": 30,
+   "PARTIAL_OBJECT": 1
+  },
+  "by_adjudication": {
+   "EXTRACTION_RECOVERABLE": 5,
+   "SOURCE_MISSING_INFORMATION": 9,
+   "TRUNCATED_CONTEXT": 1,
+   "WRONG_DOCUMENT": 22
+  },
+  "not_an_action": 22,
+  "real_actions_adjudicated": 15,
+  "recoverable": 6,
+  "recoverable_object_rate": 0.4,
+  "not_an_action_rate": 0.5946,
+  "note": "recoverable_object_rate is over adjudicated REAL actions. A sentence that is not an action at all is not a missing buyer, and counting it as one would send every wave to improve an extractor that was already right to refuse."
+ },
+ "verdict": "The bottleneck is NOT where wave 8 left it. Of 37 refusals, 22 (59.5%) are sentences that announce nothing — release cadences, navigation, benefit copy, customer testimonials, definitions of what a release IS. The object extractor was right to refuse every one of them, and the defect is upstream in what the ACTION detector admitted. Of the 15 that are real actions, 6 (40%) have the missing dimension present in the document and were missed.",
+ "ordering": [
+  "1. action-detector precision — 22 of 37 refusals should never have been actions",
+  "2. object-extraction recall — 6 of 15 real actions are recoverable today",
+  "3. source content — 9 of 15 real actions genuinely do not name a buyer"
+ ],
+ "recoverable_examples": [
+  {
+   "span": "Introducing 10 new granular permissions, including view-only permissions, so store owners have better control over staff access to products and can delegate more confidently.",
+   "note": "buyer store owners is in the sentence"
+  },
+  {
+   "span": "Winter ’26 Release: New Agentforce Sales Features Unveiled at Dreamforce.",
+   "note": "product Agentforce and workflow Sales are both in the sentence"
+  },
+  {
+   "span": "Bundled with Unlimited Edition.",
+   "note": "Unlimited Edition is a named priced tier and satisfies WHAT"
+  },
+  {
+   "span": "VCARB Partners with Salesforce to Supercharge Fan Engagement with AI, Deploying Agentforce 360.",
+   "note": "use case fan engagement is stated; actor is VCARB, unknown to the attribution gate"
+  },
+  {
+   "span": "Missionforce National Security Unveils IL5-Authorized AI Agents and Apps to Drive Decision Advantage, Readiness, and Enhanced Warfighter Support.",
+   "note": "buyer national security / warfighter is stated; actor is Missionforce"
+  },
+  {
+   "span": "Starting June 1, 2026, BigCommerce is updating its plan structure and pricing.",
+   "note": "real dated price change; tier and buyer are in the plan table further down the same page"
+  }
+ ],
+ "genuinely_absent_examples": [
+  {
+   "span": "Coming soon, you can set up bundles with the new Shopify Bundles app or any of the upcoming bundles apps built on Shopify Functions in the Shopify App Store.",
+   "note": "real forthcoming launch; sentence names no buyer"
+  },
+  {
+   "span": "Since launching 6 months ago, we’ve already improved B2B on Shopify with dozens of enhancements.",
+   "note": "retrospective summary; dozens of enhancements is not a change"
+  },
+  {
+   "span": "Introducing JavaScript for Shopify Functions.",
+   "note": "real launch; buyer developers only implied"
+  },
+  {
+   "span": "We’re providing unthrottled API calls for our newly launched Commerce Components by Shopify and increasing standard Admin API rate limits by 10x for Shopify Plus.",
+   "note": "real change to a named product; the sentence names no buyer"
+  },
+  {
+   "span": "Introducing Commerce Components.",
+   "note": "real launch; title only, no buyer"
+  }
+ ],
+ "rows": [
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_f64ed4e3521c",
+   "actor": "Shopify",
+   "source_family": "release_notes",
+   "action_type": "BUNDLE_CHANGE",
+   "span": "Coming soon, you can set up bundles with the new Shopify Bundles app or any of the upcoming bundles apps built on Shopify Functions in the Shopify App Store.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "SOURCE_MISSING_INFORMATION",
+   "note": "real forthcoming launch; sentence names no buyer"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_178c7443a73b",
+   "actor": "Shopify",
+   "source_family": "release_notes",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Since launching 6 months ago, we’ve already improved B2B on Shopify with dozens of enhancements.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "SOURCE_MISSING_INFORMATION",
+   "note": "retrospective summary; dozens of enhancements is not a change"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_462c8f01765b",
+   "actor": "Shopify",
+   "source_family": "release_notes",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Introducing 10 new granular permissions, including view-only permissions, so store owners have better control over staff access to products and can delegate more confidently.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "EXTRACTION_RECOVERABLE",
+   "note": "buyer store owners is in the sentence"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_d17401534408",
+   "actor": "Shopify",
+   "source_family": "release_notes",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Our latest releases help speed up your build and give you more ways to customize commerce.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "section blurb"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_85181720b010",
+   "actor": "Shopify",
+   "source_family": "release_notes",
+   "action_type": "BUNDLE_CHANGE",
+   "span": "Build the product bundles, order routing logic, checkout and cart validation rules, or delivery and payment options you need.",
+   "dimensions_present": [
+    "WHAT"
+   ],
+   "missing_dimensions": [
+    "who"
+   ],
+   "cluster": "NO_BUYER",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "imperative capability copy on a developer page; nobody announced a change"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_60ef81645ffc",
+   "actor": "Shopify",
+   "source_family": "release_notes",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Introducing JavaScript for Shopify Functions.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "SOURCE_MISSING_INFORMATION",
+   "note": "real launch; buyer developers only implied"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_924cabc192b9",
+   "actor": "Shopify",
+   "source_family": "release_notes",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "We’re providing unthrottled API calls for our newly launched Commerce Components by Shopify and increasing standard Admin API rate limits by 10x for Shopify Plus.",
+   "dimensions_present": [
+    "WHAT"
+   ],
+   "missing_dimensions": [
+    "who"
+   ],
+   "cluster": "NO_BUYER",
+   "adjudication": "SOURCE_MISSING_INFORMATION",
+   "note": "real change to a named product; the sentence names no buyer"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_afc27362696d",
+   "actor": "Shopify",
+   "source_family": "release_notes",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Introducing Commerce Components.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "SOURCE_MISSING_INFORMATION",
+   "note": "real launch; title only, no buyer"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_eee106cab5ef",
+   "actor": "Shopify",
+   "source_family": "pricing_page",
+   "action_type": "PARTNERSHIP",
+   "span": "We partner with Stripe Payments Company for money transmission services and account services with funds held at Fifth Third Bank N.A., Member FDIC.",
+   "dimensions_present": [
+    "WHAT"
+   ],
+   "missing_dimensions": [
+    "who"
+   ],
+   "cluster": "NO_BUYER",
+   "adjudication": "SOURCE_MISSING_INFORMATION",
+   "note": "real partnership with a stated use case; no buyer, and PARTNERSHIP needs one"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_3ba924c81f46",
+   "actor": "Shopify",
+   "source_family": "product_launch_page",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Introducing Tinker: Play with AI, bring your ideas to life.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "SOURCE_MISSING_INFORMATION",
+   "note": "real launch; no buyer named"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_3fa499e7ab08",
+   "actor": "Shopify",
+   "source_family": "migration_page",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Google Analytics 4 to create an annotation on the day the new live site launches and validate key events (purchase, begin_checkout) in real time.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "instruction fragment from a migration checklist"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_0e1a80a0d0fb",
+   "actor": "Shopify",
+   "source_family": "comparison_page",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Shopify launches more new features than WooCommerce.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "comparative marketing claim on a rival's page"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_63a0d2b6701b",
+   "actor": "Salesforce",
+   "source_family": "release_notes",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Join our Year-End Innovation Review to explore the top features from 2025 alongside an exclusive look at the Winter '26 and upcoming 2026 releases for Agentforce Field Service.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "event invitation"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_2d6bc8b81f1a",
+   "actor": "Salesforce",
+   "source_family": "release_notes",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Winter ’26 Release: New Agentforce Sales Features Unveiled at Dreamforce.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "EXTRACTION_RECOVERABLE",
+   "note": "product Agentforce and workflow Sales are both in the sentence"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_b146b465ce7f",
+   "actor": "Salesforce",
+   "source_family": "release_notes",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Salesforce releases are major platform updates delivered three times a year—Winter, Spring, and Summer—that introduce new features, enhancements, and security updates.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "definition of the release programme, not a release"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_6c28d1a66b1a",
+   "actor": "Salesforce",
+   "source_family": "release_notes",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "To see what’s coming soon, visit Release Notes for Features Released Monthly.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "navigation"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_04cc4ed6756b",
+   "actor": "Salesforce",
+   "source_family": "release_notes",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Salesforce delivers three seasonal releases every year.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "cadence statement"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_578df96d9256",
+   "actor": "Salesforce",
+   "source_family": "release_notes",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Regular releases keep your org secure, scalable, and innovative—without manual upgrades or downtime.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "benefit copy"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_74ead42912d2",
+   "actor": "Salesforce",
+   "source_family": "release_notes",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Each release introduces features that help admins, developers, and users work smarter and deliver more value.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "generic benefit; names roles but announces nothing"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_fc5d0960662c",
+   "actor": "Salesforce",
+   "source_family": "release_notes",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Patch or maintenance updates are smaller, targeted fixes released between major updates.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "definition"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_10da21d4650a",
+   "actor": "Salesforce",
+   "source_family": "release_notes",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Salesforce announces sign-up opportunities through the Release Readiness Trailblazer Community.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "announces sign-ups to a community, not a product change"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_6529d277d471",
+   "actor": "Salesforce",
+   "source_family": "release_notes",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Use multiple channels: Slack, the Release in a Box deck, short training sessions for teams impacted by new releases and executive walkthroughs.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "internal-adoption advice"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_c4ea14ca4602",
+   "actor": "Salesforce",
+   "source_family": "release_notes",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "You can access the latest version on Salesforce Releases and the Release Readiness Trailblazer Community.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "navigation"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_284f0c3bc295",
+   "actor": "Salesforce",
+   "source_family": "pricing_page",
+   "action_type": "BUNDLE_CHANGE",
+   "span": "Bundled with Unlimited Edition.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "EXTRACTION_RECOVERABLE",
+   "note": "Unlimited Edition is a named priced tier and satisfies WHAT"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_bbe87c340918",
+   "actor": "Salesforce",
+   "source_family": "pricing_page",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Whether you’re launching new campaigns, improving personalization, or optimizing performance, Marketing Cloud gives you the tools to do it faster, smarter, and more effectively than ever before.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "conditional marketing copy"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_d880ebac0343",
+   "actor": "Salesforce",
+   "source_family": "product_launch_page",
+   "action_type": "PARTNERSHIP",
+   "span": "VCARB Partners with Salesforce to Supercharge Fan Engagement with AI, Deploying Agentforce 360.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "EXTRACTION_RECOVERABLE",
+   "note": "use case fan engagement is stated; actor is VCARB, unknown to the attribution gate"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_bca67f9b4c74",
+   "actor": "Salesforce",
+   "source_family": "product_launch_page",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Missionforce National Security Unveils IL5-Authorized AI Agents and Apps to Drive Decision Advantage, Readiness, and Enhanced Warfighter Support.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "EXTRACTION_RECOVERABLE",
+   "note": "buyer national security / warfighter is stated; actor is Missionforce"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_18e901d91ca2",
+   "actor": "Salesforce",
+   "source_family": "product_launch_page",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Salesforce has released its 2026 Agentic Enterprise Index, which analyzes aggregated AI usage data from the Agentforce platform to uncover how businesses are deploying, using, and getting value out of AI agents.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "SOURCE_MISSING_INFORMATION",
+   "note": "a research report; real publication, contests no buying decision"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_8d851cbb0234",
+   "actor": "Salesforce",
+   "source_family": "product_launch_page",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "The Help Agent, Salesforce’s implementation of Agentforce on help.salesforce.com, launched in October 2024 and is the most prominent example.",
+   "dimensions_present": [
+    "WHERE"
+   ],
+   "missing_dimensions": [
+    "what",
+    "who"
+   ],
+   "cluster": "PARTIAL_OBJECT",
+   "adjudication": "SOURCE_MISSING_INFORMATION",
+   "note": "real dated launch; buyer not named, and it is two years old"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_7548c42fdcf7",
+   "actor": "BigCommerce",
+   "source_family": "pricing_page",
+   "action_type": "PRICE_CHANGE",
+   "span": "Starting June 1, 2026, BigCommerce is updating its plan structure and pricing.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "TRUNCATED_CONTEXT",
+   "note": "real dated price change; tier and buyer are in the plan table further down the same page"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_597830e2ab92",
+   "actor": "BigCommerce",
+   "source_family": "pricing_page",
+   "action_type": "PRICE_CHANGE",
+   "span": "If you're on a monthly plan, switching to annual billing locks in your pricing for 12 months and reduces your monthly rate.",
+   "dimensions_present": [
+    "WHAT"
+   ],
+   "missing_dimensions": [
+    "who"
+   ],
+   "cluster": "NO_BUYER",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "describes how existing billing works; not a change"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_9d0f5ad647b4",
+   "actor": "BigCommerce",
+   "source_family": "pricing_page",
+   "action_type": "PRICE_CHANGE",
+   "span": "Upgrading to a higher plan reduces your fee rate; moving to a contracted Performance plan eliminates it.",
+   "dimensions_present": [
+    "WHAT"
+   ],
+   "missing_dimensions": [
+    "who"
+   ],
+   "cluster": "NO_BUYER",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "describes the existing plan ladder; not a change"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_c880cb80f3b3",
+   "actor": "BigCommerce",
+   "source_family": "comparison_page",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Shopify is widely known for its ease of use, especially for businesses launching their first online store.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "BigCommerce's page describing a rival; not an action by anyone"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_467535cca899",
+   "actor": "BigCommerce",
+   "source_family": "solution_page",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "Localize with ease: craft buyer-specific experiences across segments, locations, verticals, languages, currencies, and more by easily launching and managing new storefronts from a single back-end.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "feature marketing copy, no change announced"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_ab3d8bdb7d8d",
+   "actor": "BigCommerce",
+   "source_family": "solution_page",
+   "action_type": "PARTNERSHIP",
+   "span": "Our curated set of third-party party applications boasts multiple partners with strong B2B applications that provide additional advanced capabilities without building out a custom experience through our APIs, like quoting.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "capability description, no change announced"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_a0c2cbd96e47",
+   "actor": "BigCommerce",
+   "source_family": "solution_page",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "“Launching on BigCommerce allowed us to personalize the customer journey and deliver frictionless experience across channels.”.",
+   "dimensions_present": [],
+   "missing_dimensions": [],
+   "cluster": "NO_WHAT_OR_WHO",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "customer testimonial; the customer acted, not BigCommerce"
+  },
+  {
+   "contract": "near_miss.v1",
+   "action_id": "act_324d1ac6b288",
+   "actor": "BigCommerce",
+   "source_family": "solution_page",
+   "action_type": "PRODUCT_LAUNCH",
+   "span": "“BigCommerce and Contentful have opened up opportunities for us to create the kind of website that positions us to publish content like our recent new brand and product launches in a way that really makes our site unique.”.",
+   "dimensions_present": [
+    "WHO"
+   ],
+   "missing_dimensions": [
+    "what"
+   ],
+   "cluster": "NO_PRODUCT",
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "customer testimonial"
+  }
+ ]
+}

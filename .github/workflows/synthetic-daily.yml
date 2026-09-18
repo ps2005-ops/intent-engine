@@ -1,0 +1,28 @@
+# G. Synthetic daily — scenarios from recurring company-specific failures.
+# Runs every day (not just trading days); proves nothing about market P&L.
+name: synthetic-daily
+
+on:
+  schedule:
+    - cron: "23 4 * * *"
+  workflow_dispatch:
+    inputs:
+      as_of:
+        description: "Override date (YYYY-MM-DD); blank = today (NY)"
+        required: false
+
+concurrency:
+  group: synthetic-daily
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  call:
+    uses: ./.github/workflows/_hosted-job.yml
+    secrets: inherit
+    with:
+      job: synthetic-daily
+      as_of: ${{ github.event.inputs.as_of }}
+      timeout_minutes: 20

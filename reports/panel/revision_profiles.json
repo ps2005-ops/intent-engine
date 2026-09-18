@@ -1,0 +1,308 @@
+[
+  {
+    "behaviour": "STABLE",
+    "differing": 0,
+    "max_relative_change": 0.0,
+    "needs_vintages": false,
+    "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 448,
+    "series_id": "UMCSENT"
+  },
+  {
+    "behaviour": "STABLE",
+    "differing": 0,
+    "max_relative_change": 0.0,
+    "needs_vintages": false,
+    "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 448,
+    "series_id": "MICH"
+  },
+  {
+    "behaviour": "REVISED",
+    "differing": 627,
+    "max_relative_change": 0.314286,
+    "needs_vintages": true,
+    "note": "",
+    "overlap": 675,
+    "series_id": "PSAVERT"
+  },
+  {
+    "behaviour": "REVISED",
+    "differing": 69,
+    "max_relative_change": 0.024609,
+    "needs_vintages": true,
+    "note": "",
+    "overlap": 96,
+    "series_id": "DRCCLACBS"
+  },
+  {
+    "behaviour": "STABLE",
+    "differing": 522,
+    "max_relative_change": 0.009089,
+    "needs_vintages": false,
+    "note": "92.1% of overlapping observations changed, by at most 0.91%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 567,
+    "series_id": "REVOLSL"
+  },
+  {
+    "behaviour": "NO_VINTAGE_HISTORY",
+    "differing": 0,
+    "max_relative_change": 0.0,
+    "needs_vintages": false,
+    "note": "BABATOTALSAUS@2015-05-15: HTTP 404 \u2014 this series has no vintage at that date, which for a series that begins later is a fact about the data rather than a failure. A series with no vintage history cannot be a walled model INPUT: using its current values at a historical origin would leak revisions published later.",
+    "overlap": 0,
+    "series_id": "BABATOTALSAUS"
+  },
+  {
+    "behaviour": "REVISED",
+    "differing": 60,
+    "max_relative_change": 0.095238,
+    "needs_vintages": true,
+    "note": "",
+    "overlap": 172,
+    "series_id": "JTSQUR"
+  },
+  {
+    "behaviour": "STABLE",
+    "differing": 15,
+    "max_relative_change": 0.001595,
+    "needs_vintages": false,
+    "note": "1.9% of overlapping observations changed, by at most 0.16%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 808,
+    "series_id": "CIVPART"
+  },
+  {
+    "behaviour": "REVISED",
+    "differing": 107,
+    "max_relative_change": 0.108696,
+    "needs_vintages": true,
+    "note": "",
+    "overlap": 120,
+    "series_id": "CORCACBS"
+  },
+  {
+    "behaviour": "REVISED",
+    "differing": 85,
+    "max_relative_change": 0.046358,
+    "needs_vintages": true,
+    "note": "",
+    "overlap": 96,
+    "series_id": "DRSFRMACBS"
+  },
+  {
+    "behaviour": "REVISED",
+    "differing": 140,
+    "max_relative_change": 0.016399,
+    "needs_vintages": true,
+    "note": "",
+    "overlap": 140,
+    "series_id": "TDSP"
+  },
+  {
+    "behaviour": "REVISED",
+    "differing": 100,
+    "max_relative_change": 0.016529,
+    "needs_vintages": true,
+    "note": "",
+    "overlap": 256,
+    "series_id": "U6RATE"
+  },
+  {
+    "behaviour": "STABLE",
+    "differing": 17,
+    "max_relative_change": 0.001718,
+    "needs_vintages": false,
+    "note": "2.1% of overlapping observations changed, by at most 0.17%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 808,
+    "series_id": "EMRATIO"
+  },
+  {
+    "behaviour": "NO_VINTAGE_HISTORY",
+    "differing": 0,
+    "max_relative_change": 0.0,
+    "needs_vintages": false,
+    "note": "BOGZ1FL153064486Q@2015-05-15: HTTP 404 \u2014 this series has no vintage at that date, which for a series that begins later is a fact about the data rather than a failure. A series with no vintage history cannot be a walled model INPUT: using its current values at a historical origin would leak revisions published later.",
+    "overlap": 0,
+    "series_id": "BOGZ1FL153064486Q"
+  },
+  {
+    "behaviour": "REVISED",
+    "differing": 219,
+    "max_relative_change": 0.056881,
+    "needs_vintages": true,
+    "note": "",
+    "overlap": 278,
+    "series_id": "DGORDER"
+  },
+  {
+    "behaviour": "STABLE",
+    "differing": 28,
+    "max_relative_change": 0.030702,
+    "needs_vintages": false,
+    "note": "4.5% of overlapping observations changed, by at most 3.07%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 627,
+    "series_id": "HSN1F"
+  },
+  {
+    "behaviour": "NO_VINTAGE_HISTORY",
+    "differing": 0,
+    "max_relative_change": 0.0,
+    "needs_vintages": false,
+    "note": "USACSCICP02STSAM@2015-05-15: HTTP 404 \u2014 this series has no vintage at that date, which for a series that begins later is a fact about the data rather than a failure. A series with no vintage history cannot be a walled model INPUT: using its current values at a historical origin would leak revisions published later.",
+    "overlap": 0,
+    "series_id": "USACSCICP02STSAM"
+  },
+  {
+    "behaviour": "STABLE",
+    "differing": 5,
+    "max_relative_change": 0.018182,
+    "needs_vintages": false,
+    "note": "0.6% of overlapping observations changed, by at most 1.82%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 808,
+    "series_id": "UNRATE"
+  },
+  {
+    "behaviour": "STABLE",
+    "differing": 51,
+    "max_relative_change": 0.001359,
+    "needs_vintages": false,
+    "note": "6.2% of overlapping observations changed, by at most 0.14%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 819,
+    "series_id": "CPIAUCSL"
+  },
+  {
+    "behaviour": "STABLE",
+    "differing": 0,
+    "max_relative_change": 0.0,
+    "needs_vintages": false,
+    "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 22233,
+    "series_id": "DFF"
+  },
+  {
+    "behaviour": "STABLE",
+    "differing": 2,
+    "max_relative_change": 0.002656,
+    "needs_vintages": false,
+    "note": "0.0% of overlapping observations changed, by at most 0.27%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 9735,
+    "series_id": "DGS2"
+  },
+  {
+    "behaviour": "STABLE",
+    "differing": 1,
+    "max_relative_change": 0.002484,
+    "needs_vintages": false,
+    "note": "0.0% of overlapping observations changed, by at most 0.25%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 13327,
+    "series_id": "DGS10"
+  },
+  {
+    "behaviour": "NO_VINTAGE_HISTORY",
+    "differing": 0,
+    "max_relative_change": 0.0,
+    "needs_vintages": false,
+    "note": "BAMLH0A0HYM2@2015-05-15: HTTP 404 \u2014 this series has no vintage at that date, which for a series that begins later is a fact about the data rather than a failure. A series with no vintage history cannot be a walled model INPUT: using its current values at a historical origin would leak revisions published later.",
+    "overlap": 0,
+    "series_id": "BAMLH0A0HYM2"
+  },
+  {
+    "behaviour": "STABLE",
+    "differing": 27,
+    "max_relative_change": 0.036717,
+    "needs_vintages": false,
+    "note": "4.0% of overlapping observations changed, by at most 3.67%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 675,
+    "series_id": "HOUST"
+  },
+  {
+    "behaviour": "REVISED",
+    "differing": 1156,
+    "max_relative_change": 0.037409,
+    "needs_vintages": true,
+    "note": "",
+    "overlap": 1156,
+    "series_id": "INDPRO"
+  },
+  {
+    "behaviour": "REVISED",
+    "differing": 99,
+    "max_relative_change": 0.133065,
+    "needs_vintages": true,
+    "note": "",
+    "overlap": 99,
+    "series_id": "PCEC96"
+  },
+  {
+    "behaviour": "REVISED",
+    "differing": 273,
+    "max_relative_change": 0.144854,
+    "needs_vintages": true,
+    "note": "",
+    "overlap": 273,
+    "series_id": "GDPC1"
+  },
+  {
+    "behaviour": "STABLE",
+    "differing": 0,
+    "max_relative_change": 0.0,
+    "needs_vintages": false,
+    "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 7347,
+    "series_id": "BAA10Y"
+  },
+  {
+    "behaviour": "STABLE",
+    "differing": 0,
+    "max_relative_change": 0.0,
+    "needs_vintages": false,
+    "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 8094,
+    "series_id": "AAA10Y"
+  },
+  {
+    "behaviour": "STABLE",
+    "differing": 0,
+    "max_relative_change": 0.0,
+    "needs_vintages": false,
+    "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 1156,
+    "series_id": "BAA"
+  },
+  {
+    "behaviour": "STABLE",
+    "differing": 0,
+    "max_relative_change": 0.0,
+    "needs_vintages": false,
+    "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 8344,
+    "series_id": "T10Y3M"
+  },
+  {
+    "behaviour": "STABLE",
+    "differing": 0,
+    "max_relative_change": 0.0,
+    "needs_vintages": false,
+    "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 2303,
+    "series_id": "MORTGAGE30US"
+  },
+  {
+    "behaviour": "REVISED",
+    "differing": 39,
+    "max_relative_change": 0.056436,
+    "needs_vintages": true,
+    "note": "",
+    "overlap": 663,
+    "series_id": "PERMIT"
+  },
+  {
+    "behaviour": "REVISED",
+    "differing": 52,
+    "max_relative_change": 0.016785,
+    "needs_vintages": true,
+    "note": "",
+    "overlap": 808,
+    "series_id": "UEMP15OV"
+  }
+]

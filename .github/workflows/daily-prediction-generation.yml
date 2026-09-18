@@ -1,0 +1,27 @@
+# B. Daily prediction generation — after the refresh, still pre-market.
+name: daily-prediction-generation
+
+on:
+  schedule:
+    - cron: "47 11 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      as_of:
+        description: "Override trading date (YYYY-MM-DD); blank = today (NY)"
+        required: false
+
+concurrency:
+  group: daily-prediction-generation
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  call:
+    uses: ./.github/workflows/_hosted-job.yml
+    secrets: inherit
+    with:
+      job: daily-prediction-generation
+      as_of: ${{ github.event.inputs.as_of }}
+      timeout_minutes: 25

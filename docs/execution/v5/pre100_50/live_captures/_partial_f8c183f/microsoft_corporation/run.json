@@ -1,0 +1,131 @@
+{
+  "company": "Microsoft Corporation",
+  "cik": "0000789019",
+  "ticker": "MSFT",
+  "reliability": {
+    "connection_reset": 0,
+    "quota_block": false,
+    "retry_required": 0,
+    "manual_recovery": 0
+  },
+  "blocked_external": false,
+  "blocked_sources": [],
+  "run_id": "01M0KTMKYTPFW0H2ATE74VK0WB",
+  "seconds": 146,
+  "auto_advanced": true,
+  "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KTMKYTPFW0H2ATE74VK0WB/intro",
+  "claimed_failure": false,
+  "failure_text": "",
+  "steps": {
+    "intro": {
+      "status": 200,
+      "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KTMKYTPFW0H2ATE74VK0WB/intro",
+      "chars": 5829,
+      "absence": []
+    },
+    "slides": {
+      "status": 200,
+      "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KTMKYTPFW0H2ATE74VK0WB/intro",
+      "chars": 5829,
+      "absence": []
+    },
+    "full": {
+      "status": 200,
+      "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KTMKYTPFW0H2ATE74VK0WB/full",
+      "chars": 29153,
+      "absence": []
+    },
+    "story": {
+      "status": 200,
+      "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KTMKYTPFW0H2ATE74VK0WB/story",
+      "chars": 4524,
+      "absence": []
+    },
+    "history": {
+      "status": 200,
+      "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KTMKYTPFW0H2ATE74VK0WB/history",
+      "chars": 28945,
+      "absence": []
+    },
+    "connect": {
+      "status": 200,
+      "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KTMKYTPFW0H2ATE74VK0WB/connect",
+      "chars": 4276,
+      "absence": []
+    }
+  },
+  "intro_head": "Microsoft Corporation \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Microsoft Corporation MSFT \u00b7 USA \u00b7 SEC CIK 0000789019 Microsoft Corporation is a software platform business that runs on an array of services, including cloud-based solutions that provide customers with AI, software, services, platforms, and content, and we provide solution support and consulting services; revenue upon transfer of control of promised products or services to customers in an amount that reflects the consideration we expect to receive in exchange for those products or services. Its position is contested less by a named firm than by the alternatives its customers already have: customers can substitute automation absorbing the task itself, and customers can internalise the work themselves \u2014 the customer's own engineering, and the alternative may be delaying the purchase alto",
+  "position_sentence": "customers can substitute automation absorbing the task itself, and customers can internalise the work themselves \u2014 the customer's own engineering, and the alternative may be delaying the purchase altogether \u2014 renewing nothing and keeping the current process, and t",
+  "model_sentence": "software platform | an array of services, including cloud-based solutions that provide customers with AI, software, services, platforms, and content, and we provide solution support and consulting services; revenue upon transfer of control of promised products",
+  "competition": {
+    "basis_note": "",
+    "rows": []
+  },
+  "belief": "",
+  "history_paths": [
+    "Actual",
+    "Better strategy",
+    "Market expectation",
+    "What the market expected"
+  ],
+  "history_vintages": [
+    "2007",
+    "2008",
+    "2009",
+    "2010",
+    "2011",
+    "2012",
+    "2013",
+    "2014",
+    "2015",
+    "2016",
+    "2017",
+    "2018",
+    "2019",
+    "2020"
+  ],
+  "connect_text": "Microsoft Corporation \u2014 connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone. That is deliberate \u2014 it is what makes it checkable. It is also what puts a boundary on it, and the boundary is visible in the analysis itself. Public intelligence \u2014 what it could establish Microsoft Corporation is a software platform business that runs on an array of services, including cloud-based solutions that provide customers with AI, software, services, platforms, and content, and we provide solution support and consulting services; revenue upon transfer of control of promised products or services to customers in an amount that reflects the consideration we expect to receive in exchange for those products or services. The reading follows from an established classification of this business and from what the company publishes about itself; 1 source(s) outside the company's control were read, which is not enough to size the effect, so it is held in direction only. 1 of the passages read came from a source the company does not control. Internal intelligence \u2014 what is still bounded These are the measures a business of this kind is judged on that the public record did not supply. Each one is a magnitude the analysis above had to leave in direction only. revenue growth \u2014 the rate the contracted base is compounding at. large-customer growth \u2014 expansion inside big accounts is where this model's margin is. contracted backlog or remaining performance obligations \u2014 revenue already signed decides how much of next year is discretionary. gross margin \u2014 delivery cost per unit served is what turns growth into profit here. net revenue retention \u2014 whether the installed base grows without a new sale. sales efficiency \u2014 what it costs to add a unit of recurring revenue. What can be connected Connected now Public filings and disclosures Regulatory filings, the company's own pages, and independent sources \u2014 everything the analysis you just read was built from. Connected now Published market intelligence The economy, the competitive record and the learning ledger this system maintains between runs. Available next Your documents Board packs, strategy decks and plans. The system reads what management actually decided rather than inferring it from the outside. Available next Financial plan and internal metrics The numbers the public record does not contain \u2014 the ones that turn every bounded magnitude above into a measured one. On the roadmap CRM and pipeline Which deals moved, which stalled, and why. This is what separates a pricing hypothesis from a pricing answer. On the roadmap Customer feedback What buyers say when they are not filling in a renewal form. On the roadmap Decision log What leadership considered, chose, and rejected \u2014 with the reasons, so the next decision starts from the last one. What a private company intelligence keeps A rec",
+  "qa": {
+    "What should management do?": {
+      "status": 200,
+      "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Microsoft Corporation What should management do? Hold this decision \u2014 what to charge, and for what \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Evidence Strongest. \u201cXBOX content and services revenue decreased 5% on a prior year comparable that benefited from strong first-party content performance, offset in part by growth in XBOX Game Pass.\u201d \u2014 10-K Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "Why now?": {
+      "status": 200,
+      "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Microsoft Corporation Why now? what to charge, and for what is a standing decision for this business model. It was ranked above retention on the same evidence. Evidence Strongest. \u201cXBOX content and services revenue decreased 5% on a prior year comparable that benefited from strong first-party content performance, offset in part by growth in XBOX Game Pass.\u201d \u2014 10-K Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What would prove this wrong?": {
+      "status": 200,
+      "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Microsoft Corporation What would prove this wrong? The expected movement failing to appear in pricing and packaging changes by the next review. Evidence Strongest. \u201cXBOX content and services revenue decreased 5% on a prior year comparable that benefited from strong first-party content performance, offset in part by growth in XBOX Game Pass.\u201d \u2014 10-K Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What's the biggest risk?": {
+      "status": 200,
+      "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Microsoft Corporation What's the biggest risk? Inter-segment transfers and shared cost allocations are not disclosed. Evidence Strongest. \u201cXBOX content and services revenue decreased 5% on a prior year comparable that benefited from strong first-party content performance, offset in part by growth in XBOX Game Pass.\u201d \u2014 10-K Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "Who's the real competitor?": {
+      "status": 200,
+      "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Microsoft Corporation Who's the real competitor? Adobe Inc.: operates the same business model (subscription software) in the same sector (software platform), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR; Cloudflare, Inc.: operates the same business model (subscription software) in the same sector (software platform), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR; Constellation Software Inc.: operates the same business model (subscription software) in the same sector (software platform), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR Evidence Strongest. \u201cXBOX content and services revenue decreased 5% on a prior year comparable that benefited from strong first-party content performance, offset in part by growth in XBOX Game Pass.\u201d \u2014 10-K Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intell"
+    },
+    "What does the market believe?": {
+      "status": 200,
+      "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Microsoft Corporation What does the market believe? That Microsoft Corporation's growth and margin can improve together for another year, because they just did.: Microsoft Corporation's own filed results show growth accelerating and margin widening. This is what a reader of that record carries into next year; nobody published it in these words and it is not a consensus estimate.; That the contest Microsoft Corporation has to win is against the customer's own engineering, and that holding that ground is what protects the economics.: read from the business model, not retrieved. Read from how this business model competes. Evidence Strongest. \u201cXBOX content and services revenue decreased 5% on a prior year comparable that benefited from strong first-party content performance, offset in part by growth in XBOX Game Pass.\u201d \u2014 10-K Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What's the weakest assumption?": {
+      "status": 200,
+      "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Microsoft Corporation What's the weakest assumption? Microsoft Corporation's filed results: The filed series is what this reading is computed from. Renewal and expansion inside an installed base is what the economics rest on Evidence Strongest. \u201cXBOX content and services revenue decreased 5% on a prior year comparable that benefited from strong first-party content performance, offset in part by growth in XBOX Game Pass.\u201d \u2014 10-K Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What impossible hypothesis should we test?": {
+      "status": 200,
+      "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Microsoft Corporation What impossible hypothesis should we test? Microsoft Corporation may be worth more serving materially fewer customers than it serves today.: Its customers are individual consumers, small and medium organizations, large global enterprises, public-sector institutions, service providers, application\u2026 \u2014 a population wide enough that the cost to serve almost certainly is not uniform across it. Where the dispersion is wide, a minority of accounts can carry the whole contribution and the remainder can consume it through support, delivery and churn.; The most valuable customer for what Microsoft Corporation has built may not be the customer it currently sells to.: The capability behind the product was built to serve individual consumers, small and medium organizations, large global enterprises, public-sector institutions, service providers, application\u2026. Capabilities are rarely specific to the buyer they were built for, and an adjacent buyer with a more expensive underlying problem can be worth more per unit of the same delivered capability.; The workflow that Microsoft Corporation's product sits inside may stop existing rather than be improved.: It sells an array of services, including cloud-based solutions that provide customers with AI, software, services, platforms, and content, and it provide\u2026. A product p"
+    },
+    "What should we measure next?": {
+      "status": 200,
+      "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Microsoft Corporation What should we measure next? customer count \u2014 revenue at a business of this kind moves with customer count.; seats or usage per customer \u2014 revenue at a business of this kind moves with seats or usage per customer.; list and realised price \u2014 revenue at a business of this kind moves with list and realised price. Evidence Strongest. \u201cXBOX content and services revenue decreased 5% on a prior year comparable that benefited from strong first-party content performance, offset in part by growth in XBOX Game Pass.\u201d \u2014 10-K Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What would you tell the board?": {
+      "status": 200,
+      "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Microsoft Corporation What would you tell the board? Hold this decision \u2014 what to charge, and for what \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Evidence Strongest. \u201cXBOX content and services revenue decreased 5% on a prior year comparable that benefited from strong first-party content performance, offset in part by growth in XBOX Game Pass.\u201d \u2014 10-K Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the running separately-reported businesses as a single portfolio thesis? How is this transition similar to Vertically integrated entertainment groups, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    }
+  },
+  "transport_errors": []
+}

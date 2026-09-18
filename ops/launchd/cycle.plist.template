@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Intent Engine — market operating cycle (launchd user agent).
+
+  Rendered from this template by ops/install_autonomous.sh. Do not edit the
+  installed copy in ~/Library/LaunchAgents: reinstalling overwrites it. Edit
+  this template and reinstall.
+
+  SECRETS: none. This file contains a path, a schedule and TRADING_MODE=PAPER.
+  Credentials are never rendered here — launchd plists are world-readable and
+  are routinely copied into support bundles. Anything the cycle needs is read
+  from the environment of the process or from files outside the repository.
+
+  SCHEDULE: StartCalendarInterval fires on the machine's LOCAL wall clock, and
+  launchd handles daylight saving by firing once at the local hour. The cycle
+  additionally runs with --enforce-window, which checks the current time in
+  America/Toronto before doing anything, so a machine in another timezone (or
+  one that changes timezone) cannot silently shift the operating day. Duplicate
+  protection is the run identity, not the schedule — see market/cycle.py.
+
+  RunAtLoad is deliberately FALSE. A cycle that runs on every login is a cycle
+  that runs at unpredictable times, and this system's measurements are indexed
+  by operating day.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>{{LABEL}}</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>{{PYTHON}}</string>
+        <string>-m</string>
+        <string>intent_engine.market</string>
+        <string>{{CYCLE}}</string>
+        <string>--root</string>
+        <string>{{ROOT}}</string>
+        <string>--enforce-window</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>{{REPO}}</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PYTHONPATH</key>
+        <string>{{REPO}}/src</string>
+        <key>TRADING_MODE</key>
+        <string>PAPER</string>
+        <key>PYTHONUNBUFFERED</key>
+        <string>1</string>
+        <key>TZ</key>
+        <string>America/Toronto</string>
+    </dict>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>{{HOUR}}</integer>
+        <key>Minute</key>
+        <integer>{{MINUTE}}</integer>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>{{LOGDIR}}/{{CYCLE}}.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>{{LOGDIR}}/{{CYCLE}}.err.log</string>
+
+    <!-- A research sweep over 28 companies has taken over nine minutes on a
+         slow network. launchd's default exit timeout would kill it mid-run and
+         leave a PARTIAL record every night. -->
+    <key>ExitTimeOut</key>
+    <integer>3600</integer>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>LowPriorityIO</key>
+    <true/>
+</dict>
+</plist>

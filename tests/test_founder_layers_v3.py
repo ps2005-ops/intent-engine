@@ -12,6 +12,7 @@ from intent_engine.founder_brief import contract as C
 from intent_engine.founder_brief import gate as G
 from intent_engine.founder_brief import layers as L
 from intent_engine.founder_brief import render as R
+from tests import canonical_market as CM
 from tests.test_founder_brief_v3 import (
     _absent_market_context, _cited_report, _market_context, _rich, _sparse,
     rendered,
@@ -44,7 +45,7 @@ def test_a_real_run_lands_inside_the_full_reading_budget(tmp_path):
     """
     from tests.test_strategic_intelligence import _strategic_webapp_run
     app, c, rid = _strategic_webapp_run(tmp_path)
-    _, _, body = c.request("GET", f"/runs/{rid}")
+    _, _, body = c.request("GET", f"/runs/{rid}/answer")
     main = body.split('<main class="nar">')[1]
     intelligence = L.intelligence_words(main)
     assert L.NARRATIVE_MIN <= intelligence <= L.NARRATIVE_MAX, intelligence
@@ -62,7 +63,7 @@ def test_the_answer_alone_is_still_a_sixty_second_read(tmp_path):
     """
     from tests.test_strategic_intelligence import _strategic_webapp_run
     app, c, rid = _strategic_webapp_run(tmp_path)
-    _, _, body = c.request("GET", f"/runs/{rid}")
+    _, _, body = c.request("GET", f"/runs/{rid}/answer")
     answer = re.search(r'<section id="executive_answer".*?</section>', body,
                        re.S)
     assert answer, "the default page has no executive answer section"
@@ -211,7 +212,7 @@ def test_the_timeline_is_deduplicated():
     assert len({r["value"] for r in rows}) == len(rows)
 
 
-def test_no_control_performance_reaches_the_dashboard():
+def test_no_control_performance_reaches_the_dashboard(tmp_path):
     html = R.render_dashboard(L.build_dashboard(
         _rich(market=_market_context())))
     for banned in ("win rate", "sharpe", "alpha", "expectancy",
@@ -425,12 +426,40 @@ def test_a_withheld_run_still_answers_why_it_matters():
     assert "Why this matters" in html
 
 
-def test_the_presentation_layer_stays_reachable():
-    """Dropping its only link orphaned a working layer."""
+def test_no_layer_is_orphaned():
+    """NOTHING IS UNREACHABLE. That is what this test has always asserted.
+
+    It used to assert it by requiring one page to link to all six others,
+    which is precisely the eight-door grid §16 removed: a reader who has just
+    read a conclusion was handed a sitemap. Reachability now comes from two
+    places, and BOTH are checked here, so the guarantee is unchanged while
+    the shape is not.
+
+      * the secondary surfaces are linked from this page directly;
+      * the six story steps form a chain from step 1, and this page links
+        into step 1.
+    """
+    from intent_engine.founder_brief import flow
+
     html = rendered(_rich())
-    for href in ("/story", "/dashboard", "/brief", "/slides", "/sources",
-                 "/full"):
-        assert href in html, href
+    # Every secondary surface, directly.
+    for key in flow.SECONDARY:
+        assert f"/{key}" in html, key
+    # ...and the way back into the story.
+    assert flow.STEPS[0].suffix in html
+
+    # The chain itself: every step reachable from the one before it.
+    reached = {flow.STEPS[0].key}
+    step = flow.STEPS[0]
+    while True:
+        nav = flow.nav("r1", step.key)
+        following = flow.following(step.key)
+        if following is None:
+            break
+        assert f"/runs/r1{following.suffix}" in nav, following.key
+        reached.add(following.key)
+        step = following
+    assert reached == {s.key for s in flow.STEPS}
 
 
 def test_interface_controls_are_excluded_from_the_intelligence_budget():
@@ -685,8 +714,14 @@ def _rich_report():
     from intent_engine.strategic_intelligence.shopify_fixture import (
         SHOPIFY_COMPANY, shopify_observations,
     )
-    return build_strategic_report(company_name=SHOPIFY_COMPANY,
-                                  observations=shopify_observations()).as_dict()
+    # THE BUSINESS MODEL IS PART OF THE REAL CALL. A tension fires on signal
+    # names, and signal names are generic enough that a chip designer's
+    # partner language matched a marketplace's -- so `tension_applies` fails
+    # closed on an unread model. Production supplies it; a fixture that omits
+    # it is exercising the refusal rather than the brief.
+    return build_strategic_report(
+        company_name=SHOPIFY_COMPANY, observations=shopify_observations(),
+        business_model="SUBSCRIPTION_SOFTWARE").as_dict()
 
 
 def _rich_pair():
@@ -844,7 +879,7 @@ def test_an_absent_card_still_says_why_it_matters_and_what_would_settle_it():
             assert module.what_to_watch, module.key
 
 
-def test_the_dashboard_never_prints_the_same_row_twice():
+def test_the_dashboard_never_prints_the_same_row_twice(tmp_path):
     """MEASURED: business momentum and the strategic timeline printed the same
     dated developments, and the market card repeated its own headline in its
     rows -- Shopify showed one price sentence three times on one screen."""
@@ -858,7 +893,8 @@ def test_the_dashboard_never_prints_the_same_row_twice():
                 seen.add(key)
 
 
-def test_an_available_card_keeps_its_interpretation_after_deduplication():
+def test_an_available_card_keeps_its_interpretation_after_deduplication(
+        tmp_path):
     """Deduplication may not buy a clean screen by emptying a card: the
     release gate fails a module shown without an interpretation."""
     modules = L.build_dashboard(_rich(market=_market_context()))

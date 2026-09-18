@@ -1,0 +1,187 @@
+{
+  "contract": "break_proofs_asi2.v1",
+  "held": 18,
+  "total": 18,
+  "proofs": [
+    {
+      "name": "01_subject_rule_dropped",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: a foreign subject's dependency was read: ['freight capacity', 'lead times holding', 'customs clearance']",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "_subject_patterns",
+      "guard_under_test": "test_mentioning_a_thing_is_not_depending_on_it",
+      "bytes_before": 33387,
+      "bytes_after": 33356
+    },
+    {
+      "name": "02_hindsight_wall_removed",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: the T0 reading was given text filed after T0",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "_text_before",
+      "guard_under_test": "test_the_t0_reading_cannot_see_a_document_filed_after_t0",
+      "bytes_before": 19095,
+      "bytes_after": 19072
+    },
+    {
+      "name": "03_rehearsal_label_forgeable",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: a forged label survived to the row",
+      "target_kind": "PERSISTENCE",
+      "mutated_symbol": "LearningDecisionDelta.as_dict",
+      "guard_under_test": "test_the_label_cannot_be_overridden_by_construction",
+      "bytes_before": 19095,
+      "bytes_after": 19051
+    },
+    {
+      "name": "04_company_name_counted_as_a_ground",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: a reading was grounded on the company's own name: ('law',)",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "ground.stripped",
+      "guard_under_test": "test_grounding_does_not_count_the_company_name_as_a_ground",
+      "bytes_before": 15741,
+      "bytes_after": 15761
+    },
+    {
+      "name": "05_class_prior_fallback_silent",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: the class-prior fallback went unstated: Every variable in this question comes from what a subscription software business normally decides: this company does not state publicly what a unit of its reven",
+      "target_kind": "RENDERER",
+      "mutated_symbol": "_basis_sentence",
+      "guard_under_test": "test_an_unread_company_keeps_the_class_prior_and_says_that_it_did",
+      "bytes_before": 65773,
+      "bytes_after": 65750
+    },
+    {
+      "name": "06_unestablished_slot_claimed_as_the_company_s",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: a slot nothing established was credited to the company",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "question_basis",
+      "guard_under_test": "test_an_unread_company_keeps_the_class_prior_and_says_that_it_did",
+      "bytes_before": 65773,
+      "bytes_after": 65748
+    },
+    {
+      "name": "07_buyer_injected_into_every_decision",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: the buyer reached a decision its identity does not bear on",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "_BUYER_BEARS_ON",
+      "guard_under_test": "test_a_buyer_does_not_reach_a_decision_it_does_not_bear_on",
+      "bytes_before": 65773,
+      "bytes_after": 65795
+    },
+    {
+      "name": "08_billing_unit_selects_the_archetype",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: stating a billing unit changed the decision: PRICING -> M&A",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "_score_archetypes",
+      "guard_under_test": "test_a_billing_unit_does_not_change_which_decision_is_faced",
+      "bytes_before": 65773,
+      "bytes_after": 65880
+    },
+    {
+      "name": "09_ungrounded_reading_asks_for_nothing",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: nothing was established and nothing was asked for",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "information_priorities",
+      "guard_under_test": "test_an_ungrounded_reading_names_what_would_have_to_be_learned",
+      "bytes_before": 15741,
+      "bytes_after": 15724
+    },
+    {
+      "name": "10_generic_buyer_accepted",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: a buyer naming everybody was accepted: 'businesses'",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "_GENERIC_BUYER",
+      "guard_under_test": "test_a_buyer_that_names_everybody_is_refused",
+      "bytes_before": 33387,
+      "bytes_after": 33313
+    },
+    {
+      "name": "11_marketing_adjective_becomes_a_buyer",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: marketing copy became a buyer: 'best security teams'",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "_EVALUATIVE",
+      "guard_under_test": "test_marketing_adjectives_do_not_become_a_buyer",
+      "bytes_before": 33387,
+      "bytes_after": 33333
+    },
+    {
+      "name": "12_delta_compared_against_a_placeholder",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: the comparator is not a real reading: 'the class prior question'",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "select.prior_question",
+      "guard_under_test": "test_the_delta_comparator_is_a_real_second_reading",
+      "bytes_before": 65773,
+      "bytes_after": 65748
+    },
+    {
+      "name": "13_buyer_read_from_a_foreign_subject",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: a buyer was read from a sentence about somebody else: 'ransomware operators'",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "_first_match.needs_subject",
+      "guard_under_test": "test_a_buyer_is_not_read_from_a_sentence_about_somebody_else",
+      "bytes_before": 33387,
+      "bytes_after": 33358
+    },
+    {
+      "name": "14_first_person_without_word_boundaries",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: the first-person pattern matched inside 'however'",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "_FIRST_PERSON",
+      "guard_under_test": "test_the_first_person_pattern_requires_word_boundaries",
+      "bytes_before": 33387,
+      "bytes_after": 33368
+    },
+    {
+      "name": "15_unrecognisable_legal_name_shown_alone",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: the run's display name is the bare legal name again",
+      "target_kind": "RENDERER",
+      "mutated_symbol": "resolve.company_name",
+      "guard_under_test": "test_a_legal_name_sharing_no_word_with_the_typed_name_carries_it",
+      "bytes_before": 14958,
+      "bytes_after": 14954
+    },
+    {
+      "name": "16_quote_ends_on_a_joining_word",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: quote ends on 'the'",
+      "target_kind": "RENDERER",
+      "mutated_symbol": "_drop_dangling",
+      "guard_under_test": "test_a_truncated_quote_does_not_end_on_a_joining_word",
+      "bytes_before": 9443,
+      "bytes_after": 9429
+    },
+    {
+      "name": "17_filing_equity_note_becomes_a_billing_unit",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: an equity note became a billing unit: 'share for the total shares withheld'",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "_acceptable.BILLING_UNIT",
+      "guard_under_test": "test_a_price_per_share_in_an_equity_note_is_not_a_billing_unit",
+      "bytes_before": 33387,
+      "bytes_after": 33364
+    },
+    {
+      "name": "18_a_non_population_becomes_a_buyer",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: a non-population was accepted as a buyer: 'construction industry ecosystem'",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "_is_population",
+      "guard_under_test": "test_a_phrase_that_is_not_a_population_is_not_a_buyer",
+      "bytes_before": 33387,
+      "bytes_after": 33368
+    }
+  ]
+}

@@ -51,6 +51,22 @@ from .db import get_connection
 
 DEFAULT_LEDGER_PATH = Path("data/prediction_ledger.db")
 
+#: The version of the stored schema, published from the module that OWNS it.
+#:
+#: `executive/snapshots.py` has reported a prediction version since snapshots
+#: existed, and imported this name to get it -- from a module that never
+#: defined it. The import raised every time and the handler supplied the same
+#: string the import would have, so the failure was invisible: success and
+#: fallback were indistinguishable by construction.
+#:
+#: Still `v1`, and that is not inertia. Task M5 added five fields for
+#: machine-evaluable market predictions, and every one of them lives inside
+#: the JSON `data` blob -- the `predictions` TABLE in `_ensure_schema` is
+#: unchanged since it was written. A reader of the table sees the same columns
+#: it always did, so the version it is told is the version it gets. Bump this
+#: when `_ensure_schema` changes, not when a field is added to `Prediction`.
+PREDICTION_SCHEMA_VERSION = "prediction_ledger.v1"
+
 PredictionSource = Literal["premortem", "scrap", "digest", "manual", "market", "baseline"]
 PredictionOutcome = Literal["happened", "did_not_happen", "unresolvable"]
 ResolutionSource = Literal["tiingo", "fred"]

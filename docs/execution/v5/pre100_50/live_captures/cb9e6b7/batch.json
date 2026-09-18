@@ -1,0 +1,213 @@
+[
+  {
+    "company": "The Goldman Sachs Group, Inc.",
+    "deployed_sha": "cb9e6b7",
+    "status": "READY",
+    "run_id": "01M0JWBWJSK3V34J4MPJAFZMSR",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/cb9e6b7/the_goldman_sachs_group_inc",
+    "process_before": {
+      "boot_id": "2e390503615a4d2d",
+      "started_at": 1787340052.1714675,
+      "uptime_seconds": 68.7
+    },
+    "entry_domain": "goldmansachs.com",
+    "seconds": 201,
+    "first_useful": 201,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JWBWJSK3V34J4MPJAFZMSR/intro",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0JWBWJSK3V34J4MPJAFZMSR/progress: timeout",
+      "GET /runs/01M0JWBWJSK3V34J4MPJAFZMSR/progress: timeout",
+      "GET /runs/01M0JWBWJSK3V34J4MPJAFZMSR/progress: timeout"
+    ]
+  },
+  {
+    "company": "Advanced Micro Devices, Inc.",
+    "deployed_sha": "cb9e6b7",
+    "status": "FAILED",
+    "run_id": "01M0JWRXG59RA1DR7CV3XMAR92",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/cb9e6b7/advanced_micro_devices_inc",
+    "process_before": {
+      "boot_id": "2e390503615a4d2d",
+      "started_at": 1787340052.1714675,
+      "uptime_seconds": 497.1
+    },
+    "entry_domain": "amd.com",
+    "seconds": 382,
+    "first_useful": null,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JWRXG59RA1DR7CV3XMAR92/progress"
+  },
+  {
+    "company": "NVIDIA Corporation",
+    "deployed_sha": "cb9e6b7",
+    "status": "FAILED",
+    "run_id": "01M0JX5S3DNJZK0E9M21RPHY64",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/cb9e6b7/nvidia_corporation",
+    "process_before": {
+      "boot_id": "2e390503615a4d2d",
+      "started_at": 1787340052.1714675,
+      "uptime_seconds": 882.8
+    },
+    "entry_domain": "",
+    "seconds": 371,
+    "first_useful": null,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JX5S3DNJZK0E9M21RPHY64/progress"
+  },
+  {
+    "company": "Pfizer Inc.",
+    "deployed_sha": "cb9e6b7",
+    "status": "READY",
+    "run_id": "01M0JXJGQ5E0R6BX3GMWBRNPMA",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/cb9e6b7/pfizer_inc",
+    "process_before": {
+      "boot_id": "2e390503615a4d2d",
+      "started_at": 1787340052.1714675,
+      "uptime_seconds": 1308.2
+    },
+    "entry_domain": "pfizer.com",
+    "seconds": 416,
+    "first_useful": 416,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JXJGQ5E0R6BX3GMWBRNPMA",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0JXJGQ5E0R6BX3GMWBRNPMA/progress: timeout",
+      "GET /runs/01M0JXJGQ5E0R6BX3GMWBRNPMA/progress: timeout",
+      "GET /runs/01M0JXJGQ5E0R6BX3GMWBRNPMA/progress: timeout"
+    ]
+  },
+  {
+    "company": "NIKE, Inc.",
+    "deployed_sha": "cb9e6b7",
+    "status": "READY",
+    "run_id": "01M0JY6H3ZB0GJZF0TA7SSQ2YZ",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/cb9e6b7/nike_inc",
+    "process_before": {
+      "boot_id": "2e390503615a4d2d",
+      "started_at": 1787340052.1714675,
+      "uptime_seconds": 1991.4
+    },
+    "entry_domain": "nike.com",
+    "seconds": 177,
+    "first_useful": 177,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JY6H3ZB0GJZF0TA7SSQ2YZ/intro",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0JY6H3ZB0GJZF0TA7SSQ2YZ/progress: timeout",
+      "GET /runs/01M0JY6H3ZB0GJZF0TA7SSQ2YZ/progress: timeout"
+    ]
+  },
+  {
+    "company": "PepsiCo, Inc.",
+    "deployed_sha": "cb9e6b7",
+    "status": "READY",
+    "run_id": "01M0JYH81CR6X0NV806J8BBXAC",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/cb9e6b7/pepsico_inc",
+    "process_before": {
+      "boot_id": "2e390503615a4d2d",
+      "started_at": 1787340052.1714675,
+      "uptime_seconds": 2343.0
+    },
+    "entry_domain": "",
+    "seconds": 340,
+    "first_useful": 340,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JYH81CR6X0NV806J8BBXAC/intro",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS_REFRESHING",
+      "intro": "FULL_ANALYSIS_REFRESHING",
+      "slides": "FULL_ANALYSIS_REFRESHING",
+      "full": "FULL_ANALYSIS_REFRESHING",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [
+      "FULL_ANALYSIS",
+      "FULL_ANALYSIS_REFRESHING"
+    ],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0JYH81CR6X0NV806J8BBXAC/progress: timeout",
+      "GET /runs/01M0JYH81CR6X0NV806J8BBXAC/progress: timeout",
+      "GET /runs/01M0JYH81CR6X0NV806J8BBXAC/progress: timeout",
+      "GET /runs/01M0JYH81CR6X0NV806J8BBXAC/progress: timeout"
+    ]
+  },
+  {
+    "company": "Meta Platforms, Inc.",
+    "deployed_sha": "cb9e6b7",
+    "status": "RUN_LOST",
+    "run_id": "01M0JZ5E1XN8MC7PPXQ0MJJ29Y",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/cb9e6b7/meta_platforms_inc",
+    "process_before": {
+      "boot_id": "2e390503615a4d2d",
+      "started_at": 1787340052.1714675,
+      "uptime_seconds": 3004.4
+    },
+    "entry_domain": "",
+    "seconds": 279,
+    "first_useful": 279,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JZ5E1XN8MC7PPXQ0MJJ29Y/intro",
+    "outcome": "FULL_ANALYSIS_REFRESHING",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS_REFRESHING",
+      "intro": "FULL_ANALYSIS_REFRESHING",
+      "slides": "FULL_ANALYSIS_REFRESHING",
+      "story": "WORKING",
+      "history": "WORKING",
+      "connect": "WORKING"
+    },
+    "outcome_disagreement": [
+      "FULL_ANALYSIS_REFRESHING",
+      "WORKING"
+    ],
+    "run_lost_after_routes": true,
+    "answers_captured": 0,
+    "process_after": {
+      "boot_id": "460f73b07edf4631",
+      "started_at": 1787343427.880808,
+      "uptime_seconds": 7.9
+    },
+    "restart_observed": true
+  }
+]

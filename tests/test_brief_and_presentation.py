@@ -382,16 +382,25 @@ def _webapp_run(tmp_path):
 def test_the_guest_default_is_the_founder_brief_not_the_full_report(tmp_path):
     """ORIGINAL SAFEGUARD unchanged: the default must not be the full report.
 
-    v3 changed only the destination -- the 60-second founder brief, which is
-    strictly less to read than the executive brief this test previously
-    accepted. The assertions still catch the original failure: a default that
-    reverted to the full analysis would carry its section markers and would
-    not carry the founder-brief ones.
+    v3 pointed the default at the 60-second founder brief. v5 points it at
+    STEP 1 of the six-step story, which is less to read again and is the
+    first page of a narrative rather than a standalone summary -- so the
+    default is now a redirect and the test follows it.
+
+    THE ASSERTION THIS TEST HAS ALWAYS MADE IS UNCHANGED: whatever the guest
+    lands on must not be the full analysis. That is still checked below, on
+    the page they actually reach.
     """
     app, c, rid = _webapp_run(tmp_path)
-    status, headers, body = c.request("GET", f"/runs/{rid}")
+    status, headers, _body = c.request("GET", f"/runs/{rid}")
+    assert status == "303 See Other"
+    assert headers["Location"] == f"/runs/{rid}/intro"
+    status, _headers, body = c.request("GET", headers["Location"])
     assert status == "200 OK"
-    assert "Why this matters" in body
+    # Step 1 answers "what is this company and what is the argument about",
+    # which is what "Why this matters" was standing in for.
+    assert "The strategic read" in body
+    assert "What matters now" in body
     assert "Executive Overview" not in body
     assert "Evidence Library" not in body
 
@@ -464,14 +473,21 @@ def test_the_central_view_survives_when_it_adds_something():
 
 
 def test_all_three_layers_are_reachable_from_each_other(tmp_path):
+    """Each layer still serves, and each still offers a way onward.
+
+    It used to be checked by requiring all three names on all three pages,
+    which is the grid. Two of these three are STEPS now and carry the
+    sequential nav; one is a secondary surface and carries the way back. Both
+    shapes are checked, so a page that offered no exit at all still fails.
+    """
     app, c, rid = _webapp_run(tmp_path)
-    for path in (f"/runs/{rid}/brief", f"/runs/{rid}/slides",
-                 f"/runs/{rid}/full"):
+    for path, expected in ((f"/runs/{rid}/brief", "Other views"),
+                           (f"/runs/{rid}/slides", "Step 2 of 6"),
+                           (f"/runs/{rid}/full", "Step 3 of 6")):
         status, _, body = c.request("GET", path)
         assert status == "200 OK", path
-        assert "Executive brief" in body
-        assert "Presentation" in body
-        assert "Full analysis" in body
+        assert expected in body, (path, expected)
+        assert f"/runs/{rid}" in body, path
 
 
 def test_the_presentation_renders_for_a_real_run(tmp_path):

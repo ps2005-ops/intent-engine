@@ -1,0 +1,60 @@
+{
+ "as_of": "2026-08-05",
+ "causal_pathways": [],
+ "company_display_name": "stripe",
+ "company_id": "stripe",
+ "competitor_reactions": [],
+ "disclaimer": "Descriptive strategic context derived from public evidence. Not a recommendation, not a forecast, and not a statement about any investment position.",
+ "evidence_ids": [
+  "ev_a980264b9a77c9ab"
+ ],
+ "expectation_mismatches": [],
+ "export_version": "strategic_market_intel.v1",
+ "freshness": {
+  "age_days": 0,
+  "as_of": "2026-08-05",
+  "note": "reflects strategic evidence available on this date",
+  "stale": false,
+  "status": "observed"
+ },
+ "generated_at": "2026-08-05T10:50:46+00:00",
+ "hidden_states": [],
+ "information_priorities": [],
+ "interactions": [],
+ "interpretation_allowed": [
+  "A named actor took a stated action on a stated date.",
+  "The evidence has shifted the weight across possible postures.",
+  "A preregistered expectation was contradicted by what was observed.",
+  "A stated mechanism connects one factor to another, with its lag.",
+  "This upcoming observation would most reduce a stated uncertainty."
+ ],
+ "interpretation_forbidden": [
+  "any buy/sell/hold implication, however hedged",
+  "any claim about the engine's trading performance",
+  "any assertion that a competitor's motive is known",
+  "any forecast of a price or a financial result",
+  "any presentation of a posture probability as a certainty"
+ ],
+ "limitations": [],
+ "pricing_actions": [],
+ "strategic_beliefs": [
+  {
+   "basis": "opened by 1 translated evidence item(s) of type GUIDANCE_REVISION, effective sample 0.90",
+   "confidence": 0.586,
+   "direction_of_last_change": null,
+   "evidence_ids": [
+    "ev_a980264b9a77c9ab"
+   ],
+   "last_updated": "2026-08-05",
+   "limitations": [
+    "one period's result is a data point, not a trend"
+   ],
+   "proposition": "stripe is seeing demand strengthen rather than plateau",
+   "subject": "stripe",
+   "update_method": "DECLARED"
+  }
+ ],
+ "subject_names": [
+  "stripe"
+ ]
+}

@@ -1,0 +1,66 @@
+[
+  {
+    "company": "Meta Platforms, Inc.",
+    "deployed_sha": "b37bee2",
+    "status": "FAILED",
+    "run_id": "01M0HVZWAQAMC4ME4E7BZ80XB3",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/b37bee2/meta_platforms_inc",
+    "process_before": {
+      "boot_id": "1d80da0ebd18404e",
+      "started_at": 1787306143.9528165,
+      "uptime_seconds": 29.5
+    },
+    "entry_domain": "",
+    "seconds": 219,
+    "first_useful": null,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HVZWAQAMC4ME4E7BZ80XB3/progress"
+  },
+  {
+    "company": "ServiceNow, Inc.",
+    "deployed_sha": "b37bee2",
+    "status": "READY",
+    "run_id": "01M0HWB82YW9DQG9M1SKGJHS92",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/b37bee2/servicenow_inc",
+    "process_before": {
+      "boot_id": "1d80da0ebd18404e",
+      "started_at": 1787306143.9528165,
+      "uptime_seconds": 404.5
+    },
+    "entry_domain": "servicenow.com",
+    "seconds": 67,
+    "first_useful": 67,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HWB82YW9DQG9M1SKGJHS92",
+    "outcome": "TRUE_EVIDENCE_SCARCITY",
+    "outcome_by_route": {
+      "run": "TRUE_EVIDENCE_SCARCITY",
+      "intro": "TRUE_EVIDENCE_SCARCITY",
+      "slides": "TRUE_EVIDENCE_SCARCITY",
+      "full": "TRUE_EVIDENCE_SCARCITY",
+      "story": "TRUE_EVIDENCE_SCARCITY",
+      "history": "TRUE_EVIDENCE_SCARCITY",
+      "connect": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "Adobe Inc.",
+    "deployed_sha": "b37bee2",
+    "status": "FAILED",
+    "run_id": "01M0HWPPD365D9PGB5JEWA0PT9",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/b37bee2/adobe_inc",
+    "process_before": {
+      "boot_id": "1d80da0ebd18404e",
+      "started_at": 1787306143.9528165,
+      "uptime_seconds": 779.6
+    },
+    "entry_domain": "adobe.com",
+    "seconds": 218,
+    "first_useful": null,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HWPPD365D9PGB5JEWA0PT9/progress"
+  }
+]

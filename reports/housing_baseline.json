@@ -1,0 +1,382 @@
+{
+  "DEEP/BEFORE": {
+    "block": [
+      "UNRATE",
+      "CPIAUCSL",
+      "DFF",
+      "DGS2",
+      "DGS10",
+      "HOUST",
+      "INDPRO"
+    ],
+    "families": {
+      "HOUST_180d": {
+        "episodes": 18,
+        "features": 18,
+        "gate_passed": false,
+        "ladder": {
+          "AR": {
+            "brier": 0.25177,
+            "directional_accuracy": 0.4562,
+            "features": 0,
+            "n": 480,
+            "name": "AR",
+            "note": ""
+          },
+          "BASE_RATE": {
+            "brier": 0.25248,
+            "directional_accuracy": 0.4396,
+            "features": 0,
+            "n": 480,
+            "name": "BASE_RATE",
+            "note": ""
+          },
+          "MACRO": {
+            "brier": 0.27757,
+            "directional_accuracy": 0.5625,
+            "features": 18,
+            "n": 480,
+            "name": "MACRO",
+            "note": ""
+          },
+          "PERSISTENCE": {
+            "brier": 0.3543,
+            "directional_accuracy": 0.4188,
+            "features": 0,
+            "n": 480,
+            "name": "PERSISTENCE",
+            "note": ""
+          }
+        },
+        "reason": "the macro baseline (Brier 0.27757) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block."
+      },
+      "HOUST_240d": {
+        "episodes": 18,
+        "features": 18,
+        "gate_passed": false,
+        "ladder": {
+          "AR": {
+            "brier": 0.25516,
+            "directional_accuracy": 0.4505,
+            "features": 0,
+            "n": 475,
+            "name": "AR",
+            "note": ""
+          },
+          "BASE_RATE": {
+            "brier": 0.25377,
+            "directional_accuracy": 0.4168,
+            "features": 0,
+            "n": 475,
+            "name": "BASE_RATE",
+            "note": ""
+          },
+          "MACRO": {
+            "brier": 0.30247,
+            "directional_accuracy": 0.5411,
+            "features": 18,
+            "n": 475,
+            "name": "MACRO",
+            "note": ""
+          },
+          "PERSISTENCE": {
+            "brier": 0.33421,
+            "directional_accuracy": 0.4589,
+            "features": 0,
+            "n": 475,
+            "name": "PERSISTENCE",
+            "note": ""
+          }
+        },
+        "reason": "the macro baseline (Brier 0.30247) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block."
+      }
+    }
+  },
+  "DEEP/WITH_HOUSING_BLOCK": {
+    "block": [
+      "UNRATE",
+      "CPIAUCSL",
+      "DFF",
+      "DGS2",
+      "DGS10",
+      "INDPRO",
+      "BAA",
+      "MORTGAGE30US",
+      "HOUST"
+    ],
+    "families": {
+      "HOUST_180d": {
+        "episodes": 18,
+        "features": 22,
+        "gate_passed": false,
+        "ladder": {
+          "AR": {
+            "brier": 0.25177,
+            "directional_accuracy": 0.4562,
+            "features": 0,
+            "n": 480,
+            "name": "AR",
+            "note": ""
+          },
+          "BASE_RATE": {
+            "brier": 0.25248,
+            "directional_accuracy": 0.4396,
+            "features": 0,
+            "n": 480,
+            "name": "BASE_RATE",
+            "note": ""
+          },
+          "MACRO": {
+            "brier": 0.27242,
+            "directional_accuracy": 0.5542,
+            "features": 22,
+            "n": 480,
+            "name": "MACRO",
+            "note": ""
+          },
+          "PERSISTENCE": {
+            "brier": 0.3543,
+            "directional_accuracy": 0.4188,
+            "features": 0,
+            "n": 480,
+            "name": "PERSISTENCE",
+            "note": ""
+          }
+        },
+        "reason": "the macro baseline (Brier 0.27242) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block."
+      },
+      "HOUST_240d": {
+        "episodes": 18,
+        "features": 22,
+        "gate_passed": false,
+        "ladder": {
+          "AR": {
+            "brier": 0.25516,
+            "directional_accuracy": 0.4505,
+            "features": 0,
+            "n": 475,
+            "name": "AR",
+            "note": ""
+          },
+          "BASE_RATE": {
+            "brier": 0.25377,
+            "directional_accuracy": 0.4168,
+            "features": 0,
+            "n": 475,
+            "name": "BASE_RATE",
+            "note": ""
+          },
+          "MACRO": {
+            "brier": 0.29316,
+            "directional_accuracy": 0.5558,
+            "features": 22,
+            "n": 475,
+            "name": "MACRO",
+            "note": ""
+          },
+          "PERSISTENCE": {
+            "brier": 0.33421,
+            "directional_accuracy": 0.4589,
+            "features": 0,
+            "n": 475,
+            "name": "PERSISTENCE",
+            "note": ""
+          }
+        },
+        "reason": "the macro baseline (Brier 0.29316) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block."
+      }
+    }
+  },
+  "MODERN/BEFORE": {
+    "block": [
+      "UNRATE",
+      "CPIAUCSL",
+      "DFF",
+      "DGS2",
+      "DGS10",
+      "HOUST",
+      "INDPRO",
+      "PCEC96"
+    ],
+    "families": {
+      "HOUST_180d": {
+        "episodes": 13,
+        "features": 20,
+        "gate_passed": false,
+        "ladder": {
+          "AR": {
+            "brier": 0.27073,
+            "directional_accuracy": 0.5345,
+            "features": 0,
+            "n": 275,
+            "name": "AR",
+            "note": ""
+          },
+          "BASE_RATE": {
+            "brier": 0.25609,
+            "directional_accuracy": 0.4582,
+            "features": 0,
+            "n": 275,
+            "name": "BASE_RATE",
+            "note": ""
+          },
+          "MACRO": {
+            "brier": 0.3035,
+            "directional_accuracy": 0.5745,
+            "features": 20,
+            "n": 275,
+            "name": "MACRO",
+            "note": ""
+          },
+          "PERSISTENCE": {
+            "brier": 0.36864,
+            "directional_accuracy": 0.3891,
+            "features": 0,
+            "n": 275,
+            "name": "PERSISTENCE",
+            "note": ""
+          }
+        },
+        "reason": "the macro baseline (Brier 0.30350) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block."
+      },
+      "HOUST_240d": {
+        "episodes": 13,
+        "features": 20,
+        "gate_passed": false,
+        "ladder": {
+          "AR": {
+            "brier": 0.26563,
+            "directional_accuracy": 0.48,
+            "features": 0,
+            "n": 275,
+            "name": "AR",
+            "note": ""
+          },
+          "BASE_RATE": {
+            "brier": 0.25638,
+            "directional_accuracy": 0.44,
+            "features": 0,
+            "n": 275,
+            "name": "BASE_RATE",
+            "note": ""
+          },
+          "MACRO": {
+            "brier": 0.30453,
+            "directional_accuracy": 0.5491,
+            "features": 20,
+            "n": 275,
+            "name": "MACRO",
+            "note": ""
+          },
+          "PERSISTENCE": {
+            "brier": 0.33227,
+            "directional_accuracy": 0.4618,
+            "features": 0,
+            "n": 275,
+            "name": "PERSISTENCE",
+            "note": ""
+          }
+        },
+        "reason": "the macro baseline (Brier 0.30453) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block."
+      }
+    }
+  },
+  "MODERN/WITH_HOUSING_BLOCK": {
+    "block": [
+      "UNRATE",
+      "CPIAUCSL",
+      "DFF",
+      "DGS2",
+      "DGS10",
+      "INDPRO",
+      "BAA",
+      "T10Y3M",
+      "MORTGAGE30US",
+      "HOUST"
+    ],
+    "families": {
+      "HOUST_180d": {
+        "episodes": 13,
+        "features": 24,
+        "gate_passed": false,
+        "ladder": {
+          "AR": {
+            "brier": 0.27073,
+            "directional_accuracy": 0.5345,
+            "features": 0,
+            "n": 275,
+            "name": "AR",
+            "note": ""
+          },
+          "BASE_RATE": {
+            "brier": 0.25609,
+            "directional_accuracy": 0.4582,
+            "features": 0,
+            "n": 275,
+            "name": "BASE_RATE",
+            "note": ""
+          },
+          "MACRO": {
+            "brier": 0.31081,
+            "directional_accuracy": 0.5745,
+            "features": 24,
+            "n": 275,
+            "name": "MACRO",
+            "note": ""
+          },
+          "PERSISTENCE": {
+            "brier": 0.36864,
+            "directional_accuracy": 0.3891,
+            "features": 0,
+            "n": 275,
+            "name": "PERSISTENCE",
+            "note": ""
+          }
+        },
+        "reason": "the macro baseline (Brier 0.31081) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block."
+      },
+      "HOUST_240d": {
+        "episodes": 13,
+        "features": 24,
+        "gate_passed": false,
+        "ladder": {
+          "AR": {
+            "brier": 0.26563,
+            "directional_accuracy": 0.48,
+            "features": 0,
+            "n": 275,
+            "name": "AR",
+            "note": ""
+          },
+          "BASE_RATE": {
+            "brier": 0.25638,
+            "directional_accuracy": 0.44,
+            "features": 0,
+            "n": 275,
+            "name": "BASE_RATE",
+            "note": ""
+          },
+          "MACRO": {
+            "brier": 0.28057,
+            "directional_accuracy": 0.5382,
+            "features": 24,
+            "n": 275,
+            "name": "MACRO",
+            "note": ""
+          },
+          "PERSISTENCE": {
+            "brier": 0.33227,
+            "directional_accuracy": 0.4618,
+            "features": 0,
+            "n": 275,
+            "name": "PERSISTENCE",
+            "note": ""
+          }
+        },
+        "reason": "the macro baseline (Brier 0.28057) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block."
+      }
+    }
+  },
+  "note": "H7's base block is frozen in its preregistration hash and was not touched. This asks only whether housing becomes an eligible target.",
+  "verdict": "BASELINE_INVALID"
+}

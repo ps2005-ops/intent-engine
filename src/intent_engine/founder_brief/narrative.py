@@ -357,9 +357,24 @@ def _excerpt(obs: dict) -> str:
         if flat and not is_filing_furniture(flat):
             text = flat
             break
+    # A CITATION ENDS WHERE A SENTENCE ENDS.
+    #
+    # The word budget used to cut mid-clause and append "…", so a reader
+    # scanning the evidence met a column of fragments -- and the same
+    # fragment, promoted, was the first line of the whole product. Cutting at
+    # a sentence boundary keeps the quotation a quotation. The word cut
+    # survives only for a passage with no sentence end inside the budget at
+    # all, which is a genuine elision and reads as one.
     words = text.split()
     if len(words) > _EXCERPT_WORDS:
-        text = " ".join(words[:_EXCERPT_WORDS]).rstrip(",;:.") + "…"
+        budget = len(" ".join(words[:_EXCERPT_WORDS]))
+        kept = ""
+        for match in re.finditer(r"[^.!?]*[.!?]", text):
+            candidate = text[:match.end()].strip()
+            if len(candidate) > budget:
+                break
+            kept = candidate
+        text = kept or (" ".join(words[:_EXCERPT_WORDS]).rstrip(",;:.") + "…")
     return text
 
 
@@ -423,7 +438,7 @@ def _trim_option(option):
     return replace(option, key_assumption=pointer)
 
 def _executive_answer(company, decision, brief, consequence, supporting,
-                      said) -> Section:
+                      said, contract=None) -> Section:
     """Two to four complete sentences: what appears to be happening, why it
     matters, and the most important uncertainty.
 
@@ -440,10 +455,47 @@ def _executive_answer(company, decision, brief, consequence, supporting,
         getattr(brief, "biggest_risk", "")) or _flat(decision.limitation)
 
     if decision.readiness == WITHHELD:
-        paras.append(f"No strategic reading of {company} cleared the evidence "
-                     f"bar, so none is asserted here.")
         reason = _flat(decision.unsafe_because) or _flat(
             getattr(brief, "withheld_reason", ""))
+        # D17. Whether a reading EXISTS is one fact, decided once, in
+        # `executive.contract`. This screen used to decide it from this run
+        # alone and announce "none is asserted here" about a company the
+        # X-Ray was, on the next click, giving a supported pricing decision
+        # for.
+        if contract is not None and getattr(contract, "reading_exists", False):
+            # WHERE THE READING IS DECIDES WHICH SENTENCE IS TRUE.
+            #
+            # `BOUNDED_READ_ONLY` means no curated transition matched and no
+            # market reading is published, but this run DID compose an
+            # economic read -- the one every section below this paragraph is
+            # already rendering. Pointing at the X-Ray would send the reader
+            # away from the page that has it, and calling it "supported"
+            # would overclaim a read its own producer calls bounded.
+            from intent_engine.executive.contract import BOUNDED_READ_ONLY
+            if getattr(contract, "merge_state", "") == BOUNDED_READ_ONLY:
+                paras.append(
+                    f"No curated transition pattern matched {company}, so "
+                    f"what follows is read from the public record directly "
+                    f"rather than from a known pattern.")
+                paras.append(
+                    "It is bounded for that reason, and every claim below "
+                    "names the evidence it rests on.")
+                return Section(EXECUTIVE_ANSWER, "The answer",
+                               paragraphs=tuple(paras))
+            paras.append(f"A supported reading of {company} exists and is set "
+                         f"out on the Executive X-Ray.")
+            paras.append(getattr(contract, "run_contribution", "") or
+                         "This run did not add enough independent evidence "
+                         "to strengthen it.")
+            if reason:
+                paras.append(end_sentence(
+                    f"What this run could not establish on its own: "
+                    f"{as_clause(reason, company)}"))
+                said.remember(reason)
+            return Section(EXECUTIVE_ANSWER, "The answer",
+                           paragraphs=tuple(paras))
+        paras.append(f"No strategic reading of {company} cleared the evidence "
+                     f"bar, so none is asserted here.")
         if reason:
             paras.append(end_sentence(
                 f"That absence is itself the finding: "
@@ -691,9 +743,9 @@ def _options(company, decision, said) -> Section:
                        kind="options", options=options)
     paras = []
     if decision.readiness == INVESTIGATION_REQUIRED:
-        paras.append("No options are put forward, because a choice between "
-                     "one supported course of action and a blank is not a "
-                     "choice. What is missing is named below.")
+        paras.append("This run puts no options forward, because a choice "
+                     "between one supported course of action and a blank is "
+                     "not a choice. What is missing is named below.")
         gap = _flat(decision.evidence_required[0]) \
             if decision.evidence_required else ""
         # "What to do next" states this gap when no falsification check exists,
@@ -706,10 +758,12 @@ def _options(company, decision, said) -> Section:
                 f"{as_clause(gap, company)}"))
             said.remember(gap)
     elif decision.readiness == WITHHELD:
-        paras.append("No options are put forward. Nothing was established "
-                     "firmly enough for one course of action to be weighed "
-                     "against another, and options built on that would be "
-                     "the product inventing a choice.")
+        # D27, same scoping. "No options are put forward" read as a verdict
+        # on the company beside a lead that asserted a supported reading.
+        paras.append("This run puts no options forward. It established "
+                     "nothing firmly enough for one course of action to be "
+                     "weighed against another, and options built on that "
+                     "would be the product inventing a choice.")
         if decision.evidence_required:
             paras.append(end_sentence(
                 f"The minimum needed before any of this becomes decidable: "
@@ -1096,7 +1150,8 @@ def _outside_conditions(external, said) -> Section:
 
 def build_narrative(*, company: str, brief, report: Optional[dict] = None,
                     observations: Optional[Sequence[dict]] = None,
-                    decision=None, actions=(), external=None) -> Narrative:
+                    decision=None, actions=(), external=None,
+                    contract=None) -> Narrative:
     """The whole default screen, from the one decision and the one brief.
 
     `decision` is accepted so a caller that already resolved it does not
@@ -1189,7 +1244,7 @@ def build_narrative(*, company: str, brief, report: Optional[dict] = None,
     said = SaidOnce()
     built = [
         _executive_answer(company, decision, brief, consequence,
-                          statements, said),
+                          statements, said, contract),
         _why_now(company, decision, brief, obs, said),
         _what_changed(company, brief, obs, said),
         _business_consequence(company, decision, brief, consequence,
