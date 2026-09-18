@@ -329,3 +329,69 @@ def test_the_repair_keeps_every_unit_that_was_verified_on_a_real_page(
     obj = DO.build(company=company, published_text=text)
     assert obj.billing_unit.known, obj.billing_unit.reason
     assert want in obj.billing_unit.value, obj.billing_unit.value
+
+
+# --- a closed verb list cannot hold English ---------------------------------
+
+@pytest.mark.parametrize("company,text", [
+    ("Vanta", "Vanta is built for define the controls you need to satisfy "
+              "auditors."),
+    ("Island", "Island is built for saying what the browser should allow at "
+               "work."),
+    ("Motive", "Motive is built for safety managers prioritize coaching "
+               "across fleets."),
+    ("Procore", "Procore is built for the construction industry ecosystem "
+                "worldwide."),
+    ("ServiceTitan", "ServiceTitan is built for the nuanced dynamics of the "
+                     "trades today."),
+])
+def test_a_phrase_that_is_not_a_population_is_not_a_buyer(company, text):
+    """MEASURED LIVE across cohorts A and B (a762b2bf).
+
+    Five companies reached the central question with a buyer that is not a
+    population: "define", "saying", "safety managers prioritize",
+    "construction industry ecosystem", "the nuanced dynamics of the trades".
+
+    Every one escaped `_COMPLEMENT_VERBS`, which is a CLOSED list of verbs --
+    and English is not closed. Adding "prioritize", "define" and "say" would
+    have failed on the fourth verb. The test is positive instead: the head of
+    the phrase must look like a population, and no word may carry a verb
+    inflection.
+    """
+    obj = DO.build(company=company, published_text=text)
+    assert not obj.buyer.known, f"{obj.buyer.value!r} was accepted as a buyer"
+
+
+@pytest.mark.parametrize("company,text,want", [
+    ("Clio", "Clio is legal practice management software designed for law "
+             "firms of every size.", "law firms"),
+    ("Cribl", "Cribl Stream is built for security and IT operations teams "
+              "everywhere.", "operations teams"),
+    ("Expel", "Expel is built for security operations teams that lack 24x7 "
+              "coverage.", "security operations teams"),
+    ("Huntress", "Huntress is built for managed service providers and small "
+                 "businesses.", "managed service providers"),
+    ("Arctic Wolf", "Arctic Wolf serves mid-market credit unions and regional "
+                    "banks daily.", "credit unions"),
+    ("Verkada", "Verkada is trusted by school districts and hospitals across "
+                "the country.", "school districts"),
+    ("Snyk", "Snyk is built for how AI teams work across the enterprise "
+             "today.", "AI teams"),
+])
+def test_the_positive_test_keeps_every_real_buyer(company, text, want):
+    """A repair that closes the door it exists to keep open is not a repair.
+
+    Each of these was verified against the company's own live page before it
+    became a fixture.
+    """
+    obj = DO.build(company=company, published_text=text)
+    assert obj.buyer.known, obj.buyer.reason
+    assert want.lower() in obj.buyer.value.lower(), obj.buyer.value
+
+
+def test_a_singular_noun_ending_in_s_is_not_a_population():
+    """"business", "campus", "analysis" end in s and name no group."""
+    for word in ("business", "campus", "analysis", "access", "logistics"):
+        assert not DO._is_population(word), word
+    for word in ("firms", "teams", "developers", "hospitals", "industry"):
+        assert DO._is_population(word), word

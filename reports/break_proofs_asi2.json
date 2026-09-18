@@ -1,7 +1,7 @@
 {
   "contract": "break_proofs_asi2.v1",
-  "held": 17,
-  "total": 17,
+  "held": 18,
+  "total": 18,
   "proofs": [
     {
       "name": "01_subject_rule_dropped",
@@ -10,8 +10,8 @@
       "target_kind": "PRODUCER",
       "mutated_symbol": "_subject_patterns",
       "guard_under_test": "test_mentioning_a_thing_is_not_depending_on_it",
-      "bytes_before": 30230,
-      "bytes_after": 30199
+      "bytes_before": 33387,
+      "bytes_after": 33356
     },
     {
       "name": "02_hindsight_wall_removed",
@@ -96,22 +96,22 @@
     {
       "name": "10_generic_buyer_accepted",
       "verdict": "CAUGHT",
-      "detail": "AssertionError: a buyer naming everybody was accepted: 'businesses of all sizes'",
+      "detail": "AssertionError: a buyer naming everybody was accepted: 'businesses'",
       "target_kind": "PRODUCER",
       "mutated_symbol": "_GENERIC_BUYER",
       "guard_under_test": "test_a_buyer_that_names_everybody_is_refused",
-      "bytes_before": 30230,
-      "bytes_after": 30156
+      "bytes_before": 33387,
+      "bytes_after": 33313
     },
     {
       "name": "11_marketing_adjective_becomes_a_buyer",
       "verdict": "CAUGHT",
-      "detail": "AssertionError: marketing copy became a buyer: 'best experience on every device'",
+      "detail": "AssertionError: marketing copy became a buyer: 'best security teams'",
       "target_kind": "PRODUCER",
       "mutated_symbol": "_EVALUATIVE",
       "guard_under_test": "test_marketing_adjectives_do_not_become_a_buyer",
-      "bytes_before": 30230,
-      "bytes_after": 30176
+      "bytes_before": 33387,
+      "bytes_after": 33333
     },
     {
       "name": "12_delta_compared_against_a_placeholder",
@@ -130,8 +130,8 @@
       "target_kind": "PRODUCER",
       "mutated_symbol": "_first_match.needs_subject",
       "guard_under_test": "test_a_buyer_is_not_read_from_a_sentence_about_somebody_else",
-      "bytes_before": 30230,
-      "bytes_after": 30201
+      "bytes_before": 33387,
+      "bytes_after": 33358
     },
     {
       "name": "14_first_person_without_word_boundaries",
@@ -140,8 +140,8 @@
       "target_kind": "PRODUCER",
       "mutated_symbol": "_FIRST_PERSON",
       "guard_under_test": "test_the_first_person_pattern_requires_word_boundaries",
-      "bytes_before": 30230,
-      "bytes_after": 30211
+      "bytes_before": 33387,
+      "bytes_after": 33368
     },
     {
       "name": "15_unrecognisable_legal_name_shown_alone",
@@ -170,8 +170,18 @@
       "target_kind": "PRODUCER",
       "mutated_symbol": "_acceptable.BILLING_UNIT",
       "guard_under_test": "test_a_price_per_share_in_an_equity_note_is_not_a_billing_unit",
-      "bytes_before": 30230,
-      "bytes_after": 30207
+      "bytes_before": 33387,
+      "bytes_after": 33364
+    },
+    {
+      "name": "18_a_non_population_becomes_a_buyer",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: a non-population was accepted as a buyer: 'construction industry ecosystem'",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "_is_population",
+      "guard_under_test": "test_a_phrase_that_is_not_a_population_is_not_a_buyer",
+      "bytes_before": 33387,
+      "bytes_after": 33368
     }
   ]
 }

@@ -530,8 +530,8 @@ def bp11():
         DO = importlib.import_module(
             "intent_engine.executive.decision_object")
         obj = DO.build(company="Anyco",
-                       published_text="Anyco is built for the best experience "
-                                      "on every device, and we mean it.")
+                       published_text="Anyco is built for the best security "
+                                      "teams anywhere, and we mean it.")
         if obj.buyer.known and "best" in obj.buyer.value.lower():
             raise AssertionError("clean code already read marketing copy")
 
@@ -544,8 +544,8 @@ def bp11():
     def check(t):
         DO = t.load("intent_engine.executive.decision_object")
         obj = DO.build(company="Anyco",
-                       published_text="Anyco is built for the best experience "
-                                      "on every device, and we mean it.")
+                       published_text="Anyco is built for the best security "
+                                      "teams anywhere, and we mean it.")
         assert not (obj.buyer.known and "best" in obj.buyer.value.lower()), (
             f"marketing copy became a buyer: {obj.buyer.value!r}")
     return run(p, mutate=mutate, check=check, control=control)
@@ -778,10 +778,46 @@ def bp17():
     return run(p, mutate=mutate, check=check, control=control)
 
 
+def bp18():
+    p = _p(name="18_a_non_population_becomes_a_buyer",
+           description='"define" and "saying" reach the central question as '
+                       "who this company sells to",
+           target_kind=BP.PRODUCER,
+           mutated_file="src/intent_engine/executive/decision_object.py",
+           mutated_symbol="_is_population",
+           guard_under_test="test_a_phrase_that_is_not_a_population_is_not_"
+                            "a_buyer",
+           production_call_path="tests/test_decision_is_measured_in_this_"
+                                "company_s_own_unit.py")
+    # Multi-word, and its head carries no verb inflection, so the ONLY rule
+    # standing between the mutation and the defect is the population test.
+    # "define" alone is refused by the older singular-word rule.
+    text = ("Procore is built for the construction industry ecosystem "
+            "worldwide.")
+
+    def control():
+        DO = importlib.import_module(
+            "intent_engine.executive.decision_object")
+        if DO.build(company="Procore", published_text=text).buyer.known:
+            raise AssertionError("clean code already accepts a non-population")
+
+    def mutate(t):
+        return t.mutate("src/intent_engine/executive/decision_object.py",
+                        "        if not _is_population(head):",
+                        "        if False:")
+
+    def check(t):
+        DO = t.load("intent_engine.executive.decision_object")
+        obj = DO.build(company="Procore", published_text=text)
+        assert not obj.buyer.known, (
+            f"a non-population was accepted as a buyer: {obj.buyer.value!r}")
+    return run(p, mutate=mutate, check=check, control=control)
+
+
 def main() -> int:
     proofs = [bp01(), bp02(), bp03(), bp04(), bp05(), bp06(),
               bp07(), bp08(), bp09(), bp10(), bp11(), bp12(),
-              bp13(), bp14(), bp15(), bp16(), bp17()]
+              bp13(), bp14(), bp15(), bp16(), bp17(), bp18()]
     rows = []
     for p in proofs:
         rows.append({"name": p.name, "verdict": p.verdict,

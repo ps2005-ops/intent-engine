@@ -318,9 +318,56 @@ def _clean_phrase(raw: str) -> str:
     # exposes "enterprise-wide access governance across all users" as the
     # activity it is.
     phrase = re.split(
-        r"\s+(?:across|throughout|within|around|worldwide|globally)\s+",
+        r"\s+(?:across|throughout|within|around|worldwide|globally|of)\s+",
         phrase, maxsplit=1, flags=re.I)[0].strip()
+    # A trailing adverb modifies the verb, not the noun: "...operations teams
+    # EVERYWHERE" names the same people as "...operations teams".
+    phrase = re.sub(r"(?:\s+(?:everywhere|worldwide|globally|today|daily|"
+                    r"now|currently|anywhere|always|everyday))+$", "",
+                    phrase, flags=re.I).strip()
     return phrase.strip(" ,;:.!?\"'()[]{}-–—")
+
+
+#: Singular nouns that name a population anyway. Deliberately tiny: every
+#: addition is a claim that a word names people, and the plural test below
+#: already covers the ordinary case.
+_COLLECTIVE = frozenset("""
+industry sector market workforce staff personnel leadership management
+government military public academia healthcare
+""".split())
+
+#: Endings that mark a verb or a gerund. A noun phrase naming buyers carries
+#: none of them at any position.
+_VERB_ENDINGS = ("ing", "ize", "ise", "ify", "ate")
+
+#: Nouns that end like verbs and are not. Short by design -- a long list
+#: here would be the closed-list mistake in a new place.
+_NOUN_EXCEPTIONS = frozenset("""
+engineering manufacturing accounting consulting banking marketing training
+underwriting shipping publishing advertising gaming staffing housing
+building holding leasing insuring nursing teaching
+""".split())
+
+
+def _is_population(word: str) -> bool:
+    """Does this word name a group of people or organisations?
+
+    A plural common noun is the ordinary form ("firms", "teams", "developers",
+    "hospitals"). "-ss", "-us" and "-is" endings are singular words that
+    merely end in s.
+    """
+    if word in _COLLECTIVE:
+        return True
+    if not word.endswith("s"):
+        return False
+    return not word.endswith(("ss", "us", "is", "ics"))
+
+
+def _is_inflected_verb(word: str) -> bool:
+    """Does this word carry a verb or gerund inflection?"""
+    if word in _NOUN_EXCEPTIONS or word in _COLLECTIVE:
+        return False
+    return word.endswith(_VERB_ENDINGS)
 
 
 def _narrow(phrase: str) -> str:
@@ -384,6 +431,28 @@ def _acceptable(phrase: str, company: str, kind: str = "") -> str:
                      r"(?![a-z])", phrase, re.I):
             return ("the phrase runs into a clause, so it names a "
                     "relationship rather than a unit")
+    if kind == "BUYER":
+        # A BUYER IS A POPULATION, AND ENGLISH NOUN PHRASES ARE HEAD-FINAL.
+        #
+        # MEASURED LIVE across cohorts A and B (a762b2bf): "define" (Vanta),
+        # "saying" (Island), "safety managers prioritize" (Motive),
+        # "construction industry ecosystem" (Procore), "nuanced dynamics of
+        # the trades" (ServiceTitan) all reached the central question as who
+        # the company sells to.
+        #
+        # Every one escaped `_COMPLEMENT_VERBS`, which is a CLOSED LIST of
+        # verbs -- and English is not closed. A third patch adding
+        # "prioritize", "define" and "say" would fail on the fourth verb.
+        # So the test is POSITIVE instead: the head of the phrase must look
+        # like a population, and no word in it may carry a verb inflection.
+        words = phrase.split()
+        head = words[-1].lower() if words else ""
+        if not _is_population(head):
+            return ("the phrase does not end in a population of people or "
+                    "organisations, so it names something other than a buyer")
+        if any(_is_inflected_verb(w.lower()) for w in words):
+            return ("the phrase carries a verb, so the capture ran past the "
+                    "people it names")
     if kind == "BUYER":
         # A BUYER IS A WHO, NOT A WHAT.
         #
