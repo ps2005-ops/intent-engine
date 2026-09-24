@@ -1,0 +1,59 @@
+{
+  "company": "Pfizer Inc.",
+  "deployed_sha": "61a7981",
+  "run_id": "01M0K7B5XYACTST3X9D6Z5TSP4",
+  "analysis_seconds": 280,
+  "stage_transitions": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Pfizer Inc. PFE \u00b7 pfizer.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working C",
+      "status": 200,
+      "html_bytes": 17007
+    },
+    {
+      "t": 72.3,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17008,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "cf-cache-status": "DYNAMIC",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K7B5XYACTST3X9D6Z5TSP4/progress",
+      "head": ""
+    },
+    {
+      "t": 280.2,
+      "text": "Pfizer Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Pfizer Inc. PFE \u00b7 USA \u00b7 pfizer.com \u00b7 SEC CIK 78003 Pfizer Inc. is a healthcare business that runs on a product or service that may only be sold once a regulator permits it and a payer agrees to pay for it. I",
+      "status": 200,
+      "html_bytes": 30500
+    }
+  ],
+  "route_seconds": {
+    "run": 36.09,
+    "intro": 33.5,
+    "slides": 35.3,
+    "full": 38.61,
+    "story": 19.3,
+    "history": 0.62,
+    "connect": 6.36
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "193067c66f6744a2",
+    "started_at": 1787350461.0625536,
+    "uptime_seconds": 1172.3
+  },
+  "process_after": {
+    "boot_id": "193067c66f6744a2",
+    "started_at": 1787350461.0625536,
+    "uptime_seconds": 1925.2
+  },
+  "errors": [
+    "GET /runs/01M0K7B5XYACTST3X9D6Z5TSP4/progress: timeout",
+    "GET /runs/01M0K7B5XYACTST3X9D6Z5TSP4/progress: timeout",
+    "GET /runs/01M0K7B5XYACTST3X9D6Z5TSP4/progress: timeout",
+    "GET /runs/01M0K7B5XYACTST3X9D6Z5TSP4/progress: timeout"
+  ]
+}

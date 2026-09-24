@@ -1,0 +1,133 @@
+{
+  "checkpoint_id": "WORLD_MODEL_RESEARCH_V3",
+  "code_sha": "e71f0637",
+  "constructs_promoted": 0,
+  "equivalence_results": {
+    "DEFENSIBLE_PROXY": [
+      "UEMP15OV"
+    ],
+    "SAME_SERIES_NOT_A_PROXY": [
+      "UMCSENT1"
+    ],
+    "UNUSABLE": [
+      "UEMPMEAN"
+    ],
+    "WEAK_PROXY": [
+      "BAA10Y",
+      "AAA10Y",
+      "BAA",
+      "T10Y3M",
+      "UEMP15OV",
+      "UEMPMEAN"
+    ]
+  },
+  "false_discoveries_killed": [
+    "INFLATION_SHOCK +0.171 (one episode)",
+    "CREDIT_STRESS +0.029 (hindsight regime labels)",
+    "two SUPPORTED transmission mechanisms (scored on baseline-invalid families)",
+    "'the V1 interval is too narrow' (measured; it is not)",
+    "UMCSENT->HOUST 6-8 month lead (evaluation-window artifact)"
+  ],
+  "founder_human_state_integration": "REFUSED",
+  "historical_limitations": {
+    "baseline_validity": "3 of 10 preregistered families clear the baseline ladder; housing clears it at no horizon in either arm",
+    "independent_episodes": "15 on the deep arm",
+    "unchecked_alternative": "wealth effects \u2014 no vintage-correct household wealth series exists in this panel",
+    "walled_behavioural_coverage": "credit and JOLTS series have no ALFRED vintage before 2011-2012; underemployment now reaches 1964 through UEMP15OV and nothing else does"
+  },
+  "history_rewind_human_state": "REFUSED",
+  "hypotheses": {
+    "H1_GLOBAL": "NOT_PROMOTED (V1, delta -0.00948)",
+    "H2_REGIME_CONDITIONAL": "INSUFFICIENT_DATA",
+    "H3_GLOBAL_MONTHLY": {
+      "DEEP": "INSUFFICIENT_POWER",
+      "MODERN": "INSUFFICIENT_POWER"
+    },
+    "H4_STRESS_CONDITIONAL": {
+      "DEEP": "INSUFFICIENT_POWER",
+      "MODERN": "INSUFFICIENT_POWER"
+    },
+    "H5_EARLY_WARNING": "NOT_SUPPORTED / INSUFFICIENT_EPISODES",
+    "H6_TRANSMISSION": "NOT_SUPPORTED (both arms)",
+    "H7_SENTIMENT_EARLY_WARNING": {
+      "hash": "3a5c4d36259e08a2",
+      "housing": "NOT SCORED \u2014 BASELINE_INVALID",
+      "industrial": "INSUFFICIENT_POWER",
+      "mechanism_role": "EARLY_REFLECTION_OF_ANOTHER_VARIABLE"
+    }
+  },
+  "hypotheses_retired": [
+    "UMCSENT->HOUST lead"
+  ],
+  "hypotheses_unresolved": [
+    "whether the collective block adds value in credit stress (never testable: no walled household credit series before 2012)",
+    "whether sentiment has early-warning value on housing (never testable: no housing baseline beats a constant)"
+  ],
+  "remaining_external_data_gaps": [
+    {
+      "acquisition_cost": "MEDIUM \u2014 likely a licensed or FOIA route",
+      "decision_impact": "HIGH",
+      "expected_power_gain": "financial_anxiety becomes testable across 8 more episodes; it is currently the only construct with a discriminating instrument and no history",
+      "question": "a vintage-correct household credit series before 2012 (H.8 delinquency real-time archive, or a licensed bank-panel equivalent)",
+      "score": 9,
+      "uncertainty": "HIGH"
+    },
+    {
+      "acquisition_cost": "LOW \u2014 MORTGAGE30US and PERMIT are on ALFRED",
+      "decision_impact": "HIGH",
+      "expected_power_gain": "unblocks the target where the sentiment claim was strongest; today it cannot be scored at all",
+      "question": "a housing-direction baseline that beats a constant (mortgage rates, permits, months-of-supply, all vintage-correct)",
+      "score": 9,
+      "uncertainty": "HIGH"
+    },
+    {
+      "acquisition_cost": "MEDIUM \u2014 Z.1 has no early real-time archive",
+      "decision_impact": "MEDIUM",
+      "expected_power_gain": "turns 'unchecked' into 'ruled out' for the mechanism claim",
+      "question": "a vintage-correct household WEALTH series, to close the one adversary alternative that is UNTESTABLE",
+      "score": 6,
+      "uncertainty": "MEDIUM"
+    }
+  ],
+  "reopening_gate": {
+    "infrastructure_retained": true,
+    "may_not_reopen_because": [
+      "a new model architecture",
+      "a longer series that has not passed the equivalence test",
+      "a finer origin grid \u2014 measured twice, it is not the constraint",
+      "a subgroup that looked promising after the fact"
+    ],
+    "may_reopen_only_if": [
+      "new historical data materially increases INDEPENDENT information (not rows, not origins \u2014 episodes or effective origins)",
+      "REAL_FORWARD BASE/AUGMENTED results show meaningful divergence once the calibration ladder permits scoring",
+      "new external evidence supports a SPECIFIC named construct"
+    ],
+    "state": "FROZEN_CANDIDATE",
+    "why_retained": "the regime classifier, episode discovery, equivalence tester, power accounting and break-proof harness are used by every other workstream. Freezing feature expansion is not deleting the subsystem."
+  },
+  "status": "FROZEN_CANDIDATE",
+  "supersedes": "WORLD_MODEL_RESEARCH_V2",
+  "the_retired_result": {
+    "claim": "consumer sentiment leads housing starts by 6-8 months, replicated across two independent arms",
+    "kept_because": "this is the programme's most valuable output. A system that retires its own best-looking result when the window widens is the thing that eventually makes the product trustworthy; the signal never was.",
+    "measurement": {
+      "on_the_evaluation_subsample": {
+        "classification": "LEADING",
+        "correlation": 0.2984,
+        "lag_months": 6,
+        "origins": 482
+      },
+      "on_the_full_record": {
+        "classification": "COINCIDENT",
+        "correlation": 0.4052,
+        "lag_months": 0,
+        "origins": 584
+      }
+    },
+    "reported_by": "WORLD_MODEL_RESEARCH_V2, as its one positive finding",
+    "retired_by": "H7 adversary test 7 (evaluation-window artifact)",
+    "the_general_lesson": "a descriptive property of the data -- a temporal order, a base rate, a revision profile -- has no reason to be computed on an evaluation subsample. The paired-prediction file is a convenient source of origins and the wrong population.",
+    "verdict": "RETIRE",
+    "why_it_happened": "the lag was computed from the paired-prediction file, which contains only the origins that appeared in the TEST FOLDS. Walk-forward reserves the earliest slice for training, so the measurement silently began in 1986 while the record begins in 1978. Restoring 1978-1986 -- the Volcker disinflation and the largest housing cycles in the sample -- removes the lead entirely AND RAISES the correlation from +0.298 to +0.405."
+  }
+}

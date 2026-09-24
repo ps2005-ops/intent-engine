@@ -1,0 +1,277 @@
+{
+  "base": "https://intent-engine-preview-bridge.onrender.com",
+  "live_commit": "807a414361b0fbc1999b4595e875c67e2a20524a",
+  "rows": [
+    {
+      "company": "Druva",
+      "domain": "https://www.druva.com",
+      "result": "PRODUCT_DEFECT",
+      "defects": [
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "/intro establishes the business model and /xray says it has not been established (decision_synthesis._select passes neither evidence_text nor published_text)"
+        }
+      ],
+      "instrument_notes": [],
+      "run_id": "01M273C65G7W1EHQB75KF34QJQ",
+      "core_s": 26.0,
+      "telemetry": {
+        "contract": "adaptive_intelligence.v1",
+        "company": "Druva",
+        "company_profile_status": "PROFILE_PARTIAL",
+        "company_profile_source": "SUBJECT_EVIDENCE",
+        "business_model_source": "SUBJECT_PUBLISHED_EVIDENCE",
+        "business_model_source_words": "this company's own published account of what it sells and how it is paid",
+        "business_model_alternatives": [],
+        "profile_available": true,
+        "lens_available": true,
+        "decision_reading_available": false,
+        "decision_map_state": "POTENTIAL_DOMAINS",
+        "causal_chain_kind": "INVESTIGATION_CHAIN",
+        "potential_domains": [
+          "where enterprise data is allowed to go",
+          "what an AI programme can be trained on",
+          "platform consolidation"
+        ],
+        "evidence_limitation": "the run did not retrieve enough independent material to test this company's own account of itself",
+        "what_would_unlock_a_decision": "a dated, third-party account of something this company has actually decided or changed -- a filing, a customer or competitor statement, or reporting that is not the company's own",
+        "business_model": "SUBSCRIPTION_SOFTWARE",
+        "business_model_confidence": "moderate",
+        "business_model_evidence": "2,000+ Microsoft 365 users\u2019 data secured.",
+        "business_model_reason": "read from this company's own published material, which states how it is paid rather than only what it sells",
+        "customer_job": "",
+        "customer_job_provenance": "NOT_ESTABLISHED",
+        "strategic_assets": [],
+        "critical_dependencies": [],
+        "company_specificity_score": 0.118,
+        "company_specific_fields": [
+          "identity",
+          "technology_exposure"
+        ],
+        "decision_opportunity_count": 0,
+        "decision_opportunities_considered": 0,
+        "decision_opportunities_withheld": [],
+        "top_decision_domain": "",
+        "top_decision_owner": "",
+        "top_decision_priority": 0.0,
+        "top_decision_components": {},
+        "primary_lens": "enterprise_data_ai",
+        "primary_lens_name": "Enterprise Data & AI Strategy",
+        "lens_confidence": "moderate",
+        "secondary_lenses": [
+          "data_security_governance"
+        ],
+        "lens_selection_reasons": "This company's own material is about \u201cdata platform\u201d, \u201centerprise data\u201d, \u201cdata management\u201d, which is what enterprise data & ai strategy reads. It scored 23.5 against 10.5 for the next eligible lens.",
+        "lens_refusals": [
+          "Regulatory & Risk Intelligence: scored 7.0 against 23.5, carried by legal hold, regulatory alone",
+          "Operational Intelligence: scored 3.0 against 23.5, carried by incident alone",
+          "Decision to Execution: scored 3.0 against 23.5, carried by onboarding alone",
+          "Data Infrastructure & Decision Trust: scored 2.5 against 23.5, carried by dashboards alone",
+          "Planning & Assumption Validation: scored 2.5 against 23.5, carried by planning alone",
+          "Market & Competitive Strategy: scored 2.0 against 23.5, carried by category alone"
+        ],
+        "causal_chain_nodes": 4,
+        "causal_chain_evidence_coverage": 0.0,
+        "causal_chain_stopped_because": "",
+        "genericity_flags": 1,
+        "differentiation_carried_by": [
+          "own_vocabulary",
+          "technology_exposure"
+        ],
+        "differentiation_flagged": true,
+        "differentiation_flag_reason": "12% of what this reading tries to establish about a company was learned from this one's own evidence; the rest is the economics of its business model, which every company of the same kind shares. The difference stated above is real but thin, and it is marked rather than dressed up.",
+        "counterevidence_present": false,
+        "information_priority": "",
+        "abstention_reason": "We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none.",
+        "role_lens": "ceo",
+        "role_module_order": [
+          "executive_change",
+          "strategic_thesis",
+          "why_this_is_different",
+          "decision_opportunity_map",
+          "causal_chain",
+          "what_would_change_our_mind",
+          "evidence",
+          "provenance",
+          "economic_exposure",
+          "strategic_lens",
+          "data_ai_exposure",
+          "information_priority",
+          "learning_state",
+          "ask_intent_engine"
+        ],
+        "role_promoted": [
+          "strategic_thesis",
+          "why_this_is_different",
+          "decision_opportunity_map",
+          "causal_chain",
+          "what_would_change_our_mind",
+          "evidence",
+          "provenance"
+        ],
+        "composition_modules": [
+          "executive_change",
+          "economic_exposure",
+          "strategic_thesis",
+          "why_this_is_different",
+          "strategic_lens",
+          "decision_opportunity_map",
+          "causal_chain",
+          "data_ai_exposure",
+          "information_priority",
+          "what_would_change_our_mind",
+          "learning_state",
+          "evidence",
+          "provenance",
+          "ask_intent_engine"
+        ],
+        "composition_excluded": [
+          "decision_delta",
+          "market_belief",
+          "customer_signals",
+          "competitive_response",
+          "supply_chain_exposure",
+          "financial_sensitivity",
+          "regulatory_exposure",
+          "client_portfolio",
+          "operational_intelligence",
+          "contradictions",
+          "alternative_interpretation",
+          "scenario_comparison"
+        ],
+        "composition_explained": 7,
+        "reasoning_provenance": "business model SUBSCRIPTION_SOFTWARE from subject evidence; executive priorities the levers a business of this kind has, since the evidence raised no decision of its own",
+        "errors": [],
+        "run_id": "01M273C65G7W1EHQB75KF34QJQ"
+      },
+      "resolved_identity": "Druva",
+      "business_model": "SUBSCRIPTION_SOFTWARE",
+      "profile_source": "SUBJECT_EVIDENCE",
+      "specificity": 0.118,
+      "primary_lens": "enterprise_data_ai",
+      "secondary_lenses": [
+        "data_security_governance"
+      ],
+      "lens_confidence": "moderate",
+      "decision_opportunity_count": 0,
+      "top_decision_domain": "",
+      "top_decision_priority": 0.0,
+      "causal_chain_nodes": 4,
+      "causal_evidence_coverage": 0.0,
+      "genericity_flags": 1,
+      "differentiation_carried_by": [
+        "own_vocabulary",
+        "technology_exposure"
+      ],
+      "abstention_reason": "We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none.",
+      "profile_available": true,
+      "lens_available": true,
+      "decision_reading_available": false,
+      "decision_map_state": "POTENTIAL_DOMAINS",
+      "causal_chain_kind": "INVESTIGATION_CHAIN",
+      "potential_domains": [
+        "where enterprise data is allowed to go",
+        "what an AI programme can be trained on",
+        "platform consolidation"
+      ],
+      "evidence_limitation": "the run did not retrieve enough independent material to test this company's own account of itself",
+      "what_would_unlock": "a dated, third-party account of something this company has actually decided or changed -- a filing, a customer or competitor statement, or reporting that is not the company's own",
+      "intro_status": 200,
+      "intro_chars": 48599,
+      "brief_status": 200,
+      "brief_chars": 39503,
+      "full_status": 200,
+      "full_chars": 49875,
+      "xray_status": 200,
+      "xray_chars": 26565,
+      "evidence_status": 200,
+      "evidence_chars": 20100,
+      "answer_status": 200,
+      "answer_chars": 32066,
+      "surface_s": 78.0,
+      "intro_words": 2137,
+      "sections": {
+        "why_this_company": "Why this analysis is different for Druva Generic interpretation A general reading of a company in this position would say that enterprise AI adoption is accelerating and every software vendor should position around it. It would reason from the economics every subscription software business shares -- recurring software subscription: revenue is contracted and renews, so the installed base carries next period's revenue before any new sale. What is different here The material it publishes is about data platform, enterprise data, data management, data protection -- its own terms, not ours. Decision consequence So what management has to weigh is Where enterprise data is allowed to go -- the decision area this company's own material points at, not a recommendation. Why Intent Engine reads it this way This company's own material is about \u201cdata platform\u201d, \u201centerprise data\u201d, \u201cdata management\u201d, which is what enterprise data & ai strategy reads. It scored 23.5 against 10.5 for the next eligible lens. 12% of what this reading tries to establish about a company was learned from this one's own evidence; the rest is the economics of its business model, which every company of the same kind shares. The difference stated above is real but thin, and it is marked rather than dressed up. The evidence this rests on The Resilience Cloud for the AI Enterprise. Your browser does not support the video tag.",
+        "decision_or_domains": "Potential decision domains Areas this company model suggests are worth investigating \u2014 not current recommendations . We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none. 01 Where enterprise data is allowed to go Its own material is about data platform, enterprise data, data management, which is what puts where enterprise data is allowed to go in scope. Would sit with: CEO What would make this a recommendation a dated, first-party statement from this company about where enterprise data is allowed to go, or a third-party account of it -- at present nothing in the retrieved record raises it 02 What an AI programme can be trained on Its own material is about data platform, enterprise data, data management, which is what puts what an AI programme can be trained on in scope. Would sit with: CEO What would make this a recommendation a dated, first-party statement from this company about what an AI programme can be trained on, or a third-party account of it -- at present nothing in the retrieved record raises it 03 Platform consolidation Its own material is about data platform, enterprise data, data management, which is what puts platform consolidation in scope. Would sit with: CPO What would make this a recommendation a dated, first-party statement from this company about platform consolidation, or a third-party account of it -- at present nothing in the retrieved record raises it",
+        "chain": "What would be worth investigating A line of enquiry, not a causal claim. Nothing below asserts that one thing caused another. What we can see Druva's published material is about where enterprise data is allowed to go, what an AI programme can be trained on inference How it could reach this company A subscription software business is reached through market rate, labor, reaching this one through what it sells: data platform, enterprise data inference What we would need to know A dated account, from someone other than this company, of something it has actually decided or changed, or anyone other than Druva writing about data platform or enterprise data. Nothing retrieved in this run carries one, which is why no mechanism is asserted above. open_question The decision it could bear on Where enterprise data is allowed to go -- the decision area this company's own material points at, not a recommendation. open_question This is an investigation, not a conclusion. No mechanism connecting an outside change to this company was established, so nothing below claims one.",
+        "bounded": "What we can and cannot say about Druva What we know It is a subscription software business, read from its own account of how it is paid. The lens this points to Enterprise Data & AI Strategy \u2014 This company's own material is about \u201cdata platform\u201d, \u201centerprise data\u201d, \u201cdata management\u201d, which is what enterprise data & ai strategy reads. It scored 23.5 against 10.5 for the next eligible lens. What we cannot yet conclude Which of these is live for this management, or which way it should go. Knowing what kind of business this is tells us which decisions tend to matter for a business like it \u2014 and any direction stated elsewhere on this page rests on that, not on anything this run established about this company in particular. Why not the run did not retrieve enough independent material to test this company's own account of itself What would unlock a decision a dated, third-party account of something this company has actually decided or changed -- a filing, a customer or competitor statement, or reporting that is not the company's own",
+        "lens": "The lens this analysis is using Enterprise Data & AI Strategy This company's own material is about \u201cdata platform\u201d, \u201centerprise data\u201d, \u201cdata management\u201d, which is what enterprise data & ai strategy reads. It scored 23.5 against 10.5 for the next eligible lens. Your browser does not support the video tag. What was considered and not selected Regulatory & Risk Intelligence: scored 7.0 against 23.5, carried by legal hold, regulatory alone Operational Intelligence: scored 3.0 against 23.5, carried by incident alone Decision to Execution: scored 3.0 against 23.5, carried by onboarding alone Data Infrastructure & Decision Trust: scored 2.5 against 23.5, carried by dashboards alone Planning & Assumption Validation: scored 2.5 against 23.5, carried by planning alone Market & Competitive Strategy: scored 2.0 against 23.5, carried by category alone",
+        "role": "Read this as Chief Executive Strategy Finance future Operations future Product future Revenue future Marketing future Risk & Security future Consultant / Advisor future Chief Executive reads executive change, strategic thesis, why this is different first because the decision in front of that reader is what to change, what it costs to wait, and what would make it the wrong call. Nothing below is removed or reworded; the order changes and the facts do not. What this reader would ask What would make this recommendation wrong? What is the largest assumption here? What does a competitor do about this first? What should I decide this quarter rather than this year? Which parts of the data estate is this actually about? What does an AI programme change about this decision?",
+        "value": "Where Intent Engine could create value for Druva Current \u2014 external evidence only Monitoring the outside record for changes that reach this company through the mechanism above Testing the assumption the current plan rests on against what the record actually says Watching where enterprise data is allowed to go Watching what an AI programme can be trained on Provenance on every claim, so a disagreement is about the evidence rather than about the tool Future \u2014 with permissioned internal data not connected CRM and pipeline, to test whether the outside reading shows up in this company\u2019s own funnel Product usage and support, to see the same change from the customer side Finance, to attach a magnitude to an exposure that is currently directional Prior decisions, so a recommendation can be checked against what was already tried No return is claimed for any of this, because none has been measured."
+      },
+      "evidence_text": "Druva Home \u00b7 Log in Why this reading exists Druva X-Ray \u00b7 Full analysis \u00b7 Presentation \u00b7 Decision history Independent support 0 of 5 source(s) are both independent of Druva and say enough about it to support the reading. We searched for independent coverage of this company and found none that bears on this question. That is a finding about the company. Search coverage: exhausted \u2014 everything findable was read \u00b7 reading: searched thoroughly and none exists We searched 1 independent channel(s), found 15 filing(s) naming this company, judged 4 of them worth reading, and read 4 in full. Set aside \u2014 duplicate origin: 11 \u00b7 irrelevant: 3 Written by the company itself (5) Useful evidence, and often the best there is \u2014 but the company speaking about itself cannot corroborate itself. Druva Resilience Cloud | Fully Managed SaaS Platform | Druva The company's own account of itself Discusses the company directly Druva\u2019s AI-powered, cloud-native SaaS platform delivers data security, identity resilience, backup protection, and fast ransomware recovery. Try it today! https://www.druva.com Author Druva Host www.druva.com Subject Druva Retrieved 2026-09-11T02:05:19.657621+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself API Lifecycle Management: Policy-driven Development, Deployment, and Retirement of APIs | Druva Another document from a source already counted Discusses the company directly Druva maintains a robust API lifecycle management system to provide APIs customers can integrate into a wide range of products. https://www.druva.com/blog/api-lifecycle-management-policy-driven-development-deployment-a Author Druva Host www.druva.com Subject Druva Retrieved 2026-09-11T02:05:19.760941+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself The Resilience Cloud Blog | Articles by Druva | Druva Another document from a source already counted Discusses the company directly Get industry news, customer stories, engineering deep dives, and company updates with Druva's blog. We cover data protection, backup, and much more. https://www.druva.com/blog Author Druva Host www.druva.com Subject Druva Retrieved 2026-09-11T02:05:19.863885+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself Protecting Customer Data | Druva Customer Success Stories | Druva Another document from a source already counted Discusses the company directly See how leading enterprises use Druva\u2019s cloud-native SaaS platform for data security, ransomware recovery, & cyber resilience with real customer success stories. https://www.druva.com/why-druva/explore/customers Author Druva Host www.druva.com Subject Druva Retrieved 2026-09-11T02:05:22.259710+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself Where MDM Stumbles | Druva Another document from a source already counted Discusses the company directly Mobile Device Management systems (MDM) accomplish a lot of good things, and they help IT manage critical applications and data on corporate smartphones and tablets. But MDM has limitations, particularly in governance, which means enterprise IT is still creating more work for itself \u2014 or making the company vulnerable. H\u2026 https://www.druva.com/blog/mdm-stumbles Author Druva Host www.druva.com Subject Druva Retrieved 2026-09-11T02:05:22.367691+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself",
+      "xray_says_unclassified": true,
+      "profile_contradiction": true,
+      "ui_html": "reports/ui/druva.html",
+      "identity_on_page": true,
+      "leaks": [],
+      "has_why_different": true,
+      "has_lens_block": true,
+      "has_role_switch": true,
+      "has_value_block": true,
+      "has_decision_map": false,
+      "has_causal_chain": false,
+      "has_potential_domains": true,
+      "has_not_a_recommendation": true,
+      "has_investigation_chain": true,
+      "has_bounded_block": true,
+      "quotes": [
+        "The Resilience Cloud for the AI Enterprise.",
+        "Your browser does not support the video tag.",
+        "Your browser does not support the video tag."
+      ],
+      "quote_count": 3,
+      "broken_quotes": [],
+      "headline_is_generic": false,
+      "lens_matches_expectation": true,
+      "role_ceo_status": 200,
+      "role_cso_status": 200,
+      "role_views_differ": true,
+      "role_facts_identical": true,
+      "qa": [
+        {
+          "q": "Why does this matter for this company specifically?",
+          "status": 200,
+          "words": 189,
+          "text": "Why does this matter for this company specifically? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Druva Why does this matter for this company specifically? Yes \u2014 on balance the evidence supports that leaning on a buyer type whose budget it does not control (low confidence). Evidence Strongest. \u201cCustomer Stories. Our customers trust us, so they can carry on changing the world. Trusted by the world's leading organizations. 9.4 out of 10. 4.9 out of 5.0. 4.7 out of 5.0. Druva's score for customer support. Updated as of August 12, 2026. \u201cDruva is a cloud-native backup solution with an air-gapped structure.\u201d \u2014 Protecting Customer Data | Druva Customer Success Stories | Druva Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the leaning on a buyer type whose budget it does not control thesis? How is this transition similar to Public-sector-heavy software vendors, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What evidence most supports this reading?",
+          "status": 200,
+          "words": 174,
+          "text": "What evidence most supports this reading? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Druva What evidence most supports this reading? Yes \u2014 on balance the evidence supports that leaning on a buyer type whose budget it does not control (low confidence). Evidence Strongest. No independent source was found; everything rests on the company's own material. Weakest. 2026-09-11: Druva publishes named customers rather than logos alone, so those customers agreed to be named, which is a stronger claim than a logo wall. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the leaning on a buyer type whose budget it does not control thesis? How is this transition similar to Public-sector-heavy software vendors, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What would have to be true for this to be wrong?",
+          "status": 200,
+          "words": 165,
+          "text": "What would have to be true for this to be wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Druva What would have to be true for this to be wrong? That was the whole of it: \u201cYes \u2014 on balance the evidence supports that leaning on a buyer type whose budget it does not control (low confidence).\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the leaning on a buyer type whose budget it does not control thesis? How is this transition similar to Public-sector-heavy software vendors, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What should management monitor next?",
+          "status": 200,
+          "words": 214,
+          "text": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Druva What should management monitor next? customer count \u2014 revenue at a business of this kind moves with customer count.; seats or usage per customer \u2014 revenue at a business of this kind moves with seats or usage per customer.; list and realised price \u2014 revenue at a business of this kind moves with list and realised price. Evidence Strongest. \u201cCustomer Stories. Our customers trust us, so they can carry on changing the world. Trusted by the world's leading organizations. 9.4 out of 10. 4.9 out of 5.0. 4.7 out of 5.0. Druva's score for customer support. Updated as of August 12, 2026. \u201cDruva is a cloud-native backup solution with an air-gapped structure.\u201d \u2014 Protecting Customer Data | Druva Customer Success Stories | Druva Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the leaning on a buyer type whose budget it does not control thesis? How is this transition similar to Public-sector-heavy software vendors, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "Which decision here is the most urgent, and why that one?",
+          "status": 200,
+          "words": 196,
+          "text": "Which decision here is the most urgent, and why that one? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Druva Which decision here is the most urgent, and why that one? That was the whole of it: \u201ccustomer count \u2014 revenue at a business of this kind moves with customer count.; seats or usage per customer \u2014 revenue at a business of this kind moves with seats or usage per customer.; list and realised price \u2014 revenue at a business of this kind moves with list and realised price.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the leaning on a buyer type whose budget it does not control thesis? How is this transition similar to Public-sector-heavy software vendors, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What is the biggest uncertainty in this analysis?",
+          "status": 200,
+          "words": 191,
+          "text": "What is the biggest uncertainty in this analysis? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Druva What is the biggest uncertainty in this analysis? every source here is published by the company itself, so nothing in this reading has been checked against an outside account of it. Evidence Strongest. \u201cCustomer Stories. Our customers trust us, so they can carry on changing the world. Trusted by the world's leading organizations. 9.4 out of 10. 4.9 out of 5.0. 4.7 out of 5.0. Druva's score for customer support. Updated as of August 12, 2026. \u201cDruva is a cloud-native backup solution with an air-gapped structure.\u201d \u2014 Protecting Customer Data | Druva Customer Success Stories | Druva Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the leaning on a buyer type whose budget it does not control thesis? How is this transition similar to Public-sector-heavy software vendors, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        }
+      ],
+      "qa_ok": 6,
+      "qa_company_specific": 6,
+      "followup_words": 169,
+      "followup_is_replay": false,
+      "followup_pass": true,
+      "wall_s": 184.2
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "base": "https://intent-engine-preview-bridge.onrender.com",
+  "contract": "live_econ_matrix.v1",
+  "label": "third_confirmation",
+  "readyz": {
+    "market_bridge": {
+      "config_source": "PREVIEW_CONFIG",
+      "configured": true,
+      "digest": "cb9c2caee1b1efde",
+      "directory": "/opt/render/project/src/reports/market/demo_snapshots",
+      "evidence_cutoff": "2026-08-14",
+      "freshness_days": 14,
+      "generated_at": "2026-08-14",
+      "invalid_files": 0,
+      "reason": "",
+      "root": "/opt/render/project/src",
+      "schema": "market_demo_snapshot.v1",
+      "snapshot_count": 26,
+      "state": "MARKET_BRIDGE_CURRENT"
+    },
+    "runtime_root": "data",
+    "storage": {
+      "accepting_feedback": false,
+      "boot_count": 1,
+      "durability": "EPHEMERAL_LIKELY",
+      "separate_filesystem": false,
+      "writable": true
+    }
+  },
+  "rows": [
+    {
+      "carried_csrf": true,
+      "company": "Salesforce",
+      "domain": "salesforce.com",
+      "econ_excerpt": "Economic impact What changed The current economic state changes 3 elements of this recommendation: information priority, top priority, top risks. The reading As of 2026-08-27 the shared economic state reads policy rate falling; financial conditions rising. How it reaches this company rates set the discount rate on customers' own investment cases, so higher rates lengthen procurement and slow new bookings without touching the contracted base. The variable it moves here is cost of funds and the hurdle rate on committed capital. Changes top priority demand capture at the storefront becomes cost of funds and the hurdle rate on committed capital because financial conditions is rising to 6.66 percentage points from 6.58 a year earlier (2025-08-21) (as of 2026-08-27, MORTGAGE30US, FRED (Federal Reserve Bank of St. Louis)). Changes top risks a company risk from its own evidence becomes the econo",
+      "failures": [],
+      "ready": true,
+      "requests": [
+        {
+          "path": "/demo",
+          "seconds": 0.4,
+          "status": 200
+        },
+        {
+          "landed": "https://intent-engine-preview-bridge.onrender.com/runs/01M13S9FWT6XZGE9FTSX53SEA5/progress",
+          "path": "/analyze",
+          "seconds": 0.5,
+          "status": 200
+        },
+        {
+          "chars": 31467,
+          "path": "/runs/01M13S9FWT6XZGE9FTSX53SEA5",
+          "seconds": 293.1,
+          "status": 200
+        },
+        {
+          "chars": 64042,
+          "path": "/runs/01M13S9FWT6XZGE9FTSX53SEA5/brief",
+          "seconds": 26.6,
+          "status": 200
+        },
+        {
+          "chars": 85227,
+          "path": "/runs/01M13S9FWT6XZGE9FTSX53SEA5/full",
+          "seconds": 13.9,
+          "status": 200
+        }
+      ],
+      "run_id": "01M13S9FWT6XZGE9FTSX53SEA5",
+      "score": {
+        "abstained": false,
+        "blocked_stated": false,
+        "cross_surface_contradiction": false,
+        "denies_exposure_then_shows_one": false,
+        "economic_section_present": true,
+        "internal_enums_leaked": [],
+        "pre_calibration_language": true,
+        "reading_called_unavailable": false,
+        "spoke": true,
+        "words": {
+          "": 957,
+          "/brief": 4149,
+          "/full": 6159
+        }
+      },
+      "seconds_to_read": 54.4,
+      "slowest_seconds": 293.1,
+      "state": "READ",
+      "timeouts": []
+    }
+  ],
+  "summary": {
+    "abstained": 0,
+    "attempted": 1,
+    "client_timeouts": 0,
+    "contradictions": 0,
+    "denies_then_shows_exposure": 0,
+    "enum_leaks": 0,
+    "http_failures": 0,
+    "read": 1,
+    "reading_called_unavailable": 0,
+    "section": 1,
+    "spoke": 1
+  },
+  "version": {
+    "app_version": "1.5.0-executive-intelligence",
+    "commit": "5a338fd3ddf6527e2e662d27ffeb8c273e100f61",
+    "process": {
+      "boot_id": "23f2c06cfada4db4",
+      "started_at": 1787906620.7782526,
+      "uptime_seconds": 704.3
+    }
+  }
+}

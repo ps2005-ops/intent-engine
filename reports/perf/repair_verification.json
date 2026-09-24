@@ -1,0 +1,219 @@
+{
+  "status": "OK",
+  "run_id": "01M18J30ZQK1YRZT8F2RTGEH7E",
+  "timing": {
+    "run_id": "01M18J30ZQK1YRZT8F2RTGEH7E",
+    "markers": {
+      "created": "2026-08-30T05:25:46.103119+00:00",
+      "accepted": "2026-08-30T05:25:49.123623+00:00",
+      "core_ready": "2026-08-30T05:27:13.623034+00:00",
+      "deep_started": "2026-08-30T05:27:24.607646+00:00"
+    },
+    "core_latency_s": 84.5,
+    "deep_latency_s": null,
+    "evidence_count": 11,
+    "deep_status": "PENDING",
+    "result_state": "DEEP_PENDING",
+    "run_state": "PARTIAL",
+    "trace": [
+      {
+        "covered_wall_ms": 93386.2,
+        "phase": "core",
+        "spans": [
+          {
+            "calibration": true,
+            "cpu_ms": 40.29,
+            "depth": 0,
+            "name": "cpu_yardstick",
+            "offset_s": 0.0,
+            "rounds": 60000,
+            "status": "ok",
+            "wall_ms": 1485.18
+          },
+          {
+            "cpu_ms": 443.5,
+            "deadline_remaining_end_s": 26.03,
+            "deadline_remaining_start_s": 58.5,
+            "depth": 0,
+            "item_count": 47,
+            "name": "discovery",
+            "offset_s": 1.485,
+            "status": "ok",
+            "wall_ms": 32474.4
+          },
+          {
+            "candidates": 47,
+            "cpu_ms": 2.6,
+            "deadline_remaining_end_s": 26.02,
+            "deadline_remaining_start_s": 26.03,
+            "depth": 0,
+            "item_count": 14,
+            "name": "source_selection",
+            "offset_s": 33.96,
+            "status": "ok",
+            "wall_ms": 12.1
+          },
+          {
+            "cpu_ms": 1189.0,
+            "deadline_remaining_end_s": 1.72,
+            "deadline_remaining_start_s": 26.02,
+            "depth": 0,
+            "item_count": 11,
+            "name": "retrieval",
+            "offset_s": 33.972,
+            "status": "ok",
+            "wall_ms": 24299.7
+          },
+          {
+            "cpu_ms": 23.6,
+            "depth": 2,
+            "item_count": 11,
+            "name": "fi_run",
+            "offset_s": 60.872,
+            "status": "ok",
+            "wall_ms": 136.2
+          },
+          {
+            "cpu_ms": 0.3,
+            "depth": 2,
+            "name": "evidence_library",
+            "offset_s": 61.008,
+            "status": "ok",
+            "wall_ms": 0.3
+          },
+          {
+            "cpu_ms": 2781.3,
+            "depth": 3,
+            "documents": 11,
+            "item_count": 7,
+            "name": "derive_observations",
+            "offset_s": 61.473,
+            "status": "ok",
+            "text_chars": 457220,
+            "wall_ms": 18803.2
+          },
+          {
+            "cpu_ms": 0.7,
+            "depth": 3,
+            "name": "ownership_append",
+            "offset_s": 80.276,
+            "status": "ok",
+            "wall_ms": 4.4,
+            "wrote_event": true
+          },
+          {
+            "cpu_ms": 176.8,
+            "depth": 3,
+            "name": "classification",
+            "offset_s": 80.28,
+            "status": "ok",
+            "wall_ms": 1194.8
+          },
+          {
+            "cpu_ms": 430.0,
+            "depth": 3,
+            "name": "build_report",
+            "offset_s": 81.475,
+            "status": "ok",
+            "wall_ms": 2906.3
+          },
+          {
+            "cpu_ms": 3389.2,
+            "depth": 2,
+            "name": "strategic_report",
+            "offset_s": 61.473,
+            "status": "ok",
+            "wall_ms": 22909.0
+          },
+          {
+            "cpu_ms": 3709.5,
+            "deadline_remaining_end_s": -24.49,
+            "deadline_remaining_start_s": 1.72,
+            "depth": 1,
+            "name": "compose_proper",
+            "offset_s": 58.272,
+            "status": "ok",
+            "wall_ms": 26210.7
+          },
+          {
+            "cpu_ms": 0.3,
+            "depth": 1,
+            "name": "memory_snapshot",
+            "offset_s": 84.486,
+            "status": "ok",
+            "wall_ms": 0.3
+          },
+          {
+            "cpu_ms": 1.8,
+            "depth": 1,
+            "item_count": 14,
+            "name": "memory_publish",
+            "offset_s": 84.487,
+            "status": "ok",
+            "wall_ms": 1.8
+          },
+          {
+            "cpu_ms": 0.1,
+            "depth": 1,
+            "name": "critic",
+            "offset_s": 84.488,
+            "status": "ok",
+            "wall_ms": 0.1
+          },
+          {
+            "cpu_ms": 3712.9,
+            "deadline_remaining_end_s": -24.5,
+            "deadline_remaining_start_s": 1.72,
+            "depth": 0,
+            "item_count": 11,
+            "name": "core_composition",
+            "offset_s": 58.272,
+            "status": "ok",
+            "wall_ms": 26217.2
+          },
+          {
+            "cpu_ms": 279.6,
+            "depth": 0,
+            "name": "external_context",
+            "offset_s": 84.492,
+            "status": "ok",
+            "wall_ms": 1881.6
+          },
+          {
+            "cpu_ms": 450.6,
+            "depth": 0,
+            "name": "demo_dossier",
+            "offset_s": 86.373,
+            "status": "ok",
+            "wall_ms": 8501.2
+          },
+          {
+            "calibration": true,
+            "cpu_ms": 39.39,
+            "depth": 0,
+            "name": "cpu_yardstick_after",
+            "offset_s": 94.875,
+            "rounds": 60000,
+            "status": "ok",
+            "wall_ms": 297.56
+          }
+        ],
+        "total_cpu_ms": 6078.2,
+        "total_wall_ms": 95172.3,
+        "unaccounted_wall_ms": 1786.1
+      }
+    ],
+    "provenance": {
+      "markers": "persisted_lifecycle_event:ci.lifecycle_marked",
+      "core_latency_s": "persisted_lifecycle_event",
+      "deep_latency_s": "persisted_lifecycle_event",
+      "evidence_count": "canonical_retrieved_documents",
+      "deep_status": "composed_report_object",
+      "result_state": "composed_report_object",
+      "run_state": "persisted_run_transitions",
+      "trace": "persisted_spans:ci.trace_recorded"
+    }
+  },
+  "harness_observed_s": 91.7,
+  "total_s": 102.2
+}

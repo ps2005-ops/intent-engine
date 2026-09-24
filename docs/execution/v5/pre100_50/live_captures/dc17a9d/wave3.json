@@ -1,0 +1,312 @@
+[
+  {
+    "company": "The Goldman Sachs Group, Inc.",
+    "deployed_sha": "dc17a9d",
+    "status": "READY",
+    "run_id": "01M0J8CBRNCAE1R0WXHZGV8B6D",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/dc17a9d/the_goldman_sachs_group_inc",
+    "process_before": {
+      "boot_id": "9890b2f49d944a8a",
+      "started_at": 1787319148.8228748,
+      "uptime_seconds": 19.1
+    },
+    "entry_domain": "goldmansachs.com",
+    "seconds": 51,
+    "first_useful": 51,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J8CBRNCAE1R0WXHZGV8B6D",
+    "outcome": "TRUE_EVIDENCE_SCARCITY",
+    "outcome_by_route": {
+      "run": "TRUE_EVIDENCE_SCARCITY",
+      "intro": "TRUE_EVIDENCE_SCARCITY",
+      "slides": "TRUE_EVIDENCE_SCARCITY",
+      "full": "TRUE_EVIDENCE_SCARCITY",
+      "story": "TRUE_EVIDENCE_SCARCITY",
+      "history": "TRUE_EVIDENCE_SCARCITY",
+      "connect": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "Morgan Stanley",
+    "deployed_sha": "dc17a9d",
+    "status": "READY",
+    "run_id": "01M0J8QWGY1916F5HD830GXPAB",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/dc17a9d/morgan_stanley",
+    "process_before": {
+      "boot_id": "9890b2f49d944a8a",
+      "started_at": 1787319148.8228748,
+      "uptime_seconds": 394.2
+    },
+    "entry_domain": "",
+    "seconds": 36,
+    "first_useful": 36,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J8QWGY1916F5HD830GXPAB",
+    "outcome": "TRUE_EVIDENCE_SCARCITY",
+    "outcome_by_route": {
+      "run": "TRUE_EVIDENCE_SCARCITY",
+      "intro": "TRUE_EVIDENCE_SCARCITY",
+      "slides": "TRUE_EVIDENCE_SCARCITY",
+      "full": "TRUE_EVIDENCE_SCARCITY",
+      "story": "TRUE_EVIDENCE_SCARCITY",
+      "history": "TRUE_EVIDENCE_SCARCITY",
+      "connect": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "Visa Inc.",
+    "deployed_sha": "dc17a9d",
+    "status": "UNREADABLE",
+    "run_id": "01M0J938Z42Y35E82P89RQRFBM",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/dc17a9d/visa_inc",
+    "process_before": {
+      "boot_id": "9890b2f49d944a8a",
+      "started_at": 1787319148.8228748,
+      "uptime_seconds": 769.6
+    },
+    "entry_domain": "visa.com",
+    "seconds": 200,
+    "first_useful": 200,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J938Z42Y35E82P89RQRFBM",
+    "outcome": "TRUE_EVIDENCE_SCARCITY",
+    "outcome_by_route": {
+      "run": "TRUE_EVIDENCE_SCARCITY",
+      "intro": "TRUE_EVIDENCE_SCARCITY",
+      "slides": "TRUE_EVIDENCE_SCARCITY",
+      "full": "TRUE_EVIDENCE_SCARCITY",
+      "story": "TRUE_EVIDENCE_SCARCITY",
+      "history": "TRUE_EVIDENCE_SCARCITY",
+      "connect": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "outcome_disagreement": [],
+    "unreadable_because": "HTTP_500",
+    "answers_captured": 0
+  },
+  {
+    "company": "Mastercard Incorporated",
+    "deployed_sha": "dc17a9d",
+    "status": "READY",
+    "run_id": "01M0J9EQ1CDQHP97A4X41XKJ03",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/dc17a9d/mastercard_incorporated",
+    "process_before": {
+      "boot_id": "9890b2f49d944a8a",
+      "started_at": 1787319148.8228748,
+      "uptime_seconds": 1144.1
+    },
+    "entry_domain": "mastercard.com",
+    "seconds": 71,
+    "first_useful": 71,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J9EQ1CDQHP97A4X41XKJ03",
+    "outcome": "TRUE_EVIDENCE_SCARCITY",
+    "outcome_by_route": {
+      "run": "TRUE_EVIDENCE_SCARCITY",
+      "intro": "TRUE_EVIDENCE_SCARCITY",
+      "slides": "TRUE_EVIDENCE_SCARCITY",
+      "full": "TRUE_EVIDENCE_SCARCITY",
+      "story": "TRUE_EVIDENCE_SCARCITY",
+      "history": "TRUE_EVIDENCE_SCARCITY",
+      "connect": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "American Express Company",
+    "deployed_sha": "dc17a9d",
+    "status": "READY",
+    "run_id": "01M0J9T67GBWW4CNF91PENQDAX",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/dc17a9d/american_express_company",
+    "process_before": {
+      "boot_id": "9890b2f49d944a8a",
+      "started_at": 1787319148.8228748,
+      "uptime_seconds": 1519.1
+    },
+    "entry_domain": "",
+    "seconds": 18,
+    "first_useful": 18,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J9T67GBWW4CNF91PENQDAX",
+    "outcome": "TRUE_EVIDENCE_SCARCITY",
+    "outcome_by_route": {
+      "run": "TRUE_EVIDENCE_SCARCITY",
+      "intro": "TRUE_EVIDENCE_SCARCITY",
+      "slides": "TRUE_EVIDENCE_SCARCITY",
+      "full": "TRUE_EVIDENCE_SCARCITY",
+      "story": "TRUE_EVIDENCE_SCARCITY",
+      "history": "TRUE_EVIDENCE_SCARCITY",
+      "connect": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "Walmart Inc.",
+    "deployed_sha": "dc17a9d",
+    "status": "READY",
+    "run_id": "01M0JA5K11YG7NC95MY8TVJVJS",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/dc17a9d/walmart_inc",
+    "process_before": {
+      "boot_id": "9890b2f49d944a8a",
+      "started_at": 1787319148.8228748,
+      "uptime_seconds": 1894.2
+    },
+    "entry_domain": "walmart.com",
+    "seconds": 186,
+    "first_useful": 186,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JA5K11YG7NC95MY8TVJVJS/intro",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0JA5K11YG7NC95MY8TVJVJS/progress: timeout",
+      "GET /runs/01M0JA5K11YG7NC95MY8TVJVJS/progress: timeout"
+    ]
+  },
+  {
+    "company": "Costco Wholesale Corporation",
+    "deployed_sha": "dc17a9d",
+    "status": "READY",
+    "run_id": "01M0JAH154VE2VHAHHNCSK94NR",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/dc17a9d/costco_wholesale_corporation",
+    "process_before": {
+      "boot_id": "9890b2f49d944a8a",
+      "started_at": 1787319148.8228748,
+      "uptime_seconds": 2269.1
+    },
+    "entry_domain": "costco.com",
+    "seconds": 96,
+    "first_useful": 96,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAH154VE2VHAHHNCSK94NR",
+    "outcome": "TRUE_EVIDENCE_SCARCITY",
+    "outcome_by_route": {
+      "run": "TRUE_EVIDENCE_SCARCITY",
+      "intro": "TRUE_EVIDENCE_SCARCITY",
+      "slides": "TRUE_EVIDENCE_SCARCITY",
+      "full": "TRUE_EVIDENCE_SCARCITY",
+      "story": "TRUE_EVIDENCE_SCARCITY",
+      "history": "TRUE_EVIDENCE_SCARCITY",
+      "connect": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "The Home Depot, Inc.",
+    "deployed_sha": "dc17a9d",
+    "status": "READY",
+    "run_id": "01M0JAWH04Z9MJJGM8952ZQ3WF",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/dc17a9d/the_home_depot_inc",
+    "process_before": {
+      "boot_id": "9890b2f49d944a8a",
+      "started_at": 1787319148.8228748,
+      "uptime_seconds": 2644.1
+    },
+    "entry_domain": "",
+    "seconds": 50,
+    "first_useful": 50,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAWH04Z9MJJGM8952ZQ3WF",
+    "outcome": "TRUE_EVIDENCE_SCARCITY",
+    "outcome_by_route": {
+      "run": "TRUE_EVIDENCE_SCARCITY",
+      "intro": "TRUE_EVIDENCE_SCARCITY",
+      "slides": "TRUE_EVIDENCE_SCARCITY",
+      "full": "TRUE_EVIDENCE_SCARCITY",
+      "story": "TRUE_EVIDENCE_SCARCITY",
+      "history": "TRUE_EVIDENCE_SCARCITY",
+      "connect": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "NIKE, Inc.",
+    "deployed_sha": "dc17a9d",
+    "status": "READY",
+    "run_id": "01M0JB8006VJY94S15ACJKXGFW",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/dc17a9d/nike_inc",
+    "process_before": {
+      "boot_id": "9890b2f49d944a8a",
+      "started_at": 1787319148.8228748,
+      "uptime_seconds": 3019.3
+    },
+    "entry_domain": "nike.com",
+    "seconds": 191,
+    "first_useful": 191,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JB8006VJY94S15ACJKXGFW/intro",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0JB8006VJY94S15ACJKXGFW/progress: timeout",
+      "GET /runs/01M0JB8006VJY94S15ACJKXGFW/progress: timeout",
+      "GET /runs/01M0JB8006VJY94S15ACJKXGFW/progress: timeout"
+    ]
+  },
+  {
+    "company": "The Coca-Cola Company",
+    "deployed_sha": "dc17a9d",
+    "status": "READY",
+    "run_id": "01M0JBM2V8TWVRR4BWH28WQY1Z",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/dc17a9d/the_coca_cola_company",
+    "process_before": {
+      "boot_id": "9890b2f49d944a8a",
+      "started_at": 1787319148.8228748,
+      "uptime_seconds": 3417.8
+    },
+    "entry_domain": "coca-colacompany.com",
+    "seconds": 142,
+    "first_useful": 142,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JBM2V8TWVRR4BWH28WQY1Z",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0JBM2V8TWVRR4BWH28WQY1Z/progress: timeout",
+      "GET /runs/01M0JBM2V8TWVRR4BWH28WQY1Z/progress: timeout"
+    ]
+  }
+]

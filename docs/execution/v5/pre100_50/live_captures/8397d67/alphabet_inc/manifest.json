@@ -1,0 +1,125 @@
+{
+  "company": "Alphabet Inc.",
+  "deployed_sha": "8397d67",
+  "captured_at": "2026-08-21T04:16:22Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H8HGXESBBWPZKED863FFZE/intro",
+      "chars": 5911,
+      "html_chars": 31469
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H8HGXESBBWPZKED863FFZE/intro",
+      "chars": 5911,
+      "html_chars": 31469
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H8HGXESBBWPZKED863FFZE/slides",
+      "chars": 6600,
+      "html_chars": 55740
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H8HGXESBBWPZKED863FFZE/full",
+      "chars": 24452,
+      "html_chars": 66237
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H8HGXESBBWPZKED863FFZE/story",
+      "chars": 4559,
+      "html_chars": 34069
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H8HGXESBBWPZKED863FFZE/history",
+      "chars": 28555,
+      "html_chars": 99985
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H8HGXESBBWPZKED863FFZE/connect",
+      "chars": 4060,
+      "html_chars": 28966
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H8HGXESBBWPZKED863FFZE/intro",
+      "chars": 5911,
+      "html_chars": 31469
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H8HGXESBBWPZKED863FFZE/evidence",
+      "chars": 6748,
+      "html_chars": 24028
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H8HGXESBBWPZKED863FFZE/report",
+      "chars": 307,
+      "html_chars": 14888
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H8HGXESBBWPZKED863FFZE/brief",
+      "chars": 19931,
+      "html_chars": 54865
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Alphabet Inc. GOOG \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecting ",
+      "status": 200,
+      "html_bytes": 16996
+    },
+    {
+      "t": 26.4,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Alphabet Inc. GOOG \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Connecting ma",
+      "status": 200,
+      "html_bytes": 16992
+    },
+    {
+      "t": 36.0,
+      "text": "",
+      "status": 303,
+      "html_bytes": 16992,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H8HGXESBBWPZKED863FFZE/progress",
+      "head": ""
+    },
+    {
+      "t": 151.8,
+      "text": "Alphabet Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Alphabet Inc. GOOG \u00b7 SEC CIK 0001652044 Alphabet Inc. is a software platform business that runs on attention resold to advertisers: revenue is an auction price per impression, so nothing is contracted forw",
+      "status": 200,
+      "html_bytes": 31542
+    }
+  ],
+  "process_before": {
+    "boot_id": "777e281ac5714ef8",
+    "started_at": 1787285577.8327832,
+    "uptime_seconds": 204.8
+  },
+  "run_id": "01M0H8HGXESBBWPZKED863FFZE",
+  "status": "READY",
+  "seconds": 152,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 6.09,
+    "intro": 5.19,
+    "slides": 9.1,
+    "full": 13.86,
+    "story": 5.92,
+    "history": 0.42,
+    "connect": 4.54
+  },
+  "errors": []
+}

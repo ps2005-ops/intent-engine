@@ -1,0 +1,88 @@
+{
+ "as_of": "2026-08-06",
+ "causal_pathways": [],
+ "company_display_name": "Microsoft Corporation",
+ "company_id": "microsoft-corporation",
+ "competitor_reactions": [],
+ "disclaimer": "Descriptive strategic context derived from public evidence. Not a recommendation, not a forecast, and not a statement about any investment position.",
+ "evidence_ids": [
+  "ev_2affe935bd973dc0",
+  "ev_2b692436eddd7283",
+  "ev_2d967036f2442a2e",
+  "ev_32eb13dd1648affa",
+  "ev_548121048c32252a",
+  "ev_d1a996088c931e52",
+  "ev_d3fdc373287a2e04"
+ ],
+ "expectation_mismatches": [],
+ "export_version": "strategic_market_intel.v1",
+ "freshness": {
+  "age_days": 0,
+  "as_of": "2026-08-06",
+  "note": "reflects strategic evidence available on this date",
+  "stale": false,
+  "status": "observed"
+ },
+ "generated_at": "2026-08-05T08:49:13+00:00",
+ "hidden_states": [],
+ "information_priorities": [],
+ "interactions": [],
+ "interpretation_allowed": [
+  "A named actor took a stated action on a stated date.",
+  "The evidence has shifted the weight across possible postures.",
+  "A preregistered expectation was contradicted by what was observed.",
+  "A stated mechanism connects one factor to another, with its lag.",
+  "This upcoming observation would most reduce a stated uncertainty."
+ ],
+ "interpretation_forbidden": [
+  "any buy/sell/hold implication, however hedged",
+  "any claim about the engine's trading performance",
+  "any assertion that a competitor's motive is known",
+  "any forecast of a price or a financial result",
+  "any presentation of a posture probability as a certainty"
+ ],
+ "limitations": [],
+ "pricing_actions": [],
+ "strategic_beliefs": [
+  {
+   "basis": "opened by 4 translated evidence item(s) of type EARNINGS_SURPRISE, effective sample 1.70",
+   "confidence": 0.618,
+   "direction_of_last_change": null,
+   "evidence_ids": [
+    "ev_548121048c32252a",
+    "ev_2d967036f2442a2e",
+    "ev_d1a996088c931e52",
+    "ev_d3fdc373287a2e04"
+   ],
+   "last_updated": "2026-08-06",
+   "limitations": [
+    "one period's result is a data point, not a trend"
+   ],
+   "proposition": "Microsoft Corporation is seeing demand strengthen rather than plateau",
+   "subject": "Microsoft Corporation",
+   "update_method": "DECLARED"
+  },
+  {
+   "basis": "opened by 3 translated evidence item(s) of type EXECUTIVE_CHANGE, effective sample 1.47",
+   "confidence": 0.6089,
+   "direction_of_last_change": null,
+   "evidence_ids": [
+    "ev_2affe935bd973dc0",
+    "ev_32eb13dd1648affa",
+    "ev_2b692436eddd7283"
+   ],
+   "last_updated": "2026-08-06",
+   "limitations": [
+    "a board departure need not change operating strategy"
+   ],
+   "proposition": "Microsoft Corporation is going through a leadership transition that will change what it prioritises",
+   "subject": "Microsoft Corporation",
+   "update_method": "DECLARED"
+  }
+ ],
+ "subject_names": [
+  "Microsoft",
+  "Microsoft Corporation",
+  "microsoft"
+ ]
+}

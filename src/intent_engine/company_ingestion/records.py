@@ -49,12 +49,25 @@ RETRIEVAL_STATUSES = ("OK", "FAILED", "UNAVAILABLE", "SKIPPED")
 FAILURE_TYPES = ("timeout", "connection", "http_status", "too_large",
                  "bad_mime", "unsafe_redirect", "blocked", "parse_error",
                  "javascript_only",
+                 # The source was never dialled because the analysis ran out
+                 # of its interactive budget first. Emphatically NOT a
+                 # finding about the company or the host: it is a fact about
+                 # how long we were willing to wait, and it is retryable.
+                 "deadline_exceeded",
                  # The page WAS retrieved, but its text tripped the credential
                  # scanner and was refused before storage. Reporting that as
                  # "blocked" told the reader the address failed a safety check,
                  # which is a different and more alarming thing than "we read
                  # this page and chose not to keep it".
-                 "content_rejected")
+                 "content_rejected",
+                 # The host had ALREADY refused to answer earlier in this run,
+                 # so this candidate was never dialled. Distinct from
+                 # "timeout" on purpose: a timeout is a thing that happened to
+                 # this URL, this is a decision we made about the host, and
+                 # the reader must be able to tell "we waited and nobody
+                 # answered" from "we stopped waiting". Retryable, and never a
+                 # finding about the company.
+                 "host_unreachable")
 
 PRIVACY_CLASSES = ("public", "user_public_excerpt", "user_internal")
 
@@ -101,6 +114,25 @@ INGESTION_EVENTS = frozenset({
     "ci.candidate_discovered", "ci.approval_recorded",
     "ci.source_retrieved", "ci.retrieval_failed",
     "ci.pasted_evidence_added", "ci.claims_built",
+    # WHAT THE RUN DID NOT HAVE TO DO. A warm run skips discovery entirely,
+    # which is invisible in every other event: the candidates it stores look
+    # exactly like a cold run's, because they are written through the same
+    # path on purpose. Without this row a reader cannot tell a reused source
+    # list from a rediscovered one, and the whole point of the snapshot is
+    # the difference between them.
+    "ci.snapshot_reused",
+    # WHAT CHANGED AFTER THE READER ALREADY HAD AN ANSWER. CORE stops
+    # blocking once the readiness contract is met and the remaining approved
+    # sources are acquired afterwards; when that wider evidence moves the
+    # thesis, the decision implications or the result state, the change is
+    # recorded here and shown as a CHANGE. Rewriting the page under a reader
+    # who has acted on it is worse than making them wait.
+    #
+    # REGISTERED WITH THE HANDLER, NOT AFTER IT. The last new event type in
+    # this file was added to the producer and not to this set: `_append`
+    # raised, a broad `except` swallowed it, and every "warm" run silently
+    # performed a full cold discovery while reporting nothing wrong.
+    "ci.analysis_updated",
     # report-quality diagnostics (operator observability)
     "ci.quality_assessed",
     # Operator-only: did the RICH path actually land? "The reasoning backend
@@ -110,7 +142,32 @@ INGESTION_EVENTS = frozenset({
     # WHO the run is about, asserted before synthesis and independently of
     # whatever the run manages to retrieve.
     "ci.entity_identified",
+    # WHOSE DOCUMENTS THE RUN DECIDED IT WAS READING, recorded at the moment
+    # it decided. Four deploys were spent on a defect whose whole difficulty
+    # was that `subject_cik` was unobservable after the fact: a run that
+    # produced a wrong attribution could not be asked whether it had had a
+    # CIK at all, and the run that would have settled it was gone by the time
+    # the question was framed. An append-only event outlives the run, the
+    # process and the deploy, which a live route does not.
+    "ci.ownership_resolved",
+    # WHEN each lifecycle boundary was crossed, recorded where it happened.
+    # The interactive SLO is written against CORE_READY, and CORE_READY was
+    # being measured by watching a progress page stop redirecting -- a UI
+    # side effect, in a harness, over a network, with a 4s poll granularity
+    # that alone is 13% of a 30s budget. An append-only marker outlives the
+    # process, is exact, and cannot be changed by a template edit.
+    "ci.lifecycle_marked",
+    # WHERE THE TIME WENT, recorded per stage rather than argued from
+    # end-to-end ratios. Two hypotheses about the deployed latency were
+    # reasoned from totals and both were wrong; an aggregate cannot say which
+    # stage owns the seconds.
+    "ci.trace_recorded",
 })
+
+#: The boundaries worth timing. Deliberately short: a marker nobody divides
+#: by is a row in a ledger that has to be maintained forever.
+LIFECYCLE_MARKERS = ("accepted", "core_ready", "deep_started", "deep_ready",
+                     "terminal")
 
 
 class IngestionError(ValueError):
@@ -205,7 +262,7 @@ def retrieved_record(*, source_id, run_id, company_id, original_url,
                      retrieval_status="OK", privacy="public",
                      origin_note="", source_class="company_owned",
                      extraction_mode="body", blocks_found=0,
-                     filing=None) -> dict:
+                     published_date="", filing=None) -> dict:
     assert_no_secret(text_content[:20000], where="retrieved source text")
     if privacy not in PRIVACY_CLASSES:
         raise IngestionError(f"unknown privacy class {privacy!r}")
@@ -227,6 +284,20 @@ def retrieved_record(*, source_id, run_id, company_id, original_url,
             # og:description is not the same evidence as a document whose body
             # was read, and every gate downstream was blind to the difference.
             "extraction_mode": extraction_mode, "blocks_found": blocks_found,
+            # WHEN THE PUBLISHER SAYS THIS WAS PUBLISHED, verbatim.
+            #
+            # The parser has always extracted this and the service has always
+            # thrown it away, keeping only a CURRENT/STALE flag derived from
+            # it. So the history surface -- whose entire job is "what did the
+            # record show at date X" -- had no dates for any company that does
+            # not file with a regulator, and told those readers their company
+            # had no history. It did not; we discarded the dates and then
+            # reported the absence as a fact about them.
+            #
+            # Empty when the publisher asserted none. NEVER inferred from the
+            # retrieval time: when we read a page is not when it was written,
+            # and conflating the two is how a rewind acquires a fake timeline.
+            "published_date": str(published_date or ""),
             # WHAT WAS READ, for a regulatory filing: the quality verdict, the
             # sections located, and the span each retained excerpt was cut
             # from. Absent (None) for every other kind of document, so no

@@ -1,0 +1,70 @@
+[
+  {
+    "company": "The Goldman Sachs Group, Inc.",
+    "deployed_sha": "3b6ba34",
+    "status": "READY",
+    "run_id": "01M0KMHJ5Y6N4XBMYQD7Q0TBFY",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/3b6ba34/the_goldman_sachs_group_inc",
+    "process_before": {
+      "boot_id": "dae43c1445054526",
+      "started_at": 1787365432.1417418,
+      "uptime_seconds": 41.0
+    },
+    "entry_domain": "goldmansachs.com",
+    "seconds": 328,
+    "first_useful": 328,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KMHJ5Y6N4XBMYQD7Q0TBFY/intro",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0KMHJ5Y6N4XBMYQD7Q0TBFY/progress: timeout",
+      "GET /runs/01M0KMHJ5Y6N4XBMYQD7Q0TBFY/progress: timeout",
+      "GET /runs/01M0KMHJ5Y6N4XBMYQD7Q0TBFY/progress: timeout",
+      "GET /runs/01M0KMHJ5Y6N4XBMYQD7Q0TBFY/progress: timeout",
+      "GET /runs/01M0KMHJ5Y6N4XBMYQD7Q0TBFY/progress: timeout"
+    ]
+  },
+  {
+    "company": "NIKE, Inc.",
+    "deployed_sha": "3b6ba34",
+    "status": "FAILED",
+    "run_id": "01M0KN5NX5NXJE93KSCCNC7Z8E",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/3b6ba34/nike_inc",
+    "process_before": {
+      "boot_id": "dae43c1445054526",
+      "started_at": 1787365432.1417418,
+      "uptime_seconds": 701.0
+    },
+    "entry_domain": "nike.com",
+    "seconds": 65,
+    "first_useful": null,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KN5NX5NXJE93KSCCNC7Z8E/progress"
+  },
+  {
+    "company": "Amazon.com, Inc.",
+    "deployed_sha": "3b6ba34",
+    "status": "FAILED",
+    "run_id": "",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/3b6ba34/amazon_com_inc",
+    "process_before": {
+      "boot_id": "dae43c1445054526",
+      "started_at": 1787365432.1417418,
+      "uptime_seconds": 1001.0
+    },
+    "entry_domain": "",
+    "failure": "analyze did not open a run (HTTP 500)",
+    "entry_text": "Something went wrong on our side Something went wrong on our side What did work. Your request was received and the company you entered was recorded. What did not. The analysis did not complete. Why. This is a fault in the product, not in what you entered or in the company. What to do next. Run it again. If it keeps happening, the reference below identifies this run in our logs. Run a new analysis "
+  }
+]

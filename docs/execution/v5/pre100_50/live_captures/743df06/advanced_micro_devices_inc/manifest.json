@@ -1,0 +1,12 @@
+{
+  "company": "Advanced Micro Devices, Inc.",
+  "deployed_sha": "743df06",
+  "captured_at": "2026-08-21T18:46:00Z",
+  "routes": {},
+  "progress": [],
+  "process_before": {},
+  "status": "FAILED",
+  "run_id": "",
+  "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/743df06/advanced_micro_devices_inc",
+  "failure": "no csrf on the entry page"
+}

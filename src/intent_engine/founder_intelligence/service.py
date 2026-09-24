@@ -68,6 +68,31 @@ def analysis_fingerprint(company_input) -> str:
     return hashlib.sha256(seed.encode()).hexdigest()[:12]
 
 
+def run_subject_key(domain: str, company_name: str) -> str:
+    """WHICH COMPANY a run is about, for its identity seed.
+
+    The seed was keyed on the domain alone. That is fine while every run has
+    one — and a run opened on a CIK deliberately has none, because the
+    regulator records no web domain and substituting one would make the
+    REGULATOR the company's website.
+
+    So every domainless filer analysed on the same day shared an empty
+    prefix, and `analysis_fingerprint` does not read the company name (it
+    covers the approved source set and the pipeline version), which means two
+    such companies with the same source shape produced the SAME digest. Two
+    different companies collapsing into one run id is not a near miss; it is
+    one company's evidence answering a question about another.
+
+    The name is the distinguishing fact when there is no domain, so it is
+    what keys the run.
+    """
+    if domain:
+        return domain
+    cleaned = "".join(ch for ch in str(company_name or "").lower()
+                      if ch.isalnum() or ch.isspace())
+    return "name:" + " ".join(cleaned.split())
+
+
 def _dont_believe_entries(cbs) -> list:
     """What THIS run cannot yet support, derived from the evidence actually
     present. Generic entries (of the "pricing may matter" or "customers may be
@@ -239,7 +264,11 @@ class FounderIntelligenceService:
         # different analysis gets its own identity instead of colliding. It
         # also stops a stale low-quality run from trapping the user after the
         # pipeline improves — a new version simply cannot reuse the old id.
-        seed = f"run:{domain}:{as_of}:{analysis_fingerprint(company_input)}"
+        # A DOMAINLESS COMPANY STILL NEEDS ITS OWN IDENTITY. With no website
+        # `domain` is "", so every filer analysed by CIK on one day would seed
+        # from the same prefix; the company name is what distinguishes them.
+        subject = run_subject_key(domain, company_name)
+        seed = f"run:{subject}:{as_of}:{analysis_fingerprint(company_input)}"
         run_id = self._stable_id(seed)
 
         # REUSE A FINISHED RUN INSTEAD OF REPLAYING IT.

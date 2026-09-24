@@ -1,0 +1,41 @@
+{
+  "company": "NVIDIA Corporation",
+  "deployed_sha": "8fd6c82",
+  "run_id": "01M0K1AW6FVAC40YMH3ZG3BGYA",
+  "analysis_seconds": 162,
+  "stage_transitions": [
+    {
+      "t": 5.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing NVIDIA Corporation NVDA \u00b7 nvidia.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence w",
+      "status": 200,
+      "html_bytes": 17016
+    },
+    {
+      "t": 162.2,
+      "text": "Limited analysis of NVIDIA Corporation Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of NVIDIA Corporation Some kinds of evidence are missing, and there are places left to look. Rather than show a briefing that looks complete and is not, here is exactly where it stands. What ",
+      "status": 200,
+      "html_bytes": 18312
+    }
+  ],
+  "route_seconds": {
+    "run": 4.09,
+    "intro": 18.47,
+    "slides": 3.58,
+    "full": 3.23,
+    "story": 6.88,
+    "history": 0.22,
+    "connect": 5.67
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "9faee695704b434b",
+    "started_at": 1787344896.8719635,
+    "uptime_seconds": 419.5
+  },
+  "process_after": {
+    "boot_id": "9faee695704b434b",
+    "started_at": 1787344896.8719635,
+    "uptime_seconds": 808.6
+  },
+  "errors": []
+}

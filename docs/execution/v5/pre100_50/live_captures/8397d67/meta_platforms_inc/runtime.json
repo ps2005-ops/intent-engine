@@ -1,0 +1,45 @@
+{
+  "company": "Meta Platforms, Inc.",
+  "deployed_sha": "8397d67",
+  "run_id": "01M0H1E7T09BN34KZQC3TTF0MF",
+  "analysis_seconds": 220,
+  "stage_transitions": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Meta Platforms, Inc. META \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Conn"
+    },
+    {
+      "t": 27.4,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Meta Platforms, Inc. META \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Connec"
+    },
+    {
+      "t": 37.2,
+      "text": ""
+    },
+    {
+      "t": 220.2,
+      "text": "Meta Platforms, Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Meta Platforms, Inc. META \u00b7 SEC CIK 0001326801 Meta Platforms, Inc. is a software platform business that runs on attention resold to advertisers: revenue is an auction price per impression, so nothi"
+    }
+  ],
+  "route_seconds": {
+    "run": 6.3,
+    "intro": 6.09,
+    "slides": 9.31,
+    "full": 15.0,
+    "story": 6.69,
+    "history": 0.26,
+    "connect": 4.73
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "ea27804e556c4fcf",
+    "started_at": 1787278313.388944,
+    "uptime_seconds": 21.2
+  },
+  "process_after": {
+    "boot_id": "ea27804e556c4fcf",
+    "started_at": 1787278313.388944,
+    "uptime_seconds": 444.0
+  },
+  "errors": []
+}

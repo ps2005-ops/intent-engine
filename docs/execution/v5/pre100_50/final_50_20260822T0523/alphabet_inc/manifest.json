@@ -1,0 +1,15 @@
+{
+ "company": "Alphabet Inc.",
+ "deployed_sha": "f8c183f",
+ "captured_at": "2026-08-22T05:36:58Z",
+ "run_id": "",
+ "outcome": "",
+ "routes": {},
+ "seconds": null,
+ "reliability": {
+  "connection_reset": 0,
+  "quota_block": false,
+  "retry_required": 0,
+  "manual_recovery": 0
+ }
+}

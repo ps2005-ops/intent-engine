@@ -1,0 +1,421 @@
+{
+  "contract": "specialization_regression.v2",
+  "generated_at": "2026-08-14",
+  "note": "Each company carries a different record, as production does. v1 passed no record at all and therefore measured the business-model prior alone, which is what exposed the within-class collapse.",
+  "rows": [
+    {
+      "company": "Cloudflare, Inc.",
+      "state": "PROFILE_AVAILABLE",
+      "model": "SUBSCRIPTION_SOFTWARE",
+      "archetype": "PRICING",
+      "question": "For Cloudflare, Inc.: what to charge, and for what, without losing more customer count than the price gains?",
+      "signals": [
+        "customer count",
+        "seats or usage per customer",
+        "list and realised price",
+        "renewal rate",
+        "sales and marketing to acquire an account",
+        "engineering headcount",
+        "infrastructure and delivery cost per unit served",
+        "pricing and packaging changes",
+        "product launches",
+        "customer wins and losses",
+        "partnership announcements"
+      ],
+      "channels": [
+        "MARKET_RATE"
+      ],
+      "causal": "Did the pricing or packaging change alter conversion and expansion, or did it only move realised price on the customers who renewed anyway?",
+      "competitors": [
+        "Adobe Inc.",
+        "Constellation Software Inc.",
+        "Databricks, Inc.",
+        "Epic Systems Corporation",
+        "Microsoft Corporation"
+      ]
+    },
+    {
+      "company": "Shopify Inc.",
+      "state": "PROFILE_AVAILABLE",
+      "model": "SUBSCRIPTION_SOFTWARE",
+      "archetype": "SALES_MOTION",
+      "question": "For Shopify Inc.: how the product is sold, and by whom, measured on acquisition cost per unit of customer count?",
+      "signals": [
+        "customer count",
+        "seats or usage per customer",
+        "list and realised price",
+        "renewal rate",
+        "sales and marketing to acquire an account",
+        "engineering headcount",
+        "infrastructure and delivery cost per unit served",
+        "pricing and packaging changes",
+        "product launches",
+        "customer wins and losses",
+        "partnership announcements"
+      ],
+      "channels": [],
+      "causal": "Did the change in sales motion improve acquisition efficiency relative to comparable vendors over the same window?",
+      "competitors": [
+        "Adobe Inc.",
+        "Cloudflare, Inc.",
+        "Constellation Software Inc.",
+        "Databricks, Inc.",
+        "Epic Systems Corporation"
+      ]
+    },
+    {
+      "company": "Johnson & Johnson",
+      "state": "PROFILE_AVAILABLE",
+      "model": "REGULATED_PRODUCT_OR_PROVIDER",
+      "archetype": "REGULATORY_RESPONSE",
+      "question": "For Johnson & Johnson: how to respond to what the regulator has done, before the decision changes what may be sold, or at what price?",
+      "signals": [
+        "approved products and indications",
+        "volume and prescriptions or procedures",
+        "net price after rebates",
+        "exclusivity runway",
+        "research and development",
+        "clinical and trial cost",
+        "manufacturing and quality",
+        "regulatory decisions and submissions",
+        "clinical and trial results",
+        "reimbursement and pricing decisions",
+        "litigation and settlement developments"
+      ],
+      "channels": [],
+      "causal": "Did the regulatory decision change the addressable population, or only the label under which it is reached?",
+      "competitors": [
+        "Eli Lilly and Company",
+        "HCA Healthcare, Inc.",
+        "Pfizer Inc.",
+        "UnitedHealth Group Incorporated",
+        "Intuitive Surgical, Inc."
+      ]
+    },
+    {
+      "company": "Advanced Micro Devices, Inc.",
+      "state": "PROFILE_AVAILABLE",
+      "model": "DESIGN_AND_MANUFACTURE",
+      "archetype": "CAPACITY",
+      "question": "For Advanced Micro Devices, Inc.: how much capacity to commit, and when, given that manufacturing and foundry cost is committed before the unit volume it is meant to serve arrives?",
+      "signals": [
+        "unit volume",
+        "product and node mix",
+        "average selling price",
+        "design wins",
+        "manufacturing and foundry cost",
+        "yield",
+        "capacity utilisation",
+        "capacity and capital expenditure announcements",
+        "product and process generation launches",
+        "supply agreements",
+        "export and trade restrictions"
+      ],
+      "channels": [
+        "INDUSTRIAL_DEMAND"
+      ],
+      "causal": "Did the capacity commitment convert into shipped volume, or into inventory that the channel had already stocked?",
+      "competitors": [
+        "Applied Materials, Inc.",
+        "Broadcom Inc.",
+        "Intel Corporation",
+        "Lam Research Corporation",
+        "Micron Technology, Inc."
+      ]
+    },
+    {
+      "company": "The Boeing Company",
+      "state": "PROFILE_AVAILABLE",
+      "model": "MANUFACTURE_AND_AFTERMARKET",
+      "archetype": "CAPACITY",
+      "question": "For The Boeing Company: how much capacity to commit, and when, given that supply chain and component availability is committed before the orders and backlog it is meant to serve arrives?",
+      "signals": [
+        "orders and backlog",
+        "delivery or production rate",
+        "aftermarket and services on the installed base",
+        "product mix",
+        "supply chain and component availability",
+        "labour and skills",
+        "rework and quality cost",
+        "orders, backlog and deliveries",
+        "production rate decisions",
+        "certification and regulatory milestones",
+        "supplier and quality events"
+      ],
+      "channels": [],
+      "causal": "Did the production rate increase convert backlog into deliveries, or did it accumulate work in progress the supply chain cannot finish?",
+      "competitors": [
+        "CAE Inc.",
+        "Caterpillar Inc.",
+        "Deere & Company",
+        "GE Aerospace",
+        "Honeywell International Inc."
+      ]
+    },
+    {
+      "company": "Bank of America Corporation",
+      "state": "PROFILE_AVAILABLE",
+      "model": "BALANCE_SHEET_OR_NETWORK",
+      "archetype": "PRICING",
+      "question": "For Bank of America Corporation: what to charge, and for what, without losing more spread on assets and liabilities than the price gains?",
+      "signals": [
+        "spread on assets and liabilities",
+        "transaction and fee volume",
+        "balance or asset growth",
+        "take rate",
+        "cost of funds",
+        "credit and fraud losses",
+        "regulatory and compliance cost",
+        "rate and pricing changes",
+        "credit quality and provisioning commentary",
+        "regulatory actions and capital requirements",
+        "partnership and network announcements"
+      ],
+      "channels": [
+        "MARKET_RATE"
+      ],
+      "causal": "Did the repricing widen the spread, or did the cost of funds follow it up within the same window?",
+      "competitors": [
+        "Bank of Montreal",
+        "Blackstone Inc.",
+        "Brookfield Asset Management Ltd.",
+        "Brookfield Corporation",
+        "JPMorgan Chase & Co."
+      ]
+    },
+    {
+      "company": "Agnico Eagle Mines Limited",
+      "state": "PROFILE_AVAILABLE",
+      "model": "COMMODITY_PRODUCER",
+      "archetype": "CAPITAL_ALLOCATION",
+      "question": "For Agnico Eagle Mines Limited: where the next increment of capital goes, given what the same capital would earn against produced volume elsewhere?",
+      "signals": [
+        "produced volume",
+        "realised commodity price",
+        "grade or quality of output",
+        "sales mix",
+        "energy and fuel",
+        "labour",
+        "sustaining capital",
+        "production and operating results",
+        "reserve and resource statements",
+        "project and capital decisions",
+        "permitting and jurisdiction changes"
+      ],
+      "channels": [
+        "COMMODITY"
+      ],
+      "causal": "Did the capital committed to this project earn a return distinguishable from what the commodity price alone delivered?",
+      "competitors": [
+        "Barrick Mining Corporation",
+        "CEMEX, S.A.B. de C.V.",
+        "Canadian Natural Resources Limited",
+        "Chevron Corporation",
+        "Exxon Mobil Corporation"
+      ]
+    },
+    {
+      "company": "Stripe, Inc.",
+      "state": "PROFILE_AVAILABLE",
+      "model": "BALANCE_SHEET_OR_NETWORK",
+      "archetype": "PRICING",
+      "question": "For Stripe, Inc.: what to charge, and for what, without losing more spread on assets and liabilities than the price gains?",
+      "signals": [
+        "spread on assets and liabilities",
+        "transaction and fee volume",
+        "balance or asset growth",
+        "take rate",
+        "cost of funds",
+        "credit and fraud losses",
+        "regulatory and compliance cost",
+        "rate and pricing changes",
+        "credit quality and provisioning commentary",
+        "regulatory actions and capital requirements",
+        "partnership and network announcements"
+      ],
+      "channels": [],
+      "causal": "Did the repricing widen the spread, or did the cost of funds follow it up within the same window?",
+      "competitors": [
+        "37signals LLC",
+        "Adobe Inc.",
+        "AgileBits Inc."
+      ]
+    },
+    {
+      "company": "McKinsey & Company",
+      "state": "PROFILE_AVAILABLE",
+      "model": "PEOPLE_OR_ROUTE_BASED_SERVICES",
+      "archetype": "CAPACITY",
+      "question": "For McKinsey & Company: how much capacity to commit, and when, given that compensation is committed before the billable headcount or capacity it is meant to serve arrives?",
+      "signals": [
+        "billable headcount or capacity",
+        "utilisation",
+        "rate or yield",
+        "engagement mix",
+        "compensation",
+        "recruiting and training",
+        "bench or idle capacity",
+        "hiring and headcount actions",
+        "client and engagement announcements",
+        "capacity, route or office changes",
+        "pricing and rate commentary"
+      ],
+      "channels": [],
+      "causal": "Did the hiring convert into billable utilisation, or into bench?",
+      "competitors": [
+        "CGI Inc.",
+        "Cintas Corporation",
+        "WSP Global Inc."
+      ]
+    },
+    {
+      "company": "Caterpillar Inc.",
+      "state": "PROFILE_AVAILABLE",
+      "model": "MANUFACTURE_AND_AFTERMARKET",
+      "archetype": "CAPACITY",
+      "question": "For Caterpillar Inc.: how much capacity to commit, and when, given that supply chain and component availability is committed before the orders and backlog it is meant to serve arrives?",
+      "signals": [
+        "orders and backlog",
+        "delivery or production rate",
+        "aftermarket and services on the installed base",
+        "product mix",
+        "supply chain and component availability",
+        "labour and skills",
+        "rework and quality cost",
+        "orders, backlog and deliveries",
+        "production rate decisions",
+        "certification and regulatory milestones",
+        "supplier and quality events"
+      ],
+      "channels": [
+        "INDUSTRIAL_DEMAND"
+      ],
+      "causal": "Did the production rate increase convert backlog into deliveries, or did it accumulate work in progress the supply chain cannot finish?",
+      "competitors": [
+        "CAE Inc.",
+        "Deere & Company",
+        "GE Aerospace",
+        "Honeywell International Inc.",
+        "Magna International Inc."
+      ]
+    },
+    {
+      "company": "Palantir Technologies Inc.",
+      "state": "PROFILE_AVAILABLE",
+      "model": "SUBSCRIPTION_SOFTWARE",
+      "archetype": "CAPACITY",
+      "question": "For Palantir Technologies Inc.: how much capacity to commit, and when, given that sales and marketing to acquire an account is committed before the customer count it is meant to serve arrives?",
+      "signals": [
+        "customer count",
+        "seats or usage per customer",
+        "list and realised price",
+        "renewal rate",
+        "sales and marketing to acquire an account",
+        "engineering headcount",
+        "infrastructure and delivery cost per unit served",
+        "pricing and packaging changes",
+        "product launches",
+        "customer wins and losses",
+        "partnership announcements"
+      ],
+      "channels": [],
+      "causal": "Did the pricing or packaging change alter conversion and expansion, or did it only move realised price on the customers who renewed anyway?",
+      "competitors": [
+        "Adobe Inc.",
+        "Cloudflare, Inc.",
+        "Constellation Software Inc.",
+        "Databricks, Inc.",
+        "Epic Systems Corporation"
+      ]
+    },
+    {
+      "company": "AgileBits Inc.",
+      "state": "PROFILE_AVAILABLE",
+      "model": "SUBSCRIPTION_SOFTWARE",
+      "archetype": "PRICING",
+      "question": "For AgileBits Inc.: what to charge, and for what, without losing more customer count than the price gains?",
+      "signals": [
+        "customer count",
+        "seats or usage per customer",
+        "list and realised price",
+        "renewal rate",
+        "sales and marketing to acquire an account",
+        "engineering headcount",
+        "infrastructure and delivery cost per unit served",
+        "pricing and packaging changes",
+        "product launches",
+        "customer wins and losses",
+        "partnership announcements"
+      ],
+      "channels": [],
+      "causal": "Did the pricing or packaging change alter conversion and expansion, or did it only move realised price on the customers who renewed anyway?",
+      "competitors": [
+        "Cohere Inc.",
+        "Datadog, Inc.",
+        "MongoDB, Inc.",
+        "Snowflake Inc.",
+        "The Descartes Systems Group Inc."
+      ]
+    },
+    {
+      "company": "Toyota Motor Corporation",
+      "state": "PROFILE_PARTIAL",
+      "model": "MANUFACTURE_AND_AFTERMARKET",
+      "archetype": "M&A",
+      "question": "For Toyota Motor Corporation: what to buy or sell, and at what price, measured against building the same orders and backlog internally?",
+      "signals": [
+        "orders and backlog",
+        "delivery or production rate",
+        "aftermarket and services on the installed base",
+        "product mix",
+        "supply chain and component availability",
+        "labour and skills",
+        "rework and quality cost",
+        "orders, backlog and deliveries",
+        "production rate decisions",
+        "certification and regulatory milestones",
+        "supplier and quality events"
+      ],
+      "channels": [],
+      "causal": "Did the production rate increase convert backlog into deliveries, or did it accumulate work in progress the supply chain cannot finish?",
+      "competitors": [
+        "CAE Inc.",
+        "Caterpillar Inc.",
+        "Deere & Company",
+        "GE Aerospace",
+        "Honeywell International Inc."
+      ]
+    },
+    {
+      "company": "Vale S.A.",
+      "state": "PROFILE_PARTIAL",
+      "model": "COMMODITY_PRODUCER",
+      "archetype": "COST_STRUCTURE",
+      "question": "For Vale S.A.: which costs are structural and which are choices, without cutting into the produced volume the cost base exists to produce?",
+      "signals": [
+        "produced volume",
+        "realised commodity price",
+        "grade or quality of output",
+        "sales mix",
+        "energy and fuel",
+        "labour",
+        "sustaining capital",
+        "production and operating results",
+        "reserve and resource statements",
+        "project and capital decisions",
+        "permitting and jurisdiction changes"
+      ],
+      "channels": [
+        "COMMODITY"
+      ],
+      "causal": "Did the cost programme lower unit cost relative to comparable producers facing the same input prices?",
+      "competitors": [
+        "Agnico Eagle Mines Limited",
+        "Barrick Mining Corporation",
+        "CEMEX, S.A.B. de C.V.",
+        "Canadian Natural Resources Limited",
+        "Chevron Corporation"
+      ]
+    }
+  ]
+}

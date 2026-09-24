@@ -1,0 +1,135 @@
+{
+  "company": "Salesforce, Inc.",
+  "deployed_sha": "5d43053",
+  "captured_at": "2026-08-21T08:17:08Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPADBBHY7PRP4G2KWVP24J/intro",
+      "chars": 5619,
+      "html_chars": 31177,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPADBBHY7PRP4G2KWVP24J/intro",
+      "chars": 5619,
+      "html_chars": 31177,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPADBBHY7PRP4G2KWVP24J/slides",
+      "chars": 6923,
+      "html_chars": 56379,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPADBBHY7PRP4G2KWVP24J/full",
+      "chars": 26075,
+      "html_chars": 68242,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPADBBHY7PRP4G2KWVP24J/story",
+      "chars": 4384,
+      "html_chars": 33914,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPADBBHY7PRP4G2KWVP24J/history",
+      "chars": 28779,
+      "html_chars": 108442,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPADBBHY7PRP4G2KWVP24J/connect",
+      "chars": 4036,
+      "html_chars": 28952,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPADBBHY7PRP4G2KWVP24J/intro",
+      "chars": 5619,
+      "html_chars": 31177,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPADBBHY7PRP4G2KWVP24J/evidence",
+      "chars": 8994,
+      "html_chars": 28493,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPADBBHY7PRP4G2KWVP24J/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HPADBBHY7PRP4G2KWVP24J/brief",
+      "chars": 19868,
+      "html_chars": 54642,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Salesforce, Inc. CRM \u00b7 salesforce.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence ",
+      "status": 200,
+      "html_bytes": 17016
+    },
+    {
+      "t": 39.5,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Salesforce, Inc. CRM \u00b7 salesforce.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence",
+      "status": 200,
+      "html_bytes": 17012
+    },
+    {
+      "t": 206.6,
+      "text": "Salesforce, Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Salesforce, Inc. CRM \u00b7 USA \u00b7 salesforce.com \u00b7 SEC CIK 0001108524 Salesforce, Inc. is a software platform business that runs on recurring software subscription: revenue is contracted and renews, so the i",
+      "status": 200,
+      "html_bytes": 31252
+    }
+  ],
+  "process_before": {
+    "boot_id": "1a03e19590ee4c01",
+    "started_at": 1787298504.401148,
+    "uptime_seconds": 1724.4
+  },
+  "run_id": "01M0HPADBBHY7PRP4G2KWVP24J",
+  "status": "READY",
+  "seconds": 207,
+  "first_useful": 207,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 6.96,
+    "intro": 6.77,
+    "slides": 8.68,
+    "full": 15.43,
+    "story": 7.42,
+    "history": 0.21,
+    "connect": 5.18
+  },
+  "outcome": "FULL_ANALYSIS",
+  "outcome_by_route": {
+    "run": "FULL_ANALYSIS",
+    "intro": "FULL_ANALYSIS",
+    "slides": "FULL_ANALYSIS",
+    "full": "FULL_ANALYSIS",
+    "story": "FULL_ANALYSIS",
+    "history": "FULL_ANALYSIS",
+    "connect": "FULL_ANALYSIS"
+  },
+  "outcome_disagreement": [],
+  "errors": []
+}

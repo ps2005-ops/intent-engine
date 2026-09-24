@@ -12,9 +12,13 @@ import urllib.error
 import urllib.request
 from urllib.parse import urlparse
 
+from intent_engine.company_ingestion import httppool
 from intent_engine.company_ingestion.records import (
     ACCEPTED_MIME_PREFIXES, CONNECT_TIMEOUT_S, MAX_REDIRECTS,
     MAX_RESPONSE_BYTES, USER_AGENT,
+)
+from intent_engine.company_ingestion.transient import (
+    DEFAULT_POLICY, call_with_retry,
 )
 from intent_engine.company_ingestion.validation import (
     UnsafeURLRejected, redirect_allowed, resolve_public_addresses,
@@ -32,12 +36,25 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
         return None                       # surface 3xx as HTTPError
 
 
+_DEFAULT_HEADERS = {"User-Agent": USER_AGENT,
+                    "Accept": "text/html,text/plain"}
+
+
 def _default_transport(url: str, timeout: float,
                        max_bytes: int = MAX_RESPONSE_BYTES):
-    """Returns (status_code, headers_dict, body_bytes_capped, exceeded)."""
+    """Returns (status_code, headers_dict, body_bytes_capped, exceeded).
+
+    Served from the process-wide keep-alive pool when pooling is enabled. The
+    urllib path below is kept as the fallback and is byte-for-byte the
+    behaviour this function always had: same headers, same cap, same
+    no-redirect handling, same exceptions. See `httppool` for why the saving
+    is a connection count and never a request count.
+    """
+    if httppool.pooling_enabled():
+        return httppool.POOL.request(url, timeout, max_bytes,
+                                     headers=_DEFAULT_HEADERS)
     opener = urllib.request.build_opener(_NoRedirect())
-    request = urllib.request.Request(url, headers={
-        "User-Agent": USER_AGENT, "Accept": "text/html,text/plain"})
+    request = urllib.request.Request(url, headers=dict(_DEFAULT_HEADERS))
     response = opener.open(request, timeout=timeout)
     body = response.read(max_bytes + 1)
     headers = {k.lower(): v for k, v in response.headers.items()}
@@ -67,7 +84,9 @@ def safe_fetch(url: str, *, transport=None, resolver=None,
                timeout: float = CONNECT_TIMEOUT_S,
                extra_mime_prefixes=(), binary: bool = False,
                accept_truncated: bool = False,
-               max_bytes: int = MAX_RESPONSE_BYTES) -> FetchResult:
+               max_bytes: int = MAX_RESPONSE_BYTES,
+               retry_policy=None, retry_ledger=None,
+               sleeper=None, rng=None) -> FetchResult:
     """``extra_mime_prefixes`` narrowly widens the accepted content types for a
     single call — used only by sitemap discovery, which must read XML. The
     default retrieval path is unchanged (HTML/text only), so no analysed
@@ -96,6 +115,14 @@ def safe_fetch(url: str, *, transport=None, resolver=None,
 
     The truncation flag is not decoration. Nothing downstream may present a
     truncated filing as a complete one, and a break proof drives exactly that.
+
+    ``retry_policy`` / ``retry_ledger`` bound in-run retries of TRANSIENT
+    failures (429, selected 5xx, timeouts) per host. Before this, a 429 was
+    marked ``retryable=True`` and returned, so the only retry that ever
+    happened was the customer being asked to try again — which is a fact
+    about our request rate presented as a fact about the company. A 403, a
+    404, an SSRF refusal or a bad MIME is never retried: see
+    ``transient.classify_failure``.
     """
     transport = transport or _default_transport
     redirects = []
@@ -111,19 +138,27 @@ def safe_fetch(url: str, *, transport=None, resolver=None,
                            final_url=current, redirects=redirects)
 
     for _hop in range(MAX_REDIRECTS + 1):
-        try:
-            # A transport takes (url, timeout) and MAY take a third argument
-            # for the byte budget. Both shapes are supported on purpose: the
-            # production transports honour the budget, while the many
-            # two-argument fakes in the suite keep working unchanged. Arity is
-            # inspected rather than discovered by catching TypeError, which
-            # would swallow a genuine TypeError raised inside the transport
-            # and turn a bug into a silent retrieval failure.
+        # A transport takes (url, timeout) and MAY take a third argument
+        # for the byte budget. Both shapes are supported on purpose: the
+        # production transports honour the budget, while the many
+        # two-argument fakes in the suite keep working unchanged. Arity is
+        # inspected rather than discovered by catching TypeError, which
+        # would swallow a genuine TypeError raised inside the transport
+        # and turn a bug into a silent retrieval failure.
+        def _attempt(target=current):
             if _takes_max_bytes(transport):
-                status, headers, body, exceeded = transport(
-                    current, timeout, max_bytes)
-            else:
-                status, headers, body, exceeded = transport(current, timeout)
+                return transport(target, timeout, max_bytes)
+            return transport(target, timeout)
+
+        try:
+            # Transient failures are retried HERE, around one hop, so a 429
+            # on the third redirect re-requests the third redirect and not
+            # the whole chain. A 3xx is control flow, not a failure, and
+            # `classify_failure` refuses to retry it.
+            status, headers, body, exceeded = call_with_retry(
+                _attempt, url=current,
+                policy=retry_policy or DEFAULT_POLICY,
+                ledger=retry_ledger, sleeper=sleeper, rng=rng)
         except urllib.error.HTTPError as exc:
             location = exc.headers.get("Location") if exc.headers else None
             if exc.code in (301, 302, 303, 307, 308) and location:

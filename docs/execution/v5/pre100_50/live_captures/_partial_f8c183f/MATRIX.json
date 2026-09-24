@@ -1,0 +1,300 @@
+{
+ "contract": "pre100_final_matrix.v1",
+ "companies_scored": 1,
+ "core_mean": 8.33,
+ "core_min": 3,
+ "dimension_means": {
+  "intro": 6,
+  "business_model": 10,
+  "revenue_drivers": 10,
+  "margin_drivers": 6,
+  "capital_intensity": null,
+  "macro": 10,
+  "micro": 6,
+  "market_belief": null,
+  "belief_challenge": null,
+  "competition": 6,
+  "adversary": 10,
+  "impossible_hypothesis": 10,
+  "economic_reasoning": 6,
+  "recommendation": null,
+  "falsifier": null,
+  "mve": null,
+  "presentation": 10,
+  "full_analysis": 10,
+  "history": 10,
+  "qa": 3,
+  "step6": 10
+ },
+ "clusters": [
+  {
+   "dimension": "market_belief",
+   "band": "NOT_MEASURED",
+   "companies": 1,
+   "core": true,
+   "example_companies": [
+    "microsoft_corporation"
+   ],
+   "impact": 20
+  },
+  {
+   "dimension": "recommendation",
+   "band": "NOT_MEASURED",
+   "companies": 1,
+   "core": true,
+   "example_companies": [
+    "microsoft_corporation"
+   ],
+   "impact": 20
+  },
+  {
+   "dimension": "qa",
+   "band": "ABSENT_OR_ADMITTED",
+   "companies": 1,
+   "core": true,
+   "example_companies": [
+    "microsoft_corporation"
+   ],
+   "impact": 20
+  },
+  {
+   "dimension": "capital_intensity",
+   "band": "NOT_MEASURED",
+   "companies": 1,
+   "core": false,
+   "example_companies": [
+    "microsoft_corporation"
+   ],
+   "impact": 10
+  },
+  {
+   "dimension": "belief_challenge",
+   "band": "NOT_MEASURED",
+   "companies": 1,
+   "core": false,
+   "example_companies": [
+    "microsoft_corporation"
+   ],
+   "impact": 10
+  },
+  {
+   "dimension": "falsifier",
+   "band": "NOT_MEASURED",
+   "companies": 1,
+   "core": false,
+   "example_companies": [
+    "microsoft_corporation"
+   ],
+   "impact": 10
+  },
+  {
+   "dimension": "mve",
+   "band": "NOT_MEASURED",
+   "companies": 1,
+   "core": false,
+   "example_companies": [
+    "microsoft_corporation"
+   ],
+   "impact": 10
+  },
+  {
+   "dimension": "competition",
+   "band": "GENERIC",
+   "companies": 1,
+   "core": true,
+   "example_companies": [
+    "microsoft_corporation"
+   ],
+   "impact": 8
+  },
+  {
+   "dimension": "economic_reasoning",
+   "band": "GENERIC",
+   "companies": 1,
+   "core": true,
+   "example_companies": [
+    "microsoft_corporation"
+   ],
+   "impact": 8
+  },
+  {
+   "dimension": "intro",
+   "band": "GENERIC",
+   "companies": 1,
+   "core": false,
+   "example_companies": [
+    "microsoft_corporation"
+   ],
+   "impact": 4
+  },
+  {
+   "dimension": "margin_drivers",
+   "band": "GENERIC",
+   "companies": 1,
+   "core": false,
+   "example_companies": [
+    "microsoft_corporation"
+   ],
+   "impact": 4
+  },
+  {
+   "dimension": "micro",
+   "band": "GENERIC",
+   "companies": 1,
+   "core": false,
+   "example_companies": [
+    "microsoft_corporation"
+   ],
+   "impact": 4
+  }
+ ],
+ "specificity": {},
+ "specificity_examples": {
+  "byte_identical": [],
+  "near_identical": []
+ },
+ "rows": [
+  {
+   "company": "microsoft_corporation",
+   "sha": "",
+   "outcome": "",
+   "seconds": null,
+   "core_mean": 8.33,
+   "core_min": 3,
+   "core_unmeasured": [
+    "market_belief",
+    "recommendation"
+   ],
+   "dimensions": {
+    "intro": 6,
+    "business_model": 10,
+    "revenue_drivers": 10,
+    "margin_drivers": 6,
+    "capital_intensity": null,
+    "macro": 10,
+    "micro": 6,
+    "market_belief": null,
+    "belief_challenge": null,
+    "competition": 6,
+    "adversary": 10,
+    "impossible_hypothesis": 10,
+    "economic_reasoning": 6,
+    "recommendation": null,
+    "falsifier": null,
+    "mve": null,
+    "presentation": 10,
+    "full_analysis": 10,
+    "history": 10,
+    "qa": 3,
+    "step6": 10
+   },
+   "evidence": {
+    "intro": {
+     "surface": "intro",
+     "why": "present but not specific to this company",
+     "passage": "\u2014 introduction"
+    },
+    "business_model": {
+     "surface": "intro",
+     "why": "company-specific and substantiated",
+     "passage": "SEC CIK 0000789019 Microsoft Corporation is a software platform business that runs on an array of services, including cloud-based solutions that provide customers with AI, software"
+    },
+    "revenue_drivers": {
+     "surface": "story",
+     "why": "company-specific and substantiated",
+     "passage": "Where the money actually comes from Revenue is decided by customer count, seats or usage per customer and list and realised price, and whether that revenue becomes margin is decide"
+    },
+    "margin_drivers": {
+     "surface": "story",
+     "why": "present but not specific to this company",
+     "passage": "becomes margin is decided by sales and marketing to acquire an account and engineering headcount"
+    },
+    "capital_intensity": {
+     "surface": "brief",
+     "why": "surface did not render",
+     "passage": ""
+    },
+    "macro": {
+     "surface": "full",
+     "why": "company-specific and substantiated",
+     "passage": "rategic Intelligence \u2014 Microsoft Corporation Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo "
+    },
+    "micro": {
+     "surface": "full",
+     "why": "present but not specific to this company",
+     "passage": "prices as though this is already true, without waiting for an outside source to confirm it"
+    },
+    "market_belief": {
+     "surface": "brief",
+     "why": "surface did not render",
+     "passage": ""
+    },
+    "belief_challenge": {
+     "surface": "brief",
+     "why": "surface did not render",
+     "passage": ""
+    },
+    "competition": {
+     "surface": "intro",
+     "why": "present but not specific to this company",
+     "passage": "customers can substitute automation absorbing the task itself, and customers can internalise the work themselves \u2014 the customer's own engineering, and the alternative may be delayi"
+    },
+    "adversary": {
+     "surface": "full",
+     "why": "company-specific and substantiated",
+     "passage": "If we move, what do they do One rival, three ways it could behave. The levels are not scenarios about the market; they are assumptions about how much of our move the competitor see"
+    },
+    "impossible_hypothesis": {
+     "surface": "full",
+     "why": "company-specific and substantiated",
+     "passage": "What could be true that we are not considering These are propositions this company's current framing rules out by construction"
+    },
+    "economic_reasoning": {
+     "surface": "full",
+     "why": "present but not specific to this company",
+     "passage": "operating leverage from a favourable mix, and nothing in what this run retrieved contradicts that"
+    },
+    "recommendation": {
+     "surface": "brief",
+     "why": "surface did not render",
+     "passage": ""
+    },
+    "falsifier": {
+     "surface": "brief",
+     "why": "surface did not render",
+     "passage": ""
+    },
+    "mve": {
+     "surface": "brief",
+     "why": "surface did not render",
+     "passage": ""
+    },
+    "presentation": {
+     "surface": "slides",
+     "why": "company-specific and substantiated",
+     "passage": "Microsoft Corporation \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Microsoft Corporation MSFT \u00b7 USA \u00b7 SEC CIK 0000789019 Microsoft Corporation i"
+    },
+    "full_analysis": {
+     "surface": "full",
+     "why": "company-specific and substantiated",
+     "passage": "Strategic Intelligence \u2014 Microsoft Corporation Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo .challenge h2{margin:0 0 .35rem;font-size:1.05rem} .challenge .challenge .challe"
+    },
+    "history": {
+     "surface": "history",
+     "why": "company-specific and substantiated",
+     "passage": "Better strategy"
+    },
+    "qa": {
+     "surface": "qa",
+     "why": "surface admits absence: 'not retrieved'",
+     "passage": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Microsoft Corporation What should management do? Hold this decision \u2014 what to charge, and for what \u2014 open for now. Run the sma"
+    },
+    "step6": {
+     "surface": "connect",
+     "why": "company-specific and substantiated",
+     "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from "
+    }
+   }
+  }
+ ]
+}

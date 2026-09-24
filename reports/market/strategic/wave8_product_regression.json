@@ -1,0 +1,58 @@
+{
+ "contract": "product_regression.v1",
+ "as_of": "2026-08-08",
+ "surface": "https://intent-engine-preview-v3.onrender.com",
+ "note": "\u00a722, which wave 7 skipped. Four live runs through the public /analyze path.",
+ "subjects": [
+  {
+   "subject": "Shopify",
+   "class": "rich public, well covered",
+   "http": 200,
+   "outcome": "full reading",
+   "excerpt_quality": "filing prose, not meta-description: the reading opens on \"We believe we can help merchants of all verticals and sizes, from aspirational entrepreneurs to companies with large-scale, direct-to-consumer or B2B\" \u2014 a 10-K sentence, carried whole",
+   "decision_present": true,
+   "options_present": true,
+   "falsifier_present": true
+  },
+  {
+   "subject": "Cloudflare",
+   "class": "rich public",
+   "http": 200,
+   "outcome": "reading WITHHELD, and says so",
+   "excerpt_quality": "mission statement carried from the company's own page; the surface then refuses: \"No strategic reading of Cloudflare cleared the evidence bar, so none is asserted here\"",
+   "decision_present": false,
+   "options_present": false,
+   "falsifier_present": false,
+   "withhold_is_correct": "it states the absence as the finding and does not dress a guess as a reading; market context appears with the right caution \u2014 \"outside conditions bound this decision; they do not make it\""
+  },
+  {
+   "subject": "Brightledger",
+   "class": "sparse / non-existent domain",
+   "http": 200,
+   "outcome": "no report, by design",
+   "excerpt_quality": "n/a \u2014 nothing retrieved",
+   "bounded_failure": "23 attempted sources are each named with their OWN reason: 20 blocked by the safety wall, 3 refused with HTTP 401/403. \"There is no result to show \u2014 we do not invent one.\""
+  },
+  {
+   "subject": "Olo",
+   "class": "sparse public",
+   "http": 400,
+   "outcome": "awaiting source confirmation",
+   "bounded_failure": "the four-part shape holds: what did work, what did not, why, what to do next. Sources were found and nothing is analysed until the user confirms which to read"
+  }
+ ],
+ "checks": {
+  "identity": "PASS \u2014 each page names its own subject",
+  "cross_company_leakage": "PASS \u2014 no page mentions any of the other three subjects, checked by whole-word match over the rendered text of all four",
+  "multi_actor_scaffolding_leak": "PASS \u2014 none of 21 internal tokens appears (StrategicInteraction, CompetitiveObject, interaction_id, cax_/act_/evt_ ids, CANDIDATE, SAME_ORIGIN, object_established, PLAUSIBLE, ...)",
+  "excerpt_quality": "PASS \u2014 excerpts are filing and site prose, not the meta-description/first-280-chars shape that produced an empty inbox previously",
+  "bounded_failure_semantics": "PASS \u2014 on both failing paths, and each names its cause",
+  "dark_readability": "PASS \u2014 every one of the four pages ships the dark block, color-scheme:dark, and the corrected focus ring (outline-color:#7aa2ff, the fix for the 2.76:1 ring)"
+ },
+ "finding": {
+  "severity": "minor",
+  "what": "the awaiting-confirmation page is served with HTTP 400. The page itself is correct and is a legitimate intermediate state \u2014 sources found, nothing read until the user chooses \u2014 but 400 says the CLIENT sent a bad request, which it did not",
+  "why_it_matters": "anything that polls a run by status code reads this state as a malformed submission and stops; the page says 'review the sources and start the analysis', which is the opposite of an error",
+  "not_fixed_here": "the founder surface is a different branch and a different deployment from the market work in this wave; recorded rather than reached across"
+ }
+}

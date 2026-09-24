@@ -1,0 +1,79 @@
+[
+  {
+    "company": "Meta Platforms, Inc.",
+    "deployed_sha": "10d1620",
+    "status": "READY",
+    "run_id": "01M0HTC66AA2MFJB3GRVN27TZQ",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/10d1620/meta_platforms_inc",
+    "process_before": {
+      "boot_id": "b79056db0dd34d53",
+      "started_at": 1787304446.6935825,
+      "uptime_seconds": 32.7
+    },
+    "entry_domain": "",
+    "seconds": 48,
+    "first_useful": 48,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HTC66AA2MFJB3GRVN27TZQ",
+    "outcome": "TRUE_EVIDENCE_SCARCITY",
+    "outcome_by_route": {
+      "run": "TRUE_EVIDENCE_SCARCITY",
+      "intro": "TRUE_EVIDENCE_SCARCITY",
+      "slides": "TRUE_EVIDENCE_SCARCITY",
+      "full": "TRUE_EVIDENCE_SCARCITY",
+      "story": "TRUE_EVIDENCE_SCARCITY",
+      "history": "TRUE_EVIDENCE_SCARCITY",
+      "connect": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "ServiceNow, Inc.",
+    "deployed_sha": "10d1620",
+    "status": "READY",
+    "run_id": "01M0HTSC6YV8MKDXJ2AM1FMQ5W",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/10d1620/servicenow_inc",
+    "process_before": {
+      "boot_id": "b79056db0dd34d53",
+      "started_at": 1787304446.6935825,
+      "uptime_seconds": 467.6
+    },
+    "entry_domain": "servicenow.com",
+    "seconds": 66,
+    "first_useful": 66,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HTSC6YV8MKDXJ2AM1FMQ5W",
+    "outcome": "TRUE_EVIDENCE_SCARCITY",
+    "outcome_by_route": {
+      "run": "TRUE_EVIDENCE_SCARCITY",
+      "intro": "TRUE_EVIDENCE_SCARCITY",
+      "slides": "TRUE_EVIDENCE_SCARCITY",
+      "full": "TRUE_EVIDENCE_SCARCITY",
+      "story": "TRUE_EVIDENCE_SCARCITY",
+      "history": "TRUE_EVIDENCE_SCARCITY",
+      "connect": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "Adobe Inc.",
+    "deployed_sha": "10d1620",
+    "status": "FAILED",
+    "run_id": "01M0HV4TGSTRRK21ZVSK42S920",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/10d1620/adobe_inc",
+    "process_before": {
+      "boot_id": "b79056db0dd34d53",
+      "started_at": 1787304446.6935825,
+      "uptime_seconds": 842.7
+    },
+    "entry_domain": "adobe.com",
+    "seconds": 219,
+    "first_useful": null,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HV4TGSTRRK21ZVSK42S920/progress"
+  }
+]

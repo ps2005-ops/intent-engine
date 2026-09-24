@@ -1,0 +1,63 @@
+{
+  "company": "Apple Inc.",
+  "run_id": "01M17WRDJ6DS1J9JSYESMTEJFH",
+  "wall_s": 16.6,
+  "documents": 10,
+  "lifecycle": {
+    "created": "2026-08-29T23:12:58.438330+00:00",
+    "accepted": "2026-08-29T23:12:58.804088+00:00",
+    "core_ready": "2026-08-29T23:13:13.902641+00:00",
+    "deep_started": "2026-08-29T23:13:13.903076+00:00",
+    "deep_ready": "2026-08-29T23:13:15.358538+00:00"
+  },
+  "waterfall": {
+    "covered_wall_ms": 15097.7,
+    "phase": "core",
+    "spans": [
+      {
+        "cpu_ms": 76.3,
+        "deadline_remaining_end_s": 52.86,
+        "deadline_remaining_start_s": 60.0,
+        "item_count": 47,
+        "name": "discovery",
+        "offset_s": 0.0,
+        "status": "ok",
+        "wall_ms": 7143.6
+      },
+      {
+        "candidates": 47,
+        "cpu_ms": 1.5,
+        "deadline_remaining_end_s": 52.85,
+        "deadline_remaining_start_s": 52.86,
+        "item_count": 14,
+        "name": "source_selection",
+        "offset_s": 7.144,
+        "status": "ok",
+        "wall_ms": 1.5
+      },
+      {
+        "cpu_ms": 312.0,
+        "deadline_remaining_end_s": 49.27,
+        "deadline_remaining_start_s": 52.85,
+        "item_count": 10,
+        "name": "retrieval",
+        "offset_s": 7.145,
+        "status": "ok",
+        "wall_ms": 3587.7
+      },
+      {
+        "cpu_ms": 2106.1,
+        "deadline_remaining_end_s": 44.9,
+        "deadline_remaining_start_s": 49.27,
+        "item_count": 10,
+        "name": "core_composition",
+        "offset_s": 10.733,
+        "status": "ok",
+        "wall_ms": 4364.9
+      }
+    ],
+    "total_cpu_ms": 2495.9,
+    "total_wall_ms": 15097.8,
+    "unaccounted_wall_ms": 0.1
+  }
+}

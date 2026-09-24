@@ -1,0 +1,138 @@
+{
+  "company": "Caterpillar Inc.",
+  "deployed_sha": "743df06",
+  "captured_at": "2026-08-21T16:47:34Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JKH117QB53H47ZMNAE3BQE",
+      "chars": 2394,
+      "html_chars": 18256,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JKH117QB53H47ZMNAE3BQE/intro",
+      "chars": 4654,
+      "html_chars": 29906,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JKH117QB53H47ZMNAE3BQE",
+      "chars": 2394,
+      "html_chars": 18256,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JKH117QB53H47ZMNAE3BQE/full",
+      "chars": 2394,
+      "html_chars": 18256,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JKH117QB53H47ZMNAE3BQE/story",
+      "chars": 5163,
+      "html_chars": 34824,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JKH117QB53H47ZMNAE3BQE/history",
+      "chars": 29240,
+      "html_chars": 109410,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JKH117QB53H47ZMNAE3BQE/connect",
+      "chars": 3915,
+      "html_chars": 28826,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JKH117QB53H47ZMNAE3BQE",
+      "chars": 2394,
+      "html_chars": 18256,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JKH117QB53H47ZMNAE3BQE/evidence",
+      "chars": 3238,
+      "html_chars": 19013,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JKH117QB53H47ZMNAE3BQE/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JKH117QB53H47ZMNAE3BQE/brief",
+      "chars": 14883,
+      "html_chars": 48613,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Caterpillar Inc. CAT \u00b7 caterpillar.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence",
+      "status": 200,
+      "html_bytes": 17017
+    },
+    {
+      "t": 66.1,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Caterpillar Inc. CAT \u00b7 caterpillar.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidenc",
+      "status": 200,
+      "html_bytes": 17015
+    },
+    {
+      "t": 120.6,
+      "text": "Limited analysis of Caterpillar Inc. Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of Caterpillar Inc. A supported reading of Caterpillar Inc. exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen the existing reading; it",
+      "status": 200,
+      "html_bytes": 18294
+    }
+  ],
+  "process_before": {
+    "boot_id": "d7df6481c13e43c7",
+    "started_at": 1787326618.1855707,
+    "uptime_seconds": 4236.9
+  },
+  "run_id": "01M0JKH117QB53H47ZMNAE3BQE",
+  "status": "READY",
+  "seconds": 121,
+  "first_useful": 121,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 6.96,
+    "intro": 11.87,
+    "slides": 3.27,
+    "full": 2.75,
+    "story": 6.51,
+    "history": 0.2,
+    "connect": 5.09
+  },
+  "evidence_gate": "compose=3 usable=3 families=investor stored=3 attempt=3 failed=26/24 dropped=0/0/0/0",
+  "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+  "outcome_by_route": {
+    "run": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "intro": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "slides": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "full": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "story": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "history": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "connect": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": []
+}

@@ -1,0 +1,112 @@
+{
+  "company": "ServiceNow, Inc.",
+  "deployed_sha": "49b6c3a",
+  "captured_at": "2026-08-21T05:31:39Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCVC9SW39Y7F4BQG776S12/intro",
+      "chars": 5446,
+      "html_chars": 30996
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCVC9SW39Y7F4BQG776S12/intro",
+      "chars": 5446,
+      "html_chars": 30996
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCVC9SW39Y7F4BQG776S12/slides",
+      "chars": 5518,
+      "html_chars": 47126
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCVC9SW39Y7F4BQG776S12/full",
+      "chars": 23166,
+      "html_chars": 64110
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCVC9SW39Y7F4BQG776S12/story",
+      "chars": 4247,
+      "html_chars": 33767
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCVC9SW39Y7F4BQG776S12/history",
+      "chars": 29023,
+      "html_chars": 104809
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCVC9SW39Y7F4BQG776S12/connect",
+      "chars": 4030,
+      "html_chars": 28941
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCVC9SW39Y7F4BQG776S12/intro",
+      "chars": 5446,
+      "html_chars": 30996
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCVC9SW39Y7F4BQG776S12/evidence",
+      "chars": 4315,
+      "html_chars": 20760
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCVC9SW39Y7F4BQG776S12/report",
+      "chars": 307,
+      "html_chars": 14888
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCVC9SW39Y7F4BQG776S12/brief",
+      "chars": 18020,
+      "html_chars": 52427
+    }
+  },
+  "progress": [
+    {
+      "t": 0.3,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing ServiceNow, Inc. NOW \u00b7 servicenow.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence ",
+      "status": 200,
+      "html_bytes": 17016
+    },
+    {
+      "t": 33.7,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing ServiceNow, Inc. NOW \u00b7 servicenow.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence",
+      "status": 200,
+      "html_bytes": 17012
+    },
+    {
+      "t": 163.8,
+      "text": "ServiceNow, Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction ServiceNow, Inc. NOW \u00b7 USA \u00b7 servicenow.com \u00b7 SEC CIK 0001373715 ServiceNow, Inc. is a software platform business that runs on recurring software subscription: revenue is contracted and renews, so the i",
+      "status": 200,
+      "html_bytes": 31067
+    }
+  ],
+  "process_before": {
+    "boot_id": "4ef1abc720dd4d9e",
+    "started_at": 1787289915.6651065,
+    "uptime_seconds": 383.9
+  },
+  "run_id": "01M0HCVC9SW39Y7F4BQG776S12",
+  "status": "READY",
+  "seconds": 164,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 6.15,
+    "intro": 5.49,
+    "slides": 8.44,
+    "full": 13.34,
+    "story": 6.52,
+    "history": 0.26,
+    "connect": 4.24
+  },
+  "errors": []
+}

@@ -78,11 +78,30 @@ def test_same_key_different_content_is_refused(svc):
 
 
 def test_corrupt_log_fails_loudly(svc, tmp_path):
+    """Corruption is still loud -- but only where dropping it would LOSE
+    history.
+
+    A malformed line with good records AFTER it is interior corruption of a
+    file that is only ever appended to: the damage is unbounded and refusing
+    to read is right. A malformed line with nothing readable after it is a
+    torn TAIL -- a write killed part-way, which on the deployed preview
+    bricked every request for hours because one bad byte made the whole log
+    unreadable. That case is repaired and recorded, not refused.
+    """
     _candidate(svc, "o1")
     path = tmp_path / "executive.jsonl"
-    path.write_text(path.read_text() + "{not json\n")
+    good = path.read_text()
+    path.write_text("{not json\n" + good)          # interior: records follow
     with pytest.raises(ExecutiveCorruptLogError, match="malformed"):
         ExecutiveStore(path).read_all()
+
+
+def test_a_torn_tail_is_recovered_rather_than_bricking_the_log(svc, tmp_path):
+    _candidate(svc, "o1")
+    path = tmp_path / "executive.jsonl"
+    before = len(ExecutiveStore(path).read_all())
+    path.write_text(path.read_text() + "{not json\n")   # tail: nothing after
+    assert len(ExecutiveStore(path).read_all()) == before
 
 
 def test_a_future_schema_version_is_refused(tmp_path):

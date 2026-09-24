@@ -1,0 +1,138 @@
+{
+  "company": "The Home Depot, Inc.",
+  "deployed_sha": "dc17a9d",
+  "captured_at": "2026-08-21T14:16:32Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAWH04Z9MJJGM8952ZQ3WF",
+      "chars": 1772,
+      "html_chars": 17134,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAWH04Z9MJJGM8952ZQ3WF/intro",
+      "chars": 4761,
+      "html_chars": 30018,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAWH04Z9MJJGM8952ZQ3WF",
+      "chars": 1772,
+      "html_chars": 17134,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAWH04Z9MJJGM8952ZQ3WF/full",
+      "chars": 1772,
+      "html_chars": 17134,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAWH04Z9MJJGM8952ZQ3WF/story",
+      "chars": 5260,
+      "html_chars": 34928,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAWH04Z9MJJGM8952ZQ3WF/history",
+      "chars": 28252,
+      "html_chars": 108570,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAWH04Z9MJJGM8952ZQ3WF/connect",
+      "chars": 4064,
+      "html_chars": 28980,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAWH04Z9MJJGM8952ZQ3WF",
+      "chars": 1772,
+      "html_chars": 17134,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAWH04Z9MJJGM8952ZQ3WF/evidence",
+      "chars": 2476,
+      "html_chars": 17898,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAWH04Z9MJJGM8952ZQ3WF/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JAWH04Z9MJJGM8952ZQ3WF/brief",
+      "chars": 15813,
+      "html_chars": 48167,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing The Home Depot, Inc. HD \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connec",
+      "status": 200,
+      "html_bytes": 17001
+    },
+    {
+      "t": 36.1,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing The Home Depot, Inc. HD \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Connecti",
+      "status": 200,
+      "html_bytes": 16997
+    },
+    {
+      "t": 50.4,
+      "text": "Limited analysis of The Home Depot, Inc. Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of The Home Depot, Inc. Some kinds of evidence are missing, and there are places left to look. Rather than show a briefing that looks complete and is not, here is exactly where it stands. W",
+      "status": 200,
+      "html_bytes": 17170
+    }
+  ],
+  "process_before": {
+    "boot_id": "9890b2f49d944a8a",
+    "started_at": 1787319148.8228748,
+    "uptime_seconds": 2644.1
+  },
+  "run_id": "01M0JAWH04Z9MJJGM8952ZQ3WF",
+  "status": "READY",
+  "seconds": 50,
+  "first_useful": 50,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 3.08,
+    "intro": 12.49,
+    "slides": 3.17,
+    "full": 2.65,
+    "story": 6.35,
+    "history": 0.29,
+    "connect": 4.56
+  },
+  "evidence_gate": "compose=2 usable=2 families=investor stored=2 attempt=1 dropped=0/0/0/0",
+  "outcome": "TRUE_EVIDENCE_SCARCITY",
+  "outcome_by_route": {
+    "run": "TRUE_EVIDENCE_SCARCITY",
+    "intro": "TRUE_EVIDENCE_SCARCITY",
+    "slides": "TRUE_EVIDENCE_SCARCITY",
+    "full": "TRUE_EVIDENCE_SCARCITY",
+    "story": "TRUE_EVIDENCE_SCARCITY",
+    "history": "TRUE_EVIDENCE_SCARCITY",
+    "connect": "TRUE_EVIDENCE_SCARCITY"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": []
+}

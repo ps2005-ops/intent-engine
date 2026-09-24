@@ -1,0 +1,123 @@
+{
+ "contract": "action_object_source_performance.v1",
+ "measured_over": {
+  "documents_retrieved": 66,
+  "cells": 24,
+  "actions_found": 112
+ },
+ "by_family": [
+  {
+   "source_family": "release_notes",
+   "attempts": 23,
+   "retrieved": 9,
+   "actions_found": 89,
+   "established_objects": 5,
+   "partial_objects": 10,
+   "unknown_objects": 74,
+   "established_per_document": 0.5556,
+   "share_of_objects_established": 0.0562,
+   "latency_per_document": 5.3,
+   "cost": "expensive",
+   "maturity": "PROVISIONAL",
+   "eligible_for_the_question": true
+  },
+  {
+   "source_family": "comparison_page",
+   "attempts": 25,
+   "retrieved": 12,
+   "actions_found": 2,
+   "established_objects": 0,
+   "partial_objects": 0,
+   "unknown_objects": 2,
+   "established_per_document": 0.0,
+   "share_of_objects_established": 0.0,
+   "latency_per_document": 4.09,
+   "cost": "expensive",
+   "maturity": "PROVISIONAL",
+   "eligible_for_the_question": false
+  },
+  {
+   "source_family": "migration_page",
+   "attempts": 26,
+   "retrieved": 10,
+   "actions_found": 0,
+   "established_objects": 0,
+   "partial_objects": 0,
+   "unknown_objects": 0,
+   "established_per_document": 0.0,
+   "share_of_objects_established": null,
+   "latency_per_document": 5.68,
+   "cost": "expensive",
+   "maturity": "PROVISIONAL",
+   "eligible_for_the_question": true
+  },
+  {
+   "source_family": "pricing_page",
+   "attempts": 27,
+   "retrieved": 15,
+   "actions_found": 12,
+   "established_objects": 0,
+   "partial_objects": 8,
+   "unknown_objects": 4,
+   "established_per_document": 0.0,
+   "share_of_objects_established": 0.0,
+   "latency_per_document": 3.51,
+   "cost": "expensive",
+   "maturity": "PROVISIONAL",
+   "eligible_for_the_question": true
+  },
+  {
+   "source_family": "product_launch_page",
+   "attempts": 28,
+   "retrieved": 15,
+   "actions_found": 7,
+   "established_objects": 0,
+   "partial_objects": 0,
+   "unknown_objects": 7,
+   "established_per_document": 0.0,
+   "share_of_objects_established": 0.0,
+   "latency_per_document": 3.99,
+   "cost": "expensive",
+   "maturity": "PROVISIONAL",
+   "eligible_for_the_question": true
+  },
+  {
+   "source_family": "solution_page",
+   "attempts": 16,
+   "retrieved": 5,
+   "actions_found": 2,
+   "established_objects": 0,
+   "partial_objects": 0,
+   "unknown_objects": 2,
+   "established_per_document": 0.0,
+   "share_of_objects_established": 0.0,
+   "latency_per_document": 6.95,
+   "cost": "expensive",
+   "maturity": "PROVISIONAL",
+   "eligible_for_the_question": false
+  }
+ ],
+ "plan_before_measurement": [
+  "pricing_page",
+  "product_launch_page",
+  "migration_page",
+  "release_notes"
+ ],
+ "plan_after_measurement": [
+  "release_notes",
+  "pricing_page",
+  "product_launch_page",
+  "migration_page"
+ ],
+ "plan_reasons": {
+  "release_notes": "0.556 established objects/document over 9 documents (PROVISIONAL); kept ahead of its rank because the sample is small",
+  "pricing_page": "0.000 established objects/document over 15 documents (PROVISIONAL); kept ahead of its rank because the sample is small",
+  "product_launch_page": "0.000 established objects/document over 15 documents (PROVISIONAL); kept ahead of its rank because the sample is small",
+  "migration_page": "0.000 established objects/document over 10 documents (PROVISIONAL); kept ahead of its rank because the sample is small"
+ },
+ "families_that_established_anything": [
+  "release_notes"
+ ],
+ "maturity_note": "every family is PROVISIONAL: the largest sample is 15 documents against a 20-document INDICATIVE floor, so this ORDERS the next budget and settles nothing",
+ "precision_note": "false_positive_rate is None by construction. An UNKNOWN object is a document that did not name a buyer, not an extraction error; counting it as one would let a family look precise by extracting nothing"
+}

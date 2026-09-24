@@ -1,0 +1,221 @@
+{
+  "contract": "econ_preregistration.v1",
+  "families": [
+    {
+      "baselines": [
+        "base_rate",
+        "persistence",
+        "base_economic_model"
+      ],
+      "event": "real personal consumption is higher at the horizon than at the origin",
+      "expected_constructs": [
+        "financial_anxiety",
+        "future_orientation",
+        "time_horizon"
+      ],
+      "family_id": "consumption_180d",
+      "horizon_days": 180,
+      "label": "real consumption (180d)",
+      "loss": "BRIER",
+      "rationale": "the collective layer's central claim is that households defer spending before the aggregates show it; this is where that claim is most directly testable",
+      "target_id_prefix": "PCEC96/180d",
+      "target_series": "PCEC96"
+    },
+    {
+      "baselines": [
+        "base_rate",
+        "persistence",
+        "base_economic_model"
+      ],
+      "event": "real personal consumption is higher at the horizon than at the origin",
+      "expected_constructs": [
+        "financial_anxiety",
+        "future_orientation",
+        "time_horizon"
+      ],
+      "family_id": "consumption_360d",
+      "horizon_days": 360,
+      "label": "real consumption (360d)",
+      "loss": "BRIER",
+      "rationale": "the collective layer's central claim is that households defer spending before the aggregates show it; this is where that claim is most directly testable",
+      "target_id_prefix": "PCEC96/360d",
+      "target_series": "PCEC96"
+    },
+    {
+      "baselines": [
+        "base_rate",
+        "persistence",
+        "base_economic_model"
+      ],
+      "event": "the unemployment rate is higher at the horizon than at the origin",
+      "expected_constructs": [
+        "perceived_control",
+        "perceived_security"
+      ],
+      "family_id": "labour_180d",
+      "horizon_days": 180,
+      "label": "labour deterioration (180d)",
+      "loss": "BRIER",
+      "rationale": "workers' read of their own options is hypothesised to move before the unemployment rate does; if it does not, perceived_control is a labour statistic wearing a psychological name",
+      "target_id_prefix": "UNRATE/180d",
+      "target_series": "UNRATE"
+    },
+    {
+      "baselines": [
+        "base_rate",
+        "persistence",
+        "base_economic_model"
+      ],
+      "event": "the unemployment rate is higher at the horizon than at the origin",
+      "expected_constructs": [
+        "perceived_control",
+        "perceived_security"
+      ],
+      "family_id": "labour_360d",
+      "horizon_days": 360,
+      "label": "labour deterioration (360d)",
+      "loss": "BRIER",
+      "rationale": "workers' read of their own options is hypothesised to move before the unemployment rate does; if it does not, perceived_control is a labour statistic wearing a psychological name",
+      "target_id_prefix": "UNRATE/360d",
+      "target_series": "UNRATE"
+    },
+    {
+      "baselines": [
+        "base_rate",
+        "persistence",
+        "base_economic_model"
+      ],
+      "event": "credit card delinquency is higher at the horizon than at the origin",
+      "expected_constructs": [
+        "financial_anxiety",
+        "perceived_security"
+      ],
+      "family_id": "credit_stress_180d",
+      "horizon_days": 180,
+      "label": "credit stress (180d)",
+      "loss": "BRIER",
+      "rationale": "delinquency is a lagging record of a decision made months earlier, so anything that leads it is genuinely early information",
+      "target_id_prefix": "DRCCLACBS/180d",
+      "target_series": "DRCCLACBS"
+    },
+    {
+      "baselines": [
+        "base_rate",
+        "persistence",
+        "base_economic_model"
+      ],
+      "event": "credit card delinquency is higher at the horizon than at the origin",
+      "expected_constructs": [
+        "financial_anxiety",
+        "perceived_security"
+      ],
+      "family_id": "credit_stress_360d",
+      "horizon_days": 360,
+      "label": "credit stress (360d)",
+      "loss": "BRIER",
+      "rationale": "delinquency is a lagging record of a decision made months earlier, so anything that leads it is genuinely early information",
+      "target_id_prefix": "DRCCLACBS/360d",
+      "target_series": "DRCCLACBS"
+    },
+    {
+      "baselines": [
+        "base_rate",
+        "persistence",
+        "base_economic_model"
+      ],
+      "event": "housing starts are higher at the horizon than at the origin",
+      "expected_constructs": [
+        "financial_anxiety",
+        "time_horizon"
+      ],
+      "family_id": "housing_180d",
+      "horizon_days": 180,
+      "label": "housing activity (180d)",
+      "loss": "BRIER",
+      "rationale": "Section 21's consensus-attacking case: rate cuts are supposed to revive housing, and the alternative is that insecurity blocks the transmission",
+      "target_id_prefix": "HOUST/180d",
+      "target_series": "HOUST"
+    },
+    {
+      "baselines": [
+        "base_rate",
+        "persistence",
+        "base_economic_model"
+      ],
+      "event": "housing starts are higher at the horizon than at the origin",
+      "expected_constructs": [
+        "financial_anxiety",
+        "time_horizon"
+      ],
+      "family_id": "housing_360d",
+      "horizon_days": 360,
+      "label": "housing activity (360d)",
+      "loss": "BRIER",
+      "rationale": "Section 21's consensus-attacking case: rate cuts are supposed to revive housing, and the alternative is that insecurity blocks the transmission",
+      "target_id_prefix": "HOUST/360d",
+      "target_series": "HOUST"
+    },
+    {
+      "baselines": [
+        "base_rate",
+        "persistence",
+        "base_economic_model"
+      ],
+      "event": "industrial production is higher at the horizon than at the origin",
+      "expected_constructs": [
+        "future_orientation",
+        "time_horizon"
+      ],
+      "family_id": "industrial_180d",
+      "horizon_days": 180,
+      "label": "industrial production (180d)",
+      "loss": "BRIER",
+      "rationale": "a downstream test: household behaviour reaching manufacturing through orders should be slower and weaker than the direct consumption channel, and if it is not, something is wrong",
+      "target_id_prefix": "INDPRO/180d",
+      "target_series": "INDPRO"
+    },
+    {
+      "baselines": [
+        "base_rate",
+        "persistence",
+        "base_economic_model"
+      ],
+      "event": "industrial production is higher at the horizon than at the origin",
+      "expected_constructs": [
+        "future_orientation",
+        "time_horizon"
+      ],
+      "family_id": "industrial_360d",
+      "horizon_days": 360,
+      "label": "industrial production (360d)",
+      "loss": "BRIER",
+      "rationale": "a downstream test: household behaviour reaching manufacturing through orders should be slower and weaker than the direct consumption channel, and if it is not, something is wrong",
+      "target_id_prefix": "INDPRO/360d",
+      "target_series": "INDPRO"
+    }
+  ],
+  "hash": "69c6732028a20679",
+  "hypothesis": {
+    "comparator": "GLOBAL_COLLECTIVE_HUMAN_STATE_V1",
+    "decision_rule": "PROMOTE_REGIME_CONDITIONAL only if the stressed-regime interval excludes zero AND the calm-regime interval does not. Anything else is TESTED_NOT_PROMOTED or INSUFFICIENT_DATA -- never a global promotion, because a global claim was already tested and failed.",
+    "falsifier": "delta in the primary regimes does not exceed the negative-control delta by more than the sampling error of both, or the layer shows the same value in calm periods as in stressed ones",
+    "hypothesis_id": "H2_REGIME_CONDITIONAL",
+    "negative_control_regime": "LOW_VOL_EXPANSION",
+    "prediction": "delta in the primary regimes is positive and its interval excludes zero, AND delta in the negative-control regime is not positive",
+    "primary_horizons": [
+      180,
+      360
+    ],
+    "primary_regimes": [
+      "CREDIT_STRESS",
+      "LIQUIDITY_STRESS"
+    ],
+    "primary_targets": [
+      "credit_stress",
+      "consumption",
+      "housing",
+      "labour"
+    ],
+    "statement": "CollectiveHumanState provides greater incremental predictive value during credit and liquidity stress than during calm expansion."
+  }
+}

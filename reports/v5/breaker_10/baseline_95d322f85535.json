@@ -1,0 +1,1732 @@
+{
+  "frozen": {
+    "contract": "breaker_wave_baseline.v1",
+    "label": "baseline",
+    "runtime_sha": "95d322f85535c1ce82f94338d5f8c452080ae380",
+    "runtime_tree_dirty": false,
+    "manifest_version": "1.0.0",
+    "dossier_contract_version": "company_demo_dossier.v1",
+    "analyst": {
+      "configured": true,
+      "key_in_env": true,
+      "detail": ""
+    },
+    "max_approved_sources": 14,
+    "started_at": "2026-08-12T16:57:03.327434+00:00",
+    "cohort": [
+      "cloudflare",
+      "advanced-micro-devices",
+      "boeing",
+      "bank-of-america",
+      "alimentation-couche-tard",
+      "agnico-eagle-mines",
+      "bce",
+      "stripe",
+      "mckinsey",
+      "johnson-and-johnson"
+    ],
+    "finished_at": "2026-08-12T17:04:50.044676+00:00"
+  },
+  "runtime_root": "/var/folders/9h/11c66kl14ssds_w88hg7w5_c0000gn/T/breaker-wave-yold18iv",
+  "results": [
+    {
+      "company_id": "cloudflare",
+      "canonical_name": "Cloudflare, Inc.",
+      "domain": "cloudflare.com",
+      "country": "USA",
+      "sector": "SOFTWARE_PLATFORM",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PUBLIC",
+      "entity_type": "OPERATING_COMPANY",
+      "coverage_expectation": "HIGH_COVERAGE",
+      "breaker_dimensions": [
+        "baseline_operating_company"
+      ],
+      "started_at": "2026-08-12T16:57:03.342893+00:00",
+      "runtime_sha": "95d322f85535c1ce82f94338d5f8c452080ae380",
+      "manifest_version": "1.0.0",
+      "analyst_configured": true,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": true,
+        "key_present": true,
+        "error": ""
+      },
+      "run_id": "01KZVEFW45RV1PG3CDV4AD70BB",
+      "discovery_seconds": 3.82,
+      "candidates_discovered": 56,
+      "candidates_approved": 14,
+      "fetch_seconds": 7.74,
+      "compose_seconds": 5.59,
+      "identity": {
+        "requested_name": "Cloudflare, Inc.",
+        "requested_domain": "cloudflare.com",
+        "resolved_company_name": "Cloudflare, Inc.",
+        "resolved_domain": "cloudflare.com",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "NORMAL",
+        "parent_company_id": null,
+        "report_subject": "Cloudflare, Inc."
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 9,
+        "failed": 5,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "http_status": 3,
+          "too_large": 1,
+          "unsafe_redirect": 1
+        },
+        "failure_messages": [
+          "HTTP 403",
+          "redirect to blog.cloudflare.com leaves the approved domain policy",
+          "response exceeded 2000000 bytes"
+        ],
+        "retryable_failures": 0,
+        "families": [
+          "commercial",
+          "customers",
+          "identity",
+          "investor",
+          "product",
+          "talent"
+        ],
+        "family_counts": {
+          "identity": 1,
+          "investor": 2,
+          "customers": 1,
+          "commercial": 1,
+          "talent": 1,
+          "product": 3
+        },
+        "missing_core": [
+          "strategy"
+        ],
+        "evidence_report_state": "EVIDENCE_REPORT_READY"
+      },
+      "evidence": {
+        "documents_retrieved": 9,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 9,
+        "evidence_independence_state": "UNAVAILABLE",
+        "independence_note": "no independence producer exists; a raw document count is not corroboration"
+      },
+      "intelligence": {
+        "strategic_report": "PRESENT",
+        "result_state": "FAILED",
+        "result_state_detail": "The analysis did not complete. No conclusions should be drawn.",
+        "reasoning_provenance": "pattern_library",
+        "strategic_analysis": "ABSENT",
+        "hypotheses": 0,
+        "shifts": 3,
+        "critic_findings": 0,
+        "readiness": true
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "cloudflare:96022063cb543917",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "AVAILABLE",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-12",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_available": 1,
+        "founder_snapshots_older_contract": 1,
+        "founder_snapshots_read": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 1/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdyD1cr4gVQFwNHLp2hvT'}",
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 2/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdyD1dYUswh8b4hCLTihc'}",
+        "ERROR intent_engine.strategic_intelligence.analyst.runner: analyst gave up after 2 attempt(s): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdyD1dYUswh8b4hCLTihc'}"
+      ],
+      "finished_at": "2026-08-12T16:57:20.516731+00:00",
+      "wall_seconds": 17.17
+    },
+    {
+      "company_id": "advanced-micro-devices",
+      "canonical_name": "Advanced Micro Devices, Inc.",
+      "domain": "amd.com",
+      "country": "USA",
+      "sector": "SEMICONDUCTOR",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PUBLIC",
+      "entity_type": "OPERATING_COMPANY",
+      "coverage_expectation": "HIGH_COVERAGE",
+      "breaker_dimensions": [
+        "competitive_response",
+        "demand_extraction",
+        "macro_transmission"
+      ],
+      "started_at": "2026-08-12T16:57:20.517557+00:00",
+      "runtime_sha": "95d322f85535c1ce82f94338d5f8c452080ae380",
+      "manifest_version": "1.0.0",
+      "analyst_configured": true,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": true,
+        "key_present": true,
+        "error": ""
+      },
+      "run_id": "01KZVEGCW88BKHQD8WBWM6H69A",
+      "discovery_seconds": 27.63,
+      "candidates_discovered": 39,
+      "candidates_approved": 14,
+      "fetch_seconds": 82.91,
+      "compose_seconds": 68.33,
+      "identity": {
+        "requested_name": "Advanced Micro Devices, Inc.",
+        "requested_domain": "amd.com",
+        "resolved_company_name": "Advanced Micro Devices, Inc.",
+        "resolved_domain": "amd.com",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "NORMAL",
+        "parent_company_id": null,
+        "report_subject": ""
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 3,
+        "failed": 11,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "http_status": 1,
+          "timeout": 10
+        },
+        "failure_messages": [
+          "HTTP 403",
+          "The read operation timed out"
+        ],
+        "retryable_failures": 10,
+        "families": [
+          "investor"
+        ],
+        "family_counts": {
+          "investor": 3
+        },
+        "missing_core": [
+          "identity",
+          "product",
+          "customers",
+          "strategy"
+        ],
+        "evidence_report_state": "EVIDENCE_PARTIAL"
+      },
+      "evidence": {
+        "documents_retrieved": 3,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 3,
+        "evidence_independence_state": "UNAVAILABLE",
+        "independence_note": "no independence producer exists; a raw document count is not corroboration"
+      },
+      "intelligence": {
+        "strategic_report": "ABSENT",
+        "reason": "no strategic report was composed for this run"
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "advanced-micro-devices:ad27175ea8a64501",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "DEGRADED",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-12",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_older_contract": 1,
+        "founder_snapshots_read": 1,
+        "founder_snapshots_unavailable": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [],
+      "finished_at": "2026-08-12T17:00:19.397449+00:00",
+      "wall_seconds": 178.88
+    },
+    {
+      "company_id": "boeing",
+      "canonical_name": "The Boeing Company",
+      "domain": "boeing.com",
+      "country": "USA",
+      "sector": "INDUSTRIAL",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PUBLIC",
+      "entity_type": "OPERATING_COMPANY",
+      "coverage_expectation": "HIGH_COVERAGE",
+      "breaker_dimensions": [
+        "capital_intensity",
+        "demand_extraction",
+        "macro_transmission",
+        "multi_segment_ambiguity",
+        "regulated_environment"
+      ],
+      "started_at": "2026-08-12T17:00:19.398721+00:00",
+      "runtime_sha": "95d322f85535c1ce82f94338d5f8c452080ae380",
+      "manifest_version": "1.0.0",
+      "analyst_configured": true,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": true,
+        "key_present": true,
+        "error": ""
+      },
+      "run_id": "01KZVENVJASJ9XAZRH128RK03Y",
+      "discovery_seconds": 3.49,
+      "candidates_discovered": 42,
+      "candidates_approved": 14,
+      "fetch_seconds": 7.01,
+      "compose_seconds": 7.58,
+      "identity": {
+        "requested_name": "The Boeing Company",
+        "requested_domain": "boeing.com",
+        "resolved_company_name": "The Boeing Company",
+        "resolved_domain": "boeing.com",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "NORMAL",
+        "parent_company_id": null,
+        "report_subject": "The Boeing Company"
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 6,
+        "failed": 8,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "http_status": 8
+        },
+        "failure_messages": [
+          "HTTP 403",
+          "HTTP 404"
+        ],
+        "retryable_failures": 0,
+        "families": [
+          "identity",
+          "investor",
+          "product"
+        ],
+        "family_counts": {
+          "identity": 1,
+          "investor": 3,
+          "product": 2
+        },
+        "missing_core": [
+          "customers",
+          "strategy"
+        ],
+        "evidence_report_state": "EVIDENCE_REPORT_READY"
+      },
+      "evidence": {
+        "documents_retrieved": 6,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 6,
+        "evidence_independence_state": "UNAVAILABLE",
+        "independence_note": "no independence producer exists; a raw document count is not corroboration"
+      },
+      "intelligence": {
+        "strategic_report": "PRESENT",
+        "result_state": "FAILED",
+        "result_state_detail": "The analysis did not complete. No conclusions should be drawn.",
+        "reasoning_provenance": "pattern_library",
+        "strategic_analysis": "ABSENT",
+        "hypotheses": 3,
+        "shifts": 2,
+        "critic_findings": 0,
+        "readiness": true
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "boeing:f97cfcd0567959b5",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "AVAILABLE",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-12",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_available": 1,
+        "founder_snapshots_older_contract": 1,
+        "founder_snapshots_read": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 1/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdyDGAM2bLkHp24YWPTWD'}",
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 2/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdyDGB6BZxCR5YAAPqakN'}",
+        "ERROR intent_engine.strategic_intelligence.analyst.runner: analyst gave up after 2 attempt(s): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdyDGB6BZxCR5YAAPqakN'}"
+      ],
+      "finished_at": "2026-08-12T17:00:37.487373+00:00",
+      "wall_seconds": 18.09
+    },
+    {
+      "company_id": "bank-of-america",
+      "canonical_name": "Bank of America Corporation",
+      "domain": "bankofamerica.com",
+      "country": "USA",
+      "sector": "FINANCIAL_REGULATED",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PUBLIC",
+      "entity_type": "OPERATING_COMPANY",
+      "coverage_expectation": "HIGH_COVERAGE",
+      "breaker_dimensions": [
+        "regulated_environment"
+      ],
+      "started_at": "2026-08-12T17:00:37.488425+00:00",
+      "runtime_sha": "95d322f85535c1ce82f94338d5f8c452080ae380",
+      "manifest_version": "1.0.0",
+      "analyst_configured": true,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": true,
+        "key_present": true,
+        "error": ""
+      },
+      "run_id": "01KZVEPD7KKXG2Q4H8P4R7350B",
+      "discovery_seconds": 3.02,
+      "candidates_discovered": 42,
+      "candidates_approved": 14,
+      "fetch_seconds": 7.22,
+      "compose_seconds": 8.02,
+      "identity": {
+        "requested_name": "Bank of America Corporation",
+        "requested_domain": "bankofamerica.com",
+        "resolved_company_name": "Bank of America Corporation",
+        "resolved_domain": "bankofamerica.com",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "NORMAL",
+        "parent_company_id": null,
+        "report_subject": "Bank of America Corporation"
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 7,
+        "failed": 7,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "http_status": 7
+        },
+        "failure_messages": [
+          "HTTP 403",
+          "HTTP 404"
+        ],
+        "retryable_failures": 0,
+        "families": [
+          "identity",
+          "investor",
+          "product"
+        ],
+        "family_counts": {
+          "identity": 1,
+          "investor": 3,
+          "product": 3
+        },
+        "missing_core": [
+          "customers",
+          "strategy"
+        ],
+        "evidence_report_state": "EVIDENCE_REPORT_READY"
+      },
+      "evidence": {
+        "documents_retrieved": 7,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 7,
+        "evidence_independence_state": "UNAVAILABLE",
+        "independence_note": "no independence producer exists; a raw document count is not corroboration"
+      },
+      "intelligence": {
+        "strategic_report": "PRESENT",
+        "result_state": "FAILED",
+        "result_state_detail": "The analysis did not complete. No conclusions should be drawn.",
+        "reasoning_provenance": "pattern_library",
+        "strategic_analysis": "ABSENT",
+        "hypotheses": 0,
+        "shifts": 2,
+        "critic_findings": 0,
+        "readiness": true
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "bank-of-america:66e41f0b7398a066",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "AVAILABLE",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-12",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_available": 1,
+        "founder_snapshots_older_contract": 1,
+        "founder_snapshots_read": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 1/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdyDHVFbtG7Zt9RPGxUaN'}",
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 2/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdyDHVsp2RbA7d6D49ipE'}",
+        "ERROR intent_engine.strategic_intelligence.analyst.runner: analyst gave up after 2 attempt(s): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdyDHVsp2RbA7d6D49ipE'}"
+      ],
+      "finished_at": "2026-08-12T17:00:55.747123+00:00",
+      "wall_seconds": 18.26
+    },
+    {
+      "company_id": "alimentation-couche-tard",
+      "canonical_name": "Alimentation Couche-Tard Inc.",
+      "domain": "couche-tard.com",
+      "country": "CANADA",
+      "sector": "CONSUMER",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PUBLIC",
+      "entity_type": "OPERATING_COMPANY",
+      "coverage_expectation": "HIGH_COVERAGE",
+      "breaker_dimensions": [
+        "identity",
+        "subject_attribution"
+      ],
+      "started_at": "2026-08-12T17:00:55.748050+00:00",
+      "runtime_sha": "95d322f85535c1ce82f94338d5f8c452080ae380",
+      "manifest_version": "1.0.0",
+      "analyst_configured": true,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": true,
+        "key_present": true,
+        "error": ""
+      },
+      "run_id": "01KZVEPZ27DDNK433SQ2MTW4FR",
+      "discovery_seconds": 1.93,
+      "candidates_discovered": 39,
+      "candidates_approved": 14,
+      "fetch_seconds": 3.08,
+      "compose_seconds": 2.15,
+      "identity": {
+        "requested_name": "Alimentation Couche-Tard Inc.",
+        "requested_domain": "couche-tard.com",
+        "resolved_company_name": "Alimentation Couche-Tard Inc.",
+        "resolved_domain": "couche-tard.com",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "IDENTITY_HARD",
+        "parent_company_id": null,
+        "report_subject": ""
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 7,
+        "failed": 7,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "http_status": 7
+        },
+        "failure_messages": [
+          "HTTP 403",
+          "HTTP 404"
+        ],
+        "retryable_failures": 0,
+        "families": [
+          "identity",
+          "product",
+          "strategy"
+        ],
+        "family_counts": {
+          "identity": 2,
+          "strategy": 1,
+          "product": 4
+        },
+        "missing_core": [
+          "customers",
+          "investor"
+        ],
+        "evidence_report_state": "EVIDENCE_REPORT_READY"
+      },
+      "evidence": {
+        "documents_retrieved": 7,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 7,
+        "evidence_independence_state": "UNAVAILABLE",
+        "independence_note": "no independence producer exists; a raw document count is not corroboration"
+      },
+      "intelligence": {
+        "strategic_report": "ABSENT",
+        "reason": "no strategic report was composed for this run"
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "alimentation-couche-tard:8c8c19718e702230",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "DEGRADED",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-12",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_older_contract": 1,
+        "founder_snapshots_read": 1,
+        "founder_snapshots_unavailable": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [],
+      "finished_at": "2026-08-12T17:01:02.918520+00:00",
+      "wall_seconds": 7.17
+    },
+    {
+      "company_id": "agnico-eagle-mines",
+      "canonical_name": "Agnico Eagle Mines Limited",
+      "domain": "agnicoeagle.com",
+      "country": "CANADA",
+      "sector": "MATERIALS_ENERGY",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PUBLIC",
+      "entity_type": "OPERATING_COMPANY",
+      "coverage_expectation": "HIGH_COVERAGE",
+      "breaker_dimensions": [
+        "capital_intensity",
+        "demand_extraction",
+        "macro_transmission"
+      ],
+      "started_at": "2026-08-12T17:01:02.919889+00:00",
+      "runtime_sha": "95d322f85535c1ce82f94338d5f8c452080ae380",
+      "manifest_version": "1.0.0",
+      "analyst_configured": true,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": true,
+        "key_present": true,
+        "error": ""
+      },
+      "run_id": "01KZVEQ62A1D13ZA4MB91EA0C6",
+      "discovery_seconds": 2.12,
+      "candidates_discovered": 38,
+      "candidates_approved": 14,
+      "fetch_seconds": 1.37,
+      "compose_seconds": 1.35,
+      "identity": {
+        "requested_name": "Agnico Eagle Mines Limited",
+        "requested_domain": "agnicoeagle.com",
+        "resolved_company_name": "Agnico Eagle Mines Limited",
+        "resolved_domain": "agnicoeagle.com",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "NORMAL",
+        "parent_company_id": null,
+        "report_subject": ""
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 2,
+        "failed": 12,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "http_status": 11,
+          "too_large": 1
+        },
+        "failure_messages": [
+          "HTTP 403",
+          "response exceeded 2000000 bytes"
+        ],
+        "retryable_failures": 0,
+        "families": [
+          "investor"
+        ],
+        "family_counts": {
+          "investor": 2
+        },
+        "missing_core": [
+          "identity",
+          "product",
+          "customers",
+          "strategy"
+        ],
+        "evidence_report_state": "EVIDENCE_PARTIAL"
+      },
+      "evidence": {
+        "documents_retrieved": 2,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 2,
+        "evidence_independence_state": "UNAVAILABLE",
+        "independence_note": "no independence producer exists; a raw document count is not corroboration"
+      },
+      "intelligence": {
+        "strategic_report": "ABSENT",
+        "reason": "no strategic report was composed for this run"
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "agnico-eagle-mines:5415ccd9086c230f",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "DEGRADED",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-12",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_older_contract": 1,
+        "founder_snapshots_read": 1,
+        "founder_snapshots_unavailable": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [],
+      "finished_at": "2026-08-12T17:01:07.765978+00:00",
+      "wall_seconds": 4.85
+    },
+    {
+      "company_id": "bce",
+      "canonical_name": "BCE Inc.",
+      "domain": "bce.ca",
+      "country": "CANADA",
+      "sector": "INFRASTRUCTURE",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PUBLIC",
+      "entity_type": "OPERATING_COMPANY",
+      "coverage_expectation": "HIGH_COVERAGE",
+      "breaker_dimensions": [
+        "capital_intensity",
+        "identity",
+        "regulated_environment",
+        "subject_attribution"
+      ],
+      "started_at": "2026-08-12T17:01:07.767107+00:00",
+      "runtime_sha": "95d322f85535c1ce82f94338d5f8c452080ae380",
+      "manifest_version": "1.0.0",
+      "analyst_configured": true,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": true,
+        "key_present": true,
+        "error": ""
+      },
+      "run_id": "01KZVEQASS275E3JRYPE2ATZZH",
+      "discovery_seconds": 6.96,
+      "candidates_discovered": 42,
+      "candidates_approved": 14,
+      "fetch_seconds": 7.93,
+      "compose_seconds": 3.77,
+      "identity": {
+        "requested_name": "BCE Inc.",
+        "requested_domain": "bce.ca",
+        "resolved_company_name": "BCE Inc.",
+        "resolved_domain": "bce.ca",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "IDENTITY_HARD",
+        "parent_company_id": null,
+        "report_subject": "BCE Inc."
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 8,
+        "failed": 6,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "http_status": 6
+        },
+        "failure_messages": [
+          "HTTP 403",
+          "HTTP 404"
+        ],
+        "retryable_failures": 0,
+        "families": [
+          "commercial",
+          "customers",
+          "identity",
+          "investor",
+          "product"
+        ],
+        "family_counts": {
+          "identity": 1,
+          "investor": 3,
+          "product": 3,
+          "commercial": 1,
+          "customers": 1
+        },
+        "missing_core": [
+          "strategy"
+        ],
+        "evidence_report_state": "EVIDENCE_REPORT_READY"
+      },
+      "evidence": {
+        "documents_retrieved": 9,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 9,
+        "evidence_independence_state": "UNAVAILABLE",
+        "independence_note": "no independence producer exists; a raw document count is not corroboration"
+      },
+      "intelligence": {
+        "strategic_report": "PRESENT",
+        "result_state": "FAILED",
+        "result_state_detail": "The analysis did not complete. No conclusions should be drawn.",
+        "reasoning_provenance": "pattern_library",
+        "strategic_analysis": "ABSENT",
+        "hypotheses": 1,
+        "shifts": 2,
+        "critic_findings": 0,
+        "readiness": true
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "bce:c24b2bfd63167011",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "AVAILABLE",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-12",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_available": 1,
+        "founder_snapshots_older_contract": 1,
+        "founder_snapshots_read": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 1/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdyDKsy9ZKMrebWK7DNa1'}",
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 2/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdyDKtXsyS1snX45BtQuZ'}",
+        "ERROR intent_engine.strategic_intelligence.analyst.runner: analyst gave up after 2 attempt(s): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdyDKtXsyS1snX45BtQuZ'}"
+      ],
+      "finished_at": "2026-08-12T17:01:26.432391+00:00",
+      "wall_seconds": 18.67
+    },
+    {
+      "company_id": "stripe",
+      "canonical_name": "Stripe, Inc.",
+      "domain": "stripe.com",
+      "country": "USA",
+      "sector": "SOFTWARE_PLATFORM",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PRIVATE",
+      "entity_type": "OPERATING_COMPANY",
+      "coverage_expectation": "HIGH_COVERAGE",
+      "breaker_dimensions": [
+        "private_company_path"
+      ],
+      "started_at": "2026-08-12T17:01:26.433212+00:00",
+      "runtime_sha": "95d322f85535c1ce82f94338d5f8c452080ae380",
+      "manifest_version": "1.0.0",
+      "analyst_configured": true,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": true,
+        "key_present": true,
+        "error": ""
+      },
+      "run_id": "01KZVEQX14E2RGFGYWHTE8FPZW",
+      "discovery_seconds": 11.2,
+      "candidates_discovered": 39,
+      "candidates_approved": 14,
+      "fetch_seconds": 5.54,
+      "compose_seconds": 4.86,
+      "identity": {
+        "requested_name": "Stripe, Inc.",
+        "requested_domain": "stripe.com",
+        "resolved_company_name": "Stripe, Inc.",
+        "resolved_domain": "stripe.com",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "NORMAL",
+        "parent_company_id": null,
+        "report_subject": "Stripe, Inc."
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 7,
+        "failed": 7,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "http_status": 6,
+          "unsafe_redirect": 1
+        },
+        "failure_messages": [
+          "HTTP 403",
+          "HTTP 404",
+          "redirect to docs.stripe.com leaves the approved domain policy"
+        ],
+        "retryable_failures": 0,
+        "families": [
+          "commercial",
+          "customers",
+          "identity",
+          "independent",
+          "product",
+          "strategy"
+        ],
+        "family_counts": {
+          "identity": 3,
+          "product": 2,
+          "strategy": 1,
+          "commercial": 1,
+          "customers": 1,
+          "independent": 2
+        },
+        "missing_core": [
+          "investor"
+        ],
+        "evidence_report_state": "EVIDENCE_REPORT_READY"
+      },
+      "evidence": {
+        "documents_retrieved": 10,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 10,
+        "evidence_independence_state": "UNAVAILABLE",
+        "independence_note": "no independence producer exists; a raw document count is not corroboration"
+      },
+      "intelligence": {
+        "strategic_report": "PRESENT",
+        "result_state": "FAILED",
+        "result_state_detail": "The analysis did not complete. No conclusions should be drawn.",
+        "reasoning_provenance": "pattern_library",
+        "strategic_analysis": "ABSENT",
+        "hypotheses": 1,
+        "shifts": 2,
+        "critic_findings": 0,
+        "readiness": true
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "stripe:da2b5868bdf594e1",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "AVAILABLE",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-12",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_available": 1,
+        "founder_snapshots_older_contract": 1,
+        "founder_snapshots_read": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 1/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdyDMVhzsPGbnH44ZMDAf'}",
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 2/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdyDMWLhXfjJKmbyaXLpm'}",
+        "ERROR intent_engine.strategic_intelligence.analyst.runner: analyst gave up after 2 attempt(s): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdyDMWLhXfjJKmbyaXLpm'}"
+      ],
+      "finished_at": "2026-08-12T17:01:48.039704+00:00",
+      "wall_seconds": 21.61
+    },
+    {
+      "company_id": "mckinsey",
+      "canonical_name": "McKinsey & Company",
+      "domain": "mckinsey.com",
+      "country": "USA",
+      "sector": "SERVICES",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PRIVATE",
+      "entity_type": "ADVISORY_ORGANIZATION",
+      "coverage_expectation": "PRIVATE_WITHHELD",
+      "breaker_dimensions": [
+        "bounded_or_withheld",
+        "non_operating_entity_contract",
+        "private_company_path",
+        "private_data_absence"
+      ],
+      "started_at": "2026-08-12T17:01:48.040434+00:00",
+      "runtime_sha": "95d322f85535c1ce82f94338d5f8c452080ae380",
+      "manifest_version": "1.0.0",
+      "analyst_configured": true,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": true,
+        "key_present": true,
+        "error": ""
+      },
+      "run_id": "01KZVERJ4BV1KNREZR7DVP7722",
+      "discovery_seconds": 26.46,
+      "candidates_discovered": 36,
+      "candidates_approved": 14,
+      "fetch_seconds": 82.35,
+      "compose_seconds": 51.5,
+      "identity": {
+        "requested_name": "McKinsey & Company",
+        "requested_domain": "mckinsey.com",
+        "resolved_company_name": "McKinsey & Company",
+        "resolved_domain": "mckinsey.com",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "NORMAL",
+        "parent_company_id": null,
+        "report_subject": ""
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 1,
+        "failed": 13,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "http_status": 3,
+          "timeout": 10
+        },
+        "failure_messages": [
+          "HTTP 403",
+          "The read operation timed out"
+        ],
+        "retryable_failures": 10,
+        "families": [
+          "independent"
+        ],
+        "family_counts": {
+          "independent": 3
+        },
+        "missing_core": [
+          "identity",
+          "product",
+          "customers",
+          "investor",
+          "strategy"
+        ],
+        "evidence_report_state": "EVIDENCE_PARTIAL"
+      },
+      "evidence": {
+        "documents_retrieved": 3,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 3,
+        "evidence_independence_state": "UNAVAILABLE",
+        "independence_note": "no independence producer exists; a raw document count is not corroboration"
+      },
+      "intelligence": {
+        "strategic_report": "ABSENT",
+        "reason": "no strategic report was composed for this run"
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "mckinsey:55cd1e88c11a86c9",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "DEGRADED",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-12",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_older_contract": 1,
+        "founder_snapshots_read": 1,
+        "founder_snapshots_unavailable": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [],
+      "finished_at": "2026-08-12T17:04:28.351758+00:00",
+      "wall_seconds": 160.31
+    },
+    {
+      "company_id": "johnson-and-johnson",
+      "canonical_name": "Johnson & Johnson",
+      "domain": "jnj.com",
+      "country": "USA",
+      "sector": "HEALTHCARE",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PUBLIC",
+      "entity_type": "OPERATING_COMPANY",
+      "coverage_expectation": "HIGH_COVERAGE",
+      "breaker_dimensions": [
+        "identity",
+        "regulated_environment",
+        "subject_attribution"
+      ],
+      "started_at": "2026-08-12T17:04:28.353081+00:00",
+      "runtime_sha": "95d322f85535c1ce82f94338d5f8c452080ae380",
+      "manifest_version": "1.0.0",
+      "analyst_configured": true,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": true,
+        "key_present": true,
+        "error": ""
+      },
+      "run_id": "01KZVEXEP4Z9XFD2Z6WM4J2R8Q",
+      "discovery_seconds": 5.01,
+      "candidates_discovered": 42,
+      "candidates_approved": 14,
+      "fetch_seconds": 9.08,
+      "compose_seconds": 7.6,
+      "identity": {
+        "requested_name": "Johnson & Johnson",
+        "requested_domain": "jnj.com",
+        "resolved_company_name": "Johnson & Johnson",
+        "resolved_domain": "jnj.com",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "IDENTITY_HARD",
+        "parent_company_id": null,
+        "report_subject": "Johnson & Johnson"
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 4,
+        "failed": 10,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "http_status": 10
+        },
+        "failure_messages": [
+          "HTTP 403",
+          "HTTP 404"
+        ],
+        "retryable_failures": 0,
+        "families": [
+          "customers",
+          "identity",
+          "investor"
+        ],
+        "family_counts": {
+          "identity": 1,
+          "investor": 3,
+          "customers": 1
+        },
+        "missing_core": [
+          "product",
+          "strategy"
+        ],
+        "evidence_report_state": "EVIDENCE_REPORT_READY"
+      },
+      "evidence": {
+        "documents_retrieved": 5,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 5,
+        "evidence_independence_state": "UNAVAILABLE",
+        "independence_note": "no independence producer exists; a raw document count is not corroboration"
+      },
+      "intelligence": {
+        "strategic_report": "PRESENT",
+        "result_state": "FAILED",
+        "result_state_detail": "The analysis did not complete. No conclusions should be drawn.",
+        "reasoning_provenance": "pattern_library",
+        "strategic_analysis": "ABSENT",
+        "hypotheses": 1,
+        "shifts": 2,
+        "critic_findings": 0,
+        "readiness": true
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "johnson-and-johnson:f2e5a340e988317a",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "AVAILABLE",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-12",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_available": 1,
+        "founder_snapshots_older_contract": 1,
+        "founder_snapshots_read": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 1/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdyDaoKGzUva5BxN5qdP2'}",
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 2/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdyDapGKWB4asJtsADFxc'}",
+        "ERROR intent_engine.strategic_intelligence.analyst.runner: analyst gave up after 2 attempt(s): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdyDapGKWB4asJtsADFxc'}"
+      ],
+      "finished_at": "2026-08-12T17:04:50.043792+00:00",
+      "wall_seconds": 21.69
+    }
+  ]
+}

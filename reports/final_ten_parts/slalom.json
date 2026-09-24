@@ -1,0 +1,290 @@
+{
+  "base": "https://intent-engine-preview-bridge.onrender.com",
+  "live_commit": "807a414361b0fbc1999b4595e875c67e2a20524a",
+  "rows": [
+    {
+      "company": "Slalom",
+      "domain": "https://www.slalom.com",
+      "result": "PRODUCT_DEFECT",
+      "defects": [
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "/brief answered 0"
+        },
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "/intro establishes the business model and /xray says it has not been established (decision_synthesis._select passes neither evidence_text nor published_text)"
+        }
+      ],
+      "instrument_notes": [],
+      "run_id": "01M273HT8EQB0K562B67BVH9WT",
+      "core_s": 36.6,
+      "telemetry": {
+        "contract": "adaptive_intelligence.v1",
+        "company": "Slalom",
+        "company_profile_status": "PROFILE_PARTIAL",
+        "company_profile_source": "SUBJECT_EVIDENCE",
+        "business_model_source": "SUBJECT_PUBLISHED_EVIDENCE",
+        "business_model_source_words": "this company's own published account of what it sells and how it is paid",
+        "business_model_alternatives": [
+          "ADVERTISING_PLATFORM"
+        ],
+        "profile_available": true,
+        "lens_available": true,
+        "decision_reading_available": false,
+        "decision_map_state": "POTENTIAL_DOMAINS",
+        "causal_chain_kind": "INVESTIGATION_CHAIN",
+        "potential_domains": [
+          "which client exposure is concentrated",
+          "which practice to staff against",
+          "what a client is about to decide"
+        ],
+        "evidence_limitation": "the run did not retrieve enough independent material to test this company's own account of itself",
+        "what_would_unlock_a_decision": "a dated, third-party account of something this company has actually decided or changed -- a filing, a customer or competitor statement, or reporting that is not the company's own",
+        "business_model": "PEOPLE_OR_ROUTE_BASED_SERVICES",
+        "business_model_confidence": "moderate",
+        "business_model_evidence": "Forbes World's Best Management Consulting Firms.",
+        "business_model_reason": "read from this company's own published material, which states how it is paid rather than only what it sells",
+        "customer_job": "",
+        "customer_job_provenance": "NOT_ESTABLISHED",
+        "strategic_assets": [],
+        "critical_dependencies": [],
+        "company_specificity_score": 0.176,
+        "company_specific_fields": [
+          "identity",
+          "self_description",
+          "technology_exposure"
+        ],
+        "decision_opportunity_count": 0,
+        "decision_opportunities_considered": 0,
+        "decision_opportunities_withheld": [],
+        "top_decision_domain": "",
+        "top_decision_owner": "",
+        "top_decision_priority": 0.0,
+        "top_decision_components": {},
+        "primary_lens": "consulting_portfolio",
+        "primary_lens_name": "Client Portfolio & Multi-Client Intelligence",
+        "lens_confidence": "moderate",
+        "secondary_lenses": [
+          "decision_execution",
+          "enterprise_data_ai"
+        ],
+        "lens_selection_reasons": "This company's own material is about \u201cconsulting\u201d, \u201ctransformation\u201d, \u201cdelivery\u201d, which is what client portfolio & multi-client intelligence reads. It scored 11.0 against 7.5 for the next eligible lens.",
+        "lens_refusals": [
+          "Data Security & Governance: scored 5.0 against 11.0, carried by privacy, compliance alone",
+          "Revenue & Go-To-Market Strategy: scored 3.0 against 11.0, carried by crm alone",
+          "Planning & Assumption Validation: scored 2.5 against 11.0, carried by planning alone",
+          "Market & Competitive Strategy: nothing in this company's own material activates it",
+          "Regulatory & Risk Intelligence: nothing in this company's own material activates it",
+          "Operational Intelligence: nothing in this company's own material activates it"
+        ],
+        "causal_chain_nodes": 4,
+        "causal_chain_evidence_coverage": 0.25,
+        "causal_chain_stopped_because": "",
+        "genericity_flags": 1,
+        "differentiation_carried_by": [
+          "self_description",
+          "own_vocabulary",
+          "technology_exposure"
+        ],
+        "differentiation_flagged": true,
+        "differentiation_flag_reason": "18% of what this reading tries to establish about a company was learned from this one's own evidence; the rest is the economics of its business model, which every company of the same kind shares. The difference stated above is real but thin, and it is marked rather than dressed up.",
+        "counterevidence_present": false,
+        "information_priority": "",
+        "abstention_reason": "We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none.",
+        "role_lens": "ceo",
+        "role_module_order": [
+          "executive_change",
+          "strategic_thesis",
+          "why_this_is_different",
+          "decision_opportunity_map",
+          "causal_chain",
+          "what_would_change_our_mind",
+          "evidence",
+          "provenance",
+          "economic_exposure",
+          "strategic_lens",
+          "client_portfolio",
+          "data_ai_exposure",
+          "information_priority",
+          "learning_state",
+          "ask_intent_engine"
+        ],
+        "role_promoted": [
+          "strategic_thesis",
+          "why_this_is_different",
+          "decision_opportunity_map",
+          "causal_chain",
+          "what_would_change_our_mind",
+          "evidence",
+          "provenance"
+        ],
+        "composition_modules": [
+          "executive_change",
+          "economic_exposure",
+          "strategic_thesis",
+          "why_this_is_different",
+          "strategic_lens",
+          "decision_opportunity_map",
+          "causal_chain",
+          "client_portfolio",
+          "data_ai_exposure",
+          "information_priority",
+          "what_would_change_our_mind",
+          "learning_state",
+          "evidence",
+          "provenance",
+          "ask_intent_engine"
+        ],
+        "composition_excluded": [
+          "decision_delta",
+          "market_belief",
+          "customer_signals",
+          "competitive_response",
+          "supply_chain_exposure",
+          "financial_sensitivity",
+          "regulatory_exposure",
+          "operational_intelligence",
+          "contradictions",
+          "alternative_interpretation",
+          "scenario_comparison"
+        ],
+        "composition_explained": 7,
+        "reasoning_provenance": "business model PEOPLE_OR_ROUTE_BASED_SERVICES from subject evidence; executive priorities the levers a business of this kind has, since the evidence raised no decision of its own",
+        "errors": [],
+        "run_id": "01M273HT8EQB0K562B67BVH9WT"
+      },
+      "resolved_identity": "Slalom",
+      "business_model": "PEOPLE_OR_ROUTE_BASED_SERVICES",
+      "profile_source": "SUBJECT_EVIDENCE",
+      "specificity": 0.176,
+      "primary_lens": "consulting_portfolio",
+      "secondary_lenses": [
+        "decision_execution",
+        "enterprise_data_ai"
+      ],
+      "lens_confidence": "moderate",
+      "decision_opportunity_count": 0,
+      "top_decision_domain": "",
+      "top_decision_priority": 0.0,
+      "causal_chain_nodes": 4,
+      "causal_evidence_coverage": 0.25,
+      "genericity_flags": 1,
+      "differentiation_carried_by": [
+        "self_description",
+        "own_vocabulary",
+        "technology_exposure"
+      ],
+      "abstention_reason": "We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none.",
+      "profile_available": true,
+      "lens_available": true,
+      "decision_reading_available": false,
+      "decision_map_state": "POTENTIAL_DOMAINS",
+      "causal_chain_kind": "INVESTIGATION_CHAIN",
+      "potential_domains": [
+        "which client exposure is concentrated",
+        "which practice to staff against",
+        "what a client is about to decide"
+      ],
+      "evidence_limitation": "the run did not retrieve enough independent material to test this company's own account of itself",
+      "what_would_unlock": "a dated, third-party account of something this company has actually decided or changed -- a filing, a customer or competitor statement, or reporting that is not the company's own",
+      "intro_status": 200,
+      "intro_chars": 48890,
+      "brief_status": 0,
+      "brief_chars": 37,
+      "full_status": 200,
+      "full_chars": 58676,
+      "xray_status": 200,
+      "xray_chars": 26373,
+      "evidence_status": 200,
+      "evidence_chars": 18982,
+      "answer_status": 200,
+      "answer_chars": 29211,
+      "surface_s": 173.6,
+      "intro_words": 2174,
+      "sections": {
+        "why_this_company": "Why this analysis is different for Slalom Generic interpretation A general reading of a company in this position would say that consulting demand follows enterprise technology spending. It would reason from the economics every people or route based services business shares -- service delivered by people or over a route network, where sold capacity is the product and unsold capacity expires. What is different here In its own words: \u201cSlalom is a fiercely human business and technology company that leads with outcomes and partners with leaders\u2014bringing more together\u201d -- which is narrower, and more specific, than the general reading above. The material it publishes is about consulting, transformation, delivery, partners with -- its own terms, not ours. Decision consequence So what management has to weigh is Which client exposure is concentrated -- the decision area this company's own material points at, not a recommendation. Why Intent Engine reads it this way This company's own material is about \u201cconsulting\u201d, \u201ctransformation\u201d, \u201cdelivery\u201d, which is what client portfolio & multi-client intelligence reads. It scored 11.0 against 7.5 for the next eligible lens. 18% of what this reading tries to establish about a company was learned from this one's own evidence; the rest is the economics of its business model, which every company of the same kind shares. The difference stated above is real but thin, and it is marked rather than dressed up. The evidence this rests on Slalom is a fiercely human business and technology company that leads with outcomes and partners with leaders\u2014bringing more together. It was evident Slalom matched our level of investment for the success of our AI capability enhancement project. By putting people first at every turn, we\u2019ve evolved a consulting experience like no other.",
+        "decision_or_domains": "Potential decision domains Areas this company model suggests are worth investigating \u2014 not current recommendations . We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none. 01 Which client exposure is concentrated It describes itself as a fiercely human business and technology company that leads with outcomes and partners with leaders\u2014bringing more together, which is what puts which client exposure is concentrated in scope. Would sit with: CONSULTANT What would make this a recommendation a dated, first-party statement from this company about which client exposure is concentrated, or a third-party account of it -- at present nothing in the retrieved record raises it 02 Which practice to staff against It describes itself as a fiercely human business and technology company that leads with outcomes and partners with leaders\u2014bringing more together, which is what puts which practice to staff against in scope. Would sit with: CONSULTANT What would make this a recommendation a dated, first-party statement from this company about which practice to staff against, or a third-party account of it -- at present nothing in the retrieved record raises it 03 What a client is about to decide It describes itself as a fiercely human business and technology company that leads with outcomes and partners with leaders\u2014bringing more together, which is what puts what a client is about to decide in scope. Would sit with: CONSULTANT What would make this a recommendation a dated, first-party statement from this company about what a client is about to decide, or a third-party account of it -- at present nothing in the retrieved record raises it",
+        "chain": "What would be worth investigating A line of enquiry, not a causal claim. Nothing below asserts that one thing caused another. What we can see In its own words: \u201cSlalom is a fiercely human business and technology company that leads with outcomes and partners with leaders\u2014bringing more together\u201d evidenced How it could reach this company A people or route based services business is reached through labor, unemployment, reaching this one through what it sells: consulting, transformation inference What we would need to know A dated account, from someone other than this company, of something it has actually decided or changed, or anyone other than Slalom writing about consulting or transformation. Nothing retrieved in this run carries one, which is why no mechanism is asserted above. open_question The decision it could bear on Which client exposure is concentrated -- the decision area this company's own material points at, not a recommendation. open_question This is an investigation, not a conclusion. No mechanism connecting an outside change to this company was established, so nothing below claims one.",
+        "bounded": "What we can and cannot say about Slalom What we know Slalom is a fiercely human business and technology company that leads with outcomes and partners with leaders\u2014bringing more together. It is a people or route based services business, read from its own account of how it is paid. The lens this points to Client Portfolio & Multi-Client Intelligence \u2014 This company's own material is about \u201cconsulting\u201d, \u201ctransformation\u201d, \u201cdelivery\u201d, which is what client portfolio & multi-client intelligence reads. It scored 11.0 against 7.5 for the next eligible lens. What we cannot yet conclude Which of these is live for this management, or which way it should go. Knowing what kind of business this is tells us which decisions tend to matter for a business like it \u2014 and any direction stated elsewhere on this page rests on that, not on anything this run established about this company in particular. Why not the run did not retrieve enough independent material to test this company's own account of itself What would unlock a decision a dated, third-party account of something this company has actually decided or changed -- a filing, a customer or competitor statement, or reporting that is not the company's own",
+        "lens": "The lens this analysis is using Client Portfolio & Multi-Client Intelligence This company's own material is about \u201cconsulting\u201d, \u201ctransformation\u201d, \u201cdelivery\u201d, which is what client portfolio & multi-client intelligence reads. It scored 11.0 against 7.5 for the next eligible lens. By putting people first at every turn, we\u2019ve evolved a consulting experience like no other. What was considered and not selected Data Security & Governance: scored 5.0 against 11.0, carried by privacy, compliance alone Revenue & Go-To-Market Strategy: scored 3.0 against 11.0, carried by crm alone Planning & Assumption Validation: scored 2.5 against 11.0, carried by planning alone Market & Competitive Strategy: nothing in this company's own material activates it Regulatory & Risk Intelligence: nothing in this company's own material activates it Operational Intelligence: nothing in this company's own material activates it",
+        "role": "Read this as Chief Executive Strategy Finance future Operations future Product future Revenue future Marketing future Risk & Security future Consultant / Advisor future Chief Executive reads executive change, strategic thesis, why this is different first because the decision in front of that reader is what to change, what it costs to wait, and what would make it the wrong call. Nothing below is removed or reworded; the order changes and the facts do not. What this reader would ask What would make this recommendation wrong? What is the largest assumption here? What does a competitor do about this first? What should I decide this quarter rather than this year? Which client industries carry the most exposure right now? What decision are those clients about to face?",
+        "value": "Where Intent Engine could create value for Slalom Current \u2014 external evidence only Monitoring the outside record for changes that reach this company through the mechanism above Testing the assumption the current plan rests on against what the record actually says Watching which client exposure is concentrated Watching which practice to staff against Provenance on every claim, so a disagreement is about the evidence rather than about the tool Future \u2014 with permissioned internal data not connected CRM and pipeline, to test whether the outside reading shows up in this company\u2019s own funnel Product usage and support, to see the same change from the customer side Finance, to attach a magnitude to an exposure that is currently directional Prior decisions, so a recommendation can be checked against what was already tried No return is claimed for any of this, because none has been measured."
+      },
+      "evidence_text": "Slalom Home \u00b7 Log in Why this reading exists Slalom X-Ray \u00b7 Full analysis \u00b7 Presentation \u00b7 Decision history Independent support 0 of 4 source(s) are both independent of Slalom and say enough about it to support the reading. No independent source in this dossier supports the reading. That is a limit of what we retrieved, not evidence that no independent coverage exists. Search coverage: no search was run \u00b7 reading: none retrieved \u2014 a limit of our search, not a finding about the company No discovery run is recorded for this analysis, so how hard we searched is unknown. Written by the company itself (4) Useful evidence, and often the best there is \u2014 but the company speaking about itself cannot corroborate itself. Who we are | Slalom AU The company's own account of itself Discusses the company directly Our vision is a world in which each person has the opportunity to love their life and work. https://www.slalom.com/au/en/who-we-are Author Slalom Host www.slalom.com Subject Slalom Retrieved 2026-09-11T02:08:27.668951+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself Consulting Services Unique To Your Needs | Slalom AU Another document from a source already counted Discusses the company directly Slalom\u2019s consulting services are tailored to our customers. Whatever outcomes you need, we customize the right mix of expertise to help you get there. https://www.slalom.com/au/en/services Author Slalom Host www.slalom.com Subject Slalom Retrieved 2026-09-11T02:08:27.865380+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself Customer Stories | Real Experiences and Success | Slalom AU Another document from a source already counted Discusses the company directly Customer stories. Every day we partner with our customers to create powerful experiences, drive innovative ways of working, and bring new products and services to life. Together we make a tangible impact on people\u2019s lives. Our stories celebrate that impact and inspire us to keep raising the bar. How can we help you? Fi\u2026 https://www.slalom.com/au/en/customer-stories Author Slalom Host www.slalom.com Subject Slalom Retrieved 2026-09-11T02:08:28.357892+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself Media & communications | Slalom AU Another document from a source already counted Discusses the company directly Slalom\u2019s deep experience and personalized consulting services help media and communications companies keep pace with the industry\u2019s rapid evolution. https://www.slalom.com/au/en/industries/media-communications Author Slalom Host www.slalom.com Subject Slalom Retrieved 2026-09-11T02:08:28.657571+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself",
+      "xray_says_unclassified": true,
+      "profile_contradiction": true,
+      "ui_html": "reports/ui/slalom.html",
+      "identity_on_page": true,
+      "leaks": [],
+      "has_why_different": true,
+      "has_lens_block": true,
+      "has_role_switch": true,
+      "has_value_block": true,
+      "has_decision_map": false,
+      "has_causal_chain": false,
+      "has_potential_domains": true,
+      "has_not_a_recommendation": true,
+      "has_investigation_chain": true,
+      "has_bounded_block": true,
+      "quotes": [
+        "Slalom is a fiercely human business and technology company that leads with outcomes and partners with leaders\u2014bringing more together.",
+        "It was evident Slalom matched our level of investment for the success of our AI capability enhancement project.",
+        "By putting people first at every turn, we\u2019ve evolved a consulting experience like no other.",
+        "By putting people first at every turn, we\u2019ve evolved a consulting experience like no other."
+      ],
+      "quote_count": 4,
+      "broken_quotes": [],
+      "headline_is_generic": false,
+      "lens_matches_expectation": true,
+      "role_ceo_status": 200,
+      "role_cso_status": 200,
+      "role_views_differ": true,
+      "role_facts_identical": true,
+      "qa": [
+        {
+          "q": "Why does this matter for this company specifically?",
+          "status": 200,
+          "words": 118,
+          "text": "Why does this matter for this company specifically? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Slalom Why does this matter for this company specifically? A supported reading of Slalom exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen it. This particular question is not answerable from what this run retrieved. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What evidence most supports this reading?",
+          "status": 200,
+          "words": 169,
+          "text": "What evidence most supports this reading? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Slalom What evidence most supports this reading? A supported reading of Slalom exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen it. This particular question is not answerable from what this run retrieved. Evidence Strongest. No independent source was found; everything rests on the company's own material. Weakest. 2026-09-11: Slalom publishes named customers rather than logos alone, so those customers agreed to be named, which is a stronger claim than a logo wall. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What would have to be true for this to be wrong?",
+          "status": 200,
+          "words": 160,
+          "text": "What would have to be true for this to be wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Slalom What would have to be true for this to be wrong? That was the whole of it: \u201cA supported reading of Slalom exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen it. This particular question is not answerable from what this run retrieved.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What should management monitor next?",
+          "status": 200,
+          "words": 122,
+          "text": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Slalom What should management monitor next? billable headcount or capacity \u2014 revenue at a business of this kind moves with billable headcount or capacity.; utilisation \u2014 revenue at a business of this kind moves with utilisation.; rate or yield \u2014 revenue at a business of this kind moves with rate or yield. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "Which decision here is the most urgent, and why that one?",
+          "status": 200,
+          "words": 170,
+          "text": "Which decision here is the most urgent, and why that one? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Slalom Which decision here is the most urgent, and why that one? That was the whole of it: \u201cbillable headcount or capacity \u2014 revenue at a business of this kind moves with billable headcount or capacity.; utilisation \u2014 revenue at a business of this kind moves with utilisation.; rate or yield \u2014 revenue at a business of this kind moves with rate or yield.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What is the biggest uncertainty in this analysis?",
+          "status": 200,
+          "words": 105,
+          "text": "What is the biggest uncertainty in this analysis? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Slalom What is the biggest uncertainty in this analysis? every source here is published by the company itself, so nothing in this reading has been checked against an outside account of it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        }
+      ],
+      "qa_ok": 6,
+      "qa_company_specific": 6,
+      "followup_words": 149,
+      "followup_is_replay": false,
+      "followup_pass": true,
+      "wall_s": 293.8
+    }
+  ]
+}

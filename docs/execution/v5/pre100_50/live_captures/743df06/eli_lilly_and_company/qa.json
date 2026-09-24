@@ -1,0 +1,62 @@
+[
+  {
+    "question": "What should management do?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What should management do? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Eli Lilly and Company What should management do? Do not act on this reading. Re-run once the market engine publishes a snapshot this side will read. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "Why now?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "Why now? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Eli Lilly and Company Why now? which development programmes to fund and which to stop is a standing decision for this business model. It was ranked above regulatory response on the same evidence. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What's the biggest risk?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What's the biggest risk? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Eli Lilly and Company What's the biggest risk? product mix is not disclosed at the granularity the decision needs. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What would prove this wrong?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What would prove this wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Eli Lilly and Company What would prove this wrong? a disclosure in regulatory decisions and submissions showing the mechanism moving in the opposite direction would overturn this reading. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "Who's the real competitor?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "Who's the real competitor? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Eli Lilly and Company Who's the real competitor? HCA Healthcare, Inc.: operates the same business model (regulated product or provider) in the same sector (healthcare), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR; Johnson & Johnson: operates the same business model (regulated product or provider) in the same sector (healthcare), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR; Pfizer Inc.: operates the same business model (regulated product or provider) in the same sector (healthcare), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What does the market believe?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What does the market believe? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Eli Lilly and Company What does the market believe? That Eli Lilly and Company's growth and margin can improve together for another year, because they just did.: Eli Lilly and Company's own filed results show growth accelerating and margin widening. This is what a reader of that record carries into next year; nobody published it in these words and it is not a consensus estimate.; That the contest Eli Lilly and Company has to win is against generic competition to Verzenio, and that holding that ground is what protects the economics.: Eli Lilly and Company's own filing \u2014 not independent, and under an obligation to be accurate. Eli Lilly and Company names it directly. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What's the weakest assumption?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What's the weakest assumption? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Eli Lilly and Company What's the weakest assumption? Eli Lilly and Company's filed results: The filed series is what this reading is computed from. A protected position that ends on a known date is what the economics rest on Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What impossible hypothesis should we investigate?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What impossible hypothesis should we investigate? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Eli Lilly and Company What impossible hypothesis should we investigate? A holder of this view is reading the record correctly as far as it goes: what it implies is the incremental margin on the next block of revenue, which is what separates operating leverage from a favourable mix, and nothing in what this run retrieved contradicts that.; A holder of this view is reading the record correctly as far as it goes: what it implies is wins and losses are decided against generic competition to Verzenio rather than somewhere else, and nothing in what this run retrieved contradicts that. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What should we measure next?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What should we measure next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Eli Lilly and Company What should we measure next? approved products and indications \u2014 revenue at a business of this kind moves with approved products and indications.; volume and prescriptions or procedures \u2014 revenue at a business of this kind moves with volume and prescriptions or procedures.; net price after rebates \u2014 revenue at a business of this kind moves with net price after rebates. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What would you tell the board?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What would you tell the board? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Eli Lilly and Company What would you tell the board? Do not act on this reading. Re-run once the market engine publishes a snapshot this side will read. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  }
+]

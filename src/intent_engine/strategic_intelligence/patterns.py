@@ -55,6 +55,42 @@ SIGNAL_VOCABULARY = (
 )
 
 
+def patterns_for(model_class: str, library=None) -> list:
+    """The patterns that can be TRUE of this kind of business.
+
+    THE GATE SIGNALS COULD NOT PROVIDE. A signal records what a company's
+    pages talk about; it cannot record what kind of business is talking.
+    `capacity_ahead_of_demand` fired on Cloudflare -- whose filing genuinely
+    discusses network capacity investment and genuinely names large customers
+    -- and put "committing capital to capacity ahead of demand", "take-or-pay
+    terms" and "replacing ageing lines" on the primary screen of a company
+    that rents elastic compute.
+
+    No threshold repairs that. The signals were present; the READING was
+    about a different kind of business, and every pattern already documented
+    which kinds in `when_it_does_not_apply`. This turns that prose into a
+    filter.
+
+    An UNKNOWN or unclassified company gets the whole library, unchanged.
+    Withholding patterns from a company we could not classify would trade a
+    wrong reading for no reading, and no reading is the failure this product
+    was reopened to fix.
+    """
+    library = list(library if library is not None else PATTERN_LIBRARY)
+    # ONE OWNER FOR THE POLICY. This function used to short-circuit UNKNOWN
+    # itself, which made the identical rule inside `applies_to_model`
+    # unreachable from here — two copies of one decision, and a break proof
+    # against the second one passed while the first still ran.
+    #
+    model = str(model_class or "").strip().upper()
+    # BOTH GATES, via the pattern itself. The old line read the denylist only,
+    # so the three classes added one cycle ago — absent from every exclusion
+    # list because they did not exist when those lists were written —
+    # qualified for the WHOLE library while every older class was filtered.
+    # See `ComparablePattern.considered_model_classes`.
+    return [p for p in library if p.applies_to_model(model)]
+
+
 def _p(**kw) -> ComparablePattern:
     p = ComparablePattern(**kw)
     p.validate()
@@ -94,6 +130,21 @@ PATTERN_LIBRARY = [
                                "party build-on ecosystem.",
         source_refs=[{"title": "curated pattern: product→platform",
                       "origin": "strategic_pattern_library"}],
+        excluded_model_classes=("COMMODITY_PRODUCER", "CONTRACTED_OR_RATE_BASE_ASSETS",),
+        considered_model_classes=(
+            "SUBSCRIPTION_SOFTWARE",
+            "DESIGN_AND_MANUFACTURE",
+            "COMMODITY_PRODUCER",
+            "BRANDED_CONSUMER",
+            "CONTRACTED_OR_RATE_BASE_ASSETS",
+            "BALANCE_SHEET_OR_NETWORK",
+            "MANUFACTURE_AND_AFTERMARKET",
+            "PEOPLE_OR_ROUTE_BASED_SERVICES",
+            "REGULATED_PRODUCT_OR_PROVIDER",
+            "ADVERTISING_PLATFORM",
+            "MULTI_ENGINE_PLATFORM",
+            "SCALE_RETAIL",
+        ),
         confidence="high",
         qualifying_signals=("infrastructure_positioning", "checkout_identity_rails",
                             "product_breadth", "platform_control",
@@ -164,6 +215,24 @@ PATTERN_LIBRARY = [
                                "declines enterprise complexity.",
         source_refs=[{"title": "curated pattern: SMB→enterprise",
                       "origin": "strategic_pattern_library"}],
+        excluded_model_classes=("COMMODITY_PRODUCER", "CONTRACTED_OR_RATE_BASE_ASSETS",
+            "REGULATED_PRODUCT_OR_PROVIDER",
+            "SCALE_RETAIL",
+        ),
+        considered_model_classes=(
+            "SUBSCRIPTION_SOFTWARE",
+            "DESIGN_AND_MANUFACTURE",
+            "COMMODITY_PRODUCER",
+            "BRANDED_CONSUMER",
+            "CONTRACTED_OR_RATE_BASE_ASSETS",
+            "BALANCE_SHEET_OR_NETWORK",
+            "MANUFACTURE_AND_AFTERMARKET",
+            "PEOPLE_OR_ROUTE_BASED_SERVICES",
+            "REGULATED_PRODUCT_OR_PROVIDER",
+            "ADVERTISING_PLATFORM",
+            "MULTI_ENGINE_PLATFORM",
+            "SCALE_RETAIL",
+        ),
         confidence="high",
         qualifying_signals=("enterprise_expansion", "product_breadth"),
         disconfirming_signals=("smb_simplicity",),
@@ -195,6 +264,23 @@ PATTERN_LIBRARY = [
                                "surfaces with no agent endpoints.",
         source_refs=[{"title": "curated pattern: human→agent workflow",
                       "origin": "strategic_pattern_library"}],
+        excluded_model_classes=("COMMODITY_PRODUCER", "MANUFACTURE_AND_AFTERMARKET",
+            "DESIGN_AND_MANUFACTURE",
+            "CONTRACTED_OR_RATE_BASE_ASSETS",),
+        considered_model_classes=(
+            "SUBSCRIPTION_SOFTWARE",
+            "DESIGN_AND_MANUFACTURE",
+            "COMMODITY_PRODUCER",
+            "BRANDED_CONSUMER",
+            "CONTRACTED_OR_RATE_BASE_ASSETS",
+            "BALANCE_SHEET_OR_NETWORK",
+            "MANUFACTURE_AND_AFTERMARKET",
+            "PEOPLE_OR_ROUTE_BASED_SERVICES",
+            "REGULATED_PRODUCT_OR_PROVIDER",
+            "ADVERTISING_PLATFORM",
+            "MULTI_ENGINE_PLATFORM",
+            "SCALE_RETAIL",
+        ),
         confidence="moderate",
         qualifying_signals=("agentic_commerce", "distribution_shift",
                             "checkout_identity_rails",
@@ -249,6 +335,21 @@ PATTERN_LIBRARY = [
                                "third-party build-on surface.",
         source_refs=[{"title": "curated pattern: product→ecosystem",
                       "origin": "strategic_pattern_library"}],
+        excluded_model_classes=("COMMODITY_PRODUCER", "CONTRACTED_OR_RATE_BASE_ASSETS",),
+        considered_model_classes=(
+            "SUBSCRIPTION_SOFTWARE",
+            "DESIGN_AND_MANUFACTURE",
+            "COMMODITY_PRODUCER",
+            "BRANDED_CONSUMER",
+            "CONTRACTED_OR_RATE_BASE_ASSETS",
+            "BALANCE_SHEET_OR_NETWORK",
+            "MANUFACTURE_AND_AFTERMARKET",
+            "PEOPLE_OR_ROUTE_BASED_SERVICES",
+            "REGULATED_PRODUCT_OR_PROVIDER",
+            "ADVERTISING_PLATFORM",
+            "MULTI_ENGINE_PLATFORM",
+            "SCALE_RETAIL",
+        ),
         confidence="high",
         qualifying_signals=("product_breadth", "partner_ecosystem_enablement",
                             "platform_control"),
@@ -280,6 +381,22 @@ PATTERN_LIBRARY = [
                                "utility) or purely closed (fully first-party).",
         source_refs=[{"title": "curated pattern: control vs openness",
                       "origin": "strategic_pattern_library"}],
+        excluded_model_classes=("COMMODITY_PRODUCER", "CONTRACTED_OR_RATE_BASE_ASSETS",
+            "REGULATED_PRODUCT_OR_PROVIDER",),
+        considered_model_classes=(
+            "SUBSCRIPTION_SOFTWARE",
+            "DESIGN_AND_MANUFACTURE",
+            "COMMODITY_PRODUCER",
+            "BRANDED_CONSUMER",
+            "CONTRACTED_OR_RATE_BASE_ASSETS",
+            "BALANCE_SHEET_OR_NETWORK",
+            "MANUFACTURE_AND_AFTERMARKET",
+            "PEOPLE_OR_ROUTE_BASED_SERVICES",
+            "REGULATED_PRODUCT_OR_PROVIDER",
+            "ADVERTISING_PLATFORM",
+            "MULTI_ENGINE_PLATFORM",
+            "SCALE_RETAIL",
+        ),
         confidence="moderate",
         qualifying_signals=("partner_ecosystem_enablement", "platform_control",
                             "checkout_identity_rails"),
@@ -310,6 +427,20 @@ PATTERN_LIBRARY = [
                                "defensible differentiator.",
         source_refs=[{"title": "curated pattern: commoditization",
                       "origin": "strategic_pattern_library"}],
+        considered_model_classes=(
+            "SUBSCRIPTION_SOFTWARE",
+            "DESIGN_AND_MANUFACTURE",
+            "COMMODITY_PRODUCER",
+            "BRANDED_CONSUMER",
+            "CONTRACTED_OR_RATE_BASE_ASSETS",
+            "BALANCE_SHEET_OR_NETWORK",
+            "MANUFACTURE_AND_AFTERMARKET",
+            "PEOPLE_OR_ROUTE_BASED_SERVICES",
+            "REGULATED_PRODUCT_OR_PROVIDER",
+            "ADVERTISING_PLATFORM",
+            "MULTI_ENGINE_PLATFORM",
+            "SCALE_RETAIL",
+        ),
         confidence="moderate",
         qualifying_signals=("storefront_creation", "product_breadth"),
         disconfirming_signals=("infrastructure_positioning",),
@@ -352,6 +483,25 @@ PATTERN_LIBRARY = [
                                "engagement model shows no product surface.",
         source_refs=[{"title": "curated pattern: services→product",
                       "origin": "strategic_pattern_library"}],
+        excluded_model_classes=("COMMODITY_PRODUCER", "CONTRACTED_OR_RATE_BASE_ASSETS",
+            "ADVERTISING_PLATFORM",
+            "MULTI_ENGINE_PLATFORM",
+            "SCALE_RETAIL",
+        ),
+        considered_model_classes=(
+            "SUBSCRIPTION_SOFTWARE",
+            "DESIGN_AND_MANUFACTURE",
+            "COMMODITY_PRODUCER",
+            "BRANDED_CONSUMER",
+            "CONTRACTED_OR_RATE_BASE_ASSETS",
+            "BALANCE_SHEET_OR_NETWORK",
+            "MANUFACTURE_AND_AFTERMARKET",
+            "PEOPLE_OR_ROUTE_BASED_SERVICES",
+            "REGULATED_PRODUCT_OR_PROVIDER",
+            "ADVERTISING_PLATFORM",
+            "MULTI_ENGINE_PLATFORM",
+            "SCALE_RETAIL",
+        ),
         confidence="moderate",
         qualifying_signals=("services_motion", "multi_product",
                             "developer_surface", "productization"),
@@ -400,6 +550,20 @@ PATTERN_LIBRARY = [
                                "the second is an aspiration with no evidence.",
         source_refs=[{"title": "curated pattern: segment split",
                       "origin": "strategic_pattern_library"}],
+        considered_model_classes=(
+            "SUBSCRIPTION_SOFTWARE",
+            "DESIGN_AND_MANUFACTURE",
+            "COMMODITY_PRODUCER",
+            "BRANDED_CONSUMER",
+            "CONTRACTED_OR_RATE_BASE_ASSETS",
+            "BALANCE_SHEET_OR_NETWORK",
+            "MANUFACTURE_AND_AFTERMARKET",
+            "PEOPLE_OR_ROUTE_BASED_SERVICES",
+            "REGULATED_PRODUCT_OR_PROVIDER",
+            "ADVERTISING_PLATFORM",
+            "MULTI_ENGINE_PLATFORM",
+            "SCALE_RETAIL",
+        ),
         confidence="moderate",
         qualifying_signals=("segment_split", "regulated_buyer",
                             "pricing_gated", "smb_simplicity"),
@@ -459,6 +623,27 @@ PATTERN_LIBRARY = [
                                "point-tool economics.",
         source_refs=[{"title": "curated pattern: tool→system of record",
                       "origin": "strategic_pattern_library"}],
+        excluded_model_classes=("COMMODITY_PRODUCER", "MANUFACTURE_AND_AFTERMARKET",
+            "DESIGN_AND_MANUFACTURE",
+            "CONTRACTED_OR_RATE_BASE_ASSETS",
+            "ADVERTISING_PLATFORM",
+            "MULTI_ENGINE_PLATFORM",
+            "SCALE_RETAIL",
+        ),
+        considered_model_classes=(
+            "SUBSCRIPTION_SOFTWARE",
+            "DESIGN_AND_MANUFACTURE",
+            "COMMODITY_PRODUCER",
+            "BRANDED_CONSUMER",
+            "CONTRACTED_OR_RATE_BASE_ASSETS",
+            "BALANCE_SHEET_OR_NETWORK",
+            "MANUFACTURE_AND_AFTERMARKET",
+            "PEOPLE_OR_ROUTE_BASED_SERVICES",
+            "REGULATED_PRODUCT_OR_PROVIDER",
+            "ADVERTISING_PLATFORM",
+            "MULTI_ENGINE_PLATFORM",
+            "SCALE_RETAIL",
+        ),
         confidence="moderate",
         qualifying_signals=("consolidation", "multi_product",
                             "developer_surface", "system_of_record_claim",
@@ -513,6 +698,25 @@ PATTERN_LIBRARY = [
                                "diversified with no regulated concentration.",
         source_refs=[{"title": "curated pattern: buyer concentration",
                       "origin": "strategic_pattern_library"}],
+        excluded_model_classes=(
+            "ADVERTISING_PLATFORM",
+            "MULTI_ENGINE_PLATFORM",
+            "SCALE_RETAIL",
+        ),
+        considered_model_classes=(
+            "SUBSCRIPTION_SOFTWARE",
+            "DESIGN_AND_MANUFACTURE",
+            "COMMODITY_PRODUCER",
+            "BRANDED_CONSUMER",
+            "CONTRACTED_OR_RATE_BASE_ASSETS",
+            "BALANCE_SHEET_OR_NETWORK",
+            "MANUFACTURE_AND_AFTERMARKET",
+            "PEOPLE_OR_ROUTE_BASED_SERVICES",
+            "REGULATED_PRODUCT_OR_PROVIDER",
+            "ADVERTISING_PLATFORM",
+            "MULTI_ENGINE_PLATFORM",
+            "SCALE_RETAIL",
+        ),
         confidence="moderate",
         qualifying_signals=("regulated_buyer", "segment_split",
                             "named_customers", "gov_dedicated_delivery",
@@ -558,6 +762,27 @@ PATTERN_LIBRARY = [
                                "spread across many independent buyers.",
         source_refs=[{"title": "curated pattern: capacity ahead of demand",
                       "origin": "strategic_pattern_library"}],
+        excluded_model_classes=("SUBSCRIPTION_SOFTWARE", "BALANCE_SHEET_OR_NETWORK",
+            "REGULATED_PRODUCT_OR_PROVIDER",
+            "PEOPLE_OR_ROUTE_BASED_SERVICES", "BRANDED_CONSUMER",
+            "ADVERTISING_PLATFORM",
+            "MULTI_ENGINE_PLATFORM",
+            "SCALE_RETAIL",
+        ),
+        considered_model_classes=(
+            "SUBSCRIPTION_SOFTWARE",
+            "DESIGN_AND_MANUFACTURE",
+            "COMMODITY_PRODUCER",
+            "BRANDED_CONSUMER",
+            "CONTRACTED_OR_RATE_BASE_ASSETS",
+            "BALANCE_SHEET_OR_NETWORK",
+            "MANUFACTURE_AND_AFTERMARKET",
+            "PEOPLE_OR_ROUTE_BASED_SERVICES",
+            "REGULATED_PRODUCT_OR_PROVIDER",
+            "ADVERTISING_PLATFORM",
+            "MULTI_ENGINE_PLATFORM",
+            "SCALE_RETAIL",
+        ),
         confidence="moderate",
         qualifying_signals=("capacity_investment", "customer_concentration",
                             "segment_reporting"),
@@ -592,6 +817,20 @@ PATTERN_LIBRARY = [
                                "described operational connection.",
         source_refs=[{"title": "curated pattern: portfolio run as one",
                       "origin": "strategic_pattern_library"}],
+        considered_model_classes=(
+            "SUBSCRIPTION_SOFTWARE",
+            "DESIGN_AND_MANUFACTURE",
+            "COMMODITY_PRODUCER",
+            "BRANDED_CONSUMER",
+            "CONTRACTED_OR_RATE_BASE_ASSETS",
+            "BALANCE_SHEET_OR_NETWORK",
+            "MANUFACTURE_AND_AFTERMARKET",
+            "PEOPLE_OR_ROUTE_BASED_SERVICES",
+            "REGULATED_PRODUCT_OR_PROVIDER",
+            "ADVERTISING_PLATFORM",
+            "MULTI_ENGINE_PLATFORM",
+            "SCALE_RETAIL",
+        ),
         confidence="moderate",
         qualifying_signals=("segment_reporting", "content_and_channel",
                             "multi_product", "cross_product_coupling",
@@ -1055,9 +1294,38 @@ HYPOTHESIS_SCAFFOLDS = {
 
 # Live tensions used to build responsible blind-spot hypotheses: a tension is
 # "live" when observations present signals from BOTH sides.
+#: WHICH BUSINESS A TENSION IS A TENSION FOR.
+#:
+#: MEASURED LIVE. NVIDIA's founder analysis carried "Consolidating
+#: checkout/identity/data rails may encroach on layers partners currently
+#: monetize" as its leading company risk, and the same sentence reached
+#: Baseline A's `top_priority`. It is commerce-platform language on a chip
+#: designer, and nothing in this table stopped it: a tension fired whenever
+#: two SIGNAL NAMES were both present in the observations, and signal names
+#: are generic enough that a semiconductor company's partner and platform
+#: language matches a marketplace's.
+#:
+#: All three tensions below describe a multi-sided commerce platform. That is
+#: an honest statement about this library's coverage -- one business-model
+#: class of the ten the validation manifest carries -- and it is written down
+#: rather than hidden by letting the tensions fire everywhere. Widening the
+#: library means writing tensions that are true of the other classes, which is
+#: research, not a filter change.
+#:
+#: `applies_to` is REQUIRED on every tension. A tension with no declared
+#: applicability cannot fire at all -- fail closed, because the failure this
+#: closes is a confident sentence about the wrong kind of company.
+#:
+#: AND EVERY NAME IN IT MUST BE A CLASS THAT EXISTS. The first version of this
+#: table declared `MARKETPLACE_OR_PLATFORM`, which is not one of the ten
+#: classes `company_profile` carries -- so the tension it gated could never
+#: fire for any real company, which is a silent deletion wearing the shape of
+#: a filter. `test_every_applicable_class_is_a_real_business_model` pins it.
+
 TENSIONS = [
     {
         "tension_id": "enterprise_vs_smb_simplicity",
+        "applies_to": ("SUBSCRIPTION_SOFTWARE",),
         "left": ("enterprise_expansion", "product_breadth"),
         "right": ("smb_simplicity",),
         "observed_tension": "An enterprise/platform push is growing at the "
@@ -1078,6 +1346,7 @@ TENSIONS = [
     },
     {
         "tension_id": "breadth_vs_clear_value_prop",
+        "applies_to": ("SUBSCRIPTION_SOFTWARE",),
         "left": ("product_breadth",),
         "right": ("merchant_outcome_positioning", "storefront_creation"),
         "observed_tension": "Expanding product breadth strengthens lock-in but "
@@ -1098,6 +1367,7 @@ TENSIONS = [
     },
     {
         "tension_id": "control_vs_partner_openness",
+        "applies_to": ("SUBSCRIPTION_SOFTWARE",),
         "left": ("platform_control", "checkout_identity_rails"),
         "right": ("partner_ecosystem_enablement",),
         "observed_tension": "Consolidating checkout/identity/data rails may "
@@ -1115,3 +1385,43 @@ TENSIONS = [
                              "keep the ecosystem growing.",
     },
 ]
+
+
+# --- §5/§6 the blind-spot contract ------------------------------------------
+#: Why a blind spot exists, or why one does not. Five states, because five
+#: different things get confused with each other when a section is allowed to
+#: be merely empty or merely full.
+KNOWN_MISSING_EVIDENCE = "KNOWN_MISSING_EVIDENCE"
+INFERRED_INFORMATION_GAP = "INFERRED_INFORMATION_GAP"
+SOURCE_COVERAGE_GAP = "SOURCE_COVERAGE_GAP"
+MODEL_COVERAGE_GAP = "MODEL_COVERAGE_GAP"
+NOT_APPLICABLE = "NOT_APPLICABLE"
+BLIND_SPOT_KINDS = (KNOWN_MISSING_EVIDENCE, INFERRED_INFORMATION_GAP,
+                    SOURCE_COVERAGE_GAP, MODEL_COVERAGE_GAP, NOT_APPLICABLE)
+
+
+def tension_applies(tension: dict, business_model: str) -> tuple:
+    """(may it fire, why not). Fail closed on an undeclared applicability.
+
+    Returns one of `BLIND_SPOT_KINDS` as the reason, so a caller can report
+    the ABSENCE with its cause rather than as an empty section: a tension the
+    business model rules out and a business model we could not read are
+    different facts about the run, and only the second is a coverage gap in
+    this engine.
+    """
+    applies = tuple(tension.get("applies_to") or ())
+    if not applies:
+        return False, MODEL_COVERAGE_GAP
+    if not str(business_model or "").strip():
+        return False, MODEL_COVERAGE_GAP
+    if business_model not in applies:
+        return False, NOT_APPLICABLE
+    return True, INFERRED_INFORMATION_GAP
+
+
+def tension_model_coverage() -> dict:
+    """Which business models this library can produce a tension for at all."""
+    covered = sorted({m for t in TENSIONS for m in (t.get("applies_to") or ())})
+    return {"tensions": len(TENSIONS), "models_covered": covered,
+            "undeclared": [t["tension_id"] for t in TENSIONS
+                           if not t.get("applies_to")]}

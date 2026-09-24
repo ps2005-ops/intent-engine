@@ -1,0 +1,45 @@
+{
+ "results": [
+  {
+   "signal": "event_drift.v1",
+   "n": 290,
+   "accuracy": 0.4759,
+   "verdict": "indistinguishable from 0.500"
+  },
+  {
+   "signal": "report_drift.v1",
+   "n": 64,
+   "accuracy": 0.3594,
+   "verdict": "DISTINGUISHABLE from 0.500"
+  }
+ ],
+ "by_form": {
+  "8-K": [
+   184,
+   93
+  ],
+  "10-Q": [
+   40,
+   13
+  ],
+  "10-K": [
+   18,
+   7
+  ],
+  "6-K": [
+   106,
+   45
+  ],
+  "20-F": [
+   6,
+   3
+  ]
+ },
+ "skipped": {
+  "before_price_history": 2408,
+  "horizon_not_elapsed": 20,
+  "no_price": 2,
+  "no_reaction": 1,
+  "no_cik": 1
+ }
+}

@@ -1,0 +1,295 @@
+{
+  "company": "Exxon Mobil Corporation",
+  "cik": "34088",
+  "ticker": "XOM",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GE7ZZEEBD3H5TPT0JK7897/intro",
+      "chars": 5339,
+      "title": "Exxon Mobil Corporation \u2014 introduction",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 0,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GE7ZZEEBD3H5TPT0JK7897/intro",
+      "chars": 5339,
+      "title": "Exxon Mobil Corporation \u2014 introduction",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 0,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GE7ZZEEBD3H5TPT0JK7897/slides",
+      "chars": 6017,
+      "title": "Exxon Mobil Corporation \u2014 presentation",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 0,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GE7ZZEEBD3H5TPT0JK7897/full",
+      "chars": 20254,
+      "title": "Strategic Intelligence \u2014 Exxon Mobil Corporation",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [
+          "no competitor"
+        ],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 2,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GE7ZZEEBD3H5TPT0JK7897/story",
+      "chars": 4108,
+      "title": "Exxon Mobil Corporation \u2014 the full story",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": []
+      },
+      "charts": 0,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GE7ZZEEBD3H5TPT0JK7897/history",
+      "chars": 27226,
+      "title": "Exxon Mobil Corporation \u2014 history rewind",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 24,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GE7ZZEEBD3H5TPT0JK7897/connect",
+      "chars": 3774,
+      "title": "Exxon Mobil Corporation \u2014 connect your company",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 0,
+      "nav_next": false,
+      "nav_back": false
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GE7ZZEEBD3H5TPT0JK7897/intro",
+      "chars": 5339,
+      "title": "Exxon Mobil Corporation \u2014 introduction",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 0,
+      "nav_next": true,
+      "nav_back": false
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GE7ZZEEBD3H5TPT0JK7897/report",
+      "chars": 307,
+      "title": "Executive report preview",
+      "names_company": false,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": []
+      },
+      "charts": 0,
+      "nav_next": false,
+      "nav_back": true
+    },
+    "answer": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GE7ZZEEBD3H5TPT0JK7897/answer",
+      "chars": 6536,
+      "title": "Exxon Mobil Corporation \u2014 the decision",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": []
+      },
+      "charts": 0,
+      "nav_next": false,
+      "nav_back": false
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GE7ZZEEBD3H5TPT0JK7897/evidence",
+      "chars": 5491,
+      "title": "Exxon Mobil Corporation",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": []
+      },
+      "charts": 0,
+      "nav_next": false,
+      "nav_back": false
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GE7ZZEEBD3H5TPT0JK7897/brief",
+      "chars": 15965,
+      "title": "Exxon Mobil Corporation \u2014 executive brief",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [
+          "no competitor"
+        ],
+        "bounded": [
+          "bounded"
+        ]
+      },
+      "charts": 2,
+      "nav_next": false,
+      "nav_back": false
+    },
+    "dashboard": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GE7ZZEEBD3H5TPT0JK7897/dashboard",
+      "chars": 9023,
+      "title": "Exxon Mobil Corporation \u2014 intelligence",
+      "names_company": true,
+      "language": {
+        "failure": [],
+        "absence": [],
+        "bounded": []
+      },
+      "charts": 2,
+      "nav_next": false,
+      "nav_back": false
+    }
+  },
+  "progress": [
+    {
+      "poll": 0,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Loading what we already know. Analysing Exxon Mobil Corporation \u2014 not this company? Identifying the company done Loading prior intelligence working Reading current company evidence to come Connecting macro and industry conditions to come Mapping competitors to come Stress-testing the stra"
+    },
+    {
+      "poll": 1,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Loading what we already know. Analysing Exxon Mobil Corporation \u2014 not this company? Identifying the company done Loading prior intelligence working Reading current company evidence to come Connecting macro and industry conditions to come Mapping competitors to come Stress-testing the stra"
+    },
+    {
+      "poll": 2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Loading what we already know. Analysing Exxon Mobil Corporation \u2014 not this company? Identifying the company done Loading prior intelligence working Reading current company evidence to come Connecting macro and industry conditions to come Mapping competitors to come Stress-testing the stra"
+    },
+    {
+      "poll": 3,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Loading what we already know. Analysing Exxon Mobil Corporation \u2014 not this company? Identifying the company done Loading prior intelligence working Reading current company evidence done Connecting macro and industry conditions done Mapping competitors to come Stress-testing the strategic "
+    },
+    {
+      "poll": 12,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Loading what we already know. Analysing Exxon Mobil Corporation \u2014 not this company? Identifying the company done Loading prior intelligence working Reading current company evidence done Connecting macro and industry conditions done Mapping competitors to come Stress-testing the strategic "
+    },
+    {
+      "poll": 24,
+      "text": "Exxon Mobil Corporation \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Exxon Mobil Corporation XOM \u00b7 USA \u00b7 SEC CIK 34088 Exxon Mobil Corporation is a materials energy business that runs on production of an undifferentiated output sold at a price the producer does not set. Its position is contested less by a named firm than by the alternatives its customers already"
+    }
+  ],
+  "run_id": "01M0GE7ZZEEBD3H5TPT0JK7897",
+  "seconds": 177,
+  "auto_advanced": true,
+  "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GE7ZZEEBD3H5TPT0JK7897/intro",
+  "qa": {
+    "What should management do?": {
+      "status": 200,
+      "text": "What should management do? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What should management do? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "Why now?": {
+      "status": 200,
+      "text": "Why now? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation Why now? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What's the biggest risk?": {
+      "status": 200,
+      "text": "What's the biggest risk? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What's the biggest risk? Utilisation, order books and take-or-pay terms are not public. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What would prove this wrong?": {
+      "status": 200,
+      "text": "What would prove this wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What would prove this wrong? The strongest case against it: Net profits income for 2023 was $12,300,176 as compared with $12,493,727 for 2022. The 2 percent decrease in net profits income from 2022 to 2023 was primarily the result of lower gas prices ($2.6 million), decreased oil production ($2.4 million), increased production expenses ($1.4 million), and increased taxes, transportation and other costs ($0.3 million), partially offset by net excess costs a. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "Who's the real competitor?": {
+      "status": 200,
+      "text": "Who's the real competitor? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation Who's the real competitor? Agnico Eagle Mines Limited: operates the same business model (commodity producer) in the same sector (materials energy), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR; Barrick Mining Corporation: operates the same business model (commodity producer) in the same sector (materials energy), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR; CEMEX, S.A.B. de C.V.: operates the same business model (commodity producer) in the same sector (materials energy), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What does the market believe?": {
+      "status": 200,
+      "text": "What does the market believe? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What does the market believe? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What's the weakest assumption?": {
+      "status": 200,
+      "text": "What's the weakest assumption? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What's the weakest assumption? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence). Evidence Strongest. 2026-08-20: Exxon Mobil Corporation sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. Weakest. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What impossible hypothesis should we test?": {
+      "status": 200,
+      "text": "What impossible hypothesis should we test? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What impossible hypothesis should we test? The decision this most affects: Whether a supply commitment should be treated as fixed or renegotiable. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What should we measure next?": {
+      "status": 200,
+      "text": "What should we measure next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What should we measure next? The decision this most affects: Whether a supply commitment should be treated as fixed or renegotiable. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    },
+    "What would you tell the board?": {
+      "status": 200,
+      "text": "What would you tell the board? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What would you tell the board? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+    }
+  },
+  "transport_errors": []
+}

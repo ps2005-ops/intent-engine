@@ -204,3 +204,92 @@ def may_promise_persistence(probe: dict) -> bool:
     had checked.
     """
     return probe.get("durability") == DURABLE_PROVEN
+
+
+# --- process identity -------------------------------------------------------
+#
+# WHY THIS IS NOT `boot_count`.
+#
+# `boot_count` reads a ledger INSIDE the runtime root. On an ephemeral
+# filesystem the ledger dies with the process that wrote it, so the count is
+# 1 on every boot and can never rise. It is a durability proof, and it is the
+# WRONG instrument for the question "did this service restart while I was
+# using it?" -- the very case it cannot report is the case that matters.
+#
+# A restart is observable from OUTSIDE with no storage at all: this process's
+# BOOT_ID is generated at import and never changes, and its start time is
+# monotonic within the process. A client that sees the pair change between two
+# requests has watched a restart, with no guessing about mounts.
+#
+# Measured need: two live canary runs disappeared between the customer steps
+# and the Q&A step, and the session that lost them had no way to tell a
+# restart from an application bug. This is that way.
+#: Set AT IMPORT, beside BOOT_ID, for the same reason BOOT_ID is. Deferring
+#: it to the first call made `started_at` mean "when something first asked",
+#: so a service nobody polled for an hour reported an uptime of zero and a
+#: reader comparing two samples could not tell a young process from a quiet
+#: one. The boot id alone answers "did it restart"; this answers "how long has
+#: it been up", and it may not silently answer a different question.
+_PROCESS_STARTED = _time_at_import = __import__("time").time()
+
+
+def process_identity(now=None) -> dict:
+    """Who this process is and how long it has been running.
+
+    Cheap, allocation-free in the steady state and safe on any host: nothing
+    here touches the filesystem, so it reports honestly even when the runtime
+    root is unwritable.
+    """
+    import time as _time
+    global _PROCESS_STARTED
+    if _PROCESS_STARTED is None:          # only if a test cleared it
+        _PROCESS_STARTED = _time.time()
+    moment = _time.time() if now is None else now
+    return {"boot_id": BOOT_ID,
+            "started_at": _PROCESS_STARTED,
+            "uptime_seconds": round(max(0.0, moment - _PROCESS_STARTED), 1)}
+
+
+def persistent_mount_candidates(paths=None) -> list:
+    """Whether a persistent disk exists on this host, MEASURED not assumed.
+
+    `/readyz` reports `durability: EPHEMERAL_LIKELY` and names the fix -- mount
+    the disk and point RUNTIME_ROOT at it -- but from inside the application
+    there was no way to tell "no disk is attached" from "a disk is attached
+    and RUNTIME_ROOT was never set to it". Those have very different fixes and
+    only one of them is a one-line dashboard change.
+
+    This only LOOKS. It never changes the runtime root: a directory that
+    happens to exist is not evidence that this service's data belongs in it,
+    and silently relocating a store is how one deployment starts serving
+    another's state.
+    """
+    candidates = paths or ("/var/data", "/data", "/mnt/data",
+                           "/opt/render/project/data")
+    try:
+        root_dev = os.stat("/").st_dev
+    except OSError:
+        root_dev = None
+    out = []
+    for raw in candidates:
+        path = Path(raw)
+        entry = {"path": str(path), "exists": False, "writable": False,
+                 "separate_filesystem": False}
+        try:
+            if path.is_dir():
+                entry["exists"] = True
+                entry["separate_filesystem"] = (
+                    root_dev is not None and path.stat().st_dev != root_dev)
+                probe = path / f".probe-{BOOT_ID}"
+                try:
+                    probe.write_text("probe", "utf-8")
+                    entry["writable"] = probe.read_text("utf-8") == "probe"
+                finally:
+                    try:
+                        probe.unlink()
+                    except OSError:
+                        pass
+        except OSError:
+            pass
+        out.append(entry)
+    return out
