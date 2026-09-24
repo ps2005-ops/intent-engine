@@ -173,7 +173,7 @@ def main() -> int:
     #: .json); `asi25_owner.json` is a heartbeat; `asi25_state.json` is the
     #: thing everything else is compared against.
     NOT_OUTPUTS = {"asi25_state.json", "asi25_findings.json",
-                   "asi25_owner.json"}
+                   "asi25_owner.json", "asi25_ui_control.json"}
     behind = [q.name for q in sorted(ROOT.glob("reports/asi25_*.json"))
               if q.name not in NOT_OUTPUTS
               and q.stat().st_mtime < state_mtime]
