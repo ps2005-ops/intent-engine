@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| companies qualified | 25/25 |
+| companies measured | 25/25 |
 | result = PASS | 24/25 |
 | primary Q&A, status | 150/150 |
 | primary Q&A, **semantic** | 150/150 |

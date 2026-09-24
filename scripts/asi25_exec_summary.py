@@ -27,7 +27,7 @@ md = f"""# Adaptive Strategic Intelligence V2 — final executive summary
 
 | | |
 |---|---|
-| companies qualified | {N}/{N} |
+| companies measured | {N}/{N} |
 | result = PASS | {D["results"].get("PASS", 0)}/{N} |
 | primary Q&A, status | {D["qa"]["primary_status"]}/{D["qa"]["primary_total"]} |
 | primary Q&A, **semantic** | {D["qa"]["primary_semantic"]}/{D["qa"]["primary_total"]} |
