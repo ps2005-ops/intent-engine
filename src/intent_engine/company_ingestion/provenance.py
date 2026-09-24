@@ -39,7 +39,8 @@ import hashlib
 from typing import Any, Dict, List, Sequence
 
 from intent_engine.adaptive.spans import (
-    elide, end_on_an_idea, trim_to_word,
+    drop_rendering_artefacts, elide, end_on_an_idea,
+    trim_to_word,
 )
 from intent_engine.company_ingestion import independence as IND
 from intent_engine.company_ingestion import relevance as _REL
@@ -119,6 +120,12 @@ def _passage(document: dict) -> str:
     """
     for key in ("meta_description", "text_content"):
         text = " ".join(str(document.get(key) or "").split())
+        # WHAT A BROWSER PRODUCED IS NOT WHAT A PUBLISHER SAID. Coveo's
+        # citation at d1c9beae was, in its entirety, "Loading. x Sorry to
+        # interrupt. CSS Error. Refresh." -- a Salesforce Community shell
+        # scraped before client-side rendering replaced it -- printed under
+        # the heading "Discusses the company directly".
+        text = drop_rendering_artefacts(text)
         if len(text) >= 40:
             if len(text) > MAX_PASSAGE:
                 return trim_to_word(text, MAX_PASSAGE)

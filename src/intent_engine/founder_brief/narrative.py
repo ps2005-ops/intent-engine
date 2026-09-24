@@ -49,7 +49,10 @@ from dataclasses import dataclass, field
 from html import escape as _e
 from typing import List, Optional, Sequence
 
-from intent_engine.adaptive.spans import elide as _elide
+from intent_engine.adaptive.spans import (
+    drop_rendering_artefacts as _drop_artefacts,
+    elide as _elide,
+)
 from intent_engine.strategic_intelligence.decision import (
     DECISION_READY, INVESTIGATION_REQUIRED, WITHHELD, as_clause,
     decision_from_dict, decision_of, end_sentence, lower_first,
@@ -354,7 +357,13 @@ def _excerpt(obs: dict) -> str:
     text = ""
     for candidate in (obs.get("excerpt"), obs.get("strategic_signal"),
                       obs.get("text")):
-        flat = _flat(candidate)
+        # BROWSER FURNITURE IS FURNITURE TOO. `is_filing_furniture` knows a
+        # filing's cover page; it does not know a client-side rendering
+        # shell. Chainguard's citation at d1c9beae read "...The world's
+        # leading companies trust Chainguard. null." -- three true sentences
+        # and one that was the string `null`, so the rule drops the sentence
+        # rather than the passage.
+        flat = _drop_artefacts(_flat(candidate))
         if flat and not is_filing_furniture(flat):
             text = flat
             break

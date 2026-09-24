@@ -131,30 +131,56 @@ def main() -> int:
     # Collect anything written under a next40 name back to its asi25 name,
     # so the artifacts a reader is given are named for the cohort they
     # describe rather than for the harness they borrowed.
-    # ALWAYS OVERWRITE. `if not target.exists()` is how the central
-    # measurement of this programme came to be wrong: a SEVENTEEN-company
-    # `asi25_differentiation.json` written mid-run at 03:17 survived every
-    # later pass, because the freshly computed 25-company result was only
-    # copied when no file was in the way. Every differentiation headline in
-    # the V2 close described 17 companies and was reported as 25. A
-    # collector that declines to collect is worse than no collector: it
-    # leaves something that LOOKS current.
+    # COLLECT BY THE DECLARED MAPPING, NEVER BY NAME SUBSTITUTION.
+    #
+    # Two defects, one after the other, both of which shipped a wrong
+    # number rather than an error:
+    #
+    #   1. `if not target.exists()` meant a freshly computed artifact was
+    #      copied only when nothing was already in the way. A SEVENTEEN
+    #      company `asi25_differentiation.json` written mid-run therefore
+    #      survived every later pass, and the V2 close reported its figures
+    #      as describing twenty-five.
+    #   2. Overwriting unconditionally, but choosing the target by replacing
+    #      "next40_" with "asi25_", is worse. `next40_differentiation`
+    #      writes the TEMPLATE measurement and STEPS sends it to
+    #      `asi25_template.json`; the substitution sent it to
+    #      `asi25_differentiation.json` and destroyed the real one. It also
+    #      copied `next40_ui_widths.json` and `next40_findings.json`, which
+    #      nothing in STEPS produces -- they are INPUTS.
+    #
+    # So the mapping is the STEPS table itself, and a source older than the
+    # state file is refused rather than collected.
     import shutil
-    state_mtime = (ROOT / "reports/asi25_state.json").stat().st_mtime \
-        if (ROOT / "reports/asi25_state.json").exists() else 0
-    for n40 in sorted(ROOT.glob("reports/next40_*.json")):
-        if n40.is_symlink():
+    state_file = ROOT / "reports/asi25_state.json"
+    state_mtime = state_file.stat().st_mtime if state_file.exists() else 0
+    for module, out, _extra in STEPS:
+        src = ROOT / "reports" / f"{module}.json"
+        dst = ROOT / "reports" / out
+        if not src.exists() or src.resolve() == dst.resolve():
             continue
-        target = ROOT / "reports" / n40.name.replace("next40_", "asi25_")
-        shutil.copy2(n40, target)
-        print(f"collected {n40.name} -> {target.name}", flush=True)
-    # AND SAY SO WHEN ONE IS STILL BEHIND THE STATE IT DESCRIBES.
-    behind = [p.name for p in sorted(ROOT.glob("reports/asi25_*.json"))
-              if p.name != "asi25_state.json"
-              and p.stat().st_mtime < state_mtime]
+        if src.stat().st_mtime < state_mtime:
+            print(f"REFUSED {src.name}: older than the state file",
+                  file=sys.stderr)
+            failures.append((f"collect:{module}", "source predates the state"))
+            continue
+        shutil.copy2(src, dst)
+        print(f"collected {src.name} -> {dst.name}", flush=True)
+    # AND SAY SO WHEN AN ARTIFACT IS STILL BEHIND THE STATE IT DESCRIBES.
+    #: Not outputs of this pipeline, so their age says nothing about it.
+    #: `asi25_findings.json` is the discovery ledger the convergence step
+    #: READS (the V2 close ledger is docs/qualification/25_company_findings
+    #: .json); `asi25_owner.json` is a heartbeat; `asi25_state.json` is the
+    #: thing everything else is compared against.
+    NOT_OUTPUTS = {"asi25_state.json", "asi25_findings.json",
+                   "asi25_owner.json"}
+    behind = [q.name for q in sorted(ROOT.glob("reports/asi25_*.json"))
+              if q.name not in NOT_OUTPUTS
+              and q.stat().st_mtime < state_mtime]
     if behind:
-        print("STALE — these describe an earlier state than reports/"
-              "asi25_state.json: " + ", ".join(behind), file=sys.stderr)
+        print("STALE — these describe an earlier state than "
+              "reports/asi25_state.json: " + ", ".join(behind),
+              file=sys.stderr)
         failures.append(("artifact_freshness", ", ".join(behind)))
     for name, why in failures:
         print(f"FAILED {name}: {why}", file=sys.stderr)

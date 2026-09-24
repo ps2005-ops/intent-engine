@@ -22,6 +22,8 @@ how two subsystems come to disagree about what a page says.
 """
 from __future__ import annotations
 
+import re
+
 from typing import Optional
 
 #: how much text either side of the match is considered for a sentence
@@ -192,6 +194,64 @@ def end_on_an_idea(text: str) -> str:
     can tell an elision it must mark from one it must not.
     """
     return _drop_dangling(str(text or ""))
+
+
+#: Text a BROWSER produces, not a publisher. A scraped page can hand us the
+#: shell that was meant to be replaced by client-side rendering, and that
+#: text is not the company speaking.
+#:
+#: MEASURED LIVE at d1c9beae on two of twenty-five companies:
+#:
+#:   Coveo       the whole citation was "Loading. x Sorry to interrupt.
+#:               CSS Error. Refresh." -- a Salesforce Community shell,
+#:               printed under the heading "Discusses the company directly".
+#:   Chainguard  "...The world's leading companies trust Chainguard. null."
+#:               -- one sentence of a real passage was the string `null`.
+#:
+#: Those are the two shapes, so the rule works per SENTENCE rather than per
+#: passage: refusing Chainguard's whole citation would throw away three true
+#: sentences to remove one artefact, and refusing only whole passages would
+#: have left it in.
+_ARTEFACT = re.compile(
+    r"^(?:null|undefined|nan|nil|none|\[object \w+\]|loading|please wait|"
+    r"sorry to interrupt|css error|refresh|enable javascript|"
+    r"javascript is (?:disabled|not enabled|required))"
+    r"[\s.,;:!?\u00d7x*-]*$", re.I)
+
+
+def _is_artefact(sentence: str) -> bool:
+    """Is this sentence nothing but browser furniture?"""
+    body = " ".join(str(sentence or "").split())
+    return bool(body) and bool(_ARTEFACT.match(body))
+
+
+def drop_rendering_artefacts(text: str) -> str:
+    """`text` with any sentence that is only browser furniture removed.
+
+    Returns "" when nothing real survives, and the CALLER RENDERS NOTHING --
+    the source's card, link and attribution still appear, because a source
+    removed is a source the reader cannot check, but a quotation that says
+    "CSS Error. Refresh." is worse than no quotation.
+    """
+    body = " ".join(str(text or "").split())
+    if not body:
+        return ""
+    parts = re.split(r"(?<=[.!?])\s+", body)
+    kept = [p for p in parts if not _is_artefact(p)]
+    # NOTHING REMOVED, NOTHING TO JUDGE. A first version applied the
+    # fragment floor below unconditionally and returned "" for
+    # "exposes a surface others can build on" (37 characters, no artefact in
+    # it) on four companies, and for Cribl's "Flexibl pricing to meet your
+    # needs." A rule that only cleans is allowed to shorten; it is not
+    # allowed to delete text it had no objection to.
+    if len(kept) == len(parts):
+        return body
+    if not kept:
+        return ""
+    out = " ".join(kept).strip()
+    # What is LEFT of a passage after an artefact was cut out has to still
+    # be worth printing; a two-word remainder is not a citation.
+    return out if len(out) >= 40 else ""
 
 
 def elide(text: str) -> str:

@@ -972,11 +972,74 @@ def bp22():
     return run(p, mutate=mutate, check=check, control=control)
 
 
+def bp23():
+    p = _p(name="23_a_browser_shell_is_quoted_as_evidence",
+           description='the evidence card prints "Loading. Sorry to '
+                       'interrupt. CSS Error. Refresh." as what this company '
+                       'says',
+           target_kind=BP.PRODUCER,
+           mutated_file="src/intent_engine/company_ingestion/provenance.py",
+           mutated_symbol="_passage",
+           guard_under_test="test_the_live_coveo_citation_is_refused_entirely",
+           production_call_path="tests/test_a_citation_is_not_browser_"
+                                "furniture.py")
+    # Coveo's whole citation at d1c9beae, byte for byte.
+    shell = "Loading. \u00d7Sorry to interrupt. CSS Error. Refresh."
+
+    def control():
+        P = importlib.import_module("intent_engine.company_ingestion.provenance")
+        if P._passage({"meta_description": shell}):
+            raise AssertionError("clean code already prints the browser shell")
+
+    def mutate(t):
+        return t.mutate(
+            "src/intent_engine/company_ingestion/provenance.py",
+            "        text = drop_rendering_artefacts(text)",
+            "        text = text")
+
+    def check(t):
+        P = t.load("intent_engine.company_ingestion.provenance")
+        out = P._passage({"meta_description": shell})
+        assert not out, f"a browser shell was quoted as evidence: {out!r}"
+    return run(p, mutate=mutate, check=check, control=control)
+
+
+def bp24():
+    p = _p(name="24_the_artefact_floor_deletes_a_real_passage",
+           description="the fragment floor fires on a short passage that "
+                       "carried no artefact at all",
+           target_kind=BP.PRODUCER,
+           mutated_file="src/intent_engine/adaptive/spans.py",
+           mutated_symbol="drop_rendering_artefacts",
+           guard_under_test="test_a_short_real_passage_is_not_deleted",
+           production_call_path="tests/test_a_citation_is_not_browser_"
+                                "furniture.py")
+    # 37 characters, no artefact. Measured on four companies at d1c9beae.
+    real = "exposes a surface others can build on"
+
+    def control():
+        SP = importlib.import_module("intent_engine.adaptive.spans")
+        if SP.drop_rendering_artefacts(real) != real:
+            raise AssertionError("clean code already deletes a real passage")
+
+    def mutate(t):
+        return t.mutate("src/intent_engine/adaptive/spans.py",
+                        "    if len(kept) == len(parts):\n        return body",
+                        "    if False:\n        return body")
+
+    def check(t):
+        SP = t.load("intent_engine.adaptive.spans")
+        out = SP.drop_rendering_artefacts(real)
+        assert out == real, (
+            f"a passage the rule had no objection to was deleted: {out!r}")
+    return run(p, mutate=mutate, check=check, control=control)
+
+
 def main() -> int:
     proofs = [bp01(), bp02(), bp03(), bp04(), bp05(), bp06(),
               bp07(), bp08(), bp09(), bp10(), bp11(), bp12(),
               bp13(), bp14(), bp15(), bp16(), bp17(), bp18(),
-              bp19(), bp20(), bp21(), bp22()]
+              bp19(), bp20(), bp21(), bp22(), bp23(), bp24()]
     rows = []
     for p in proofs:
         rows.append({"name": p.name, "verdict": p.verdict,

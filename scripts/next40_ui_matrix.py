@@ -51,8 +51,17 @@ _LITERAL_NONE = re.compile(
     r"(?<![A-Za-z])(?:null|nan|undefined)(?![A-Za-z])"
     r"|(?:[:=]\s*|[\[\(]\s*|\|\s*)None(?![A-Za-z])"
     r"|(?<![A-Za-z])None\s*(?:[\]\),]|$)")
-_SPINNER = re.compile(r"(still working|analysing|analyzing|please wait|"
-                      r"loading)", re.I)
+#: A PAGE THAT IS STILL SPINNING. WORD BOUNDARIES ARE NOT OPTIONAL.
+#:
+#: MEASURED on Island's result page at d1c9beae: this pattern reported a
+#: stale spinner because "loading" appears inside "entering or UPLOADING
+#: sensitive data". That is the same defect the product itself was repaired
+#: for at bbb75261, where `_FIRST_PERSON` matched inside "however" -- a
+#: substring wall reported against real prose. A detector that invents a
+#: finding costs more than one that misses it, because the invented one gets
+#: reported.
+_SPINNER = re.compile(r"\b(still working|analysing|analyzing|please wait|"
+                      r"loading)\b", re.I)
 #: A SERIALISED PYTHON OBJECT ON A CUSTOMER SURFACE.
 #:
 #: The scan reported "raw enums 0, internal engineering language 0" on cohort

@@ -166,3 +166,84 @@ could not fail, and a mutation that appended a newline to a frozenset literal
 and emptied nothing. Each is recorded here rather than quietly fixed, because
 a break-proof harness whose failures are always the product's is not measuring
 itself.
+
+---
+
+## 6. ADDENDUM — THE CLOSE (`d1c9beae`)
+
+Three further rules, all added because a captured page was read rather than
+because a test failed. Each one is a case of **one rule with more than one
+producer**, which is now the recurring shape of this codebase's defects.
+
+### 6.1 `adaptive/spans.end_on_an_idea` / `elide` — one joining-word rule
+
+`trim_to_word` had refused a quotation ending on a conjunction since
+`bbb75261`. Netskope's evidence page still carried
+
+> "…My job combines the usual CISO responsibilities alongside daily self and"
+
+because **three other places** shorten a reader-facing quotation and each had
+its own arithmetic: `company_ingestion.provenance._passage`,
+`founder_brief.narrative._excerpt` and `strategic_intelligence.brief`. All
+three now call the shared rule.
+
+The second half is the part worth keeping. That passage was **148 characters
+against a 320-character budget** — nothing in this product truncated it. The
+publisher's own meta description ended on the conjunction. A rule that only
+policed *our* cuts would have printed it again, so the rule is about the text
+the reader is shown, not about the provenance of the cut.
+
+`elide` marks unconditionally; `end_on_an_idea` does not. The caller knows
+whether it cut, and a version that marked only when the rule removed a word
+returned `fit_to_words("word " * 100, 10)` as ten clean words with nothing to
+say they opened a hundred.
+
+### 6.2 `decision_object._head_noun` — the cut the comment already promised
+
+The BUYER branch said in a comment that it found the head "by cutting the
+trailing prepositional phrase", and then tested `words[-1]`. English noun
+phrases are head-final **up to the first post-head preposition**, so:
+
+| phrase | `words[-1]` | real head | verdict |
+|---|---|---|---|
+| `vital role in our customers' operations` | `operations` (plural) | `role` | refused |
+| `mid-market enterprises across north america` | `america` | `enterprises` | accepted |
+
+A second rule was needed for ServiceTitan's `experience their own rapid
+technological changes`, which ends in a plural noun and carries no verb
+inflection. A **possessive determiner** means the phrase points back at a
+subject named elsewhere. That is a genuinely closed class in English — unlike
+the verb list this module had to abandon at `1b5689f6`.
+
+### 6.3 `analysis_selection._countable` — number agreement after "more"
+
+The tails are documented as "phrased to avoid subject-verb agreement", and
+they are. Number agreement is a second problem they never covered: `"more
+{driver}"` needs a plural or a mass noun, and a billing unit is usually a
+singular count noun. NinjaOne's X-Ray read *"without losing more device than
+the price gains?"*.
+
+The class constant the slot replaces is already `customer count`, so a
+singular unit takes **that same shape** rather than a guessed plural —
+`"capacity"` has no plural, and the rule has to be idempotent because a first
+version produced `"customer count count"`.
+
+### 6.4 What this cost, deliberately
+
+Repairing 6.2 **reduces** measured differentiation. Procore and ServiceTitan
+fall back to the class constant, and their grounding verdict falls from
+`GROUNDED` to `NAME_ONLY` — verified live, where Procore's page now states
+"Nothing in this reading comes from what this company published."
+
+Two of the five "distinct" decision questions in this cohort were garbage. A
+distinct-question count that counts them is measuring noise, and §11 says
+downgrade, not manufacture.
+
+### 6.5 The measurement defect behind the previous close
+
+`scripts/asi25_analysis.py` copied each freshly computed artifact onto its
+cohort name only `if not target.exists()`. A **seventeen-company**
+`asi25_differentiation.json`, written mid-run, therefore survived every later
+pass — and every differentiation headline in the previous V2 close described
+17 companies while being reported as 25. The collector now always overwrites
+and reports any artifact still behind the state it claims to describe.
