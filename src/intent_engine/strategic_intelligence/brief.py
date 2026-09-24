@@ -27,6 +27,7 @@ what trimming is for.
 """
 from __future__ import annotations
 
+from intent_engine.adaptive.spans import elide as _elide
 import re
 from dataclasses import dataclass, field
 
@@ -71,7 +72,9 @@ def fit_to_words(text: str, max_words: int) -> str:
         return " ".join(kept).strip()
     # A single sentence longer than the whole budget: cut at a word boundary
     # and mark the cut, rather than silently presenting a fragment as complete.
-    return " ".join(text.split()[:max_words]).rstrip(",;:") + "…"
+    # and on an idea: the same joining-word rule every other producer of a
+    # shortened quotation applies, rather than a fourth restatement of it.
+    return _elide(" ".join(text.split()[:max_words]).rstrip(",;:"))
 
 
 MAX_HEADLINE_WORDS = 60

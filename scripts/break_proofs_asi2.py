@@ -814,10 +814,169 @@ def bp18():
     return run(p, mutate=mutate, check=check, control=control)
 
 
+#: The live Netskope evidence quote at 591041b0, byte for byte. It is 148
+#: characters against a 320-character budget, so NOTHING in this product
+#: truncated it -- the publisher's own meta description ended on "and".
+#: That is why these two proofs mutate the PRODUCERS rather than the rule:
+#: a rule that only policed its own cuts would have printed it again.
+_CISO = ("Being CISO for a security technology vendor can be an interesting "
+         "position. My job combines the usual CISO responsibilities "
+         "alongside daily self and")
+
+
+def _tail_word(text):
+    words = str(text).rstrip(" \u2026").split()
+    return words[-1].lower().strip(",;:") if words else ""
+
+
+def bp19():
+    p = _p(name="19_an_evidence_passage_ends_on_a_joining_word",
+           description="the evidence card prints a publisher's own truncated "
+                       "description, conjunction and all",
+           target_kind=BP.PRODUCER,
+           mutated_file="src/intent_engine/company_ingestion/provenance.py",
+           mutated_symbol="_passage",
+           guard_under_test="test_the_live_netskope_passage_no_longer_ends_"
+                            "on_a_conjunction",
+           production_call_path="tests/test_a_quotation_may_not_end_on_a_"
+                                "joining_word.py")
+
+    def control():
+        P = importlib.import_module("intent_engine.company_ingestion.provenance")
+        out = P._passage({"meta_description": _CISO})
+        if _tail_word(out) in ("and", "or", "the", "of", "to"):
+            raise AssertionError(
+                f"clean code already ends on a joining word: {out!r}")
+
+    def mutate(t):
+        return t.mutate(
+            "src/intent_engine/company_ingestion/provenance.py",
+            "            return text if end_on_an_idea(text) == text "
+            "else elide(text)",
+            "            return text")
+
+    def check(t):
+        P = t.load("intent_engine.company_ingestion.provenance")
+        out = P._passage({"meta_description": _CISO})
+        assert _tail_word(out) not in ("and", "or", "the", "of", "to"), (
+            f"the reader was left holding a conjunction: {out!r}")
+    return run(p, mutate=mutate, check=check, control=control)
+
+
+def bp20():
+    p = _p(name="20_the_brief_cuts_a_sentence_on_a_joining_word",
+           description="the executive brief's own word budget lands on a "
+                       "conjunction and marks it as a quotation",
+           target_kind=BP.PRODUCER,
+           mutated_file="src/intent_engine/strategic_intelligence/brief.py",
+           mutated_symbol="fit_to_words",
+           guard_under_test="test_no_producer_leaves_the_reader_holding_a_"
+                            "joining_word",
+           production_call_path="tests/test_a_quotation_may_not_end_on_a_"
+                                "joining_word.py")
+    # THE BUDGET HAS TO LAND ON THE JOINING WORD. A first version passed a
+    # 49-word body against a 49-word budget: `fit_to_words` returned it
+    # untouched -- it had cut nothing -- and the control read that as the
+    # guard firing on clean code. The twelfth word is the conjunction, and
+    # there is no sentence end anywhere, so the word cut is the only path.
+    body = ("alpha beta gamma delta epsilon zeta eta theta iota kappa "
+            "lambda and mu nu xi omicron pi rho sigma tau")
+
+    def control():
+        B = importlib.import_module("intent_engine.strategic_intelligence.brief")
+        if _tail_word(B.fit_to_words(body, 12)) == "and":
+            raise AssertionError("clean code already cuts on a conjunction")
+
+    def mutate(t):
+        return t.mutate(
+            "src/intent_engine/strategic_intelligence/brief.py",
+            '    return _elide(" ".join(text.split()[:max_words])'
+            '.rstrip(",;:"))',
+            '    return " ".join(text.split()[:max_words]).rstrip(",;:")'
+            ' + "\u2026"')
+
+    def check(t):
+        B = t.load("intent_engine.strategic_intelligence.brief")
+        out = B.fit_to_words(body, 12)
+        assert _tail_word(out) != "and", (
+            f"the brief ended a cut quotation on a conjunction: {out!r}")
+    return run(p, mutate=mutate, check=check, control=control)
+
+
+def bp21():
+    p = _p(name="21_a_prepositional_phrase_becomes_a_buyer",
+           description="the head is read off the last word instead of the "
+                       "word before the preposition",
+           target_kind=BP.PRODUCER,
+           mutated_file="src/intent_engine/executive/decision_object.py",
+           mutated_symbol="_head_noun",
+           guard_under_test="test_the_live_procore_buyer_is_refused",
+           production_call_path="tests/test_the_decision_question_is_a_"
+                                "sentence.py")
+    # Procore's live phrase WITH THE POSSESSIVE REMOVED. The verbatim
+    # capture ("vital role in our customers' operations") is refused by TWO
+    # independent rules, so disabling the head cut left it refused anyway
+    # and the proof came back NOT_CAUGHT -- a guard that cannot be reached
+    # is not a guard that held. This phrase isolates the head cut: its last
+    # word is plural, its actual head is not, and it carries no possessive.
+    phrase = "vital role in customer operations"
+
+    def control():
+        DO = importlib.import_module(
+            "intent_engine.executive.decision_object")
+        if not DO._acceptable(phrase, "Procore", "BUYER"):
+            raise AssertionError("clean code already accepts the live defect")
+
+    def mutate(t):
+        return t.mutate("src/intent_engine/executive/decision_object.py",
+                        "        if index and word in _POST_HEAD:\n"
+                        "            return words[index - 1]",
+                        "        if False:\n"
+                        "            return words[index - 1]")
+
+    def check(t):
+        DO = t.load("intent_engine.executive.decision_object")
+        assert DO._acceptable(phrase, "Procore", "BUYER"), (
+            "a prepositional phrase was accepted as a population of buyers")
+    return run(p, mutate=mutate, check=check, control=control)
+
+
+def bp22():
+    p = _p(name="22_a_singular_unit_lands_after_more",
+           description='the billing unit reaches "without losing more '
+                       'device than the price gains"',
+           target_kind=BP.PRODUCER,
+           mutated_file="src/intent_engine/executive/analysis_selection.py",
+           mutated_symbol="_countable",
+           guard_under_test="test_a_unit_can_follow_the_word_more",
+           production_call_path="tests/test_the_decision_question_is_a_"
+                                "sentence.py")
+
+    def control():
+        AS = importlib.import_module(
+            "intent_engine.executive.analysis_selection")
+        if AS._countable("device") == "device":
+            raise AssertionError("clean code already returns a bare singular")
+
+    def mutate(t):
+        return t.mutate(
+            "src/intent_engine/executive/analysis_selection.py",
+            "    return f\"{text} count\"",
+            "    return text")
+
+    def check(t):
+        AS = t.load("intent_engine.executive.analysis_selection")
+        out = AS._countable("device")
+        assert out != "device", (
+            f"a singular count noun went straight after \"more\": {out!r}")
+    return run(p, mutate=mutate, check=check, control=control)
+
+
 def main() -> int:
     proofs = [bp01(), bp02(), bp03(), bp04(), bp05(), bp06(),
               bp07(), bp08(), bp09(), bp10(), bp11(), bp12(),
-              bp13(), bp14(), bp15(), bp16(), bp17(), bp18()]
+              bp13(), bp14(), bp15(), bp16(), bp17(), bp18(),
+              bp19(), bp20(), bp21(), bp22()]
     rows = []
     for p in proofs:
         rows.append({"name": p.name, "verdict": p.verdict,

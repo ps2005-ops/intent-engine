@@ -349,18 +349,65 @@ building holding leasing insuring nursing teaching
 """.split())
 
 
+def is_plural_noun(word: str) -> bool:
+    """Plural in FORM. One rule, because two callers need exactly this test.
+
+    `_is_population` asks it about a buyer's head word; `analysis_selection`
+    asks it about a billing unit before putting it after "more", which is
+    how "without losing more device than the price gains" reached NinjaOne's
+    X-Ray. Restating it there would be a second copy of a rule that is
+    already subtle: "-ss", "-us", "-is" and "-ics" endings are singular
+    words that merely end in s.
+    """
+    w = str(word or "").lower().strip(",;:.'\u2019\"")
+    if not w.endswith("s"):
+        return False
+    return not w.endswith(("ss", "us", "is", "ics"))
+
+
 def _is_population(word: str) -> bool:
     """Does this word name a group of people or organisations?
 
     A plural common noun is the ordinary form ("firms", "teams", "developers",
-    "hospitals"). "-ss", "-us" and "-is" endings are singular words that
-    merely end in s.
+    "hospitals").
     """
     if word in _COLLECTIVE:
         return True
-    if not word.endswith("s"):
-        return False
-    return not word.endswith(("ss", "us", "is", "ics"))
+    return is_plural_noun(word)
+
+
+#: Prepositions that open a POST-HEAD modifier. English noun phrases are
+#: head-final up to the first of these, and everything after one modifies
+#: the head rather than being it.
+_POST_HEAD = ("in", "of", "for", "across", "with", "to", "at", "on", "from",
+              "among", "within", "through", "by", "under", "over", "into",
+              "between", "around", "about", "against")
+
+#: Possessive determiners -- a genuinely CLOSED class in English, unlike the
+#: verb list this module had to abandon at 1b5689f6. A named population is
+#: named; a phrase carrying "their" or "our" is pointing back at a subject
+#: somewhere else in the sentence, which is the tell of a capture that ran
+#: past the people it was meant to name.
+_POSSESSIVE = ("my", "our", "your", "their", "its", "his", "her", "whose")
+
+
+def _head_noun(phrase: str) -> str:
+    """The head: the last word BEFORE the first post-head preposition.
+
+    THE COMMENT BELOW PROMISED THIS AND THE CODE DID NOT DO IT. The buyer
+    branch said "the head is found by cutting the trailing prepositional
+    phrase" and then tested `words[-1]`, so on Procore's live X-Ray at
+    591041b0 "vital role in our customers' operations" was accepted as a
+    population -- its LAST word, "operations", is plural, while its actual
+    head, "role", is not. The central question went out reading "without
+    losing more customer count among vital role in our customers'
+    operations than the price gains".
+    """
+    words = [w.lower() for w in str(phrase or "").split()]
+    for index, word in enumerate(words):
+        if index and word in _POST_HEAD:
+            return words[index - 1].strip(",;:.'\u2019\"")
+    return words[-1].strip(",;:.'\u2019\"") if words else ""
 
 
 def _is_inflected_verb(word: str) -> bool:
@@ -446,10 +493,19 @@ def _acceptable(phrase: str, company: str, kind: str = "") -> str:
         # So the test is POSITIVE instead: the head of the phrase must look
         # like a population, and no word in it may carry a verb inflection.
         words = phrase.split()
-        head = words[-1].lower() if words else ""
+        head = _head_noun(phrase)
         if not _is_population(head):
             return ("the phrase does not end in a population of people or "
                     "organisations, so it names something other than a buyer")
+        # MEASURED LIVE on ServiceTitan (591041b0): "experience their own
+        # rapid technological changes" ends in a plural noun and carries no
+        # verb inflection, so both rules above let it through and the
+        # central question read "without losing more customer count among
+        # experience their own rapid technological changes". A population
+        # this company sells to is NAMED, never referred back to.
+        if any(w.lower() in _POSSESSIVE for w in words):
+            return ("the phrase points back at a subject named elsewhere, "
+                    "so the capture ran past the people it names")
         if any(_is_inflected_verb(w.lower()) for w in words):
             return ("the phrase carries a verb, so the capture ran past the "
                     "people it names")

@@ -782,6 +782,49 @@ def _score_archetypes(profile, facts: RecordFacts, own_text: str = ""):
     return tuple(rows)
 
 
+#: Nouns that ALREADY measure something, so "more <noun>" needs no help.
+#: A closed list is defensible here in a way a closed VERB list was not:
+#: this is the small vocabulary a company uses to say what it counts, and a
+#: miss costs a redundant but grammatical "count", never a broken sentence.
+_MEASURE_NOUNS = frozenset("""
+count usage capacity volume revenue spend throughput bandwidth storage
+traffic data time value consumption utilisation utilization headcount
+""".split())
+
+
+def _countable(unit: str) -> str:
+    """`unit` in a form that can follow the word "more".
+
+    MEASURED LIVE on NinjaOne (591041b0): the company establishes that it
+    charges per device, the slot took "device", and the central question
+    read "what to charge, and for what, without losing more device than the
+    price gains?".
+
+    THE COMMENT BELOW THIS FUNCTION'S CALLER SAYS THE TAILS ARE "PHRASED TO
+    AVOID SUBJECT-VERB AGREEMENT" -- and they are. Number agreement is a
+    second problem it does not cover: "more X" needs a plural or a mass
+    noun, and a billing unit is usually a singular count noun.
+
+    NOT PLURALISED BY GUESSWORK. "capacity" has no plural and "device" and
+    "seat" have irregular company. The class constant this slot REPLACES is
+    already "customer count", so a singular unit is given that same shape --
+    "device count" -- which is both grammatical and the phrasing the rest of
+    the product uses.
+    """
+    text = " ".join(str(unit or "").split())
+    if not text:
+        return text
+    last = text.split()[-1].lower()
+    # ALREADY COUNTABLE AFTER "MORE": a plural, or a noun that is itself a
+    # measure. A first version appended unconditionally and produced
+    # "customer count count" -- the class constant is already in this shape,
+    # so the rule has to be idempotent -- and "capacity count", when "more
+    # capacity" was grammatical to begin with.
+    if _decision_object.is_plural_noun(last) or last in _MEASURE_NOUNS:
+        return text
+    return f"{text} count"
+
+
 def _decision_question(profile, archetype: str, facts: RecordFacts,
                        objects=None) -> str:
     """The question, in this business's own variables.
@@ -818,7 +861,7 @@ def _decision_question(profile, archetype: str, facts: RecordFacts,
     cost = costs[0] if costs else "the cost base"
     unit = getattr(getattr(objects, "billing_unit", None), "value", "")
     if getattr(getattr(objects, "billing_unit", None), "known", False):
-        driver = unit
+        driver = _countable(unit)
     buyer = getattr(getattr(objects, "buyer", None), "value", "")
     if getattr(getattr(objects, "buyer", None), "known", False):
         # The buyer sharpens the decisions that are ABOUT a buyer, and is

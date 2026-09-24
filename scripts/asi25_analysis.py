@@ -36,8 +36,33 @@ STEPS = (
     ("next40_econ_chain", "asi25_econ_chain.json", ["--cohort", "ALL"]),
     ("next40_differentiation", "asi25_template.json", []),
     ("next40_convergence", "asi25_convergence.json", []),
-    ("next40_learning_report", "asi25_learning.json", []),
 )
+
+#: REBINDING A MODULE CONSTANT IS NOT ENOUGH. Several of these scripts read
+#: their paths from an argparse DEFAULT STRING or a literal inside main(),
+#: so `mod.STATE = ...` changes nothing. Aliasing the files onto the names
+#: they expect is the honest alternative: one file, two names, and no fork
+#: of eight measurement scripts. This worktree carries no next40 run, so
+#: there is nothing to collide with.
+ALIASES = (
+    ("reports/asi25_state.json", "reports/next40_state.json"),
+    ("reports/asi25_ui", "reports/next40_ui"),
+    ("reports/asi25_ui_widths.json", "reports/next40_ui_widths.json"),
+)
+
+
+def _alias():
+    import shutil
+    made = []
+    for src, dst in ALIASES:
+        s, d = ROOT / src, ROOT / dst
+        if not s.exists():
+            continue
+        if d.exists() or d.is_symlink():
+            continue
+        d.symlink_to(s.resolve())
+        made.append(dst)
+    return made
 
 
 #: `next40_ten_dimensions` reads the layout measurements from a HARDCODED
@@ -74,7 +99,7 @@ def main() -> int:
     ap.add_argument("--only", action="append", default=None)
     args = ap.parse_args()
     import importlib
-    print(_align_widths(), flush=True)
+    print("aliased:", _alias() or "(already present)", flush=True)
     failures = []
     for name, out, extra in STEPS:
         if args.only and name not in args.only:
@@ -86,8 +111,11 @@ def main() -> int:
             continue
         argv = sys.argv[:1] + extra
         old = sys.argv
-        sys.argv = argv + (["--out", str(ROOT / "reports" / out)]
-                           if _takes_out(mod) else [])
+        # LET EACH SCRIPT WRITE ITS OWN DEFAULT NAME. Redirecting the first
+        # one with --out meant the ones downstream of it looked for a file
+        # that had been written somewhere else. They are collected to the
+        # asi25 names afterwards instead.
+        sys.argv = argv
         try:
             rc = mod.main()
             print(f"{name:28s} rc={rc}", flush=True)
@@ -100,6 +128,34 @@ def main() -> int:
             failures.append((name, f"{type(exc).__name__}: {exc}"))
         finally:
             sys.argv = old
+    # Collect anything written under a next40 name back to its asi25 name,
+    # so the artifacts a reader is given are named for the cohort they
+    # describe rather than for the harness they borrowed.
+    # ALWAYS OVERWRITE. `if not target.exists()` is how the central
+    # measurement of this programme came to be wrong: a SEVENTEEN-company
+    # `asi25_differentiation.json` written mid-run at 03:17 survived every
+    # later pass, because the freshly computed 25-company result was only
+    # copied when no file was in the way. Every differentiation headline in
+    # the V2 close described 17 companies and was reported as 25. A
+    # collector that declines to collect is worse than no collector: it
+    # leaves something that LOOKS current.
+    import shutil
+    state_mtime = (ROOT / "reports/asi25_state.json").stat().st_mtime \
+        if (ROOT / "reports/asi25_state.json").exists() else 0
+    for n40 in sorted(ROOT.glob("reports/next40_*.json")):
+        if n40.is_symlink():
+            continue
+        target = ROOT / "reports" / n40.name.replace("next40_", "asi25_")
+        shutil.copy2(n40, target)
+        print(f"collected {n40.name} -> {target.name}", flush=True)
+    # AND SAY SO WHEN ONE IS STILL BEHIND THE STATE IT DESCRIBES.
+    behind = [p.name for p in sorted(ROOT.glob("reports/asi25_*.json"))
+              if p.name != "asi25_state.json"
+              and p.stat().st_mtime < state_mtime]
+    if behind:
+        print("STALE — these describe an earlier state than reports/"
+              "asi25_state.json: " + ", ".join(behind), file=sys.stderr)
+        failures.append(("artifact_freshness", ", ".join(behind)))
     for name, why in failures:
         print(f"FAILED {name}: {why}", file=sys.stderr)
     return 1 if failures else 0

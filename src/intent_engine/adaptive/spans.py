@@ -169,6 +169,53 @@ def _drop_dangling(text: str) -> str:
     return " ".join(words)
 
 
+def end_on_an_idea(text: str) -> str:
+    """The joining-word rule, for every producer that cuts a quotation.
+
+    ONE RULE, FOUR PRODUCERS. `trim_to_word` has applied this since
+    bbb75261, and three other places that shorten a reader-facing quotation
+    did not: the evidence card's passage
+    (`company_ingestion.provenance._passage`), the founder brief's citation
+    fallback (`founder_brief.narrative._excerpt`) and the executive brief's
+    single-long-sentence cut (`strategic_intelligence.brief`). Netskope's
+    evidence page went out reading "...alongside daily self and" while
+    `trim_to_word` was already refusing exactly that.
+
+    IT IS NOT ONLY OUR CUTS. That Netskope passage was 148 characters
+    against a 320-character budget, so nothing in this product truncated
+    it -- the publisher's own meta description ended on the conjunction. A
+    quotation that ends on a joining word reads as broken no matter who cut
+    it, so the rule is about the text the reader is shown and not about the
+    provenance of the cut.
+
+    Returns the text unchanged when it already ends on an idea, so a caller
+    can tell an elision it must mark from one it must not.
+    """
+    return _drop_dangling(str(text or ""))
+
+
+def elide(text: str) -> str:
+    """`text` cut short: ending on an idea, and MARKED as an elision.
+
+    For a caller that has ALREADY shortened the text and must show the
+    reader that something follows. The marker is unconditional, because
+    the CALLER made the cut, not this function: a first version marked
+    only when the joining-word rule itself removed a word, and
+    `brief.fit_to_words("word " * 100, 10)` came back as ten clean words
+    with nothing to say they were the opening of a hundred.
+
+    The marker is `trim_to_word`'s -- a space and an ellipsis -- so a
+    reader meets one convention for a shortened quotation everywhere.
+
+    A caller that may NOT have cut anything wants `end_on_an_idea` and a
+    comparison against its own input; `provenance._passage` is that
+    caller, because a publisher's description can arrive already broken
+    while sitting well inside the budget.
+    """
+    kept = end_on_an_idea(text)
+    return (kept + " \u2026") if kept else ""
+
+
 def quote_around(text: str, start: int, end: int,
                  *, max_chars: int = MAX_CHARS) -> str:
     """The best real sentence containing or adjoining [start, end).

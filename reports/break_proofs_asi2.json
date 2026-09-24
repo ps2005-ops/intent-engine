@@ -1,7 +1,7 @@
 {
   "contract": "break_proofs_asi2.v1",
-  "held": 18,
-  "total": 18,
+  "held": 22,
+  "total": 22,
   "proofs": [
     {
       "name": "01_subject_rule_dropped",
@@ -10,8 +10,8 @@
       "target_kind": "PRODUCER",
       "mutated_symbol": "_subject_patterns",
       "guard_under_test": "test_mentioning_a_thing_is_not_depending_on_it",
-      "bytes_before": 33387,
-      "bytes_after": 33356
+      "bytes_before": 36271,
+      "bytes_after": 36240
     },
     {
       "name": "02_hindsight_wall_removed",
@@ -50,8 +50,8 @@
       "target_kind": "RENDERER",
       "mutated_symbol": "_basis_sentence",
       "guard_under_test": "test_an_unread_company_keeps_the_class_prior_and_says_that_it_did",
-      "bytes_before": 65773,
-      "bytes_after": 65750
+      "bytes_before": 67807,
+      "bytes_after": 67784
     },
     {
       "name": "06_unestablished_slot_claimed_as_the_company_s",
@@ -60,8 +60,8 @@
       "target_kind": "PRODUCER",
       "mutated_symbol": "question_basis",
       "guard_under_test": "test_an_unread_company_keeps_the_class_prior_and_says_that_it_did",
-      "bytes_before": 65773,
-      "bytes_after": 65748
+      "bytes_before": 67807,
+      "bytes_after": 67782
     },
     {
       "name": "07_buyer_injected_into_every_decision",
@@ -70,8 +70,8 @@
       "target_kind": "PRODUCER",
       "mutated_symbol": "_BUYER_BEARS_ON",
       "guard_under_test": "test_a_buyer_does_not_reach_a_decision_it_does_not_bear_on",
-      "bytes_before": 65773,
-      "bytes_after": 65795
+      "bytes_before": 67807,
+      "bytes_after": 67829
     },
     {
       "name": "08_billing_unit_selects_the_archetype",
@@ -80,8 +80,8 @@
       "target_kind": "PRODUCER",
       "mutated_symbol": "_score_archetypes",
       "guard_under_test": "test_a_billing_unit_does_not_change_which_decision_is_faced",
-      "bytes_before": 65773,
-      "bytes_after": 65880
+      "bytes_before": 67807,
+      "bytes_after": 67914
     },
     {
       "name": "09_ungrounded_reading_asks_for_nothing",
@@ -100,8 +100,8 @@
       "target_kind": "PRODUCER",
       "mutated_symbol": "_GENERIC_BUYER",
       "guard_under_test": "test_a_buyer_that_names_everybody_is_refused",
-      "bytes_before": 33387,
-      "bytes_after": 33313
+      "bytes_before": 36271,
+      "bytes_after": 36197
     },
     {
       "name": "11_marketing_adjective_becomes_a_buyer",
@@ -110,8 +110,8 @@
       "target_kind": "PRODUCER",
       "mutated_symbol": "_EVALUATIVE",
       "guard_under_test": "test_marketing_adjectives_do_not_become_a_buyer",
-      "bytes_before": 33387,
-      "bytes_after": 33333
+      "bytes_before": 36271,
+      "bytes_after": 36217
     },
     {
       "name": "12_delta_compared_against_a_placeholder",
@@ -120,8 +120,8 @@
       "target_kind": "PRODUCER",
       "mutated_symbol": "select.prior_question",
       "guard_under_test": "test_the_delta_comparator_is_a_real_second_reading",
-      "bytes_before": 65773,
-      "bytes_after": 65748
+      "bytes_before": 67807,
+      "bytes_after": 67782
     },
     {
       "name": "13_buyer_read_from_a_foreign_subject",
@@ -130,8 +130,8 @@
       "target_kind": "PRODUCER",
       "mutated_symbol": "_first_match.needs_subject",
       "guard_under_test": "test_a_buyer_is_not_read_from_a_sentence_about_somebody_else",
-      "bytes_before": 33387,
-      "bytes_after": 33358
+      "bytes_before": 36271,
+      "bytes_after": 36242
     },
     {
       "name": "14_first_person_without_word_boundaries",
@@ -140,8 +140,8 @@
       "target_kind": "PRODUCER",
       "mutated_symbol": "_FIRST_PERSON",
       "guard_under_test": "test_the_first_person_pattern_requires_word_boundaries",
-      "bytes_before": 33387,
-      "bytes_after": 33368
+      "bytes_before": 36271,
+      "bytes_after": 36252
     },
     {
       "name": "15_unrecognisable_legal_name_shown_alone",
@@ -160,8 +160,8 @@
       "target_kind": "RENDERER",
       "mutated_symbol": "_drop_dangling",
       "guard_under_test": "test_a_truncated_quote_does_not_end_on_a_joining_word",
-      "bytes_before": 9443,
-      "bytes_after": 9429
+      "bytes_before": 11672,
+      "bytes_after": 11658
     },
     {
       "name": "17_filing_equity_note_becomes_a_billing_unit",
@@ -170,8 +170,8 @@
       "target_kind": "PRODUCER",
       "mutated_symbol": "_acceptable.BILLING_UNIT",
       "guard_under_test": "test_a_price_per_share_in_an_equity_note_is_not_a_billing_unit",
-      "bytes_before": 33387,
-      "bytes_after": 33364
+      "bytes_before": 36271,
+      "bytes_after": 36248
     },
     {
       "name": "18_a_non_population_becomes_a_buyer",
@@ -180,8 +180,48 @@
       "target_kind": "PRODUCER",
       "mutated_symbol": "_is_population",
       "guard_under_test": "test_a_phrase_that_is_not_a_population_is_not_a_buyer",
-      "bytes_before": 33387,
-      "bytes_after": 33368
+      "bytes_before": 36271,
+      "bytes_after": 36252
+    },
+    {
+      "name": "19_an_evidence_passage_ends_on_a_joining_word",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: the reader was left holding a conjunction: 'Being CISO for a security technology vendor can be an interesting position. My job combines the usual CISO responsibilities alongside daily self and'",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "_passage",
+      "guard_under_test": "test_the_live_netskope_passage_no_longer_ends_on_a_conjunction",
+      "bytes_before": 12789,
+      "bytes_after": 12740
+    },
+    {
+      "name": "20_the_brief_cuts_a_sentence_on_a_joining_word",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: the brief ended a cut quotation on a conjunction: 'alpha beta gamma delta epsilon zeta eta theta iota kappa lambda and\u2026'",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "fit_to_words",
+      "guard_under_test": "test_no_producer_leaves_the_reader_holding_a_joining_word",
+      "bytes_before": 35726,
+      "bytes_after": 35724
+    },
+    {
+      "name": "21_a_prepositional_phrase_becomes_a_buyer",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: a prepositional phrase was accepted as a population of buyers",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "_head_noun",
+      "guard_under_test": "test_the_live_procore_buyer_is_refused",
+      "bytes_before": 36271,
+      "bytes_after": 36248
+    },
+    {
+      "name": "22_a_singular_unit_lands_after_more",
+      "verdict": "CAUGHT",
+      "detail": "AssertionError: a singular count noun went straight after \"more\": 'device'",
+      "target_kind": "PRODUCER",
+      "mutated_symbol": "_countable",
+      "guard_under_test": "test_a_unit_can_follow_the_word_more",
+      "bytes_before": 67807,
+      "bytes_after": 67796
     }
   ]
 }

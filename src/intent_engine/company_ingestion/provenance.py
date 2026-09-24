@@ -38,6 +38,9 @@ from __future__ import annotations
 import hashlib
 from typing import Any, Dict, List, Sequence
 
+from intent_engine.adaptive.spans import (
+    elide, end_on_an_idea, trim_to_word,
+)
 from intent_engine.company_ingestion import independence as IND
 from intent_engine.company_ingestion import relevance as _REL
 
@@ -97,12 +100,33 @@ def _provenance_id(row: dict, document: dict) -> str:
 
 
 def _passage(document: dict) -> str:
-    """A bounded excerpt, preferring the description the publisher wrote."""
+    """A bounded excerpt, preferring the description the publisher wrote.
+
+    TWO CUTS, NEITHER BY GRAMMAR. `text[:MAX_PASSAGE]` is arithmetic: it can
+    end mid-word, which is the defect `trim_to_word` exists to prevent, and
+    this producer never called it. And the budget is not the only way a
+    fragment arrives -- measured live on Netskope at 591041b0, this passage
+    was 148 characters against a 320-character budget, so nothing here
+    truncated it and the evidence page still printed
+
+        "...My job combines the usual CISO responsibilities alongside
+         daily self and"
+
+    because the publisher's own meta description ended on the conjunction.
+    Both paths now end on an idea: the over-budget one through
+    `trim_to_word`, the already-short one through `elide`, which marks the
+    cut only when it makes one.
+    """
     for key in ("meta_description", "text_content"):
         text = " ".join(str(document.get(key) or "").split())
         if len(text) >= 40:
-            return text[:MAX_PASSAGE].rstrip() + (
-                "…" if len(text) > MAX_PASSAGE else "")
+            if len(text) > MAX_PASSAGE:
+                return trim_to_word(text, MAX_PASSAGE)
+            # Inside the budget this producer cut nothing, so an
+            # ellipsis here would be a claim about text that is whole.
+            # It is marked only when the joining-word rule had to
+            # remove something the publisher had already cut.
+            return text if end_on_an_idea(text) == text else elide(text)
     return ""
 
 

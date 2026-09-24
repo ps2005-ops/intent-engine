@@ -49,6 +49,7 @@ from dataclasses import dataclass, field
 from html import escape as _e
 from typing import List, Optional, Sequence
 
+from intent_engine.adaptive.spans import elide as _elide
 from intent_engine.strategic_intelligence.decision import (
     DECISION_READY, INVESTIGATION_REQUIRED, WITHHELD, as_clause,
     decision_from_dict, decision_of, end_sentence, lower_first,
@@ -374,7 +375,10 @@ def _excerpt(obs: dict) -> str:
             if len(candidate) > budget:
                 break
             kept = candidate
-        text = kept or (" ".join(words[:_EXCERPT_WORDS]).rstrip(",;:.") + "…")
+        # ... AND ON AN IDEA. The word budget can land on a conjunction,
+        # which is the same broken quotation `trim_to_word` refuses; `elide`
+        # is that one rule, shared rather than restated.
+        text = kept or _elide(" ".join(words[:_EXCERPT_WORDS]).rstrip(",;:."))
     return text
 
 
