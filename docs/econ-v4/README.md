@@ -24,6 +24,12 @@ than argued about.
 | [MECHANISM_FALSIFIABILITY_AUDIT.md](MECHANISM_FALSIFIABILITY_AUDIT.md) | 16 mechanisms, five-way classification, and why 12 must NOT be bound |
 | [BELIEF_INFERENCE_AND_CALIBRATION.md](BELIEF_INFERENCE_AND_CALIBRATION.md) | the ±0.060/−0.080 constant, and the first proper score ever computed |
 
+## Wave 1 (v2) — scheduler recovery (COMPLETE)
+
+| artifact | what it establishes |
+|---|---|
+| [ECON_SCHEDULER_RECOVERY_PROOF.md](ECON_SCHEDULER_RECOVERY_PROOF.md) | 20 of 145 due cycles were lost in silence; root cause verified as host sleep suspending a flock holder, plus detection, alerting and bounded safe catch-up with live proof |
+
 ## Wave 6 — deployment and live proof (COMPLETE)
 
 | artifact | what it establishes |
@@ -44,7 +50,7 @@ These correspond to waves not reached. They are absent rather than
 stubbed, because an artifact asserting an unproven claim is worse than no
 artifact:
 
-`ECON_V4_OBSERVATION_ROUTING_PROOF` (Wave 2) ·
+`ECON_MECHANISM_OBSERVABILITY_PROOF` / `ECON_V4_OBSERVATION_ROUTING_PROOF` (Wave 2) ·
 `ECON_V4_REPEATED_LEARNING_PROOF` (Wave 2) ·
 `ECON_V4_INFERENCE_AND_CALIBRATION` (Wave 3 — partly covered by
 BELIEF_INFERENCE_AND_CALIBRATION) · `ECON_V4_FORECAST_SKILL` (Wave 3) ·

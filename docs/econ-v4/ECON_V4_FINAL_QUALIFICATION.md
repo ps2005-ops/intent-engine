@@ -150,3 +150,82 @@ the adjustment to its own evaluation set.
 4. **Defensible inference** to replace the constant update.
 5. **Founder bridge transport** — producer and consumer agree on schema and
    have never shared a root.
+
+---
+
+# ADDENDUM — 2026-10-11, Wave 1 (scheduler recovery) complete
+
+| | |
+|---|---|
+| Runtime HEAD | **`dc4eb541e851`** (deployed, verified under the plist env) |
+| Remote | `origin/fix/econ-v4-calibration` = `dc4eb541e851…`, verified |
+| Guard | **5932 passed, 5 skipped, 37 deselected, EXIT=0** (+38 tests) |
+
+## What changed
+
+The binding constraint named at the end of the previous session — "the
+missed-cycle alert" — is built, tested, deployed and live-proven. See
+`ECON_SCHEDULER_RECOVERY_PROOF.md`.
+
+The headline measurement is new and was previously unobtainable:
+
+```
+schedule reliability : 86.2%   (125 of 145 due cycles did work)
+cycles lost          : 20      (14 lock contention, 6 never invoked)
+recoverable          : 7
+permanently lost     : 13
+```
+
+Root cause verified as a **host-power fact, not a code defect**: host sleep
+suspends a cycle that keeps holding the `flock`, so the next scheduled cycle
+is refused; and a 38-hour hibernation at 1% battery swallowed three slots
+outright.
+
+## Revised before/after
+
+| metric | 2026-10-09 | now | kind |
+|---|---:|---:|---|
+| Full regression guard | 12 failures | **0** (5932 pass) | engineering |
+| Can the engine see a missed cycle? | **no** | **yes** | operational |
+| Schedule reliability | unmeasurable | **86.2%** | measurement |
+| Missed-cycle alert | none | **CRITICAL, live** | operational |
+| Safe catch-up | none | **live, bounded, proven** | operational |
+| Mechanisms gradeable | 2 | 2 | *unchanged* |
+| Beliefs repeatedly tested | 0 | **0** | *unchanged* |
+| Brier / skill | 0.2138 / −0.0576 | 0.2138 / −0.0576 | *unchanged* |
+| PAPER positions | 0 | 0 | *unchanged* |
+
+## Revised verdicts
+
+**1. ENGINEERING — PARTIAL.** Waves 1 and 6 complete. Waves 2–5 and 7–10 of
+the current spec are not started.
+
+**2. DAILY OPERATION — PARTIAL**, and now for a *stated* reason rather than an
+unmeasured one. Detection, alerting and recovery are live and proven. What
+remains is not code: a MacBook at 1% battery hibernates through a scheduled
+time, and the two fixes (a `pmset` scheduled wake, or an always-on host) are
+both the user's to authorize. Reliability will keep reporting the truth
+meanwhile.
+
+**3. LEARNING ARCHITECTURE — PARTIAL.** Unchanged. Repeated belief testing and
+defensible inference remain the gap.
+
+**4. REAL FORWARD LEARNING — NOT_YET_PROVEN.** Unchanged: 0 of 132 beliefs
+tested twice.
+
+**5. PREDICTIVE IMPROVEMENT — INCONCLUSIVE.** Unchanged, and nothing in this
+wave could change it. Worth saying plainly: **recovering 20 lost cycles would
+have produced more evidence, not better predictions.** The two are separate,
+and conflating them is how "LEARNING_ACCELERATING" got printed over a negative
+Brier skill in the first place.
+
+## What remains, in priority order
+
+1. **Repeated belief testing** — 0 of 132 is the binding constraint on every
+   statistical claim downstream.
+2. **`DEMAND_SIGNAL` routing behind a per-item ownership gate** — 81 ledger
+   items, second most common evidence type, routed nowhere.
+3. **Defensible inference** to replace the ±0.060/−0.080 constant.
+4. **Automatic catch-up on wake** — the command exists and yields correctly;
+   nothing invokes it unattended yet.
+5. **Founder bridge transport** — schemas agree, roots have never been shared.

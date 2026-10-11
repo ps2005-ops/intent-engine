@@ -221,6 +221,44 @@ day. It does **not** recover that day's market-session statistics, because the
 bar that would have advanced them is no longer obtainable. Both halves are
 true and the ledger says which one happened.
 
+## Production proof
+
+Deployed to the runtime (`dc4eb541e851`) and run against production itself,
+bounded to one slot, after a fresh backup:
+
+```
+replaying 2026-10-04 day ...
+  2026-10-04:day:America/Toronto  SKIPPED_NO_NEW_MARKET_SESSION
+replayed 1, refused 0
+
+whole history 2026-07-31 .. 2026-10-11:
+  reliability 86.2%,  coverage 86.9%,  19 lost
+```
+
+**Reliability held at 86.2% while coverage rose to 86.9%.** That is the whole
+design in one line: the replay recovered real work (production ledger
+21,358 → 21,378) and could not flatter the schedule.
+
+The production record, re-read in a fresh process:
+
+```json
+{"run_id": "2026-10-04:day:America/Toronto", "as_of": "2026-10-04",
+ "status": "SKIPPED_NO_NEW_MARKET_SESSION", "catch_up": true,
+ "started_at":  "2026-10-11T12:44:39+00:00",
+ "finished_at": "2026-10-11T13:00:42+00:00"}
+```
+
+Reload proof, fresh process, state from disk only:
+
+```
+reliability 0.862   coverage 0.869
+on_time 125   by_catch_up 1   lost 19
+alerts: ['CYCLES_MISSED', 'SCHEDULE_RELIABILITY_LOW']
+```
+
+Six slots remain recoverable. `market catch-up --root <root>` replays them and
+will yield automatically within 45 minutes of the 20:30 cycle.
+
 ## The host limitation, stated plainly
 
 **What is now achievable: recovery after waking.** Detection, alerting and
