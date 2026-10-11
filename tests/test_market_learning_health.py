@@ -100,7 +100,7 @@ def test_calibration_is_unmeasurable_below_the_minimum_sample(tmp_path):
     store = _store(tmp_path, beliefs=3, expectations=3, reconciliations=0)
     health = LH.assess(root=tmp_path, as_of="2026-08-07", store=store)
     cal = health.calibration
-    assert cal["expectation_calibration"] == LH.UNMEASURABLE
+    assert cal["hit_rate"] == LH.UNMEASURABLE
     assert cal["false_positive_rate"] == LH.UNMEASURABLE
     assert cal["effective_sample_size"] == 0
     # and it says WHY, so nobody reads the sentinel as a bug
@@ -113,8 +113,12 @@ def test_calibration_becomes_measurable_at_the_threshold(tmp_path):
     health = LH.assess(root=tmp_path, as_of="2026-08-07", store=store)
     cal = health.calibration
     assert cal["effective_sample_size"] == 6
-    assert cal["expectation_calibration"] == pytest.approx(4 / 6)
+    assert cal["hit_rate"] == pytest.approx(4 / 6)
     assert cal["false_positive_rate"] == pytest.approx(2 / 6)
+    # The hit rate must NOT be presented as calibration -- that conflation is
+    # the defect this field name replaced.
+    assert "expectation_calibration" not in cal
+    assert "belief_calibration" not in cal
 
 
 # ===========================================================================

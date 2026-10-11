@@ -7,6 +7,17 @@
 #      checked (repo convention). Live/networked tests are deselected; the
 #      guard makes 0 model calls (ANTHROPIC_API_KEY is stripped).
 #
+#      "Live" means a test whose result depends on state this guard does not
+#      control — a network call OR the production ledger at
+#      /Users/prathamsharma/intent-engine-market, which a scheduled cycle
+#      appends to twice a day. Such a test is a MONITOR of production, not a
+#      regression test: a legitimate new observation can turn it red with
+#      nothing broken, and a cycle writing while the guard reads makes it
+#      nondeterministic. Five market_*_live.py modules were split out on
+#      2026-10-11 for exactly that reason; their assertions are unchanged and
+#      they are still run on demand. Their invariants remain covered offline
+#      by the deterministic tests left behind in the original modules.
+#
 # Install:  scripts/install_precommit_hook.sh   (copies this to .git/hooks/pre-commit)
 # Escape hatch (emergencies only): git commit --no-verify
 # Env: GUARD_PYTHON overrides the interpreter (default .venv/bin/python, then
@@ -77,7 +88,12 @@ if [[ "${GUARD_SKIP_PYTEST:-0}" != "1" ]]; then
     --deselect tests/test_calendar_live.py \
     --deselect tests/test_macro_data_live.py \
     --deselect tests/test_market_resolution_live.py \
-    --deselect tests/test_scrap_estimate_live.py
+    --deselect tests/test_scrap_estimate_live.py \
+    --deselect tests/test_market_calibration_consistency_live.py \
+    --deselect tests/test_market_causal_calibration_live.py \
+    --deselect tests/test_market_counterfactual_memory_live.py \
+    --deselect tests/test_market_economic_chain_live.py \
+    --deselect tests/test_market_learning_acceleration_live.py
   code=$?
   if [[ $code -ne 0 ]]; then
     echo "GUARD FAIL (suite): pytest EXIT=$code (need EXIT=0). Commit blocked." >&2

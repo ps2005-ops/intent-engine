@@ -71,12 +71,41 @@ STARTED = "STARTED"
 COMPLETED = "COMPLETED"
 PARTIAL = "PARTIAL"
 FAILED = "FAILED"
+#: The run id had already completed. A genuine duplicate: the work exists.
 SKIPPED_DUPLICATE = "SKIPPED_DUPLICATE"
+#: Fired outside its scheduled local-time window. NOT a duplicate -- the work
+#: does NOT exist and, because nothing retries, it never will.
+#:
+#: This is what launchd does after the machine has been asleep: it coalesces
+#: the missed `StartCalendarInterval` firings and runs them at wake time, so
+#: both the 06:30 and the 20:30 job can fire together at (measured)
+#: 06:09. `--enforce-window` correctly refuses them -- and reporting that
+#: refusal as SKIPPED_DUPLICATE made three permanently lost cycles
+#: indistinguishable from three cycles whose work was already done.
+#: 2026-10-09 night, 2026-10-10 day and 2026-10-10 night were all lost this
+#: way, with every monitoring surface reporting success.
+SKIPPED_OUTSIDE_WINDOW = "SKIPPED_OUTSIDE_WINDOW"
+#: Another cycle held the shared lock. Also not a duplicate: this run did no
+#: work, though the holder presumably did.
+SKIPPED_LOCK_CONTENTION = "SKIPPED_LOCK_CONTENTION"
 SKIPPED_STALE_DATA = "SKIPPED_STALE_DATA"
 SKIPPED_NO_NEW_MARKET_SESSION = "SKIPPED_NO_NEW_MARKET_SESSION"
 
 STATUSES = (STARTED, COMPLETED, PARTIAL, FAILED, SKIPPED_DUPLICATE,
+            SKIPPED_OUTSIDE_WINDOW, SKIPPED_LOCK_CONTENTION,
             SKIPPED_STALE_DATA, SKIPPED_NO_NEW_MARKET_SESSION)
+
+#: Statuses where the process returned BEFORE running any step. The useful
+#: group for "did this run do the work", and deliberately excluding
+#: SKIPPED_NO_NEW_MARKET_SESSION, which ran every step and found no new market
+#: observation -- that is a completed cycle reporting an honest absence, not a
+#: skipped one, and grouping it here made a successful run look like a no-op.
+SKIPPED_WITHOUT_RUNNING = (SKIPPED_DUPLICATE, SKIPPED_OUTSIDE_WINDOW,
+                           SKIPPED_LOCK_CONTENTION, SKIPPED_STALE_DATA)
+
+#: Every non-failure status that is not a plain COMPLETED. Exists so adding a
+#: skip kind cannot silently fall out of the exit-code mapping below.
+SKIPPED = SKIPPED_WITHOUT_RUNNING + (SKIPPED_NO_NEW_MARKET_SESSION,)
 
 # The lock is shared by BOTH cycles. A night run must not start while a slow
 # day run is still going: they write the same funnel history and the same
@@ -141,8 +170,11 @@ class CycleResult:
     def exit_code(self) -> int:
         """Nonzero on anything that is not a clean completion or a deliberate
         skip. launchd surfaces this, and a human's `status` reads it."""
-        return 0 if self.status in (COMPLETED, SKIPPED_DUPLICATE,
-                                    SKIPPED_NO_NEW_MARKET_SESSION) else 1
+        # Every skip kind exits 0: launchd must not thrash or back off over a
+        # deliberate refusal. The MISSED-cycle signal belongs on the health
+        # report, which can tell SKIPPED_OUTSIDE_WINDOW from a duplicate --
+        # exit status cannot, and conflating them is what hid the loss.
+        return 0 if self.status in (COMPLETED,) + SKIPPED else 1
 
     def as_dict(self) -> dict:
         return {"run_id": self.run_id, "cycle": self.cycle,
@@ -363,7 +395,7 @@ def run_cycle(cycle: str, *, root, steps: Sequence[Tuple[str, StepFn]],
         hour, minute = SCHEDULE[cycle]
         if not S.within_window(now, hour, minute):
             return finish(
-                SKIPPED_DUPLICATE,
+                SKIPPED_OUTSIDE_WINDOW,
                 f"fired at {now.strftime('%H:%M %Z')}, outside the "
                 f"{hour:02d}:{minute:02d} {S.TIMEZONE} window — not running",
                 mode=mode)
@@ -420,7 +452,7 @@ def run_cycle(cycle: str, *, root, steps: Sequence[Tuple[str, StepFn]],
             return finish(COMPLETED, session.reason, session, ran, mode,
                           reports)
     except JobLockedError:
-        return finish(SKIPPED_DUPLICATE,
+        return finish(SKIPPED_LOCK_CONTENTION,
                       "another cycle holds the lock", mode=mode)
     except Exception as exc:  # noqa: BLE001 - never lose a failure
         return finish(FAILED, f"{F.classify(exc)}: {type(exc).__name__}: {exc}",

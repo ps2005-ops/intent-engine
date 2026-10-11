@@ -118,13 +118,6 @@ def test_a_self_test_is_read_from_observation_binding_not_formation():
     assert LA._observation_metrics(binding)["self_tests_refused"] == 20
 
 
-def test_the_real_report_sees_the_twenty_self_tests():
-    got = LA.report(real_observations(), ledger=real_ledger())
-    # The production runtime appends nightly, so this constant has an
-    # expiry date. What is durable is that the self-tests are SEEN.
-    assert got["windows"]["recent"]["metrics"]["self_tests_refused"] >= 20.0
-
-
 # --- levels, not only trends ---------------------------------------------
 
 def test_a_rate_that_was_undefined_and_is_now_bad_still_degrades():
@@ -161,15 +154,6 @@ def test_absolute_limits_are_skipped_where_they_would_be_meaningless():
     assert LA.absolute_failures(now, reconciliations=9)
 
 
-def test_no_quality_dimension_can_exceed_one():
-    for name, value in LA.quality(real_observations(),
-                                  ledger=real_ledger()).items():
-        if value is None or name == "source_diversity" \
-                or name.startswith("_"):
-            continue
-        assert 0.0 <= float(value) <= 1.0, name
-
-
 def test_a_share_above_one_raises_rather_than_being_clamped():
     """Found by a break proof, not by a test.
 
@@ -197,31 +181,6 @@ def test_a_share_above_one_raises_rather_than_being_clamped():
 
 # --- windows are computed only where the history defends them ------------
 
-def test_windows_beyond_the_history_report_insufficient_with_the_real_count():
-    """A window the history cannot defend says so, and names the shortfall.
-
-    THE LIST USED TO BE HARD-CODED — ("7_cycle", "14_cycle", "30_cycle") —
-    which asserted a fact about how much history existed on the day it was
-    written. Production appends nightly, so the history grew past seven cycles
-    and `7_cycle` became computable: the suite went red because the engine had
-    LEARNED MORE, with no code change. The durable claim is the relationship
-    between what a window requires and what exists, so it is now read off the
-    report rather than remembered.
-    """
-    got = LA.report(real_observations(), ledger=real_ledger())
-    beyond = [n for n, w in got["windows"].items()
-              if w["cycles_required"] > w["cycles_available"]]
-    assert beyond, "no window exceeds the history; the case is unexercised"
-    for name in beyond:
-        window = got["windows"][name]
-        assert window["status"] == LA.INSUFFICIENT_HISTORY
-        assert str(window["cycles_available"]) in window["reason"]
-    # ...and the converse, so this cannot pass by calling everything short.
-    for name, window in got["windows"].items():
-        if window["cycles_required"] <= window["cycles_available"]:
-            assert window["status"] != LA.INSUFFICIENT_HISTORY
-
-
 def test_the_recent_window_is_the_shortest_that_can_carry_a_direction():
     assert dict(LA.WINDOWS)[LA.RECENT] == LA.MIN_CYCLES_FOR_TREND
     got = LA.window([Obs() for _ in range(4)], name="w", size=1)
@@ -232,34 +191,7 @@ def test_the_recent_window_is_the_shortest_that_can_carry_a_direction():
 
 # --- the real history -----------------------------------------------------
 
-def test_the_real_history_reads_degrading_on_the_self_test_rate():
-    got = LA.report(real_observations(), ledger=real_ledger())
-    assert got["cycles_total"] >= 6
-    assert got["backlog_cycles_excluded"] == 1
-    # Exactly the windows the history can defend — derived, not remembered.
-    # Pinning `[RECENT]` asserted that only four cycles existed, which stopped
-    # being true the moment production ran again.
-    expected = [n for n, size in LA.WINDOWS
-                if size <= got["windows"][n]["cycles_available"]]
-    assert got["windows_computed"] == expected
-    assert LA.RECENT in got["windows_computed"]
-    assert got["status"] == LA.DEGRADING
-    assert any("self_test_rate" in d for d in got["degradations"])
-    assert got["quality"]["self_test_rate"] >= 0.8
-
-
 # --- a rate without its denominator is not a measurement -----------------
-
-def test_every_rate_carries_the_pair_it_came_from():
-    got = LA.quality(real_observations(), ledger=real_ledger())
-    pairs = got["_denominators"]
-    for name in LA.QUALITY_NAMES:
-        if got.get(name) is None or name == "source_diversity":
-            continue
-        assert name in pairs, name
-        numerator, denominator = pairs[name]
-        assert numerator <= denominator
-
 
 def test_sample_maturity_separates_two_events_from_a_finding():
     assert LA.sample_maturity(5) == LA.INSUFFICIENT_SAMPLE
@@ -291,20 +223,3 @@ def test_one_mature_failure_still_justifies_degrading():
     assert got == LA.DEGRADING
 
 
-def test_a_trend_degradation_is_tagged_with_its_maturity_too():
-    """An untagged trend would be read as mature by default."""
-    got = LA.report(real_observations(), ledger=real_ledger())
-    assert any("USABLE]" in d or "MATURE]" in d or "EARLY]" in d
-               for d in got["degradations"])
-
-
-def test_the_real_verdict_still_degrades_and_says_on_which_dimension():
-    """DEGRADING is retained, and now for a stated reason: it rests on
-    false_positive_rate at 23/90 (USABLE), not on the EARLY self-test rate."""
-    got = LA.report(real_observations(), ledger=real_ledger())
-    assert got["status"] == LA.DEGRADING
-    mature = [d for d in got["degradations"]
-              if "USABLE]" in d or "MATURE]" in d]
-    assert mature, got["degradations"]
-    assert any("self_test_rate" in d
-               for d in got["degradations"])

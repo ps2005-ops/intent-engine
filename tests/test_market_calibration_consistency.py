@@ -107,20 +107,3 @@ def test_precedence_is_stated_in_the_summary():
     assert got["incoherent_pairs"] == 0
 
 
-def test_the_real_ledger_is_currently_coherent():
-    """Zero is the finding, and the guard exists for when it is not."""
-    if not REAL_LEDGER.exists():                       # pragma: no cover
-        return
-    from intent_engine.universe.companies import default_universe
-
-    rows = [json.loads(line) for line in
-            REAL_LEDGER.read_text().splitlines() if line.strip()]
-    industry = {c.company_id: (getattr(c, "industry", "") or "")
-                for c in default_universe().prediction_companies()}
-    family_of = {r.get("hypothesis_id"): r.get("metric") for r in rows
-                 if r.get("record") == "expectation"}
-    got = CK.check(maturities=BM.classify(rows, as_of="2026-08-07"),
-                   mechanisms=MC.calibrate(rows),
-                   causal_families=CC.calibrate(rows, industry_of=industry),
-                   family_of=family_of)
-    assert got == ()

@@ -133,6 +133,21 @@ def evaluate_prediction(
     age = _age_days(prediction.created_at, as_of)
     if age is None:
         return reject("prediction timestamp unparseable", "stale_data")
+    # A NEGATIVE age means the prediction is stamped after the moment it is
+    # being evaluated at. That is not staleness -- it is the opposite, and it
+    # is the more dangerous of the two: `age > max_data_age_days` is False for
+    # every negative number, so a prediction dated in the future sailed
+    # through the freshness gate entirely. Measured on this tree: a prediction
+    # 17 days ahead of `as_of` was returned eligible.
+    #
+    # Its own rule, not `stale_data`, because "I was created after you asked"
+    # and "I am too old" are different findings and a caller that lumps them
+    # together cannot tell a clock problem from a backfill problem.
+    if age < 0:
+        return reject(
+            f"prediction is dated {-age}d after as_of {str(as_of)[:10]} "
+            f"-- a future-dated prediction cannot inform a decision made "
+            f"before it existed", "future_dated")
     if age > config.max_data_age_days:
         return reject(f"prediction is {age}d old (> {config.max_data_age_days})",
                       "stale_data")

@@ -147,6 +147,59 @@ def check(*, maturities: Sequence = (), mechanisms: Sequence = (),
     return tuple(out)
 
 
+def cap_mechanism_summary(summary: dict,
+                          incoherences: Sequence[Incoherence]) -> dict:
+    """Hold every published mechanism maturity at its causal ceiling.
+
+    WHY THIS EXISTS
+    ---------------
+    `check` has been able to SEE these violations since it was written, and
+    nothing ever applied them: **no module under `src/` imported this one.**
+    `learning_health` published `MC.summarise(MC.calibrate(rows))` unmodified,
+    so `demand_strengthening`, graded ESTABLISHED off a 19/20 hit rate, stayed
+    ESTABLISHED on the operator surface while its causal family sat at
+    CONTESTED. Detection without application is how a 0.95 "reliability"
+    reached a screen beside the evidence that it was not identified.
+
+    A hit rate measures prediction. A causal grade measures identification.
+    This function is the one place that refuses to let the first be read as
+    the second.
+
+    WHAT IT DOES NOT DO
+    -------------------
+    It does not touch the ledger, the reconciliations, or the hit rate. The
+    uncapped grade is kept beside the published one as `maturity_uncapped`,
+    and the reason is carried on the row, because a cap that hides what it
+    overrode is just a different wrong number. The contradiction is the
+    finding and it stays visible.
+    """
+    ceilings = {i.family: i for i in incoherences
+                if i.kind == "MECHANISM_ABOVE_ITS_CAUSAL_CEILING"}
+    out = dict(summary)
+    rows = []
+    capped_keys = []
+    for row in summary.get("mechanisms", ()):  # each is a plain dict
+        row = dict(row)
+        breach = ceilings.get(row.get("mechanism"))
+        if breach is not None:
+            row["maturity_uncapped"] = row.get("maturity")
+            row["maturity"] = breach.permitted
+            row["capped_by"] = breach.upper_layer
+            row["capped_because"] = breach.why
+            row["causal_standing"] = breach.upper_state
+            capped_keys.append(row.get("mechanism"))
+        rows.append(row)
+    out["mechanisms"] = rows
+    # `by_maturity` is a published count and must agree with the rows above,
+    # or the summary contradicts its own table.
+    out["by_maturity"] = dict(collections.Counter(
+        r.get("maturity") for r in rows))
+    out["capped_by_causal_ceiling"] = tuple(capped_keys)
+    out["incoherent_pairs"] = len(incoherences)
+    out["incoherences"] = tuple(i.as_dict() for i in incoherences)
+    return out
+
+
 def summarise(incoherences: Sequence[Incoherence]) -> dict:
     return {
         "contract": CONTRACT,

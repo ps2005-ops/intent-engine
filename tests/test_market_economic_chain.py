@@ -67,14 +67,6 @@ def test_no_link_constructor_can_produce_observed():
     assert got.status != EC.OBSERVED
 
 
-def test_no_chain_built_from_the_real_ledger_contains_an_observed_link():
-    for subject in ("honda", "shopify", "cloudflare", "jpmorgan"):
-        built = EC.build(rows(), subject=subject)
-        assert all(l.status != EC.OBSERVED for l in built.links)
-    assert EC.summarise([EC.build(rows(), subject="honda")])[
-        "observed_links"] == 0
-
-
 # --- the ladder is evidence, not argument --------------------------------
 
 def test_an_unknown_end_makes_the_link_unknown():
@@ -110,68 +102,7 @@ def test_a_link_missing_any_of_the_three_is_refused(missing):
 
 # --- candidate scoring is a measurement, not a preference ----------------
 
-def test_scoring_prefers_coverage_and_resolution_over_volume():
-    got = EC.score_candidates(rows())
-    top = got[0]
-    # The property is that COVERAGE beats VOLUME, not that any particular
-    # company wins. The live ledger grows nightly and the leader has
-    # already changed once (honda -> toyota) on new evidence; pinning the
-    # name asserted a snapshot rather than the scorer's behaviour.
-    assert top["resolved_expectations"] >= 1 or \
-        top["primary_source_observations"] >= 10
-    by_volume = max(got, key=lambda r: r["observations"])
-    assert top["score"] >= by_volume["score"]
-
-
 # --- the real chain -------------------------------------------------------
-
-def test_the_honda_chain_is_honest_about_what_is_missing():
-    built = EC.build(rows(), subject="honda")
-    got = built.as_dict()
-    assert got["overall_status"] == EC.UNKNOWN
-    assert got["known_nodes"] == 4 and got["unknown_nodes"] == 3
-    assert got["by_link_status"] == {EC.UNKNOWN: 3, EC.HYPOTHESIZED: 3}
-    missing = {n["node_type"] for n in got["nodes"]
-               if n["status"] == EC.UNKNOWN}
-    assert missing == {EC.MACRO_STATE, EC.CUSTOMER_STATE, EC.ORDERS}
-
-
-def test_the_weakest_link_names_the_boundary_not_the_first_gap():
-    """Three consecutive UNKNOWNs are one finding; name where it ends."""
-    built = EC.build(rows(), subject="honda")
-    assert built.weakest_link.source == EC.ORDERS
-    assert built.weakest_link.target == EC.COMPANY_DEMAND
-    assert built.weakest_link.status == EC.UNKNOWN
-
-
-def test_a_node_holds_the_figure_not_the_announcement_of_it():
-    """Same filing, same day: only one of the two sentences is a quantity."""
-    built = EC.build(rows(), subject="honda")
-    demand = next(n for n in built.nodes if n.node_type == EC.COMPANY_DEMAND)
-    assert "13.5%" in demand.statement
-    assert not demand.statement.startswith("Exhibit 1")
-
-
-def test_the_document_supplies_its_own_alternative_explanation():
-    """Honda's filing attributes its margin move. That is the competing story."""
-    built = EC.build(rows(), subject="honda")
-    margin = next(l for l in built.links if l.target == EC.MARGIN)
-    assert "the source document itself attributes this" in \
-        margin.alternative_explanation
-    assert "EV" in margin.alternative_explanation
-    # And it does NOT promote the link: an interested party's attribution is
-    # a statement about a link, not an observation of one.
-    assert margin.status == EC.HYPOTHESIZED
-
-
-def test_the_founder_translation_separates_established_from_missing():
-    got = EC.build(rows(), subject="honda").founder_translation()
-    assert len(got["established"]) == 4
-    assert len(got["missing"]) == 3
-    assert got["weakest_link"] == "ORDERS → COMPANY_DEMAND"
-    assert got["what_would_resolve_it"]
-    assert "relying on the unmeasured ones" in got["why_it_matters"]
-
 
 # --- macro and capital live on THIS graph ---------------------------------
 

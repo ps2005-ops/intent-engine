@@ -60,7 +60,12 @@ import statistics
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Tuple
 
-CONTRACT = "market_learning_health.v1"
+# v2 renamed the former `expectation_calibration` / `belief_calibration` to
+# `hit_rate`, which is what they always computed, and added a real
+# `probabilistic_calibration` block beside it. The version is bumped rather
+# than the fields quietly redefined because 60 v1 snapshots are on record and
+# a reader must be able to tell which question a given row answered.
+CONTRACT = "market_learning_health.v2"
 
 # The sentinel. A metric is UNMEASURABLE when the data required to compute it
 # does not exist yet -- distinct from a measured zero, which is a finding.
@@ -977,6 +982,10 @@ def assess(*, root: pathlib.Path, as_of: str, store=None,
     belief_rows = [r for r in rows if r.get("record") == "belief"]
     expectation_rows = [r for r in rows if r.get("record") == "expectation"]
     reconciliations = [r for r in rows if r.get("record") == "reconciliation"]
+    # Carries the forecast probability AND the realised direction in one row,
+    # which is why calibration is scored from here rather than from a join --
+    # see `probabilistic_calibration` on why the join scores the wrong prior.
+    belief_updates = [r for r in rows if r.get("record") == "belief_update"]
 
     observations = load_cycle_observations(root)
     health = LearningHealth(as_of=as_of[:10], runtime_sha=runtime_sha)
@@ -1101,14 +1110,20 @@ def assess(*, root: pathlib.Path, as_of: str, store=None,
                 + outcomes.get("CONTRADICTED", 0))
     # Below the minimum sample every one of these is a number that would be
     # read as a measurement and is not one.
+    # Two different questions, two different fields. `hit_rate` is how often
+    # the engine was right; `probabilistic_calibration` is whether its stated
+    # probabilities mean anything. They can disagree, and on this ledger they
+    # do -- a 0.72 hit rate sitting on negative Brier skill. Reporting the
+    # first under the name of the second is the defect this replaces.
+    from . import probabilistic_calibration as PC
+    proper_score = PC.score(PC.pairs_from_updates(belief_updates))
     if resolved < MIN_RESOLVED_FOR_CALIBRATION:
         health.calibration = {
             "effective_sample_size": resolved,
-            "belief_calibration": UNMEASURABLE,
-            "expectation_calibration": UNMEASURABLE,
+            "hit_rate": UNMEASURABLE,
             "false_positive_rate": UNMEASURABLE,
             "false_negative_rate": UNMEASURABLE,
-            "brier_or_equivalent": UNMEASURABLE,
+            "probabilistic_calibration": proper_score,
             "because": f"{resolved} informative resolutions on record; "
                        f"{MIN_RESOLVED_FOR_CALIBRATION} is the minimum at "
                        f"which any of these stops being noise",
@@ -1118,11 +1133,10 @@ def assess(*, root: pathlib.Path, as_of: str, store=None,
             "PARTIALLY_CONFIRMED", 0)
         health.calibration = {
             "effective_sample_size": resolved,
-            "expectation_calibration": confirmed / resolved,
+            "hit_rate": confirmed / resolved,
             "false_positive_rate": outcomes.get("CONTRADICTED", 0) / resolved,
             "false_negative_rate": UNMEASURABLE,
-            "belief_calibration": confirmed / resolved,
-            "brier_or_equivalent": UNMEASURABLE,
+            "probabilistic_calibration": proper_score,
         }
     health.counterfactual = {
         "near_misses": 0,
@@ -1194,7 +1208,34 @@ def assess(*, root: pathlib.Path, as_of: str, store=None,
     # a transmission hypothesis that has been wrong every time it was checked
     # keeps proposing beliefs at full strength forever.
     from . import mechanism_calibration as MC
-    health.mechanisms = MC.summarise(MC.calibrate(rows))
+    # The mechanism grade is capped by its CAUSAL standing before it is
+    # published. `calibration_consistency` could always compute that ceiling
+    # and nothing applied it -- no module under src/ imported it -- so a
+    # mechanism graded ESTABLISHED off a hit rate was published as ESTABLISHED
+    # under a CONTESTED causal family. A high confirmation rate measures
+    # prediction, not identification, and must not be read as the second.
+    from . import calibration_consistency as CK
+    from . import causal_calibration as CC
+    from . import belief_maturity as BM
+    _mechanisms = MC.calibrate(rows)
+    try:
+        from intent_engine.universe.companies import default_universe
+        _industry = {c.company_id: (getattr(c, "industry", "") or "")
+                     for c in default_universe().prediction_companies()}
+    except Exception:  # noqa: BLE001 - a cap must not depend on the universe
+        _industry = {}
+    # No try/except around `check`: it is pure comparison over data already
+    # in hand, and swallowing a failure here would silently restore exactly
+    # the uncapped publication this exists to stop -- the cap would look
+    # applied and not be. If it can raise, that is a defect to see, not hide.
+    _incoherences = CK.check(
+        maturities=BM.classify(rows, as_of=as_of),
+        mechanisms=_mechanisms,
+        causal_families=CC.calibrate(rows, industry_of=_industry),
+        family_of={r.get("hypothesis_id"): r.get("metric")
+                   for r in expectation_rows})
+    health.mechanisms = CK.cap_mechanism_summary(
+        MC.summarise(_mechanisms), _incoherences)
 
     health.funnel = funnel(observations, ledger_totals={
         "expectations_resolved": resolved,
@@ -1373,13 +1414,22 @@ def render(health: LearningHealth) -> str:
         f"{expectation['expectations_confirmed']} / "
         f"{expectation['expectations_contradicted']}",
         f"- Validated knowledge: {knowledge['net_new_knowledge']}",
-        f"- Expectation calibration: "
-        f"{_fmt(calibration['expectation_calibration'])} "
+        f"- Hit rate (how often it was right): "
+        f"{_fmt(calibration['hit_rate'])} "
         f"(n={calibration['effective_sample_size']})",
         "",
     ]
     if calibration.get("because"):
         lines += [f"_{calibration['because']}_", ""]
+
+    # Deliberately its own section. Folded in beside the hit rate it reads as
+    # a second opinion on the same quantity, and it is not one.
+    proper_score = calibration.get("probabilistic_calibration") or {}
+    if proper_score:
+        from . import probabilistic_calibration as PC
+        lines += ["## Do its probabilities mean anything?", ""]
+        lines += PC.render(proper_score)
+        lines += [""]
 
     lines += [
         "## Is learning speeding up?",

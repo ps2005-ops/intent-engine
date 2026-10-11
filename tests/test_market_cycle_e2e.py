@@ -202,7 +202,7 @@ def test_an_idempotent_rerun_after_a_partial_does_not_double_append(tmp_path):
 
     audit_after_partial = len(STEPS.read_audit(tmp_path))
     good = _run(tmp_path, steps=_steps())
-    assert good.status != C.SKIPPED_DUPLICATE
+    assert good.status not in C.SKIPPED_WITHOUT_RUNNING
     # the retry appended its own records; the partial's are not duplicated away
     assert len(STEPS.read_audit(tmp_path)) > audit_after_partial
 
@@ -302,7 +302,7 @@ def test_a_skip_exits_zero_because_it_is_not_an_error(tmp_path):
 
 
 def test_a_rehearsal_does_not_cancel_the_real_run(tmp_path):
-    """A dry run at 06:00 must not make the 06:30 cycle a SKIPPED_DUPLICATE."""
+    """A dry run at 06:00 must not make the 06:30 cycle skip."""
     rehearsal = _run(tmp_path, dry_run=True)
     assert rehearsal.status == C.COMPLETED
     real = _run(tmp_path)
