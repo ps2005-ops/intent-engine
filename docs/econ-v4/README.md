@@ -24,6 +24,13 @@ than argued about.
 | [MECHANISM_FALSIFIABILITY_AUDIT.md](MECHANISM_FALSIFIABILITY_AUDIT.md) | 16 mechanisms, five-way classification, and why 12 must NOT be bound |
 | [BELIEF_INFERENCE_AND_CALIBRATION.md](BELIEF_INFERENCE_AND_CALIBRATION.md) | the ±0.060/−0.080 constant, and the first proper score ever computed |
 
+## Wave 6 — deployment and live proof (COMPLETE)
+
+| artifact | what it establishes |
+|---|---|
+| [ECON_V4_LIVE_CYCLE_PROOF.md](ECON_V4_LIVE_CYCLE_PROOF.md) | deployment to the runtime, imports verified under the plist env, a real 15-step cycle on the deployed code, and a restart/reload proof |
+| [ECON_V4_NEXT_30_DAY_VALIDATION.md](ECON_V4_NEXT_30_DAY_VALIDATION.md) | thresholds declared BEFORE the data, and which questions are explicitly unreadable in 30 days |
+
 ## Qualification
 
 | artifact | what it establishes |
@@ -37,7 +44,10 @@ These correspond to waves not reached. They are absent rather than
 stubbed, because an artifact asserting an unproven claim is worse than no
 artifact:
 
-`ECON_V4_OBSERVATION_ROUTING_PROOF` · `ECON_V4_REPEATED_LEARNING_PROOF` ·
-`ECON_V4_FORECAST_SKILL` · `ECON_V4_NEGATIVE_KNOWLEDGE_DELTA` ·
-`ECON_V4_FOUNDER_BRIDGE_PROOF` · `ECON_V4_PAPER_SHADOW_PROOF` ·
-`ECON_V4_LIVE_CYCLE_PROOF` · `ECON_V4_NEXT_30_DAY_VALIDATION`
+`ECON_V4_OBSERVATION_ROUTING_PROOF` (Wave 2) ·
+`ECON_V4_REPEATED_LEARNING_PROOF` (Wave 2) ·
+`ECON_V4_INFERENCE_AND_CALIBRATION` (Wave 3 — partly covered by
+BELIEF_INFERENCE_AND_CALIBRATION) · `ECON_V4_FORECAST_SKILL` (Wave 3) ·
+`ECON_V4_NEGATIVE_KNOWLEDGE_DELTA` (Wave 4) ·
+`ECON_V4_PAPER_SHADOW_PROOF` (Wave 4) ·
+`ECON_V4_FOUNDER_BRIDGE_PROOF` (Wave 5)

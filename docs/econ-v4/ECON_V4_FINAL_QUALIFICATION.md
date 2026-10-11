@@ -1,7 +1,7 @@
 # ECON_V4_FINAL_QUALIFICATION
 
-Session of 2026-10-11, continuing 2026-10-09. **Wave 1 complete.** Waves 2–6
-not reached. This document separates what is proven from what is not, and
+Session of 2026-10-11, continuing 2026-10-09. **Wave 1 complete, and Wave 6
+(deployment + live proof) complete.** Waves 2–5 not reached. This document separates what is proven from what is not, and
 distinguishes engineering improvement from predictive improvement — they are
 not the same thing and must not be summed.
 
@@ -11,9 +11,11 @@ not the same thing and must not be summed.
 |---|---|
 | Runtime root | `/Users/prathamsharma/intent-engine-market` |
 | Runtime HEAD at session start | `9b01ff1b10d3` |
+| **Runtime HEAD now (deployed)** | **`3b53037044c3`** |
+| Remote | `origin/fix/econ-v4-calibration` = `3b53037044c3`, verified |
 | Development worktree | `/Users/prathamsharma/ie-econ-v4-dev` |
 | Development branch | `fix/econ-v4-calibration` |
-| Development HEAD | **`9fe55742`** |
+| Development HEAD | `9fe55742` repairs, `3b530370` artifacts |
 | Preserved patch | 1,783 lines, sha256 `02fd77cb5fc7d41e…`, already applied |
 
 ## The guard
@@ -49,9 +51,9 @@ Engineering state, 2026-10-09 baseline vs now:
 | Future-dated prediction rejected | no | **yes** | correctness |
 | Mechanisms observable | 4 | 4 | *unchanged* |
 | Mechanisms gradeable | 2 | 2 | *unchanged* |
-| Beliefs | 131 | 131 | *unchanged* |
+| Beliefs | 131 | 132 | *unchanged by this work* — +1 from the scheduled cycle |
 | Beliefs repeatedly tested | 0 | **0** | *unchanged* |
-| Untested beliefs | 99 | 99 | *unchanged* |
+| Untested beliefs | 99 | **100** | *unchanged by this work* — the new belief is untested |
 | Resolved expectations | 32 | 32 | *unchanged* |
 | Brier | 0.2138 | 0.2138 | *unchanged* |
 | Brier skill vs climatology | −0.0576 | −0.0576 | *unchanged* |
@@ -59,7 +61,11 @@ Engineering state, 2026-10-09 baseline vs now:
 | PAPER positions | 0 | 0 | *unchanged* |
 | Founder consumption receipts (local) | 0 | 0 | *unchanged* |
 
-**Nothing in the lower block moved, and nothing should have.** Wave 1 repaired
+**Nothing in the lower block moved because of this work, and nothing should
+have.** The two belief counts advanced by one overnight, from the scheduled
+cycle — and the new belief landed on `regulatory_pressure`, a family
+classified `NOT_A_CAUSAL_MECHANISM`, so it is untested and untestable. That is
+the audit's central finding reproducing itself in real time, not progress. Wave 1 repaired
 measurement, publication and operational honesty. None of that can improve
 predictive accuracy, and claiming otherwise would be the inflation this
 execution was told to avoid.
@@ -99,6 +105,10 @@ execution was told to avoid.
 Wave 1 is complete and committed green. Waves 2–6 are not started.
 
 **2. DAILY OPERATION — PARTIAL.**
+Deployment is live-proven: runtime HEAD advanced to `3b53037044c3`, imports
+verified under the plist environment, and a real 15-step cycle completed on
+the deployed code (EXIT=0) with the capped mechanism and v2 contract persisted
+to a durable report and surviving a fresh-process reload.
 On-schedule invocation is live-proven: a `day` cycle fired at 06:30 on
 2026-10-11 and ran. But three cycles were silently lost to host sleep in the
 preceding two days, and while a lost cycle is now *nameable*, it is still not
