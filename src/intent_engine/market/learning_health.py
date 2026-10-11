@@ -140,6 +140,16 @@ KNOWLEDGE_REVERSAL_RATE_RISING = "KNOWLEDGE_REVERSAL_RATE_RISING"
 WATCHLIST_COVERAGE_DROPPING = "PRIORITY_WATCHLIST_COVERAGE_DROPPING"
 FOUNDER_UTILITY_DROPPING = "FOUNDER_UTILITY_DROPPING"
 PIPELINE_STAGE_REGRESSION = "PIPELINE_STAGE_REGRESSION"
+#: A scheduled cycle did no work and nothing will retry it. Fires on the
+#: SCHEDULE, not on the cycle reports, because a cycle that never ran wrote no
+#: report -- which is precisely why 20 of 145 due slots were lost in silence
+#: while every surface here reported healthy.
+CYCLES_MISSED = "CYCLES_MISSED"
+SCHEDULE_RELIABILITY_LOW = "SCHEDULE_RELIABILITY_LOW"
+
+#: Below this fraction of due slots actually doing work, the schedule is the
+#: engine's binding problem and no learning metric below it means much.
+MIN_SCHEDULE_RELIABILITY = 0.95
 
 ALERT_CLASSES = frozenset({
     LEARNING_STALLED, BELIEF_TESTING_STALLED, EXPECTATION_BACKLOG_GROWING,
@@ -793,11 +803,13 @@ class LearningHealth:
     status: Dict[str, object] = field(default_factory=dict)
     alerts: List[dict] = field(default_factory=list)
     coverage: Dict[str, object] = field(default_factory=dict)
+    schedule: Dict[str, object] = field(default_factory=dict)
 
     def as_dict(self) -> dict:
         return {
             "contract": CONTRACT, "as_of": self.as_of,
             "runtime_sha": self.runtime_sha,
+            "schedule_health": self.schedule,
             "observation_health": self.observation,
             "belief_health": self.belief,
             "expectation_health": self.expectation,
@@ -830,11 +842,34 @@ def alerts(observations: Sequence[CycleObservation],
     """
     usable = [o for o in observations if not o.backlog_drain]
     out: List[dict] = []
-    if len(usable) < MIN_CYCLES_FOR_ALERT:
-        return out
 
     def fire(name: str, detail: str, severity: str = "WARN") -> None:
         out.append({"alert": name, "severity": severity, "detail": detail})
+
+    # --- schedule first, and ABOVE the observation gate -------------------
+    # Every alert below needs MIN_CYCLES_FOR_ALERT observations, and an
+    # observation only exists for a cycle that RAN. So the fewer cycles run,
+    # the fewer alerts could fire -- the engine went quietest exactly when it
+    # was most broken. A missed cycle is read from the schedule, which exists
+    # whether or not anything ran, so it must be checked before that gate.
+    schedule = health.schedule or {}
+    lost = int(schedule.get("slots_lost", 0) or 0)
+    if lost:
+        recoverable = len(schedule.get("recoverable", ()) or ())
+        fire(CYCLES_MISSED,
+             f"{lost} scheduled cycle(s) did no work and nothing retried "
+             f"them; {recoverable} are still recoverable "
+             f"(`market catch-up` replays them)",
+             "CRITICAL" if recoverable else "WARN")
+    reliability = schedule.get("reliability")
+    if _is_number(reliability) and reliability < MIN_SCHEDULE_RELIABILITY:
+        fire(SCHEDULE_RELIABILITY_LOW,
+             f"{reliability:.1%} of due cycles did work "
+             f"(floor {MIN_SCHEDULE_RELIABILITY:.0%}); the schedule is the "
+             f"binding problem, not the learning rate", "CRITICAL")
+
+    if len(usable) < MIN_CYCLES_FOR_ALERT:
+        return out
 
     recent = usable[-MIN_CYCLES_FOR_ALERT:]
 
@@ -1263,6 +1298,11 @@ def assess(*, root: pathlib.Path, as_of: str, store=None,
 
     health.status = classify(observations, as_of=as_of,
                              bottleneck=health.funnel.get("bottleneck"))
+    # The schedule is read from the durable run ledger, not from the cycle
+    # reports -- a cycle that never ran wrote no report, so the reports can
+    # never reveal its absence. Must precede `alerts`, which consumes it.
+    from . import schedule_audit as SCHED
+    health.schedule = SCHED.audit(root=root, end=as_of[:10])
     health.alerts = alerts(observations, health)
     return health
 
@@ -1509,6 +1549,13 @@ def render(health: LearningHealth) -> str:
         f"{cov.get('off_watchlist_companies_observed')}",
         "",
     ]
+
+    schedule = d.get("schedule_health") or {}
+    if schedule:
+        from . import schedule_audit as SCHED
+        lines += ["## Did every scheduled cycle actually run?", ""]
+        lines += SCHED.render(schedule)
+        lines += [""]
 
     if d["alerts"]:
         lines += ["## Alerts", ""]

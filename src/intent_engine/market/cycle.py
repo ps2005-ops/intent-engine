@@ -160,6 +160,12 @@ class CycleResult:
     finished_at: str = ""
     trading_mode: str = ""
     dry_run: bool = False
+    #: True when this run replayed a slot that had already been missed. The
+    #: ledger MUST be able to tell a replay from an on-time run: a cycle
+    #: replayed on Sunday for Friday is a Sunday execution of Friday's window,
+    #: and reporting it as Friday's cycle would turn schedule reliability into
+    #: a number about replays. Execution timestamps are never backdated.
+    catch_up: bool = False
     report_paths: dict = field(default_factory=dict)
 
     @property
@@ -180,6 +186,7 @@ class CycleResult:
         return {"run_id": self.run_id, "cycle": self.cycle,
                 "as_of": self.as_of, "timezone": self.timezone,
                 "status": self.status, "reason": self.reason,
+                "catch_up": self.catch_up,
                 "session": self.session,
                 "steps": [s.as_dict() for s in self.steps],
                 "started_at": self.started_at, "finished_at": self.finished_at,
@@ -350,6 +357,7 @@ def run_cycle(cycle: str, *, root, steps: Sequence[Tuple[str, StepFn]],
               dry_run: bool = False,
               env: Optional[dict] = None,
               enforce_window: bool = False,
+              catch_up: bool = False,
               sleep: Callable[[float], None] = time.sleep) -> CycleResult:
     """Run one complete cycle. The order of the guards below is the design.
 
@@ -378,7 +386,7 @@ def run_cycle(cycle: str, *, root, steps: Sequence[Tuple[str, StepFn]],
             status=status, reason=reason,
             session=(session.as_dict() if session else {}),
             steps=tuple(steps_run), started_at=started, finished_at=_now_utc(),
-            trading_mode=mode, dry_run=dry_run,
+            trading_mode=mode, dry_run=dry_run, catch_up=catch_up,
             report_paths=reports or {})
         store.append(result)
         return result

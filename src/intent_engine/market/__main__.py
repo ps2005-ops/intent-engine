@@ -118,6 +118,79 @@ def cmd_cycle(name: str, args) -> int:
     return result.exit_code
 
 
+def cmd_catch_up(args) -> int:
+    """Replay scheduled cycles that did no work and nothing retried.
+
+    Never enforces the window: a catch-up is BY DEFINITION out of its window,
+    and that is what makes it a catch-up rather than a duplicate.
+    """
+    from intent_engine.market import schedule_audit as SA
+    # `resolve_root`, NEVER `_root`: the latter redirects to <root>/dryrun
+    # whenever a `--dry-run` flag is set, which is right for rehearsing a
+    # cycle and catastrophic here -- the audit would read an almost-empty
+    # sandbox tree and report every real cycle as MISSED_NEVER_INVOKED, then
+    # offer to replay 15 cycles that had in fact completed. Measured.
+    # The flag is `--plan-only` for the same reason: "dry run" already means
+    # "write into the sandbox" in this CLI, and it cannot also mean "read the
+    # real tree and change nothing".
+    root = resolve_root(args.root)
+    root.mkdir(parents=True, exist_ok=True)
+
+    before = SA.audit(root=root)
+    print("\n".join(SA.render(before)))
+    plan = SA.catch_up_plan(before)
+    if not plan:
+        print("\nnothing to replay")
+        return 0
+    if args.plan_only:
+        print(f"\nwould replay {len(plan)} slot(s), oldest first:")
+        for slot in sorted(plan, key=lambda s: (s["as_of"], s["cycle"])):
+            print(f"  --as-of {slot['as_of']} {slot['cycle']}")
+        return 0
+
+    def runner(cycle: str, as_of: str):
+        print(f"\nreplaying {as_of} {cycle} ...")
+        result = C.run_cycle(
+            cycle, root=root, steps=STEPS.STEPS[cycle](),
+            as_of=as_of, catch_up=True,
+            # No window enforcement, and no bar probe: the probe answers
+            # "what is the newest bar NOW", which for a historical replay is
+            # future information. Leaving it None makes the session report
+            # BAR_UNAVAILABLE honestly rather than dating today's bar to a
+            # past operating day.
+            enforce_window=False, latest_bar=None)
+        print(f"  {result.run_id}  {result.status}")
+        if result.reason:
+            print(f"    {result.reason}")
+        return result
+
+    outcome = SA.catch_up(root=root, runner=runner, limit=args.limit)
+    print(f"\nreplayed {len(outcome['replayed'])}, "
+          f"refused {len(outcome['refused'])}")
+    if outcome.get("yielded_to_schedule"):
+        held = outcome["yielded_to_schedule"]
+        print(f"stopped: a scheduled cycle is due in "
+              f"{held['minutes_to_next_slot']:.0f} min — the live slot "
+              f"outranks a historical one")
+    rel, cov = outcome["reliability_after"], outcome["coverage_after"]
+    # Scoped to the recoverable window, NOT the whole history printed above.
+    print(f"\nover the recoverable window "
+          f"{outcome['window_start']} .. {outcome['window_end']}:")
+    print(f"  cycles still lost      : {outcome['slots_lost_after']}")
+    print(f"  still recoverable      : {outcome['still_recoverable']}")
+    print(f"  unrecoverable (too old): {outcome['unrecoverable']}")
+    if rel is not None:
+        print(f"  schedule reliability   : {rel:.1%}  (on-time only)")
+        print(f"  coverage               : {cov:.1%}  (including replays)")
+    whole = SA.audit(root=root)
+    if whole.get("reliability") is not None:
+        print(f"\nwhole history {whole['start']} .. {whole['end']}: "
+              f"reliability {whole['reliability']:.1%}, "
+              f"coverage {whole['coverage']:.1%}, "
+              f"{whole['slots_lost']} lost")
+    return 0
+
+
 def cmd_status(args) -> int:
     root = resolve_root(args.root)
     health = H.check(root)
@@ -236,6 +309,17 @@ def build_parser() -> argparse.ArgumentParser:
                        help="refuse to run outside the scheduled local-time "
                             "window (used by launchd; guards DST)")
 
+    p = sub.add_parser("catch-up",
+                       help="replay scheduled cycles that did no work")
+    p.add_argument("--root", default=None,
+                   help=f"runtime tree (default: ${ROOT_ENV}, else "
+                        f"./{FALLBACK_ROOT})")
+    p.add_argument("--plan-only", action="store_true",
+                   help="list what would be replayed and exit; reads the "
+                        "real tree and changes nothing")
+    p.add_argument("--limit", type=int, default=0,
+                   help="replay at most N slots (0 = all recoverable)")
+
     p = sub.add_parser("status", help="operational health, one screen")
     p.add_argument("--root", default=None,
                    help=f"runtime tree (default: ${ROOT_ENV}, else "
@@ -278,6 +362,8 @@ def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
     if args.command in C.CYCLES:
         return cmd_cycle(args.command, args)
+    if args.command == "catch-up":
+        return cmd_catch_up(args)
     if args.command == "status":
         return cmd_status(args)
     if args.command == "runs":
