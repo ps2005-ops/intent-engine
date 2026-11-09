@@ -5,6 +5,14 @@ Branch `prospect100/identity`, cut from the deployed preview commit
 2026-11-09. **Deployed to the preview** (`d5672e71`, verified live; see below). Nothing here touches production, the market
 runtime or any ledger.
 
+> **Passes 2 and 3 (2026-11-09):** the per-company qualification table, the
+> performance, research, visual and engineering reports and the final verdict
+> are in [`QUALIFICATION_100.md`](QUALIFICATION_100.md), generated from the
+> measurement files by `scripts/prospect100/write_report.py`. Headline: 0 of
+> 100 at 10/10; 94 functional but evidence-limited; 5 status pages by design;
+> 0 visual and 0 performance failures on the final code; 85 of 95 analysed
+> companies have no independent corroboration.
+
 ## Executive summary (deliverable L)
 
 Every analysis surface depends on opening the right company, so Pass 1

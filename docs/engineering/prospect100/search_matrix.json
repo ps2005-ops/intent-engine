@@ -1,0 +1,3690 @@
+{
+ "summary": {
+  "prospects": 100,
+  "pass": 100,
+  "partial": [],
+  "fail": [],
+  "bounded_exact_ticker": [
+   [
+    4,
+    "Atac",
+    "Albatross Acquisition Corp"
+   ],
+   [
+    22,
+    "Neo",
+    "Neogenomics Inc"
+   ],
+   [
+    29,
+    "Alt",
+    "Altimmune, Inc."
+   ],
+   [
+    31,
+    "Say",
+    "Saratoga Investment Corp."
+   ],
+   [
+    35,
+    "MSC",
+    "STUDIO CITY INTERNATIONAL HOLDINGS Ltd"
+   ],
+   [
+    36,
+    "Fac",
+    "Factorial Energy Inc."
+   ],
+   [
+    47,
+    "Cor",
+    "Cencora, Inc."
+   ],
+   [
+    53,
+    "Cub",
+    "Lionheart Holdings"
+   ],
+   [
+    58,
+    "Wor",
+    "Worthington Enterprises, Inc."
+   ],
+   [
+    60,
+    "Pay",
+    "Paymentus Holdings, Inc."
+   ],
+   [
+    67,
+    "Flo",
+    "Flowers Foods Inc"
+   ],
+   [
+    90,
+    "Swim",
+    "Latham Group, Inc."
+   ],
+   [
+    91,
+    "Pax",
+    "Patria Investments Ltd"
+   ]
+  ],
+  "bounded_shared_prefix": [
+   [
+    69,
+    "Data",
+    "Dataiku, Inc."
+   ]
+  ],
+  "queries": 400,
+  "cold_first_query_ms": 742.3,
+  "warm_p50_ms": 2.47,
+  "warm_p95_ms": 4.42,
+  "warm_max_ms": 6.89,
+  "registrant_table_loaded": true
+ },
+ "rows": [
+  {
+   "prospect_id": 1,
+   "entity_id": "hammerspace",
+   "typed": "Hammerspace",
+   "queries": [
+    {
+     "typed": "Hamme",
+     "verdict": "PASS",
+     "top": "Hammerspace",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "hammerspace",
+     "verdict": "PASS",
+     "top": "Hammerspace",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "HAMMERSPACE",
+     "verdict": "PASS",
+     "top": "Hammerspace",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Hammerspace",
+     "verdict": "PASS",
+     "top": "Hammerspace",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 2,
+   "entity_id": "weka",
+   "typed": "WEKA",
+   "queries": [
+    {
+     "typed": "WEK",
+     "verdict": "PASS",
+     "top": "WekaIO, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "weka",
+     "verdict": "PASS",
+     "top": "WekaIO, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "WEKA",
+     "verdict": "PASS",
+     "top": "WekaIO, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "WEKA",
+     "verdict": "PASS",
+     "top": "WekaIO, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 3,
+   "entity_id": "reltio",
+   "typed": "Reltio",
+   "queries": [
+    {
+     "typed": "Rel",
+     "verdict": "PASS",
+     "top": "Reltio, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "reltio",
+     "verdict": "PASS",
+     "top": "Reltio, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "RELTIO",
+     "verdict": "PASS",
+     "top": "Reltio, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Reltio",
+     "verdict": "PASS",
+     "top": "Reltio, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 4,
+   "entity_id": "ataccama",
+   "typed": "Ataccama",
+   "queries": [
+    {
+     "typed": "Atac",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Albatross Acquisition Corp",
+     "top_ticker": "ATAC",
+     "status_shown": false
+    },
+    {
+     "typed": "ataccama",
+     "verdict": "PASS",
+     "top": "Ataccama",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "ATACCAMA",
+     "verdict": "PASS",
+     "top": "Ataccama",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Ataccama",
+     "verdict": "PASS",
+     "top": "Ataccama",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 5,
+   "entity_id": "informatica",
+   "typed": "Informatica",
+   "queries": [
+    {
+     "typed": "Infor",
+     "verdict": "PASS",
+     "top": "Informatica Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "informatica",
+     "verdict": "PASS",
+     "top": "Informatica Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "INFORMATICA",
+     "verdict": "PASS",
+     "top": "Informatica Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "Informatica",
+     "verdict": "PASS",
+     "top": "Informatica Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 6,
+   "entity_id": "qlik",
+   "typed": "Qlik",
+   "queries": [
+    {
+     "typed": "Qli",
+     "verdict": "PASS",
+     "top": "Qlik",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "qlik",
+     "verdict": "PASS",
+     "top": "Qlik",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "QLIK",
+     "verdict": "PASS",
+     "top": "Qlik",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Qlik",
+     "verdict": "PASS",
+     "top": "Qlik",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 7,
+   "entity_id": "matillion",
+   "typed": "Matillion",
+   "queries": [
+    {
+     "typed": "Mati",
+     "verdict": "PASS",
+     "top": "Matillion",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "matillion",
+     "verdict": "PASS",
+     "top": "Matillion",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "MATILLION",
+     "verdict": "PASS",
+     "top": "Matillion",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Matillion",
+     "verdict": "PASS",
+     "top": "Matillion",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 8,
+   "entity_id": "keboola",
+   "typed": "Keboola",
+   "queries": [
+    {
+     "typed": "Keb",
+     "verdict": "PASS",
+     "top": "Keboola",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "keboola",
+     "verdict": "PASS",
+     "top": "Keboola",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "KEBOOLA",
+     "verdict": "PASS",
+     "top": "Keboola",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Keboola",
+     "verdict": "PASS",
+     "top": "Keboola",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 9,
+   "entity_id": "cdata",
+   "typed": "CData",
+   "queries": [
+    {
+     "typed": "CDa",
+     "verdict": "PASS",
+     "top": "CData Software, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "cdata",
+     "verdict": "PASS",
+     "top": "CData Software, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "CDATA",
+     "verdict": "PASS",
+     "top": "CData Software, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "CData",
+     "verdict": "PASS",
+     "top": "CData Software, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 10,
+   "entity_id": "precisely",
+   "typed": "Precisely",
+   "queries": [
+    {
+     "typed": "Prec",
+     "verdict": "PASS",
+     "top": "Precisely",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "precisely",
+     "verdict": "PASS",
+     "top": "Precisely",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "PRECISELY",
+     "verdict": "PASS",
+     "top": "Precisely",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Precisely",
+     "verdict": "PASS",
+     "top": "Precisely",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 11,
+   "entity_id": "securiti",
+   "typed": "Securiti",
+   "queries": [
+    {
+     "typed": "Secu",
+     "verdict": "PASS",
+     "top": "Securiti",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "securiti",
+     "verdict": "PASS",
+     "top": "Securiti",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "SECURITI",
+     "verdict": "PASS",
+     "top": "Securiti",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "Securiti",
+     "verdict": "PASS",
+     "top": "Securiti",
+     "top_ticker": "",
+     "status_shown": true
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 12,
+   "entity_id": "immuta",
+   "typed": "Immuta",
+   "queries": [
+    {
+     "typed": "Imm",
+     "verdict": "PASS",
+     "top": "Immuta, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "immuta",
+     "verdict": "PASS",
+     "top": "Immuta, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "IMMUTA",
+     "verdict": "PASS",
+     "top": "Immuta, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Immuta",
+     "verdict": "PASS",
+     "top": "Immuta, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 13,
+   "entity_id": "privacera",
+   "typed": "Privacera",
+   "queries": [
+    {
+     "typed": "Priv",
+     "verdict": "PASS",
+     "top": "Privacera, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "privacera",
+     "verdict": "PASS",
+     "top": "Privacera, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "PRIVACERA",
+     "verdict": "PASS",
+     "top": "Privacera, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Privacera",
+     "verdict": "PASS",
+     "top": "Privacera, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 14,
+   "entity_id": "soda-data",
+   "typed": "Soda",
+   "queries": [
+    {
+     "typed": "Sod",
+     "verdict": "PASS",
+     "top": "Soda",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "soda",
+     "verdict": "PASS",
+     "top": "Soda",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "SODA",
+     "verdict": "PASS",
+     "top": "Soda",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Soda",
+     "verdict": "PASS",
+     "top": "Soda",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 15,
+   "entity_id": "acceldata",
+   "typed": "Acceldata",
+   "queries": [
+    {
+     "typed": "Acce",
+     "verdict": "PASS",
+     "top": "Acceldata",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "acceldata",
+     "verdict": "PASS",
+     "top": "Acceldata",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "ACCELDATA",
+     "verdict": "PASS",
+     "top": "Acceldata",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Acceldata",
+     "verdict": "PASS",
+     "top": "Acceldata",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 16,
+   "entity_id": "anomalo",
+   "typed": "Anomalo",
+   "queries": [
+    {
+     "typed": "Ano",
+     "verdict": "PASS",
+     "top": "Anomalo",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "anomalo",
+     "verdict": "PASS",
+     "top": "Anomalo",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "ANOMALO",
+     "verdict": "PASS",
+     "top": "Anomalo",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Anomalo",
+     "verdict": "PASS",
+     "top": "Anomalo",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 17,
+   "entity_id": "observe-inc",
+   "typed": "Observe",
+   "queries": [
+    {
+     "typed": "Obs",
+     "verdict": "PASS",
+     "top": "Observe, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "observe",
+     "verdict": "PASS",
+     "top": "Observe, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "OBSERVE",
+     "verdict": "PASS",
+     "top": "Observe, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "Observe",
+     "verdict": "PASS",
+     "top": "Observe, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 18,
+   "entity_id": "chronosphere",
+   "typed": "Chronosphere",
+   "queries": [
+    {
+     "typed": "Chrono",
+     "verdict": "PASS",
+     "top": "Chronosphere, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "chronosphere",
+     "verdict": "PASS",
+     "top": "Chronosphere, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "CHRONOSPHERE",
+     "verdict": "PASS",
+     "top": "Chronosphere, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "Chronosphere",
+     "verdict": "PASS",
+     "top": "Chronosphere, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 19,
+   "entity_id": "cratedb",
+   "typed": "CrateDB",
+   "queries": [
+    {
+     "typed": "Cra",
+     "verdict": "PASS",
+     "top": "Crate.io",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "cratedb",
+     "verdict": "PASS",
+     "top": "Crate.io",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "CRATEDB",
+     "verdict": "PASS",
+     "top": "Crate.io",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "CrateDB",
+     "verdict": "PASS",
+     "top": "Crate.io",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 20,
+   "entity_id": "singlestore",
+   "typed": "SingleStore",
+   "queries": [
+    {
+     "typed": "Singl",
+     "verdict": "PASS",
+     "top": "SingleStore, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "singlestore",
+     "verdict": "PASS",
+     "top": "SingleStore, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "SINGLESTORE",
+     "verdict": "PASS",
+     "top": "SingleStore, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "SingleStore",
+     "verdict": "PASS",
+     "top": "SingleStore, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 21,
+   "entity_id": "tigergraph",
+   "typed": "TigerGraph",
+   "queries": [
+    {
+     "typed": "Tiger",
+     "verdict": "PASS",
+     "top": "TigerGraph, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "tigergraph",
+     "verdict": "PASS",
+     "top": "TigerGraph, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "TIGERGRAPH",
+     "verdict": "PASS",
+     "top": "TigerGraph, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "TigerGraph",
+     "verdict": "PASS",
+     "top": "TigerGraph, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 22,
+   "entity_id": "neo4j",
+   "typed": "Neo4j",
+   "queries": [
+    {
+     "typed": "Neo",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Neogenomics Inc",
+     "top_ticker": "NEO",
+     "status_shown": false
+    },
+    {
+     "typed": "neo4j",
+     "verdict": "PASS",
+     "top": "Neo4j, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "NEO4J",
+     "verdict": "PASS",
+     "top": "Neo4j, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Neo4j",
+     "verdict": "PASS",
+     "top": "Neo4j, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 23,
+   "entity_id": "arango",
+   "typed": "Arango",
+   "queries": [
+    {
+     "typed": "Ara",
+     "verdict": "PASS",
+     "top": "ArangoDB Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "arango",
+     "verdict": "PASS",
+     "top": "ArangoDB Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "ARANGO",
+     "verdict": "PASS",
+     "top": "ArangoDB Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Arango",
+     "verdict": "PASS",
+     "top": "ArangoDB Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 24,
+   "entity_id": "kx",
+   "typed": "KX",
+   "queries": [
+    {
+     "typed": "KX",
+     "verdict": "PASS",
+     "top": "KX",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "kx",
+     "verdict": "PASS",
+     "top": "KX",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "KX",
+     "verdict": "PASS",
+     "top": "KX",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "KX",
+     "verdict": "PASS",
+     "top": "KX",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 25,
+   "entity_id": "tecton",
+   "typed": "Tecton",
+   "queries": [
+    {
+     "typed": "Tec",
+     "verdict": "PASS",
+     "top": "Tecton",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "tecton",
+     "verdict": "PASS",
+     "top": "Tecton",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "TECTON",
+     "verdict": "PASS",
+     "top": "Tecton",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "Tecton",
+     "verdict": "PASS",
+     "top": "Tecton",
+     "top_ticker": "",
+     "status_shown": true
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 26,
+   "entity_id": "interos",
+   "typed": "Interos",
+   "queries": [
+    {
+     "typed": "Int",
+     "verdict": "PASS",
+     "top": "Interos",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "interos",
+     "verdict": "PASS",
+     "top": "Interos",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "INTEROS",
+     "verdict": "PASS",
+     "top": "Interos",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Interos",
+     "verdict": "PASS",
+     "top": "Interos",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 27,
+   "entity_id": "everstream",
+   "typed": "Everstream Analytics",
+   "queries": [
+    {
+     "typed": "Everstream",
+     "verdict": "PASS",
+     "top": "Everstream Analytics",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "everstream analytics",
+     "verdict": "PASS",
+     "top": "Everstream Analytics",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "EVERSTREAM ANALYTICS",
+     "verdict": "PASS",
+     "top": "Everstream Analytics",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Everstream Analytics",
+     "verdict": "PASS",
+     "top": "Everstream Analytics",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 28,
+   "entity_id": "resilinc",
+   "typed": "Resilinc",
+   "queries": [
+    {
+     "typed": "Resi",
+     "verdict": "PASS",
+     "top": "Resilinc",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "resilinc",
+     "verdict": "PASS",
+     "top": "Resilinc",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "RESILINC",
+     "verdict": "PASS",
+     "top": "Resilinc",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Resilinc",
+     "verdict": "PASS",
+     "top": "Resilinc",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 29,
+   "entity_id": "altana",
+   "typed": "Altana",
+   "queries": [
+    {
+     "typed": "Alt",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Altimmune, Inc.",
+     "top_ticker": "ALT",
+     "status_shown": false
+    },
+    {
+     "typed": "altana",
+     "verdict": "PASS",
+     "top": "Altana",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "ALTANA",
+     "verdict": "PASS",
+     "top": "Altana",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Altana",
+     "verdict": "PASS",
+     "top": "Altana",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 30,
+   "entity_id": "exiger",
+   "typed": "Exiger",
+   "queries": [
+    {
+     "typed": "Exi",
+     "verdict": "PASS",
+     "top": "Exiger",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "exiger",
+     "verdict": "PASS",
+     "top": "Exiger",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "EXIGER",
+     "verdict": "PASS",
+     "top": "Exiger",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Exiger",
+     "verdict": "PASS",
+     "top": "Exiger",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 31,
+   "entity_id": "sayari",
+   "typed": "Sayari",
+   "queries": [
+    {
+     "typed": "Say",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Saratoga Investment Corp.",
+     "top_ticker": "SAY",
+     "status_shown": false
+    },
+    {
+     "typed": "sayari",
+     "verdict": "PASS",
+     "top": "Sayari",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "SAYARI",
+     "verdict": "PASS",
+     "top": "Sayari",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Sayari",
+     "verdict": "PASS",
+     "top": "Sayari",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 32,
+   "entity_id": "kharon",
+   "typed": "Kharon",
+   "queries": [
+    {
+     "typed": "Kha",
+     "verdict": "PASS",
+     "top": "Kharon",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "kharon",
+     "verdict": "PASS",
+     "top": "Kharon",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "KHARON",
+     "verdict": "PASS",
+     "top": "Kharon",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Kharon",
+     "verdict": "PASS",
+     "top": "Kharon",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 33,
+   "entity_id": "moodys",
+   "typed": "Moody's",
+   "queries": [
+    {
+     "typed": "Moo",
+     "verdict": "PASS",
+     "top": "Moody's Corporation",
+     "top_ticker": "MCO",
+     "status_shown": false
+    },
+    {
+     "typed": "moody's",
+     "verdict": "PASS",
+     "top": "Moody's Corporation",
+     "top_ticker": "MCO",
+     "status_shown": false
+    },
+    {
+     "typed": "MOODY'S",
+     "verdict": "PASS",
+     "top": "Moody's Corporation",
+     "top_ticker": "MCO",
+     "status_shown": false
+    },
+    {
+     "typed": "Moody's",
+     "verdict": "PASS",
+     "top": "Moody's Corporation",
+     "top_ticker": "MCO",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 34,
+   "entity_id": "sp-global",
+   "typed": "S&P Global",
+   "queries": [
+    {
+     "typed": "S&P G",
+     "verdict": "PASS",
+     "top": "S&P Global Inc.",
+     "top_ticker": "SPGI",
+     "status_shown": false
+    },
+    {
+     "typed": "s&p global",
+     "verdict": "PASS",
+     "top": "S&P Global Inc.",
+     "top_ticker": "SPGI",
+     "status_shown": false
+    },
+    {
+     "typed": "S&P GLOBAL",
+     "verdict": "PASS",
+     "top": "S&P Global Inc.",
+     "top_ticker": "SPGI",
+     "status_shown": false
+    },
+    {
+     "typed": "S&P Global",
+     "verdict": "PASS",
+     "top": "S&P Global Inc.",
+     "top_ticker": "SPGI",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 35,
+   "entity_id": "msci",
+   "typed": "MSCI",
+   "queries": [
+    {
+     "typed": "MSC",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "STUDIO CITY INTERNATIONAL HOLDINGS Ltd",
+     "top_ticker": "MSC",
+     "status_shown": false
+    },
+    {
+     "typed": "msci",
+     "verdict": "PASS",
+     "top": "MSCI Inc.",
+     "top_ticker": "MSCI",
+     "status_shown": false
+    },
+    {
+     "typed": "MSCI",
+     "verdict": "PASS",
+     "top": "MSCI Inc.",
+     "top_ticker": "MSCI",
+     "status_shown": false
+    },
+    {
+     "typed": "MSCI",
+     "verdict": "PASS",
+     "top": "MSCI Inc.",
+     "top_ticker": "MSCI",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 36,
+   "entity_id": "factset",
+   "typed": "FactSet",
+   "queries": [
+    {
+     "typed": "Fac",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Factorial Energy Inc.",
+     "top_ticker": "FAC",
+     "status_shown": false
+    },
+    {
+     "typed": "factset",
+     "verdict": "PASS",
+     "top": "FactSet Research Systems Inc.",
+     "top_ticker": "FDS",
+     "status_shown": false
+    },
+    {
+     "typed": "FACTSET",
+     "verdict": "PASS",
+     "top": "FactSet Research Systems Inc.",
+     "top_ticker": "FDS",
+     "status_shown": false
+    },
+    {
+     "typed": "FactSet",
+     "verdict": "PASS",
+     "top": "FactSet Research Systems Inc.",
+     "top_ticker": "FDS",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 37,
+   "entity_id": "morningstar",
+   "typed": "Morningstar",
+   "queries": [
+    {
+     "typed": "Morni",
+     "verdict": "PASS",
+     "top": "Morningstar, Inc.",
+     "top_ticker": "MORN",
+     "status_shown": false
+    },
+    {
+     "typed": "morningstar",
+     "verdict": "PASS",
+     "top": "Morningstar, Inc.",
+     "top_ticker": "MORN",
+     "status_shown": false
+    },
+    {
+     "typed": "MORNINGSTAR",
+     "verdict": "PASS",
+     "top": "Morningstar, Inc.",
+     "top_ticker": "MORN",
+     "status_shown": false
+    },
+    {
+     "typed": "Morningstar",
+     "verdict": "PASS",
+     "top": "Morningstar, Inc.",
+     "top_ticker": "MORN",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 38,
+   "entity_id": "enverus",
+   "typed": "Enverus",
+   "queries": [
+    {
+     "typed": "Env",
+     "verdict": "PASS",
+     "top": "Enverus",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "enverus",
+     "verdict": "PASS",
+     "top": "Enverus",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "ENVERUS",
+     "verdict": "PASS",
+     "top": "Enverus",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Enverus",
+     "verdict": "PASS",
+     "top": "Enverus",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 39,
+   "entity_id": "rystad-energy",
+   "typed": "Rystad Energy",
+   "queries": [
+    {
+     "typed": "Rystad",
+     "verdict": "PASS",
+     "top": "Rystad Energy",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "rystad energy",
+     "verdict": "PASS",
+     "top": "Rystad Energy",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "RYSTAD ENERGY",
+     "verdict": "PASS",
+     "top": "Rystad Energy",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Rystad Energy",
+     "verdict": "PASS",
+     "top": "Rystad Energy",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 40,
+   "entity_id": "wood-mackenzie",
+   "typed": "Wood Mackenzie",
+   "queries": [
+    {
+     "typed": "Wood Ma",
+     "verdict": "PASS",
+     "top": "Wood Mackenzie",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "wood mackenzie",
+     "verdict": "PASS",
+     "top": "Wood Mackenzie",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "WOOD MACKENZIE",
+     "verdict": "PASS",
+     "top": "Wood Mackenzie",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Wood Mackenzie",
+     "verdict": "PASS",
+     "top": "Wood Mackenzie",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 41,
+   "entity_id": "verisk",
+   "typed": "Verisk",
+   "queries": [
+    {
+     "typed": "Ver",
+     "verdict": "PASS",
+     "top": "Verisk Analytics, Inc.",
+     "top_ticker": "VRSK",
+     "status_shown": false
+    },
+    {
+     "typed": "verisk",
+     "verdict": "PASS",
+     "top": "Verisk Analytics, Inc.",
+     "top_ticker": "VRSK",
+     "status_shown": false
+    },
+    {
+     "typed": "VERISK",
+     "verdict": "PASS",
+     "top": "Verisk Analytics, Inc.",
+     "top_ticker": "VRSK",
+     "status_shown": false
+    },
+    {
+     "typed": "Verisk",
+     "verdict": "PASS",
+     "top": "Verisk Analytics, Inc.",
+     "top_ticker": "VRSK",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 42,
+   "entity_id": "jupiter-intelligence",
+   "typed": "Jupiter Intelligence",
+   "queries": [
+    {
+     "typed": "Jupiter In",
+     "verdict": "PASS",
+     "top": "Jupiter Intelligence",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "jupiter intelligence",
+     "verdict": "PASS",
+     "top": "Jupiter Intelligence",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "JUPITER INTELLIGENCE",
+     "verdict": "PASS",
+     "top": "Jupiter Intelligence",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Jupiter Intelligence",
+     "verdict": "PASS",
+     "top": "Jupiter Intelligence",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 43,
+   "entity_id": "cervest",
+   "typed": "Cervest",
+   "queries": [
+    {
+     "typed": "Cer",
+     "verdict": "PASS",
+     "top": "Cervest",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "cervest",
+     "verdict": "PASS",
+     "top": "Cervest",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "CERVEST",
+     "verdict": "PASS",
+     "top": "Cervest",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "Cervest",
+     "verdict": "PASS",
+     "top": "Cervest",
+     "top_ticker": "",
+     "status_shown": true
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 44,
+   "entity_id": "watershed",
+   "typed": "Watershed",
+   "queries": [
+    {
+     "typed": "Wate",
+     "verdict": "PASS",
+     "top": "Watershed",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "watershed",
+     "verdict": "PASS",
+     "top": "Watershed",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "WATERSHED",
+     "verdict": "PASS",
+     "top": "Watershed",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Watershed",
+     "verdict": "PASS",
+     "top": "Watershed",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 45,
+   "entity_id": "persefoni",
+   "typed": "Persefoni",
+   "queries": [
+    {
+     "typed": "Pers",
+     "verdict": "PASS",
+     "top": "Persefoni",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "persefoni",
+     "verdict": "PASS",
+     "top": "Persefoni",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "PERSEFONI",
+     "verdict": "PASS",
+     "top": "Persefoni",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Persefoni",
+     "verdict": "PASS",
+     "top": "Persefoni",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 46,
+   "entity_id": "benchmark-gensuite",
+   "typed": "Benchmark Gensuite",
+   "queries": [
+    {
+     "typed": "Benchmark",
+     "verdict": "PASS",
+     "top": "Benchmark Gensuite",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "benchmark gensuite",
+     "verdict": "PASS",
+     "top": "Benchmark Gensuite",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "BENCHMARK GENSUITE",
+     "verdict": "PASS",
+     "top": "Benchmark Gensuite",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Benchmark Gensuite",
+     "verdict": "PASS",
+     "top": "Benchmark Gensuite",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 47,
+   "entity_id": "cority",
+   "typed": "Cority",
+   "queries": [
+    {
+     "typed": "Cor",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Cencora, Inc.",
+     "top_ticker": "COR",
+     "status_shown": false
+    },
+    {
+     "typed": "cority",
+     "verdict": "PASS",
+     "top": "Cority Software Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "CORITY",
+     "verdict": "PASS",
+     "top": "Cority Software Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Cority",
+     "verdict": "PASS",
+     "top": "Cority Software Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 48,
+   "entity_id": "assent",
+   "typed": "Assent",
+   "queries": [
+    {
+     "typed": "Ass",
+     "verdict": "PASS",
+     "top": "Assent Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "assent",
+     "verdict": "PASS",
+     "top": "Assent Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "ASSENT",
+     "verdict": "PASS",
+     "top": "Assent Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Assent",
+     "verdict": "PASS",
+     "top": "Assent Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 49,
+   "entity_id": "ecovadis",
+   "typed": "EcoVadis",
+   "queries": [
+    {
+     "typed": "EcoV",
+     "verdict": "PASS",
+     "top": "EcoVadis",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "ecovadis",
+     "verdict": "PASS",
+     "top": "EcoVadis",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "ECOVADIS",
+     "verdict": "PASS",
+     "top": "EcoVadis",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "EcoVadis",
+     "verdict": "PASS",
+     "top": "EcoVadis",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 50,
+   "entity_id": "dun-and-bradstreet",
+   "typed": "Dun & Bradstreet",
+   "queries": [
+    {
+     "typed": "Dun & Br",
+     "verdict": "PASS",
+     "top": "Dun & Bradstreet Holdings, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "dun & bradstreet",
+     "verdict": "PASS",
+     "top": "Dun & Bradstreet Holdings, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "DUN & BRADSTREET",
+     "verdict": "PASS",
+     "top": "Dun & Bradstreet Holdings, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "Dun & Bradstreet",
+     "verdict": "PASS",
+     "top": "Dun & Bradstreet Holdings, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 51,
+   "entity_id": "planful",
+   "typed": "Planful",
+   "queries": [
+    {
+     "typed": "Pla",
+     "verdict": "PASS",
+     "top": "Planful, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "planful",
+     "verdict": "PASS",
+     "top": "Planful, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "PLANFUL",
+     "verdict": "PASS",
+     "top": "Planful, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Planful",
+     "verdict": "PASS",
+     "top": "Planful, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 52,
+   "entity_id": "vena",
+   "typed": "Vena",
+   "queries": [
+    {
+     "typed": "Ven",
+     "verdict": "PASS",
+     "top": "Vena Solutions Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "vena",
+     "verdict": "PASS",
+     "top": "Vena Solutions Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "VENA",
+     "verdict": "PASS",
+     "top": "Vena Solutions Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Vena",
+     "verdict": "PASS",
+     "top": "Vena Solutions Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 53,
+   "entity_id": "cube-planning",
+   "typed": "Cube",
+   "queries": [
+    {
+     "typed": "Cub",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Lionheart Holdings",
+     "top_ticker": "CUB",
+     "status_shown": false
+    },
+    {
+     "typed": "cube",
+     "verdict": "PASS",
+     "top": "Cube Planning, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "CUBE",
+     "verdict": "PASS",
+     "top": "Cube Planning, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Cube",
+     "verdict": "PASS",
+     "top": "Cube Planning, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 54,
+   "entity_id": "mosaic-tech",
+   "typed": "Mosaic",
+   "queries": [
+    {
+     "typed": "Mos",
+     "verdict": "PASS",
+     "top": "Mosaic Co",
+     "top_ticker": "MOS",
+     "status_shown": true
+    },
+    {
+     "typed": "mosaic",
+     "verdict": "PASS",
+     "top": "Mosaic",
+     "top_ticker": "MOS",
+     "status_shown": true
+    },
+    {
+     "typed": "MOSAIC",
+     "verdict": "PASS",
+     "top": "Mosaic",
+     "top_ticker": "MOS",
+     "status_shown": true
+    },
+    {
+     "typed": "Mosaic",
+     "verdict": "PASS",
+     "top": "Mosaic",
+     "top_ticker": "MOS",
+     "status_shown": true
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 55,
+   "entity_id": "aleph",
+   "typed": "Aleph",
+   "queries": [
+    {
+     "typed": "Ale",
+     "verdict": "PASS",
+     "top": "Aleph",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "aleph",
+     "verdict": "PASS",
+     "top": "Aleph",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "ALEPH",
+     "verdict": "PASS",
+     "top": "Aleph",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Aleph",
+     "verdict": "PASS",
+     "top": "Aleph",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 56,
+   "entity_id": "pigment",
+   "typed": "Pigment",
+   "queries": [
+    {
+     "typed": "Pig",
+     "verdict": "PASS",
+     "top": "Pigment",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "pigment",
+     "verdict": "PASS",
+     "top": "Pigment",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "PIGMENT",
+     "verdict": "PASS",
+     "top": "Pigment",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Pigment",
+     "verdict": "PASS",
+     "top": "Pigment",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 57,
+   "entity_id": "anaplan",
+   "typed": "Anaplan",
+   "queries": [
+    {
+     "typed": "Ana",
+     "verdict": "PASS",
+     "top": "Anaplan, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "anaplan",
+     "verdict": "PASS",
+     "top": "Anaplan, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "ANAPLAN",
+     "verdict": "PASS",
+     "top": "Anaplan, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Anaplan",
+     "verdict": "PASS",
+     "top": "Anaplan, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 58,
+   "entity_id": "workday",
+   "typed": "Workday",
+   "queries": [
+    {
+     "typed": "Wor",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Worthington Enterprises, Inc.",
+     "top_ticker": "WOR",
+     "status_shown": false
+    },
+    {
+     "typed": "workday",
+     "verdict": "PASS",
+     "top": "Workday, Inc.",
+     "top_ticker": "WDAY",
+     "status_shown": false
+    },
+    {
+     "typed": "WORKDAY",
+     "verdict": "PASS",
+     "top": "Workday, Inc.",
+     "top_ticker": "WDAY",
+     "status_shown": false
+    },
+    {
+     "typed": "Workday",
+     "verdict": "PASS",
+     "top": "Workday, Inc.",
+     "top_ticker": "WDAY",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 59,
+   "entity_id": "dayforce",
+   "typed": "Dayforce",
+   "queries": [
+    {
+     "typed": "Dayf",
+     "verdict": "PASS",
+     "top": "Dayforce, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "dayforce",
+     "verdict": "PASS",
+     "top": "Dayforce, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "DAYFORCE",
+     "verdict": "PASS",
+     "top": "Dayforce, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "Dayforce",
+     "verdict": "PASS",
+     "top": "Dayforce, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 60,
+   "entity_id": "paycor",
+   "typed": "Paycor",
+   "queries": [
+    {
+     "typed": "Pay",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Paymentus Holdings, Inc.",
+     "top_ticker": "PAY",
+     "status_shown": false
+    },
+    {
+     "typed": "paycor",
+     "verdict": "PASS",
+     "top": "Paycor HCM, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "PAYCOR",
+     "verdict": "PASS",
+     "top": "Paycor HCM, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "Paycor",
+     "verdict": "PASS",
+     "top": "Paycor HCM, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 61,
+   "entity_id": "rippling",
+   "typed": "Rippling",
+   "queries": [
+    {
+     "typed": "Ripp",
+     "verdict": "PASS",
+     "top": "People Center, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "rippling",
+     "verdict": "PASS",
+     "top": "People Center, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "RIPPLING",
+     "verdict": "PASS",
+     "top": "People Center, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Rippling",
+     "verdict": "PASS",
+     "top": "People Center, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 62,
+   "entity_id": "deel",
+   "typed": "Deel",
+   "queries": [
+    {
+     "typed": "Dee",
+     "verdict": "PASS",
+     "top": "Deel, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "deel",
+     "verdict": "PASS",
+     "top": "Deel, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "DEEL",
+     "verdict": "PASS",
+     "top": "Deel, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Deel",
+     "verdict": "PASS",
+     "top": "Deel, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 63,
+   "entity_id": "gusto",
+   "typed": "Gusto",
+   "queries": [
+    {
+     "typed": "Gus",
+     "verdict": "PASS",
+     "top": "Gusto, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "gusto",
+     "verdict": "PASS",
+     "top": "Gusto, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "GUSTO",
+     "verdict": "PASS",
+     "top": "Gusto, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Gusto",
+     "verdict": "PASS",
+     "top": "Gusto, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 64,
+   "entity_id": "ramp",
+   "typed": "Ramp",
+   "queries": [
+    {
+     "typed": "Ram",
+     "verdict": "PASS",
+     "top": "Ramp Business Corporation",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "ramp",
+     "verdict": "PASS",
+     "top": "Ramp Business Corporation",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "RAMP",
+     "verdict": "PASS",
+     "top": "Ramp Business Corporation",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Ramp",
+     "verdict": "PASS",
+     "top": "Ramp Business Corporation",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 65,
+   "entity_id": "brex",
+   "typed": "Brex",
+   "queries": [
+    {
+     "typed": "Bre",
+     "verdict": "PASS",
+     "top": "Brex Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "brex",
+     "verdict": "PASS",
+     "top": "Brex Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "BREX",
+     "verdict": "PASS",
+     "top": "Brex Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "Brex",
+     "verdict": "PASS",
+     "top": "Brex Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 66,
+   "entity_id": "bill",
+   "typed": "BILL",
+   "queries": [
+    {
+     "typed": "BIL",
+     "verdict": "PASS",
+     "top": "BILL Holdings, Inc.",
+     "top_ticker": "BILL",
+     "status_shown": false
+    },
+    {
+     "typed": "bill",
+     "verdict": "PASS",
+     "top": "BILL Holdings, Inc.",
+     "top_ticker": "BILL",
+     "status_shown": false
+    },
+    {
+     "typed": "BILL",
+     "verdict": "PASS",
+     "top": "BILL Holdings, Inc.",
+     "top_ticker": "BILL",
+     "status_shown": false
+    },
+    {
+     "typed": "BILL",
+     "verdict": "PASS",
+     "top": "BILL Holdings, Inc.",
+     "top_ticker": "BILL",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 67,
+   "entity_id": "floqast",
+   "typed": "FloQast",
+   "queries": [
+    {
+     "typed": "Flo",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Flowers Foods Inc",
+     "top_ticker": "FLO",
+     "status_shown": false
+    },
+    {
+     "typed": "floqast",
+     "verdict": "PASS",
+     "top": "FloQast, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "FLOQAST",
+     "verdict": "PASS",
+     "top": "FloQast, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "FloQast",
+     "verdict": "PASS",
+     "top": "FloQast, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 68,
+   "entity_id": "blackline",
+   "typed": "BlackLine",
+   "queries": [
+    {
+     "typed": "Blac",
+     "verdict": "PASS",
+     "top": "BlackLine, Inc.",
+     "top_ticker": "BL",
+     "status_shown": false
+    },
+    {
+     "typed": "blackline",
+     "verdict": "PASS",
+     "top": "BlackLine, Inc.",
+     "top_ticker": "BL",
+     "status_shown": false
+    },
+    {
+     "typed": "BLACKLINE",
+     "verdict": "PASS",
+     "top": "BlackLine, Inc.",
+     "top_ticker": "BL",
+     "status_shown": false
+    },
+    {
+     "typed": "BlackLine",
+     "verdict": "PASS",
+     "top": "BlackLine, Inc.",
+     "top_ticker": "BL",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 69,
+   "entity_id": "datarails",
+   "typed": "Datarails",
+   "queries": [
+    {
+     "typed": "Data",
+     "verdict": "BOUNDED_SHARED_PREFIX",
+     "top": "Dataiku, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "datarails",
+     "verdict": "PASS",
+     "top": "Datarails",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "DATARAILS",
+     "verdict": "PASS",
+     "top": "Datarails",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Datarails",
+     "verdict": "PASS",
+     "top": "Datarails",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 70,
+   "entity_id": "centage",
+   "typed": "Centage",
+   "queries": [
+    {
+     "typed": "Cen",
+     "verdict": "PASS",
+     "top": "Centage",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "centage",
+     "verdict": "PASS",
+     "top": "Centage",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "CENTAGE",
+     "verdict": "PASS",
+     "top": "Centage",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Centage",
+     "verdict": "PASS",
+     "top": "Centage",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 71,
+   "entity_id": "acumatica",
+   "typed": "Acumatica",
+   "queries": [
+    {
+     "typed": "Acum",
+     "verdict": "PASS",
+     "top": "Acumatica, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "acumatica",
+     "verdict": "PASS",
+     "top": "Acumatica, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "ACUMATICA",
+     "verdict": "PASS",
+     "top": "Acumatica, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Acumatica",
+     "verdict": "PASS",
+     "top": "Acumatica, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 72,
+   "entity_id": "epicor",
+   "typed": "Epicor",
+   "queries": [
+    {
+     "typed": "Epi",
+     "verdict": "PASS",
+     "top": "Epicor Software Corporation",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "epicor",
+     "verdict": "PASS",
+     "top": "Epicor Software Corporation",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "EPICOR",
+     "verdict": "PASS",
+     "top": "Epicor Software Corporation",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Epicor",
+     "verdict": "PASS",
+     "top": "Epicor Software Corporation",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 73,
+   "entity_id": "plex-systems",
+   "typed": "Plex",
+   "queries": [
+    {
+     "typed": "Ple",
+     "verdict": "PASS",
+     "top": "Plex Systems, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "plex",
+     "verdict": "PASS",
+     "top": "Plex Systems, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "PLEX",
+     "verdict": "PASS",
+     "top": "Plex Systems, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "Plex",
+     "verdict": "PASS",
+     "top": "Plex Systems, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 74,
+   "entity_id": "ifs",
+   "typed": "IFS",
+   "queries": [
+    {
+     "typed": "IFS",
+     "verdict": "PASS",
+     "top": "IFS",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "ifs",
+     "verdict": "PASS",
+     "top": "IFS",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "IFS",
+     "verdict": "PASS",
+     "top": "IFS",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "IFS",
+     "verdict": "PASS",
+     "top": "IFS",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 75,
+   "entity_id": "qad",
+   "typed": "QAD",
+   "queries": [
+    {
+     "typed": "QAD",
+     "verdict": "PASS",
+     "top": "QAD Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "qad",
+     "verdict": "PASS",
+     "top": "QAD Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "QAD",
+     "verdict": "PASS",
+     "top": "QAD Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "QAD",
+     "verdict": "PASS",
+     "top": "QAD Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 76,
+   "entity_id": "auvik",
+   "typed": "Auvik",
+   "queries": [
+    {
+     "typed": "Auv",
+     "verdict": "PASS",
+     "top": "Auvik Networks Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "auvik",
+     "verdict": "PASS",
+     "top": "Auvik Networks Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "AUVIK",
+     "verdict": "PASS",
+     "top": "Auvik Networks Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Auvik",
+     "verdict": "PASS",
+     "top": "Auvik Networks Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 77,
+   "entity_id": "kaseya",
+   "typed": "Kaseya",
+   "queries": [
+    {
+     "typed": "Kas",
+     "verdict": "PASS",
+     "top": "Kaseya",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "kaseya",
+     "verdict": "PASS",
+     "top": "Kaseya",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "KASEYA",
+     "verdict": "PASS",
+     "top": "Kaseya",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Kaseya",
+     "verdict": "PASS",
+     "top": "Kaseya",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 78,
+   "entity_id": "connectwise",
+   "typed": "ConnectWise",
+   "queries": [
+    {
+     "typed": "Conne",
+     "verdict": "PASS",
+     "top": "ConnectWise, LLC",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "connectwise",
+     "verdict": "PASS",
+     "top": "ConnectWise, LLC",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "CONNECTWISE",
+     "verdict": "PASS",
+     "top": "ConnectWise, LLC",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "ConnectWise",
+     "verdict": "PASS",
+     "top": "ConnectWise, LLC",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 79,
+   "entity_id": "n-able",
+   "typed": "N-able",
+   "queries": [
+    {
+     "typed": "N-a",
+     "verdict": "PASS",
+     "top": "N-able, Inc.",
+     "top_ticker": "NABL",
+     "status_shown": false
+    },
+    {
+     "typed": "n-able",
+     "verdict": "PASS",
+     "top": "N-able, Inc.",
+     "top_ticker": "NABL",
+     "status_shown": false
+    },
+    {
+     "typed": "N-ABLE",
+     "verdict": "PASS",
+     "top": "N-able, Inc.",
+     "top_ticker": "NABL",
+     "status_shown": false
+    },
+    {
+     "typed": "N-able",
+     "verdict": "PASS",
+     "top": "N-able, Inc.",
+     "top_ticker": "NABL",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 80,
+   "entity_id": "datto",
+   "typed": "Datto",
+   "queries": [
+    {
+     "typed": "Dat",
+     "verdict": "PASS",
+     "top": "Datto, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "datto",
+     "verdict": "PASS",
+     "top": "Datto, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "DATTO",
+     "verdict": "PASS",
+     "top": "Datto, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "Datto",
+     "verdict": "PASS",
+     "top": "Datto, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 81,
+   "entity_id": "barracuda",
+   "typed": "Barracuda",
+   "queries": [
+    {
+     "typed": "Barr",
+     "verdict": "PASS",
+     "top": "Barracuda Networks, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "barracuda",
+     "verdict": "PASS",
+     "top": "Barracuda Networks, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "BARRACUDA",
+     "verdict": "PASS",
+     "top": "Barracuda Networks, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Barracuda",
+     "verdict": "PASS",
+     "top": "Barracuda Networks, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 82,
+   "entity_id": "esentire",
+   "typed": "eSentire",
+   "queries": [
+    {
+     "typed": "eSen",
+     "verdict": "PASS",
+     "top": "eSentire, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "esentire",
+     "verdict": "PASS",
+     "top": "eSentire, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "ESENTIRE",
+     "verdict": "PASS",
+     "top": "eSentire, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "eSentire",
+     "verdict": "PASS",
+     "top": "eSentire, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 83,
+   "entity_id": "blackpoint-cyber",
+   "typed": "Blackpoint Cyber",
+   "queries": [
+    {
+     "typed": "Blackpoi",
+     "verdict": "PASS",
+     "top": "Blackpoint Cyber",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "blackpoint cyber",
+     "verdict": "PASS",
+     "top": "Blackpoint Cyber",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "BLACKPOINT CYBER",
+     "verdict": "PASS",
+     "top": "Blackpoint Cyber",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Blackpoint Cyber",
+     "verdict": "PASS",
+     "top": "Blackpoint Cyber",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 84,
+   "entity_id": "red-canary",
+   "typed": "Red Canary",
+   "queries": [
+    {
+     "typed": "Red C",
+     "verdict": "PASS",
+     "top": "Red Canary, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "red canary",
+     "verdict": "PASS",
+     "top": "Red Canary, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "RED CANARY",
+     "verdict": "PASS",
+     "top": "Red Canary, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "Red Canary",
+     "verdict": "PASS",
+     "top": "Red Canary, Inc.",
+     "top_ticker": "",
+     "status_shown": true
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 85,
+   "entity_id": "reliaquest",
+   "typed": "ReliaQuest",
+   "queries": [
+    {
+     "typed": "Relia",
+     "verdict": "PASS",
+     "top": "ReliaQuest, LLC",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "reliaquest",
+     "verdict": "PASS",
+     "top": "ReliaQuest, LLC",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "RELIAQUEST",
+     "verdict": "PASS",
+     "top": "ReliaQuest, LLC",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "ReliaQuest",
+     "verdict": "PASS",
+     "top": "ReliaQuest, LLC",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 86,
+   "entity_id": "tanium",
+   "typed": "Tanium",
+   "queries": [
+    {
+     "typed": "Tan",
+     "verdict": "PASS",
+     "top": "Tanium Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "tanium",
+     "verdict": "PASS",
+     "top": "Tanium Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "TANIUM",
+     "verdict": "PASS",
+     "top": "Tanium Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Tanium",
+     "verdict": "PASS",
+     "top": "Tanium Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 87,
+   "entity_id": "lansweeper",
+   "typed": "Lansweeper",
+   "queries": [
+    {
+     "typed": "Lansw",
+     "verdict": "PASS",
+     "top": "Lansweeper",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "lansweeper",
+     "verdict": "PASS",
+     "top": "Lansweeper",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "LANSWEEPER",
+     "verdict": "PASS",
+     "top": "Lansweeper",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Lansweeper",
+     "verdict": "PASS",
+     "top": "Lansweeper",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 88,
+   "entity_id": "torq",
+   "typed": "Torq",
+   "queries": [
+    {
+     "typed": "Tor",
+     "verdict": "PASS",
+     "top": "Torq",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "torq",
+     "verdict": "PASS",
+     "top": "Torq",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "TORQ",
+     "verdict": "PASS",
+     "top": "Torq",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Torq",
+     "verdict": "PASS",
+     "top": "Torq",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 89,
+   "entity_id": "tines",
+   "typed": "Tines",
+   "queries": [
+    {
+     "typed": "Tin",
+     "verdict": "PASS",
+     "top": "Tines",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "tines",
+     "verdict": "PASS",
+     "top": "Tines",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "TINES",
+     "verdict": "PASS",
+     "top": "Tines",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Tines",
+     "verdict": "PASS",
+     "top": "Tines",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 90,
+   "entity_id": "swimlane",
+   "typed": "Swimlane",
+   "queries": [
+    {
+     "typed": "Swim",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Latham Group, Inc.",
+     "top_ticker": "SWIM",
+     "status_shown": false
+    },
+    {
+     "typed": "swimlane",
+     "verdict": "PASS",
+     "top": "Swimlane",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "SWIMLANE",
+     "verdict": "PASS",
+     "top": "Swimlane",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Swimlane",
+     "verdict": "PASS",
+     "top": "Swimlane",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 91,
+   "entity_id": "pax8",
+   "typed": "Pax8",
+   "queries": [
+    {
+     "typed": "Pax",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Patria Investments Ltd",
+     "top_ticker": "PAX",
+     "status_shown": false
+    },
+    {
+     "typed": "pax8",
+     "verdict": "PASS",
+     "top": "Pax8, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "PAX8",
+     "verdict": "PASS",
+     "top": "Pax8, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Pax8",
+     "verdict": "PASS",
+     "top": "Pax8, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 92,
+   "entity_id": "sherweb",
+   "typed": "Sherweb",
+   "queries": [
+    {
+     "typed": "She",
+     "verdict": "PASS",
+     "top": "Sherweb Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "sherweb",
+     "verdict": "PASS",
+     "top": "Sherweb Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "SHERWEB",
+     "verdict": "PASS",
+     "top": "Sherweb Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Sherweb",
+     "verdict": "PASS",
+     "top": "Sherweb Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 93,
+   "entity_id": "softchoice",
+   "typed": "Softchoice",
+   "queries": [
+    {
+     "typed": "Softc",
+     "verdict": "PASS",
+     "top": "Softchoice Corporation",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "softchoice",
+     "verdict": "PASS",
+     "top": "Softchoice Corporation",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "SOFTCHOICE",
+     "verdict": "PASS",
+     "top": "Softchoice Corporation",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "Softchoice",
+     "verdict": "PASS",
+     "top": "Softchoice Corporation",
+     "top_ticker": "",
+     "status_shown": true
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 94,
+   "entity_id": "cdw",
+   "typed": "CDW",
+   "queries": [
+    {
+     "typed": "CDW",
+     "verdict": "PASS",
+     "top": "CDW Corporation",
+     "top_ticker": "CDW",
+     "status_shown": false
+    },
+    {
+     "typed": "cdw",
+     "verdict": "PASS",
+     "top": "CDW Corporation",
+     "top_ticker": "CDW",
+     "status_shown": false
+    },
+    {
+     "typed": "CDW",
+     "verdict": "PASS",
+     "top": "CDW Corporation",
+     "top_ticker": "CDW",
+     "status_shown": false
+    },
+    {
+     "typed": "CDW",
+     "verdict": "PASS",
+     "top": "CDW Corporation",
+     "top_ticker": "CDW",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 95,
+   "entity_id": "presidio",
+   "typed": "Presidio",
+   "queries": [
+    {
+     "typed": "Pres",
+     "verdict": "PASS",
+     "top": "Presidio, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "presidio",
+     "verdict": "PASS",
+     "top": "Presidio, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "PRESIDIO",
+     "verdict": "PASS",
+     "top": "Presidio, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Presidio",
+     "verdict": "PASS",
+     "top": "Presidio, Inc.",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 96,
+   "entity_id": "trace3",
+   "typed": "Trace3",
+   "queries": [
+    {
+     "typed": "Tra",
+     "verdict": "PASS",
+     "top": "Trace3, LLC",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "trace3",
+     "verdict": "PASS",
+     "top": "Trace3, LLC",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "TRACE3",
+     "verdict": "PASS",
+     "top": "Trace3, LLC",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "Trace3",
+     "verdict": "PASS",
+     "top": "Trace3, LLC",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 97,
+   "entity_id": "world-wide-technology",
+   "typed": "World Wide Technology",
+   "queries": [
+    {
+     "typed": "World Wide",
+     "verdict": "PASS",
+     "top": "World Wide Technology Holding Co., LLC",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "world wide technology",
+     "verdict": "PASS",
+     "top": "World Wide Technology Holding Co., LLC",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "WORLD WIDE TECHNOLOGY",
+     "verdict": "PASS",
+     "top": "World Wide Technology Holding Co., LLC",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "World Wide Technology",
+     "verdict": "PASS",
+     "top": "World Wide Technology Holding Co., LLC",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 98,
+   "entity_id": "ahead",
+   "typed": "AHEAD",
+   "queries": [
+    {
+     "typed": "AHE",
+     "verdict": "PASS",
+     "top": "AHEAD",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "ahead",
+     "verdict": "PASS",
+     "top": "AHEAD",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "AHEAD",
+     "verdict": "PASS",
+     "top": "AHEAD",
+     "top_ticker": "",
+     "status_shown": false
+    },
+    {
+     "typed": "AHEAD",
+     "verdict": "PASS",
+     "top": "AHEAD",
+     "top_ticker": "",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 99,
+   "entity_id": "rackspace",
+   "typed": "Rackspace Technology",
+   "queries": [
+    {
+     "typed": "Rackspace ",
+     "verdict": "PASS",
+     "top": "Rackspace Technology, Inc.",
+     "top_ticker": "RXT",
+     "status_shown": false
+    },
+    {
+     "typed": "rackspace technology",
+     "verdict": "PASS",
+     "top": "Rackspace Technology, Inc.",
+     "top_ticker": "RXT",
+     "status_shown": false
+    },
+    {
+     "typed": "RACKSPACE TECHNOLOGY",
+     "verdict": "PASS",
+     "top": "Rackspace Technology, Inc.",
+     "top_ticker": "RXT",
+     "status_shown": false
+    },
+    {
+     "typed": "Rackspace Technology",
+     "verdict": "PASS",
+     "top": "Rackspace Technology, Inc.",
+     "top_ticker": "RXT",
+     "status_shown": false
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 100,
+   "entity_id": "pellera",
+   "typed": "Pellera Technologies",
+   "queries": [
+    {
+     "typed": "Pellera Te",
+     "verdict": "PASS",
+     "top": "Pellera Technologies",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "pellera technologies",
+     "verdict": "PASS",
+     "top": "Pellera Technologies",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "PELLERA TECHNOLOGIES",
+     "verdict": "PASS",
+     "top": "Pellera Technologies",
+     "top_ticker": "",
+     "status_shown": true
+    },
+    {
+     "typed": "Pellera Technologies",
+     "verdict": "PASS",
+     "top": "Pellera Technologies",
+     "top_ticker": "",
+     "status_shown": true
+    }
+   ],
+   "search_status": "PASS"
+  }
+ ]
+}

@@ -1,0 +1,90 @@
+{
+ "summary": {
+  "live_sha": "d5672e714d65235b37efa73a74142589711190c3",
+  "companies_scored": 1,
+  "qualification_10_of_10": 0,
+  "epistemic_outcomes": {
+   "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY": 1
+  },
+  "by_tier": {
+   "T1": {
+    "companies": 1,
+    "qualified": 0
+   }
+  },
+  "dimensions": {
+   "IDENTITY": {
+    "PASS": 1
+   },
+   "EVIDENCE_PROVENANCE": {
+    "PASS": 1
+   },
+   "COMPANY_UNDERSTANDING": {
+    "PASS_BOUNDED": 1
+   },
+   "ECONOMIC_INTELLIGENCE": {
+    "PASS_BOUNDED": 1
+   },
+   "STRATEGIC_DECISION": {
+    "PASS_BOUNDED": 1
+   },
+   "HISTORY": {
+    "PASS_BOUNDED": 1
+   },
+   "DISCOVERY": {
+    "PASS": 1
+   },
+   "QA_ROLE": {
+    "PASS": 1
+   },
+   "UI": {
+    "NOT_MEASURED": 1
+   },
+   "EXECUTIVE_USEFULNESS": {
+    "PASS_BOUNDED": 1
+   }
+  },
+  "core_s_p50": 22.7,
+  "core_s_p90": 22.7
+ },
+ "companies": [
+  {
+   "company": "Hammerspace",
+   "n": 1,
+   "outcome": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "LEVEL C over 0 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_NO_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "core_s": 22.7
+  }
+ ]
+}

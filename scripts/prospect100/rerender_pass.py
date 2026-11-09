@@ -68,7 +68,9 @@ def main() -> int:
     app = WebApp(cfg)
 
     rows = []
-    for f in sorted(glob.glob(str(ROOT / "reports/prospect100_pass3/s*/state.json"))):
+    pattern = (sys.argv[sys.argv.index("--states") + 1] if "--states" in sys.argv
+               else "reports/prospect100_pass3/s*/state.json")
+    for f in sorted(glob.glob(str(ROOT / pattern))):
         rows += [r for r in json.loads(pathlib.Path(f).read_text())["rows"].values()
                  if r.get("run_id")]
     index = {}

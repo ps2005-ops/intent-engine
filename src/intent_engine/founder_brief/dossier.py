@@ -2002,24 +2002,27 @@ def render_decision_lead(decision, company: str = "", *, depth: str = BRIEF,
             # the experiment and the falsifier. Rendering it here is not
             # lowering the bar: nothing below asserts a magnitude, and the
             # standing on every line says what kind of claim it is.
-            out.append(_p(escape(read.level5_decision.text)))
+            # `_p` escapes. Escaping here as well printed "period&#x27;s" on
+            # 39 companies' /brief and /full once bounded reads reached
+            # this branch (prospect-100 pass 3).
+            out.append(_p((read.level5_decision.text)))
             action = read.level6_action
             if action is not None:
-                out.append(_p(escape(
+                out.append(_p((
                     f"Causal confidence: {action.causal_confidence}.")))
-                out.append(_p(escape(
+                out.append(_p((
                     f"What is known: {action.what_is_known}")))
-                out.append(_p(escape(
+                out.append(_p((
                     f"What remains unknown: {action.what_remains_unknown}")))
-                out.append(_p(escape(
+                out.append(_p((
                     f"Why that matters: {action.why_it_matters}")))
-                out.append(_p(escape(
+                out.append(_p((
                     f"What management should do now: {action.action_now}")))
-                out.append(_p(escape(
+                out.append(_p((
                     f"Minimum viable experiment: "
                     f"{action.minimum_viable_experiment}")))
-                out.append(_p(escape(f"Kill switch: {action.kill_switch}")))
-                out.append(_p(escape(
+                out.append(_p((f"Kill switch: {action.kill_switch}")))
+                out.append(_p((
                     f"What would change our mind: {action.falsifier}")))
             if decision.unsafe_because:
                 out.append(_p(end_sentence(

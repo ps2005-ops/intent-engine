@@ -72,9 +72,11 @@ def _rows(*state_files):
 def _documents_read() -> dict:
     """run_id -> documents retrieved, from the pass-3 store copy."""
     import collections as _c
-    store = P3 / "captures_final_store" / "ci.jsonl"
     counts = _c.Counter()
-    if store.exists():
+    scratch = pathlib.Path(__import__("os").environ.get("PASS3_EXTRA_STORE", ""))
+    for store in (P3 / "captures_final_store" / "ci.jsonl", scratch):
+        if not store or not store.is_file():
+            continue
         with open(store, encoding="utf-8") as fh:
             for line in fh:
                 if '"ci.source_retrieved"' in line:
@@ -95,6 +97,11 @@ def prose_repeats(captures: pathlib.Path) -> dict:
     rep = audit(captures, strip_svg=True)
     per = collections.Counter()
     for page, dup in rep["repeats"].items():
+        # History Rewind keeps every year's panel in the page and shows one at
+        # a time (display:none on the rest), so a sentence shared by two
+        # years is never on screen twice. Static text cannot see that.
+        if page.endswith("-history.html"):
+            continue
         slug = page.rpartition("-")[0]
         per[slug] += sum(1 for s in dup if not _FURNITURE.match(s)
                          and len(s) >= 60)
@@ -204,7 +211,7 @@ def grade(reg, local, live, search, ui, repeats, core_budget=120.0,
     words = {
         "identity": "the run's surfaces do not name the company consistently",
         "search": "a typed prefix puts another company first",
-        "coverage": f"only {docs} dated document(s) read",
+        "coverage": f"only {docs} document(s) read",
         "independence": (f"{ind} independent relevant origin(s); the reading "
                          f"rests on company-published sources"),
         "economics": ("the decision question is the business-model default, "
@@ -239,7 +246,9 @@ def main() -> int:
     reg = yaml.safe_load((DOCS / "PROSPECT_REGISTRY.yaml").read_text())["prospects"]
     search = {r["prospect_id"]: r for r in
               (_load(DOCS / "search_matrix.json", {}) or {}).get("rows", [])}
-    local = _rows(*sorted(P3.glob("s*/state.json")))
+    # Shards first, then targeted re-runs, which supersede (later wins):
+    # Barracuda was re-run after the gzip repair invalidated its documents.
+    local = _rows(*sorted(P3.glob("s*/state.json")), P3 / "rerun/state.json")
     live = _rows(P2 / "state.json")
     ui = ((_load(DOCS / "ui_matrix_pass3.json", {}) or {}).get("summary") or {}) \
         .get("per_company")

@@ -93,3 +93,31 @@ def test_a_macro_label_counts_as_said_so_the_chart_heading_goes():
                              charts={"macro_interest_rates": chart})
     assert html.count("Average interest rate on outstanding") == 1, html
     assert "<figcaption>" in html          # the new caption stays
+
+
+def test_the_bounded_read_lead_escapes_once():
+    """Live (local pass 3): "period&#x27;s revenue" on 39 companies' /brief
+    and /full -- `_p` escapes, and the bounded-read branch escaped first."""
+    from types import SimpleNamespace as NS
+
+    from intent_engine.executive import contract as ec
+    from intent_engine.founder_brief import dossier as fd
+    from intent_engine.strategic_intelligence.decision import (
+        FounderDecision, WITHHELD,
+    )
+    decision = FounderDecision(readiness=WITHHELD, company_name="Acme")
+    contract = ec.decide(company="Acme", run_decision=decision,
+                         market_decision=None, bounded_read=True)
+    action = NS(causal_confidence="BOUNDED",
+                what_is_known="the installed base carries next period's "
+                              "revenue",
+                what_remains_unknown="x", why_it_matters="y",
+                action_now="z", minimum_viable_experiment="m",
+                kill_switch="k", falsifier="f")
+    read = NS(puts_a_strategy_forward=True, level6_action=action,
+              level5_decision=NS(text="The decision is what Acme's "
+                                      "customers pay for."))
+    lead = fd.render_decision_lead(decision, "Acme", contract=contract,
+                                   read=read)
+    assert "&amp;#x27;" not in lead and "&amp;" not in lead, lead
+    assert "period&#x27;s" in lead or "period's" in lead
