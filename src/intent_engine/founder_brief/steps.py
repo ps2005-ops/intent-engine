@@ -30,6 +30,8 @@ a real label, which a JS slider would have had to reimplement badly.
 """
 from __future__ import annotations
 
+import re as _re
+
 from html import escape
 from typing import Optional, Sequence
 
@@ -105,7 +107,7 @@ margin-bottom:.2rem}
 padding:.5rem .6rem;border:1px solid var(--line);border-radius:8px;
 font:inherit;background:var(--bg,#fff);color:var(--fg)}
 .fbx button{padding:.55rem 1.1rem;border-radius:9px;border:0;
-background:var(--accent);color:#fff;font-weight:650;cursor:pointer;
+background:var(--accent,#1d4ed8);color:#fff;font-weight:650;cursor:pointer;
 font-size:.95rem}
 .fbx .fb-priv{font-size:.78rem;color:var(--muted);margin:.7rem 0 0}
 .fbx .fb-ok{border-left:3px solid var(--accent);padding-left:.7rem;
@@ -223,8 +225,18 @@ def render_intro(read, *, run_id: str, company: str,
             out.append(f'<p>{_e(statement.text)}'
                        f'{_badge(statement.standing)}</p>')
     else:
-        out.append(f'<p class="q">The question worth arguing about is '
-                   f'{_e(_lower(read.central_question))}</p>')
+        # ONE STATEMENT OF THE QUESTION. Live on the prospect-100 pass the
+        # read box said "The question worth arguing about is what to charge
+        # ...?" and, on the next line, "The decision in front of management
+        # is what to charge ...?" -- the decision sentence already carries the
+        # question, so the question line is dropped when it is contained.
+        _q = " ".join(_re.findall(r"[a-z0-9]+",
+                                  str(read.central_question or "").lower()))
+        _d = " ".join(_re.findall(r"[a-z0-9]+",
+                                  str(read.level5_decision.text or "").lower()))
+        if not (_q and _q in _d):
+            out.append(f'<p class="q">The question worth arguing about is '
+                       f'{_e(_lower(read.central_question))}</p>')
         out.append(f'<p>{_e(read.level5_decision.text)}'
                    f'{_badge(read.level5_decision.standing)}</p>')
         out.append(f'<p><strong>Our read:</strong> '
@@ -305,7 +317,10 @@ def render_intro(read, *, run_id: str, company: str,
                            title="Where this comes from"))
     out.append(flow.nav(run_id, "intro"))
     out.append('</main>')
-    return "".join(out)
+    from intent_engine.founder_brief.dossier import (
+        dedupe_page_paragraphs,
+    )
+    return dedupe_page_paragraphs("".join(out))
 
 
 def _read_word(standing: str) -> str:

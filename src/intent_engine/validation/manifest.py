@@ -248,13 +248,40 @@ def _no_answer_key(row: dict, unknown: Sequence[str]) -> None:
                 f"test, never what the analysis should conclude")
 
 
+#: Parsed manifests, one per file version. See `load`.
+_LOADED: dict = {}
+
+
 def load(path=None) -> Manifest:
-    """Read the manifest. Frozen records; there is no writer here (§27)."""
+    """Read the manifest. Frozen records; there is no writer here (§27).
+
+    PARSED ONCE PER FILE VERSION. Profiled 2026-11-09 on the prospect-100
+    local pass: one /full request called this six times (executive contract,
+    company profile, manifest placement, analysis selection), each a fresh
+    YAML parse of ~240ms -- 4.36s of a 4.92s three-request profile, 89% of
+    the page. `suggest` had cached it for autocomplete since 2026-09-04;
+    every other caller still paid. The records are frozen, so one parsed
+    object is safe to share, and the key is (path, mtime, size): an edited
+    manifest is re-read on the next call, never served stale until restart.
+    """
+    p = pathlib.Path(path or MANIFEST_PATH)
+    try:
+        stat = p.stat()
+    except OSError:
+        raise ManifestInvalid(f"no manifest at {p}")
+    key = (str(p.resolve()), stat.st_mtime_ns, stat.st_size)
+    held = _LOADED.get(key)
+    if held is None:
+        held = _parse(p)
+        if len(_LOADED) >= 8:
+            _LOADED.clear()
+        _LOADED[key] = held
+    return held
+
+
+def _parse(p) -> Manifest:
     import yaml
 
-    p = pathlib.Path(path or MANIFEST_PATH)
-    if not p.exists():
-        raise ManifestInvalid(f"no manifest at {p}")
     raw = yaml.safe_load(p.read_text(encoding="utf-8"))
     if not isinstance(raw, dict) or raw.get("contract") != CONTRACT:
         raise ManifestInvalid(

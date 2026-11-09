@@ -2289,8 +2289,16 @@ class CompanyIngestionService:
             # recompose after a restart legitimately plans a different set
             # (earlier targets are already retrieved), and reusing the key
             # would collide on differing content.
-            target_key = hashlib.sha256(
-                ",".join(sorted(extra)).encode()).hexdigest()[:12]
+            #
+            # AND FROM EVERY OTHER FIELD THE PAYLOAD RECORDS. Keyed on the
+            # targets alone, a recompose that planned the same targets on a
+            # different pass, or for a different reason, reused the key with
+            # different content and the append-only store refused it: on the
+            # prospect-100 re-render, Moody's stored run answered 500 on "/"
+            # and "/full" in a fresh process. The key now names the content.
+            target_key = hashlib.sha256(json.dumps(
+                {"targets": sorted(extra), "retry_pass": attempt,
+                 "reason": reason}, sort_keys=True).encode()).hexdigest()[:12]
             self._append("ci.run_transitioned", run_id=run_id,
                          domain=self.run_meta(run_id)["domain"],
                          payload={"to": "DISCOVERING_SOURCES",

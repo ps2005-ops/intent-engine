@@ -219,7 +219,16 @@ pre,code{overflow-x:auto;max-width:100%}
    truncated to fit; it wraps. `anywhere` breaks a token only when it
    cannot fit, so ordinary text keeps its normal breaks. */
 code,.src,.prov{overflow-wrap:anywhere;word-break:break-word}
+.muted{overflow-wrap:anywhere;word-break:break-word}
+li{overflow-wrap:break-word}
 a[href]{overflow-wrap:anywhere}
+/* TARGET SIZE (WCAG 2.2, 2.5.8). Measured on the prospect-100 pass at 10
+   widths x 2 themes: the page navigation, the side navigation and the
+   disclosure toggles rendered 16-17px tall and sat closer than 24px to
+   their neighbours, on every company and every surface. Inline links in
+   running text are exempt and untouched; only chrome is enlarged. */
+nav a[href],aside a[href],nav button{padding-top:4px;padding-bottom:4px}
+summary{min-height:24px}
 /* AND THE SAME IS TRUE OF A QUOTE, FOR A STRONGER REASON. <q> and
    <blockquote> exist to hold text THIS PRODUCT DID NOT WRITE, so their
    contents have no shape we control. MEASURED on Workato at 375px: an
@@ -4858,7 +4867,51 @@ class WebApp:
         key, _c, _m = self._manifest_placement(
             company_key(name or str(meta.get("domain") or "") or run_id),
             name=name, domain=str(meta.get("domain") or ""))
+        # A RUN THAT RETRIEVED NOTHING HAS NO DOSSIER, AND IS STILL A RUN.
+        #
+        # Measured on the prospect-100 re-render: Wood Mackenzie and Presidio
+        # (every page refused the reader) answered 404 here -- "No analysis is
+        # stored here for 'wood-mackenzie'", an internal key on a dead end --
+        # and `/sources` redirects to this page, so the navigation's own link
+        # ended on it. The run exists and its attempts are recorded, so the
+        # reader is shown what was tried and why each attempt failed.
+        try:
+            from intent_engine.demo_dossier.store import DossierStore
+            has_dossier = DossierStore(self._runtime_root).latest(key) \
+                is not None
+        except Exception:                                   # noqa: BLE001
+            has_dossier = True              # let the screen decide, as before
+        if not has_dossier:
+            return self._evidence_nothing_retrieved(session, run_id, name)
         return self._evidence_screen(key)
+
+    def _evidence_nothing_retrieved(self, session, run_id, name):
+        """The evidence page for a run whose every source failed."""
+        candidates = {c.get("candidate_id"): c
+                      for c in (self.ci.store.candidates(run_id) or ())}
+        rows = []
+        for failure in (self.ci.store.failures(run_id) or ())[:20]:
+            cand = candidates.get(failure.get("candidate_id")) or {}
+            url = str(cand.get("url") or "")
+            reason = str(failure.get("safe_message") or
+                         failure.get("failure_type") or "not read")
+            rows.append(f"<li><code>{_e(url)}</code> — {_e(reason)}</li>")
+        tried = (f"<ul>{''.join(rows)}</ul>" if rows else
+                 "<p>No source reached the reading stage.</p>")
+        company = name or "this company"
+        body = (
+            f'<main><h1>{_e(company)}</h1>'
+            f'<p class="eyebrow">Why this reading exists</p>'
+            f'<p>This run retrieved no evidence for {_e(company)}, so there '
+            f'is nothing yet to trace a reading back to. That is a fact about '
+            f'what this run could read, not about the company: the pages it '
+            f'tried are listed below with the reason each one was not '
+            f'read.</p><h2>What was tried</h2>{tried}'
+            f'<p><a href="/runs/{_e(run_id)}">Back to the analysis</a></p>'
+            f'</main>')
+        csrf = (session or {}).get("csrf", "")
+        return self._html(self._page(f"{company} — evidence", body,
+                                     session, csrf))
 
     def _composed_decision(self, run_id):
         """The composed executive decision as a dict — what the X-Ray renders.

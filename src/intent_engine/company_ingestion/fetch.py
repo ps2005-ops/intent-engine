@@ -218,11 +218,52 @@ def safe_fetch(url: str, *, transport=None, resolver=None,
                                redirects=redirects, failure_type=None,
                                safe_message="", retryable=False,
                                truncated=truncated)
+        # A COMPRESSED BODY IS NOT TEXT. Measured 2026-11-09: barracuda.com
+        # answers gzip even to a request that asks for none, and four of its
+        # pages were stored as 27k characters of replacement glyphs, then
+        # shown to a reader as "What changed, and when". The body is
+        # inflated under the SAME byte budget (a compressed bomb cannot grow
+        # past it); an encoding this reader cannot inflate is refused.
+        encoding = (headers.get("content-encoding") or "").strip().lower()
+        # Inflated only when the bytes ARE compressed: a transport that has
+        # already inflated a body may leave the header in place, and
+        # inflating it twice would refuse a good page.
+        if encoding in ("gzip", "x-gzip") and body[:2] == b"\x1f\x8b":
+            import zlib
+            try:
+                body = zlib.decompressobj(31).decompress(body, max_bytes)
+            except zlib.error:
+                return FetchResult(
+                    ok=False, failure_type="parse_error",
+                    safe_message="compressed body could not be inflated",
+                    retryable=False, final_url=current, redirects=redirects)
+        elif encoding == "deflate":
+            import zlib
+            for wbits in (15, -15):
+                try:
+                    body = zlib.decompressobj(wbits).decompress(body, max_bytes)
+                    break
+                except zlib.error:
+                    continue
+        elif encoding not in ("", "identity", "gzip", "x-gzip", "deflate"):
+            return FetchResult(ok=False, failure_type="parse_error",
+                               safe_message=f"unsupported content encoding "
+                                            f"{encoding!r}",
+                               retryable=False, final_url=current,
+                               redirects=redirects)
         try:
             text = body.decode("utf-8", errors="replace")
         except Exception:                                  # noqa: BLE001
             return FetchResult(ok=False, failure_type="parse_error",
                                safe_message="body could not be decoded",
+                               retryable=False, final_url=current,
+                               redirects=redirects)
+        # And whatever the headers said: a page that decodes mostly to
+        # replacement characters is binary, and binary is never evidence.
+        sample = text[:20000]
+        if sample and sample.count("\ufffd") > max(50, len(sample) // 20):
+            return FetchResult(ok=False, failure_type="parse_error",
+                               safe_message="body is not readable text",
                                retryable=False, final_url=current,
                                redirects=redirects)
         return FetchResult(ok=True, status_code=status, mime_type=mime,

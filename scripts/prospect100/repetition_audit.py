@@ -21,7 +21,10 @@ DEFAULT = ROOT / "reports/prospect100_pass2/reports/next40_ui"
 
 
 def visible(page: str) -> str:
-    page = re.sub(r"(?is)<(script|style|noscript|template)[^>]*>.*?</\1>", " ", page)
+    # <title> and <desc> are never painted: the page title sits in <head>,
+    # and an SVG chart's title/desc are its screen-reader name. Counting them
+    # reported every chart as saying its sentence three times.
+    page = re.sub(r"(?is)<(script|style|noscript|template|title|desc)[^>]*>.*?</\1>", " ", page)
     page = re.sub(r"(?is)<(br|p|div|li|h[1-6]|section|article|tr|td|th|dt|dd)[^>]*>", "\n", page)
     page = re.sub(r"(?s)<[^>]+>", " ", page)
     return H.unescape(page)
@@ -36,14 +39,19 @@ def sentences(text: str):
                 yield s
 
 
-def audit(captures: pathlib.Path):
+def audit(captures: pathlib.Path, strip_svg: bool = False):
     per_page = {}
     by_surface = collections.defaultdict(lambda: collections.defaultdict(set))
     companies = set()
     for f in sorted(captures.glob("*.html")):
         slug, _, surface = f.stem.rpartition("-")
         companies.add(slug)
-        sents = list(sentences(visible(f.read_text(errors="replace"))))
+        raw = f.read_text(errors="replace")
+        if strip_svg:
+            # A chart's painted labels restate the passage by design; this
+            # audit counts PROSE said twice.
+            raw = re.sub(r"(?is)<svg.*?</svg>", " ", raw)
+        sents = list(sentences(visible(raw)))
         c = collections.Counter(sents)
         dup = {s: n for s, n in c.items() if n >= 2}
         if dup:

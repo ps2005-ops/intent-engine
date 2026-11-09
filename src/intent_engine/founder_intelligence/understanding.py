@@ -31,10 +31,32 @@ def _card(claim, kind) -> InsightCard:
         why_it_matters=EXTERNAL_QUALIFIER)
 
 
+def _speakable(card) -> bool:
+    """A card the product may state, or False -- never an exception.
+
+    The headline IS the claim's text, and a claim is often a company's own
+    promotional copy. Wood Mackenzie's said "you must", the product-language
+    validator refused it, and the whole composition raised: the run reached
+    the reader as a retrieval limitation and every page answered 500. The
+    validator is right that the product does not issue commands, so that one
+    card is left out; the other cards, and the run, stand.
+    """
+    from intent_engine.founder_intelligence.records import (
+        FounderIntelligenceError,
+    )
+    try:
+        card.validate()
+    except FounderIntelligenceError:
+        return False
+    return True
+
+
 def assemble_understanding(claims: list) -> IntelligenceSection:
     """Proof of Understanding — supported fields only, each cited."""
-    cards = tuple(_card(c, SECTION_UNDERSTANDING) for c in claims
-                  if c.availability != AVAIL_UNAVAILABLE)
+    cards = tuple(card for card in (_card(c, SECTION_UNDERSTANDING)
+                                    for c in claims
+                                    if c.availability != AVAIL_UNAVAILABLE)
+                  if _speakable(card))
     section = IntelligenceSection(
         kind=SECTION_UNDERSTANDING, title="What we understood",
         cards=cards, availability=AVAIL_SUPPORTED if cards else AVAIL_UNAVAILABLE,

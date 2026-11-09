@@ -46,6 +46,7 @@ import html as html_lib
 import re
 
 from dataclasses import dataclass, field
+from dataclasses import replace as _replace
 from typing import List, Optional, Sequence
 
 from intent_engine.founder_brief.narrative import (
@@ -1398,8 +1399,15 @@ def _artefacts(company, decision, report, said) -> Passage:
                 f"written so the trade-off has to be made explicitly rather "
                 f"than by default")})
     else:
+        # NOT A THIRD COPY OF THE UNKNOWNS. Live on the prospect-100 pass the
+        # same near-miss sentence ("We found signs of this shape for X, but
+        # did not verify that ...") printed under "What is still unknown",
+        # then again in the evidence request, then again in the diligence
+        # checklist -- three times on one page. A request names what is
+        # missing; it does not re-read the paragraph above it.
         wanted = "; ".join(_flat(e).rstrip(".")
-                           for e in decision.evidence_required[:3])
+                           for e in decision.evidence_required[:3]
+                           if not said.has(e))
         if wanted:
             rows.append({"label": "Evidence request",
                          "text": end_sentence(
@@ -1417,7 +1425,9 @@ def _artefacts(company, decision, report, said) -> Passage:
         rows.append({"label": "Board discussion questions",
                      "text": end_sentence("; ".join(
                          q.rstrip("?") for q in questions))})
-    gaps = [_flat(g) for g in (report.get("evidence_gaps") or ())][:2]
+    asked = SaidOnce(seed=decision.evidence_required[:3])
+    gaps = [_flat(g) for g in (report.get("evidence_gaps") or ())
+            if _flat(g) and not said.has(g) and not asked.has(g)][:2]
     if gaps:
         rows.append({"label": "Diligence checklist",
                      "text": end_sentence("; ".join(
@@ -1616,6 +1626,166 @@ def _lead_sentences(lead_html: str) -> tuple:
     return tuple(out)
 
 
+def _sentence_keys(text: str) -> list:
+    """Identities of a text's sentences long enough to mean something."""
+    out = []
+    for sentence in re.split(r"(?<=[.!?])\s+", " ".join(str(text or "").split())):
+        key = _words(sentence)
+        if len(key) >= 50:
+            out.append(key)
+    return out
+
+
+_BACK_REFERENCE = re.compile(
+    r"^(this|that|these|those|it|its|they|their|such|so|which|then)\b", re.I)
+
+
+def _said(key: str, restated) -> bool:
+    return any(key == s or key in s for s in restated)
+
+
+def _all_said(text: str, restated) -> bool:
+    """Every substantial sentence of `text` is already on the page."""
+    keys = _sentence_keys(text)
+    if not keys:
+        return _restates(text, restated)
+    return all(_said(k, restated) for k in keys)
+
+
+def _without_said(text: str, restated: list) -> str:
+    """`text` minus the substantial sentences the page already said.
+
+    A sentence is only removed when the one after it does not lean on it:
+    "This ..." / "That ..." / "It ..." refer back, and cutting what they refer
+    to would trade a repetition for a sentence that means nothing.
+    """
+    sentences = re.split(r"(?<=[.!?])\s+", " ".join(str(text or "").split()))
+    kept = []
+    for i, sentence in enumerate(sentences):
+        key = _words(sentence)
+        nxt = sentences[i + 1] if i + 1 < len(sentences) else ""
+        if len(key) >= 50 and _said(key, restated) \
+                and not _BACK_REFERENCE.match(nxt):
+            continue
+        kept.append(sentence)
+    out = " ".join(kept).strip()
+    restated.extend(_sentence_keys(out))
+    return out
+
+
+def _fresh_paragraphs(paragraphs, restated: list) -> list:
+    """The paragraphs, with what the page already said taken out.
+
+    Whole paragraphs that restate the page are dropped; a paragraph that
+    adds something keeps its new sentences (see `_without_said`).
+    """
+    kept = []
+    for paragraph in paragraphs or ():
+        if _restates(paragraph, restated) or _all_said(paragraph, restated):
+            continue
+        rest = _without_said(paragraph, restated)
+        if rest:
+            kept.append(rest)
+    return kept
+
+
+def _chart_without_restated_heading(chart_html: str, restated: list) -> str:
+    """Drop a chart's painted text when the page has already said it.
+
+    The heading, the caption and the source stamp are the three pieces of a
+    chart a reader sees outside the drawing; each restated what the passage
+    above had just said (measured: every macro sentence twice on Workday's
+    /full). The SVG keeps its own <title> and <desc>, so the chart stays named
+    for a screen reader; only the painted duplicates go.
+    """
+    html = chart_html or ""
+    for pattern in (r'<p class="xc-hd">(.*?)</p>',
+                    r'<figcaption>(.*?)</figcaption>',
+                    r'<p class="xc-src">(.*?)</p>'):
+        m = re.search(pattern, html, re.S)
+        if not m:
+            continue
+        text = html_lib.unescape(re.sub(r"<[^>]+>", "", m.group(1))).strip()
+        if not text:
+            continue
+        stamp = pattern.startswith('<p class="xc-src"')
+        key = _words(text)
+        if (_all_said(text, restated)
+                or (stamp and key and any(key == r for r in restated))):
+            html = html[:m.start()] + html[m.end():]
+        else:
+            restated.extend(_sentence_keys(text) or ([key] if stamp else []))
+    return html
+
+
+def dedupe_page_paragraphs(page_html: str) -> str:
+    """Remove a <p> whose every substantial sentence the page already said.
+
+    For surfaces assembled from several builders that share no ledger (the
+    introduction: "Why this analysis is different" and "The lens this
+    analysis is using" both printed the lens rationale). A paragraph with
+    one new sentence is kept whole.
+    """
+    seen: list = []
+
+    def keep(m):
+        text = html_lib.unescape(re.sub(r"<[^>]+>", " ", m.group(2)))
+        keys = _sentence_keys(text)
+        # Every sentence of four words or more must already be on the page;
+        # a short new sentence is still new.
+        sentences = [x for x in re.split(r"(?<=[.!?])\s+",
+                                         " ".join(text.split()))
+                     if len(x.split()) >= 4]
+        if keys and all(_said(_words(x), seen) for x in sentences):
+            return ""
+        seen.extend(keys)
+        return m.group(0)
+
+    return re.sub(r"<p(\s[^>]*)?>(.*?)</p>", keep, page_html or "",
+                  flags=re.S)
+
+
+def _drop_said_rows(block_html: str, seen: list) -> str:
+    """Remove <dt>/<dd> rows whose text the page has already said."""
+    if not block_html or not seen:
+        return block_html
+
+    def keep(m):
+        text = html_lib.unescape(re.sub(r"<[^>]+>", " ", m.group(2)))
+        return "" if _all_said(text, seen) else m.group(0)
+
+    return re.sub(r"<dt>(.*?)</dt><dd>(.*?)</dd>", keep, block_html,
+                  flags=re.S)
+
+
+def _render_appendix(passage, run_id, labels, restated: list) -> str:
+    """Every source, once -- and an excerpt already quoted is not re-quoted."""
+    from html import escape
+
+    from intent_engine.founder_brief.narrative import _evidence_link, _para
+    out = [_para(x) for x in _fresh_paragraphs(passage.paragraphs, restated)]
+    if passage.items:
+        out.append('<ul class="ev">')
+        for item in passage.items:
+            text = getattr(item, "text", "") or ""
+            out.append("<li>")
+            if text and _all_said(text, restated):
+                body = '<span class="muted">quoted above</span>'
+            elif text:
+                body = f"<q>{escape(text)}</q>"
+                restated.extend(_sentence_keys(text))
+            else:
+                body = ('<span class="muted">read in full; no single passage '
+                        'is quoted here</span>')
+            out.append(f'<span class="prov">{escape(item.provenance)}</span>'
+                       + body)
+            out.append(f'<span class="src">'
+                       f"{_evidence_link(item, run_id, labels)}</span>")
+            out.append("</li>")
+        out.append("</ul>")
+    return "".join(out)
+
+
 def _restates(paragraph: str, seeds) -> bool:
     """True when the paragraph says nothing a lead sentence did not.
 
@@ -1669,7 +1839,15 @@ def render_dossier(dossier, *, depth: str, run_id: str = "",
     # here, at the one place both meet. Only sentences of real length seed
     # this, so a short line in the lead can never silence a paragraph that
     # merely contains its words.
-    restated = _lead_sentences(lead)
+    restated = list(_lead_sentences(lead))
+    # ...AND THE SAME RULE ACROSS THE PASSAGES THEMSELVES. Measured on the
+    # prospect-100 round-2 server, Workday's /full still said 20 sentences
+    # twice: "What the evidence actually says" quoted an excerpt that "Every
+    # source this rests on" quoted again; a chart's visible heading repeated
+    # the sentence directly above it; two rival cards carried the identical
+    # response template. Each passage built its text correctly on its own --
+    # the repetition only exists on the assembled page, so it is removed
+    # where the page is assembled. `restated` grows as the page is written.
 
     charts = charts or {}
     #: Which chart belongs under which passage. Only these three passages
@@ -1683,16 +1861,34 @@ def render_dossier(dossier, *, depth: str, run_id: str = "",
     for passage in dossier.at(depth):
         out.append(f'<section id="{escape(passage.key)}">')
         out.append(f"<h2>{escape(passage.title)}</h2>")
-        if passage.kind == "evidence":
-            out.append(_render_evidence(passage, run_id, citation_labels))
+        if passage.kind == "evidence" and passage.key == "evidence_appendix":
+            out.append(_render_appendix(passage, run_id, citation_labels,
+                                        restated))
+        elif passage.kind == "evidence":
+            fresh = _fresh_paragraphs(passage.paragraphs, restated)
+            out.append(_render_evidence(
+                _replace(passage, paragraphs=tuple(fresh)), run_id,
+                citation_labels))
+            for item in passage.items:
+                restated.extend(_sentence_keys(getattr(item, "text", "")))
         elif passage.kind == "options":
             out.append(_render_options(passage.options))
+            for option in passage.options:
+                for value in vars(option).values():
+                    if isinstance(value, str):
+                        restated.extend(_sentence_keys(value))
         elif passage.kind == "labelled":
             out.append('<dl class="dl">')
             for item in passage.items:
+                text = _without_said(str(item.get("text", "")), restated)
+                # The label is often the fact itself (a macro row's label IS
+                # the reading), so it counts as said too.
+                restated.extend(_sentence_keys(str(item.get("label", ""))))
+                if not text:
+                    continue
                 out.append(f'<div class="row"><dt class="k">'
                            f'{escape(str(item.get("label", "")))}</dt>'
-                           f'<dd>{escape(str(item.get("text", "")))}</dd>'
+                           f'<dd>{escape(text)}</dd>'
                            f'</div>')
             out.append("</dl>")
         elif passage.kind == "dated":
@@ -1728,11 +1924,12 @@ def render_dossier(dossier, *, depth: str, run_id: str = "",
                                f'{escape(item["cases"])}</p>')
                 out.append("</div>")
         else:
-            out.extend(_p(x) for x in passage.paragraphs
-                       if not _restates(x, restated))
+            out.extend(_p(x) for x in
+                       _fresh_paragraphs(passage.paragraphs, restated))
         for key in _CHART_FOR.get(passage.key, ()):
             if charts.get(key):
-                out.append(charts[key])
+                out.append(_chart_without_restated_heading(charts[key],
+                                                           restated))
         if passage.note:
             out.append(f'<p class="gap">{escape(passage.note)}</p>')
         out.append("</section>")
@@ -1922,7 +2119,13 @@ def render_decision_lead(decision, company: str = "", *, depth: str = BRIEF,
     if read is not None:
         try:
             from intent_engine.founder_brief import challenge_block
-            out.append(challenge_block.render(read, company=company))
+            # The challenge block re-states the falsifier that "What to do
+            # next" printed a few lines above (measured on Moody's and
+            # Workday: "One check separates them: ..." twice). Its other rows
+            # are new and stay; a row the lead already said is dropped.
+            out.append(_drop_said_rows(
+                challenge_block.render(read, company=company),
+                list(_lead_sentences("".join(out)))))
         except Exception:                                   # noqa: BLE001
             pass
     return "".join(out)

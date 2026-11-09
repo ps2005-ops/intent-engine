@@ -34,11 +34,23 @@ NAMES = ["IDENTITY", "EVIDENCE_PROVENANCE", "COMPANY_UNDERSTANDING",
          "DISCOVERY", "QA_ROLE", "UI", "EXECUTIVE_USEFULNESS"]
 
 
+def _arg(name, default):
+    return sys.argv[sys.argv.index(name) + 1] if name in sys.argv else default
+
+
 def main() -> int:
-    ui = OUT / "reports/next40_ui"
+    # --state may be given more than once (pass 3 ran as two shards);
+    # --captures points at the pages to judge; --out names the scorecard.
+    states = [ROOT / a for i, a in enumerate(sys.argv)
+              if i and sys.argv[i - 1] == "--state"] or [OUT / "state.json"]
+    ui = ROOT / _arg("--captures", str(OUT / "reports/next40_ui"))
     TD.UI = ui
     NA.UI = ui
-    state = json.loads((OUT / "state.json").read_text())
+    state = {"rows": {}, "live_sha": None}
+    for f in states:
+        part = json.loads(pathlib.Path(f).read_text())
+        state["rows"].update(part.get("rows") or {})
+        state["live_sha"] = state["live_sha"] or part.get("live_sha")
     try:
         priors = NA._prior_first()
     except Exception:                                        # noqa: BLE001
@@ -87,7 +99,7 @@ def main() -> int:
         if a["failed"]:
             print(f"  FAIL {a['n']:>3} {a['company'][:22]:22s} {a['failed']}")
     DOCS.mkdir(parents=True, exist_ok=True)
-    (DOCS / "pass2_scorecard.json").write_text(json.dumps(
+    (DOCS / _arg("--out", "pass2_scorecard.json")).write_text(json.dumps(
         {"summary": summary, "companies": out}, indent=1, default=str))
     return 0
 
