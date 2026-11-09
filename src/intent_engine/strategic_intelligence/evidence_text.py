@@ -511,6 +511,44 @@ def density(sentence: str) -> int:
     return score
 
 
+#: Furniture a page puts IN FRONT of its content: a consent wall, an embed's
+#: licence prompt, a skip link. Not the page's words about anything.
+_CONSENT_WALL = ("accept cookies", "cookie preferences", "cookie settings",
+                 "cookie consent", "terms of service", "skip to main content",
+                 "skip to content", "enable javascript", "your browser")
+
+
+def _furniture_fallback(doc, body: str, max_chars: int) -> str:
+    """What to quote when every sentence of a page is furniture.
+
+    The raw body used to be quoted whole, which is honest about a page whose
+    prose is all navigation -- and wrong about a consent wall. Live on the
+    prospect-100 pass, Workday's pages were quoted as a "Company claim":
+    "Continue. Skip to main content. Please accept cookies to continue. This
+    content is blocked due to your cookie preferences for this site. By
+    clicking here, you accept YouTube's Terms of Service and Pol." That is
+    the cookie banner speaking, not Workday.
+
+    So: the page's own description first, which is a company statement; then
+    the body with consent and skip-link sentences removed; the raw body only
+    when nothing else is left, as before.
+    """
+    meta = " ".join(_doc_field(doc, "meta_description").split())
+    if meta and not any(m in meta.lower() for m in _CONSENT_WALL):
+        return meta[:max_chars]
+    kept = [" ".join(sentence.split()) for _o, sentence in split_sentences(body)
+            if not any(m in sentence.lower() for m in _CONSENT_WALL)]
+    kept = [k for k in kept if len(k.split()) >= 3]
+    if kept:
+        return " ".join(kept)[:max_chars]
+    # A PURE CONSENT WALL says nothing about the company, and quoting it
+    # under "Company claim" is worse than quoting nothing: the page was not
+    # readable, which is what an empty excerpt reports.
+    if any(m in body.lower() for m in _CONSENT_WALL):
+        return ""
+    return body[:max_chars]
+
+
 def evidence_excerpt(doc, *, max_chars: int = EXCERPT_CHARS) -> str:
     """The excerpt an observation carries: real sentences, in document order.
 
@@ -536,7 +574,7 @@ def evidence_excerpt(doc, *, max_chars: int = EXCERPT_CHARS) -> str:
     body = " ".join(body_text(doc).split())
     items = candidates(doc)
     if not items:
-        return body[:max_chars]
+        return _furniture_fallback(doc, body, max_chars)
 
     scores = [density(c.text) for c in items]
     best_start, best_score, best_end = 0, -1, 0

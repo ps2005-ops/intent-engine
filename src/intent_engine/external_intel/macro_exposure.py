@@ -150,11 +150,23 @@ RULES = (
     ),
     _Rule(
         CONSUMER_PRICES,
-        strong=("consumer spending", "consumer demand", "merchants",
-                "merchant", "shoppers", "gross merchandise", "e-commerce",
-                "ecommerce", "retail", "checkout", "discretionary",
-                "direct-to-consumer", "storefront"),
-        supporting=("basket", "shipping costs", "input costs",
+        # The mechanism is a VOLUME business -- revenue that moves with what
+        # households spend through the platform. Only phrases that state that
+        # are strong. "retail", "e-commerce", "merchants", "checkout" and
+        # "storefront" are how a B2B vendor lists the industries it sells
+        # into ("Industries: Retail, Healthcare, ..."), and on the live
+        # prospect-100 pass they printed take-rate revenue and household
+        # budgets on 18 of 32 software companies' analyses -- Kaseya,
+        # Matillion, Workday -- the same failure as "procurement" making
+        # Shopify a defence contractor. They still add evidence to an
+        # exposure a volume phrase established.
+        strong=("consumer spending", "consumer demand", "gross merchandise",
+                "gross merchandise volume", "take rate", "payment volume",
+                "transaction volume", "household spending",
+                "direct-to-consumer"),
+        supporting=("merchants", "merchant", "shoppers", "e-commerce",
+                    "ecommerce", "retail", "checkout", "discretionary",
+                    "storefront", "basket", "shipping costs", "input costs",
                     "cost of goods", "freight"),
         mechanism=(
             "The company's revenue tracks what end consumers spend through "

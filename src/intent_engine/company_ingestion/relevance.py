@@ -106,6 +106,13 @@ _BIOGRAPHICAL = re.compile(
     r"age\s+\d{2}\b|"
     r"he\s+(?:is|was|has)|she\s+(?:is|was|has)|they\s+(?:are|were|have)|"
     r"holds?\s+a\s+(?:B\.?[AS]|M\.?[BAS]|Ph\.?D)|"
+    # Measured on the prospect-100 pass: a blank-check company's 10-K made
+    # Matillion's one "independent, directly relevant" source out of "Black
+    # currently sits on the boards of Nextiva's, Matillion and Plum
+    # Acquisition Corp." and a directors' table row "Matillion Ltd Technology
+    # Board Member". A seat on a board is a career fact like any other.
+    r"sits?\s+on\s+(?:the\s+)?boards?|board\s+members?|"
+    r"members?\s+of\s+(?:the|its|their)\s+boards?|"
     r"(?:board|director|officer|chair)\s+of)\b", re.I)
 
 #: THE AUTHOR'S OWN ARRANGEMENTS, in the supply direction.
@@ -331,7 +338,11 @@ def adjudicate(document: dict, *, subject_name: str = "",
     #: A whole filing, or an excerpt of one? Sentence SHAPE is only evidence
     #: when the sentence boundaries are the document's own.
     reading_full_text = len(text.strip()) >= _FULL_TEXT_CHARS
-    for sentence in mentions:
+    # ONE SENTENCE IS ONE PASSAGE, however often the document repeats it. A
+    # filing restates its directors' biographies in two places, and counting
+    # each copy made one sentence into the "2 passages" DIRECTLY_RELEVANT
+    # requires.
+    for sentence in dict.fromkeys(" ".join(m.split()) for m in mentions):
         if _BOILERPLATE.search(sentence):
             continue
         # IS THIS A SENTENCE? A holdings row, a bullet or a case caption names

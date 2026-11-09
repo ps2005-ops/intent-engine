@@ -1342,6 +1342,39 @@ def derive_observations(documents, *, company: str = "",
             doc.get("text_content", "")]))
         source_class = doc.get("source_class") or _SOURCE_CLASS.get(
             doc.get("source_type"), "company_owned")
+        # A FILING BY SOMEONE ELSE, decided on ownership, not on one class.
+        #
+        # This used to test `source_class == "competitor"`, which was every
+        # third-party filing's class until `third_party_filings._emit` began
+        # reading the class from the relationship. From then on a SPAC's 10-K
+        # arrived as independent evidence, missed this branch, and was read
+        # like the subject's own filing: live on the prospect-100 pass,
+        # Plum Acquisition Corp. I's 10-K became "Matillion publishes its
+        # prices", with the SPAC's cover page as the quoted evidence. The
+        # signals are read from the passage naming the subject too -- a
+        # claim belongs to whoever made it, and the rest of the filing is
+        # the filer's account of itself.
+        body_text = doc.get("text_content", "") or ""
+        is_filing = FS.looks_like_filing(body_text, doc.get("final_url", ""))
+        #
+        # INDEPENDENT CLASSES ONLY. A third-party filing classed
+        # `investor_material` (the class production stamps on every proposed
+        # filing) is still read whole here; its ownership is enforced where
+        # the model states a component -- see `subject_documents`.
+        from intent_engine.company_ingestion.records import (
+            INDEPENDENT_CLASSES as _INDEPENDENT,
+        )
+        foreign_filing = is_filing and str(
+            doc.get("source_class") or "") in _INDEPENDENT
+        subject_passage = ""
+        if foreign_filing:
+            subject_passage = FS.subject_span(body_text, company)
+            if not subject_passage:
+                continue
+            # The cover page stays: the filing detectors recognise a filing
+            # by its structure, and the cover page states only the form.
+            text = " ".join(filter(None, [title, body_text[:800],
+                                          subject_passage]))
         signals = _detect_signals(text, source_class, company)
         if not signals:
             continue
@@ -1356,9 +1389,7 @@ def derive_observations(documents, *, company: str = "",
         # Section-aware selection is tried FIRST and falls back silently, so a
         # malformed or unrecognised filing keeps the old behaviour rather than
         # losing its observation.
-        body_text = doc.get("text_content", "") or ""
         excerpt, section = "", ""
-        is_filing = FS.looks_like_filing(body_text, doc.get("final_url", ""))
         # A FILING BY SOMEONE ELSE IS READ FOR WHAT IT SAYS ABOUT US.
         #
         # `third_party_filings` retrieves filings by other registrants that
@@ -1371,10 +1402,8 @@ def derive_observations(documents, *, company: str = "",
         # Fails closed. A third-party filing whose usable prose never names
         # the subject is not evidence about the subject, and the document is
         # dropped rather than shown with someone else's business description.
-        if is_filing and doc.get("source_class") == "competitor":
-            excerpt = FS.subject_span(body_text, company)
-            if not excerpt:
-                continue
+        if foreign_filing:
+            excerpt = subject_passage
             section = "the passage naming this company"
         elif is_filing:
             # The form decides which Item carries MD&A: 7 in an annual report,

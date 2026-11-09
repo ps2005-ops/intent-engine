@@ -195,12 +195,11 @@ def macro_blocks(context: ExternalContext) -> List[Block]:
     blocks = []
     for factor in context.macro:
         d = factor.as_dict()
-        direction = d["direction"] or "has not moved materially"
+        direction = d["direction"] or "no comparable earlier reading"
         blocks.append(Block(
             key=f"macro_{d['factor_key']}", context=MACRO,
             title="Macro and industry pressure",
-            fact=(f"{d['factor']} is {direction}: {d['change_text']}, "
-                  f"{d['comparison_note']}."),
+            fact=d["sentence"],
             so_what=f"{d['company_exposure_mechanism']} "
                     f"{d['business_consequence']}",
             decision=d["affected_kpi_or_decision"],

@@ -598,8 +598,16 @@ def suggest(typed: str, *, limit: int = 8, allow_registrant: bool = True,
             cik=held.cik or row.cik,
             status=held.status or row.status,
             status_state=held.status_state or row.status_state)
+    # WITHIN A TIE, THE NAME A PERSON TYPES DECIDES, NOT THE LEGAL FORM.
+    #
+    # Measured live (prospect-100 pass 2): "Dat" offered Datarails before
+    # Datto because "Datto, Inc." is two characters longer than "Datarails"
+    # -- the ", Inc." decided it. The typed prefix covers more of "Datto"
+    # than of "Datarails", which is what a shorter spoken name means; the
+    # legal-name length stays as the last tie-break.
     ordered = sorted(merged.values(),
                      key=lambda r: (r.match, SOURCE_RANK.get(r.source, 9),
+                                    len(r.common_name or r.legal_name),
                                     len(r.legal_name)))
     return tuple(ordered[:limit])
 

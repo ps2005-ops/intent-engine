@@ -1260,7 +1260,8 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     # fired, and the deck kept denying a reading the X-Ray asserted. The
     # producer already flags this case; asking it is what the fix should have
     # done in the first place.
-    if (contract is not None and getattr(contract, "reading_exists", False)
+    if (contract is not None
+            and getattr(contract, "supported_reading_exists", False)
             and thesis.get("view_withheld")):
         view_bullets = [_bullet(
             f"A supported reading of {company} exists and is set out on the "

@@ -88,6 +88,16 @@ MAX_APPROVED_SOURCES = 14
 #: The budget for ONE untrusted web response. SEC filings are fetched against
 #: `edgar.MAX_FILING_BYTES` instead — see the reasoning there.
 MAX_RESPONSE_BYTES = 2_000_000
+#: The budget for a page on the company's OWN verified domain.
+#:
+#: Measured 2026-11-09 on the prospect-100 list: modern marketing sites put
+#: megabytes of inline script in <head>, so the readable <body> starts past
+#: 2MB -- Altana's at 2.57MB of 3.16MB, BlackLine's at 2.06MB of 2.22MB. The
+#: 2MB rule refused both homepages whole, and the run reported companies that
+#: "publish nothing". Parsing the full page took 21-24ms. Past this budget the
+#: page is kept truncated and flagged, never discarded. Third-party pages
+#: stay at MAX_RESPONSE_BYTES.
+MAX_OWN_PAGE_BYTES = 4_000_000
 #: The budget for a whole run.
 #:
 #: This had to move with the filing budget, not after it. At 15MB a single

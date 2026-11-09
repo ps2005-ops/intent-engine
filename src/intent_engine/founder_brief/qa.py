@@ -927,7 +927,7 @@ def answer(question: str, brief, *, engine_answer: str = "",
     # here and still contradicted the contract. Same defect, one branch over.
     _fallback = "There is not enough public evidence to answer that confidently."
     if k is None and contract is not None and getattr(
-            contract, "reading_exists", False):
+            contract, "supported_reading_exists", False):
         _fallback = (
             f"A supported reading of "
             f"{getattr(contract, 'company', '') or 'this company'} exists and "

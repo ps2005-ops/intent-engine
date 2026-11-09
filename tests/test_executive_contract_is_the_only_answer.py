@@ -102,6 +102,29 @@ def test_the_brief_does_not_deny_a_reading_the_contract_asserts():
     assert "did not add enough independent evidence" in lead
 
 
+def test_a_bounded_read_is_never_called_supported_or_sent_elsewhere():
+    """Live on the prospect-100 pass: 14 of 32 executive briefs opened with
+    "A supported reading of X exists and is set out on the Executive X-Ray"
+    when the only reading was the bounded one on the page itself."""
+    from intent_engine.founder_brief import dossier as fd
+
+    decision = FounderDecision(readiness=WITHHELD, company_name="Acme")
+    contract = ec.decide(company="Acme", run_decision=decision,
+                         market_decision=None, bounded_read=True)
+    assert contract.reading_exists and not contract.supported_reading_exists
+    lead = fd.render_decision_lead(decision, "Acme", contract=contract)
+    assert "Executive X-Ray" not in lead
+    assert "supported reading" not in lead.lower()
+    assert "No strategic reading of Acme cleared" not in lead, (
+        "a bounded read exists and may not be denied")
+    # positive control: a market-supported reading still points to it
+    market = ec.decide(company="Acme", run_decision=decision,
+                       market_decision=_market(True))
+    assert market.supported_reading_exists
+    assert "Executive X-Ray" in fd.render_decision_lead(
+        decision, "Acme", contract=market)
+
+
 def test_the_brief_still_refuses_when_the_contract_refuses():
     """The fix must not turn every refusal into a claim."""
     from intent_engine.founder_brief import dossier as fd

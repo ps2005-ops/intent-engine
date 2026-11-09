@@ -100,6 +100,21 @@ class ExecutiveContract:
     market_note: str = ""
     sources: tuple = field(default_factory=tuple)
 
+    @property
+    def supported_reading_exists(self) -> bool:
+        """A reading some producer SUPPORTS -- not merely a bounded read.
+
+        `reading_exists` answers "may a surface deny a reading?" and a bounded
+        read correctly says no. It does not license "a supported reading
+        exists and is set out on the Executive X-Ray": the bounded read is ON
+        the page the reader is already looking at, and its own producer calls
+        it bounded. Live on the prospect-100 pass, 14 of 32 executive briefs
+        opened with that pointer sentence instead of the bounded read below
+        it -- the narrative screen gated on this distinction, and the brief,
+        the deck, the Q&A fallback and the limited-analysis page did not.
+        """
+        return self.reading_exists and self.merge_state != BOUNDED_READ_ONLY
+
 
 def _standing_of(decision) -> str:
     return str(getattr(decision, "standing", "")

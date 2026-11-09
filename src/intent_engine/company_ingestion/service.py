@@ -1832,6 +1832,8 @@ class CompanyIngestionService:
         policies, two cache-write rules and two byte budgets that drift.
         """
         from intent_engine.company_ingestion.pdf import PDF_MIME_PREFIXES
+        from intent_engine.company_ingestion.records import MAX_OWN_PAGE_BYTES
+        own_page = bool(candidate.get("same_domain")) and not wants_pdf
         kwargs = dict(
             transport=self.transport, resolver=self.resolver,
             extra_mime_prefixes=(PDF_MIME_PREFIXES if wants_pdf else ()),
@@ -1844,8 +1846,14 @@ class CompanyIngestionService:
             # large" and left the run bounded. `accept_truncated` is the
             # fallback for anything past even that budget; nothing downstream
             # may call such a read complete.
-            accept_truncated=bool(candidate.get("accept_truncated")),
-            max_bytes=int(candidate.get("max_bytes") or MAX_RESPONSE_BYTES))
+            #
+            # The company's own pages get a larger budget and are kept
+            # truncated rather than refused past it: see MAX_OWN_PAGE_BYTES.
+            accept_truncated=(bool(candidate.get("accept_truncated"))
+                              or own_page),
+            max_bytes=int(candidate.get("max_bytes")
+                          or (MAX_OWN_PAGE_BYTES if own_page
+                              else MAX_RESPONSE_BYTES)))
         if timeout is not None:
             kwargs["timeout"] = timeout
         # POLITENESS BEFORE THE REQUEST, not after being told off for it.

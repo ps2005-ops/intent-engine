@@ -967,35 +967,50 @@ HYPOTHESIS_SCAFFOLDS = {
         "threshold": 2,
     },
     "human_to_agent_workflow": {
-        "title": "positioning for demand mediated by AI agents rather "
-                 "than by people",
-        "statement": "{company} appears to be positioning for buying that is "
-                     "mediated by AI agents rather than by people directly, "
-                     "shifting where demand is captured.",
-        "reasoning": "Agent/AI-commerce endpoints plus a distribution shift "
-                     "plus ownership of checkout/identity match the "
-                     "human→agent-workflow mechanism: when agents transact, "
-                     "the rails they call matter more than the human-facing "
-                     "storefront.",
+        # WORDED FOR ANY WORKFLOW, NOT FOR SHOPPING.
+        #
+        # The gate (`required_any_signals`) deliberately admits any workflow
+        # a person used to run that software now executes -- an agent that
+        # reconciles invoices qualifies, and the tests pin that. This text
+        # was written for one case of it, commerce: on the live prospect-100
+        # pass Vena and Pigment (FP&A) and Keboola (data integration) were
+        # told "the rails they call matter more than the human-facing
+        # storefront" and asked about "merchant demand capture". The
+        # consequence is the same for a checkout and a month-end close --
+        # value moves to what the agent calls -- so it is stated that way.
+        "title": "positioning for work done by AI agents rather than by "
+                 "people",
+        "statement": "{company} appears to be positioning for work that AI "
+                     "agents carry out on a customer's behalf, rather than "
+                     "people doing it directly, which moves where value is "
+                     "captured.",
+        "reasoning": "Software that acts on the customer's behalf, plus a "
+                     "change in how the product is reached, matches the "
+                     "human→agent-workflow mechanism: when agents do the "
+                     "work, the interfaces, permissions and records they act "
+                     "through matter more than the screens a person used to "
+                     "work in.",
         "alternatives": [
-            "Agentic-commerce work is R&D optionality, not a near-term "
-            "distribution change.",
-            "Human storefront browsing remains dominant for years and agent "
-            "endpoints stay marginal.",
+            "The agent work is R&D optionality, not a near-term change in "
+            "how customers use or pay for the product.",
+            "People keep doing the work for years and the agent features "
+            "stay marginal.",
         ],
         "implications": [
-            "Whether to invest now in agent-readable endpoints, identity, and "
-            "checkout the agents will call.",
-            "How to keep merchant demand capture as browsing intermediates.",
+            "Whether to invest now in the agent-callable interfaces, "
+            "permissions and audit trail the work will run through.",
+            "How to keep the customer relationship when an agent, not a "
+            "person, is the one using the product.",
         ],
         "falsification": [
-            "Is a measurable and growing share of orders originating from "
-            "AI-agent surfaces rather than human browsing?",
-            "Do merchants see agent-driven demand they cannot get elsewhere?",
+            "Is a measurable and growing share of the work -- orders, "
+            "transactions, tasks -- completed by agents rather than people?",
+            "Do customers pay for work the agent completes, rather than for "
+            "the seats people used?",
         ],
         "gaps": [
-            "Real agent-driven order volume vs. human browsing is not yet "
-            "observable in public data.",
+            "The share of work agents actually complete, versus work people "
+            "still do, is not yet observable in public data.",
         ],
         "threshold": 2,
     },

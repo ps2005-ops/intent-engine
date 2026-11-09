@@ -252,3 +252,37 @@ def test_discovery_still_refuses_a_non_substantive_form():
     got = classify_mention(snippet=RIVAL, form="8-K",
                            company_name="Cloudflare, Inc.")
     assert got["usable"] is False
+
+
+def test_a_board_seat_is_a_career_fact_not_a_discussion_of_the_company():
+    """Measured live (prospect-100 pass 2): Plum Acquisition Corp. I's 10-K was
+    Matillion's ONE independent, "directly relevant" source, and its counted
+    spans were a director's biography printed twice plus a directors' table
+    row. Matillion's decision-grade reading rested on it."""
+    from intent_engine.company_ingestion import relevance as R
+    pad = "The registrant files this annual report under the Act. " * 8
+    bio = ("Black currently sits on the boards of Nextiva's, Matillion and "
+           "Plum Acquisition Corp. Matillion Ltd Technology Board Member. "
+           "Black currently sits on the boards of Nextiva's, Matillion and "
+           "Plum Acquisition Corp.")
+    verdict = R.adjudicate({"text_content": pad + bio},
+                           subject_name="Matillion",
+                           author_name="Plum Acquisition Corp. I")
+    assert verdict["state"] == R.IRRELEVANT, verdict
+    # positive control: an account of the subject's business still counts
+    rival = ("Customers migrated from Matillion to our platform after "
+             "Matillion raised its pricing. We compete with Matillion in "
+             "data integration.")
+    assert R.adjudicate({"text_content": pad + rival},
+                        subject_name="Matillion",
+                        author_name="Plum Acquisition Corp. I")["state"] \
+        == R.DIRECTLY_RELEVANT
+
+
+def test_one_sentence_repeated_is_one_passage():
+    from intent_engine.company_ingestion import relevance as R
+    pad = "The registrant files this annual report under the Act. " * 8
+    once = "Acme Robotics competes on price in warehouse automation."
+    verdict = R.adjudicate({"text_content": pad + once + " " + once},
+                           subject_name="Acme Robotics")
+    assert verdict["substantive_mentions"] == 1, verdict

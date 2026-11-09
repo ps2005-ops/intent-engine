@@ -272,14 +272,15 @@ def detect_opportunities(company, observations, hypotheses,
 
 _VULNERABILITY_PLAYBOOK = {
     "human_to_agent_workflow": dict(
-        layer="demand capture at the storefront",
-        mechanism="if buying is mediated by AI agents, the owned human-facing "
-                  "storefront matters less than the rails an agent calls",
-        why="agentic-commerce signals are appearing before the interface moat "
-            "is replaced",
-        force="AI shopping agents / answer engines",
-        impact="erosion of the interface advantage that drives acquisition",
-        indicator="share of orders originating from agent surfaces"),
+        layer="the interface customers work through",
+        mechanism="if AI agents do the work, the screens a person used "
+                  "matter less than the interfaces and records an agent "
+                  "acts through",
+        why="agent-execution signals are appearing before the interface "
+            "advantage is replaced",
+        force="AI agents and the platforms that host them",
+        impact="erosion of the interface advantage that drives adoption",
+        indicator="share of the work completed by agents rather than people"),
     "ecosystem_control_vs_openness": dict(
         layer="the partner ecosystem",
         mechanism="consolidating checkout/identity/data can turn partners into "
@@ -343,9 +344,10 @@ def underexamined_questions(company, observations, hypotheses, blind_spots):
                  f"quietly become competitors — and does that shrink the "
                  f"ecosystem faster than rails revenue grows?")
         elif h.pattern_id == "human_to_agent_workflow":
-            q = (f"If AI agents mediate buying, does {company} still own the "
-                 f"customer relationship, or does the agent platform capture "
-                 f"it — and what does that do to merchant demand?")
+            q = (f"If AI agents do the work {company}'s customers do "
+                 f"today, does {company} still own the customer "
+                 f"relationship, or does the platform hosting the agent "
+                 f"capture it?")
         elif h.pattern_id == "smb_wedge_to_enterprise":
             q = (f"Is enterprise focus quietly raising the complexity SMBs "
                  f"experience in {company}'s core flows, eroding the wedge "

@@ -321,3 +321,15 @@ def test_an_acquired_company_that_still_publishes_opens_a_run(app):
     (status, headers, body), session = _analyze(app, company_name="Chronosphere")
     assert "now part of" not in body
     assert _spent(app) == 1
+
+
+def test_a_tie_is_broken_by_the_name_a_person_types_not_the_legal_form():
+    """Live on the prospect-100 pass: "Dat" offered Datarails before Datto
+    because "Datto, Inc." is two characters longer than "Datarails" -- the
+    ", Inc." decided it. Both are leading matches; the shorter SPOKEN name is
+    the one the prefix covers more of."""
+    rows = SG.suggest("Dat", allow_registrant=False)
+    assert rows[0].entity_id == "datto", [r.legal_name for r in rows[:4]]
+    # positive control: a longer prefix still reaches the longer name
+    assert SG.suggest("Datar", allow_registrant=False)[0].entity_id \
+        == "datarails"

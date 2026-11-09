@@ -4412,8 +4412,8 @@ class WebApp:
         # What it may no longer do is conclude, from this run alone, that the
         # system has nothing to say about the company.
         _contract = self._executive_contract(run_id)
-        if _contract is not None and getattr(_contract, "reading_exists",
-                                             False):
+        if _contract is not None and getattr(
+                _contract, "supported_reading_exists", False):
             # The CONTRACT's name, which is the canonical one resolved for the
             # dossier. `company` here is whatever the run metadata recorded,
             # which is what the founder typed -- "Caterpillar" rather than

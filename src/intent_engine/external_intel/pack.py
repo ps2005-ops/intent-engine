@@ -773,8 +773,7 @@ def reasoning_pack(context: ExternalContext) -> dict:
                 "role": ("An outside condition this company is exposed to "
                          "through a stated mechanism. It bounds a decision; "
                          "it does not establish that results have moved."),
-                "facts": [f"{d['factor']}: {d['change_text']} "
-                          f"({d['direction']}), {d['comparison_note']}.",
+                "facts": [d["sentence"],
                           f"Exposure: {d['company_exposure_mechanism']}",
                           f"Consequence: {d['business_consequence']}"],
                 "evidence_ids": d["evidence_ids"],

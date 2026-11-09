@@ -42,6 +42,9 @@ costs the reader.
 """
 from __future__ import annotations
 
+import html as html_lib
+import re
+
 from dataclasses import dataclass, field
 from typing import List, Optional, Sequence
 
@@ -1592,6 +1595,42 @@ def render_families(families) -> str:
             f'</h2><ul class="fam">{chips}</ul>{gaps}</section>')
 
 
+def _words(text: str) -> str:
+    # Words only, NO label stripping: `sentence_identity` strips up to the
+    # first colon, which turns "What to do now: The gap ...: X" and "The gap
+    # ...: X" into two different identities.
+    return " ".join(re.findall(r"[a-z0-9]+", str(text or "").lower()))
+
+
+def _lead_sentences(lead_html: str) -> tuple:
+    """The lead's sentences, as identities, long enough to mean something."""
+    if not lead_html:
+        return ()
+    text = re.sub(r"(?is)<(style|script)[^>]*>.*?</\1>", " ", lead_html)
+    text = html_lib.unescape(re.sub(r"<[^>]+>", " ", text))
+    out = []
+    for sentence in re.split(r"(?<=[.!?])\s+", " ".join(text.split())):
+        key = _words(sentence)
+        if len(key) >= 50:
+            out.append(key)
+    return tuple(out)
+
+
+def _restates(paragraph: str, seeds) -> bool:
+    """True when the paragraph says nothing a lead sentence did not.
+
+    Equal, contained in a lead sentence, or containing one with little else
+    -- a paragraph that adds a clause of its own is kept.
+    """
+    if not seeds:
+        return False
+    key = _words(paragraph)
+    if not key:
+        return False
+    return any(key == s or key in s or (s in key and len(key) <= len(s) * 1.3)
+               for s in seeds)
+
+
 def render_dossier(dossier, *, depth: str, run_id: str = "",
                    citation_labels=None, lead: str = "",
                    wrap: bool = True, charts=None) -> str:
@@ -1619,6 +1658,18 @@ def render_dossier(dossier, *, depth: str, run_id: str = "",
            f'<p class="kicker">{escape(kicker)}</p>']
     if lead:
         out.append(lead)
+    # THE LEAD AND THE DOSSIER ARE TWO COMPOSERS WITH TWO LEDGERS.
+    #
+    # The lead (`render_decision_lead`) and the passages below it each keep
+    # their own record of what they have said, so neither knows what the
+    # other printed: live on the prospect-100 pass, "The gap that has to
+    # close first is this: ..." reached /full three times -- "What to do
+    # next", then "What to do now:" under "The recommendation". A passage
+    # paragraph that restates a sentence the lead already gave is dropped
+    # here, at the one place both meet. Only sentences of real length seed
+    # this, so a short line in the lead can never silence a paragraph that
+    # merely contains its words.
+    restated = _lead_sentences(lead)
 
     charts = charts or {}
     #: Which chart belongs under which passage. Only these three passages
@@ -1677,7 +1728,8 @@ def render_dossier(dossier, *, depth: str, run_id: str = "",
                                f'{escape(item["cases"])}</p>')
                 out.append("</div>")
         else:
-            out.extend(_p(x) for x in passage.paragraphs)
+            out.extend(_p(x) for x in passage.paragraphs
+                       if not _restates(x, restated))
         for key in _CHART_FOR.get(passage.key, ()):
             if charts.get(key):
                 out.append(charts[key])
@@ -1723,7 +1775,8 @@ def render_decision_lead(decision, company: str = "", *, depth: str = BRIEF,
         # the one contract every executive surface consults. The reasoning
         # prose below is untouched, because the brief's job is still to
         # explain what THIS run could and could not establish.
-        if contract is not None and getattr(contract, "reading_exists", False):
+        if contract is not None and getattr(contract,
+                                            "supported_reading_exists", False):
             out.append(_p(
                 f"A supported reading of {company} exists and is set out on "
                 f"the Executive X-Ray."))
@@ -1775,6 +1828,15 @@ def render_decision_lead(decision, company: str = "", *, depth: str = BRIEF,
                 out.append(_p(end_sentence(
                     f"What this run could not establish on its own: "
                     f"{as_clause(decision.unsafe_because, company)}")))
+        elif getattr(contract, "merge_state", "") == "BOUNDED_READ_ONLY":
+            # The contract holds a bounded read this lead was not handed. It
+            # may not be denied (HAS_READING) and may not be called supported
+            # -- the narrative screen's wording, so the two surfaces agree.
+            out.append(_p(f"No curated transition pattern matched {company}, "
+                          f"so what follows is read from the public record "
+                          f"directly rather than from a known pattern."))
+            out.append(_p("It is bounded for that reason, and every claim "
+                          "below names the evidence it rests on."))
         else:
             out.append(_p(f"No strategic reading of {company} cleared the "
                           f"evidence bar, so none is asserted here."))
