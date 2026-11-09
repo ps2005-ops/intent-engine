@@ -1,0 +1,712 @@
+{
+ "summary": {
+  "served": "live preview",
+  "correct_top1": 99,
+  "wrong_top1": 0,
+  "empty": 1,
+  "roundtrip_ms_p50": 187,
+  "roundtrip_ms_p95": 338
+ },
+ "rows": [
+  {
+   "prospect_id": 1,
+   "name": "Hammerspace",
+   "verdict": "OK",
+   "top": "Hammerspace",
+   "ms": 262
+  },
+  {
+   "prospect_id": 2,
+   "name": "WEKA",
+   "verdict": "OK",
+   "top": "WekaIO, Inc.",
+   "ms": 182
+  },
+  {
+   "prospect_id": 3,
+   "name": "Reltio",
+   "verdict": "OK",
+   "top": "Reltio, Inc.",
+   "ms": 343
+  },
+  {
+   "prospect_id": 4,
+   "name": "Ataccama",
+   "verdict": "OK",
+   "top": "Ataccama",
+   "ms": 176
+  },
+  {
+   "prospect_id": 5,
+   "name": "Informatica",
+   "verdict": "OK",
+   "top": "Informatica Inc.",
+   "ms": 347
+  },
+  {
+   "prospect_id": 6,
+   "name": "Qlik",
+   "verdict": "OK",
+   "top": "Qlik",
+   "ms": 182
+  },
+  {
+   "prospect_id": 7,
+   "name": "Matillion",
+   "verdict": "OK",
+   "top": "Matillion",
+   "ms": 343
+  },
+  {
+   "prospect_id": 8,
+   "name": "Keboola",
+   "verdict": "OK",
+   "top": "Keboola",
+   "ms": 344
+  },
+  {
+   "prospect_id": 9,
+   "name": "CData Software",
+   "verdict": "OK",
+   "top": "CData Software, Inc.",
+   "ms": 180
+  },
+  {
+   "prospect_id": 10,
+   "name": "Precisely",
+   "verdict": "OK",
+   "top": "Precisely",
+   "ms": 190
+  },
+  {
+   "prospect_id": 11,
+   "name": "Securiti",
+   "verdict": "OK",
+   "top": "Securiti",
+   "ms": 334
+  },
+  {
+   "prospect_id": 12,
+   "name": "Immuta",
+   "verdict": "OK",
+   "top": "Immuta, Inc.",
+   "ms": 206
+  },
+  {
+   "prospect_id": 13,
+   "name": "Privacera",
+   "verdict": "OK",
+   "top": "Privacera, Inc.",
+   "ms": 318
+  },
+  {
+   "prospect_id": 14,
+   "name": "Soda",
+   "verdict": "OK",
+   "top": "Soda",
+   "ms": 192
+  },
+  {
+   "prospect_id": 15,
+   "name": "Acceldata",
+   "verdict": "OK",
+   "top": "Acceldata",
+   "ms": 330
+  },
+  {
+   "prospect_id": 16,
+   "name": "Anomalo",
+   "verdict": "OK",
+   "top": "Anomalo",
+   "ms": 335
+  },
+  {
+   "prospect_id": 17,
+   "name": "Observe",
+   "verdict": "OK",
+   "top": "Observe, Inc.",
+   "ms": 195
+  },
+  {
+   "prospect_id": 18,
+   "name": "Chronosphere",
+   "verdict": "OK",
+   "top": "Chronosphere, Inc.",
+   "ms": 335
+  },
+  {
+   "prospect_id": 19,
+   "name": "CrateDB",
+   "verdict": "OK",
+   "top": "Crate.io",
+   "ms": 196
+  },
+  {
+   "prospect_id": 20,
+   "name": "SingleStore",
+   "verdict": "OK",
+   "top": "SingleStore, Inc.",
+   "ms": 188
+  },
+  {
+   "prospect_id": 21,
+   "name": "TigerGraph",
+   "verdict": "OK",
+   "top": "TigerGraph, Inc.",
+   "ms": 327
+  },
+  {
+   "prospect_id": 22,
+   "name": "Neo4j",
+   "verdict": "OK",
+   "top": "Neo4j, Inc.",
+   "ms": 185
+  },
+  {
+   "prospect_id": 23,
+   "name": "Arango",
+   "verdict": "OK",
+   "top": "ArangoDB Inc.",
+   "ms": 338
+  },
+  {
+   "prospect_id": 24,
+   "name": "KX",
+   "verdict": "OK",
+   "top": "KX",
+   "ms": 174
+  },
+  {
+   "prospect_id": 25,
+   "name": "Tecton",
+   "verdict": "OK",
+   "top": "Tecton",
+   "ms": 350
+  },
+  {
+   "prospect_id": 26,
+   "name": "Interos",
+   "verdict": "OK",
+   "top": "Interos",
+   "ms": 212
+  },
+  {
+   "prospect_id": 27,
+   "name": "Everstream Analytics",
+   "verdict": "OK",
+   "top": "Everstream Analytics",
+   "ms": 303
+  },
+  {
+   "prospect_id": 28,
+   "name": "Resilinc",
+   "verdict": "OK",
+   "top": "Resilinc",
+   "ms": 195
+  },
+  {
+   "prospect_id": 29,
+   "name": "Altana",
+   "verdict": "OK",
+   "top": "Altana",
+   "ms": 324
+  },
+  {
+   "prospect_id": 30,
+   "name": "Exiger",
+   "verdict": "OK",
+   "top": "Exiger",
+   "ms": 175
+  },
+  {
+   "prospect_id": 31,
+   "name": "Sayari",
+   "verdict": "OK",
+   "top": "Sayari",
+   "ms": 204
+  },
+  {
+   "prospect_id": 32,
+   "name": "Kharon",
+   "verdict": "OK",
+   "top": "Kharon",
+   "ms": 177
+  },
+  {
+   "prospect_id": 33,
+   "name": "Moody's",
+   "verdict": "OK",
+   "top": "Moody's Corporation",
+   "ms": 202
+  },
+  {
+   "prospect_id": 34,
+   "name": "S&P Global",
+   "verdict": "OK",
+   "top": "S&P Global Inc.",
+   "ms": 252
+  },
+  {
+   "prospect_id": 35,
+   "name": "MSCI",
+   "verdict": "OK",
+   "top": "MSCI Inc.",
+   "ms": 189
+  },
+  {
+   "prospect_id": 36,
+   "name": "FactSet",
+   "verdict": "OK",
+   "top": "FactSet Research Systems Inc.",
+   "ms": 220
+  },
+  {
+   "prospect_id": 37,
+   "name": "Morningstar",
+   "verdict": "OK",
+   "top": "Morningstar, Inc.",
+   "ms": 185
+  },
+  {
+   "prospect_id": 38,
+   "name": "Enverus",
+   "verdict": "OK",
+   "top": "Enverus",
+   "ms": 200
+  },
+  {
+   "prospect_id": 39,
+   "name": "Rystad Energy",
+   "verdict": "OK",
+   "top": "Rystad Energy",
+   "ms": 269
+  },
+  {
+   "prospect_id": 40,
+   "name": "Wood Mackenzie",
+   "verdict": "OK",
+   "top": "Wood Mackenzie",
+   "ms": 185
+  },
+  {
+   "prospect_id": 41,
+   "name": "Verisk",
+   "verdict": "OK",
+   "top": "Verisk Analytics, Inc.",
+   "ms": 181
+  },
+  {
+   "prospect_id": 42,
+   "name": "Jupiter Intelligence",
+   "verdict": "OK",
+   "top": "Jupiter Intelligence",
+   "ms": 175
+  },
+  {
+   "prospect_id": 43,
+   "name": "Cervest",
+   "verdict": "OK",
+   "top": "Cervest",
+   "ms": 197
+  },
+  {
+   "prospect_id": 44,
+   "name": "Watershed",
+   "verdict": "OK",
+   "top": "Watershed",
+   "ms": 197
+  },
+  {
+   "prospect_id": 45,
+   "name": "Persefoni",
+   "verdict": "OK",
+   "top": "Persefoni",
+   "ms": 181
+  },
+  {
+   "prospect_id": 46,
+   "name": "Benchmark Gensuite",
+   "verdict": "OK",
+   "top": "Benchmark Gensuite",
+   "ms": 192
+  },
+  {
+   "prospect_id": 47,
+   "name": "Cority",
+   "verdict": "OK",
+   "top": "Cority Software Inc.",
+   "ms": 171
+  },
+  {
+   "prospect_id": 48,
+   "name": "Assent",
+   "verdict": "OK",
+   "top": "Assent Inc.",
+   "ms": 194
+  },
+  {
+   "prospect_id": 49,
+   "name": "EcoVadis",
+   "verdict": "OK",
+   "top": "EcoVadis",
+   "ms": 177
+  },
+  {
+   "prospect_id": 50,
+   "name": "Dun & Bradstreet",
+   "verdict": "OK",
+   "top": "Dun & Bradstreet Holdings, Inc.",
+   "ms": 183
+  },
+  {
+   "prospect_id": 51,
+   "name": "Planful",
+   "verdict": "OK",
+   "top": "Planful, Inc.",
+   "ms": 187
+  },
+  {
+   "prospect_id": 52,
+   "name": "Vena Solutions",
+   "verdict": "OK",
+   "top": "Vena Solutions Inc.",
+   "ms": 180
+  },
+  {
+   "prospect_id": 53,
+   "name": "Cube",
+   "verdict": "OK",
+   "top": "Cube Planning, Inc.",
+   "ms": 183
+  },
+  {
+   "prospect_id": 54,
+   "name": "Mosaic Tech",
+   "verdict": "OK",
+   "top": "Mosaic",
+   "ms": 196
+  },
+  {
+   "prospect_id": 55,
+   "name": "Aleph",
+   "verdict": "OK",
+   "top": "Aleph",
+   "ms": 187
+  },
+  {
+   "prospect_id": 56,
+   "name": "Pigment",
+   "verdict": "OK",
+   "top": "Pigment",
+   "ms": 180
+  },
+  {
+   "prospect_id": 57,
+   "name": "Anaplan",
+   "verdict": "OK",
+   "top": "Anaplan, Inc.",
+   "ms": 179
+  },
+  {
+   "prospect_id": 58,
+   "name": "Workday",
+   "verdict": "OK",
+   "top": "Workday, Inc.",
+   "ms": 170
+  },
+  {
+   "prospect_id": 59,
+   "name": "Dayforce",
+   "verdict": "OK",
+   "top": "Dayforce, Inc.",
+   "ms": 174
+  },
+  {
+   "prospect_id": 60,
+   "name": "Paycor",
+   "verdict": "OK",
+   "top": "Paycor HCM, Inc.",
+   "ms": 194
+  },
+  {
+   "prospect_id": 61,
+   "name": "Rippling",
+   "verdict": "OK",
+   "top": "People Center, Inc.",
+   "ms": 177
+  },
+  {
+   "prospect_id": 62,
+   "name": "Deel",
+   "verdict": "OK",
+   "top": "Deel, Inc.",
+   "ms": 173
+  },
+  {
+   "prospect_id": 63,
+   "name": "Gusto",
+   "verdict": "OK",
+   "top": "Gusto, Inc.",
+   "ms": 185
+  },
+  {
+   "prospect_id": 64,
+   "name": "Ramp",
+   "verdict": "OK",
+   "top": "Ramp Business Corporation",
+   "ms": 203
+  },
+  {
+   "prospect_id": 65,
+   "name": "Brex",
+   "verdict": "OK",
+   "top": "Brex Inc.",
+   "ms": 170
+  },
+  {
+   "prospect_id": 66,
+   "name": "BILL",
+   "verdict": "OK",
+   "top": "BILL Holdings, Inc.",
+   "ms": 199
+  },
+  {
+   "prospect_id": 67,
+   "name": "FloQast",
+   "verdict": "OK",
+   "top": "FloQast, Inc.",
+   "ms": 167
+  },
+  {
+   "prospect_id": 68,
+   "name": "BlackLine",
+   "verdict": "OK",
+   "top": "BlackLine, Inc.",
+   "ms": 198
+  },
+  {
+   "prospect_id": 69,
+   "name": "Datarails",
+   "verdict": "OK",
+   "top": "Datarails",
+   "ms": 178
+  },
+  {
+   "prospect_id": 70,
+   "name": "Centage",
+   "verdict": "OK",
+   "top": "Centage",
+   "ms": 189
+  },
+  {
+   "prospect_id": 71,
+   "name": "Acumatica",
+   "verdict": "OK",
+   "top": "Acumatica, Inc.",
+   "ms": 182
+  },
+  {
+   "prospect_id": 72,
+   "name": "Epicor",
+   "verdict": "OK",
+   "top": "Epicor Software Corporation",
+   "ms": 175
+  },
+  {
+   "prospect_id": 73,
+   "name": "Plex (Rockwell Automation)",
+   "verdict": "OK",
+   "top": "Plex Systems, Inc.",
+   "ms": 203
+  },
+  {
+   "prospect_id": 74,
+   "name": "IFS North America",
+   "verdict": "OK",
+   "top": "IFS",
+   "ms": 187
+  },
+  {
+   "prospect_id": 75,
+   "name": "QAD",
+   "verdict": "OK",
+   "top": "QAD Inc.",
+   "ms": 192
+  },
+  {
+   "prospect_id": 76,
+   "name": "Auvik",
+   "verdict": "OK",
+   "top": "Auvik Networks Inc.",
+   "ms": 176
+  },
+  {
+   "prospect_id": 77,
+   "name": "Kaseya",
+   "verdict": "OK",
+   "top": "Kaseya",
+   "ms": 174
+  },
+  {
+   "prospect_id": 78,
+   "name": "ConnectWise",
+   "verdict": "OK",
+   "top": "ConnectWise, LLC",
+   "ms": 208
+  },
+  {
+   "prospect_id": 79,
+   "name": "N-able",
+   "verdict": "OK",
+   "top": "N-able, Inc.",
+   "ms": 183
+  },
+  {
+   "prospect_id": 80,
+   "name": "Datto",
+   "verdict": "OK",
+   "top": "Datto, Inc.",
+   "ms": 177
+  },
+  {
+   "prospect_id": 81,
+   "name": "Barracuda Networks",
+   "verdict": "OK",
+   "top": "Barracuda Networks, Inc.",
+   "ms": 261
+  },
+  {
+   "prospect_id": 82,
+   "name": "Arctic Wolf Networks' peer, eSentire",
+   "verdict": "EMPTY",
+   "top": null,
+   "ms": 171
+  },
+  {
+   "prospect_id": 83,
+   "name": "Blackpoint Cyber",
+   "verdict": "OK",
+   "top": "Blackpoint Cyber",
+   "ms": 172
+  },
+  {
+   "prospect_id": 84,
+   "name": "Red Canary",
+   "verdict": "OK",
+   "top": "Red Canary, Inc.",
+   "ms": 182
+  },
+  {
+   "prospect_id": 85,
+   "name": "ReliaQuest",
+   "verdict": "OK",
+   "top": "ReliaQuest, LLC",
+   "ms": 181
+  },
+  {
+   "prospect_id": 86,
+   "name": "Tanium",
+   "verdict": "OK",
+   "top": "Tanium Inc.",
+   "ms": 175
+  },
+  {
+   "prospect_id": 87,
+   "name": "Lansweeper",
+   "verdict": "OK",
+   "top": "Lansweeper",
+   "ms": 205
+  },
+  {
+   "prospect_id": 88,
+   "name": "Torq",
+   "verdict": "OK",
+   "top": "Torq",
+   "ms": 177
+  },
+  {
+   "prospect_id": 89,
+   "name": "Tines",
+   "verdict": "OK",
+   "top": "Tines",
+   "ms": 207
+  },
+  {
+   "prospect_id": 90,
+   "name": "Swimlane",
+   "verdict": "OK",
+   "top": "Swimlane",
+   "ms": 191
+  },
+  {
+   "prospect_id": 91,
+   "name": "Pax8",
+   "verdict": "OK",
+   "top": "Pax8, Inc.",
+   "ms": 186
+  },
+  {
+   "prospect_id": 92,
+   "name": "Sherweb",
+   "verdict": "OK",
+   "top": "Sherweb Inc.",
+   "ms": 172
+  },
+  {
+   "prospect_id": 93,
+   "name": "Softchoice",
+   "verdict": "OK",
+   "top": "Softchoice Corporation",
+   "ms": 234
+  },
+  {
+   "prospect_id": 94,
+   "name": "CDW",
+   "verdict": "OK",
+   "top": "CDW Corporation",
+   "ms": 186
+  },
+  {
+   "prospect_id": 95,
+   "name": "Presidio",
+   "verdict": "OK",
+   "top": "Presidio, Inc.",
+   "ms": 177
+  },
+  {
+   "prospect_id": 96,
+   "name": "Trace3",
+   "verdict": "OK",
+   "top": "Trace3, LLC",
+   "ms": 173
+  },
+  {
+   "prospect_id": 97,
+   "name": "World Wide Technology",
+   "verdict": "OK",
+   "top": "World Wide Technology Holding Co., LLC",
+   "ms": 185
+  },
+  {
+   "prospect_id": 98,
+   "name": "Ahead",
+   "verdict": "OK",
+   "top": "AHEAD",
+   "ms": 170
+  },
+  {
+   "prospect_id": 99,
+   "name": "Onica / Rackspace Technology",
+   "verdict": "OK",
+   "top": "Rackspace Technology, Inc.",
+   "ms": 153
+  },
+  {
+   "prospect_id": 100,
+   "name": "Converge Technology Solutions",
+   "verdict": "OK",
+   "top": "Pellera Technologies",
+   "ms": 168
+  }
+ ]
+}

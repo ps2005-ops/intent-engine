@@ -2,7 +2,7 @@
 
 Branch `prospect100/identity`, cut from the deployed preview commit
 `b49a6565` (`feat/founder-market-integration` = `v6/asi-v2`). Built
-2026-11-09. **Not deployed.** Nothing here touches production, the market
+2026-11-09. **Deployed to the preview** (`d5672e71`, verified live; see below). Nothing here touches production, the market
 runtime or any ledger.
 
 ## Executive summary (deliverable L)
@@ -129,6 +129,27 @@ Run against this worktree on `localhost:8600` with the built-in browser:
   `/full` cites three of its own pages and holds the reading open because
   every source is company-published. Under the program's own qualification
   rule, that is honest handling.
+
+## Deployed and verified live (2026-11-09)
+
+Pushed to `feat/founder-market-integration` with the user's approval; the
+preview serves `d5672e71` (`/version`).
+
+- **Search, all 100, live** (`live_search_acceptance.json`): 99 correct first
+  suggestions, 0 wrong, 1 empty (#82's sentence). Round trip from a laptop:
+  p50 187 ms, p95 338 ms (network included; the first query after boot is
+  ~2.7 s while the SEC table loads).
+- **Red Canary, picked from the live list:** the status page. No run, offers
+  Zscaler.
+- **Hammerspace, live run** (`live_journey_d5672e71.json`): all six steps 200,
+  right identity, no other company's name, the same bounded answer as the
+  local run, citing three Hammerspace pages.
+- **Step pages take 4–11 s each on the preview** (intro 10.2 s, full 10.6 s;
+  history 0.2 s). Locally the same pages take well under a second, so this is
+  the free instance's CPU share, consistent with earlier measurements. It is
+  the largest gap to the brief's 500 ms navigation target, and no
+  rendering change will close it on the free tier. Precomputed per-company
+  pages, or a paid instance, would.
 
 ## Shared-system changes (deliverable I)
 
