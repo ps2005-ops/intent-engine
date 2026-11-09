@@ -1,0 +1,3987 @@
+version: prospect100.registry.v1
+built: '2026-11-09'
+what_this_is: 'Deliverable A: the canonical identity of each requested prospect. entry_readiness says
+  how far a search-to-run journey can go on identity and retrievable sources; it is NOT a quality score.
+  analysis_quality stays NOT_MEASURED until a pass measures it.'
+entry_readiness_counts:
+  IDENTITY_ONLY_SITE_REFUSED: 10
+  READY_EXISTING_REGISTER: 1
+  READY_FILINGS_AND_SITE: 6
+  READY_FILINGS_ONLY_SITE_REFUSED: 5
+  READY_SITE: 66
+  READY_THIN_SITE: 7
+  STOP_NO_LONGER_INDEPENDENT: 5
+prospects:
+- prospect_id: 1
+  tier: 1
+  name_as_listed: Hammerspace
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: hammerspace
+  legal_name: Hammerspace
+  common_name: Hammerspace
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: hammerspace.com
+  aliases:
+  - hammerspace
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: hammerspace.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Hammerspace - The Data Platform for AI Anywhere
+  attested_sources:
+  - kind: corporate
+    url: https://hammerspace.com/about-us
+  - kind: customers
+    url: https://hammerspace.com/customers
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 2
+  tier: 1
+  name_as_listed: WEKA
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: weka
+  legal_name: WekaIO, Inc.
+  common_name: WEKA
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: weka.io
+  aliases:
+  - weka
+  - wekaio
+  - weka.io
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: weka.io
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: WEKA | Accelerated AI Storage for Purpose-Built Compute
+  attested_sources:
+  - kind: corporate
+    url: https://www.weka.io
+  - kind: segment
+    url: https://www.weka.io/product/neuralmesh
+  - kind: newsroom
+    url: https://www.weka.io/news/neuralmesh-6-enterprise-agentic-ai
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 3
+  tier: 1
+  name_as_listed: Reltio
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: reltio
+  legal_name: Reltio, Inc.
+  common_name: Reltio
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: reltio.com
+  aliases:
+  - reltio
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: reltio.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Context Intelligence & AI-Powered Data Unification for the Enterprise
+  attested_sources:
+  - kind: corporate
+    url: https://www.reltio.com
+  - kind: segment
+    url: https://www.reltio.com/products/agentflow
+  - kind: customers
+    url: https://www.reltio.com/customers
+  - kind: newsroom
+    url: https://www.reltio.com/newsroom
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 4
+  tier: 1
+  name_as_listed: Ataccama
+  flag_as_listed: CA
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: ataccama
+  legal_name: Ataccama
+  common_name: Ataccama
+  hq_country: Canada
+  flag_matches_hq: true
+  primary_domain: ataccama.com
+  aliases:
+  - ataccama
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: ataccama.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Ataccama – Agentic Data Trust Software | AI built on quality data
+  attested_sources:
+  - kind: corporate
+    url: https://www.ataccama.com/company
+  - kind: segment
+    url: https://www.ataccama.com/platform
+  - kind: customers
+    url: https://www.ataccama.com/customers
+  - kind: newsroom
+    url: https://www.ataccama.com/category/news
+  - kind: pricing
+    url: https://www.ataccama.com/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 5
+  tier: 1
+  name_as_listed: Informatica
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: informatica
+  legal_name: Informatica Inc.
+  common_name: Informatica
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: informatica.com
+  aliases:
+  - informatica
+  listing: null
+  sec_cik: null
+  former_sec_filer:
+    cik: '1868778'
+    name: Informatica Inc.
+    sec_name: Informatica Inc.
+    last_annual_report: '2025-02-25'
+    last_filing_of_any_kind: '2025-11-28'
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status:
+    state: ACQUIRED_OPERATING
+    effective: '2025-11-18'
+    counterparty: Salesforce, Inc.
+    counterparty_domain: salesforce.com
+    summary: Part of Salesforce since November 2025
+    evidence:
+    - https://investor.salesforce.com/news/news-details/2025/Salesforce-Completes-Acquisition-of-Informatica/default.aspx
+  identity_notes: null
+  domain_checks:
+  - candidate: informatica.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Informatica from Salesforce
+  attested_sources:
+  - kind: corporate
+    url: https://www.informatica.com/about-us/news.html
+  - kind: segment
+    url: https://www.informatica.com/platform/claire-ai.html
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 6
+  tier: 1
+  name_as_listed: Qlik
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: qlik
+  legal_name: Qlik
+  common_name: Qlik
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: qlik.com
+  aliases:
+  - qlik
+  - qliktech
+  - qlik technologies
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: qlik.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Qlik Data Integration, Data Quality, and Analytics Solutions
+  attested_sources:
+  - kind: corporate
+    url: https://www.qlik.com/us/company
+  retrieval_note: null
+  entry_readiness: READY_THIN_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 7
+  tier: 1
+  name_as_listed: Matillion
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: matillion
+  legal_name: Matillion
+  common_name: Matillion
+  hq_country: United Kingdom
+  flag_matches_hq: false
+  primary_domain: matillion.com
+  aliases:
+  - matillion
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: matillion.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: 'Matillion: Data Integration and ETL, Now Autonomous'
+  attested_sources:
+  - kind: corporate
+    url: https://www.matillion.com
+  - kind: segment
+    url: https://www.matillion.com/solutions
+  - kind: customers
+    url: https://www.matillion.com/customers
+  - kind: newsroom
+    url: https://www.matillion.com/news
+  - kind: pricing
+    url: https://www.matillion.com/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 8
+  tier: 1
+  name_as_listed: Keboola
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: keboola
+  legal_name: Keboola
+  common_name: Keboola
+  hq_country: Czech Republic
+  flag_matches_hq: false
+  primary_domain: keboola.com
+  aliases:
+  - keboola
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: keboola.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Keboola — AI-ready data foundation for finance
+  attested_sources:
+  - kind: corporate
+    url: https://www.keboola.com/about/jobs
+  - kind: segment
+    url: https://www.keboola.com/product/mcp
+  - kind: customers
+    url: https://www.keboola.com/customer-stories
+  - kind: pricing
+    url: https://www.keboola.com/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 9
+  tier: 1
+  name_as_listed: CData Software
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: cdata
+  legal_name: CData Software, Inc.
+  common_name: CData
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: cdata.com
+  aliases:
+  - cdata
+  - cdata software
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: cdata.com
+    product_fetcher_ok: false
+    status: 403
+    failure: http_status
+    redirected_to: null
+    title: null
+  attested_sources: []
+  retrieval_note: 403 to the product's fetcher on 2026-11-09 (homepage and sitemap index)
+  entry_readiness: IDENTITY_ONLY_SITE_REFUSED
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 10
+  tier: 1
+  name_as_listed: Precisely
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: precisely
+  legal_name: Precisely
+  common_name: Precisely
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: precisely.com
+  aliases:
+  - precisely
+  - syncsort
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: precisely.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Unified data management for AI-ready data | Precisely
+  attested_sources:
+  - kind: corporate
+    url: https://www.precisely.com/about-us
+  - kind: segment
+    url: https://www.precisely.com/products
+  - kind: customers
+    url: https://www.precisely.com/resources/customer-stories
+  - kind: newsroom
+    url: https://www.precisely.com/newsroom
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 11
+  tier: 1
+  name_as_listed: Securiti
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: securiti
+  legal_name: Securiti
+  common_name: Securiti
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: securiti.ai
+  aliases:
+  - securiti
+  - securiti ai
+  - securiti.ai
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status:
+    state: ACQUIRED_OPERATING
+    effective: '2025-12-11'
+    counterparty: Veeam Software
+    counterparty_domain: veeam.com
+    summary: Part of Veeam since December 2025
+    evidence:
+    - https://www.businesswire.com/news/home/20251211040418/en/Veeam-Completes-Acquisition-of-Securiti-AI-to-Create-the-Industrys-First-Trusted-Data-Platform-for-Accelerating-Safe-AI-at-Scale
+  identity_notes: null
+  domain_checks:
+  - candidate: securiti.ai
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: 'Securiti: DSPM | Data Security | AI Security | PrivacyOps'
+  attested_sources:
+  - kind: corporate
+    url: https://securiti.ai/about
+  - kind: segment
+    url: https://securiti.ai/products/marketing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 12
+  tier: 1
+  name_as_listed: Immuta
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: immuta
+  legal_name: Immuta, Inc.
+  common_name: Immuta
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: immuta.com
+  aliases:
+  - immuta
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: immuta.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: The Authorization Layer for Data Access | Immuta
+  attested_sources:
+  - kind: corporate
+    url: https://www.immuta.com/company
+  - kind: segment
+    url: https://www.immuta.com/platform/comply
+  - kind: customers
+    url: https://www.immuta.com/customers
+  - kind: newsroom
+    url: https://www.immuta.com/newsroom/media
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 13
+  tier: 1
+  name_as_listed: Privacera
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: privacera
+  legal_name: Privacera, Inc.
+  common_name: Privacera
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: privacera.com
+  aliases:
+  - privacera
+  - trust3 ai
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: privacera.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Splash Page - Trust3 AI by PrivaceraTrust3 AI by Privacera
+  attested_sources:
+  - kind: corporate
+    url: https://privacera.com/leadership
+  - kind: customers
+    url: https://privacera.com/customers
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 14
+  tier: 1
+  name_as_listed: Soda
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: soda-data
+  legal_name: Soda
+  common_name: Soda
+  hq_country: Belgium
+  flag_matches_hq: false
+  primary_domain: soda.io
+  aliases:
+  - soda
+  - soda data
+  - soda.io
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: '"Soda" also names Jones Soda Co., an SEC registrant that sells soft drinks; before
+    this row the product resolved "Soda" to it and opened an analysis of its filings.'
+  domain_checks:
+  - candidate: soda.io
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Soda Data Quality
+  attested_sources:
+  - kind: corporate
+    url: https://soda.io/company
+  - kind: segment
+    url: https://soda.io/product/mcp
+  - kind: pricing
+    url: https://soda.io/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 15
+  tier: 1
+  name_as_listed: Acceldata
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: acceldata
+  legal_name: Acceldata
+  common_name: Acceldata
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: acceldata.io
+  aliases:
+  - acceldata
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: acceldata.io
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Autonomous Data & AI Platform for Hybrid Clouds | Acceldata
+  attested_sources:
+  - kind: corporate
+    url: https://www.acceldata.io/about-us
+  - kind: segment
+    url: https://www.acceldata.io/platform
+  - kind: customers
+    url: https://www.acceldata.io/case-studies
+  - kind: newsroom
+    url: https://www.acceldata.io/newsroom
+  - kind: pricing
+    url: https://www.acceldata.io/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 16
+  tier: 1
+  name_as_listed: Anomalo
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: anomalo
+  legal_name: Anomalo
+  common_name: Anomalo
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: anomalo.com
+  aliases:
+  - anomalo
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: anomalo.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Home - Anomalo
+  attested_sources:
+  - kind: corporate
+    url: https://www.anomalo.com/about
+  - kind: segment
+    url: https://www.anomalo.com/platform
+  - kind: customers
+    url: https://www.anomalo.com/customers
+  - kind: newsroom
+    url: https://www.anomalo.com/press
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 17
+  tier: 1
+  name_as_listed: Observe
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: observe-inc
+  legal_name: Observe, Inc.
+  common_name: Observe
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: observeinc.com
+  aliases:
+  - observe
+  - observe inc
+  - observeinc
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: observe
+  corporate_status:
+    state: ACQUIRED_ABSORBED
+    effective: '2026-01-08'
+    counterparty: Snowflake Inc.
+    counterparty_domain: snowflake.com
+    summary: Acquired by Snowflake; observeinc.com now redirects to Snowflake's Observe product page
+    evidence:
+    - https://www.businesswire.com/news/home/20260108681865/en/Snowflake-Announces-Intent-to-Acquire-Observe-to-Deliver-AI-Powered-Observability-at-Enterprise-Scale
+  identity_notes: Not Observe.AI (observe.ai), a contact-centre AI company; "Observe" is offered as a
+    choice between the two.
+  domain_checks:
+  - candidate: observe.ai
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Observe.AI | Purpose-Built AI Agents. One CX Platform.
+  - candidate: observeinc.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: www.snowflake.com
+    title: Snowflake AI Data Cloud
+  attested_sources: []
+  retrieval_note: null
+  entry_readiness: STOP_NO_LONGER_INDEPENDENT
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 18
+  tier: 1
+  name_as_listed: Chronosphere
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: chronosphere
+  legal_name: Chronosphere, Inc.
+  common_name: Chronosphere
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: chronosphere.io
+  aliases:
+  - chronosphere
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status:
+    state: ACQUIRED_OPERATING
+    effective: '2026-01-29'
+    counterparty: Palo Alto Networks
+    counterparty_domain: paloaltonetworks.com
+    summary: Part of Palo Alto Networks since January 2026
+    evidence:
+    - https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-completes-chronosphere-acquisition-unifying
+  identity_notes: null
+  domain_checks:
+  - candidate: chronosphere.io
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Chronosphere | Observability Purpose Built for Kubernetes
+  attested_sources:
+  - kind: corporate
+    url: https://chronosphere.io
+  retrieval_note: null
+  entry_readiness: READY_THIN_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 19
+  tier: 1
+  name_as_listed: CrateDB
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: cratedb
+  legal_name: Crate.io
+  common_name: CrateDB
+  hq_country: Liechtenstein
+  flag_matches_hq: false
+  primary_domain: cratedb.com
+  aliases:
+  - cratedb
+  - crate.io
+  - crate db
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: Crate.io AG, Vaduz, per its own legal imprint; founded in Dornbirn, Austria, with offices
+    in Berlin and San Francisco.
+  domain_checks:
+  - candidate: crate.io
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: cratedb.com
+    title: 'CrateDB: European Real-Time Analytics Database | Live operational data'
+  - candidate: cratedb.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: 'CrateDB: European Real-Time Analytics Database | Live operational data'
+  attested_sources:
+  - kind: corporate
+    url: https://cratedb.com/company/team
+  - kind: newsroom
+    url: https://cratedb.com/press
+  - kind: pricing
+    url: https://cratedb.com/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 20
+  tier: 1
+  name_as_listed: SingleStore
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: singlestore
+  legal_name: SingleStore, Inc.
+  common_name: SingleStore
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: singlestore.com
+  aliases:
+  - singlestore
+  - memsql
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: singlestore.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: SingleStore | The Real-Time AI Database for Enterprise. Answers Included.
+  attested_sources:
+  - kind: corporate
+    url: https://www.singlestore.com/company
+  - kind: segment
+    url: https://www.singlestore.com/platform/search
+  - kind: pricing
+    url: https://www.singlestore.com/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 21
+  tier: 1
+  name_as_listed: TigerGraph
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: tigergraph
+  legal_name: TigerGraph, Inc.
+  common_name: TigerGraph
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: tigergraph.com
+  aliases:
+  - tigergraph
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: tigergraph.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Graph Database for Real-Time AI & Analytics | TigerGraph
+  attested_sources:
+  - kind: corporate
+    url: https://www.tigergraph.com/company
+  - kind: segment
+    url: https://www.tigergraph.com/product
+  - kind: customers
+    url: https://www.tigergraph.com/customers
+  - kind: newsroom
+    url: https://www.tigergraph.com/press-releases
+  - kind: pricing
+    url: https://www.tigergraph.com/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 22
+  tier: 1
+  name_as_listed: Neo4j
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: neo4j
+  legal_name: Neo4j, Inc.
+  common_name: Neo4j
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: neo4j.com
+  aliases:
+  - neo4j
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: neo4j.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Neo4j Graph Intelligence Platform
+  attested_sources:
+  - kind: corporate
+    url: https://neo4j.com/company
+  - kind: segment
+    url: https://neo4j.com/product
+  - kind: customers
+    url: https://neo4j.com/customer-stories
+  - kind: newsroom
+    url: https://neo4j.com/newsroom
+  - kind: pricing
+    url: https://neo4j.com/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 23
+  tier: 1
+  name_as_listed: Arango
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: arango
+  legal_name: ArangoDB Inc.
+  common_name: Arango
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: arango.ai
+  aliases:
+  - arango
+  - arangodb
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: Rebranded from ArangoDB to Arango in 2025; arangodb.com redirects to arango.ai.
+  domain_checks:
+  - candidate: arango.ai
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Arango Contextual Data Platform
+  - candidate: arangodb.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: arango.ai
+    title: Arango Contextual Data Platform
+  attested_sources:
+  - kind: corporate
+    url: https://arango.ai/about-us
+  - kind: segment
+    url: https://arango.ai/products
+  - kind: customers
+    url: https://arango.ai/customer-stories
+  - kind: pricing
+    url: https://arango.ai/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 24
+  tier: 1
+  name_as_listed: KX
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: kx
+  legal_name: KX
+  common_name: KX
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: kx.com
+  aliases:
+  - kx
+  - kx systems
+  - kdb
+  - kdb+
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: kx.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: The Data Intelligence AI Platform Built For Capital Markets
+  attested_sources:
+  - kind: corporate
+    url: https://kx.com/about
+  - kind: segment
+    url: https://kx.com/products
+  - kind: customers
+    url: https://kx.com/customer-stories
+  - kind: pricing
+    url: https://kx.com/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 25
+  tier: 1
+  name_as_listed: Tecton
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: tecton
+  legal_name: Tecton
+  common_name: Tecton
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: tecton.ai
+  aliases:
+  - tecton
+  - tecton.ai
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status:
+    state: ACQUIRED_ABSORBED
+    effective: 2025-08
+    counterparty: Databricks
+    counterparty_domain: databricks.com
+    summary: Acquired by Databricks; tecton.ai now redirects to databricks.com
+    evidence:
+    - https://www.fenwick.com/insights/experience/fenwick-represents-databricks-in-acquisition-of-the-assets-of-tecton
+  identity_notes: Not Tectonic Metals Inc., an SEC registrant the search box offered for "Tecton".
+  domain_checks:
+  - candidate: tecton.ai
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: www.databricks.com
+    title: 'Databricks: Leading Data and AI Platform for Enterprises'
+  attested_sources: []
+  retrieval_note: null
+  entry_readiness: STOP_NO_LONGER_INDEPENDENT
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 26
+  tier: 2
+  name_as_listed: Interos
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: interos
+  legal_name: Interos
+  common_name: Interos
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: interos.ai
+  aliases:
+  - interos
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: interos.ai
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Supply Chain Risk Management Software | interos.ai
+  attested_sources:
+  - kind: corporate
+    url: https://www.interos.ai/about
+  - kind: segment
+    url: https://www.interos.ai/solutions
+  - kind: newsroom
+    url: https://www.interos.ai/press
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 27
+  tier: 2
+  name_as_listed: Everstream Analytics
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: everstream
+  legal_name: Everstream Analytics
+  common_name: Everstream Analytics
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: everstream.ai
+  aliases:
+  - everstream
+  - everstream analytics
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: everstream.ai
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Everstream Analytics, a Leader in Supply Chain Risk Management
+  attested_sources:
+  - kind: corporate
+    url: https://www.everstream.ai/company/media
+  - kind: segment
+    url: https://www.everstream.ai/platform/risk-assessment
+  - kind: customers
+    url: https://www.everstream.ai/insights/case-studies
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 28
+  tier: 2
+  name_as_listed: Resilinc
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: resilinc
+  legal_name: Resilinc
+  common_name: Resilinc
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: resilinc.ai
+  aliases:
+  - resilinc
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: resilinc.ai
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Supply Chain Risk Management Solutions – Agentic Supply Chain Resiliency | Resilinc
+  - candidate: resilinc.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: resilinc.ai
+    title: Supply Chain Risk Management Solutions – Agentic Supply Chain Resiliency | Resilinc
+  attested_sources:
+  - kind: corporate
+    url: https://resilinc.ai/about
+  - kind: segment
+    url: https://resilinc.ai/platform/enterprise-integrations
+  - kind: customers
+    url: https://resilinc.ai/learning-center/case-studies
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 29
+  tier: 2
+  name_as_listed: Altana
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: altana
+  legal_name: Altana
+  common_name: Altana
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: altana.ai
+  aliases:
+  - altana
+  - altana ai
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: Not ALTANA AG, the German specialty-chemicals group.
+  domain_checks:
+  - candidate: altana.ai
+    product_fetcher_ok: false
+    status: null
+    failure: too_large
+    redirected_to: null
+    title: null
+  attested_sources: []
+  retrieval_note: pages exceed the fetch byte budget on 2026-11-09 (homepage ~3 MB; /about and /platform
+    refused as too large)
+  entry_readiness: IDENTITY_ONLY_SITE_REFUSED
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 30
+  tier: 2
+  name_as_listed: Exiger
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: exiger
+  legal_name: Exiger
+  common_name: Exiger
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: exiger.com
+  aliases:
+  - exiger
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: exiger.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Exiger is the AI partner for supply chain and procurement automation. - Exiger
+  attested_sources:
+  - kind: corporate
+    url: https://www.exiger.com/about
+  - kind: newsroom
+    url: https://www.exiger.com/news
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 31
+  tier: 2
+  name_as_listed: Sayari
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: sayari
+  legal_name: Sayari
+  common_name: Sayari
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: sayari.com
+  aliases:
+  - sayari
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: sayari.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Sovereign AI for Risk Intelligence | Sayari
+  attested_sources:
+  - kind: corporate
+    url: https://sayari.com/about
+  - kind: segment
+    url: https://sayari.com/platform
+  - kind: customers
+    url: https://sayari.com/resources/case-studies
+  - kind: newsroom
+    url: https://sayari.com/resources/newsroom
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 32
+  tier: 2
+  name_as_listed: Kharon
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: kharon
+  legal_name: Kharon
+  common_name: Kharon
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: kharon.com
+  aliases:
+  - kharon
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: kharon.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: The premier global risk analytics platform | Kharon
+  attested_sources:
+  - kind: corporate
+    url: https://www.kharon.com/about
+  - kind: segment
+    url: https://www.kharon.com/products/api
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 33
+  tier: 2
+  name_as_listed: Moody's
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: moodys
+  legal_name: Moody's Corporation
+  common_name: Moody's
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: moodys.com
+  aliases:
+  - moody's
+  - moodys
+  - moody's corporation
+  listing:
+  - 'NYSE: MCO'
+  sec_cik: '1059556'
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: moodys.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Moody's - credit ratings, research, and data for global capital markets
+  attested_sources:
+  - kind: corporate
+    url: https://www.moodys.com
+  retrieval_note: null
+  entry_readiness: READY_FILINGS_AND_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 34
+  tier: 2
+  name_as_listed: S&P Global
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: sp-global
+  legal_name: S&P Global Inc.
+  common_name: S&P Global
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: spglobal.com
+  aliases:
+  - s&p global
+  - s&p
+  - sp global
+  - standard & poor's
+  listing:
+  - 'NYSE: SPGI'
+  sec_cik: '64040'
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: spglobal.com
+    product_fetcher_ok: false
+    status: 403
+    failure: http_status
+    redirected_to: null
+    title: null
+  attested_sources: []
+  retrieval_note: 403 to the product's fetcher on 2026-11-09 (homepage, robots.txt and sitemap); SEC filings
+    remain readable
+  entry_readiness: READY_FILINGS_ONLY_SITE_REFUSED
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 35
+  tier: 2
+  name_as_listed: MSCI
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: msci
+  legal_name: MSCI Inc.
+  common_name: MSCI
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: msci.com
+  aliases:
+  - msci
+  listing:
+  - 'NYSE: MSCI'
+  sec_cik: '1408198'
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: msci.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Bringing clarity to investment decisions | MSCI
+  attested_sources:
+  - kind: corporate
+    url: https://www.msci.com/discover-msci/about-us
+  - kind: segment
+    url: https://www.msci.com/solutions/corporate-solutions
+  retrieval_note: null
+  entry_readiness: READY_FILINGS_AND_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 36
+  tier: 2
+  name_as_listed: FactSet
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: factset
+  legal_name: FactSet Research Systems Inc.
+  common_name: FactSet
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: factset.com
+  aliases:
+  - factset
+  listing:
+  - 'NYSE: FDS'
+  sec_cik: '1013237'
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: factset.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: FactSet | Financial Data, Market Analytics & AI Solutions
+  attested_sources: []
+  retrieval_note: 'pages render client-side: 46-63 visible characters on 2026-11-09; SEC filings remain
+    readable'
+  entry_readiness: READY_FILINGS_ONLY_SITE_REFUSED
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 37
+  tier: 2
+  name_as_listed: Morningstar
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: morningstar
+  legal_name: Morningstar, Inc.
+  common_name: Morningstar
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: morningstar.com
+  aliases:
+  - morningstar
+  listing:
+  - 'NASDAQ: MORN'
+  sec_cik: '1289419'
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: morningstar.com
+    product_fetcher_ok: false
+    status: 403
+    failure: http_status
+    redirected_to: null
+    title: null
+  attested_sources: []
+  retrieval_note: 403 on the homepage and 202 with an empty body on /company on 2026-11-09; SEC filings
+    remain readable
+  entry_readiness: READY_FILINGS_ONLY_SITE_REFUSED
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 38
+  tier: 2
+  name_as_listed: Enverus
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: enverus
+  legal_name: Enverus
+  common_name: Enverus
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: enverus.com
+  aliases:
+  - enverus
+  - drillinginfo
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: enverus.com
+    product_fetcher_ok: false
+    status: null
+    failure: connection
+    redirected_to: null
+    title: null
+  attested_sources: []
+  retrieval_note: 403 to the product's fetcher on 2026-11-09 (homepage, robots.txt and sitemap)
+  entry_readiness: IDENTITY_ONLY_SITE_REFUSED
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 39
+  tier: 2
+  name_as_listed: Rystad Energy
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: rystad-energy
+  legal_name: Rystad Energy
+  common_name: Rystad Energy
+  hq_country: Norway
+  flag_matches_hq: false
+  primary_domain: rystadenergy.com
+  aliases:
+  - rystad
+  - rystad energy
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: Headquartered in Oslo; the prospect list names its North American operations.
+  domain_checks:
+  - candidate: rystadenergy.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Rystad Energy - Navigating the future of energy
+  attested_sources:
+  - kind: corporate
+    url: https://www.rystadenergy.com/about-us
+  - kind: newsroom
+    url: https://www.rystadenergy.com/newsroom
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 40
+  tier: 2
+  name_as_listed: Wood Mackenzie
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: wood-mackenzie
+  legal_name: Wood Mackenzie
+  common_name: Wood Mackenzie
+  hq_country: United Kingdom
+  flag_matches_hq: false
+  primary_domain: woodmac.com
+  aliases:
+  - wood mackenzie
+  - woodmac
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: woodmac.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Wood Mackenzie | Data & analytics solutions
+  attested_sources:
+  - kind: corporate
+    url: https://www.woodmac.com/about/overview
+  - kind: segment
+    url: https://www.woodmac.com/products/training
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 41
+  tier: 2
+  name_as_listed: Verisk
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: verisk
+  legal_name: Verisk Analytics, Inc.
+  common_name: Verisk
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: verisk.com
+  aliases:
+  - verisk
+  listing:
+  - 'NASDAQ: VRSK'
+  sec_cik: '1442145'
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: verisk.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Leading source of information about insurance risk
+  attested_sources:
+  - kind: corporate
+    url: https://www.verisk.com/company/about
+  - kind: segment
+    url: https://www.verisk.com/products
+  - kind: newsroom
+    url: https://www.verisk.com/company/newsroom
+  retrieval_note: null
+  entry_readiness: READY_FILINGS_AND_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 42
+  tier: 2
+  name_as_listed: Jupiter Intelligence
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: jupiter-intelligence
+  legal_name: Jupiter Intelligence
+  common_name: Jupiter Intelligence
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: jupiterintel.com
+  aliases:
+  - jupiter intelligence
+  - jupiterintel
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: jupiterintel.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Jupiter Intelligence | Climate Resilience Experts
+  attested_sources:
+  - kind: corporate
+    url: https://www.jupiterintel.com/company
+  - kind: segment
+    url: https://www.jupiterintel.com/products
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 43
+  tier: 2
+  name_as_listed: Cervest
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: cervest
+  legal_name: Cervest
+  common_name: Cervest
+  hq_country: United Kingdom
+  flag_matches_hq: false
+  primary_domain: cervest.earth
+  aliases:
+  - cervest
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status:
+    state: CEASED_OPERATING
+    effective: '2023-07-05'
+    counterparty: Mitiga Solutions
+    counterparty_domain: earth-scan.com
+    summary: Ceased trading in 2023; its intellectual property was bought by Mitiga Solutions, and cervest.earth
+      now redirects to EarthScan
+    evidence:
+    - https://www.mitigasolutions.com/press/mitiga-solutions-acquires-cervests-intellectual-property-rights
+  identity_notes: null
+  domain_checks:
+  - candidate: cervest.earth
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: www.earth-scan.com
+    title: EarthScan™ | Climate Risk Analytics & Intelligence Software
+  attested_sources: []
+  retrieval_note: null
+  entry_readiness: STOP_NO_LONGER_INDEPENDENT
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 44
+  tier: 2
+  name_as_listed: Watershed
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: watershed
+  legal_name: Watershed
+  common_name: Watershed
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: watershed.com
+  aliases:
+  - watershed
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: watershed.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Watershed — The sustainability AI platform
+  attested_sources:
+  - kind: corporate
+    url: https://watershed.com/about-us
+  - kind: segment
+    url: https://watershed.com/platform
+  - kind: customers
+    url: https://watershed.com/customers
+  - kind: newsroom
+    url: https://watershed.com/news
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 45
+  tier: 2
+  name_as_listed: Persefoni
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: persefoni
+  legal_name: Persefoni
+  common_name: Persefoni
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: persefoni.com
+  aliases:
+  - persefoni
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: persefoni.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Persefoni AI – Carbon Accounting and Sustainability Management Platform
+  attested_sources:
+  - kind: corporate
+    url: https://www.persefoni.com/company/careers
+  - kind: segment
+    url: https://www.persefoni.com/solutions/sb-261
+  - kind: customers
+    url: https://www.persefoni.com/customers
+  - kind: pricing
+    url: https://www.persefoni.com/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 46
+  tier: 2
+  name_as_listed: Benchmark Gensuite
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: benchmark-gensuite
+  legal_name: Benchmark Gensuite
+  common_name: Benchmark Gensuite
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: benchmarkgensuite.com
+  aliases:
+  - benchmark gensuite
+  - gensuite
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: benchmarkgensuite.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: EHS Management & Sustainability Software | Benchmark Gensuite
+  attested_sources:
+  - kind: corporate
+    url: https://benchmarkgensuite.com
+  retrieval_note: null
+  entry_readiness: READY_THIN_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 47
+  tier: 2
+  name_as_listed: Cority
+  flag_as_listed: CA
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: cority
+  legal_name: Cority Software Inc.
+  common_name: Cority
+  hq_country: Canada
+  flag_matches_hq: true
+  primary_domain: cority.com
+  aliases:
+  - cority
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: cority.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: EHS Software Solutions | Applied AI for EHS Management
+  attested_sources:
+  - kind: corporate
+    url: https://www.cority.com/our-story
+  - kind: newsroom
+    url: https://www.cority.com/news
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 48
+  tier: 2
+  name_as_listed: Assent
+  flag_as_listed: CA
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: assent
+  legal_name: Assent Inc.
+  common_name: Assent
+  hq_country: Canada
+  flag_matches_hq: true
+  primary_domain: assent.com
+  aliases:
+  - assent
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: assent.com
+    product_fetcher_ok: false
+    status: null
+    failure: too_large
+    redirected_to: null
+    title: null
+  attested_sources:
+  - kind: corporate
+    url: https://www.assent.com/company/careers
+  - kind: segment
+    url: https://www.assent.com/capabilities/platform
+  - kind: newsroom
+    url: https://www.assent.com/newsroom
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 49
+  tier: 2
+  name_as_listed: EcoVadis
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: ecovadis
+  legal_name: EcoVadis
+  common_name: EcoVadis
+  hq_country: France
+  flag_matches_hq: false
+  primary_domain: ecovadis.com
+  aliases:
+  - ecovadis
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: Headquartered in Paris; the prospect list names its North American operations.
+  domain_checks:
+  - candidate: ecovadis.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: The Global Standard for Resilient, Sustainable Supply Chains | EcoVadis
+  attested_sources:
+  - kind: corporate
+    url: https://ecovadis.com/about-us
+  - kind: segment
+    url: https://ecovadis.com/solutions/iq
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 50
+  tier: 2
+  name_as_listed: Dun & Bradstreet
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: dun-and-bradstreet
+  legal_name: Dun & Bradstreet Holdings, Inc.
+  common_name: Dun & Bradstreet
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: dnb.com
+  aliases:
+  - dun & bradstreet
+  - dun and bradstreet
+  - d&b
+  - dnb
+  listing: null
+  sec_cik: null
+  former_sec_filer:
+    cik: '1799208'
+    name: Dun & Bradstreet Holdings, Inc.
+    sec_name: Dun & Bradstreet Holdings, Inc.
+    last_annual_report: '2025-04-30'
+    last_filing_of_any_kind: '2025-11-13'
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status:
+    state: TAKEN_PRIVATE
+    effective: '2025-08-26'
+    counterparty: Clearlake Capital
+    counterparty_domain: ''
+    summary: Taken private by Clearlake Capital in August 2025
+    evidence:
+    - https://pulse2.com/clearlake-7-7-billion-acquisition-of-dun-bradstreet-completed
+  identity_notes: null
+  domain_checks:
+  - candidate: dnb.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: 'Dun & Bradstreet Canada: Intelligent Data for Business Performance'
+  attested_sources:
+  - kind: corporate
+    url: https://www.dnb.com
+  retrieval_note: null
+  entry_readiness: READY_THIN_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 51
+  tier: 3
+  name_as_listed: Planful
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: planful
+  legal_name: Planful, Inc.
+  common_name: Planful
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: planful.com
+  aliases:
+  - planful
+  - host analytics
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: planful.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Drive Financial Performance with Planful
+  attested_sources:
+  - kind: corporate
+    url: https://planful.com/about-us
+  - kind: segment
+    url: https://planful.com/platform
+  - kind: customers
+    url: https://planful.com/customer-stories
+  - kind: newsroom
+    url: https://planful.com/newsroom
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 52
+  tier: 3
+  name_as_listed: Vena Solutions
+  flag_as_listed: CA
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: vena
+  legal_name: Vena Solutions Inc.
+  common_name: Vena
+  hq_country: Canada
+  flag_matches_hq: true
+  primary_domain: venasolutions.com
+  aliases:
+  - vena
+  - vena solutions
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: venasolutions.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: 'Vena: The #1 Microsoft-Native Financial and Operational Planning Platform'
+  attested_sources:
+  - kind: corporate
+    url: https://www.venasolutions.com/about-us
+  - kind: segment
+    url: https://www.venasolutions.com/platform/microsoft
+  - kind: customers
+    url: https://www.venasolutions.com/customer-stories
+  - kind: newsroom
+    url: https://www.venasolutions.com/newsroom
+  - kind: pricing
+    url: https://www.venasolutions.com/resources/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 53
+  tier: 3
+  name_as_listed: Cube
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: cube-planning
+  legal_name: Cube Planning, Inc.
+  common_name: Cube
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: cubesoftware.com
+  aliases:
+  - cube
+  - cube planning
+  - cube software
+  - cube fp&a
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: cube
+  corporate_status: null
+  identity_notes: '"Cube" also names Cube Dev, Inc. (cube.dev, a semantic-layer company) and CubeSmart
+    (NYSE: CUBE); "Cube" is offered as a choice.'
+  domain_checks:
+  - candidate: cube.dev
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Cube — The agentic analytics platform built on a semantic layer
+  - candidate: cubesoftware.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Agentic FP&A Platform | Cube
+  attested_sources:
+  - kind: corporate
+    url: https://www.cubesoftware.com/about
+  - kind: customers
+    url: https://www.cubesoftware.com/customers
+  - kind: newsroom
+    url: https://www.cubesoftware.com/news
+  - kind: pricing
+    url: https://www.cubesoftware.com/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 54
+  tier: 3
+  name_as_listed: Mosaic Tech
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: mosaic-tech
+  legal_name: Mosaic
+  common_name: Mosaic
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: mosaic.tech
+  aliases:
+  - mosaic
+  - mosaic tech
+  - mosaic.tech
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status:
+    state: ACQUIRED_ABSORBED
+    effective: '2025-02-13'
+    counterparty: HiBob
+    counterparty_domain: hibob.com
+    summary: Acquired by HiBob; mosaic.tech now redirects to HiBob's finance product
+    evidence:
+    - https://www.hibob.com/news/hibob-acquires-financial-planning-and-analysis-platform-mosaic-expanding-capabilities-to-empower-people-first-cfos/
+  identity_notes: null
+  domain_checks:
+  - candidate: mosaic.tech
+    product_fetcher_ok: false
+    status: null
+    failure: connection
+    redirected_to: null
+    title: null
+  attested_sources: []
+  retrieval_note: null
+  entry_readiness: STOP_NO_LONGER_INDEPENDENT
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 55
+  tier: 3
+  name_as_listed: Aleph
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: aleph
+  legal_name: Aleph
+  common_name: Aleph
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: getaleph.com
+  aliases:
+  - aleph
+  - getaleph
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: getaleph.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Aleph | AI-native FP&A software & data management for finance
+  attested_sources:
+  - kind: corporate
+    url: https://www.getaleph.com/about-us
+  - kind: segment
+    url: https://www.getaleph.com/platform/ai
+  - kind: customers
+    url: https://www.getaleph.com/customers
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 56
+  tier: 3
+  name_as_listed: Pigment
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: pigment
+  legal_name: Pigment
+  common_name: Pigment
+  hq_country: France
+  flag_matches_hq: false
+  primary_domain: pigment.com
+  aliases:
+  - pigment
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: pigment.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Agentic AI for enterprise business planning | Pigment
+  attested_sources:
+  - kind: corporate
+    url: https://www.pigment.com/about-us
+  - kind: segment
+    url: https://www.pigment.com/platform
+  - kind: customers
+    url: https://www.pigment.com/customers/portraits-podcast
+  - kind: newsroom
+    url: https://www.pigment.com/newsroom
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 57
+  tier: 3
+  name_as_listed: Anaplan
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: anaplan
+  legal_name: Anaplan, Inc.
+  common_name: Anaplan
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: anaplan.com
+  aliases:
+  - anaplan
+  listing: null
+  sec_cik: null
+  former_sec_filer:
+    cik: '1540755'
+    name: Anaplan, Inc.
+    sec_name: Anaplan, Inc.
+    last_annual_report: '2022-05-27'
+    last_filing_of_any_kind: '2022-06-30'
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: anaplan.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Decision Infrastructure for Agentic Enterprises | Anaplan
+  attested_sources:
+  - kind: corporate
+    url: https://www.anaplan.com/about
+  - kind: segment
+    url: https://www.anaplan.com/platform
+  - kind: customers
+    url: https://www.anaplan.com/customers
+  - kind: newsroom
+    url: https://www.anaplan.com/news
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 58
+  tier: 3
+  name_as_listed: Workday
+  flag_as_listed: US
+  register: validation manifest
+  entity_id: workday
+  entry_readiness: READY_EXISTING_REGISTER
+  analysis_quality: NOT_MEASURED
+- prospect_id: 59
+  tier: 3
+  name_as_listed: Dayforce
+  flag_as_listed: CA
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: dayforce
+  legal_name: Dayforce, Inc.
+  common_name: Dayforce
+  hq_country: United States
+  flag_matches_hq: false
+  primary_domain: dayforce.com
+  aliases:
+  - dayforce
+  - ceridian
+  listing: null
+  sec_cik: null
+  former_sec_filer:
+    cik: '1725057'
+    name: Dayforce, Inc.
+    sec_name: Dayforce, Inc.
+    last_annual_report: '2025-02-28'
+    last_filing_of_any_kind: '2026-05-15'
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status:
+    state: TAKEN_PRIVATE
+    effective: '2026-02-04'
+    counterparty: Thoma Bravo
+    counterparty_domain: ''
+    summary: Taken private by Thoma Bravo in February 2026
+    evidence:
+    - https://www.thomabravo.com/press-releases/thoma-bravo-completes-acquisition-of-dayforce
+  identity_notes: Headquartered in Minneapolis with a large Toronto presence; formerly Ceridian.
+  domain_checks:
+  - candidate: dayforce.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Dayforce - Global HCM Software | HR, Pay, Time, Talent, Analytics
+  attested_sources:
+  - kind: corporate
+    url: https://www.dayforce.com/who-we-are/events
+  - kind: customers
+    url: https://www.dayforce.com/why-dayforce/customer-stories
+  - kind: newsroom
+    url: https://www.dayforce.com/who-we-are/newsroom
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 60
+  tier: 3
+  name_as_listed: Paycor
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: paycor
+  legal_name: Paycor HCM, Inc.
+  common_name: Paycor
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: paycor.com
+  aliases:
+  - paycor
+  listing: null
+  sec_cik: null
+  former_sec_filer:
+    cik: '1839439'
+    name: Paycor HCM, Inc.
+    sec_name: PAYCOR HCM, INC.
+    last_annual_report: '2024-08-22'
+    last_filing_of_any_kind: '2025-04-24'
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status:
+    state: ACQUIRED_OPERATING
+    effective: '2025-04-14'
+    counterparty: Paychex, Inc.
+    counterparty_domain: paychex.com
+    summary: Part of Paychex since April 2025
+    evidence:
+    - https://www.businesswire.com/news/home/20250413165349/en/Paychex-Completes-Acquisition-of-Paycor
+  identity_notes: null
+  domain_checks:
+  - candidate: paycor.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: HR and Payroll Solutions | Empowering Leaders
+  attested_sources:
+  - kind: corporate
+    url: https://www.paycor.com/company
+  retrieval_note: null
+  entry_readiness: READY_THIN_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 61
+  tier: 3
+  name_as_listed: Rippling
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: rippling
+  legal_name: People Center, Inc.
+  common_name: Rippling
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: rippling.com
+  aliases:
+  - rippling
+  - people center
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: rippling.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: 'Rippling: #1 Workforce Management System | HR, IT, Finance'
+  attested_sources:
+  - kind: corporate
+    url: https://www.rippling.com/about
+  - kind: segment
+    url: https://www.rippling.com/platform
+  - kind: newsroom
+    url: https://www.rippling.com/company/newsroom
+  - kind: pricing
+    url: https://www.rippling.com/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 62
+  tier: 3
+  name_as_listed: Deel
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: deel
+  legal_name: Deel, Inc.
+  common_name: Deel
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: deel.com
+  aliases:
+  - deel
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: deel.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Deel | Global Payroll, Compliance, HR Solutions | HRIS
+  attested_sources:
+  - kind: corporate
+    url: https://www.deel.com/about
+  - kind: segment
+    url: https://www.deel.com/solutions
+  - kind: customers
+    url: https://www.deel.com/case-studies
+  - kind: newsroom
+    url: https://www.deel.com/press
+  - kind: pricing
+    url: https://www.deel.com/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 63
+  tier: 3
+  name_as_listed: Gusto
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: gusto
+  legal_name: Gusto, Inc.
+  common_name: Gusto
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: gusto.com
+  aliases:
+  - gusto
+  - zenpayroll
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: gusto.com
+    product_fetcher_ok: false
+    status: 403
+    failure: http_status
+    redirected_to: null
+    title: null
+  attested_sources: []
+  retrieval_note: 403 to the product's fetcher on 2026-11-09 (homepage, robots.txt and sitemap)
+  entry_readiness: IDENTITY_ONLY_SITE_REFUSED
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 64
+  tier: 3
+  name_as_listed: Ramp
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: ramp
+  legal_name: Ramp Business Corporation
+  common_name: Ramp
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: ramp.com
+  aliases:
+  - ramp
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: 'Not LiveRamp Holdings (NYSE: RAMP), which the search box offered for "Ramp".'
+  domain_checks:
+  - candidate: ramp.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Spend Management, Corporate Cards & Accounts Payable Solutions | Ramp
+  attested_sources:
+  - kind: corporate
+    url: https://ramp.com/about-us
+  - kind: segment
+    url: https://ramp.com/platform
+  - kind: customers
+    url: https://ramp.com/customers
+  - kind: pricing
+    url: https://ramp.com/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 65
+  tier: 3
+  name_as_listed: Brex
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: brex
+  legal_name: Brex Inc.
+  common_name: Brex
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: brex.com
+  aliases:
+  - brex
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status:
+    state: ACQUIRED_OPERATING
+    effective: '2026-04-07'
+    counterparty: Capital One Financial
+    counterparty_domain: capitalone.com
+    summary: Part of Capital One since April 2026
+    evidence:
+    - https://www.capitalone.com/about/newsroom/capital-one-completes-acquisition-of-brex/
+  identity_notes: null
+  domain_checks:
+  - candidate: brex.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: 'Brex: The Modern Finance Software Platform | Spend Smarter'
+  attested_sources:
+  - kind: corporate
+    url: https://www.brex.com/about
+  - kind: segment
+    url: https://www.brex.com/platform/budgets
+  - kind: customers
+    url: https://www.brex.com/customers
+  - kind: newsroom
+    url: https://www.brex.com/journal/press
+  - kind: pricing
+    url: https://www.brex.com/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 66
+  tier: 3
+  name_as_listed: BILL
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: bill
+  legal_name: BILL Holdings, Inc.
+  common_name: BILL
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: bill.com
+  aliases:
+  - bill
+  - bill.com
+  - bill holdings
+  listing:
+  - 'NYSE: BILL'
+  sec_cik: '1786352'
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: bill.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: BILL | Financial Operations Platform for Businesses & Firms
+  attested_sources:
+  - kind: corporate
+    url: https://www.bill.com/about-us
+  - kind: segment
+    url: https://www.bill.com/product
+  - kind: newsroom
+    url: https://www.bill.com/newsroom
+  - kind: pricing
+    url: https://www.bill.com/product/pricing
+  retrieval_note: null
+  entry_readiness: READY_FILINGS_AND_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 67
+  tier: 3
+  name_as_listed: FloQast
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: floqast
+  legal_name: FloQast, Inc.
+  common_name: FloQast
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: floqast.com
+  aliases:
+  - floqast
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: floqast.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: FloQast | Accounting Workflow Automation
+  attested_sources:
+  - kind: corporate
+    url: https://www.floqast.com/company/leadership
+  - kind: newsroom
+    url: https://www.floqast.com/press
+  - kind: pricing
+    url: https://www.floqast.com/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 68
+  tier: 3
+  name_as_listed: BlackLine
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: blackline
+  legal_name: BlackLine, Inc.
+  common_name: BlackLine
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: blackline.com
+  aliases:
+  - blackline
+  listing:
+  - 'NASDAQ: BL'
+  sec_cik: '1666134'
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: blackline.com
+    product_fetcher_ok: false
+    status: null
+    failure: too_large
+    redirected_to: null
+    title: null
+  attested_sources: []
+  retrieval_note: pages exceed the fetch byte budget on 2026-11-09 (homepage ~2 MB; /about and /customers
+    refused as too large); SEC filings remain readable
+  entry_readiness: READY_FILINGS_ONLY_SITE_REFUSED
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 69
+  tier: 3
+  name_as_listed: Datarails
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: datarails
+  legal_name: Datarails
+  common_name: Datarails
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: datarails.com
+  aliases:
+  - datarails
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: Headquartered in New York with its founding office in Tel Aviv.
+  domain_checks:
+  - candidate: datarails.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: 'Datarails FinanceOS: Trusted AI for Finance Teams - Datarails'
+  attested_sources:
+  - kind: corporate
+    url: https://datarails.com
+  retrieval_note: null
+  entry_readiness: READY_THIN_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 70
+  tier: 3
+  name_as_listed: Centage
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: centage
+  legal_name: Centage
+  common_name: Centage
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: centage.com
+  aliases:
+  - centage
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: centage.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: FP&A Software for Mid-Market Finance Teams | Centage
+  attested_sources:
+  - kind: corporate
+    url: https://www.centage.com/about-us/contact
+  - kind: segment
+    url: https://www.centage.com/product/advisors
+  - kind: customers
+    url: https://www.centage.com/resources/case-studies
+  - kind: pricing
+    url: https://www.centage.com/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 71
+  tier: 3
+  name_as_listed: Acumatica
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: acumatica
+  legal_name: Acumatica, Inc.
+  common_name: Acumatica
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: acumatica.com
+  aliases:
+  - acumatica
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: acumatica.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Acumatica | Cloud ERP Business Management System
+  attested_sources:
+  - kind: corporate
+    url: https://www.acumatica.com/about-us
+  - kind: customers
+    url: https://www.acumatica.com/success-stories
+  - kind: pricing
+    url: https://www.acumatica.com/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 72
+  tier: 3
+  name_as_listed: Epicor
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: epicor
+  legal_name: Epicor Software Corporation
+  common_name: Epicor
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: epicor.com
+  aliases:
+  - epicor
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: epicor.com
+    product_fetcher_ok: false
+    status: 403
+    failure: http_status
+    redirected_to: null
+    title: null
+  attested_sources: []
+  retrieval_note: 403 to the product's fetcher on 2026-11-09 (homepage and sitemap)
+  entry_readiness: IDENTITY_ONLY_SITE_REFUSED
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 73
+  tier: 3
+  name_as_listed: Plex (Rockwell Automation)
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: plex-systems
+  legal_name: Plex Systems, Inc.
+  common_name: Plex
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: plex.rockwellautomation.com
+  aliases:
+  - plex
+  - plex systems
+  - plex rockwell
+  - plex (rockwell automation)
+  - plex by rockwell automation
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status:
+    state: ACQUIRED_OPERATING
+    effective: '2021-09-01'
+    counterparty: Rockwell Automation
+    counterparty_domain: rockwellautomation.com
+    summary: Part of Rockwell Automation since September 2021
+    evidence:
+    - https://plex.rockwellautomation.com/en-us/company/newsroom/rockwell-automation-completes-acquisition-plex-systems.html
+  identity_notes: Not Plexus Corp or Plex, Inc. (the media server). Plex now publishes under Rockwell
+    Automation; plex.com redirects to plex.rockwellautomation.com.
+  domain_checks:
+  - candidate: plex.com
+    product_fetcher_ok: false
+    status: null
+    failure: unsafe_redirect
+    redirected_to: null
+    title: null
+  attested_sources: []
+  retrieval_note: 403 to the product's fetcher on 2026-11-09 (homepage, robots.txt and sitemap)
+  entry_readiness: IDENTITY_ONLY_SITE_REFUSED
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 74
+  tier: 3
+  name_as_listed: IFS North America
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: ifs
+  legal_name: IFS
+  common_name: IFS
+  hq_country: Sweden
+  flag_matches_hq: false
+  primary_domain: ifs.com
+  aliases:
+  - ifs
+  - ifs north america
+  - industrial and financial systems
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: 'Headquartered in Linkoping, Sweden; the prospect list names its North American operations.
+    Not Intercorp Financial Services (NYSE: IFS).'
+  domain_checks:
+  - candidate: ifs.com
+    product_fetcher_ok: false
+    status: 429
+    failure: http_status
+    redirected_to: null
+    title: null
+  attested_sources: []
+  retrieval_note: 429 rate-limited on 2026-11-09 (homepage and robots.txt); sitemap exceeds the byte budget
+  entry_readiness: IDENTITY_ONLY_SITE_REFUSED
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 75
+  tier: 3
+  name_as_listed: QAD
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: qad
+  legal_name: QAD Inc.
+  common_name: QAD
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: qad.com
+  aliases:
+  - qad
+  - qad redzone
+  listing: null
+  sec_cik: null
+  former_sec_filer:
+    cik: '1036188'
+    name: QAD INC
+    sec_name: QAD INC
+    last_annual_report: '2021-04-13'
+    last_filing_of_any_kind: '2023-02-17'
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: qad.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: 'QAD | Redzone: The #1 Manufacturing Platform Powered by Agentic AI'
+  attested_sources:
+  - kind: corporate
+    url: https://www.qad.com/about
+  - kind: segment
+    url: https://www.qad.com/solutions/adaptive-erp
+  - kind: customers
+    url: https://www.qad.com/resources/customers
+  - kind: newsroom
+    url: https://www.qad.com/about/news
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 76
+  tier: 4
+  name_as_listed: Auvik
+  flag_as_listed: CA
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: auvik
+  legal_name: Auvik Networks Inc.
+  common_name: Auvik
+  hq_country: Canada
+  flag_matches_hq: true
+  primary_domain: auvik.com
+  aliases:
+  - auvik
+  - auvik networks
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: auvik.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: 'Auvik Networks: Best Network Management Software Solution'
+  attested_sources:
+  - kind: corporate
+    url: https://www.auvik.com/about
+  - kind: customers
+    url: https://www.auvik.com/case-studies
+  - kind: pricing
+    url: https://www.auvik.com/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 77
+  tier: 4
+  name_as_listed: Kaseya
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: kaseya
+  legal_name: Kaseya
+  common_name: Kaseya
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: kaseya.com
+  aliases:
+  - kaseya
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: kaseya.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: 'Kaseya: IT Management Software & Solutions for IT Pros'
+  attested_sources:
+  - kind: corporate
+    url: https://www.kaseya.com/company
+  - kind: segment
+    url: https://www.kaseya.com/platform
+  - kind: customers
+    url: https://www.kaseya.com/case-studies
+  - kind: pricing
+    url: https://www.kaseya.com/request/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 78
+  tier: 4
+  name_as_listed: ConnectWise
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: connectwise
+  legal_name: ConnectWise, LLC
+  common_name: ConnectWise
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: connectwise.com
+  aliases:
+  - connectwise
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: connectwise.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: IT Management Software - ITSM & MSP Solutions | ConnectWise
+  attested_sources:
+  - kind: corporate
+    url: https://www.connectwise.com/company/about-us
+  - kind: segment
+    url: https://www.connectwise.com/platform
+  - kind: customers
+    url: https://www.connectwise.com/case-studies
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 79
+  tier: 4
+  name_as_listed: N-able
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: n-able
+  legal_name: N-able, Inc.
+  common_name: N-able
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: n-able.com
+  aliases:
+  - n-able
+  - nable
+  - n able
+  listing:
+  - 'NYSE: NABL'
+  sec_cik: '1834488'
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: n-able.com
+    product_fetcher_ok: false
+    status: 403
+    failure: http_status
+    redirected_to: null
+    title: null
+  attested_sources: []
+  retrieval_note: 403 to the product's fetcher on 2026-11-09 (homepage and sitemap index); SEC filings
+    remain readable
+  entry_readiness: READY_FILINGS_ONLY_SITE_REFUSED
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 80
+  tier: 4
+  name_as_listed: Datto
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: datto
+  legal_name: Datto, Inc.
+  common_name: Datto
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: datto.com
+  aliases:
+  - datto
+  listing: null
+  sec_cik: null
+  former_sec_filer:
+    cik: '1724570'
+    name: DATTO HOLDING CORP.
+    sec_name: DATTO HOLDING CORP.
+    last_annual_report: '2022-04-13'
+    last_filing_of_any_kind: '2022-07-05'
+  parent_entity_id: kaseya
+  disambiguation_group: null
+  corporate_status:
+    state: ACQUIRED_OPERATING
+    effective: '2022-06-23'
+    counterparty: Kaseya
+    counterparty_domain: kaseya.com
+    summary: Part of Kaseya since June 2022
+    evidence:
+    - https://www.businesswire.com/news/home/20220623005080/en/Kaseya-Closes-Acquisition-of-Datto-with-Promise-to-Boost-Innovation-and-Lower-Prices
+  identity_notes: null
+  domain_checks:
+  - candidate: datto.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Datto | IT Solutions Built for You
+  attested_sources:
+  - kind: corporate
+    url: https://www.datto.com/about
+  - kind: segment
+    url: https://www.datto.com/products
+  - kind: customers
+    url: https://www.datto.com/case-studies
+  - kind: newsroom
+    url: https://www.datto.com/news
+  - kind: pricing
+    url: https://www.datto.com/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 81
+  tier: 4
+  name_as_listed: Barracuda Networks
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: barracuda
+  legal_name: Barracuda Networks, Inc.
+  common_name: Barracuda
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: barracuda.com
+  aliases:
+  - barracuda
+  - barracuda networks
+  listing: null
+  sec_cik: null
+  former_sec_filer:
+    cik: '1348334'
+    name: BARRACUDA NETWORKS INC
+    sec_name: BARRACUDA NETWORKS INC
+    last_annual_report: '2017-05-15'
+    last_filing_of_any_kind: '2018-02-22'
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: barracuda.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: null
+  attested_sources:
+  - kind: corporate
+    url: https://www.barracuda.com
+  retrieval_note: null
+  entry_readiness: READY_THIN_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 82
+  tier: 4
+  name_as_listed: Arctic Wolf Networks' peer, eSentire
+  flag_as_listed: CA
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: esentire
+  legal_name: eSentire, Inc.
+  common_name: eSentire
+  hq_country: Canada
+  flag_matches_hq: true
+  primary_domain: esentire.com
+  aliases:
+  - esentire
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: 'Listed as "Arctic Wolf Networks'' peer, eSentire": the subject is eSentire. Arctic
+    Wolf Networks is a separate catalog company and is not this entry.'
+  domain_checks:
+  - candidate: esentire.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Managed Detection and Response Services & Security Operations Platform | eSentire
+  attested_sources:
+  - kind: corporate
+    url: https://www.esentire.com/company/about-us
+  - kind: newsroom
+    url: https://www.esentire.com/company/newsroom
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 83
+  tier: 4
+  name_as_listed: Blackpoint Cyber
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: blackpoint-cyber
+  legal_name: Blackpoint Cyber
+  common_name: Blackpoint Cyber
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: blackpointcyber.com
+  aliases:
+  - blackpoint
+  - blackpoint cyber
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: blackpointcyber.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Managed Detection and Response (MDR) Platform - Blackpoint Cyber
+  attested_sources:
+  - kind: corporate
+    url: https://blackpointcyber.com/company
+  - kind: segment
+    url: https://blackpointcyber.com/platform
+  - kind: customers
+    url: https://blackpointcyber.com/company/success-stories
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 84
+  tier: 4
+  name_as_listed: Red Canary
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: red-canary
+  legal_name: Red Canary, Inc.
+  common_name: Red Canary
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: redcanary.com
+  aliases:
+  - red canary
+  - redcanary
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status:
+    state: ACQUIRED_ABSORBED
+    effective: '2025-08-01'
+    counterparty: Zscaler, Inc.
+    counterparty_domain: zscaler.com
+    summary: Acquired by Zscaler; redcanary.com now redirects to Zscaler's managed detection and response
+      page
+    evidence:
+    - https://ir.zscaler.com/node/15086
+  identity_notes: null
+  domain_checks:
+  - candidate: redcanary.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: www.zscaler.com
+    title: Leading Cloud Enterprise Security Provider for Zero Trust
+  attested_sources: []
+  retrieval_note: null
+  entry_readiness: STOP_NO_LONGER_INDEPENDENT
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 85
+  tier: 4
+  name_as_listed: ReliaQuest
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: reliaquest
+  legal_name: ReliaQuest, LLC
+  common_name: ReliaQuest
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: reliaquest.com
+  aliases:
+  - reliaquest
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: reliaquest.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: 'Home | ReliaQuest GreyMatter: The Agentic AI Security Operations Platform for Agentic Defense'
+  attested_sources:
+  - kind: corporate
+    url: https://reliaquest.com/about-us
+  - kind: segment
+    url: https://reliaquest.com/solutions
+  - kind: customers
+    url: https://reliaquest.com/resources/customer-stories
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 86
+  tier: 4
+  name_as_listed: Tanium
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: tanium
+  legal_name: Tanium Inc.
+  common_name: Tanium
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: tanium.com
+  aliases:
+  - tanium
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: tanium.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Autonomous IT, endpoint intelligence and control | Tanium
+  attested_sources:
+  - kind: corporate
+    url: https://www.tanium.com/about
+  - kind: segment
+    url: https://www.tanium.com/platform
+  - kind: customers
+    url: https://www.tanium.com/customers/sap
+  - kind: newsroom
+    url: https://www.tanium.com/newsroom
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 87
+  tier: 4
+  name_as_listed: Lansweeper
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: lansweeper
+  legal_name: Lansweeper
+  common_name: Lansweeper
+  hq_country: Belgium
+  flag_matches_hq: false
+  primary_domain: lansweeper.com
+  aliases:
+  - lansweeper
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: lansweeper.com
+    product_fetcher_ok: false
+    status: 403
+    failure: http_status
+    redirected_to: null
+    title: null
+  attested_sources: []
+  retrieval_note: 403 to the product's fetcher on 2026-11-09 (homepage and sitemap index)
+  entry_readiness: IDENTITY_ONLY_SITE_REFUSED
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 88
+  tier: 4
+  name_as_listed: Torq
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: torq
+  legal_name: Torq
+  common_name: Torq
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: torq.io
+  aliases:
+  - torq
+  - torq.io
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: Not Torq Resources Inc., an SEC registrant (mining); before this row the product resolved
+    "Torq" to it and opened an analysis of its filings.
+  domain_checks:
+  - candidate: torq.io
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Torq AI SOC Platform | AI Agents and Agentic SecOps
+  attested_sources:
+  - kind: corporate
+    url: https://torq.io/company
+  - kind: customers
+    url: https://torq.io/customers
+  - kind: newsroom
+    url: https://torq.io/news
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 89
+  tier: 4
+  name_as_listed: Tines
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: tines
+  legal_name: Tines
+  common_name: Tines
+  hq_country: Ireland
+  flag_matches_hq: false
+  primary_domain: tines.com
+  aliases:
+  - tines
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: Headquartered in Dublin with a second headquarters in Boston.
+  domain_checks:
+  - candidate: tines.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Tines | The secure environment for AI agents, apps and automation
+  attested_sources:
+  - kind: corporate
+    url: https://www.tines.com/about
+  - kind: segment
+    url: https://www.tines.com/solutions
+  - kind: customers
+    url: https://www.tines.com/customers
+  - kind: newsroom
+    url: https://www.tines.com/newsroom
+  - kind: pricing
+    url: https://www.tines.com/pricing
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 90
+  tier: 4
+  name_as_listed: Swimlane
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: swimlane
+  legal_name: Swimlane
+  common_name: Swimlane
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: swimlane.com
+  aliases:
+  - swimlane
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: swimlane.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Agentic AI Security Automation & AI SOC Platform | Swimlane
+  attested_sources:
+  - kind: corporate
+    url: https://swimlane.com/about
+  - kind: segment
+    url: https://swimlane.com/platform/ai
+  - kind: customers
+    url: https://swimlane.com/customers
+  - kind: newsroom
+    url: https://swimlane.com/news
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 91
+  tier: 4
+  name_as_listed: Pax8
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: pax8
+  legal_name: Pax8, Inc.
+  common_name: Pax8
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: pax8.com
+  aliases:
+  - pax8
+  - pax 8
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: pax8.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: The Cloud Marketplace That Unlocks a Universe of Possibility | Pax8 Canada (EN)
+  attested_sources:
+  - kind: corporate
+    url: https://www.pax8.com/en-ca/about
+  - kind: customers
+    url: https://www.pax8.com/en-ca/case-studies
+  - kind: newsroom
+    url: https://www.pax8.com/en-ca/news
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 92
+  tier: 4
+  name_as_listed: Sherweb
+  flag_as_listed: CA
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: sherweb
+  legal_name: Sherweb Inc.
+  common_name: Sherweb
+  hq_country: Canada
+  flag_matches_hq: true
+  primary_domain: sherweb.com
+  aliases:
+  - sherweb
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: sherweb.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: More than a cloud distributor | Sherweb
+  attested_sources:
+  - kind: corporate
+    url: https://www.sherweb.com/about
+  - kind: segment
+    url: https://www.sherweb.com/platform/msp-client-platform
+  - kind: newsroom
+    url: https://www.sherweb.com/about/newsroom
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 93
+  tier: 4
+  name_as_listed: Softchoice
+  flag_as_listed: CA
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: softchoice
+  legal_name: Softchoice Corporation
+  common_name: Softchoice
+  hq_country: Canada
+  flag_matches_hq: true
+  primary_domain: softchoice.com
+  aliases:
+  - softchoice
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: world-wide-technology
+  disambiguation_group: null
+  corporate_status:
+    state: ACQUIRED_OPERATING
+    effective: '2025-03-13'
+    counterparty: World Wide Technology
+    counterparty_domain: wwt.com
+    summary: Part of World Wide Technology since March 2025
+    evidence:
+    - https://www.businesswire.com/news/home/20250313509499/en/World-Wide-Technology-Completes-Acquisition-of-Softchoice-Corporation
+  identity_notes: null
+  domain_checks:
+  - candidate: softchoice.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: 'Softchoice: Success. Fully realized.'
+  attested_sources: []
+  retrieval_note: 'homepage renders client-side: 155 visible characters on 2026-11-09'
+  entry_readiness: IDENTITY_ONLY_SITE_REFUSED
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 94
+  tier: 4
+  name_as_listed: CDW
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: cdw
+  legal_name: CDW Corporation
+  common_name: CDW
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: cdw.com
+  aliases:
+  - cdw
+  - cdw corp
+  listing:
+  - 'NASDAQ: CDW'
+  sec_cik: '1402057'
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: cdw.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: 'CDW: IT Solutions and Services, Hardware, Software for Business'
+  attested_sources:
+  - kind: corporate
+    url: https://www.cdw.com
+  retrieval_note: null
+  entry_readiness: READY_FILINGS_AND_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 95
+  tier: 4
+  name_as_listed: Presidio
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: presidio
+  legal_name: Presidio, Inc.
+  common_name: Presidio
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: presidio.com
+  aliases:
+  - presidio
+  listing: null
+  sec_cik: null
+  former_sec_filer:
+    cik: '1631825'
+    name: Presidio, Inc.
+    sec_name: Presidio, Inc.
+    last_annual_report: '2019-08-29'
+    last_filing_of_any_kind: '2020-02-13'
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: Not Presidio Production Co, an SEC registrant (oil and gas); before this row the product
+    resolved "Presidio" to it and opened an analysis of its filings.
+  domain_checks:
+  - candidate: presidio.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Home | Presidio
+  attested_sources:
+  - kind: corporate
+    url: https://www.presidio.com/who-we-are/newsroom-press
+  - kind: customers
+    url: https://www.presidio.com/learn-from-us/case-studies
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 96
+  tier: 4
+  name_as_listed: Trace3
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: trace3
+  legal_name: Trace3, LLC
+  common_name: Trace3
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: trace3.com
+  aliases:
+  - trace3
+  - trace 3
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: trace3.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Trace3 | All Possibilities Live in Technology
+  attested_sources:
+  - kind: corporate
+    url: https://www.trace3.com/about-us
+  - kind: newsroom
+    url: https://www.trace3.com/news
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 97
+  tier: 4
+  name_as_listed: World Wide Technology
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: world-wide-technology
+  legal_name: World Wide Technology Holding Co., LLC
+  common_name: World Wide Technology
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: wwt.com
+  aliases:
+  - world wide technology
+  - wwt
+  - worldwide technology
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: Not Wolverine World Wide (footwear) or Watts Water Technologies; before this row "World
+    Wide Technology" opened an analysis of Wolverine World Wide's filings and "WWT" suggested Watts Water.
+  domain_checks:
+  - candidate: wwt.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: null
+  attested_sources: []
+  retrieval_note: homepage renders client-side (0 visible characters) and /about exceeds the byte budget
+    on 2026-11-09
+  entry_readiness: IDENTITY_ONLY_SITE_REFUSED
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 98
+  tier: 4
+  name_as_listed: Ahead
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: ahead
+  legal_name: AHEAD
+  common_name: AHEAD
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: ahead.com
+  aliases:
+  - ahead
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: null
+  domain_checks:
+  - candidate: ahead.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: AHEAD | Digital Platforms Engineered for Modern Enterprises
+  attested_sources:
+  - kind: corporate
+    url: https://www.ahead.com/leadership
+  - kind: newsroom
+    url: https://www.ahead.com/news
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 99
+  tier: 4
+  name_as_listed: Onica / Rackspace Technology
+  flag_as_listed: US
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: rackspace
+  legal_name: Rackspace Technology, Inc.
+  common_name: Rackspace Technology
+  hq_country: United States
+  flag_matches_hq: true
+  primary_domain: rackspace.com
+  aliases:
+  - rackspace
+  - rackspace technology
+  - onica
+  - onica / rackspace technology
+  listing:
+  - 'NASDAQ: RXT'
+  sec_cik: '1810019'
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status: null
+  identity_notes: Onica, an AWS consultancy, was acquired by Rackspace in 2019 and operates within it;
+    onica.com no longer serves a site.
+  domain_checks:
+  - candidate: onica.com
+    product_fetcher_ok: false
+    status: 500
+    failure: http_status
+    redirected_to: null
+    title: null
+  - candidate: rackspace.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: Rackspace
+  attested_sources:
+  - kind: corporate
+    url: https://www.rackspace.com/about
+  - kind: customers
+    url: https://www.rackspace.com/case-studies
+  - kind: newsroom
+    url: https://www.rackspace.com/newsroom
+  retrieval_note: null
+  entry_readiness: READY_FILINGS_AND_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'
+- prospect_id: 100
+  tier: 4
+  name_as_listed: Converge Technology Solutions
+  flag_as_listed: CA
+  register: catalog (company_ingestion/catalog_prospects.py)
+  entity_id: pellera
+  legal_name: Pellera Technologies
+  common_name: Pellera Technologies
+  hq_country: United States
+  flag_matches_hq: false
+  primary_domain: pellera.com
+  aliases:
+  - pellera
+  - pellera technologies
+  - converge
+  - converge technology solutions
+  - converge technology
+  listing: null
+  sec_cik: null
+  former_sec_filer: null
+  parent_entity_id: null
+  disambiguation_group: null
+  corporate_status:
+    state: RENAMED_SUCCESSOR
+    effective: '2025-04-22'
+    counterparty: Converge Technology Solutions
+    counterparty_domain: convergetp.com
+    summary: Formerly Converge Technology Solutions; renamed after merging with Mainline in April 2025
+    evidence:
+    - https://hig.com/news/h-i-g-capital-completes-merger-of-converge-technology-solutions-and-mainline-information-systems-to-form-pellera-technologies/
+  identity_notes: null
+  domain_checks:
+  - candidate: convergetp.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: 'Converge Technology Solutions: IT for Business'
+  - candidate: pellera.com
+    product_fetcher_ok: true
+    status: 200
+    failure: null
+    redirected_to: null
+    title: IT Solutions for Businesses - Pellera Technologies
+  attested_sources:
+  - kind: corporate
+    url: https://pellera.com/about-us
+  - kind: segment
+    url: https://pellera.com/solutions
+  - kind: customers
+    url: https://pellera.com/case-studies
+  - kind: newsroom
+    url: https://pellera.com/news
+  retrieval_note: null
+  entry_readiness: READY_SITE
+  analysis_quality: NOT_MEASURED
+  last_verified: '2026-11-09'

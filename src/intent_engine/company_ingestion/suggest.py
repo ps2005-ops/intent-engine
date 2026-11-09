@@ -67,11 +67,21 @@ class Suggestion:
     cik: str = ""
     source: str = REGISTRY
     match: int = CONTAINS
+    #: Ownership / operating status, from a curated source only -- "Part of
+    #: Salesforce since November 2025". Empty for a company that is itself.
+    status: str = ""
+    status_state: str = ""
 
     def describe(self) -> str:
-        """The second line under the name. Only what a source carries."""
-        bits = [b for b in (self.ticker, self.country, self.city,
-                            self.domain) if b]
+        """The second line under the name. Only what a source carries.
+
+        STATUS COMES FIRST. A customer choosing between "Red Canary" and
+        nothing needs to know before they pick that Red Canary is now part of
+        Zscaler, and a status trailing a domain is the part a narrow phone
+        list truncates.
+        """
+        bits = [b for b in (self.status, self.ticker, self.country,
+                            self.city, self.domain) if b]
         return " · ".join(bits)
 
     def as_dict(self) -> dict:
@@ -80,7 +90,9 @@ class Suggestion:
                 "city": self.city, "domain": self.domain,
                 "listing": self.listing, "sector": self.sector,
                 "entity_id": self.entity_id, "cik": self.cik,
-                "source": self.source, "describe": self.describe()}
+                "source": self.source, "status": self.status,
+                "status_state": self.status_state,
+                "describe": self.describe()}
 
 
 _SUFFIXES = frozenset({
@@ -295,8 +307,18 @@ def _from_registry(typed: str) -> List[Suggestion]:
             # catalog has not recorded.
             listing=("PUBLIC" if (getattr(profile, "listings", ())
                                   or getattr(profile, "sec_cik", "")) else ""),
+            status=_status_line(profile),
+            status_state=getattr(getattr(profile, "corporate_status", None),
+                                 "state", "") or "",
             source=REGISTRY, match=best))
     return out
+
+
+def _status_line(profile) -> str:
+    status = getattr(profile, "corporate_status", None)
+    if status is None:
+        return ""
+    return str(getattr(status, "summary", "") or "").strip()
 
 
 def _registry_ticker(profile) -> str:
@@ -573,7 +595,9 @@ def suggest(typed: str, *, limit: int = 8, allow_registrant: bool = True,
             listing=held.listing or row.listing,
             sector=held.sector or row.sector,
             entity_id=held.entity_id or row.entity_id,
-            cik=held.cik or row.cik)
+            cik=held.cik or row.cik,
+            status=held.status or row.status,
+            status_state=held.status_state or row.status_state)
     ordered = sorted(merged.values(),
                      key=lambda r: (r.match, SOURCE_RANK.get(r.source, 9),
                                     len(r.legal_name)))

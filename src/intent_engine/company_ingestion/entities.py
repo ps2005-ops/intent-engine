@@ -142,6 +142,51 @@ class OfficialSource:
                 "note": self.note}
 
 
+#: OWNERSHIP AND OPERATING STATUS, as identity -- never as analysis.
+#:
+#: MEASURED 2026-11-09 on the 100-company prospect list: 16 of 100 had changed
+#: owner or form, and five no longer publish as themselves at all --
+#: redcanary.com redirects to zscaler.com, tecton.ai to databricks.com,
+#: mosaic.tech to hibob.com, observeinc.com to snowflake.com, and Cervest
+#: stopped trading in 2023. Opening an analysis on one of those reads the
+#: ACQUIRER's pages under the acquired company's name, or reads nothing and
+#: reports a company that "publishes nothing" -- both are a confident report
+#: about something that is not the company asked about.
+#:
+#: Two of the states stop entry before any run is opened; the rest are shown
+#: beside the name so a reader knows whose company it now is.
+ACQUIRED_OPERATING = "ACQUIRED_OPERATING"   # owned by another, publishes as itself
+TAKEN_PRIVATE = "TAKEN_PRIVATE"             # delisted; its own filings stop
+ACQUIRED_ABSORBED = "ACQUIRED_ABSORBED"     # no longer publishes as itself
+CEASED_OPERATING = "CEASED_OPERATING"       # no longer trading
+RENAMED_SUCCESSOR = "RENAMED_SUCCESSOR"     # this entity succeeds a renamed one
+CORPORATE_STATES = (ACQUIRED_OPERATING, TAKEN_PRIVATE, ACQUIRED_ABSORBED,
+                    CEASED_OPERATING, RENAMED_SUCCESSOR)
+#: The states with no independent publishing surface left to analyse.
+NOT_INDEPENDENTLY_ANALYSABLE = frozenset({ACQUIRED_ABSORBED, CEASED_OPERATING})
+
+
+@dataclass(frozen=True)
+class CorporateStatus:
+    """What happened to a company, who it happened with, and the evidence."""
+    state: str
+    effective: str = ""          # ISO date, or year-month where that is all
+    counterparty: str = ""       # acquirer, owner, or predecessor name
+    counterparty_domain: str = ""
+    summary: str = ""            # one plain sentence a reader can be shown
+    evidence: tuple = ()         # URLs of the announcement(s)
+
+    @property
+    def stops_entry(self) -> bool:
+        return self.state in NOT_INDEPENDENTLY_ANALYSABLE
+
+    def as_dict(self) -> dict:
+        return {"state": self.state, "effective": self.effective,
+                "counterparty": self.counterparty,
+                "counterparty_domain": self.counterparty_domain,
+                "summary": self.summary, "evidence": list(self.evidence)}
+
+
 @dataclass(frozen=True)
 class EntityProfile:
     """A company we can name precisely, with its official publishing surface."""
@@ -162,6 +207,13 @@ class EntityProfile:
     official_sources: tuple = field(default_factory=tuple)
     # Sibling/child entities a bare common name could also mean.
     disambiguation_group: str = ""
+    # None for a company that is simply itself; see CorporateStatus.
+    corporate_status: "CorporateStatus | None" = None
+    # WHY THIS ENTRY CARRIES NO OFFICIAL SOURCE, when it carries none: the
+    # measured refusal ("403 to the product's fetcher on 2026-11-09"). An
+    # identity-only entry still stops a wrong-company match; it must say why
+    # it cannot also help a blocked run, rather than look like an omission.
+    retrieval_note: str = ""
 
     # -- derived ------------------------------------------------------------
     @property
@@ -196,6 +248,8 @@ class EntityProfile:
             "ambiguity_notes": self.ambiguity_notes,
             "aliases": list(self.aliases),
             "official_sources": [s.as_dict() for s in self.official_sources],
+            "corporate_status": (self.corporate_status.as_dict()
+                                 if self.corporate_status else None),
             "registry_version": ENTITY_REGISTRY_VERSION,
         }
 

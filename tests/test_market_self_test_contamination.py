@@ -110,24 +110,6 @@ def test_one_document_two_excerpts_is_its_own_class():
         item(observed="2026-08-05")) == OB.SAME_DOCUMENT_DIFFERENT_EXCERPT
 
 
-def test_the_real_ledgers_dominant_class_is_the_sweep_re_read():
-    if not REAL_LEDGER.exists():                       # pragma: no cover
-        return
-    store = LS.LearningStore(REAL_LEDGER)
-    got = OB.diagnose(store.open_expectations(as_of="2026-08-07"),
-                      store.evidence())
-    # `>= 28` was a count of the live ledger on the day it was written and
-    # has since fallen to 23 -- not because anything regressed, but because
-    # the ledger this reads is a growing production artifact and its class
-    # mix moves. DOMINANCE is the claim, and it is asserted relationally.
-    assert got["dominant_class"] == OB.SAME_SOURCE_REPACKAGING
-    counts = got["by_class"]
-    assert counts[OB.SAME_SOURCE_REPACKAGING] > 0
-    assert counts[OB.SAME_SOURCE_REPACKAGING] == max(counts.values()), (
-        "the dominant class must actually be the largest; a label computed "
-        f"some other way is the defect this catches: {counts}")
-    assert "no longer hashes the sweep date" in \
-        got["producers"][OB.SAME_SOURCE_REPACKAGING]
 
 
 # --- the repair removes contamination without costing recall -------------

@@ -1,0 +1,26 @@
+[
+ {
+  "prospect_id": 69,
+  "host": "datarails.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "home",
+    "url": "https://datarails.com",
+    "text_chars": 9373
+   }
+  ],
+  "rejected": [
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://datarails.com/platform/financeos",
+    "text_chars": 6933,
+    "why": "left host:www.datarails.com"
+   }
+  ]
+ }
+]

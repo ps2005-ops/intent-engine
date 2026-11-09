@@ -1,0 +1,118 @@
+# The 100-company prospect universe, exactly as supplied on 2026-11-09.
+#
+# This file is the REQUEST, not the resolution. `name_as_listed` and
+# `flag` are preserved verbatim, including entries whose wording is not a
+# company name ("Arctic Wolf Networks' peer, eSentire") or whose flag is the
+# North American office of a foreign company. Identity resolution lives in
+# PROSPECT_REGISTRY.yaml and points back here by `prospect_id`.
+#
+# `prospect_note` is sales context written by the requester. It is NOT
+# evidence about the company and nothing in the analysis pipeline may read it.
+version: prospect100.v1
+supplied: 2026-11-09
+tiers:
+  1: Highest-priority strategic prospects (data infrastructure and governance)
+  2: Economic intelligence, risk and strategic decision platforms
+  3: Enterprise operating systems and business platforms
+  4: High-upside growth companies and distribution partners
+prospects:
+- {prospect_id: 1, tier: 1, name_as_listed: "Hammerspace", flag: US, prospect_note: "Enterprise data orchestration; opportunity to connect distributed information with strategic decision intelligence."}
+- {prospect_id: 2, tier: 1, name_as_listed: "WEKA", flag: US, prospect_note: "AI data infrastructure; could help validate decision intelligence built over demanding enterprise data environments."}
+- {prospect_id: 3, tier: 1, name_as_listed: "Reltio", flag: US, prospect_note: "Master data and entity resolution; strong complement to Intent Engine's canonical company model."}
+- {prospect_id: 4, tier: 1, name_as_listed: "Ataccama", flag: CA, prospect_note: "Data quality and governance; potential trusted-evidence integration and enterprise distribution."}
+- {prospect_id: 5, tier: 1, name_as_listed: "Informatica", flag: US, prospect_note: "Enterprise data management; enormous integration potential, although access is more difficult."}
+- {prospect_id: 6, tier: 1, name_as_listed: "Qlik", flag: US, prospect_note: "Analytics and data integration; potential move from business insights to evidence-backed decisions."}
+- {prospect_id: 7, tier: 1, name_as_listed: "Matillion", flag: US, prospect_note: "Data pipeline infrastructure; could connect business evidence to strategic reasoning."}
+- {prospect_id: 8, tier: 1, name_as_listed: "Keboola", flag: US, prospect_note: "Data operations and automation; relatively focused ecosystem for experimentation and partnership."}
+- {prospect_id: 9, tier: 1, name_as_listed: "CData Software", flag: US, prospect_note: "Enterprise connectivity; particularly valuable for future internal-company intelligence."}
+- {prospect_id: 10, tier: 1, name_as_listed: "Precisely", flag: US, prospect_note: "Data integrity, location intelligence and governance; useful for evidence quality and economic exposure."}
+- {prospect_id: 11, tier: 1, name_as_listed: "Securiti", flag: US, prospect_note: "Data and AI governance; potential complement for safe internal intelligence."}
+- {prospect_id: 12, tier: 1, name_as_listed: "Immuta", flag: US, prospect_note: "Data access controls; important for secure, permission-aware executive reasoning."}
+- {prospect_id: 13, tier: 1, name_as_listed: "Privacera", flag: US, prospect_note: "Unified data security and governance; strong V4 integration hypothesis."}
+- {prospect_id: 14, tier: 1, name_as_listed: "Soda", flag: US, prospect_note: "Data reliability and quality; helps establish whether strategic conclusions rest on trustworthy information."}
+- {prospect_id: 15, tier: 1, name_as_listed: "Acceldata", flag: US, prospect_note: "Data observability; potential to detect when deteriorating evidence should weaken a belief."}
+- {prospect_id: 16, tier: 1, name_as_listed: "Anomalo", flag: US, prospect_note: "Automated data-quality monitoring; natural input to confidence and evidence-integrity checks."}
+- {prospect_id: 17, tier: 1, name_as_listed: "Observe", flag: US, prospect_note: "Operational telemetry; could connect changes in system behavior to business consequences."}
+- {prospect_id: 18, tier: 1, name_as_listed: "Chronosphere", flag: US, prospect_note: "Cloud observability economics; a useful setting for cost, capacity and infrastructure decisions."}
+- {prospect_id: 19, tier: 1, name_as_listed: "CrateDB", flag: US, prospect_note: "Operational and time-series data; potential for economic and industrial decision intelligence."}
+- {prospect_id: 20, tier: 1, name_as_listed: "SingleStore", flag: US, prospect_note: "Real-time analytics and AI data infrastructure; useful as a context layer for strategic reasoning."}
+- {prospect_id: 21, tier: 1, name_as_listed: "TigerGraph", flag: US, prospect_note: "Enterprise graph analytics; potential relationship around causal and commercial dependency graphs."}
+- {prospect_id: 22, tier: 1, name_as_listed: "Neo4j", flag: US, prospect_note: "Knowledge graphs and connected data; strong architectural complement to company/economic state."}
+- {prospect_id: 23, tier: 1, name_as_listed: "Arango", flag: US, prospect_note: "Graph and multimodel databases; potential infrastructure and graph-reasoning collaboration."}
+- {prospect_id: 24, tier: 1, name_as_listed: "KX", flag: US, prospect_note: "Time-series analytics and decision-sensitive financial/industrial data."}
+- {prospect_id: 25, tier: 1, name_as_listed: "Tecton", flag: US, prospect_note: "Real-time ML features; potential bridge from structured evidence into learned decision models."}
+- {prospect_id: 26, tier: 2, name_as_listed: "Interos", flag: US, prospect_note: "Supply-chain relationship intelligence; connect supplier exposure to financial and strategic consequences."}
+- {prospect_id: 27, tier: 2, name_as_listed: "Everstream Analytics", flag: US, prospect_note: "Supply-chain risk signals; extend disruption alerts into decisions about suppliers, inventory and investment."}
+- {prospect_id: 28, tier: 2, name_as_listed: "Resilinc", flag: US, prospect_note: "Multi-tier supplier visibility; test whether external disruptions should change sourcing strategy."}
+- {prospect_id: 29, tier: 2, name_as_listed: "Altana", flag: US, prospect_note: "Global supply-chain knowledge graph; excellent fit for economic transmission and network reasoning."}
+- {prospect_id: 30, tier: 2, name_as_listed: "Exiger", flag: US, prospect_note: "Supply-chain and third-party risk; translate complex risk evidence into executive choices."}
+- {prospect_id: 31, tier: 2, name_as_listed: "Sayari", flag: US, prospect_note: "Corporate ownership and trade networks; strengthen counterparty, geopolitical and regulatory intelligence."}
+- {prospect_id: 32, tier: 2, name_as_listed: "Kharon", flag: US, prospect_note: "Sanctions and commercial risk intelligence; potential decision layer above geopolitical exposure."}
+- {prospect_id: 33, tier: 2, name_as_listed: "Moody's", flag: US, prospect_note: "Credit and economic risk intelligence; major potential data partner, though difficult to access."}
+- {prospect_id: 34, tier: 2, name_as_listed: "S&P Global", flag: US, prospect_note: "Economic, financial and market evidence; major complement for rigorous economic intelligence."}
+- {prospect_id: 35, tier: 2, name_as_listed: "MSCI", flag: US, prospect_note: "Portfolio, climate and financial risk models; potential for scenario and exposure intelligence."}
+- {prospect_id: 36, tier: 2, name_as_listed: "FactSet", flag: US, prospect_note: "Financial data and research workflows; strategic assumption testing could complement existing analytics."}
+- {prospect_id: 37, tier: 2, name_as_listed: "Morningstar", flag: US, prospect_note: "Investment and company research; potential research-to-decision intelligence partnership."}
+- {prospect_id: 38, tier: 2, name_as_listed: "Enverus", flag: US, prospect_note: "Energy market and asset intelligence; rich opportunities for commodity, capital and operational decisions."}
+- {prospect_id: 39, tier: 2, name_as_listed: "Rystad Energy", flag: US, prospect_note: "North American energy intelligence operations; potential economic exposure and energy-strategy use cases."}
+- {prospect_id: 40, tier: 2, name_as_listed: "Wood Mackenzie", flag: US, prospect_note: "Energy transition and commodity intelligence; connect forecasts to corporate capital allocation."}
+- {prospect_id: 41, tier: 2, name_as_listed: "Verisk", flag: US, prospect_note: "Risk analytics and insurance intelligence; convert modeled exposures into strategic interventions."}
+- {prospect_id: 42, tier: 2, name_as_listed: "Jupiter Intelligence", flag: US, prospect_note: "Climate risk analytics; translate physical risks into location, investment and resilience decisions."}
+- {prospect_id: 43, tier: 2, name_as_listed: "Cervest", flag: US, prospect_note: "Climate intelligence; potential exposure-to-decision workflow, subject to current operating-status verification."}
+- {prospect_id: 44, tier: 2, name_as_listed: "Watershed", flag: US, prospect_note: "Carbon and sustainability intelligence; link regulatory and emissions evidence to economic trade-offs."}
+- {prospect_id: 45, tier: 2, name_as_listed: "Persefoni", flag: US, prospect_note: "Carbon accounting and enterprise reporting; potential strategic scenario layer."}
+- {prospect_id: 46, tier: 2, name_as_listed: "Benchmark Gensuite", flag: US, prospect_note: "Enterprise EHS and risk operations; connect compliance events to executive priorities."}
+- {prospect_id: 47, tier: 2, name_as_listed: "Cority", flag: CA, prospect_note: "Enterprise environmental, health and safety software; promising Canadian operational-intelligence partner."}
+- {prospect_id: 48, tier: 2, name_as_listed: "Assent", flag: CA, prospect_note: "Supply-chain sustainability and product compliance; strong regulatory and supplier-evidence use case."}
+- {prospect_id: 49, tier: 2, name_as_listed: "EcoVadis", flag: US, prospect_note: "North American sustainability and supplier-risk ecosystem; distribution potential, though globally headquartered."}
+- {prospect_id: 50, tier: 2, name_as_listed: "Dun & Bradstreet", flag: US, prospect_note: "Commercial entity and relationship data; highly complementary to canonical company intelligence."}
+- {prospect_id: 51, tier: 3, name_as_listed: "Planful", flag: US, prospect_note: "Financial planning; challenge assumptions behind forecasts and budget allocations."}
+- {prospect_id: 52, tier: 3, name_as_listed: "Vena Solutions", flag: CA, prospect_note: "Excel-connected financial planning; strong Canadian target for evidence-backed scenario intelligence."}
+- {prospect_id: 53, tier: 3, name_as_listed: "Cube", flag: US, prospect_note: "FP&A platform; potentially accessible partner for strategic assumption validation."}
+- {prospect_id: 54, tier: 3, name_as_listed: "Mosaic Tech", flag: US, prospect_note: "Strategic finance software; natural overlap with decision-oriented financial intelligence."}
+- {prospect_id: 55, tier: 3, name_as_listed: "Aleph", flag: US, prospect_note: "Financial planning and analysis; potential early-stage integration or design partnership."}
+- {prospect_id: 56, tier: 3, name_as_listed: "Pigment", flag: US, prospect_note: "Major North American planning presence; strategically relevant but strongly competitor-adjacent."}
+- {prospect_id: 57, tier: 3, name_as_listed: "Anaplan", flag: US, prospect_note: "Enterprise planning; potential complementary external intelligence layer, but substantial competitive overlap."}
+- {prospect_id: 58, tier: 3, name_as_listed: "Workday", flag: US, prospect_note: "Finance and workforce systems; enormous future internal-context opportunity."}
+- {prospect_id: 59, tier: 3, name_as_listed: "Dayforce", flag: CA, prospect_note: "Workforce and payroll intelligence; connect labour economics to management decisions."}
+- {prospect_id: 60, tier: 3, name_as_listed: "Paycor", flag: US, prospect_note: "HR and workforce software; potential labour-cost, hiring and growth-strategy intelligence."}
+- {prospect_id: 61, tier: 3, name_as_listed: "Rippling", flag: US, prospect_note: "Cross-functional HR, IT and finance context; strong future company-state integration hypothesis."}
+- {prospect_id: 62, tier: 3, name_as_listed: "Deel", flag: US, prospect_note: "Global workforce operations; useful for expansion, labour and regulatory decisions."}
+- {prospect_id: 63, tier: 3, name_as_listed: "Gusto", flag: US, prospect_note: "SMB financial and workforce data; possible distribution into businesses without strategy teams."}
+- {prospect_id: 64, tier: 3, name_as_listed: "Ramp", flag: US, prospect_note: "Corporate spending intelligence; connect expenditure patterns with external economic conditions."}
+- {prospect_id: 65, tier: 3, name_as_listed: "Brex", flag: US, prospect_note: "Financial operations and spend management; potential strategic cash and investment intelligence."}
+- {prospect_id: 66, tier: 3, name_as_listed: "BILL", flag: US, prospect_note: "SMB financial workflows; strong opportunity for accessible, data-grounded decision support."}
+- {prospect_id: 67, tier: 3, name_as_listed: "FloQast", flag: US, prospect_note: "Accounting operations; connect trusted financial records to executive decisions."}
+- {prospect_id: 68, tier: 3, name_as_listed: "BlackLine", flag: US, prospect_note: "Financial controls and accounting automation; strong evidence and reconciliation complement."}
+- {prospect_id: 69, tier: 3, name_as_listed: "Datarails", flag: US, prospect_note: "FP&A for finance teams; potentially useful integration and mid-market distribution channel."}
+- {prospect_id: 70, tier: 3, name_as_listed: "Centage", flag: US, prospect_note: "Budgeting and planning; external assumptions and learning could enhance planning workflows."}
+- {prospect_id: 71, tier: 3, name_as_listed: "Acumatica", flag: US, prospect_note: "Cloud ERP ecosystem; potential access to mid-market operational and financial evidence."}
+- {prospect_id: 72, tier: 3, name_as_listed: "Epicor", flag: US, prospect_note: "Manufacturing and distribution ERP; rich operational/economic exposure use cases."}
+- {prospect_id: 73, tier: 3, name_as_listed: "Plex (Rockwell Automation)", flag: US, prospect_note: "Manufacturing execution and ERP; connect industrial operations to external market signals."}
+- {prospect_id: 74, tier: 3, name_as_listed: "IFS North America", flag: US, prospect_note: "Asset-intensive enterprise software; strong operational decision potential, though globally headquartered."}
+- {prospect_id: 75, tier: 3, name_as_listed: "QAD", flag: US, prospect_note: "Manufacturing and supply-chain ERP; potential for decision intelligence around production and sourcing."}
+- {prospect_id: 76, tier: 4, name_as_listed: "Auvik", flag: CA, prospect_note: "IT network management and MSP channels; potential access to many mid-market customers."}
+- {prospect_id: 77, tier: 4, name_as_listed: "Kaseya", flag: US, prospect_note: "MSP and IT management ecosystem; high distribution leverage, though partnership access may be difficult."}
+- {prospect_id: 78, tier: 4, name_as_listed: "ConnectWise", flag: US, prospect_note: "MSP business operations; opportunity to distribute strategic intelligence across service-provider clients."}
+- {prospect_id: 79, tier: 4, name_as_listed: "N-able", flag: US, prospect_note: "MSP-focused IT management; could help translate operational signals into business priorities."}
+- {prospect_id: 80, tier: 4, name_as_listed: "Datto", flag: US, prospect_note: "SMB data protection ecosystem; potential channel via its parent-company relationships."}
+- {prospect_id: 81, tier: 4, name_as_listed: "Barracuda Networks", flag: US, prospect_note: "Security and data protection; channel reach plus changing cybersecurity economics."}
+- {prospect_id: 82, tier: 4, name_as_listed: "Arctic Wolf Networks' peer, eSentire", flag: CA, prospect_note: "Managed detection and response; Canadian enterprise relationships and executive risk use cases."}
+- {prospect_id: 83, tier: 4, name_as_listed: "Blackpoint Cyber", flag: US, prospect_note: "MSP security ecosystem; potentially more approachable for early partnership discussions."}
+- {prospect_id: 84, tier: 4, name_as_listed: "Red Canary", flag: US, prospect_note: "Threat detection and response; could translate security patterns into business risk decisions."}
+- {prospect_id: 85, tier: 4, name_as_listed: "ReliaQuest", flag: US, prospect_note: "Security operations intelligence; strong fit for decision prioritization and strategic risk reasoning."}
+- {prospect_id: 86, tier: 4, name_as_listed: "Tanium", flag: US, prospect_note: "Endpoint and enterprise asset intelligence; potential operational context layer."}
+- {prospect_id: 87, tier: 4, name_as_listed: "Lansweeper", flag: US, prospect_note: "Technology asset intelligence; useful for company dependency and exposure mapping."}
+- {prospect_id: 88, tier: 4, name_as_listed: "Torq", flag: US, prospect_note: "Security workflow automation; potential bounded-action complement for future V5 capabilities."}
+- {prospect_id: 89, tier: 4, name_as_listed: "Tines", flag: US, prospect_note: "Workflow automation in security and IT; strategic reasoning could feed human-approved execution."}
+- {prospect_id: 90, tier: 4, name_as_listed: "Swimlane", flag: US, prospect_note: "Security automation; connect threat evidence, business materiality and intervention."}
+- {prospect_id: 91, tier: 4, name_as_listed: "Pax8", flag: US, prospect_note: "Cloud marketplace and MSP ecosystem; exceptionally interesting distribution partner."}
+- {prospect_id: 92, tier: 4, name_as_listed: "Sherweb", flag: CA, prospect_note: "Cloud solutions and MSP distribution; potentially accessible Canadian partnership route."}
+- {prospect_id: 93, tier: 4, name_as_listed: "Softchoice", flag: CA, prospect_note: "Enterprise IT advisory and implementation; potential customer introductions and co-selling."}
+- {prospect_id: 94, tier: 4, name_as_listed: "CDW", flag: US, prospect_note: "Enterprise technology distribution and advisory; enormous reach, but a harder early-stage partner."}
+- {prospect_id: 95, tier: 4, name_as_listed: "Presidio", flag: US, prospect_note: "Digital infrastructure, cloud and security services; possible consulting-led distribution."}
+- {prospect_id: 96, tier: 4, name_as_listed: "Trace3", flag: US, prospect_note: "Enterprise IT and data/AI advisory; attractive route to strategy and transformation buyers."}
+- {prospect_id: 97, tier: 4, name_as_listed: "World Wide Technology", flag: US, prospect_note: "Major enterprise technology integrator; substantial upside for demonstrations and co-selling."}
+- {prospect_id: 98, tier: 4, name_as_listed: "Ahead", flag: US, prospect_note: "Cloud, data and digital transformation; potentially strong partner for strategic intelligence pilots."}
+- {prospect_id: 99, tier: 4, name_as_listed: "Onica / Rackspace Technology", flag: US, prospect_note: "Cloud transformation and managed services; potential access to enterprise operating context."}
+- {prospect_id: 100, tier: 4, name_as_listed: "Converge Technology Solutions", flag: CA, prospect_note: "North American IT solutions and advisory ecosystem; strong Canadian relationship opportunity."}

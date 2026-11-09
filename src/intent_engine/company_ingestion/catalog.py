@@ -66,6 +66,7 @@ from typing import List
 from intent_engine.company_ingestion.entities import (
     AUTHORITY_OFFICIAL_PRIMARY,
     AUTHORITY_OFFICIAL_SECONDARY,
+    CorporateStatus,
     EntityProfile,
     OfficialSource,
 )
@@ -1717,6 +1718,28 @@ CATALOG: tuple = (
 )
 
 
+#: The 100-company prospect universe (2026-11-09). Kept in its own generated
+#: module because it is a hundred rows authored by a script from attested
+#: fetches; splicing it here keeps `CATALOG` the one list every reader uses.
+from intent_engine.company_ingestion.catalog_prospects import (  # noqa: E402
+    PROSPECT_CATALOG,
+)
+
+CATALOG = CATALOG + PROSPECT_CATALOG
+
+
+def _status(row: dict):
+    raw = row.get("corporate_status")
+    if not raw:
+        return None
+    return CorporateStatus(
+        state=raw["state"], effective=raw.get("effective", ""),
+        counterparty=raw.get("counterparty", ""),
+        counterparty_domain=raw.get("counterparty_domain", ""),
+        summary=raw.get("summary", ""),
+        evidence=tuple(raw.get("evidence", ())))
+
+
 def _profile(row: dict) -> EntityProfile:
     return EntityProfile(
         entity_id=row["entity_id"],
@@ -1729,8 +1752,12 @@ def _profile(row: dict) -> EntityProfile:
         listings=tuple(row.get("listings", ())),
         sec_relationship=row.get("sec_relationship", ""),
         sec_cik=row.get("sec_cik", ""),
+        parent_entity_id=row.get("parent_entity_id", ""),
         identity_confidence=row.get("identity_confidence", "HIGH"),
         ambiguity_notes=row.get("ambiguity_notes", ""),
+        corporate_status=_status(row),
+        disambiguation_group=row.get("disambiguation_group", ""),
+        retrieval_note=row.get("retrieval_note", ""),
         official_sources=tuple(
             OfficialSource(url, kind, label, authority)
             for (url, kind, label, authority) in row.get("sources", ())),

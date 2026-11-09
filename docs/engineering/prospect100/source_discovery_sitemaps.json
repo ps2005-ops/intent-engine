@@ -1,0 +1,180 @@
+{
+ "9": {
+  "robots": 200,
+  "sitemap": [
+   "https://www.cdata.com/sitemapindex.xml",
+   403
+  ],
+  "accepted": []
+ },
+ "29": {
+  "robots": 200,
+  "sitemap": [
+   "https://altana.ai/sitemap.xml",
+   200
+  ],
+  "accepted": [],
+  "rejected": [
+   [
+    "corporate",
+    "https://altana.ai/about",
+    "too_large",
+    0
+   ],
+   [
+    "segment",
+    "https://altana.ai/platform",
+    "too_large",
+    0
+   ]
+  ]
+ },
+ "34": {
+  "robots": 403,
+  "sitemap": [
+   "https://www.spglobal.com/sitemap.xml",
+   403
+  ],
+  "accepted": []
+ },
+ "36": {
+  "robots": 200,
+  "sitemap": [
+   "https://www.factset.com/sitemap.xml",
+   200
+  ],
+  "accepted": [],
+  "rejected": [
+   [
+    "segment",
+    "https://www.factset.com/solutions",
+    200,
+    63
+   ],
+   [
+    "newsroom",
+    "https://www.factset.com/newsroom",
+    200,
+    46
+   ]
+  ]
+ },
+ "37": {
+  "robots": 200,
+  "sitemap": [
+   "https://www.morningstar.com/content/marketing_sitemap.xml",
+   200
+  ],
+  "accepted": [],
+  "rejected": [
+   [
+    "corporate",
+    "https://www.morningstar.com/company",
+    202,
+    0
+   ]
+  ]
+ },
+ "38": {
+  "robots": 403,
+  "sitemap": [
+   "https://www.enverus.com/sitemap.xml",
+   403
+  ],
+  "accepted": []
+ },
+ "63": {
+  "robots": 403,
+  "sitemap": [
+   "https://gusto.com/sitemap.xml",
+   403
+  ],
+  "accepted": []
+ },
+ "68": {
+  "robots": 200,
+  "sitemap": [
+   "https://www.blackline.com/fr/sitemap.xml",
+   200
+  ],
+  "accepted": [],
+  "rejected": [
+   [
+    "corporate",
+    "https://www.blackline.com/about/",
+    "too_large",
+    0
+   ],
+   [
+    "customers",
+    "https://www.blackline.com/customers/",
+    "too_large",
+    0
+   ]
+  ]
+ },
+ "72": {
+  "robots": 200,
+  "sitemap": [
+   "https://www.epicor.com/en-au/sitemap.xml",
+   403
+  ],
+  "accepted": []
+ },
+ "73": {
+  "robots": 403,
+  "sitemap": [
+   "https://plex.rockwellautomation.com/sitemap.xml",
+   403
+  ],
+  "accepted": []
+ },
+ "74": {
+  "robots": 429,
+  "sitemap": [
+   "https://www.ifs.com/sitemap.xml",
+   "too_large"
+  ],
+  "accepted": []
+ },
+ "79": {
+  "robots": 200,
+  "sitemap": [
+   "https://www.n-able.com/sitemap_index.xml",
+   403
+  ],
+  "accepted": []
+ },
+ "87": {
+  "robots": 200,
+  "sitemap": [
+   "https://www.lansweeper.com/sitemap_index.xml",
+   403
+  ],
+  "accepted": []
+ },
+ "93": {
+  "robots": 200,
+  "sitemap": [
+   "https://www.softchoice.com/sitemap.xml",
+   200
+  ],
+  "accepted": []
+ },
+ "97": {
+  "robots": 200,
+  "sitemap": [
+   "https://www.wwt.com/sitemap.xml",
+   200
+  ],
+  "accepted": [],
+  "rejected": [
+   [
+    "corporate",
+    "https://www.wwt.com/about",
+    "too_large",
+    0
+   ]
+  ]
+ }
+}

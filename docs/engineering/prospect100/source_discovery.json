@@ -1,0 +1,2655 @@
+[
+ {
+  "prospect_id": 1,
+  "host": "hammerspace.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://hammerspace.com/about-us",
+    "text_chars": 10674
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://hammerspace.com/customers",
+    "text_chars": 8404
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 2,
+  "host": "www.weka.io",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "home",
+    "url": "https://www.weka.io",
+    "text_chars": 1694
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.weka.io/product/neuralmesh",
+    "text_chars": 5773
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.weka.io/news/neuralmesh-6-enterprise-agentic-ai",
+    "text_chars": 13787
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 3,
+  "host": "www.reltio.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "home",
+    "url": "https://www.reltio.com",
+    "text_chars": 10518
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.reltio.com/products/agentflow",
+    "text_chars": 12011
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.reltio.com/customers",
+    "text_chars": 8430
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.reltio.com/newsroom",
+    "text_chars": 5880
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 4,
+  "host": "www.ataccama.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.ataccama.com/company",
+    "text_chars": 13614
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.ataccama.com/platform",
+    "text_chars": 8490
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.ataccama.com/customers",
+    "text_chars": 8024
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.ataccama.com/category/news",
+    "text_chars": 7353
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://www.ataccama.com/pricing",
+    "text_chars": 7876
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 5,
+  "host": "www.informatica.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.informatica.com/about-us/news.html",
+    "text_chars": 5318
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.informatica.com/platform/claire-ai.html",
+    "text_chars": 9343
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 6,
+  "host": "www.qlik.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.qlik.com/us/company",
+    "text_chars": 15222
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 7,
+  "host": "www.matillion.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "home",
+    "url": "https://www.matillion.com",
+    "text_chars": 7308
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.matillion.com/solutions",
+    "text_chars": 4571
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.matillion.com/customers",
+    "text_chars": 3805
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.matillion.com/news",
+    "text_chars": 2709
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://www.matillion.com/pricing",
+    "text_chars": 7839
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 8,
+  "host": "www.keboola.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.keboola.com/about/jobs",
+    "text_chars": 7752
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.keboola.com/product/mcp",
+    "text_chars": 10144
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.keboola.com/customer-stories",
+    "text_chars": 8598
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://www.keboola.com/pricing",
+    "text_chars": 9514
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 9,
+  "host": "cdata.com",
+  "home_ok": false,
+  "home_failure": "http_status",
+  "home_status": 403,
+  "accepted": [],
+  "rejected": []
+ },
+ {
+  "prospect_id": 10,
+  "host": "www.precisely.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.precisely.com/about-us",
+    "text_chars": 8276
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.precisely.com/products",
+    "text_chars": 6779
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.precisely.com/resources/customer-stories",
+    "text_chars": 5095
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.precisely.com/newsroom",
+    "text_chars": 5498
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 11,
+  "host": "securiti.ai",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://securiti.ai/about",
+    "text_chars": 18729
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://securiti.ai/products/marketing",
+    "text_chars": 18600
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 12,
+  "host": "www.immuta.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.immuta.com/company",
+    "text_chars": 10798
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.immuta.com/platform/comply",
+    "text_chars": 5781
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.immuta.com/customers",
+    "text_chars": 2995
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.immuta.com/newsroom/media",
+    "text_chars": 10099
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 13,
+  "host": "privacera.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://privacera.com/leadership",
+    "text_chars": 8667
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://privacera.com/customers",
+    "text_chars": 8839
+   }
+  ],
+  "rejected": [
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://privacera.com/platform",
+    "text_chars": 0,
+    "why": "fetch:unsafe_redirect"
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://privacera.com/newsroom",
+    "text_chars": 0,
+    "why": "fetch:unsafe_redirect"
+   }
+  ]
+ },
+ {
+  "prospect_id": 14,
+  "host": "soda.io",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://soda.io/company",
+    "text_chars": 3630
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://soda.io/product/mcp",
+    "text_chars": 6094
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://soda.io/pricing",
+    "text_chars": 8782
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 15,
+  "host": "www.acceldata.io",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.acceldata.io/about-us",
+    "text_chars": 29781
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.acceldata.io/platform",
+    "text_chars": 31035
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.acceldata.io/case-studies",
+    "text_chars": 42318
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.acceldata.io/newsroom",
+    "text_chars": 452215
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://www.acceldata.io/pricing",
+    "text_chars": 27098
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 16,
+  "host": "www.anomalo.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.anomalo.com/about",
+    "text_chars": 6866
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.anomalo.com/platform",
+    "text_chars": 10210
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.anomalo.com/customers",
+    "text_chars": 7857
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.anomalo.com/press",
+    "text_chars": 5688
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 18,
+  "host": "chronosphere.io",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "home",
+    "url": "https://chronosphere.io",
+    "text_chars": 9953
+   }
+  ],
+  "rejected": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://chronosphere.io/about",
+    "text_chars": 9953,
+    "why": "same body as homepage (SPA shell)"
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://chronosphere.io/platform",
+    "text_chars": 0,
+    "why": "fetch:unsafe_redirect"
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://chronosphere.io/newsroom",
+    "text_chars": 0,
+    "why": "fetch:unsafe_redirect"
+   }
+  ]
+ },
+ {
+  "prospect_id": 19,
+  "host": "cratedb.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://cratedb.com/company/team",
+    "text_chars": 1720
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://cratedb.com/press",
+    "text_chars": 3955
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://cratedb.com/pricing",
+    "text_chars": 2899
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 20,
+  "host": "www.singlestore.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.singlestore.com/company",
+    "text_chars": 5418
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.singlestore.com/platform/search",
+    "text_chars": 5736
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://www.singlestore.com/pricing",
+    "text_chars": 7857
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 21,
+  "host": "www.tigergraph.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.tigergraph.com/company",
+    "text_chars": 8175
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.tigergraph.com/product",
+    "text_chars": 10443
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.tigergraph.com/customers",
+    "text_chars": 10725
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.tigergraph.com/press-releases",
+    "text_chars": 6317
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://www.tigergraph.com/pricing",
+    "text_chars": 7866
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 22,
+  "host": "neo4j.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://neo4j.com/company",
+    "text_chars": 11507
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://neo4j.com/product",
+    "text_chars": 11296
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://neo4j.com/customer-stories",
+    "text_chars": 11084
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://neo4j.com/newsroom",
+    "text_chars": 12971
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://neo4j.com/pricing",
+    "text_chars": 37982
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 23,
+  "host": "arango.ai",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://arango.ai/about-us",
+    "text_chars": 7561
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://arango.ai/products",
+    "text_chars": 5390
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://arango.ai/customer-stories",
+    "text_chars": 5971
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://arango.ai/pricing",
+    "text_chars": 9683
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 24,
+  "host": "kx.com",
+  "home_ok": false,
+  "home_failure": "timeout",
+  "home_status": null,
+  "accepted": [],
+  "rejected": []
+ },
+ {
+  "prospect_id": 26,
+  "host": "www.interos.ai",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.interos.ai/about",
+    "text_chars": 22581
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.interos.ai/solutions",
+    "text_chars": 4387
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.interos.ai/press",
+    "text_chars": 2852
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 27,
+  "host": "www.everstream.ai",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.everstream.ai/company/media",
+    "text_chars": 7713
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.everstream.ai/platform/risk-assessment",
+    "text_chars": 9800
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.everstream.ai/insights/case-studies",
+    "text_chars": 4836
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 28,
+  "host": "resilinc.ai",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://resilinc.ai/about",
+    "text_chars": 9276
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://resilinc.ai/platform/enterprise-integrations",
+    "text_chars": 11844
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://resilinc.ai/learning-center/case-studies",
+    "text_chars": 7497
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 29,
+  "host": "altana.ai",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [],
+  "rejected": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://altana.ai/about",
+    "text_chars": 0,
+    "why": "fetch:too_large"
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://altana.ai/platform",
+    "text_chars": 0,
+    "why": "fetch:too_large"
+   }
+  ]
+ },
+ {
+  "prospect_id": 30,
+  "host": "www.exiger.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.exiger.com/about",
+    "text_chars": 6057
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.exiger.com/news",
+    "text_chars": 3659
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 31,
+  "host": "sayari.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://sayari.com/about",
+    "text_chars": 11067
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://sayari.com/platform",
+    "text_chars": 5282
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://sayari.com/resources/case-studies",
+    "text_chars": 5616
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://sayari.com/resources/newsroom",
+    "text_chars": 4451
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 32,
+  "host": "www.kharon.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.kharon.com/about",
+    "text_chars": 25900
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.kharon.com/products/api",
+    "text_chars": 5204
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 33,
+  "host": "www.moodys.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "home",
+    "url": "https://www.moodys.com",
+    "text_chars": 8994
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 34,
+  "host": "spglobal.com",
+  "home_ok": false,
+  "home_failure": "http_status",
+  "home_status": 403,
+  "accepted": [],
+  "rejected": []
+ },
+ {
+  "prospect_id": 35,
+  "host": "www.msci.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.msci.com/discover-msci/about-us",
+    "text_chars": 9425
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.msci.com/solutions/corporate-solutions",
+    "text_chars": 8114
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 36,
+  "host": "www.factset.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [],
+  "rejected": []
+ },
+ {
+  "prospect_id": 37,
+  "host": "morningstar.com",
+  "home_ok": false,
+  "home_failure": "http_status",
+  "home_status": 403,
+  "accepted": [],
+  "rejected": []
+ },
+ {
+  "prospect_id": 38,
+  "host": "enverus.com",
+  "home_ok": false,
+  "home_failure": "connection",
+  "home_status": null,
+  "accepted": [],
+  "rejected": []
+ },
+ {
+  "prospect_id": 39,
+  "host": "rystadenergy.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "home",
+    "url": "https://rystadenergy.com",
+    "text_chars": 5782
+   }
+  ],
+  "rejected": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://rystadenergy.com/about-us",
+    "text_chars": 2196,
+    "why": "left host:www.rystadenergy.com"
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://rystadenergy.com/newsroom",
+    "text_chars": 9599,
+    "why": "left host:www.rystadenergy.com"
+   }
+  ]
+ },
+ {
+  "prospect_id": 40,
+  "host": "www.woodmac.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.woodmac.com/about/overview",
+    "text_chars": 14909
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.woodmac.com/products/training",
+    "text_chars": 11063
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 41,
+  "host": "www.verisk.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.verisk.com/company/about",
+    "text_chars": 23364
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.verisk.com/products",
+    "text_chars": 20382
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.verisk.com/company/newsroom",
+    "text_chars": 21200
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 42,
+  "host": "www.jupiterintel.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.jupiterintel.com/company",
+    "text_chars": 17670
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.jupiterintel.com/products",
+    "text_chars": 8055
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 44,
+  "host": "watershed.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://watershed.com/about-us",
+    "text_chars": 9643
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://watershed.com/platform",
+    "text_chars": 7989
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://watershed.com/customers",
+    "text_chars": 12475
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://watershed.com/news",
+    "text_chars": 6244
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 45,
+  "host": "www.persefoni.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.persefoni.com/company/careers",
+    "text_chars": 5973
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.persefoni.com/solutions/sb-261",
+    "text_chars": 7820
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.persefoni.com/customers",
+    "text_chars": 7935
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://www.persefoni.com/pricing",
+    "text_chars": 15495
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 46,
+  "host": "benchmarkgensuite.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "home",
+    "url": "https://benchmarkgensuite.com",
+    "text_chars": 19410
+   }
+  ],
+  "rejected": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://benchmarkgensuite.com/our-story",
+    "text_chars": 0,
+    "why": "fetch:http_status"
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://benchmarkgensuite.com/solutions",
+    "text_chars": 0,
+    "why": "fetch:http_status"
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://benchmarkgensuite.com/case-studies",
+    "text_chars": 0,
+    "why": "fetch:http_status"
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://benchmarkgensuite.com/news",
+    "text_chars": 0,
+    "why": "fetch:timeout"
+   }
+  ]
+ },
+ {
+  "prospect_id": 47,
+  "host": "www.cority.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.cority.com/our-story",
+    "text_chars": 9043
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.cority.com/news",
+    "text_chars": 10685
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 48,
+  "host": "www.assent.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.assent.com/company/careers",
+    "text_chars": 17523
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.assent.com/capabilities/platform",
+    "text_chars": 16914
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.assent.com/newsroom",
+    "text_chars": 18279
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 49,
+  "host": "ecovadis.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://ecovadis.com/about-us",
+    "text_chars": 8124
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://ecovadis.com/solutions/iq",
+    "text_chars": 8754
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 50,
+  "host": "www.dnb.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "home",
+    "url": "https://www.dnb.com",
+    "text_chars": 4981
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 51,
+  "host": "planful.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://planful.com/about-us",
+    "text_chars": 10462
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://planful.com/platform",
+    "text_chars": 5009
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://planful.com/customer-stories",
+    "text_chars": 4038
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://planful.com/newsroom",
+    "text_chars": 5180
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 52,
+  "host": "www.venasolutions.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.venasolutions.com/about-us",
+    "text_chars": 5140
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.venasolutions.com/platform/microsoft",
+    "text_chars": 6179
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.venasolutions.com/customer-stories",
+    "text_chars": 21604
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.venasolutions.com/newsroom",
+    "text_chars": 767884
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://www.venasolutions.com/resources/pricing",
+    "text_chars": 6147
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 53,
+  "host": "www.cubesoftware.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.cubesoftware.com/about",
+    "text_chars": 9794
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.cubesoftware.com/customers",
+    "text_chars": 8623
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.cubesoftware.com/news",
+    "text_chars": 28610
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://www.cubesoftware.com/pricing",
+    "text_chars": 9827
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 55,
+  "host": "www.getaleph.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.getaleph.com/about-us",
+    "text_chars": 2246
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.getaleph.com/platform/ai",
+    "text_chars": 3084
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.getaleph.com/customers",
+    "text_chars": 4804
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 56,
+  "host": "www.pigment.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.pigment.com/about-us",
+    "text_chars": 5285
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.pigment.com/platform",
+    "text_chars": 17677
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.pigment.com/customers/portraits-podcast",
+    "text_chars": 9434
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.pigment.com/newsroom",
+    "text_chars": 11570
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 57,
+  "host": "www.anaplan.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.anaplan.com/about",
+    "text_chars": 13507
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.anaplan.com/platform",
+    "text_chars": 19790
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.anaplan.com/customers",
+    "text_chars": 13367
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.anaplan.com/news",
+    "text_chars": 12246
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 58,
+  "host": "www.workday.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "home",
+    "url": "https://www.workday.com",
+    "text_chars": 7435
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 59,
+  "host": "www.dayforce.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.dayforce.com/who-we-are/events",
+    "text_chars": 2503
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.dayforce.com/why-dayforce/customer-stories",
+    "text_chars": 13913
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.dayforce.com/who-we-are/newsroom",
+    "text_chars": 2525
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 60,
+  "host": "www.paycor.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.paycor.com/company",
+    "text_chars": 18051
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 61,
+  "host": "www.rippling.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.rippling.com/about",
+    "text_chars": 6151
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.rippling.com/platform",
+    "text_chars": 5716
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.rippling.com/company/newsroom",
+    "text_chars": 5508
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://www.rippling.com/pricing",
+    "text_chars": 22719
+   }
+  ],
+  "rejected": [
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.rippling.com/customers",
+    "text_chars": 0,
+    "why": "fetch:too_large"
+   }
+  ]
+ },
+ {
+  "prospect_id": 62,
+  "host": "www.deel.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.deel.com/about",
+    "text_chars": 6009
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.deel.com/solutions",
+    "text_chars": 10566
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.deel.com/case-studies",
+    "text_chars": 3309
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.deel.com/press",
+    "text_chars": 3174
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://www.deel.com/pricing",
+    "text_chars": 7189
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 63,
+  "host": "gusto.com",
+  "home_ok": false,
+  "home_failure": "http_status",
+  "home_status": 403,
+  "accepted": [],
+  "rejected": []
+ },
+ {
+  "prospect_id": 64,
+  "host": "ramp.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://ramp.com/about-us",
+    "text_chars": 14610
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://ramp.com/platform",
+    "text_chars": 12999
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://ramp.com/customers",
+    "text_chars": 14278
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://ramp.com/pricing",
+    "text_chars": 31461
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 65,
+  "host": "brex.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "home",
+    "url": "https://brex.com",
+    "text_chars": 10846
+   }
+  ],
+  "rejected": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://brex.com/about",
+    "text_chars": 5290,
+    "why": "left host:www.brex.com"
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://brex.com/platform/budgets",
+    "text_chars": 6046,
+    "why": "left host:www.brex.com"
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://brex.com/customers",
+    "text_chars": 11252,
+    "why": "left host:www.brex.com"
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://brex.com/journal/press",
+    "text_chars": 3097,
+    "why": "left host:www.brex.com"
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://brex.com/pricing",
+    "text_chars": 7568,
+    "why": "left host:www.brex.com"
+   }
+  ]
+ },
+ {
+  "prospect_id": 66,
+  "host": "www.bill.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.bill.com/about-us",
+    "text_chars": 16466
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.bill.com/product",
+    "text_chars": 10937
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.bill.com/newsroom",
+    "text_chars": 10403
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://www.bill.com/product/pricing",
+    "text_chars": 41143
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 67,
+  "host": "www.floqast.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.floqast.com/company/leadership",
+    "text_chars": 10330
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.floqast.com/press",
+    "text_chars": 23540
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://www.floqast.com/pricing",
+    "text_chars": 6714
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 68,
+  "host": "www.blackline.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [],
+  "rejected": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.blackline.com/about",
+    "text_chars": 0,
+    "why": "fetch:too_large"
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.blackline.com/products/studio360",
+    "text_chars": 0,
+    "why": "fetch:too_large"
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.blackline.com/customers",
+    "text_chars": 0,
+    "why": "fetch:too_large"
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.blackline.com/about/press-releases",
+    "text_chars": 0,
+    "why": "fetch:too_large"
+   }
+  ]
+ },
+ {
+  "prospect_id": 69,
+  "host": "www.datarails.com",
+  "home_ok": false,
+  "home_failure": "http_status",
+  "home_status": 403,
+  "accepted": [],
+  "rejected": []
+ },
+ {
+  "prospect_id": 70,
+  "host": "www.centage.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.centage.com/about-us/contact",
+    "text_chars": 4180
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.centage.com/product/advisors",
+    "text_chars": 5759
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.centage.com/resources/case-studies",
+    "text_chars": 4791
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://www.centage.com/pricing",
+    "text_chars": 15259
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 71,
+  "host": "www.acumatica.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.acumatica.com/about-us",
+    "text_chars": 9494
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.acumatica.com/success-stories",
+    "text_chars": 6510
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://www.acumatica.com/pricing",
+    "text_chars": 5790
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 72,
+  "host": "epicor.com",
+  "home_ok": false,
+  "home_failure": "http_status",
+  "home_status": 403,
+  "accepted": [],
+  "rejected": []
+ },
+ {
+  "prospect_id": 73,
+  "host": "plex.rockwellautomation.com",
+  "home_ok": false,
+  "home_failure": "http_status",
+  "home_status": 403,
+  "accepted": [],
+  "rejected": []
+ },
+ {
+  "prospect_id": 74,
+  "host": "ifs.com",
+  "home_ok": false,
+  "home_failure": "http_status",
+  "home_status": 429,
+  "accepted": [],
+  "rejected": []
+ },
+ {
+  "prospect_id": 75,
+  "host": "www.qad.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.qad.com/about",
+    "text_chars": 14946
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.qad.com/solutions/adaptive-erp",
+    "text_chars": 3810
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.qad.com/resources/customers",
+    "text_chars": 42329
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.qad.com/about/news",
+    "text_chars": 6883
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 76,
+  "host": "www.auvik.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.auvik.com/about",
+    "text_chars": 40897
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.auvik.com/case-studies",
+    "text_chars": 7918
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://www.auvik.com/pricing",
+    "text_chars": 1172
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 77,
+  "host": "www.kaseya.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.kaseya.com/company",
+    "text_chars": 8869
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.kaseya.com/platform",
+    "text_chars": 10700
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.kaseya.com/case-studies",
+    "text_chars": 5789
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://www.kaseya.com/request/pricing",
+    "text_chars": 5906
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 78,
+  "host": "www.connectwise.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.connectwise.com/company/about-us",
+    "text_chars": 5977
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.connectwise.com/platform",
+    "text_chars": 7613
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.connectwise.com/case-studies",
+    "text_chars": 5554
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 79,
+  "host": "n-able.com",
+  "home_ok": false,
+  "home_failure": "http_status",
+  "home_status": 403,
+  "accepted": [],
+  "rejected": []
+ },
+ {
+  "prospect_id": 80,
+  "host": "www.datto.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.datto.com/about",
+    "text_chars": 8219
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.datto.com/products",
+    "text_chars": 8839
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.datto.com/case-studies",
+    "text_chars": 5345
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.datto.com/news",
+    "text_chars": 4602
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://www.datto.com/pricing",
+    "text_chars": 3905
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 81,
+  "host": "www.barracuda.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "home",
+    "url": "https://www.barracuda.com",
+    "text_chars": 14562
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 82,
+  "host": "www.esentire.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.esentire.com/company/about-us",
+    "text_chars": 17912
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.esentire.com/company/newsroom",
+    "text_chars": 9155
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 83,
+  "host": "blackpointcyber.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://blackpointcyber.com/company",
+    "text_chars": 8355
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://blackpointcyber.com/platform",
+    "text_chars": 12587
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://blackpointcyber.com/company/success-stories",
+    "text_chars": 6668
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 85,
+  "host": "reliaquest.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://reliaquest.com/about-us",
+    "text_chars": 22410
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://reliaquest.com/solutions",
+    "text_chars": 5875
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://reliaquest.com/resources/customer-stories",
+    "text_chars": 6974
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 86,
+  "host": "tanium.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "home",
+    "url": "https://tanium.com",
+    "text_chars": 5281
+   }
+  ],
+  "rejected": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://tanium.com/about",
+    "text_chars": 4110,
+    "why": "left host:www.tanium.com"
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://tanium.com/platform",
+    "text_chars": 4811,
+    "why": "left host:www.tanium.com"
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://tanium.com/customers/sap",
+    "text_chars": 3894,
+    "why": "left host:www.tanium.com"
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://tanium.com/newsroom",
+    "text_chars": 10804,
+    "why": "left host:www.tanium.com"
+   }
+  ]
+ },
+ {
+  "prospect_id": 87,
+  "host": "lansweeper.com",
+  "home_ok": false,
+  "home_failure": "http_status",
+  "home_status": 403,
+  "accepted": [],
+  "rejected": []
+ },
+ {
+  "prospect_id": 88,
+  "host": "torq.io",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://torq.io/company",
+    "text_chars": 4764
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://torq.io/customers",
+    "text_chars": 5548
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://torq.io/news",
+    "text_chars": 50211
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 89,
+  "host": "tines.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "home",
+    "url": "https://tines.com",
+    "text_chars": 3769
+   }
+  ],
+  "rejected": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://tines.com/about",
+    "text_chars": 2914,
+    "why": "left host:www.tines.com"
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://tines.com/solutions",
+    "text_chars": 2978,
+    "why": "left host:www.tines.com"
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://tines.com/customers",
+    "text_chars": 4890,
+    "why": "left host:www.tines.com"
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://tines.com/newsroom",
+    "text_chars": 8051,
+    "why": "left host:www.tines.com"
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://tines.com/pricing",
+    "text_chars": 2285,
+    "why": "left host:www.tines.com"
+   }
+  ]
+ },
+ {
+  "prospect_id": 90,
+  "host": "swimlane.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://swimlane.com/about",
+    "text_chars": 18922
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://swimlane.com/platform/ai",
+    "text_chars": 12948
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://swimlane.com/customers",
+    "text_chars": 12416
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://swimlane.com/news",
+    "text_chars": 5129
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 91,
+  "host": "www.pax8.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.pax8.com/en-ca/about",
+    "text_chars": 6160
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.pax8.com/en-ca/case-studies",
+    "text_chars": 4464
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.pax8.com/en-ca/news",
+    "text_chars": 9030
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 92,
+  "host": "www.sherweb.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.sherweb.com/about",
+    "text_chars": 4954
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.sherweb.com/platform/msp-client-platform",
+    "text_chars": 3812
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.sherweb.com/about/newsroom",
+    "text_chars": 93793
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 93,
+  "host": "www.softchoice.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [],
+  "rejected": []
+ },
+ {
+  "prospect_id": 94,
+  "host": "www.cdw.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "home",
+    "url": "https://www.cdw.com",
+    "text_chars": 9508
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 95,
+  "host": "www.presidio.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.presidio.com/who-we-are/newsroom-press",
+    "text_chars": 46763
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.presidio.com/learn-from-us/case-studies",
+    "text_chars": 16097
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 96,
+  "host": "www.trace3.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.trace3.com/about-us",
+    "text_chars": 3994
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.trace3.com/news",
+    "text_chars": 4994
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 97,
+  "host": "wwt.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [],
+  "rejected": []
+ },
+ {
+  "prospect_id": 98,
+  "host": "www.ahead.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.ahead.com/leadership",
+    "text_chars": 4730
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.ahead.com/news",
+    "text_chars": 2927
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 99,
+  "host": "www.rackspace.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.rackspace.com/about",
+    "text_chars": 12813
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.rackspace.com/case-studies",
+    "text_chars": 6536
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.rackspace.com/newsroom",
+    "text_chars": 3123
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 100,
+  "host": "pellera.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://pellera.com/about-us",
+    "text_chars": 3785
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://pellera.com/solutions",
+    "text_chars": 3966
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://pellera.com/case-studies",
+    "text_chars": 3541
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://pellera.com/news",
+    "text_chars": 5742
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 1001,
+  "host": "observe.ai",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "home",
+    "url": "https://observe.ai",
+    "text_chars": 12115
+   }
+  ],
+  "rejected": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://observe.ai/about-us",
+    "text_chars": 6325,
+    "why": "left host:www.observe.ai"
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://observe.ai/platform/cobuilder",
+    "text_chars": 7725,
+    "why": "left host:www.observe.ai"
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://observe.ai/customers",
+    "text_chars": 8905,
+    "why": "left host:www.observe.ai"
+   }
+  ]
+ },
+ {
+  "prospect_id": 1002,
+  "host": "cube.dev",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://cube.dev/about",
+    "text_chars": 2412
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://cube.dev/product/data-modeling",
+    "text_chars": 4994
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://cube.dev/case-studies",
+    "text_chars": 2792
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://cube.dev/pricing",
+    "text_chars": 6098
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 1003,
+  "host": "convergetp.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://convergetp.com/about-us",
+    "text_chars": 5307
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://convergetp.com/solutions",
+    "text_chars": 3739
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://convergetp.com/case-studies",
+    "text_chars": 2574
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://convergetp.com/insights/press-releases",
+    "text_chars": 5167
+   }
+  ],
+  "rejected": []
+ }
+]

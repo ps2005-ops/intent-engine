@@ -107,16 +107,26 @@ SCRIPT = """
     ['id','cik','tk','dm','ct','ok'].forEach(function(k){set(k,'');});
     if(picked){picked.hidden=true; picked.innerHTML='';}
   }
+  // A legal name that shares nothing with the name people use ("People
+  // Center, Inc." is Rippling) cannot be recognised in a list, so the common
+  // name rides beside it -- the rule result pages already apply.
+  function shown(row){
+    var legal=row.legal_name||'', cn=(row.common_name||'').trim();
+    var head=cn.toLowerCase().split(' ')[0];
+    if(cn && head && legal.toLowerCase().indexOf(head)<0){
+      return legal+' ('+cn+')';}
+    return legal;
+  }
   function confirm(row){
     set('id',row.entity_id); set('cik',row.cik); set('tk',row.ticker);
     set('dm',row.domain); set('ct',row.country); set('ok',row.legal_name);
     input.value = row.legal_name;
     if(picked){
-      var bits=[row.ticker,row.country,row.domain].filter(Boolean).join(' \\u00b7 ');
+      var bits=[row.status,row.ticker,row.country,row.domain].filter(Boolean).join(' \\u00b7 ');
       picked.innerHTML='';
       var s=document.createElement('span');
       s.innerHTML='Analysing <b></b>';
-      s.querySelector('b').textContent=row.legal_name;
+      s.querySelector('b').textContent=shown(row);
       picked.appendChild(s);
       if(bits){var m=document.createElement('span');
         m.className='dsc'; m.textContent=bits; picked.appendChild(m);}
@@ -147,7 +157,7 @@ SCRIPT = """
       li.id='cbo'+i; li.setAttribute('role','option');
       li.setAttribute('aria-selected','false');
       var nm=document.createElement('span'); nm.className='nm';
-      nm.textContent=row.legal_name; li.appendChild(nm);
+      nm.textContent=shown(row); li.appendChild(nm);
       if(row.describe){var d=document.createElement('span');
         d.className='dsc'; d.textContent=row.describe; li.appendChild(d);}
       li.addEventListener('mousedown',function(ev){

@@ -180,8 +180,19 @@ def test_every_registry_entity_is_internally_consistent(entity_id):
     profile = resolve_choice(entity_id).profile
     assert profile.legal_name and profile.common_name and profile.country
     assert profile.primary_domain
-    assert profile.official_sources, "an entity with no official source " \
-                                     "cannot help a blocked run"
+    # An entry with no official source is allowed ONLY when it says why, in
+    # one of two auditable ways: it never opens a run (absorbed or closed),
+    # or the measured refusal is recorded. Silence is still a failure.
+    status = getattr(profile, "corporate_status", None)
+    never_runs = status is not None and status.stops_entry
+    refusal = str(getattr(profile, "retrieval_note", "") or "").strip()
+    assert profile.official_sources or never_runs or refusal, (
+        "an entity with no official source cannot help a blocked run, and "
+        "this one records neither a stopping status nor a measured refusal")
+    if never_runs:
+        assert not profile.official_sources, (
+            "an entity that never opens a run must not carry sources a run "
+            "would read")
     if profile.parent_entity_id:
         assert resolve_choice(profile.parent_entity_id).status == RESOLVED
     for source in profile.official_sources:

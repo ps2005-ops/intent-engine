@@ -53,9 +53,15 @@ AMBIGUOUS_COMPANY = "AMBIGUOUS_COMPANY"
 #: retrieval at somebody else's website. So the truthful state is "we know
 #: exactly who this is, and we need the one thing we do not have".
 IDENTIFIED_NO_DOMAIN = "IDENTIFIED_NO_DOMAIN"
+#: The company was identified with certainty AND no longer publishes as
+#: itself -- it was absorbed by an acquirer or stopped trading. Not resolved:
+#: opening a run would read the acquirer's pages under this company's name,
+#: or read nothing and report a company that "publishes nothing". The entry
+#: page says what happened and offers the company it now belongs to.
+NO_LONGER_INDEPENDENT = "NO_LONGER_INDEPENDENT"
 COMPANY_NOT_FOUND = "COMPANY_NOT_FOUND"
 STATES = (EXACT_MATCH, HIGH_CONFIDENCE_MATCH, AMBIGUOUS_COMPANY,
-          IDENTIFIED_NO_DOMAIN, COMPANY_NOT_FOUND)
+          IDENTIFIED_NO_DOMAIN, NO_LONGER_INDEPENDENT, COMPANY_NOT_FOUND)
 
 
 class NameEntry:
@@ -63,11 +69,11 @@ class NameEntry:
 
     __slots__ = ("state", "company_name", "website", "company_id", "ticker",
                  "country", "sector", "public_private", "choices", "reason",
-                 "source")
+                 "source", "corporate_status")
 
     def __init__(self, state, *, company_name="", website="", company_id="",
                  ticker="", country="", sector="", public_private="",
-                 choices=(), reason="", source=""):
+                 choices=(), reason="", source="", corporate_status=None):
         self.state = state
         self.company_name = company_name
         self.website = website
@@ -79,6 +85,8 @@ class NameEntry:
         self.choices = tuple(choices)
         self.reason = reason
         self.source = source
+        #: CorporateStatus.as_dict() when a curated source records one.
+        self.corporate_status = corporate_status
 
     @property
     def resolved(self) -> bool:
@@ -91,6 +99,7 @@ class NameEntry:
                 "country": self.country, "sector": self.sector,
                 "public_private": self.public_private,
                 "reason": self.reason, "source": self.source,
+                "corporate_status": self.corporate_status,
                 "choices": list(self.choices)}
 
 
@@ -230,6 +239,23 @@ technologies technology solutions systems software labs
 """.split())
 
 
+def _names_the_filer(typed: str, title) -> bool:
+    """Does the typed name NAME this registrant, by a stated rule?
+
+    Exact (legal form aside) or the leading words of the title -- "FactSet"
+    names "FACTSET RESEARCH SYSTEMS INC". A word in the middle of the title
+    does not: "World Wide Technology" is not "Wolverine World Wide".
+    """
+    import re as _re
+    from intent_engine.company_ingestion.suggest import identity_key
+    clean = _re.sub(r"\s*/[A-Za-z]{2}/?$", "", str(title or "")).strip()
+    typed_key = identity_key(typed).split()
+    title_key = identity_key(clean).split()
+    if not typed_key or not title_key:
+        return False
+    return title_key[:len(typed_key)] == typed_key
+
+
 def resolve(company_name: str = "", website: str = "", *,
             allow_registrant: bool = False, transport=None,
             resolver=None) -> NameEntry:
@@ -255,12 +281,22 @@ def resolve(company_name: str = "", website: str = "", *,
             reason=entity.reason, source="entity registry")
     if entity.resolved:
         profile = entity.profile
+        status = getattr(profile, "corporate_status", None)
+        if status is not None and status.stops_entry:
+            return NameEntry(
+                NO_LONGER_INDEPENDENT, company_name=_recognisable(profile),
+                website=f"https://{profile.primary_domain}",
+                company_id=profile.entity_id,
+                country=getattr(profile, "country", ""),
+                reason=status.summary, source="entity registry",
+                corporate_status=status.as_dict())
         return NameEntry(
             EXACT_MATCH, company_name=_recognisable(profile),
             website=website or f"https://{profile.primary_domain}",
             country=getattr(profile, "country", ""),
             reason="matched the curated entity registry",
-            source="entity registry")
+            source="entity registry",
+            corporate_status=status.as_dict() if status else None)
 
     # A website the registry does not know is still a usable identity: the
     # user named the company by the strongest identifier there is.
@@ -315,6 +351,20 @@ def resolve(company_name: str = "", website: str = "", *,
     # of those are worth more than breadth when a source has them.
     filer = _registrant(company_name, allow_registrant,
                         transport=transport, resolver=resolver)
+    if filer and not _names_the_filer(company_name, filer.get("title")):
+        # THE REGULATOR'S MATCH WAS CONTAINMENT, NOT NAMING.
+        #
+        # MEASURED 2026-11-09 on the 100-company prospect list:
+        # `resolve_cik` accepts a filer when the typed words appear ANYWHERE
+        # in its title, and IDENTIFIED_NO_DOMAIN opens a run on that CIK at
+        # once. So "World Wide Technology" opened an analysis of Wolverine
+        # World Wide's filings and "Soda" one of Jones Soda Co.'s -- each a
+        # confident report about a company nobody asked for, and each spent
+        # one of the visitor's analyses. A filer is identified only when the
+        # typed name IS its name, or the leading words of it -- the same two
+        # stated rules the manifest path uses. Anything looser is a
+        # suggestion for a person to confirm, never an identity.
+        filer = None
     if filer:
         # EDGAR titles carry filing-index artifacts -- "TOYOTA MOTOR CORP/"
         # ends in a slash because the index path did. Strip ONLY the slash:

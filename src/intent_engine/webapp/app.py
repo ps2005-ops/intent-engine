@@ -2399,6 +2399,13 @@ class WebApp:
             if entry.resolved:
                 company_name = entry.company_name
                 website = entry.website
+            elif entry.state == _NE.NO_LONGER_INDEPENDENT:
+                # ABSORBED OR CLOSED. Asking costs nothing and answers the
+                # question truthfully; a run would read the acquirer's pages
+                # under this company's name. No run is opened, so nothing is
+                # spent.
+                self._release_demo_quota(session, remote, _reserved)
+                return self._corporate_status_page(session, entry)
             elif entry.state == _NE.IDENTIFIED_NO_DOMAIN:
                 # A FILER IS ANALYSABLE WITHOUT A WEBSITE. The regulator
                 # records no domain, and guessing one would send retrieval at
@@ -2483,6 +2490,28 @@ class WebApp:
                     company_name = resolution.profile.legal_name
                 if not company_name:
                     company_name = name_from_domain(website)
+            # THE LAST DOOR BEFORE A RUN, FOR EVERY ROUTE IN.
+            #
+            # A typed name is stopped in the name-entry branch above, but a
+            # picked suggestion posts an entity id and a typed website posts
+            # a domain, and both skip that branch. Each of them still arrives
+            # here with the website the run would open on, so the curated
+            # status is checked against THAT -- once, at the one place every
+            # real run passes through.
+            if website:
+                held = resolve_entity(company_name="", website=website)
+                status = (getattr(held.profile, "corporate_status", None)
+                          if held.resolved else None)
+                if status is not None and status.stops_entry:
+                    from intent_engine.company_ingestion import (
+                        name_entry as _NE2)
+                    self._release_demo_quota(session, remote, _reserved)
+                    return self._corporate_status_page(session, _NE2.NameEntry(
+                        _NE2.NO_LONGER_INDEPENDENT,
+                        company_name=held.profile.legal_name,
+                        website=website, company_id=held.profile.entity_id,
+                        reason=status.summary, source="entity registry",
+                        corporate_status=status.as_dict()))
             # REAL company path: validate → discover → source approval.
             try:
                 run = self.ci.create_run(
@@ -2688,6 +2717,77 @@ class WebApp:
             f'different products, results and risks, so the answer depends '
             f'on which one you want.</p>{cards}'
             f'<p><a href="/">Start over with a different company</a></p>'
+            f'</main></body></html>')
+        return self._html(body)
+
+    def _corporate_status_page(self, session, entry):
+        """A company that no longer publishes as itself, said plainly.
+
+        Absorbed by an acquirer or no longer trading. Either way the honest
+        answer is a sentence and a date, not an analysis: there is no
+        independent publishing surface left, and a run would read the
+        acquirer's pages under this company's name. The page names what
+        happened, links the announcement, and -- for an acquisition --
+        offers the company it now belongs to as the analysable subject.
+        """
+        csrf = session["csrf"] if session else ""
+        st = getattr(entry, "corporate_status", None) or {}
+        from intent_engine.company_ingestion.suggest import _common
+
+        def plain(legal):
+            # "Red Canary, Inc.'s name" reads as a filing; prose uses the
+            # name a person says. The legal name stays in the heading.
+            return _common(legal) or legal
+        legal_name = _e(entry.company_name)
+        name = _e(plain(entry.company_name))
+        cp_legal = str(st.get("counterparty") or "")
+        cp = plain(cp_legal)
+        cp_domain = str(st.get("counterparty_domain") or "")
+        absorbed = st.get("state") == "ACQUIRED_ABSORBED"
+        heading = (f"{legal_name} is now part of {_e(cp)}" if absorbed and cp
+                   else f"{legal_name} no longer operates as a separate "
+                        f"company")
+        when = str(st.get("effective") or "")
+        try:
+            import datetime as _dt
+            if len(when) == 10:
+                d = _dt.date.fromisoformat(when)
+                when = f"{d.day} {d.strftime('%B %Y')}"
+            elif len(when) == 7:
+                when = _dt.date.fromisoformat(when + "-01").strftime("%B %Y")
+        except ValueError:
+            pass
+        evidence = "".join(
+            f'<li><a href="{_e(u)}" rel="noopener noreferrer">'
+            f'{_e(u.split("/")[2] if u.count("/") >= 2 else u)}</a></li>'
+            for u in (st.get("evidence") or ()))
+        offer = ""
+        if absorbed and cp and cp_domain:
+            offer = (
+                f'<form action="/analyze" method="post" class="analyze">'
+                f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+                f'<input type="hidden" name="consent" value="1">'
+                f'<input type="hidden" name="company_name" value="{_e(cp)}">'
+                f'<input type="hidden" name="website" '
+                f'value="https://{_e(cp_domain)}">'
+                f'<button type="submit">Analyse {_e(cp)} instead</button>'
+                f'</form>')
+        body = (
+            f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            f'<meta name="viewport" content="width=device-width,'
+            f'initial-scale=1"><title>{heading}</title>'
+            f'</head><body>{self._nav(session, csrf)}'
+            f'<main class="notice"><h1>{heading}</h1>'
+            f'<p>{_e(entry.reason)}.'
+            f'{f" Date of record: {_e(when)}." if when else ""}</p>'
+            f'<p>We have not opened an analysis. {name} no longer publishes '
+            f'as itself, so an analysis now would read '
+            f'{_e(cp) + "&rsquo;s" if cp else "another company&rsquo;s"} '
+            f'pages under {name}&rsquo;s name. Nothing was fetched and no '
+            f'analysis credit was used.</p>'
+            f'{f"<p>Announcement:</p><ul>{evidence}</ul>" if evidence else ""}'
+            f'{offer}'
+            f'<p><a href="/demo">Choose a different company</a></p>'
             f'</main></body></html>')
         return self._html(body)
 
