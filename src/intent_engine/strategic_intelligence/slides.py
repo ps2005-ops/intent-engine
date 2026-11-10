@@ -136,7 +136,12 @@ def _cap(bullets):
     bullet is the product speaking, and a quotation is indistinguishable from
     an assertion once it is on a slide in front of a room.
     """
-    bullets = [b for b in (bullets or ()) if (b or {}).get("text", "").strip()]
+    # A BARE STRING IS A BULLET. `belief_slides` has always passed strings,
+    # and the moment runs began forming market beliefs (prospect-100 pass 4,
+    # once independent reporting arrived) /slides answered 500 on 8 of 95.
+    bullets = [_bullet(b) if isinstance(b, str) else b
+               for b in (bullets or ())]
+    bullets = [b for b in bullets if (b or {}).get("text", "").strip()]
     kept = deduplicate(meaningful_items(bullets, key="text"), key="text")
     kept = [b for b in kept if not addresses_the_system(b.get("text", ""))]
     out, spent = [], 0

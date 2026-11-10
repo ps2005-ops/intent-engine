@@ -332,3 +332,32 @@ def test_a_wikipedia_reference_must_be_a_dated_article():
     assert out is None
     assert report["rejection_reasons"]["REFERENCE_NOT_A_DATED_ARTICLE"] == 1
     assert IR._NOT_REPORTING.search("catalogue.bnf.fr.")
+
+
+def test_a_quoted_verdict_leaves_a_competitor_card_out_not_the_run():
+    """Live (pass 4): a competitor claim quoting "is broken" made the
+    competitors section raise and the conversation endpoint answer 500."""
+    from intent_engine.founder_intelligence import perspective as P
+    from intent_engine.founder_intelligence.records import AVAIL_SUPPORTED
+
+    class _C:
+        def __init__(self, cid, text):
+            self.claim_id, self.text = cid, text
+            self.availability, self.confidence = AVAIL_SUPPORTED, "MEDIUM"
+
+        def validate(self):
+            return None
+    section = P.assemble_competitors(True, claims=[
+        _C("a", "Analysts say the incumbent's pricing model is broken."),
+        _C("b", "Rival Co sells to the same data teams.")])
+    heads = [c.headline for c in section.cards]
+    assert heads == ["Rival Co sells to the same data teams."]
+
+
+def test_a_slide_given_bare_strings_renders():
+    """belief_slides passes strings; /slides answered 500 on 8 of 95."""
+    from intent_engine.strategic_intelligence import slides as S
+    slide = S._slide("market_believes", "What the market believes",
+                     ["The market expects growth to slow.", "Basis: prices."])
+    assert [b["text"] for b in slide["bullets"]][:1] == [
+        "The market expects growth to slow."]
