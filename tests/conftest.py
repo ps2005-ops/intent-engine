@@ -47,3 +47,13 @@ def _await_async_analysis(monkeypatch):
 
     monkeypatch.setattr(WebApp, "__call__", waiting_call)
     yield
+
+
+@pytest.fixture(autouse=True)
+def _no_live_independent_reporting(monkeypatch):
+    """No test reaches a live publisher. A test that exercises the channel
+    injects its own fake web (see test_independent_reporting.py)."""
+    from intent_engine.company_ingestion.service import CompanyIngestionService
+    monkeypatch.setattr(CompanyIngestionService,
+                        "INDEPENDENT_REPORTING_LIVE", False)
+    yield

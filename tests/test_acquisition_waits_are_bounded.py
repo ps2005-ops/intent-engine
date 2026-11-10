@@ -142,9 +142,12 @@ def test_both_optional_discovery_branches_are_capped():
     # branch a run cannot do without, so capping it at an optional branch's
     # share would drop required evidence to save time. The cap is about what
     # the product can live without, not about which calls happen to be joins.
+    # The independent-reporting branch (trade-press articles) is optional in
+    # the same sense as the filing search: the run stands without it.
     optional = [c for c in sites
-                if "sitemap" in c or "third_party" in c or "third-party" in c]
-    assert len(optional) >= 2, (
+                if "sitemap" in c or "third_party" in c or "third-party" in c
+                or "reporting" in c]
+    assert len(optional) >= 3, (
         "the optional branches are no longer identifiable in this gate")
     uncapped = [c for c in optional if "cap_s=" not in c]
     assert not uncapped, (
