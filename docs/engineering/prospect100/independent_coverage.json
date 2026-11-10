@@ -1,0 +1,3684 @@
+{
+ "summary": {
+  "measured": "2026-11-09, discovery + verified retrieval, no analysis",
+  "companies_without_independent_evidence_before": 85,
+  "now_with_at_least_one_independent_origin": 53,
+  "now_with_two_or_more": 20,
+  "independent_articles_total": 247,
+  "by_tier": {
+   "T1": 13,
+   "T2": 10,
+   "T3": 13,
+   "T4": 17
+  },
+  "publishers": [
+   "BetaKit",
+   "Channel Insider",
+   "Help Net Security",
+   "SiliconANGLE",
+   "StorageReview",
+   "ZDNET",
+   "amplify.la",
+   "appdevelopermagazine.com",
+   "catalogue.bnf.fr",
+   "e2btek.com",
+   "finance.yahoo.com",
+   "fortune.com",
+   "labusinessjournal.com",
+   "nypost.com",
+   "oakhill.com",
+   "pv-magazine-usa.com",
+   "sdtimes.com",
+   "techcrunch.com",
+   "thenextweb.com",
+   "www.accountingtoday.com",
+   "www.afr.com",
+   "www.builtinla.com",
+   "www.cmswire.com",
+   "www.cnbc.com",
+   "www.courant.com",
+   "www.cpapracticeadvisor.com",
+   "www.crn.com",
+   "www.ctinsider.com",
+   "www.erpsoftwareblog.com",
+   "www.expressnews.com",
+   "www.financial-planning.com",
+   "www.fool.com",
+   "www.ftc.gov",
+   "www.idref.fr",
+   "www.iteuropa.com",
+   "www.loc.gov",
+   "www.news4jax.com",
+   "www.offshore-mag.com",
+   "www.pbs.org",
+   "www.pymnts.com",
+   "www.scribd.com",
+   "www.seattletimes.com",
+   "www.socaltech.com",
+   "www.techtarget.com",
+   "www.thetradenews.com",
+   "www.waterstechnology.com"
+  ],
+  "wikipedia_identity_matched": 18,
+  "gdelt": "excluded: 429 from this IP on single paced requests",
+  "seconds_p50": 25.4
+ },
+ "companies": [
+  {
+   "prospect_id": 1,
+   "company": "Hammerspace",
+   "tier": 1,
+   "seconds": 25.8,
+   "pointers": 12,
+   "fetched": 8,
+   "independent_articles": 8,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 1,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 4,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-10-06",
+     "title": "Three key insights you may have missed from theCUBE\u2019s coverage of the Supermicro Open Storage Summit interview series",
+     "url": "https://siliconangle.com/2026/10/06/ai-storage-strategy-three-insightgs-supermicro-summit-supermicroopenstoragesummit/",
+     "excerpt": "Coordinating access and movement across the data estate requires several complementary layers: Supermicro\u2019s validated systems, Hammerspace Inc.\u2019s unified namespace and data orchestration, Cloudian Inc.\u2019s object storage and Seagate Technology LLC\u2019s capacity for longer-term retention."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-09-02",
+     "title": "Storage leaders target AI\u2019s unstructured data challenge",
+     "url": "https://siliconangle.com/2026/09/02/unstructured-data-hammerspace-cloudian-seagate-supermicro-supermicroopenstoragesummit/",
+     "excerpt": "On the Hammerspace side, we are really focused on that, the new MCP layer where you can get understanding of the data that\u2019s sitting out there because it\u2019s not well described."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-08-20",
+     "title": "Supermicro alliance tackles the storage bottlenecks holding back enterprise AI",
+     "url": "https://siliconangle.com/2026/08/20/storage-modernization-supermicro-partners-ai-supermicroopenstoragesummit/",
+     "excerpt": "The process of making storage systems work together to enable AI readiness has been a central element in Supermicro\u2019s partnership with Hammerspace and Sandisk."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-03-17",
+     "title": "Hammerspace storage platform feeds distributed data directly to GPUs",
+     "url": "https://siliconangle.com/2026/03/17/hammerspace-storage-platform-feeds-distributed-data-directly-gpus/",
+     "excerpt": "Hammerspace storage platform feeds distributed data directly to GPUs."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-01-23",
+     "title": "Hybrid cloud moves from infrastructure choice to AI execution layer",
+     "url": "https://siliconangle.com/2026/01/23/hybrid-cloud-ai-execution-layer-futureofdataplatforms/",
+     "excerpt": "are part of a broader shift toward treating hybrid cloud as an operational model for seeing, moving and activating data across environments, not just a place to run workloads, according to Molly Presley (pictured), senior vice president of global marketing at Hammerspace."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-09-10",
+     "title": "Three insights you might have missed from theCUBE\u2019s Supermicro Open Storage Summit",
+     "url": "https://siliconangle.com/2025/09/10/three-insights-thecube-supermicro-data-storage-openstoragesummit/",
+     "excerpt": "Tony Asaro of Hammerspace joined executives from Nvidia, Supermicro, Cloudian, and Solidigm to discuss data storage."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-08-22",
+     "title": "Breaking down data walls: Hammerspace tackles silos in the AI era",
+     "url": "https://siliconangle.com/2025/08/22/hammerspace-tackles-siloed-data-challenge-ai-era-futureofdataplatforms/",
+     "excerpt": "Breaking down data walls: Hammerspace tackles silos in the AI era."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-08-19",
+     "title": "Scaling AI inference: Why storage is the unsung hero of the next AI wave",
+     "url": "https://siliconangle.com/2025/08/19/scaling-ai-inference-storage-unsung-hero-openstoragesummit/",
+     "excerpt": "Tony Asaro (front row, middle), chief strategy and business development officer at Hammerspace Inc.;"
+    }
+   ]
+  },
+  {
+   "prospect_id": 2,
+   "company": "WEKA",
+   "tier": 1,
+   "seconds": 44.0,
+   "pointers": 22,
+   "fetched": 22,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 44,
+    "FEED_UNAVAILABLE_404": 1,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1,
+    "AMBIGUOUS_NAME_NO_IDENTITY_ANCHOR": 22
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 3,
+   "company": "Reltio",
+   "tier": 1,
+   "seconds": 26.5,
+   "pointers": 4,
+   "fetched": 4,
+   "independent_articles": 4,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 1,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 1,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-10-27",
+     "title": "SAP advances its autonomous enterprise push with smarter, governed Joule agents",
+     "url": "https://siliconangle.com/2026/10/27/sap-advances-its-autonomous-enterprise-push-with-smarter-governed-joule-agents/",
+     "excerpt": "SAP\u2019s acquisition of Reltio, recently announced at SAP Connect, brings on board multidomain data management to BDC."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-04-27",
+     "title": "\u2018You can\u2019t make great decisions without good data\u2019: How fragmented data blocks enterprise AI success",
+     "url": "https://siliconangle.com/2026/04/27/trusted-data-foundation-agentic-ai-reltio-says-googlecloudnext/",
+     "excerpt": "As a matter of fact, enterprises are paying a steep price because of fragmented, problematic data stores, according to Alyson Welch (pictured), chief revenue officer at Reltio Inc., a cloud-native master management company."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-03-30",
+     "title": "SAP buys Reltio to pull in more outside data for AI agents",
+     "url": "https://siliconangle.com/2026/03/30/sap-buys-reltio-pull-outside-data-ai-agents/",
+     "excerpt": "SAP buys Reltio to pull in more outside data for AI agents."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-08-20",
+     "title": "Reltio puts real-time data activation at the center of enterprise decision-making",
+     "url": "https://siliconangle.com/2025/08/20/reltio-workato-boost-real-time-data-activation-business-insights-worldofworkato/",
+     "excerpt": "Reltio puts real-time data activation at the center of enterprise decision-making."
+    }
+   ]
+  },
+  {
+   "prospect_id": 4,
+   "company": "Ataccama",
+   "tier": 1,
+   "seconds": 20.4,
+   "pointers": 3,
+   "fetched": 3,
+   "independent_articles": 3,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 36,
+    "FEED_UNAVAILABLE_404": 1,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-05-08",
+     "title": "What to expect at the AWS Financial Services Symposium: Watch theCUBE\u2019s exclusive on-demand coverage starting May 11",
+     "url": "https://siliconangle.com/2026/05/08/ai-trust-financial-services-awsfinserv/",
+     "excerpt": "An important factor for increasing consumer confidence in AI is data trust, according to Larry Hunt, field chief data officer for financial services at Ataccama Corp."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-12-09",
+     "title": "Snowflake Ventures invests in data trust startup Ataccama to boost agentic reliability",
+     "url": "https://siliconangle.com/2025/12/09/snowflake-ventures-invests-data-trust-startup-ataccama-boost-agentic-reliability/",
+     "excerpt": "Snowflake Ventures invests in data trust startup Ataccama to boost agentic reliability."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-11-06",
+     "title": "Closing the AI readiness gap: Ataccama\u2019s agentic approach to data trust",
+     "url": "https://siliconangle.com/2025/11/06/ataccama-data-quality-data-trust-platform-ataccamaai/",
+     "excerpt": "Closing the AI readiness gap: Ataccama\u2019s agentic approach to data trust."
+    }
+   ]
+  },
+  {
+   "prospect_id": 6,
+   "company": "Qlik",
+   "tier": 1,
+   "seconds": 127.5,
+   "pointers": 106,
+   "fetched": 40,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": true,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 42,
+    "FEED_UNAVAILABLE_404": 1,
+    "AMBIGUOUS_NAME_NO_IDENTITY_ANCHOR": 36,
+    "FETCH_TIMEOUT": 2,
+    "FETCH_HTTP_STATUS": 2
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 7,
+   "company": "Matillion",
+   "tier": 1,
+   "seconds": 17.9,
+   "pointers": 2,
+   "fetched": 2,
+   "independent_articles": 2,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 1,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 5,
+    "WIKIDATA_NO_MATCHING_NAME": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-06-27",
+     "title": "Permissions management startup AuthZed raises $12M to accelerate its strategic expansion",
+     "url": "https://siliconangle.com/2024/06/27/permissions-management-startup-authzed-raises-12m-accelerate-strategic-expansion/",
+     "excerpt": "Ltd., WithClutch Inc., Turo Inc., Matillion Ltd., HackerRank Inc., Spot.ai Inc."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-06-06",
+     "title": "Coca Cola Consolidated transforms workforce with AI for all",
+     "url": "https://siliconangle.com/2024/06/05/matillion-coca-cola-collaboration-data-pipeline-datacloudsummit/",
+     "excerpt": "Many companies wanting to implement artificial intelligence often lack experts in data and AI learning, but Matillion Ltd."
+    }
+   ]
+  },
+  {
+   "prospect_id": 8,
+   "company": "Keboola",
+   "tier": 1,
+   "seconds": 19.7,
+   "pointers": 0,
+   "fetched": 0,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 2,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 9,
+   "company": "CData",
+   "tier": 1,
+   "seconds": 64.4,
+   "pointers": 7,
+   "fetched": 7,
+   "independent_articles": 7,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 1,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 10,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-09-29",
+     "title": "CData\u2019s AI gateway governs agents\u2019 access to enterprise data",
+     "url": "https://siliconangle.com/2026/09/29/cdatas-ai-gateway-governs-agents-access-to-enterprise-data/",
+     "excerpt": "CData\u2019s AI gateway governs agents\u2019 access to enterprise data."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-06-23",
+     "title": "CData targets AI developers with governed data access tools",
+     "url": "https://siliconangle.com/2026/06/23/cdata-targets-ai-developers-governed-data-access-tools/",
+     "excerpt": "CData targets AI developers with governed data access tools."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-03-09",
+     "title": "CData expands Connect AI platform with agent-specific tooling and governance",
+     "url": "https://siliconangle.com/2026/03/09/cdata-expands-connect-ai-platform-agent-specific-tooling-governance/",
+     "excerpt": "CData expands Connect AI platform with agent-specific tooling and governance."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-09-24",
+     "title": "CData links AI systems to more than 300 data sources",
+     "url": "https://siliconangle.com/2025/09/24/cdata-links-ai-systems-300-data-sources/",
+     "excerpt": "CData links AI systems to more than 300 data sources."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-06-05",
+     "title": "Exclusive: CData to embed its connectivity technology across Palantir analytics and AI platforms",
+     "url": "https://siliconangle.com/2025/06/05/exclusive-cdata-embed-connectivity-technology-across-palantir-analytics-ai-platforms/",
+     "excerpt": "Exclusive: CData to embed its connectivity technology across Palantir analytics and AI platforms."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-06-28",
+     "title": "Generative AI\u2019s big copyright battle commences, and chip upstarts target AI workloads",
+     "url": "https://siliconangle.com/2024/06/28/generative-ais-big-copyright-battle-commences-chip-upstarts-target-ai-workloads/",
+     "excerpt": "CData raises $350M in growth capital to enhance data connectivity solutions."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-06-26",
+     "title": "CData raises $350M in growth capital to enhance data connectivity solutions",
+     "url": "https://siliconangle.com/2024/06/26/cdata-raises-350m-growth-capital-enhance-data-connectivity-solutions/",
+     "excerpt": "CData raises $350M in growth capital to enhance data connectivity solutions."
+    }
+   ]
+  },
+  {
+   "prospect_id": 11,
+   "company": "Securiti",
+   "tier": 1,
+   "seconds": 38.2,
+   "pointers": 9,
+   "fetched": 8,
+   "independent_articles": 8,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 214,
+    "FEED_UNAVAILABLE_404": 1,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-05-15",
+     "title": "9 themes defining the future of trust infrastructure: Insights from VeeamON",
+     "url": "https://siliconangle.com/2026/05/15/ai-resilience-insights-veeams-next-evolution-veeamon/",
+     "excerpt": "After seeing the same AI trust and governance challenges repeatedly across customers, Veeam built a new strategy around creating a data and AI trust layer above enterprise data platforms, a thesis that ultimately drove Veeam\u2019s acquisition of Securiti Inc."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-02-24",
+     "title": "Veeam launches Agent Commander to tackle AI risk and reverse agent mistakes",
+     "url": "https://siliconangle.com/2026/02/24/veeam-launches-agent-commander-tackle-ai-risk-reverse-agent-mistakes/",
+     "excerpt": "The new offering is powered by technology from Securiti Inc., a company Veeam acquired in December following a $1.7 billion deal in October."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-10-21",
+     "title": "Veeam to acquire Securiti for $1.7B+ to accelerate safe AI at scale",
+     "url": "https://siliconangle.com/2025/10/21/veeam-acquire-securiti-accelerate-safe-ai-scale/",
+     "excerpt": "Veeam to acquire Securiti for $1.7B+ to accelerate safe AI at scale."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-02-19",
+     "title": "Securiti and Databricks partner to ease AI application development",
+     "url": "https://siliconangle.com/2025/02/19/securiti-databricks-partner-ease-ai-application-development/",
+     "excerpt": "Securiti and Databricks partner to ease AI application development."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-10-29",
+     "title": "Securiti launches Gencore AI to enhance secure enterprise generative AI adoption",
+     "url": "https://siliconangle.com/2024/10/29/securiti-launches-gencore-ai-enhance-secure-enterprise-generative-ai-adoption/",
+     "excerpt": "Securiti launches Gencore AI to enhance secure enterprise generative AI adoption."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-05-31",
+     "title": "How data governance is shaping AI security: Insights from Securiti\u2019s Chief Data Officer Jack Berkowitz",
+     "url": "https://siliconangle.com/2024/05/31/ai-data-governance-challenges-solutions-rsac/",
+     "excerpt": "How data governance is shaping AI security: Insights from Securiti\u2019s Chief Data Officer Jack Berkowitz."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-04-02",
+     "title": "New compliance solution from Securiti aims to simplify enterprise AI regulation management",
+     "url": "https://siliconangle.com/2024/04/02/new-compliance-solution-securiti-simplifies-enterprise-ai-regulation-management/",
+     "excerpt": "New compliance solution from Securiti aims to simplify enterprise AI regulation management."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-02-07",
+     "title": "New \u2018AI Governance\u2019 solution from Securiti aims to streamline AI model compliance",
+     "url": "https://siliconangle.com/2024/02/07/new-ai-governance-solution-securiti-aims-streamline-ai-model-compliance/",
+     "excerpt": "New \u2018AI Governance\u2019 solution from Securiti aims to streamline AI model compliance."
+    }
+   ]
+  },
+  {
+   "prospect_id": 12,
+   "company": "Immuta",
+   "tier": 1,
+   "seconds": 26.3,
+   "pointers": 4,
+   "fetched": 4,
+   "independent_articles": 3,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 68,
+    "FEED_UNAVAILABLE_404": 1,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1,
+    "RELEVANCE_IRRELEVANT": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-10-21",
+     "title": "Immuta expands data provisioning platform with new guardrails and automated workflows",
+     "url": "https://siliconangle.com/2025/10/21/immuta-expands-data-provisioning-platform-new-guardrails-automated-workflows/",
+     "excerpt": "Immuta expands data provisioning platform with new guardrails and automated workflows."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-06-12",
+     "title": "Advancing data governance in financial services: Insights from Immuta\u2019s Chris Brown",
+     "url": "https://siliconangle.com/2024/06/12/enhancing-data-governance-in-financial-services-awsfinserv/",
+     "excerpt": "Advancing data governance in financial services: Insights from Immuta\u2019s Chris Brown."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-06-03",
+     "title": "Immuta releases new multilayer data security architecture for RAG-based AI solutions",
+     "url": "https://siliconangle.com/2024/06/03/immuta-releases-new-multi-layer-data-security-architecture-rag-based-ai-solutions/",
+     "excerpt": "Immuta releases new multilayer data security architecture for RAG-based AI solutions."
+    }
+   ]
+  },
+  {
+   "prospect_id": 13,
+   "company": "Privacera",
+   "tier": 1,
+   "seconds": 26.4,
+   "pointers": 6,
+   "fetched": 6,
+   "independent_articles": 6,
+   "independent_origins": 1,
+   "publishers": [
+    "Help Net Security"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 1,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 4,
+    "WIKIDATA_NO_MATCHING_NAME": 1
+   },
+   "articles": [
+    {
+     "publisher": "Help Net Security",
+     "published": "2025-02-28",
+     "title": "Infosec products of the month: February 2025",
+     "url": "https://www.helpnetsecurity.com/2025/02/28/infosec-products-of-the-month-february-2025/",
+     "excerpt": "Here\u2019s a look at the most interesting products from the past month, featuring releases from: 1Password, Armor, BigID, Dynatrace, Fortinet, Legit Security, Netwrix, Nymi, Palo Alto Networks, Pangea, Privacera, Qualys, SafeBreach, Satori, Seal Security, Socure, and Veeam Software."
+    },
+    {
+     "publisher": "Help Net Security",
+     "published": "2025-02-21",
+     "title": "New infosec products of the week: February 21, 2025",
+     "url": "https://www.helpnetsecurity.com/2025/02/21/new-infosec-products-of-the-week-february-21-2025/",
+     "excerpt": "Here\u2019s a look at the most interesting products from the past week, featuring releases from 1Password, Fortinet, Pangea, Privacera, and Veeam Software."
+    },
+    {
+     "publisher": "Help Net Security",
+     "published": "2025-02-20",
+     "title": "Privacera enables enterprises to identify, assess, and remediate AI-related risks",
+     "url": "https://www.helpnetsecurity.com/2025/02/20/privacera-paig-nist-ai-risk-management-framework/",
+     "excerpt": "Privacera enables enterprises to identify, assess, and remediate AI-related risks."
+    },
+    {
+     "publisher": "Help Net Security",
+     "published": "2024-05-01",
+     "title": "Infosec products of the month: April 2024",
+     "url": "https://www.helpnetsecurity.com/2024/05/01/infosec-products-of-the-month-april-2024/",
+     "excerpt": "Here\u2019s a look at the most interesting products from the past month, featuring releases from: Akamai, Bitdefender, CyberInt, Fastly, Forcepoint, IDnow, Immuta, Index Engines, Invicti Security, LogRhythm, Netwrix, Owl Cyber Defense Solutions, Privacera, Redgate, ShadowDragon, Siemens, Tanium, Trend Mi"
+    },
+    {
+     "publisher": "Help Net Security",
+     "published": "2024-04-19",
+     "title": "New infosec products of the week: April 19, 2024",
+     "url": "https://www.helpnetsecurity.com/2024/04/19/new-infosec-products-of-the-week-april-19-2024/",
+     "excerpt": "Here\u2019s a look at the most interesting products from the past week, featuring releases from IDnow, Immuta, Privacera, Redgate, ShadowDragon, and Tanium."
+    },
+    {
+     "publisher": "Help Net Security",
+     "published": "2024-04-15",
+     "title": "Privacera adds access control and data filtering functionality for Vector DB/RAG",
+     "url": "https://www.helpnetsecurity.com/2024/04/15/privacera-ai-governance/",
+     "excerpt": "Privacera adds access control and data filtering functionality for Vector DB/RAG."
+    }
+   ]
+  },
+  {
+   "prospect_id": 14,
+   "company": "Soda",
+   "tier": 1,
+   "seconds": 25.4,
+   "pointers": 1,
+   "fetched": 1,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 52,
+    "FEED_UNAVAILABLE_404": 2,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1,
+    "AMBIGUOUS_NAME_NO_IDENTITY_ANCHOR": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 15,
+   "company": "Acceldata",
+   "tier": 1,
+   "seconds": 25.6,
+   "pointers": 5,
+   "fetched": 5,
+   "independent_articles": 5,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 2,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 2,
+    "WIKIDATA_UNAVAILABLE": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-04-29",
+     "title": "Acceldata can now spot data anomalies across multiple dimensions",
+     "url": "https://siliconangle.com/2025/04/29/acceldata-can-now-spot-data-anomalies-across-multiple-dimensions/",
+     "excerpt": "Acceldata can now spot data anomalies across multiple dimensions."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-12-10",
+     "title": "Acceldata adds AI-assisted reconciliation to its data observability platform",
+     "url": "https://siliconangle.com/2024/12/10/acceldata-adds-ai-assisted-reconciliation-data-observability-platform/",
+     "excerpt": "Acceldata adds AI-assisted reconciliation to its data observability platform."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-06-14",
+     "title": "Acceldata highlights data governance and observability amid generative AI shift",
+     "url": "https://siliconangle.com/2024/06/14/data-observability-dataaisummit/",
+     "excerpt": "Acceldata highlights data governance and observability amid generative AI shift."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-06-11",
+     "title": "Data observability\u2019s crucial role in the AI era: Acceldata and Workday weigh in",
+     "url": "https://siliconangle.com/2024/06/11/data-observability-ai-workday-acceldata-datacloudsummit/",
+     "excerpt": "Data observability\u2019s crucial role in the AI era: Acceldata and Workday weigh in."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-02-06",
+     "title": "Acceldata copilot aids in data observability",
+     "url": "https://siliconangle.com/2024/02/06/645110/",
+     "excerpt": "Acceldata copilot aids in data observability."
+    }
+   ]
+  },
+  {
+   "prospect_id": 16,
+   "company": "Anomalo",
+   "tier": 1,
+   "seconds": 28.6,
+   "pointers": 3,
+   "fetched": 3,
+   "independent_articles": 3,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 46,
+    "FEED_UNAVAILABLE_404": 2,
+    "WIKIDATA_UNAVAILABLE": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-10-29",
+     "title": "Anomalo expands its platform with AIDA, an intelligent data analyst for the enterprise",
+     "url": "https://siliconangle.com/2025/10/29/anomalo-expands-platform-aida-intelligent-data-analyst-enterprise/",
+     "excerpt": "Anomalo expands its platform with AIDA, an intelligent data analyst for the enterprise."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-05-29",
+     "title": "Anomalo expands data quality insights to unstructured information",
+     "url": "https://siliconangle.com/2025/05/29/anomalo-expands-data-quality-insights-unstructured-information/",
+     "excerpt": "Anomalo expands data quality insights to unstructured information."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-01-24",
+     "title": "Databricks backs $33M round for data quality monitoring startup Anomalo",
+     "url": "https://siliconangle.com/2024/01/24/databricks-backs-33m-round-data-quality-monitoring-startup-anomalo/",
+     "excerpt": "Databricks backs $33M round for data quality monitoring startup Anomalo."
+    }
+   ]
+  },
+  {
+   "prospect_id": 19,
+   "company": "CrateDB",
+   "tier": 1,
+   "seconds": 20.1,
+   "pointers": 0,
+   "fetched": 0,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 2,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 1,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 20,
+   "company": "SingleStore",
+   "tier": 1,
+   "seconds": 41.4,
+   "pointers": 41,
+   "fetched": 12,
+   "independent_articles": 8,
+   "independent_origins": 4,
+   "publishers": [
+    "SiliconANGLE",
+    "appdevelopermagazine.com",
+    "sdtimes.com",
+    "www.techtarget.com"
+   ],
+   "wire_releases": 0,
+   "wikipedia": true,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 28,
+    "FEED_UNAVAILABLE_404": 1,
+    "ARTICLE_DISALLOWED_BY_ROBOTS": 4,
+    "AMBIGUOUS_NAME_NO_IDENTITY_ANCHOR": 2,
+    "FETCH_HTTP_STATUS": 1,
+    "RELEVANCE_IRRELEVANT": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-09-08",
+     "title": "28 ways enterprise AI and cloud strategies are colliding: theCUBE + NYSE Wired: Mixture of Experts interview series insights",
+     "url": "https://siliconangle.com/2025/09/08/thecube-nyse-wired-mixture-of-experts-insights-moeexperts/",
+     "excerpt": "SingleStore\u2019s role in scaling enterprise AI."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-06-26",
+     "title": "SingleStore adds Iceberg support and speedier vector search",
+     "url": "https://siliconangle.com/2024/06/26/singlestore-adds-iceberg-support-speedier-vector-search/",
+     "excerpt": "SingleStore adds Iceberg support and speedier vector search."
+    },
+    {
+     "publisher": "appdevelopermagazine.com",
+     "published": "",
+     "title": "MemSQL is now SingleStore",
+     "url": "https://appdevelopermagazine.com/memsql-is-now-singlestore/",
+     "excerpt": "MemSQL, The Database of Now, announced that it is rebranding as SingleStore."
+    },
+    {
+     "publisher": "www.techtarget.com",
+     "published": "",
+     "title": "SingleStore raises $80M for distributed SQL database | TechTarget",
+     "url": "https://www.techtarget.com/news/SingleStore-raises-80M-for-distributed-SQL-database/844522/",
+     "excerpt": "SingleStore raises $80M for distributed SQL database."
+    },
+    {
+     "publisher": "sdtimes.com",
+     "published": "",
+     "title": "SD Times news digest: MemSQL rebrands as SingleStore, .NET for Apache Spark 1.0, and Intel acquires SigOpt - SD Times",
+     "url": "https://sdtimes.com/softwaredev/sd-times-news-digest-memsql-rebrands-as-singlestore-net-for-apache-spark-1-0-and-intel-acquires-sigopt/",
+     "excerpt": "MemSQL will now be known as SingleStore."
+    },
+    {
+     "publisher": "www.techtarget.com",
+     "published": "",
+     "title": "SingleStore adds Iceberg integration, improved vector search | TechTarget",
+     "url": "https://www.techtarget.com/news/SingleStore-adds-Iceberg-integration-improved-vector-search/842903/",
+     "excerpt": "SingleStore adds Iceberg integration, improved vector search."
+    },
+    {
+     "publisher": "www.techtarget.com",
+     "published": "",
+     "title": "SingleStore unveils features aimed at enabling real-time AI | TechTarget",
+     "url": "https://www.techtarget.com/news/SingleStore-unveils-features-aimed-at-enabling-real-time-AI/843187/",
+     "excerpt": "SingleStore unveils features aimed at enabling real-time AI."
+    },
+    {
+     "publisher": "www.techtarget.com",
+     "published": "",
+     "title": "SingleStore update adds new tools to fuel GenAI, analytics | TechTarget",
+     "url": "https://www.techtarget.com/news/SingleStore-update-adds-new-tools-to-fuel-GenAI-analytics/843111/",
+     "excerpt": "SingleStore update adds new tools to fuel GenAI, analytics."
+    }
+   ]
+  },
+  {
+   "prospect_id": 21,
+   "company": "TigerGraph",
+   "tier": 1,
+   "seconds": 17.0,
+   "pointers": 2,
+   "fetched": 2,
+   "independent_articles": 2,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 2,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 19,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-03-04",
+     "title": "TigerGraph adds hybrid search capability to its graph database, releases free edition",
+     "url": "https://siliconangle.com/2025/03/04/tigergraph-adds-hybrid-search-capability-graph-database-releases-free-edition/",
+     "excerpt": "TigerGraph adds hybrid search capability to its graph database, releases free edition."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-01-21",
+     "title": "TigerGraph revs up its graph database offering with faster setup times and new preconfigurations",
+     "url": "https://siliconangle.com/2025/01/21/tigergraph-revs-graph-database-offering-faster-setup-times-pre-configurations/",
+     "excerpt": "TigerGraph revs up its graph database offering with faster setup times and new preconfigurations."
+    }
+   ]
+  },
+  {
+   "prospect_id": 22,
+   "company": "Neo4j",
+   "tier": 1,
+   "seconds": 30.8,
+   "pointers": 40,
+   "fetched": 8,
+   "independent_articles": 8,
+   "independent_origins": 2,
+   "publishers": [
+    "SiliconANGLE",
+    "StorageReview"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 37,
+    "FEED_UNAVAILABLE_404": 2,
+    "WIKIDATA_UNAVAILABLE": 1
+   },
+   "articles": [
+    {
+     "publisher": "StorageReview",
+     "published": "2026-10-20",
+     "title": "Neo4j Context Engine Gives AI Agents a Shared Knowledge Layer, 6-Layer Business Ontology, and Graph-Native Memory",
+     "url": "https://www.storagereview.com/news/neo4j-context-engine-ai-agents-knowledge-layer-ontology-graph-native-memory",
+     "excerpt": "Neo4j Context Engine Gives AI Agents a Shared Knowledge Layer, 6-Layer Business Ontology, and Graph-Native Memory."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-10-16",
+     "title": "Knowledge graphs fuel AI innovation for financial services at Raymond James Financial",
+     "url": "https://siliconangle.com/2026/10/16/knowledge-graphs-ai-raymond-james-neo4j-neo4jgraphsummit/",
+     "excerpt": "As a Neo4j customer, Raymond James uses graph technologies that give developers a way to represent the relationships, dependencies and business context that AI applications need to reason effectively."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-10-13",
+     "title": "Imago Platform uses graphs to improve AI knowledge management",
+     "url": "https://siliconangle.com/2026/10/13/imago-platform-uses-graphs-improve-ai-knowledge-management-neo4jdatatoknowledge/",
+     "excerpt": "\u201cWe got on the Neo4j Startup Program and got some help to start working with graphs, and suddenly \u2026 the model started delivering correct results again and again and again.\u201d."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-10-13",
+     "title": "Spranic builds spatial memory for physical AI",
+     "url": "https://siliconangle.com/2026/10/13/spranic-builds-spatial-memory-for-physical-ai-neo4jdatatoknowledge/",
+     "excerpt": "Neither Neo4j, the sponsor of theCUBE\u2019s event coverage, nor other sponsors have editorial control over content on theCUBE or SiliconANGLE.)."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-10-12",
+     "title": "Phasis develops platform for agentic orientation using World APIs and reality layers",
+     "url": "https://siliconangle.com/2026/10/12/orienting-ai-agents-phasis-thecube-models-neo4jdatatoknowledge/",
+     "excerpt": "Neither Neo4j, the sponsor of theCUBE\u2019s event coverage, nor other sponsors have editorial control over content on theCUBE or SiliconANGLE.)."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-10-12",
+     "title": "BotMan AI uses knowledge graphs for legacy modernization",
+     "url": "https://siliconangle.com/2026/10/11/botman-ai-uses-knowledge-graphs-for-legacy-modernization-neo4jdatatoknowledge/",
+     "excerpt": "Neither Neo4j, the sponsor of theCUBE\u2019s event coverage, nor other sponsors have editorial control over content on theCUBE or SiliconANGLE.)."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-10-11",
+     "title": "Flahy uses knowledge graphs to support AI-powered healthcare",
+     "url": "https://siliconangle.com/2026/10/11/flahy-uses-knowledge-graphs-support-ai-powered-healthcare-neo4jdatatoknowledge/",
+     "excerpt": "Neither Neo4j, the sponsor of theCUBE\u2019s event coverage, nor other sponsors have editorial control over content on theCUBE or SiliconANGLE.)."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-10-09",
+     "title": "Seismora builds a control plane to route AI workloads across devices and clouds",
+     "url": "https://siliconangle.com/2026/10/09/control-plane-agentic-ai-seismora-thecube-neo4jdatatoknowledge/",
+     "excerpt": "Neither Neo4j, the sponsor of theCUBE\u2019s event coverage, nor other sponsors have editorial control over content on theCUBE or SiliconANGLE.)."
+    }
+   ]
+  },
+  {
+   "prospect_id": 23,
+   "company": "Arango",
+   "tier": 1,
+   "seconds": 17.2,
+   "pointers": 0,
+   "fetched": 0,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 3,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 9,
+    "WIKIDATA_UNAVAILABLE": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 24,
+   "company": "KX",
+   "tier": 1,
+   "seconds": 20.8,
+   "pointers": 0,
+   "fetched": 0,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 3,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 184,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 26,
+   "company": "Interos",
+   "tier": 2,
+   "seconds": 18.6,
+   "pointers": 1,
+   "fetched": 1,
+   "independent_articles": 1,
+   "independent_origins": 1,
+   "publishers": [
+    "Help Net Security"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 2,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 2,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": [
+    {
+     "publisher": "Help Net Security",
+     "published": "2024-03-25",
+     "title": "Interos Resilience Watchtower enables companies to monitor vulnerabilities",
+     "url": "https://www.helpnetsecurity.com/2024/03/25/interos-resilience-watchtower/",
+     "excerpt": "Interos Resilience Watchtower enables companies to monitor vulnerabilities."
+    }
+   ]
+  },
+  {
+   "prospect_id": 27,
+   "company": "Everstream Analytics",
+   "tier": 2,
+   "seconds": 15.1,
+   "pointers": 0,
+   "fetched": 0,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 2,
+    "WIKIDATA_NO_MATCHING_NAME": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 28,
+   "company": "Resilinc",
+   "tier": 2,
+   "seconds": 13.8,
+   "pointers": 0,
+   "fetched": 0,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 3,
+    "WIKIDATA_NO_MATCHING_NAME": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 30,
+   "company": "Exiger",
+   "tier": 2,
+   "seconds": 17.9,
+   "pointers": 0,
+   "fetched": 0,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 3,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 28,
+    "WIKIDATA_UNAVAILABLE": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 31,
+   "company": "Sayari",
+   "tier": 2,
+   "seconds": 19.7,
+   "pointers": 0,
+   "fetched": 0,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 2,
+    "WIKIDATA_UNAVAILABLE": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 32,
+   "company": "Kharon",
+   "tier": 2,
+   "seconds": 17.7,
+   "pointers": 0,
+   "fetched": 0,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 2,
+    "WIKIDATA_UNAVAILABLE": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 33,
+   "company": "Moody's",
+   "tier": 2,
+   "seconds": 17.1,
+   "pointers": 0,
+   "fetched": 0,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 2,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 37,
+    "WIKIDATA_UNAVAILABLE": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 34,
+   "company": "S&P Global",
+   "tier": 2,
+   "seconds": 58.3,
+   "pointers": 62,
+   "fetched": 21,
+   "independent_articles": 1,
+   "independent_origins": 1,
+   "publishers": [
+    "finance.yahoo.com"
+   ],
+   "wire_releases": 1,
+   "wikipedia": true,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 2,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 67,
+    "FETCH_UNSAFE_REDIRECT": 2,
+    "ARTICLE_DISALLOWED_BY_ROBOTS": 18,
+    "FETCH_HTTP_STATUS": 13,
+    "RELEVANCE_IRRELEVANT": 4,
+    "REGULATORY_FILING_NOT_REPORTING": 1
+   },
+   "articles": [
+    {
+     "publisher": "finance.yahoo.com",
+     "published": "",
+     "title": "S&P Global Inc. (SPGI) Stock Price, News, Quote & History - Yahoo Finance",
+     "url": "https://finance.yahoo.com/quote/SPGI/",
+     "excerpt": "S&P Global Inc., together with its subsidiaries, provides benchmarks, data, analytics, and workflow solutions in the global capital, energy and commodity, and automotive markets."
+    }
+   ]
+  },
+  {
+   "prospect_id": 35,
+   "company": "MSCI",
+   "tier": 2,
+   "seconds": 72.6,
+   "pointers": 37,
+   "fetched": 23,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 1,
+   "wikipedia": true,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 2,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 9,
+    "FETCH_HTTP_STATUS": 9,
+    "ARTICLE_DISALLOWED_BY_ROBOTS": 12,
+    "FETCH_UNSAFE_REDIRECT": 2,
+    "AMBIGUOUS_NAME_NO_IDENTITY_ANCHOR": 10,
+    "FETCH_TIMEOUT": 1,
+    "REGULATORY_FILING_NOT_REPORTING": 2
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 36,
+   "company": "FactSet",
+   "tier": 2,
+   "seconds": 52.7,
+   "pointers": 44,
+   "fetched": 17,
+   "independent_articles": 6,
+   "independent_origins": 6,
+   "publishers": [
+    "SiliconANGLE",
+    "oakhill.com",
+    "www.ctinsider.com",
+    "www.fool.com",
+    "www.thetradenews.com",
+    "www.waterstechnology.com"
+   ],
+   "wire_releases": 2,
+   "wikipedia": true,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 33,
+    "FEED_UNAVAILABLE_404": 1,
+    "ARTICLE_DISALLOWED_BY_ROBOTS": 11,
+    "RELEVANCE_IRRELEVANT": 3,
+    "FETCH_HTTP_STATUS": 6,
+    "REGULATORY_FILING_NOT_REPORTING": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2023-11-14",
+     "title": "How data is redefining capital markets",
+     "url": "https://siliconangle.com/2023/11/14/data-redefining-capital-markets-awsfinancialservices-awsfinancialservices-cubeconversations/",
+     "excerpt": "and FactSet Research Systems Inc."
+    },
+    {
+     "publisher": "www.fool.com",
+     "published": "",
+     "title": "Screening for Winners | The Motley Fool",
+     "url": "https://www.fool.com/investing/general/2003/12/08/screening-for-winners.aspx",
+     "excerpt": "FactSet Research Systems (NYSE:FDS) -- provides online database services to the financial and investing community."
+    },
+    {
+     "publisher": "oakhill.com",
+     "published": "",
+     "title": "Philip Hadley \u2013 Oak Hill",
+     "url": "https://oakhill.com/team/philip-hadley/",
+     "excerpt": "Hadley joined FactSet in 1985 as a Consultant."
+    },
+    {
+     "publisher": "www.thetradenews.com",
+     "published": "",
+     "title": "FactSet acquires Boston-headquartered Cobalt Software - The TRADE",
+     "url": "https://www.thetradenews.com/factset-acquires-boston-headquartered-cobalt-software/",
+     "excerpt": "Integrated financial information provider FactSet has acquired Boston-headquartered portfolio monitoring solutions provider Cobalt Software."
+    },
+    {
+     "publisher": "www.waterstechnology.com",
+     "published": "",
+     "title": "FactSet lays out trading roadmap post LiquidityBook deal - WatersTechnology.com",
+     "url": "https://www.waterstechnology.com/trading-tech/7952280/factset-lays-out-trading-roadmap-post-liquiditybook-deal",
+     "excerpt": "That same year, another New England-based entity was making moves of its own: data and software provider FactSet bought BISAM, a provider of portfolio performance and attribution, and multi-asset risk services, for $205.2 million."
+    },
+    {
+     "publisher": "www.ctinsider.com",
+     "published": "",
+     "title": "CT-based financial technology company FactSet announces new CEO",
+     "url": "https://www.ctinsider.com/business/article/factset-norwalk-ceo-phil-snow-sanoke-viswanathan-20358784.php",
+     "excerpt": "Norwalk-based financial technology company FactSet announces new CEO."
+    }
+   ]
+  },
+  {
+   "prospect_id": 37,
+   "company": "Morningstar",
+   "tier": 2,
+   "seconds": 44.5,
+   "pointers": 43,
+   "fetched": 14,
+   "independent_articles": 5,
+   "independent_origins": 3,
+   "publishers": [
+    "SiliconANGLE",
+    "www.financial-planning.com",
+    "www.seattletimes.com"
+   ],
+   "wire_releases": 3,
+   "wikipedia": true,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 35,
+    "FEED_UNAVAILABLE_404": 1,
+    "FETCH_HTTP_STATUS": 5,
+    "ARTICLE_DISALLOWED_BY_ROBOTS": 7,
+    "FETCH_UNSAFE_REDIRECT": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-08-04",
+     "title": "SpaceX stock falls 8% as first earnings beat is overshadowed by $18B capex",
+     "url": "https://siliconangle.com/2026/08/04/spacex-stock-falls-8-first-earnings-beat-overshadowed-18b-capex/",
+     "excerpt": "Morgan Stanley analyst Adam Jonas, who rates the stock overweight, argued last week that bearish sentiment has run ahead of fundamentals he described as \u201clargely unchanged,\u201d and said the company is \u201cuniquely positioned across launch, connectivity, and AI.\u201d Morningstar analyst Nicolas Owens took the "
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-05-22",
+     "title": "18 ways AI is rewriting the future of financial services: Key insights from the AWS Financial Services Symposium",
+     "url": "https://siliconangle.com/2026/05/22/ai-in-financial-services-moves-beyond-pilots-profits-awsfinserv/",
+     "excerpt": "helped Citibank shrink a 150-page cloud onboarding document into a 10-minute automated workflow and consolidated Morningstar\u2019s 36,000 Jenkins pipelines down to 50 reusable templates, noted Alex Valentine, vice president of solutions engineering at Harness."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-08-20",
+     "title": "Seemplicity raises $50M to expand AI driven exposure management platform",
+     "url": "https://siliconangle.com/2025/08/20/seemplicity-raises-50m-expand-ai-driven-exposure-management-platform/",
+     "excerpt": "Notable customers include Fiverr International Ltd., Morningstar Inc., Carlsberg A/S, Paramount Global and Nippon Telegraph and Telephone Corp."
+    },
+    {
+     "publisher": "www.financial-planning.com",
+     "published": "",
+     "title": "Morningstar Acquires MBS Rater Realpoint | Financial Planning",
+     "url": "https://www.financial-planning.com/news/morningstar-acquires-mbs-rater-realpoint",
+     "excerpt": "Morningstar Acquires MBS Rater Realpoint."
+    },
+    {
+     "publisher": "www.seattletimes.com",
+     "published": "",
+     "title": "Morningstar buys Seattle startup PitchBook in $225 million deal | The Seattle Times",
+     "url": "https://www.seattletimes.com/business/technology/morningstar-buys-seattle-startup-pitchbook-for-180-million/",
+     "excerpt": "Seattle startup PitchBook Data has been bought by investment-research firm Morningstar for about $180 million."
+    }
+   ]
+  },
+  {
+   "prospect_id": 38,
+   "company": "Enverus",
+   "tier": 2,
+   "seconds": 16.0,
+   "pointers": 0,
+   "fetched": 0,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 2,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 2,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 39,
+   "company": "Rystad Energy",
+   "tier": 2,
+   "seconds": 23.9,
+   "pointers": 9,
+   "fetched": 5,
+   "independent_articles": 1,
+   "independent_origins": 1,
+   "publishers": [
+    "www.offshore-mag.com"
+   ],
+   "wire_releases": 0,
+   "wikipedia": true,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 2,
+    "ARTICLE_DISALLOWED_BY_ROBOTS": 4,
+    "FETCH_HTTP_STATUS": 1,
+    "FETCH_UNSAFE_REDIRECT": 3
+   },
+   "articles": [
+    {
+     "publisher": "www.offshore-mag.com",
+     "published": "",
+     "title": "Exploration overdrive urgently required, Rystad Energy report claims | Offshore Magazine",
+     "url": "https://www.offshore-mag.com/drilling-completion/article/14188804/exploration-overdrive-urgently-required-rystad-energy-report-claims",
+     "excerpt": "Exploration needs to speed up to help supply the oil volumes needed worldwide by 2050, according to Rystad Energy."
+    }
+   ]
+  },
+  {
+   "prospect_id": 40,
+   "company": "Wood Mackenzie",
+   "tier": 2,
+   "seconds": 25.4,
+   "pointers": 8,
+   "fetched": 5,
+   "independent_articles": 2,
+   "independent_origins": 2,
+   "publishers": [
+    "pv-magazine-usa.com",
+    "www.afr.com"
+   ],
+   "wire_releases": 0,
+   "wikipedia": true,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 2,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 23,
+    "ARTICLE_DISALLOWED_BY_ROBOTS": 3,
+    "FETCH_HTTP_STATUS": 3
+   },
+   "articles": [
+    {
+     "publisher": "www.afr.com",
+     "published": "",
+     "title": "COUNTY NATWEST BUYS SCOTS BROKING GROUP",
+     "url": "https://www.afr.com/politics/county-natwest-buys-scots-broking-group-19871214-k2kjh",
+     "excerpt": "County NatWest, the investment banking arm of National Westminster, announced on Friday it had bought stockbroker Wood Mackenzie from the merchant bank Hill Samuel."
+    },
+    {
+     "publisher": "pv-magazine-usa.com",
+     "published": "",
+     "title": "Wood Mackenzie acquires LandGate as data centers forecast to drive 68% of U.S. load growth - pv magazine USA",
+     "url": "https://pv-magazine-usa.com/2026/06/24/wood-mackenzie-acquires-landgate-as-data-centers-forecast-to-drive-68-of-u-s-load-growth/",
+     "excerpt": "Wood Mackenzie acquires LandGate as data centers forecast to drive 68% of U.S."
+    }
+   ]
+  },
+  {
+   "prospect_id": 41,
+   "company": "Verisk",
+   "tier": 2,
+   "seconds": 18.3,
+   "pointers": 1,
+   "fetched": 1,
+   "independent_articles": 1,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 1,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 2,
+    "WIKIDATA_UNAVAILABLE": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-12-30",
+     "title": "Verisk scraps $2.35B acquisition of roofing software maker AccuLynx",
+     "url": "https://siliconangle.com/2025/12/29/verisk-scraps-2-35b-acquisition-roofing-software-maker-acculynx/",
+     "excerpt": "Verisk scraps $2.35B acquisition of roofing software maker AccuLynx."
+    }
+   ]
+  },
+  {
+   "prospect_id": 42,
+   "company": "Jupiter Intelligence",
+   "tier": 2,
+   "seconds": 21.1,
+   "pointers": 0,
+   "fetched": 0,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 2,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 34,
+    "WIKIDATA_UNAVAILABLE": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 44,
+   "company": "Watershed",
+   "tier": 2,
+   "seconds": 19.3,
+   "pointers": 1,
+   "fetched": 1,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 2,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 71,
+    "WIKIDATA_UNAVAILABLE": 1,
+    "FETCH_HTTP_STATUS": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 45,
+   "company": "Persefoni",
+   "tier": 2,
+   "seconds": 20.2,
+   "pointers": 1,
+   "fetched": 1,
+   "independent_articles": 1,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 1,
+    "FEED_UNAVAILABLE_404": 2,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-05-24",
+     "title": "Deloitte and Informatica aim to drive ESG data management capabilities",
+     "url": "https://siliconangle.com/2024/05/24/deliotte-informatica-esg-data-management-informaticaworld/",
+     "excerpt": "Informatica is front and center, but think about Workiva, Persefoni, Snowflake or Databricks."
+    }
+   ]
+  },
+  {
+   "prospect_id": 46,
+   "company": "Benchmark Gensuite",
+   "tier": 2,
+   "seconds": 18.9,
+   "pointers": 0,
+   "fetched": 0,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 3,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 21,
+    "WIKIDATA_NO_MATCHING_NAME": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 47,
+   "company": "Cority",
+   "tier": 2,
+   "seconds": 44.8,
+   "pointers": 0,
+   "fetched": 0,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 2,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 4,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 48,
+   "company": "Assent",
+   "tier": 2,
+   "seconds": 46.6,
+   "pointers": 6,
+   "fetched": 6,
+   "independent_articles": 6,
+   "independent_origins": 1,
+   "publishers": [
+    "BetaKit"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 86,
+    "FEED_UNAVAILABLE_404": 1,
+    "FEED_UNAVAILABLE_ERR": 1,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": [
+    {
+     "publisher": "BetaKit",
+     "published": "2026-07-09",
+     "title": "Assent makes first acquisition deal with purchase of German firm IPoint",
+     "url": "https://betakit.com/assent-makes-first-acquisition-deal-with-purchase-of-german-firm-ipoint/",
+     "excerpt": "Assent CEO Michael Southworth in front of the company's Ottawa headquarters."
+    },
+    {
+     "publisher": "BetaKit",
+     "published": "2026-01-07",
+     "title": "Backboard.io looks to solve AI amnesia with \u201csubstantial\u201d pre-seed round",
+     "url": "https://betakit.com/backboard-io-looks-to-solve-ai-amnesia-with-substantial-pre-seed-round/",
+     "excerpt": "Assent co-founder Rob Imbeault's new AI company has backing from Mistral and Garage."
+    },
+    {
+     "publisher": "BetaKit",
+     "published": "2025-06-17",
+     "title": "US private equity firm Vista ups stake in Assent at reported $1.3-billion USD valuation",
+     "url": "https://betakit.com/vista-ups-stake-in-assent/",
+     "excerpt": "Assent CEO Michael Southworth in front of the company's Ottawa headquarters."
+    },
+    {
+     "publisher": "BetaKit",
+     "published": "2025-05-28",
+     "title": "Michael Southworth \u201cspecifically chosen\u201d as Assent\u2019s new CEO to spearhead $250-million revenue effort",
+     "url": "https://betakit.com/michael-southworth-specifically-chosen-as-assents-new-ceo-to-spearhead-250-million-revenue-effort/",
+     "excerpt": "Assent's new CEO Michael Southworth."
+    },
+    {
+     "publisher": "BetaKit",
+     "published": "2024-09-06",
+     "title": "\u201cIt\u2019s just straight math\u201d: Assent CEO Andrew Waitman sets bar higher after hitting centaur status",
+     "url": "https://betakit.com/assent-ceo-andrew-waitman-talks-centaur-status/",
+     "excerpt": "Assent executive chairman Andrew Waitman."
+    },
+    {
+     "publisher": "BetaKit",
+     "published": "2024-01-04",
+     "title": "Assent CEO talks ESG\u2019s growing impact on stakeholder, customer, and investor relationships",
+     "url": "https://betakit.com/assent-ceo-talks-esgs-growing-impact-on-stakeholder-customer-and-investor-relationships/",
+     "excerpt": "In a recent #CIBCInnovationBanking podcast episode, Andrew Waitman, CEO of Assent, explained how startup leaders can begin to craft an ESG strategy that drives business growth."
+    }
+   ]
+  },
+  {
+   "prospect_id": 49,
+   "company": "EcoVadis",
+   "tier": 2,
+   "seconds": 26.7,
+   "pointers": 0,
+   "fetched": 0,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 2,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 1,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 50,
+   "company": "Dun & Bradstreet",
+   "tier": 2,
+   "seconds": 88.1,
+   "pointers": 54,
+   "fetched": 18,
+   "independent_articles": 8,
+   "independent_origins": 8,
+   "publishers": [
+    "catalogue.bnf.fr",
+    "finance.yahoo.com",
+    "www.cnbc.com",
+    "www.ftc.gov",
+    "www.idref.fr",
+    "www.loc.gov",
+    "www.news4jax.com",
+    "www.pbs.org"
+   ],
+   "wire_releases": 0,
+   "wikipedia": true,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 37,
+    "FEED_UNAVAILABLE_404": 2,
+    "FETCH_HTTP_STATUS": 5,
+    "ARTICLE_DISALLOWED_BY_ROBOTS": 10,
+    "RELEVANCE_IRRELEVANT": 2,
+    "FETCH_UNSAFE_REDIRECT": 3,
+    "REGULATORY_FILING_NOT_REPORTING": 1
+   },
+   "articles": [
+    {
+     "publisher": "finance.yahoo.com",
+     "published": "",
+     "title": "Dun & Bradstreet Ushers in a New Era",
+     "url": "https://finance.yahoo.com/news/dun-bradstreet-ushers-era-100000570.html",
+     "excerpt": "Dun & Bradstreet Ushers in a New Era."
+    },
+    {
+     "publisher": "catalogue.bnf.fr",
+     "published": "",
+     "title": "Notice de collectivit\u00e9 \"Dun & Bradstreet corporation\" | Accueil | Catalogue g\u00e9n\u00e9ral | BnF- Biblioth\u00e8que nationale de France",
+     "url": "https://catalogue.bnf.fr/ark:/12148/cb12534132s",
+     "excerpt": "Dun & Bradstreet corporation forme internationale."
+    },
+    {
+     "publisher": "www.idref.fr",
+     "published": "",
+     "title": "Dun & Bradstreet corporation",
+     "url": "https://www.idref.fr/034602267",
+     "excerpt": "Note publique d'information : Groupe industriel constitu\u00e9 en 1973, r\u00e9sultant de la fusion de \"Dun & Bradstreet companies\" et de \"Dun & Bradstreet, inc.\" ;"
+    },
+    {
+     "publisher": "www.news4jax.com",
+     "published": "",
+     "title": "Large data and analytics company moving global headquarters from New Jersey to Jacksonville",
+     "url": "https://www.news4jax.com/news/local/2021/05/20/large-data-and-analytics-company-moving-global-headquarters-from-new-jersey-to-jacksonville/",
+     "excerpt": "\u2013 Dun & Bradstreet, a prestigious data and analytics company currently based in New Jersey, announced Thursday it is moving its global headquarters to Jacksonville."
+    },
+    {
+     "publisher": "www.pbs.org",
+     "published": "",
+     "title": "Who Made America? | Innovators | Lewis Tappan",
+     "url": "https://www.pbs.org/wgbh/theymadeamerica/whomade/tappan_hi.html",
+     "excerpt": "Dun & Bradstreet Tappan transferred the running of the agency to his chief clerk, Benjamin Douglass, in 1849."
+    },
+    {
+     "publisher": "www.loc.gov",
+     "published": "",
+     "title": "Dun & Bradstreet Founded - This Month in Business History - Research Guides at Library of Congress",
+     "url": "https://guides.loc.gov/this-month-in-business-history/july/dun-bradstreet-founded",
+     "excerpt": "The company now known as Dun & Bradstreet can be traced back to July 20, 1841 when Lewis Tappan formed the Mercantile Agency in New York City."
+    },
+    {
+     "publisher": "www.ftc.gov",
+     "published": "",
+     "title": "FTC Challenges Dun & Bradstreet's Purchase of Competing Education Data Provider | Federal Trade Commission",
+     "url": "https://www.ftc.gov/news-events/news/press-releases/2010/05/ftc-challenges-dun-bradstreets-purchase-competing-education-data-provider",
+     "excerpt": "FTC Challenges Dun & Bradstreet's Purchase of Competing Education Data Provider."
+    },
+    {
+     "publisher": "www.cnbc.com",
+     "published": "",
+     "title": "Dun & Bradstreet to go private for $5.38 billion",
+     "url": "https://www.cnbc.com/2018/08/09/dun--bradstreet-to-go-private-for-5point38-billion.html",
+     "excerpt": "Data and analytics company Dun & Bradstreet said on Wednesday it would be acquired by a group of investors led by CC Capital, Cannae Holdings and funds affiliated with Thomas H."
+    }
+   ]
+  },
+  {
+   "prospect_id": 51,
+   "company": "Planful",
+   "tier": 3,
+   "seconds": 19.4,
+   "pointers": 0,
+   "fetched": 0,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 3,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 27,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 52,
+   "company": "Vena",
+   "tier": 3,
+   "seconds": 24.2,
+   "pointers": 5,
+   "fetched": 5,
+   "independent_articles": 4,
+   "independent_origins": 1,
+   "publishers": [
+    "BetaKit"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 3,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 135,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1,
+    "AMBIGUOUS_NAME_NO_IDENTITY_ANCHOR": 1
+   },
+   "articles": [
+    {
+     "publisher": "BetaKit",
+     "published": "2026-07-28",
+     "title": "Vena Solutions set to acquire Morpheo AI in agentic capability push",
+     "url": "https://betakit.com/vena-solutions-set-to-acquire-morpheo-ai-in-agentic-capability-push/",
+     "excerpt": "From left to right: Vena CTO Hugh Cumming, Morpheo CEO Sandesh Patil, Vena CEO Hunter Madely, Morpheo chief strategy officer Charly Lin."
+    },
+    {
+     "publisher": "BetaKit",
+     "published": "2026-02-04",
+     "title": "Vena moves into \u201corchestrated\u201d financial planning with Acterys acquisition",
+     "url": "https://betakit.com/vena-moves-into-orchestrated-financial-planning-with-acterys-acquisition/",
+     "excerpt": "Toronto FinTech company Vena Solutions has signed a definitive agreement to acquire Australia\u2019s Acterys to expand its financial planning and analysis (FP&A) capabilities."
+    },
+    {
+     "publisher": "BetaKit",
+     "published": "2025-06-19",
+     "title": "Europe is rising on the radar of Canadian tech",
+     "url": "https://betakit.com/europe-is-rising-on-the-radar-of-canadian-tech/",
+     "excerpt": "For nearly a decade, Vena Solutions focused squarely on North America."
+    },
+    {
+     "publisher": "BetaKit",
+     "published": "2024-07-12",
+     "title": "After reaching $100 million USD in ARR, Vena becomes Canada\u2019s latest \u201ccentaur\u201d company",
+     "url": "https://betakit.com/after-reaching-100-million-usd-in-revenue-vena-becomes-canadas-latest-centaur-company/",
+     "excerpt": "Vena Solutions team circa Feb 2019."
+    }
+   ]
+  },
+  {
+   "prospect_id": 53,
+   "company": "Cube",
+   "tier": 3,
+   "seconds": 34.4,
+   "pointers": 8,
+   "fetched": 8,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 214,
+    "FEED_UNAVAILABLE_404": 2,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1,
+    "AMBIGUOUS_NAME_NO_IDENTITY_ANCHOR": 8
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 55,
+   "company": "Aleph",
+   "tier": 3,
+   "seconds": 25.4,
+   "pointers": 5,
+   "fetched": 5,
+   "independent_articles": 5,
+   "independent_origins": 2,
+   "publishers": [
+    "BetaKit",
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 52,
+    "FEED_UNAVAILABLE_404": 2,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-09-16",
+     "title": "Cohere and Aleph Alpha agree to merge in reported $20B deal",
+     "url": "https://siliconangle.com/2026/09/16/cohere-and-aleph-alpha-agree-to-merge-in-reported-20b-deal/",
+     "excerpt": "Cohere and Aleph Alpha agree to merge in reported $20B deal."
+    },
+    {
+     "publisher": "BetaKit",
+     "published": "2026-09-16",
+     "title": "Cohere reaches terms with German peer Aleph Alpha to take on AI giants",
+     "url": "https://betakit.com/cohere-reaches-terms-with-german-peer-aleph-alpha-to-take-on-ai-giants/",
+     "excerpt": "Cohere is one step closer to combining with its German peer Aleph Alpha to rival American competitors OpenAI and Anthropic."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-08-06",
+     "title": "Inevitable AI Group raises $6M to derail SaaS incumbents with more agile, AI-native software startups",
+     "url": "https://siliconangle.com/2026/08/06/inevitable-ai-group-raises-6m-take-saas-incumbents-agile-ai-native-software-startups/",
+     "excerpt": "Aleph, one of Israel\u2019s top funds, is backing a new artificial intelligence-native venture studio with $6 million in pre-seed funding so it can build and launch dozens of new software startups by the end of the year."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-04-25",
+     "title": "AI startups Cohere, Aleph Alpha to merge with $600M in new funding",
+     "url": "https://siliconangle.com/2026/04/24/ai-startups-cohere-aleph-alpha-merge-600m-new-funding/",
+     "excerpt": "AI startups Cohere, Aleph Alpha to merge with $600M in new funding."
+    },
+    {
+     "publisher": "BetaKit",
+     "published": "2026-04-24",
+     "title": "Cohere to acquire Germany\u2019s Aleph Alpha in sovereign AI play",
+     "url": "https://betakit.com/cohere-to-acquire-germanys-aleph-alpha-in-sovereign-ai-play/",
+     "excerpt": "Toronto-based AI scaleup Cohere announced Friday morning it will join forces with Germany\u2019s Aleph Alpha to create a \u201ctransatlantic AI powerhouse.\u201d."
+    }
+   ]
+  },
+  {
+   "prospect_id": 56,
+   "company": "Pigment",
+   "tier": 3,
+   "seconds": 23.7,
+   "pointers": 2,
+   "fetched": 2,
+   "independent_articles": 2,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 35,
+    "FEED_UNAVAILABLE_404": 2,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-09-10",
+     "title": "Pigment launches AI-generated interfaces to broaden business planning",
+     "url": "https://siliconangle.com/2026/09/10/pigment-launches-ai-generated-interfaces-to-broaden-business-planning/",
+     "excerpt": "Pigment launches AI-generated interfaces to broaden business planning."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-04-04",
+     "title": "Business planning platform startup Pigment raises $145M to drive innovation",
+     "url": "https://siliconangle.com/2024/04/04/business-planning-platform-startup-pigment-raises-145m-drive-innovation/",
+     "excerpt": "Business planning platform startup Pigment raises $145M to drive innovation."
+    }
+   ]
+  },
+  {
+   "prospect_id": 57,
+   "company": "Anaplan",
+   "tier": 3,
+   "seconds": 56.0,
+   "pointers": 28,
+   "fetched": 19,
+   "independent_articles": 6,
+   "independent_origins": 4,
+   "publishers": [
+    "BetaKit",
+    "nypost.com",
+    "techcrunch.com",
+    "www.techtarget.com"
+   ],
+   "wire_releases": 0,
+   "wikipedia": true,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 25,
+    "FEED_UNAVAILABLE_404": 1,
+    "RELEVANCE_IRRELEVANT": 1,
+    "FETCH_HTTP_STATUS": 11,
+    "ARTICLE_DISALLOWED_BY_ROBOTS": 7,
+    "REGULATORY_FILING_NOT_REPORTING": 2,
+    "FETCH_UNSAFE_REDIRECT": 1
+   },
+   "articles": [
+    {
+     "publisher": "BetaKit",
+     "published": "2024-04-30",
+     "title": "FinTech startup Fluence Technologies agrees to be acquired by Anaplan",
+     "url": "https://betakit.com/fintech-startup-fluence-technologies-agrees-to-be-acquired-by-anaplan/",
+     "excerpt": "Anaplan plans to integrate Fluence\u2019s financial consolidation software into its own platform."
+    },
+    {
+     "publisher": "techcrunch.com",
+     "published": "",
+     "title": "With $90 Million In New Funding And Unicorn Status, Anaplan Looks Ahead to IPO | TechCrunch",
+     "url": "https://techcrunch.com/2016/01/14/with-another-90-million-of-funding-and-unicorn-status-anaplan-looks-ahead-to-ipo/",
+     "excerpt": "Anaplan announced a $90 million round today at a valuation of S1.09 billion after funding, putting the company squarely in unicorn territory, those companies with valuations of a billion or more."
+    },
+    {
+     "publisher": "techcrunch.com",
+     "published": "",
+     "title": "Anaplan App Hub Wants To Bring Open-Source Sharing Ethos to Financial Planners | TechCrunch",
+     "url": "https://techcrunch.com/2014/11/12/anaplan-app-hub-wants-to-bring-open-source-sharing-ethos-to-financial-planners/",
+     "excerpt": "Anaplan has always been focused on changing the way financial planners do their work, moving it from Excel spreadsheets to a cloud service."
+    },
+    {
+     "publisher": "www.techtarget.com",
+     "published": "",
+     "title": "Anaplan | TechTarget",
+     "url": "https://www.techtarget.com/news/Anaplan/851045/",
+     "excerpt": "Anaplan is a web-based enterprise platform for business planning."
+    },
+    {
+     "publisher": "nypost.com",
+     "published": "",
+     "title": "Exclusive | Software giant Anaplan begins layoffs after Thoma Bravo's $10.4B buyout deal",
+     "url": "https://nypost.com/2023/06/23/software-giant-anaplan-begins-layoffs-after-thoma-bravos-10-4b-buyout-deal/",
+     "excerpt": "Mass layoffs are underway at business software giant Anaplan, The Post has learned \u2013 with some impacted workers grumbling that buyout firm Thoma Bravo has \u201cdestroyed the company\u201d since taking it private in a $10.4 billion deal last year."
+    },
+    {
+     "publisher": "techcrunch.com",
+     "published": "",
+     "title": "Anaplan Rakes in $100M In Series D Funding And Announces Anaplan Hub | TechCrunch",
+     "url": "https://techcrunch.com/2014/05/13/anaplan-rakes-in-100m-in-series-d-funding-and-announces-anaplan-hub/",
+     "excerpt": "It\u2019s a busy week for Anaplan: They open their user conference later today, announced $100M in new funding and introduced Anaplan Hub, a marketplace where customers can share and find pre-designed planning models ready to adapt and use."
+    }
+   ]
+  },
+  {
+   "prospect_id": 58,
+   "company": "Workday",
+   "tier": 3,
+   "seconds": 28.3,
+   "pointers": 48,
+   "fetched": 9,
+   "independent_articles": 8,
+   "independent_origins": 2,
+   "publishers": [
+    "SiliconANGLE",
+    "ZDNET"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 101,
+    "FEED_UNAVAILABLE_404": 1,
+    "RELEVANCE_IRRELEVANT": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-10-13",
+     "title": "Workday makes Sana its new home for AI-driven HR and finance",
+     "url": "https://siliconangle.com/2026/10/13/workday-makes-sana-its-new-home-for-ai-driven-hr-and-finance/",
+     "excerpt": "Workday makes Sana its new home for AI-driven HR and finance."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-08-31",
+     "title": "Workday rethinks the enterprise workflow for AI agents",
+     "url": "https://siliconangle.com/2026/08/31/workday-reimagines-workflows-enterprise-ai-agents-googlecloudaiagentsinaction/",
+     "excerpt": "Workday rethinks the enterprise workflow for AI agents."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-08-28",
+     "title": "It\u2019s Nvidia\u2019s world. We just live in it",
+     "url": "https://siliconangle.com/2026/08/28/its-nvidias-world-we-just-live-in-it/",
+     "excerpt": "Workday did pretty well too, though investors weren\u2019t that impressed."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-08-27",
+     "title": "Workday posts strong earnings and revenue amid rapid uptake of its AI agents",
+     "url": "https://siliconangle.com/2026/08/27/workday-posts-strong-earnings-and-revenue-amid-rapid-uptake-of-its-ai-agents/",
+     "excerpt": "Workday posts strong earnings and revenue amid rapid uptake of its AI agents."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-08-13",
+     "title": "Workday\u2019s stock jumps 17% on report of Silver Lake buyout discussions",
+     "url": "https://siliconangle.com/2026/08/13/workdays-stock-jumps-17-report-silver-lake-buyout-discussions/",
+     "excerpt": "Workday\u2019s stock jumps 17% on report of Silver Lake buyout discussions."
+    },
+    {
+     "publisher": "ZDNET",
+     "published": "2026-07-17",
+     "title": "\u2018The SaaS apocalypse is overrated\u2019: How Workday and other software providers plan to survive AI",
+     "url": "https://www.zdnet.com/article/saas-apocalypse-overrated-how-workday-and-software-providers-will-survive-ai/",
+     "excerpt": "One executive who\u2019s considering such questions is Clare Hickie, CTO for EMEA at Workday, who told ZDNET that AI brings uncertainty, and business leaders will look for providers that offer a degree of certainty, an area where she believes her firm excels."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-06-25",
+     "title": "Warp lands $60M to automate payroll, compliance and HR with AI",
+     "url": "https://siliconangle.com/2026/06/25/warp-lands-60m-automate-payroll-compliance-hr-ai/",
+     "excerpt": "The New York-based company pitches itself as an AI-native alternative to legacy human capital management software, the category long dominated by Workday Inc."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-06-02",
+     "title": "Workday introduces new capabilities for building and verifying AI agents",
+     "url": "https://siliconangle.com/2026/06/02/workday-introduces-new-capabilities-building-verifying-ai-agents/",
+     "excerpt": "Workday introduces new capabilities for building and verifying AI agents."
+    }
+   ]
+  },
+  {
+   "prospect_id": 59,
+   "company": "Dayforce",
+   "tier": 3,
+   "seconds": 24.9,
+   "pointers": 6,
+   "fetched": 6,
+   "independent_articles": 3,
+   "independent_origins": 2,
+   "publishers": [
+    "BetaKit",
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 24,
+    "FEED_UNAVAILABLE_404": 2,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1,
+    "FETCH_HTTP_STATUS": 3
+   },
+   "articles": [
+    {
+     "publisher": "BetaKit",
+     "published": "2026-10-23",
+     "title": "Dayforce to acquire Ribbon AI to bolster AI recruitment capabilities",
+     "url": "https://betakit.com/dayforce-to-acquire-ribbon-ai-to-bolster-ai-recruitment-capabilities/",
+     "excerpt": "Dayforce is looking to help its enterprise customers offload some job interviews to AI."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-08-21",
+     "title": "Thoma Bravo to take HR software provider Dayforce private for $12.3B",
+     "url": "https://siliconangle.com/2025/08/21/thoma-bravo-take-hr-software-provider-dayforce-private-12-3b/",
+     "excerpt": "Thoma Bravo to take HR software provider Dayforce private for $12.3B."
+    },
+    {
+     "publisher": "BetaKit",
+     "published": "2025-08-20",
+     "title": "Canadian-led Dayforce to be taken private by Thoma Bravo in $12.3-billion USD deal",
+     "url": "https://betakit.com/canadian-led-dayforce-to-be-acquired-by-thoma-bravo/",
+     "excerpt": "Canadian-led human resources (HR) management software company Dayforce is set to be acquired and taken private by United States (US) private equity giant Thoma Bravo for $12.3 billion USD ($17 billion CAD)."
+    }
+   ]
+  },
+  {
+   "prospect_id": 62,
+   "company": "Deel",
+   "tier": 3,
+   "seconds": 22.3,
+   "pointers": 4,
+   "fetched": 4,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 35,
+    "FEED_UNAVAILABLE_404": 2,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1,
+    "AMBIGUOUS_NAME_NO_IDENTITY_ANCHOR": 2,
+    "FETCH_HTTP_STATUS": 2
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 63,
+   "company": "Gusto",
+   "tier": 3,
+   "seconds": 55.5,
+   "pointers": 30,
+   "fetched": 25,
+   "independent_articles": 7,
+   "independent_origins": 3,
+   "publishers": [
+    "fortune.com",
+    "techcrunch.com",
+    "www.cnbc.com"
+   ],
+   "wire_releases": 1,
+   "wikipedia": true,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 63,
+    "FEED_UNAVAILABLE_404": 2,
+    "FETCH_HTTP_STATUS": 4,
+    "RELEVANCE_IRRELEVANT": 10,
+    "ARTICLE_DISALLOWED_BY_ROBOTS": 1,
+    "FETCH_UNSAFE_REDIRECT": 3
+   },
+   "articles": [
+    {
+     "publisher": "techcrunch.com",
+     "published": "",
+     "title": "SMB payroll startup Gusto raises $200M Series D, plans R&D expansion to NYC | TechCrunch",
+     "url": "https://techcrunch.com/2019/07/24/smb-payroll-startup-gusto-raises-200m-series-d-plans-rd-expansion-to-nyc/",
+     "excerpt": "Gusto was founded to solve that problem for SMBs, and so far, it has seen strong adoption."
+    },
+    {
+     "publisher": "techcrunch.com",
+     "published": "",
+     "title": "Gusto is now offering pieces of its service to other companies via API | TechCrunch",
+     "url": "https://techcrunch.com/2021/06/30/2171608/",
+     "excerpt": "This morning Gusto, a unicorn that sells payroll and benefits management software, announced that it will now offer part of its service via an API to external platforms."
+    },
+    {
+     "publisher": "techcrunch.com",
+     "published": "",
+     "title": "Gusto reaches $500M in trailing revenue, teams up with Remote to support international hires | TechCrunch",
+     "url": "https://techcrunch.com/2023/06/27/gusto-remote-deal-500m-revenue/",
+     "excerpt": "Gusto, best known for its American payroll management software and services, is playing in the big leagues."
+    },
+    {
+     "publisher": "fortune.com",
+     "published": "",
+     "title": "Gusto is cash flow positive\u2013and it got there by sticking to mom-approved values | Fortune",
+     "url": "https://fortune.com/2024/05/10/gusto-cash-flow-positive-cofounders-mom-approved-values/",
+     "excerpt": "Gusto is cash flow positive\u2013and it got there by sticking to mom-approved values."
+    },
+    {
+     "publisher": "techcrunch.com",
+     "published": "",
+     "title": "Sources: Gusto paid $600M to acquire Guideline, plans to divest customers linked to rivals | TechCrunch",
+     "url": "https://techcrunch.com/2025/10/01/sources-gusto-paid-600m-to-acquire-guideline-plans-to-divest-customers-linked-to-rivals/",
+     "excerpt": "Last month, Gusto, a payroll and HR software company, announced that it agreed to acquire Guideline, a startup offering retirement plans to small and medium businesses."
+    },
+    {
+     "publisher": "www.cnbc.com",
+     "published": "",
+     "title": "Gusto agrees to buy retirement plan provider Guideline",
+     "url": "https://www.cnbc.com/2025/08/27/gusto-retirement-guideline-deal.html",
+     "excerpt": "Gusto, which offers payroll and human resources software, has agreed to acquire Guideline, a startup that provides 401(k) plans to small businesses."
+    },
+    {
+     "publisher": "techcrunch.com",
+     "published": "",
+     "title": "Gusto hits $1B revenue, a figure that brings it closer to public markets | TechCrunch",
+     "url": "https://techcrunch.com/2026/05/07/gusto-hits-1b-revenue-a-figure-that-brings-it-closer-to-public-markets/",
+     "excerpt": "One of these companies is small-business payroll provider Gusto."
+    }
+   ]
+  },
+  {
+   "prospect_id": 64,
+   "company": "Ramp",
+   "tier": 3,
+   "seconds": 32.6,
+   "pointers": 17,
+   "fetched": 16,
+   "independent_articles": 8,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 235,
+    "FEED_UNAVAILABLE_404": 1,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1,
+    "AMBIGUOUS_NAME_NO_IDENTITY_ANCHOR": 5,
+    "FETCH_HTTP_STATUS": 1,
+    "RELEVANCE_IRRELEVANT": 2
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-10-15",
+     "title": "Ramp raises $1.85B as it expands beyond finance software",
+     "url": "https://siliconangle.com/2026/10/15/ramp-raises-1-85b-as-it-expands-beyond-finance-software/",
+     "excerpt": "Ramp raises $1.85B as it expands beyond finance software."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-07-16",
+     "title": "Ramp targets AI\u2019s fastest-growing cost with expanded token spend tracking",
+     "url": "https://siliconangle.com/2026/07/16/ramp-targets-ais-fastest-growing-cost-expanded-token-spend-tracking/",
+     "excerpt": "Ramp targets AI\u2019s fastest-growing cost with expanded token spend tracking."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-06-09",
+     "title": "Rental screening startup 100 acquires fraud detection firm Cobblestone Labs",
+     "url": "https://siliconangle.com/2026/06/09/rental-screening-startup-100-acquires-fraud-detection-firm-cobblestone-labs/",
+     "excerpt": "Rental screening startup 100 today announced that it has acquired Cobblestone Labs Inc., a fraud detection and income verification platform built by former engineers from corporate card company Ramp Business Corp., in a deal that folds an artificial intelligence-native underwriting engine into 100\u2019s"
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-02-24",
+     "title": "Profound raises $96M at $1B valuation for AI discovery monitoring platform",
+     "url": "https://siliconangle.com/2026/02/24/profound-raises-96m-1b-valuation-ai-discovery-monitoring-platform/",
+     "excerpt": "Notable Profound customers include Target Corp., Figma Inc., Walmart Inc., Ramp Business Corp., MongoDB Inc., Chime Financial Inc."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-12-16",
+     "title": "Adaptive Security raises $81M to expand AI-driven social engineering defense platform",
+     "url": "https://siliconangle.com/2025/12/16/adaptive-security-raises-81m-expand-ai-driven-social-engineering-defense-platform/",
+     "excerpt": "Notable customers include PayPal Holdings Inc., Xerox Holdings Corp., Bose Corp., the National Hockey League, the Professional Golfers\u2019 Association of America, Figma Inc., Ramp Business Corp., Vimeo Inc., TaylorMade Golf Co."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-11-17",
+     "title": "Financial technology startup Ramp closes $300M investment at $32B valuation",
+     "url": "https://siliconangle.com/2025/11/17/financial-technology-startup-ramp-closes-300m-investment-32b-valuation/",
+     "excerpt": "Financial technology startup Ramp closes $300M investment at $32B valuation."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-08-14",
+     "title": "AI coding assistant startup Cognition reportedly raises nearly $500M on $9.8B valuation",
+     "url": "https://siliconangle.com/2025/08/14/ai-coding-assistant-startup-cognition-reportedly-raises-nearly-500m-9-8b-valuation/",
+     "excerpt": "Notable customers include Goldman Sachs Group Inc., Ramp Business Corp., Nu Holdings Ltd."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-07-30",
+     "title": "Weeks after its last funding round, fintech startup Ramp raises $500M more",
+     "url": "https://siliconangle.com/2025/07/30/weeks-last-funding-round-fintech-startup-ramp-raises-another-500m/",
+     "excerpt": "Weeks after its last funding round, fintech startup Ramp raises $500M more."
+    }
+   ]
+  },
+  {
+   "prospect_id": 65,
+   "company": "Brex",
+   "tier": 3,
+   "seconds": 27.8,
+   "pointers": 11,
+   "fetched": 11,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 84,
+    "FEED_UNAVAILABLE_404": 2,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1,
+    "FETCH_HTTP_STATUS": 3,
+    "AMBIGUOUS_NAME_NO_IDENTITY_ANCHOR": 8
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 66,
+   "company": "BILL",
+   "tier": 3,
+   "seconds": 34.6,
+   "pointers": 6,
+   "fetched": 6,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 235,
+    "FEED_UNAVAILABLE_ERR": 1,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1,
+    "RELEVANCE_IRRELEVANT": 1,
+    "AMBIGUOUS_NAME_NO_IDENTITY_ANCHOR": 5
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 67,
+   "company": "FloQast",
+   "tier": 3,
+   "seconds": 146.8,
+   "pointers": 18,
+   "fetched": 13,
+   "independent_articles": 8,
+   "independent_origins": 7,
+   "publishers": [
+    "SiliconANGLE",
+    "amplify.la",
+    "finance.yahoo.com",
+    "labusinessjournal.com",
+    "www.accountingtoday.com",
+    "www.builtinla.com",
+    "www.pymnts.com"
+   ],
+   "wire_releases": 0,
+   "wikipedia": true,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 3,
+    "FEED_UNAVAILABLE_404": 1,
+    "FETCH_HTTP_STATUS": 3,
+    "ARTICLE_DISALLOWED_BY_ROBOTS": 3,
+    "RELEVANCE_IRRELEVANT": 1,
+    "FETCH_UNSAFE_REDIRECT": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-04-10",
+     "title": "Financial operations platform FloQast raises $100M in late-stage funding",
+     "url": "https://siliconangle.com/2024/04/10/financial-operations-platform-floqast-raises-100m-series-e-funding-achieve-unicorn-status/",
+     "excerpt": "Financial operations platform FloQast raises $100M in late-stage funding."
+    },
+    {
+     "publisher": "www.builtinla.com",
+     "published": "",
+     "title": "Balancing the books: How FloQast\u2019s SaaS platform is revolutionizing the world of accounting | Built In Los Angeles",
+     "url": "https://www.builtinla.com/articles/floqast-salesforce-accountants",
+     "excerpt": "Together, the two built FloQast a minimum viable product that landed them a spot in Amplify\u2019s accelerator program."
+    },
+    {
+     "publisher": "amplify.la",
+     "published": "",
+     "title": "Portfolio - Amplify | We help passionate technology entrepreneurs grow their startups into strong, scalable & successful companies",
+     "url": "https://amplify.la/portfolio/",
+     "excerpt": "FloQast automates accounting workflows for enterprise teams."
+    },
+    {
+     "publisher": "www.accountingtoday.com",
+     "published": "",
+     "title": "Close management software developer FloQast relocates headquarters | Accounting Today",
+     "url": "https://www.accountingtoday.com/news/close-management-software-developer-floqast-relocates-headquarters",
+     "excerpt": "Close management software developer FloQast Inc."
+    },
+    {
+     "publisher": "www.pymnts.com",
+     "published": "",
+     "title": "PYMNTS | Big Data, Open Banking And The Close Process",
+     "url": "https://www.pymnts.com/news/b2b-payments/2018/floqast-close-process-accounting/",
+     "excerpt": "And, according to close management software company FloQast, the technologies that are impacting the market are also continually evolving."
+    },
+    {
+     "publisher": "www.accountingtoday.com",
+     "published": "",
+     "title": "FloQast scores $110M in latest funding round | Accounting Today",
+     "url": "https://www.accountingtoday.com/news/floqast-scores-110m-in-latest-funding-round",
+     "excerpt": "FloQast scores $110M in latest funding round."
+    },
+    {
+     "publisher": "finance.yahoo.com",
+     "published": "",
+     "title": "FloQast raises $100 mln in late-stage funding at $1.60 bln valuation",
+     "url": "https://finance.yahoo.com/news/floqast-raises-100-mln-stage-140513633.html",
+     "excerpt": "FloQast raises $100 mln in late-stage funding at $1.60 bln valuation."
+    },
+    {
+     "publisher": "labusinessjournal.com",
+     "published": "",
+     "title": "FloQast Raises $100 Million, Eyes IPO - Los Angeles Business Journal",
+     "url": "https://labusinessjournal.com/featured/floqast-raises-100-million-eyes-ipo/",
+     "excerpt": "FloQast Raises $100 Million, Eyes IPO."
+    }
+   ]
+  },
+  {
+   "prospect_id": 68,
+   "company": "BlackLine",
+   "tier": 3,
+   "seconds": 20.5,
+   "pointers": 1,
+   "fetched": 1,
+   "independent_articles": 1,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 42,
+    "FEED_UNAVAILABLE_404": 1,
+    "WIKIDATA_UNAVAILABLE": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-09-09",
+     "title": "BlackLine launches Verity AI to create a trusted digital workforce for finance",
+     "url": "https://siliconangle.com/2025/09/09/blackline-launches-verity-ai-create-trusted-digital-workforce-finance/",
+     "excerpt": "BlackLine launches Verity AI to create a trusted digital workforce for finance."
+    }
+   ]
+  },
+  {
+   "prospect_id": 69,
+   "company": "Datarails",
+   "tier": 3,
+   "seconds": 18.9,
+   "pointers": 1,
+   "fetched": 1,
+   "independent_articles": 1,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 2,
+    "FEED_UNAVAILABLE_404": 1,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-01-21",
+     "title": "Datarails raises $70M to inject AI smarts into Excel-based finance",
+     "url": "https://siliconangle.com/2026/01/21/datarails-raises-70m-inject-ai-smarts-excel-based-finance/",
+     "excerpt": "Datarails raises $70M to inject AI smarts into Excel-based finance."
+    }
+   ]
+  },
+  {
+   "prospect_id": 70,
+   "company": "Centage",
+   "tier": 3,
+   "seconds": 18.8,
+   "pointers": 0,
+   "fetched": 0,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 2,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 180,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 71,
+   "company": "Acumatica",
+   "tier": 3,
+   "seconds": 45.6,
+   "pointers": 17,
+   "fetched": 13,
+   "independent_articles": 6,
+   "independent_origins": 5,
+   "publishers": [
+    "thenextweb.com",
+    "www.cmswire.com",
+    "www.cpapracticeadvisor.com",
+    "www.erpsoftwareblog.com",
+    "www.techtarget.com"
+   ],
+   "wire_releases": 1,
+   "wikipedia": true,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 1,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 12,
+    "ARTICLE_DISALLOWED_BY_ROBOTS": 4,
+    "FETCH_HTTP_STATUS": 5,
+    "FETCH_UNSAFE_REDIRECT": 1
+   },
+   "articles": [
+    {
+     "publisher": "thenextweb.com",
+     "published": "",
+     "title": "Runa Capital has $157M to spend \u2014 and will now also back deep tech and quantum startups",
+     "url": "https://thenextweb.com/news/runa-capital-has-157m-to-spend-and-will-now-also-back-deep-tech-and-quantum-startups",
+     "excerpt": "The firm\u2019s founding partners have built several software companies, including Acronis (raised a $147 million round by Goldman Sachs in 2019), Parallels (acquired by Corel), Odin (acquired by Ingram Micro), and Acumatica (acquired by private equity fund EQT Partners)."
+    },
+    {
+     "publisher": "www.cmswire.com",
+     "published": "",
+     "title": "Acumatica Business Management Suite Hosted Anywhere You Want",
+     "url": "https://www.cmswire.com/cms/enterprise-cms/acumatica-business-management-suite-hosted-anywhere-you-want-004695.php",
+     "excerpt": "A new set of business management applications that can be hosted on-site, from a data center, or as a SaaS has just gone on general availability (GA) from Virgina-based Acumatica."
+    },
+    {
+     "publisher": "www.erpsoftwareblog.com",
+     "published": "",
+     "title": "A Brief History of ERP Software Including Dynamics GP and Acumatica - ERP Software Blog",
+     "url": "https://erpsoftwareblog.com/2020/04/a-brief-history-of-erp-software-including-dynamics-gp-and-acumatica/",
+     "excerpt": "Acumatica launched its first product, Acumatica ERP, in November 2008, alongside an accompanying financial demo."
+    },
+    {
+     "publisher": "www.cpapracticeadvisor.com",
+     "published": "",
+     "title": "Acumatica and BDO Partner to Accelerate Digital Transformation and Disrupt Industry Landscape",
+     "url": "https://www.cpapracticeadvisor.com/2019/12/12/acumatica-and-bdo-partner-to-accelerate-digital-transformation-and-disrupt-industry-landscape/35960/",
+     "excerpt": "Acumatica and BDO Partner to Accelerate Digital Transformation and Disrupt Industry Landscape."
+    },
+    {
+     "publisher": "www.techtarget.com",
+     "published": "",
+     "title": "Shopify opens e-commerce platform to enterprise ERP vendors | TechTarget",
+     "url": "https://www.techtarget.com/news/Shopify-opens-e-commerce-platform-to-enterprise-ERP-vendors/851722/",
+     "excerpt": "Shopify, based in Ottawa, launched an ERP integration service with Acumatica, Infor, Microsoft Dynamics 365 Business Central and Oracle NetSuite, as well as Brightpearl, a retail-focused inventory and distribution vendor."
+    },
+    {
+     "publisher": "www.techtarget.com",
+     "published": "",
+     "title": "Acumatica cloud ERP, IFS systems fit together well | TechTarget",
+     "url": "https://www.techtarget.com/news/Acumatica-cloud-ERP-IFS-systems-fit-together-well/853713/",
+     "excerpt": "Acumatica cloud ERP, IFS systems fit together well."
+    }
+   ]
+  },
+  {
+   "prospect_id": 72,
+   "company": "Epicor",
+   "tier": 3,
+   "seconds": 55.2,
+   "pointers": 40,
+   "fetched": 16,
+   "independent_articles": 7,
+   "independent_origins": 6,
+   "publishers": [
+    "SiliconANGLE",
+    "e2btek.com",
+    "finance.yahoo.com",
+    "www.accountingtoday.com",
+    "www.scribd.com",
+    "www.socaltech.com"
+   ],
+   "wire_releases": 1,
+   "wikipedia": true,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 24,
+    "FEED_UNAVAILABLE_404": 1,
+    "FETCH_HTTP_STATUS": 6,
+    "REGULATORY_FILING_NOT_REPORTING": 1,
+    "ARTICLE_DISALLOWED_BY_ROBOTS": 6,
+    "RELEVANCE_IRRELEVANT": 2
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-05-12",
+     "title": "Absorbing supply chain shocks with AI at Epicor Insights 2025",
+     "url": "https://siliconangle.com/2025/05/12/absorbing-supply-chain-shocks-ai-epicor-insights-2025/",
+     "excerpt": "Absorbing supply chain shocks with AI at Epicor Insights 2025."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-05-05",
+     "title": "RightRev lands $13M to meet growing demand for intelligent revenue recognition",
+     "url": "https://siliconangle.com/2025/05/05/rightrev-lands-13m-meet-growing-demand-intelligent-revenue-recognition/",
+     "excerpt": "RighRev counts among its customers Snowflake Inc., Datasite LLC, Epicor Software Corp., CAE Inc., Docedo Inc."
+    },
+    {
+     "publisher": "www.socaltech.com",
+     "published": "",
+     "title": "Epicor Buys CRS Retail Systems For $121M - socaltech.com",
+     "url": "https://www.socaltech.com/epicor_buys_crs_retail_systems_for____m/s-0002739.html",
+     "excerpt": "Epicor Buys CRS Retail Systems For $121M."
+    },
+    {
+     "publisher": "www.accountingtoday.com",
+     "published": "",
+     "title": "Epicor Acquires ShopVisible | Accounting Today",
+     "url": "https://www.accountingtoday.com/news/epicor-acquires-shopvisible",
+     "excerpt": "Epicor Software, business software solutions provider for retail, manufacturing, distribution and services organizations, announced the acquisition of ShopVisible, a privately held provider of cloud retail order management and digital commerce solutions."
+    },
+    {
+     "publisher": "finance.yahoo.com",
+     "published": "",
+     "title": "Epicor Completes Acquisition of Solarsoft Business Systems; Reports Preliminary Fiscal 2012 Financial Results",
+     "url": "https://finance.yahoo.com/news/epicor-completes-acquisition-solarsoft-business-130000481.html",
+     "excerpt": "Epicor Completes Acquisition of Solarsoft Business Systems;"
+    },
+    {
+     "publisher": "www.scribd.com",
+     "published": "",
+     "title": "Epicor Software Overview and Solutions | PDF | Supply Chain Management | Enterprise Resource Planning",
+     "url": "https://www.scribd.com/document/98082605/EPICOR",
+     "excerpt": "Epicor Software Overview and Solutions."
+    },
+    {
+     "publisher": "e2btek.com",
+     "published": "",
+     "title": "e2b teknologies - Vendor | Sage",
+     "url": "https://e2btek.com/vendor-sage/",
+     "excerpt": "Manufacturing functionality is available for Sage Live through a third party relationship with KeyedIn \u2013 formed by several former Epicor (Platinum) employees."
+    }
+   ]
+  },
+  {
+   "prospect_id": 73,
+   "company": "Plex",
+   "tier": 3,
+   "seconds": 20.5,
+   "pointers": 0,
+   "fetched": 0,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 211,
+    "FEED_UNAVAILABLE_404": 1,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 74,
+   "company": "IFS",
+   "tier": 3,
+   "seconds": 22.6,
+   "pointers": 1,
+   "fetched": 1,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 139,
+    "FEED_UNAVAILABLE_404": 1,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1,
+    "AMBIGUOUS_NAME_NO_IDENTITY_ANCHOR": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 75,
+   "company": "QAD",
+   "tier": 3,
+   "seconds": 33.3,
+   "pointers": 8,
+   "fetched": 8,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 23,
+    "FEED_UNAVAILABLE_404": 1,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1,
+    "AMBIGUOUS_NAME_NO_IDENTITY_ANCHOR": 8
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 76,
+   "company": "Auvik",
+   "tier": 4,
+   "seconds": 22.4,
+   "pointers": 2,
+   "fetched": 2,
+   "independent_articles": 2,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 16,
+    "FEED_UNAVAILABLE_404": 1,
+    "WIKIDATA_UNAVAILABLE": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-04-29",
+     "title": "Auvik launches Aurora AI agents to speed ticket resolution and prevent outages",
+     "url": "https://siliconangle.com/2026/04/29/auvik-launches-aurora-ai-agents-speed-ticket-resolution-prevent-outages/",
+     "excerpt": "Auvik launches Aurora AI agents to speed ticket resolution and prevent outages."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-03-20",
+     "title": "Auvik introduces new features for SaaS management, network visibility and server monitoring",
+     "url": "https://siliconangle.com/2025/03/20/auvik-introduces-new-features-saas-management-network-visibility-server-monitoring/",
+     "excerpt": "Auvik introduces new features for SaaS management, network visibility and server monitoring."
+    }
+   ]
+  },
+  {
+   "prospect_id": 77,
+   "company": "Kaseya",
+   "tier": 4,
+   "seconds": 26.9,
+   "pointers": 7,
+   "fetched": 7,
+   "independent_articles": 6,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 27,
+    "WIKIDATA_UNAVAILABLE": 1,
+    "FETCH_HTTP_STATUS": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-10-07",
+     "title": "Kaseya expands cybersecurity platform with acquisition of INKY",
+     "url": "https://siliconangle.com/2025/10/07/kaseya-expands-cybersecurity-platform-acquisition-inky/",
+     "excerpt": "Kaseya expands cybersecurity platform with acquisition of INKY."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-06-18",
+     "title": "Bitdefender to acquire Mesh Security to bolster email protection for managed service providers",
+     "url": "https://siliconangle.com/2025/06/18/bitdefender-acquire-mesh-security-bolster-email-protection-msps/",
+     "excerpt": "The platform is designed to make life easier for MSPs by offering centralized multi-tenant management, automated policy enforcement and deep integration with tools like ConnectWise and Kaseya for licensing and billing."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-12-23",
+     "title": "Kaseya delivers a next-level cybersecurity playbook for SMBs and MSPs",
+     "url": "https://siliconangle.com/2024/12/23/kaseya-powers-cyber-defense-for-smbs-kaseya/",
+     "excerpt": "Kaseya delivers a next-level cybersecurity playbook for SMBs and MSPs."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-10-30",
+     "title": "How Kaseya 365 is boosting MSP economics for enhanced SMB profitability",
+     "url": "https://siliconangle.com/2024/10/30/kaseya-365-boosting-msp-economics-for-smbs-efficiency-cubeconversations/",
+     "excerpt": "How Kaseya 365 is boosting MSP economics for enhanced SMB profitability."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-10-29",
+     "title": "How Kaseya safeguards IT workers against increasing cyberattacks",
+     "url": "https://siliconangle.com/2024/10/29/kaseya-datto-edr-constant-cyberattacks-cubeconversations/",
+     "excerpt": "How Kaseya safeguards IT workers against increasing cyberattacks."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-08-22",
+     "title": "Disaster recovery in action: Kaseya responds to CrowdStrike crisis",
+     "url": "https://siliconangle.com/2024/08/22/disaster-recovery-cubeconversations/",
+     "excerpt": "Disaster recovery in action: Kaseya responds to CrowdStrike crisis."
+    }
+   ]
+  },
+  {
+   "prospect_id": 78,
+   "company": "ConnectWise",
+   "tier": 4,
+   "seconds": 20.9,
+   "pointers": 4,
+   "fetched": 4,
+   "independent_articles": 3,
+   "independent_origins": 2,
+   "publishers": [
+    "Channel Insider",
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 35,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1,
+    "FETCH_HTTP_STATUS": 1
+   },
+   "articles": [
+    {
+     "publisher": "Channel Insider",
+     "published": "2026-11-03",
+     "title": "Lemhi Makes Managed AI Platform Available to all MSPs",
+     "url": "https://www.channelinsider.com/ai/lemhi-managed-ai-platform-msps-connectwise/",
+     "excerpt": "Lemhi makes its managed AI services platform available to all MSPs, adding ConnectWise PSA integration to help providers deliver and govern AI services."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-06-08",
+     "title": "ConnectWise launches AI-native platform in push toward \u2018Predictive IT\u2019",
+     "url": "https://siliconangle.com/2026/06/08/connectwise-launches-ai-native-platform-push-toward-predictive/",
+     "excerpt": "ConnectWise launches AI-native platform in push toward \u2018Predictive IT\u2019."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-06-18",
+     "title": "Bitdefender to acquire Mesh Security to bolster email protection for managed service providers",
+     "url": "https://siliconangle.com/2025/06/18/bitdefender-acquire-mesh-security-bolster-email-protection-msps/",
+     "excerpt": "The platform is designed to make life easier for MSPs by offering centralized multi-tenant management, automated policy enforcement and deep integration with tools like ConnectWise and Kaseya for licensing and billing."
+    }
+   ]
+  },
+  {
+   "prospect_id": 79,
+   "company": "N-able",
+   "tier": 4,
+   "seconds": 29.4,
+   "pointers": 13,
+   "fetched": 8,
+   "independent_articles": 8,
+   "independent_origins": 2,
+   "publishers": [
+    "BetaKit",
+    "Help Net Security"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 40,
+    "WIKIDATA_NO_MATCHING_NAME": 1
+   },
+   "articles": [
+    {
+     "publisher": "Help Net Security",
+     "published": "2026-09-07",
+     "title": "N-able patches critical N-central zero-day exploited in the wild (CVE-2026-86218)",
+     "url": "https://www.helpnetsecurity.com/2026/09/07/n-able-n-central-hotfix-cve-2026-86218/",
+     "excerpt": "N-able patches critical N-central zero-day exploited in the wild (CVE-2026-86218)."
+    },
+    {
+     "publisher": "Help Net Security",
+     "published": "2026-08-10",
+     "title": "N-able ships second N-central hotfix as attackers keep exploiting CVE-2026-18577",
+     "url": "https://www.helpnetsecurity.com/2026/08/10/cve-2026-18577-n-central-hotfix-2-msps/",
+     "excerpt": "N-able ships second N-central hotfix as attackers keep exploiting CVE-2026-18577."
+    },
+    {
+     "publisher": "Help Net Security",
+     "published": "2026-08-03",
+     "title": "Attackers exploit N-able N-central flaw to reach managed endpoints (CVE-2026-18577)",
+     "url": "https://www.helpnetsecurity.com/2026/08/03/cve-2026-18577-n-able-n-central-vulnerability/",
+     "excerpt": "Attackers exploit N-able N-central flaw to reach managed endpoints (CVE-2026-18577)."
+    },
+    {
+     "publisher": "Help Net Security",
+     "published": "2026-06-23",
+     "title": "New N-able feature gives IT teams visibility into AI usage across endpoints and networks",
+     "url": "https://www.helpnetsecurity.com/2026/06/23/n-able-shadow-ai-visibility/",
+     "excerpt": "New N-able feature gives IT teams visibility into AI usage across endpoints and networks."
+    },
+    {
+     "publisher": "Help Net Security",
+     "published": "2026-02-27",
+     "title": "N-able\u2019s Anomaly Detection feature identifies credential-based threats",
+     "url": "https://www.helpnetsecurity.com/2026/02/27/n-able-cove-data-protection-anomaly-detection-capabilities/",
+     "excerpt": "N-able\u2019s Anomaly Detection feature identifies credential-based threats."
+    },
+    {
+     "publisher": "Help Net Security",
+     "published": "2026-01-29",
+     "title": "N-able brings AI to endpoint, security, and recovery",
+     "url": "https://www.helpnetsecurity.com/2026/01/29/n-able-enhanced-ai-capabilities/",
+     "excerpt": "N-able brings AI to endpoint, security, and recovery."
+    },
+    {
+     "publisher": "BetaKit",
+     "published": "2025-11-28",
+     "title": "Augmentt lands $18 million to help safeguard cloud software for SMBs",
+     "url": "https://betakit.com/ottawa-startup-augmentt-lands-18-million-to-help-safeguard-cloud-software-for-smbs/",
+     "excerpt": "Former N-able leaders aim to help MSPs manage security across SaaS apps."
+    },
+    {
+     "publisher": "Help Net Security",
+     "published": "2025-09-16",
+     "title": "N-able strengthens backup threat protection",
+     "url": "https://www.helpnetsecurity.com/2025/09/16/n-able-strengthens-backup-threat-protection/",
+     "excerpt": "N-able strengthens backup threat protection."
+    }
+   ]
+  },
+  {
+   "prospect_id": 80,
+   "company": "Datto",
+   "tier": 4,
+   "seconds": 51.4,
+   "pointers": 25,
+   "fetched": 15,
+   "independent_articles": 7,
+   "independent_origins": 5,
+   "publishers": [
+    "fortune.com",
+    "techcrunch.com",
+    "www.courant.com",
+    "www.crn.com",
+    "www.iteuropa.com"
+   ],
+   "wire_releases": 0,
+   "wikipedia": true,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 15,
+    "FETCH_UNSAFE_REDIRECT": 3,
+    "ARTICLE_DISALLOWED_BY_ROBOTS": 9,
+    "FETCH_HTTP_STATUS": 4,
+    "RELEVANCE_IRRELEVANT": 1,
+    "REGULATORY_FILING_NOT_REPORTING": 1
+   },
+   "articles": [
+    {
+     "publisher": "www.iteuropa.com",
+     "published": "",
+     "title": "Datto reveals European growth and builds pub",
+     "url": "https://www.iteuropa.com/news/datto-reveals-european-growth-and-builds-pub",
+     "excerpt": "Datto reveals European growth and builds pub."
+    },
+    {
+     "publisher": "techcrunch.com",
+     "published": "",
+     "title": "Datto Scores $75 Million As It Seeks To Expand Beyond Disaster Recovery | TechCrunch",
+     "url": "https://techcrunch.com/2015/11/16/datto-scores-75-million-as-it-seeks-to-expand-beyond-disaster-recovery/",
+     "excerpt": "Datto, the company that acts as a backup and disaster recovery service for small to medium sized businesses (SMBs), announced today that it has raised $75 million in a Series B investment."
+    },
+    {
+     "publisher": "fortune.com",
+     "published": "",
+     "title": "Datto Nets $75 Million in New Funding | Fortune",
+     "url": "https://fortune.com/2015/11/17/datto-funding/",
+     "excerpt": "Datto Snags $75 Million to Fund Geographic Expansion."
+    },
+    {
+     "publisher": "techcrunch.com",
+     "published": "",
+     "title": "Datto trades modestly higher after pricing IPO at top of range | TechCrunch",
+     "url": "https://techcrunch.com/2020/10/21/datto-trades-modestly-higher-after-pricing-ipo-at-top-of-range/",
+     "excerpt": "After pricing at $27 per share, Datto\u2019s stock rose during regular trading."
+    },
+    {
+     "publisher": "www.courant.com",
+     "published": "",
+     "title": "Data Storage Startup Datto Acquired In Deal, Merges With IT Firm \u2013 Hartford Courant",
+     "url": "https://www.courant.com/2017/10/26/data-storage-startup-datto-acquired-in-deal-merges-with-it-firm/",
+     "excerpt": "Connecticut\u2019s billion-dollar startup, the cloud storage company Datto Inc."
+    },
+    {
+     "publisher": "www.crn.com",
+     "published": "",
+     "title": "Datto Buys Threat Detection And Response Vendor Infocyte | CRN",
+     "url": "https://www.crn.com/news/security/datto-buys-threat-detection-and-response-vendor-infocyte",
+     "excerpt": "Datto Buys Threat Detection And Response Vendor Infocyte."
+    },
+    {
+     "publisher": "www.crn.com",
+     "published": "",
+     "title": "It\u2019s Official: Kaseya Completes Datto Acquisition | CRN",
+     "url": "https://www.crn.com/news/channel-programs/it-s-official-kaseya-completes-datto-acquisition",
+     "excerpt": "It\u2019s Official: Kaseya Completes Datto Acquisition."
+    }
+   ]
+  },
+  {
+   "prospect_id": 81,
+   "company": "Barracuda",
+   "tier": 4,
+   "seconds": 31.5,
+   "pointers": 11,
+   "fetched": 9,
+   "independent_articles": 8,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 62,
+    "WIKIDATA_UNAVAILABLE": 1,
+    "FETCH_HTTP_STATUS": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-09-22",
+     "title": "Barracuda launches AI Data Security to control what employees send to chatbots",
+     "url": "https://siliconangle.com/2026/09/22/barracuda-launches-ai-data-security-to-control-what-employees-send-to-chatbots/",
+     "excerpt": "Barracuda launches AI Data Security to control what employees send to chatbots."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-07-07",
+     "title": "Barracuda Networks acquires access management startup Evo Security",
+     "url": "https://siliconangle.com/2026/07/07/barracuda-networks-acquires-access-management-startup-evo-security/",
+     "excerpt": "Barracuda Networks acquires access management startup Evo Security."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-03-24",
+     "title": "Barracuda expands BarracudaONE platform and overhauls Partner Success Program",
+     "url": "https://siliconangle.com/2026/03/24/barracuda-expands-barracudaone-platform-overhauls-partner-success-program/",
+     "excerpt": "Barracuda expands BarracudaONE platform and overhauls Partner Success Program."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-01-07",
+     "title": "Barracuda report finds phishing kits doubled in 2025 as attacks grew more evasive",
+     "url": "https://siliconangle.com/2026/01/07/barracuda-report-finds-phishing-kits-doubled-2025-attacks-grew-evasive/",
+     "excerpt": "Barracuda report finds phishing kits doubled in 2025 as attacks grew more evasive."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-10-15",
+     "title": "Whisper 2FA kit steals Microsoft 365 credentials and MFA tokens in real time",
+     "url": "https://siliconangle.com/2025/10/15/whisper-2fa-kit-steals-microsoft-365-credentials-mfa-tokens-real-time/",
+     "excerpt": "A new report released today by cloud cybersecurity firm Barracuda Networks Inc."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-07-08",
+     "title": "New Barracuda backup tool extends Microsoft Entra ID data retention",
+     "url": "https://siliconangle.com/2025/07/08/new-barracuda-backup-tool-extends-microsoft-entra-id-data-retention/",
+     "excerpt": "New Barracuda backup tool extends Microsoft Entra ID data retention."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-05-07",
+     "title": "Barracuda adds multimodal AI to boost threat detection accuracy and speed",
+     "url": "https://siliconangle.com/2025/05/07/barracuda-adds-multimodal-ai-boost-threat-detection-accuracy-speed/",
+     "excerpt": "Barracuda adds multimodal AI to boost threat detection accuracy and speed."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-06-18",
+     "title": "Barracuda report: AI-enhanced phishing drives surge in email security threats",
+     "url": "https://siliconangle.com/2024/06/18/barracuda-report-ai-enhanced-phishing-drives-surge-email-security-threats/",
+     "excerpt": "Barracuda report: AI-enhanced phishing drives surge in email security threats."
+    }
+   ]
+  },
+  {
+   "prospect_id": 82,
+   "company": "eSentire",
+   "tier": 4,
+   "seconds": 17.9,
+   "pointers": 3,
+   "fetched": 3,
+   "independent_articles": 1,
+   "independent_origins": 1,
+   "publishers": [
+    "BetaKit"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 51,
+    "FEED_UNAVAILABLE_404": 1,
+    "WIKIDATA_NO_MATCHING_NAME": 1,
+    "RELEVANCE_IRRELEVANT": 2
+   },
+   "articles": [
+    {
+     "publisher": "BetaKit",
+     "published": "2025-01-17",
+     "title": "\u2018Is there life after acquisition?\u2019 Canadian founders get candid at TechTO",
+     "url": "https://betakit.com/is-there-life-after-acquisition-canadian-founders-get-candid-at-techto/",
+     "excerpt": "Founders from eSentire, Sensibill, Fable, and Sprout Family shared their stories at MaRS on Jan."
+    }
+   ]
+  },
+  {
+   "prospect_id": 83,
+   "company": "Blackpoint Cyber",
+   "tier": 4,
+   "seconds": 17.1,
+   "pointers": 3,
+   "fetched": 3,
+   "independent_articles": 1,
+   "independent_origins": 1,
+   "publishers": [
+    "Channel Insider"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 4,
+    "WIKIDATA_NO_MATCHING_NAME": 1,
+    "FETCH_HTTP_STATUS": 1,
+    "RELEVANCE_IRRELEVANT": 1
+   },
+   "articles": [
+    {
+     "publisher": "Channel Insider",
+     "published": "2024-07-05",
+     "title": "Video: Blackpoint Cyber CEO on Why MSPs Need Better MDR in 2024",
+     "url": "https://www.channelinsider.com/video/blackpoint-cyber-ceo-on-why-msps-need-better-mdr-in-2024/",
+     "excerpt": "Video: Blackpoint Cyber CEO on Why MSPs Need Better MDR in 2024."
+    }
+   ]
+  },
+  {
+   "prospect_id": 86,
+   "company": "Tanium",
+   "tier": 4,
+   "seconds": 33.8,
+   "pointers": 22,
+   "fetched": 10,
+   "independent_articles": 8,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": true,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 58,
+    "FEED_UNAVAILABLE_404": 1,
+    "RELEVANCE_IRRELEVANT": 2
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-10-09",
+     "title": "OpenAI revenue falls short, models play hopscotch and Trump cracks down on tech green cards",
+     "url": "https://siliconangle.com/2026/10/09/openai-revenue-falls-short-models-play-hopscotch-and-trump-cracks-down-on-tech-green-cards/",
+     "excerpt": "Tanium expands Security Operations with Atlas-powered detection, response and hunting."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-10-06",
+     "title": "Tanium expands Security Operations with Atlas-powered detection, response and hunting",
+     "url": "https://siliconangle.com/2026/10/06/tanium-expands-security-operations-with-atlas-powered-detection-response-and-hunting/",
+     "excerpt": "Tanium expands Security Operations with Atlas-powered detection, response and hunting."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-05-06",
+     "title": "Tanium and ServiceNow launch joint solution to automate endpoint patching and remediation",
+     "url": "https://siliconangle.com/2026/05/06/tanium-servicenow-launch-joint-solution-automate-endpoint-patching-remediation/",
+     "excerpt": "Tanium and ServiceNow launch joint solution to automate endpoint patching and remediation."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-11-18",
+     "title": "Tanium rolls out agentic AI upgrades, expanded endpoint management and new security tools",
+     "url": "https://siliconangle.com/2025/11/18/tanium-rolls-agentic-ai-upgrades-expanded-endpoint-management-new-security-tools/",
+     "excerpt": "Tanium rolls out agentic AI upgrades, expanded endpoint management and new security tools."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-11-19",
+     "title": "Tanium introduces autonomous endpoint management to enhance IT and security operations",
+     "url": "https://siliconangle.com/2024/11/19/tanium-introduces-autonomous-endpoint-management-enhance-security-operations/",
+     "excerpt": "Tanium introduces autonomous endpoint management to enhance IT and security operations."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-07-11",
+     "title": "AI adoption and automation: Tanium\u2019s strategies for organizational resilience",
+     "url": "https://siliconangle.com/2024/07/11/ai-adoption-challenges-navigating-new-tech-risks-rsac/",
+     "excerpt": "AI adoption and automation: Tanium\u2019s strategies for organizational resilience."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-04-16",
+     "title": "New Tanium Automate offers automated insights for endpoint security",
+     "url": "https://siliconangle.com/2024/04/16/new-tanium-automate-offers-automated-insights-endpoint-security/",
+     "excerpt": "New Tanium Automate offers automated insights for endpoint security."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-04-01",
+     "title": "New Tanium-Microsoft partnership provides endpoint data to Copilot for Security",
+     "url": "https://siliconangle.com/2024/04/01/new-tanium-microsoft-partnership-provides-endpoint-data-copilot-security/",
+     "excerpt": "New Tanium-Microsoft partnership provides endpoint data to Copilot for Security."
+    }
+   ]
+  },
+  {
+   "prospect_id": 87,
+   "company": "Lansweeper",
+   "tier": 4,
+   "seconds": 20.3,
+   "pointers": 2,
+   "fetched": 2,
+   "independent_articles": 2,
+   "independent_origins": 2,
+   "publishers": [
+    "SiliconANGLE",
+    "ZDNET"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 1,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 11,
+    "WIKIDATA_UNAVAILABLE": 1
+   },
+   "articles": [
+    {
+     "publisher": "ZDNET",
+     "published": "2025-08-07",
+     "title": "Think Linux desktop market share isn\u2019t over 6%? This 15 million-system scan says otherwise",
+     "url": "https://www.zdnet.com/article/think-linux-desktop-market-share-isnt-over-6-this-15-million-system-scan-says-otherwise/",
+     "excerpt": "Linux desktop share tops 6% in Lansweeper\u2019s 15 million-system analysis."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-07-17",
+     "title": "Lansweeper acquires Redjack to expand passive asset discovery and mapping capabilities",
+     "url": "https://siliconangle.com/2025/07/17/lansweeper-acquires-redjack-expand-passive-asset-discovery-mapping-capabilities/",
+     "excerpt": "Lansweeper acquires Redjack to expand passive asset discovery and mapping capabilities."
+    }
+   ]
+  },
+  {
+   "prospect_id": 89,
+   "company": "Tines",
+   "tier": 4,
+   "seconds": 36.8,
+   "pointers": 10,
+   "fetched": 9,
+   "independent_articles": 8,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 80,
+    "FEED_UNAVAILABLE_404": 1,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1,
+    "RELEVANCE_IRRELEVANT": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-07-28",
+     "title": "Tines seeks to tame \u2018wild code\u2019 AI sprawl",
+     "url": "https://siliconangle.com/2026/07/28/tines-launches-3b-help-enterprises-govern-ai-built-apps-agents/",
+     "excerpt": "Tines seeks to tame \u2018wild code\u2019 AI sprawl."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-01-15",
+     "title": "Tines launches AI interaction layer to unify agents, copilots and workflows",
+     "url": "https://siliconangle.com/2026/01/15/tines-launches-ai-interaction-layer-unify-agents-copilots-workflows/",
+     "excerpt": "Tines launches AI interaction layer to unify agents, copilots and workflows."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-06-25",
+     "title": "Tines adds AI-powered agents to expand enterprise workflow automation",
+     "url": "https://siliconangle.com/2025/06/25/tines-adds-ai-powered-agents-expand-enterprise-workflow-automation/",
+     "excerpt": "Tines adds AI-powered agents to expand enterprise workflow automation."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-02-11",
+     "title": "Tines nabs $125M for its AI-powered workflow automation platform",
+     "url": "https://siliconangle.com/2025/02/11/tines-nabs-125m-ai-powered-workflow-automation-platform/",
+     "excerpt": "Tines nabs $125M for its AI-powered workflow automation platform."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-08-11",
+     "title": "Knowledge work automation in a post-RPA world",
+     "url": "https://siliconangle.com/2024/08/11/knowledge-work-automation-post-rpa-world/",
+     "excerpt": "Tines (Tines Security Services Ltd.), in contrast, focuses primarily on cybersecurity-related tasks."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-06-05",
+     "title": "Tines debuts new AI capabilities to streamline security and IT operations",
+     "url": "https://siliconangle.com/2024/06/05/tines-debuts-new-ai-capabilities-streamline-security-operations/",
+     "excerpt": "Tines debuts new AI capabilities to streamline security and IT operations."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-04-24",
+     "title": "Irish startup Tines raises $50M to expand no-code automation tools",
+     "url": "https://siliconangle.com/2024/04/24/irish-startup-tines-raises-50m-develop-no-code-automation-tools/",
+     "excerpt": "Irish startup Tines raises $50M to expand no-code automation tools."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-04-14",
+     "title": "Akamai reportedly in advanced talks to acquire Noname Security for $500M",
+     "url": "https://siliconangle.com/2024/04/14/akamai-reportedly-advanced-talks-acquire-noname-security-500m/",
+     "excerpt": "In November, Noname Security announced integrations with leading security orchestration, automation and response platform providers Swimlane Inc., Tines Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 90,
+   "company": "Swimlane",
+   "tier": 4,
+   "seconds": 36.7,
+   "pointers": 13,
+   "fetched": 9,
+   "independent_articles": 8,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 1,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 15,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1,
+    "RELEVANCE_IRRELEVANT": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-08-19",
+     "title": "Swimlane updates security operations center with intelligent routing",
+     "url": "https://siliconangle.com/2026/08/19/swimlane-updates-security-operations-center-with-intelligent-routing/",
+     "excerpt": "Swimlane updates security operations center with intelligent routing."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-07-22",
+     "title": "Swimlane launches AI security operations center for managed security services providers",
+     "url": "https://siliconangle.com/2026/07/22/swimlane-launches-ai-security-operations-center-managed-security-services-providers/",
+     "excerpt": "Swimlane launches AI security operations center for managed security services providers."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-02-18",
+     "title": "Swimlane debuts AI SOC with agentic back end to tackle cybersecurity operations",
+     "url": "https://siliconangle.com/2026/02/18/swimlane-debuts-ai-soc-agentic-backend-tackle-cybersecurity-operations/",
+     "excerpt": "Swimlane debuts AI SOC with agentic back end to tackle cybersecurity operations."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-01-27",
+     "title": "Swimlane unleashes agentic AI fleet and agent builder for cybersecurity",
+     "url": "https://siliconangle.com/2026/01/27/swimlane-unleashes-agentic-ai-fleet-agent-builder-cybersecurity/",
+     "excerpt": "Swimlane unleashes agentic AI fleet and agent builder for cybersecurity."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-09-10",
+     "title": "Swimlane expands Hero AI to deliver agentic automation for security teams",
+     "url": "https://siliconangle.com/2025/09/10/swimlane-expands-hero-ai-deliver-agentic-automation-security-teams/",
+     "excerpt": "Swimlane expands Hero AI to deliver agentic automation for security teams."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-06-10",
+     "title": "Swimlane raises $45M to expand AI-powered security automation platform",
+     "url": "https://siliconangle.com/2025/06/10/swimlane-raises-45m-expand-ai-powered-security-automation-platform/",
+     "excerpt": "Swimlane raises $45M to expand AI-powered security automation platform."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-08-05",
+     "title": "Swimlane enhances Hero AI with advance case summarization and AI-augmented reporting",
+     "url": "https://siliconangle.com/2024/08/05/swimlane-enhances-hero-ai-advance-case-summarization-ai-augmented-reporting/",
+     "excerpt": "Swimlane enhances Hero AI with advance case summarization and AI-augmented reporting."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-05-06",
+     "title": "Swimlane launches new marketplace for enhanced security automation and integration",
+     "url": "https://siliconangle.com/2024/05/06/swimlane-launches-new-marketplace-enhanced-security-automation-integration/",
+     "excerpt": "Swimlane launches new marketplace for enhanced security automation and integration."
+    }
+   ]
+  },
+  {
+   "prospect_id": 91,
+   "company": "Pax8",
+   "tier": 4,
+   "seconds": 40.5,
+   "pointers": 13,
+   "fetched": 13,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 3,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1,
+    "AMBIGUOUS_NAME_NO_IDENTITY_ANCHOR": 13
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 92,
+   "company": "Sherweb",
+   "tier": 4,
+   "seconds": 18.6,
+   "pointers": 0,
+   "fetched": 0,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 2,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 1,
+    "WIKIDATA_UNAVAILABLE": 1
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 93,
+   "company": "Softchoice",
+   "tier": 4,
+   "seconds": 22.0,
+   "pointers": 3,
+   "fetched": 3,
+   "independent_articles": 3,
+   "independent_origins": 2,
+   "publishers": [
+    "BetaKit",
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 36,
+    "WIKIDATA_NO_MATCHING_NAME": 1
+   },
+   "articles": [
+    {
+     "publisher": "BetaKit",
+     "published": "2025-03-14",
+     "title": "Softchoice taken private, moved stateside by WWT after $1.48-billion acquisition closes",
+     "url": "https://betakit.com/softchoice-taken-private-moved-stateside-by-wwt-after-1-48-billion-acquisition-closes/",
+     "excerpt": "American cloud services giant World Wide Technology (WWT) has completed its acquisition of Softchoice, the Toronto-based cloud and software solutions provider for businesses."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-12-31",
+     "title": "WWT to acquire Softchoice in $1.25B technology services deal",
+     "url": "https://siliconangle.com/2024/12/31/wwt-acquire-softchoice-1-25b-technology-services-deal/",
+     "excerpt": "WWT to acquire Softchoice in $1.25B technology services deal."
+    },
+    {
+     "publisher": "BetaKit",
+     "published": "2023-11-30",
+     "title": "Getting hybrid work right requires building a long-term plan",
+     "url": "https://betakit.com/getting-hybrid-work-right-requires-building-a-long-term-plan/",
+     "excerpt": "Experts from Intel, Softchoice, and the University of Toronto explained what it will take to make hybrid work successful in 2024."
+    }
+   ]
+  },
+  {
+   "prospect_id": 94,
+   "company": "CDW",
+   "tier": 4,
+   "seconds": 52.8,
+   "pointers": 20,
+   "fetched": 11,
+   "independent_articles": 0,
+   "independent_origins": 0,
+   "publishers": [],
+   "wire_releases": 2,
+   "wikipedia": true,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 64,
+    "AMBIGUOUS_NAME_NO_IDENTITY_ANCHOR": 7,
+    "FETCH_HTTP_STATUS": 2,
+    "ARTICLE_DISALLOWED_BY_ROBOTS": 6,
+    "REGULATORY_FILING_NOT_REPORTING": 3
+   },
+   "articles": []
+  },
+  {
+   "prospect_id": 95,
+   "company": "Presidio",
+   "tier": 4,
+   "seconds": 24.1,
+   "pointers": 7,
+   "fetched": 7,
+   "independent_articles": 7,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 22,
+    "FEED_UNAVAILABLE_404": 1,
+    "WIKIDATA_NO_ITEM_WITH_THIS_WEBSITE": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-01-13",
+     "title": "Presidio rolls out Adaptive Cloud Services on AWS for cloud operations and cost management",
+     "url": "https://siliconangle.com/2026/01/13/presidio-rolls-adaptive-cloud-services-aws-cloud-operations-cost-management/",
+     "excerpt": "Presidio rolls out Adaptive Cloud Services on AWS for cloud operations and cost management."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-11-25",
+     "title": "Mercy Ships, Presidio and Cisco partner at the intersection technology and purpose",
+     "url": "https://siliconangle.com/2025/11/25/mercy-ships-presidio-cisco-partner-intersection-technology-purpose/",
+     "excerpt": "Mercy Ships, Presidio and Cisco partner at the intersection technology and purpose."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-02-04",
+     "title": "Presidio launches Private AI Accelerator powered by Nvidia for secure on-premises AI",
+     "url": "https://siliconangle.com/2025/02/04/presidio-launches-private-ai-accelerator-powered-nvidia-secure-premises-ai/",
+     "excerpt": "Presidio launches Private AI Accelerator powered by Nvidia for secure on-premises AI."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-11-01",
+     "title": "Three insights you might have missed from the \u2018Smarter Storage for Tomorrow\u2019s Opportunities\u2019 event",
+     "url": "https://siliconangle.com/2024/11/01/three-insights-dell-smarter-storage-dellpowerstore/",
+     "excerpt": "\u201cWhen you think about pinpointing issues across the stack within the storage array, a lot of that happens without the customer knowing about what\u2019s happening, and Dell can mitigate some of those challenges before they do occur,\u201d said Raphael Meyerowitz, vice president and partner of go-to-market at "
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-10-29",
+     "title": "Future-proofing data: Why resilience and adaptability matter in AI-driven storage",
+     "url": "https://siliconangle.com/2024/10/29/data-resilience-and-adaptability-data-storage-dellpowerstore/",
+     "excerpt": "Schulke and Raphael Meyerowitz (left), vice president and partner of go to market at Presidio Inc., spoke with theCUBE Research\u2019s Rob Strechay at the Smarter Storage for Tomorrow\u2019s Opportunities event, during an exclusive broadcast on theCUBE, SiliconANGLE Media\u2019s livestreaming studio."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2024-10-15",
+     "title": "Presidio expands AWS partnership to drive AI adoption and cloud migration",
+     "url": "https://siliconangle.com/2024/10/15/presidio-expands-aws-partnership-drive-ai-adoption-cloud-migration/",
+     "excerpt": "Presidio expands AWS partnership to drive AI adoption and cloud migration."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2023-11-28",
+     "title": "AWS Marketplace transforms cloud spending and procurement for Dell and Presidio clients",
+     "url": "https://siliconangle.com/2023/11/28/aws-marketplace-transforms-cloud-spending-and-procurement-for-dell-and-presidio-clients-supercloud5/",
+     "excerpt": "AWS Marketplace transforms cloud spending and procurement for Dell and Presidio clients."
+    }
+   ]
+  },
+  {
+   "prospect_id": 96,
+   "company": "Trace3",
+   "tier": 4,
+   "seconds": 22.2,
+   "pointers": 1,
+   "fetched": 1,
+   "independent_articles": 1,
+   "independent_origins": 1,
+   "publishers": [
+    "Channel Insider"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 11,
+    "WIKIDATA_UNAVAILABLE": 1
+   },
+   "articles": [
+    {
+     "publisher": "Channel Insider",
+     "published": "2025-06-30",
+     "title": "Video: Descope Reinvents Customer Identity and Access Management with Secure Drag-and-Drop Solution",
+     "url": "https://www.channelinsider.com/video/descope-reinvents-customer-identity-and-access-management-with-secure-drag-and-drop-solution/",
+     "excerpt": "Discover how Descope simplifies CIAM with a drag-and-drop platform built for the AI era and why Trace3 chose Descope for real-world customer deployments."
+    }
+   ]
+  },
+  {
+   "prospect_id": 99,
+   "company": "Rackspace Technology",
+   "tier": 4,
+   "seconds": 73.3,
+   "pointers": 49,
+   "fetched": 19,
+   "independent_articles": 8,
+   "independent_origins": 4,
+   "publishers": [
+    "SiliconANGLE",
+    "StorageReview",
+    "techcrunch.com",
+    "www.expressnews.com"
+   ],
+   "wire_releases": 0,
+   "wikipedia": true,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 1,
+    "FEED_ITEM_NOT_ABOUT_SUBJECT": 46,
+    "FETCH_HTTP_STATUS": 11,
+    "ARTICLE_DISALLOWED_BY_ROBOTS": 6
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-09-03",
+     "title": "Rackspace launches managed multitenant cloud on VCF 9.1",
+     "url": "https://siliconangle.com/2026/09/03/rackspace-launches-managed-multitenant-cloud-on-vcf-9-1-vmwareexplore/",
+     "excerpt": "Rackspace launches managed multitenant cloud on VCF 9.1."
+    },
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2026-07-07",
+     "title": "What to expect at the AMD Advancing AI event: Join theCUBE July 22-23",
+     "url": "https://siliconangle.com/2026/07/07/amd-advancing-ai-enterprise-ai-infrastructure-amdadvancingai/",
+     "excerpt": "The company\u2019s recent agreement with Rackspace Technology Inc."
+    },
+    {
+     "publisher": "StorageReview",
+     "published": "2026-06-18",
+     "title": "AMD and Rackspace Formalize 30MW AI Infrastructure Deployment Across Global Data Centers",
+     "url": "https://www.storagereview.com/news/amd-and-rackspace-formalize-30mw-ai-infrastructure-deployment-across-global-data-centers",
+     "excerpt": "AMD and Rackspace Formalize 30MW AI Infrastructure Deployment Across Global Data Centers."
+    },
+    {
+     "publisher": "StorageReview",
+     "published": "2026-05-12",
+     "title": "Rackspace and AMD Plan Governed AI Cloud for Enterprise Workloads",
+     "url": "https://www.storagereview.com/news/rackspace-and-amd-plan-governed-ai-cloud-for-enterprise-workloads",
+     "excerpt": "Rackspace and AMD Plan Governed AI Cloud for Enterprise Workloads."
+    },
+    {
+     "publisher": "techcrunch.com",
+     "published": "",
+     "title": "Rackspace now offers managed services for Google's Cloud Platform | TechCrunch",
+     "url": "https://techcrunch.com/2017/03/08/rackspace-now-offers-managed-services-for-googles-cloud-platform/",
+     "excerpt": "Rackspace today announced it\u2019s expanding its managed service portfolio to include support for the Google Cloud Platform."
+    },
+    {
+     "publisher": "techcrunch.com",
+     "published": "",
+     "title": "Rackspace Acquires JungleDisk, Slicehost To Take On Amazon Web Services | TechCrunch",
+     "url": "https://techcrunch.com/2008/10/22/rackspace-acquires-jungledisk-slicehost-to-take-on-amazon-web-services/",
+     "excerpt": "Web hosting provider Rackspace has acquired JungleDisk, an online backup service, and Virtual Machine provider Slicehost in a deal designed to help bolster its offerings against top competitor Amazon Web Services."
+    },
+    {
+     "publisher": "techcrunch.com",
+     "published": "",
+     "title": "Rackspace Goes Down. Again. Takes The Internet With It. Again. | TechCrunch",
+     "url": "https://techcrunch.com/2009/12/18/rackspace-down/",
+     "excerpt": "Another day, another Rackspace outage."
+    },
+    {
+     "publisher": "www.expressnews.com",
+     "published": "",
+     "title": "It\u2019s official: Rackspace exiting New York Stock Exchange",
+     "url": "https://www.expressnews.com/business/local/article/It-s-official-Rackspace-exiting-New-York-Stock-10591228.php",
+     "excerpt": "It\u2019s official: Rackspace exiting New York Stock Exchange."
+    }
+   ]
+  },
+  {
+   "prospect_id": 100,
+   "company": "Pellera Technologies",
+   "tier": 4,
+   "seconds": 19.3,
+   "pointers": 1,
+   "fetched": 1,
+   "independent_articles": 1,
+   "independent_origins": 1,
+   "publishers": [
+    "SiliconANGLE"
+   ],
+   "wire_releases": 0,
+   "wikipedia": false,
+   "rejection_reasons": {
+    "FEED_UNAVAILABLE_404": 1,
+    "WIKIDATA_NO_MATCHING_NAME": 1
+   },
+   "articles": [
+    {
+     "publisher": "SiliconANGLE",
+     "published": "2025-08-29",
+     "title": "Incentives reshape the Broadcom partner ecosystem for enterprise IT",
+     "url": "https://siliconangle.com/2025/08/29/certifications-services-redefine-partner-ecosystem-vmwareexplore/",
+     "excerpt": "Broadcom\u2019s Tara Fine and Pellera Technologies\u2019 Pierre Cayouette discuss how Broadcom and its partners are reshaping the partner ecosystem."
+    }
+   ]
+  }
+ ]
+}
