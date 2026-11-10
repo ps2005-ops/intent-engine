@@ -1,0 +1,3717 @@
+{
+ "summary": {
+  "live_sha": "unknown",
+  "companies_scored": 95,
+  "qualification_10_of_10": 0,
+  "epistemic_outcomes": {
+   "DECISION_GRADE_READING": 49,
+   "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY": 19,
+   "DEFENSIBLE_ABSTENTION": 21,
+   "RETRIEVAL_LIMITATION_HANDLED_CORRECTLY": 5,
+   "PRODUCT_DEFECT": 1
+  },
+  "by_tier": {
+   "T1": {
+    "companies": 23,
+    "qualified": 0
+   },
+   "T2": {
+    "companies": 24,
+    "qualified": 0
+   },
+   "T3": {
+    "companies": 24,
+    "qualified": 0
+   },
+   "T4": {
+    "companies": 24,
+    "qualified": 0
+   }
+  },
+  "dimensions": {
+   "IDENTITY": {
+    "PASS": 95
+   },
+   "EVIDENCE_PROVENANCE": {
+    "PASS": 95
+   },
+   "COMPANY_UNDERSTANDING": {
+    "PASS": 67,
+    "PASS_BOUNDED": 22,
+    "FAIL": 6
+   },
+   "ECONOMIC_INTELLIGENCE": {
+    "PASS_BOUNDED": 90,
+    "FAIL": 5
+   },
+   "STRATEGIC_DECISION": {
+    "PASS_BOUNDED": 76,
+    "FAIL": 5,
+    "PASS": 14
+   },
+   "HISTORY": {
+    "PASS_BOUNDED": 56,
+    "PASS": 39
+   },
+   "DISCOVERY": {
+    "PASS": 91,
+    "PASS_BOUNDED": 4
+   },
+   "QA_ROLE": {
+    "PASS": 94,
+    "FAIL": 1
+   },
+   "UI": {
+    "NOT_MEASURED": 95
+   },
+   "EXECUTIVE_USEFULNESS": {
+    "PASS_BOUNDED": 85,
+    "PASS": 9,
+    "FAIL": 1
+   }
+  },
+  "core_s_p50": 28.3,
+  "core_s_p90": 44.4
+ },
+ "companies": [
+  {
+   "company": "Hammerspace",
+   "n": 1,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL C over 1 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 20.5
+  },
+  {
+   "company": "WEKA",
+   "n": 2,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "FAIL",
+    "STRATEGIC_DECISION": "FAIL",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: site error ",
+    "ECONOMIC_INTELLIGENCE": "2/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page",
+    "HISTORY": "LEVEL B over 5 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [
+    "ECONOMIC_INTELLIGENCE",
+    "STRATEGIC_DECISION"
+   ],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 12.1
+  },
+  {
+   "company": "Reltio",
+   "n": 3,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 5 dated record(s), hindsight wall PRESENT; 1 repeated passage(s)",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 16.1
+  },
+  {
+   "company": "Ataccama",
+   "n": 4,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: service delivered by people or over a route network",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 2 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 32.4
+  },
+  {
+   "company": "Informatica",
+   "n": 5,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_REINFORCED_BY_EVIDENCE",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_REINFORCED_BY_EVIDENCE, stated on the page on ['consumption pricing', 'pricing model']",
+    "HISTORY": "LEVEL B over 2 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 24.1
+  },
+  {
+   "company": "Qlik",
+   "n": 6,
+   "outcome": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: service delivered by people or over a route network",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL C over 0 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "core_s": 24.4
+  },
+  {
+   "company": "Matillion",
+   "n": 7,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 6 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 16.2
+  },
+  {
+   "company": "Keboola",
+   "n": 8,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 9 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_NO_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 24.4
+  },
+  {
+   "company": "CData",
+   "n": 9,
+   "outcome": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "LEVEL C over 0 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "core_s": 37.0
+  },
+  {
+   "company": "Precisely",
+   "n": 10,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "LEVEL B over 4 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 37.0
+  },
+  {
+   "company": "Securiti",
+   "n": 11,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 4 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 40.2
+  },
+  {
+   "company": "Immuta",
+   "n": 12,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 4 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 61.0
+  },
+  {
+   "company": "Privacera",
+   "n": 13,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 7 dated record(s), hindsight wall PRESENT; 2 repeated passage(s)",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 28.1
+  },
+  {
+   "company": "Soda",
+   "n": 14,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 2 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 48.4
+  },
+  {
+   "company": "Acceldata",
+   "n": 15,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL C over 1 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 28.6
+  },
+  {
+   "company": "Anomalo",
+   "n": 16,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 6 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 24.2
+  },
+  {
+   "company": "Chronosphere",
+   "n": 18,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 9 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 2 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 24.1
+  },
+  {
+   "company": "CrateDB",
+   "n": 19,
+   "outcome": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "FAIL",
+    "STRATEGIC_DECISION": "FAIL",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: access refused ",
+    "ECONOMIC_INTELLIGENCE": "2/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page",
+    "HISTORY": "LEVEL C over 1 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY"
+   },
+   "failed": [
+    "ECONOMIC_INTELLIGENCE",
+    "STRATEGIC_DECISION"
+   ],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "core_s": 16.1
+  },
+  {
+   "company": "SingleStore",
+   "n": 20,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 2 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 24.3
+  },
+  {
+   "company": "TigerGraph",
+   "n": 21,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 12 dated record(s), hindsight wall PRESENT; 4 repeated passage(s)",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 20.3
+  },
+  {
+   "company": "Neo4j",
+   "n": 22,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 10 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 24.2
+  },
+  {
+   "company": "Arango",
+   "n": 23,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "FAIL",
+    "STRATEGIC_DECISION": "FAIL",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: access refused ",
+    "ECONOMIC_INTELLIGENCE": "1/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page",
+    "HISTORY": "LEVEL B over 13 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_NO_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [
+    "ECONOMIC_INTELLIGENCE",
+    "STRATEGIC_DECISION"
+   ],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 32.2
+  },
+  {
+   "company": "KX",
+   "n": 24,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 4 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T1",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 36.5
+  },
+  {
+   "company": "Interos",
+   "n": 26,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "EVIDENCE_LED",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: service delivered by people or over a route network",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force EVIDENCE_LED, stated on the page on ['logistics', 'procurement', 'supplier']",
+    "HISTORY": "LEVEL C over 1 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 8.4
+  },
+  {
+   "company": "Everstream Analytics",
+   "n": 27,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "LEVEL B over 11 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_NO_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 12.2
+  },
+  {
+   "company": "Resilinc",
+   "n": 28,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "EVIDENCE_LED",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force EVIDENCE_LED, stated on the page on ['freight', 'logistics', 'procurement']",
+    "HISTORY": "LEVEL B over 4 dated record(s), hindsight wall PRESENT; 1 repeated passage(s)",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 20.7
+  },
+  {
+   "company": "Altana",
+   "n": 29,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "EVIDENCE_LED",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force EVIDENCE_LED, stated on the page on ['customs', 'freight', 'logistics']",
+    "HISTORY": "LEVEL C over 0 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 28.3
+  },
+  {
+   "company": "Exiger",
+   "n": 30,
+   "outcome": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "decision_force": "EVIDENCE_LED",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force EVIDENCE_LED, stated on the page on ['lead time', 'logistics', 'procurement']",
+    "HISTORY": "LEVEL C over 1 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "core_s": 24.3
+  },
+  {
+   "company": "Sayari",
+   "n": 31,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "EVIDENCE_LED",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force EVIDENCE_LED, stated on the page on ['customs', 'freight', 'logistics']",
+    "HISTORY": "LEVEL B over 11 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_NO_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 24.2
+  },
+  {
+   "company": "Kharon",
+   "n": 32,
+   "outcome": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "LEVEL C over 1 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_NO_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "core_s": 32.3
+  },
+  {
+   "company": "Moody's",
+   "n": 33,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL A over 90 dated record(s), hindsight wall PRESENT; 51 repeated passage(s)",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 28.7
+  },
+  {
+   "company": "S&P Global",
+   "n": 34,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL A over 90 dated record(s), hindsight wall PRESENT; 50 repeated passage(s)",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 24.2
+  },
+  {
+   "company": "MSCI",
+   "n": 35,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL A over 90 dated record(s), hindsight wall PRESENT; 50 repeated passage(s)",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 32.1
+  },
+  {
+   "company": "FactSet",
+   "n": 36,
+   "outcome": "RETRIEVAL_LIMITATION_HANDLED_CORRECTLY",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "FAIL",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS_BOUNDED",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "no business model stated and no explanation of why",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "no report was produced \u2014 the site refused automated access \u2014 so there is no dated record to rewind, and the page says so instead of drawing an empty frame",
+    "DISCOVERY": "INTERACTIVE_BUDGET_SPENT, 0 independent origin(s); the limit is stated as ours, not as the company's record",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state RETRIEVAL_LIMITATION_HANDLED_CORRECTLY"
+   },
+   "failed": [
+    "COMPANY_UNDERSTANDING"
+   ],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "RETRIEVAL_LIMITATION_HANDLED_CORRECTLY",
+   "core_s": 44.4
+  },
+  {
+   "company": "Morningstar",
+   "n": 37,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_REINFORCED_BY_EVIDENCE",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "FAIL",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "no business model stated and no explanation of why",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_REINFORCED_BY_EVIDENCE, stated on the page on ['capital allocation', 'repurchase program', 'share repurchase']",
+    "HISTORY": "LEVEL A over 90 dated record(s), hindsight wall PRESENT; 50 repeated passage(s)",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [
+    "COMPANY_UNDERSTANDING"
+   ],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 32.3
+  },
+  {
+   "company": "Enverus",
+   "n": 38,
+   "outcome": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "LEVEL C over 0 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "core_s": 28.4
+  },
+  {
+   "company": "Rystad Energy",
+   "n": 39,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "LEVEL B over 5 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 44.8
+  },
+  {
+   "company": "Wood Mackenzie",
+   "n": 40,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: service delivered by people or over a route network",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 4 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 2 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 37.2
+  },
+  {
+   "company": "Verisk",
+   "n": 41,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS_BOUNDED",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: service delivered by people or over a route network",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL A over 90 dated record(s), hindsight wall PRESENT; 45 repeated passage(s)",
+    "DISCOVERY": "INTERACTIVE_BUDGET_SPENT, 0 independent origin(s); the limit is stated as ours, not as the company's record",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 48.7
+  },
+  {
+   "company": "Jupiter Intelligence",
+   "n": 42,
+   "outcome": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "LEVEL C over 0 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "core_s": 20.3
+  },
+  {
+   "company": "Watershed",
+   "n": 44,
+   "outcome": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "LEVEL C over 1 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "core_s": 48.9
+  },
+  {
+   "company": "Persefoni",
+   "n": 45,
+   "outcome": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL C over 0 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "core_s": 12.4
+  },
+  {
+   "company": "Benchmark Gensuite",
+   "n": 46,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: service delivered by people or over a route network",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 3 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 20.3
+  },
+  {
+   "company": "Cority",
+   "n": 47,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 11 dated record(s), hindsight wall PRESENT; 1 repeated passage(s)",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 32.5
+  },
+  {
+   "company": "Assent",
+   "n": 48,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 5 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 32.2
+  },
+  {
+   "company": "EcoVadis",
+   "n": 49,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 8 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 16.3
+  },
+  {
+   "company": "Dun & Bradstreet",
+   "n": 50,
+   "outcome": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "LEVEL C over 1 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T2",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "core_s": 40.6
+  },
+  {
+   "company": "Planful",
+   "n": 51,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 3 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 20.1
+  },
+  {
+   "company": "Vena",
+   "n": 52,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "LEVEL B over 3 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 20.1
+  },
+  {
+   "company": "Cube",
+   "n": 53,
+   "outcome": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL C over 0 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_NO_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "core_s": 32.2
+  },
+  {
+   "company": "Aleph",
+   "n": 55,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "LEVEL C over 1 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 41.2
+  },
+  {
+   "company": "Pigment",
+   "n": 56,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_REINFORCED_BY_EVIDENCE",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_REINFORCED_BY_EVIDENCE, stated on the page on ['customer acquisition cost', 'sales capacity']",
+    "HISTORY": "LEVEL C over 0 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 2 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 32.3
+  },
+  {
+   "company": "Anaplan",
+   "n": 57,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL C over 0 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 68.6
+  },
+  {
+   "company": "Workday",
+   "n": 58,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL A over 90 dated record(s), hindsight wall PRESENT; 50 repeated passage(s)",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 32.6
+  },
+  {
+   "company": "Dayforce",
+   "n": 59,
+   "outcome": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL C over 1 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "core_s": 16.1
+  },
+  {
+   "company": "Paycor",
+   "n": 60,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 12 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 20.2
+  },
+  {
+   "company": "Rippling",
+   "n": 61,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "FAIL",
+    "ECONOMIC_INTELLIGENCE": "FAIL",
+    "STRATEGIC_DECISION": "FAIL",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "no business model stated and no explanation of why",
+    "ECONOMIC_INTELLIGENCE": "2/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page",
+    "HISTORY": "LEVEL C over 0 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [
+    "COMPANY_UNDERSTANDING",
+    "ECONOMIC_INTELLIGENCE",
+    "STRATEGIC_DECISION"
+   ],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 44.3
+  },
+  {
+   "company": "Deel",
+   "n": 62,
+   "outcome": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL C over 0 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "core_s": 24.1
+  },
+  {
+   "company": "Gusto",
+   "n": 63,
+   "outcome": "RETRIEVAL_LIMITATION_HANDLED_CORRECTLY",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "no report was produced \u2014 the site refused automated access \u2014 so there is no dated record to rewind, and the page says so instead of drawing an empty frame",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state RETRIEVAL_LIMITATION_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "RETRIEVAL_LIMITATION_HANDLED_CORRECTLY",
+   "core_s": 24.5
+  },
+  {
+   "company": "Ramp",
+   "n": 64,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL C over 1 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 28.1
+  },
+  {
+   "company": "Brex",
+   "n": 65,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL C over 1 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 32.3
+  },
+  {
+   "company": "BILL",
+   "n": 66,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "CLASS_PRIOR_REINFORCED_BY_EVIDENCE",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_REINFORCED_BY_EVIDENCE, stated on the page on ['discounting', 'pricing model']",
+    "HISTORY": "LEVEL A over 90 dated record(s), hindsight wall PRESENT; 50 repeated passage(s)",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 32.4
+  },
+  {
+   "company": "FloQast",
+   "n": 67,
+   "outcome": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL C over 0 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_NO_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "core_s": 36.8
+  },
+  {
+   "company": "BlackLine",
+   "n": 68,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_REINFORCED_BY_EVIDENCE",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "FAIL",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "no business model stated and no explanation of why",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_REINFORCED_BY_EVIDENCE, stated on the page on ['direct sales force', 'partner-led']",
+    "HISTORY": "LEVEL A over 90 dated record(s), hindsight wall PRESENT; 45 repeated passage(s)",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [
+    "COMPANY_UNDERSTANDING"
+   ],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 36.2
+  },
+  {
+   "company": "Datarails",
+   "n": 69,
+   "outcome": "PRODUCT_DEFECT",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "FAIL"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 5 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "terminal state PRODUCT_DEFECT, which is not one of the four allowed outcomes; failed gates ['AUTOCOMPLETE']"
+   },
+   "failed": [
+    "EXECUTIVE_USEFULNESS"
+   ],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "PRODUCT_DEFECT",
+   "core_s": 40.9
+  },
+  {
+   "company": "Centage",
+   "n": 70,
+   "outcome": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL C over 0 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "core_s": 28.3
+  },
+  {
+   "company": "Acumatica",
+   "n": 71,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 5 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 20.1
+  },
+  {
+   "company": "Epicor",
+   "n": 72,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "LEVEL C over 1 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 2 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 44.3
+  },
+  {
+   "company": "Plex",
+   "n": 73,
+   "outcome": "RETRIEVAL_LIMITATION_HANDLED_CORRECTLY",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "no report was produced \u2014 the site refused automated access \u2014 so there is no dated record to rewind, and the page says so instead of drawing an empty frame",
+    "DISCOVERY": "SEARCH_RAN_WITH_NO_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state RETRIEVAL_LIMITATION_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "RETRIEVAL_LIMITATION_HANDLED_CORRECTLY",
+   "core_s": 16.2
+  },
+  {
+   "company": "IFS",
+   "n": 74,
+   "outcome": "RETRIEVAL_LIMITATION_HANDLED_CORRECTLY",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "no report was produced \u2014 the site refused automated access \u2014 so there is no dated record to rewind, and the page says so instead of drawing an empty frame",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state RETRIEVAL_LIMITATION_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "RETRIEVAL_LIMITATION_HANDLED_CORRECTLY",
+   "core_s": 53.0
+  },
+  {
+   "company": "QAD",
+   "n": 75,
+   "outcome": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "decision_force": "EVIDENCE_LED",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force EVIDENCE_LED, stated on the page on ['carrier', 'customs', 'procurement']",
+    "HISTORY": "LEVEL C over 0 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T3",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "core_s": 40.3
+  },
+  {
+   "company": "Auvik",
+   "n": 76,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS_BOUNDED",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 7 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "DISCOVERY_BLOCKED, 0 independent origin(s); the limit is stated as ours, not as the company's record",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 20.0
+  },
+  {
+   "company": "Kaseya",
+   "n": 77,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 4 dated record(s), hindsight wall PRESENT; 1 repeated passage(s)",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 24.5
+  },
+  {
+   "company": "ConnectWise",
+   "n": 78,
+   "outcome": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL C over 0 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "core_s": 32.1
+  },
+  {
+   "company": "N-able",
+   "n": 79,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_REINFORCED_BY_EVIDENCE",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_REINFORCED_BY_EVIDENCE, stated on the page on ['direct sales force', 'land and expand']",
+    "HISTORY": "LEVEL A over 90 dated record(s), hindsight wall PRESENT; 33 repeated passage(s)",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 28.3
+  },
+  {
+   "company": "Datto",
+   "n": 80,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 5 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 24.1
+  },
+  {
+   "company": "Barracuda",
+   "n": 81,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 2 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 64.4
+  },
+  {
+   "company": "eSentire",
+   "n": 82,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 7 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 20.1
+  },
+  {
+   "company": "Blackpoint Cyber",
+   "n": 83,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 11 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 16.3
+  },
+  {
+   "company": "ReliaQuest",
+   "n": 85,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_REINFORCED_BY_EVIDENCE",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_REINFORCED_BY_EVIDENCE, stated on the page on ['price increase', 'pricing model']",
+    "HISTORY": "LEVEL B over 5 dated record(s), hindsight wall PRESENT; 1 repeated passage(s)",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 8.0
+  },
+  {
+   "company": "Tanium",
+   "n": 86,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "LEVEL B over 2 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 24.2
+  },
+  {
+   "company": "Lansweeper",
+   "n": 87,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "LEVEL B over 4 dated record(s), hindsight wall PRESENT; 1 repeated passage(s)",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 4 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 36.4
+  },
+  {
+   "company": "Torq",
+   "n": 88,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 4 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 24.2
+  },
+  {
+   "company": "Tines",
+   "n": 89,
+   "outcome": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL C over 0 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "core_s": 24.3
+  },
+  {
+   "company": "Swimlane",
+   "n": 90,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "LEVEL B over 4 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 40.4
+  },
+  {
+   "company": "Pax8",
+   "n": 91,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 5 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 32.8
+  },
+  {
+   "company": "Sherweb",
+   "n": 92,
+   "outcome": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "FAIL",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "no business model stated and no explanation of why",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL C over 1 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_NO_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY"
+   },
+   "failed": [
+    "COMPANY_UNDERSTANDING"
+   ],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "core_s": 24.2
+  },
+  {
+   "company": "Softchoice",
+   "n": 93,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "LEVEL B over 2 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 2 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 24.1
+  },
+  {
+   "company": "CDW",
+   "n": 94,
+   "outcome": "DEFENSIBLE_ABSTENTION",
+   "decision_force": "CLASS_PRIOR_REINFORCED_BY_EVIDENCE",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "FAIL",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "no business model stated and no explanation of why",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_REINFORCED_BY_EVIDENCE, stated on the page on ['logistics', 'procurement', 'shipment']",
+    "HISTORY": "LEVEL A over 90 dated record(s), hindsight wall PRESENT; 52 repeated passage(s)",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 0 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL; terminal state DEFENSIBLE_ABSTENTION"
+   },
+   "failed": [
+    "COMPANY_UNDERSTANDING"
+   ],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "core_s": 44.5
+  },
+  {
+   "company": "Presidio",
+   "n": 95,
+   "outcome": "RETRIEVAL_LIMITATION_HANDLED_CORRECTLY",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "FAIL",
+    "STRATEGIC_DECISION": "FAIL",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS_BOUNDED",
+    "QA_ROLE": "FAIL",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: site error ",
+    "ECONOMIC_INTELLIGENCE": "2/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page",
+    "HISTORY": "no report was produced \u2014 the site refused automated access \u2014 so there is no dated record to rewind, and the page says so instead of drawing an empty frame",
+    "DISCOVERY": "ATTRIBUTE_ABSENT, None independent origin(s)",
+    "QA_ROLE": "0/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state RETRIEVAL_LIMITATION_HANDLED_CORRECTLY"
+   },
+   "failed": [
+    "ECONOMIC_INTELLIGENCE",
+    "STRATEGIC_DECISION",
+    "QA_ROLE"
+   ],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "RETRIEVAL_LIMITATION_HANDLED_CORRECTLY",
+   "core_s": 36.3
+  },
+  {
+   "company": "Trace3",
+   "n": 96,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "LEVEL C over 1 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 20.1
+  },
+  {
+   "company": "World Wide Technology",
+   "n": 97,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "LEVEL B over 2 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 3 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 52.5
+  },
+  {
+   "company": "AHEAD",
+   "n": 98,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "NO_DECISION",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS_BOUNDED",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "the model could not be established and the page says so, naming what would settle it",
+    "ECONOMIC_INTELLIGENCE": "7/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force NO_DECISION, stated on the page; no decision, and the page names what would settle it",
+    "HISTORY": "LEVEL C over 0 dated record(s), hindsight wall NOT_APPLICABLE",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 24.5
+  },
+  {
+   "company": "Rackspace Technology",
+   "n": 99,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS_BOUNDED",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: recurring software subscription",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL A over 90 dated record(s), hindsight wall PRESENT; 50 repeated passage(s)",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 37.1
+  },
+  {
+   "company": "Pellera Technologies",
+   "n": 100,
+   "outcome": "DECISION_GRADE_READING",
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "dimensions": {
+    "IDENTITY": "PASS",
+    "EVIDENCE_PROVENANCE": "PASS",
+    "COMPANY_UNDERSTANDING": "PASS",
+    "ECONOMIC_INTELLIGENCE": "PASS_BOUNDED",
+    "STRATEGIC_DECISION": "PASS_BOUNDED",
+    "HISTORY": "PASS",
+    "DISCOVERY": "PASS",
+    "QA_ROLE": "PASS",
+    "UI": "NOT_MEASURED",
+    "EXECUTIVE_USEFULNESS": "PASS_BOUNDED"
+   },
+   "why": {
+    "IDENTITY": "resolved from the combobox with no manual URL; no CIK claimed (curated non-filer)",
+    "EVIDENCE_PROVENANCE": "subject-correct provenance, no duplicate passages, no broken spans",
+    "COMPANY_UNDERSTANDING": "model stated: service delivered by people or over a route network",
+    "ECONOMIC_INTELLIGENCE": "9/9 economic questions addressed on the page; 0 stop(s) placed beside a published economic state; the page states specifically where the economic layer could not reach",
+    "STRATEGIC_DECISION": "decision force CLASS_PRIOR_ONLY, stated on the page; the prior is named as the basis rather than dressed as evidence",
+    "HISTORY": "LEVEL B over 11 dated record(s), hindsight wall PRESENT",
+    "DISCOVERY": "SEARCH_RAN_WITH_RESULTS, 1 independent origin(s)",
+    "QA_ROLE": "6/6 answered, follow-up kept, CEO/CSO share canonical facts",
+    "UI": "0 surfaces; enums 0, dict reprs 0, internal 0, literal None 0, spinners 0; width/theme pass not yet run",
+    "EXECUTIVE_USEFULNESS": "EXECUTIVE_USEFUL_BUT_BOUNDED; terminal state DECISION_GRADE_READING"
+   },
+   "failed": [],
+   "unmeasured": [
+    "UI"
+   ],
+   "qualification_10_of_10": false,
+   "tier": "T4",
+   "final_class": "DECISION_GRADE_READING",
+   "core_s": 12.2
+  }
+ ]
+}

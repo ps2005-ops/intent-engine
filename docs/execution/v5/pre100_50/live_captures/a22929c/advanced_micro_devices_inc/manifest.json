@@ -1,0 +1,30 @@
+{
+  "company": "Advanced Micro Devices, Inc.",
+  "deployed_sha": "a22929c",
+  "captured_at": "2026-08-21T20:17:37Z",
+  "routes": {},
+  "progress": [
+    {
+      "t": 0.3,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Advanced Micro Devices, Inc. AMD \u00b7 amd.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evid",
+      "status": 200,
+      "html_bytes": 17021
+    },
+    {
+      "t": 58.0,
+      "text": "Something went wrong on our side Something went wrong on our side What did work. Your request was received and the company you entered was recorded. What did not. The analysis did not complete. Why. This is a fault in the product, not in what you entered or in the company. What to do next. Run it ag",
+      "status": 500,
+      "html_bytes": 17022
+    }
+  ],
+  "process_before": {
+    "boot_id": "460f73b07edf4631",
+    "started_at": 1787343427.880808,
+    "uptime_seconds": 29.4
+  },
+  "run_id": "01M0JZHP9Z5KG0XCTF09RXZZA8",
+  "status": "FAILED",
+  "seconds": 90,
+  "first_useful": null,
+  "auto_advanced": true
+}

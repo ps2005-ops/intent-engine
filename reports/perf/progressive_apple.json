@@ -1,0 +1,64 @@
+{
+  "base": "https://intent-engine-preview-bridge.onrender.com",
+  "cohort": "tier1",
+  "version": "{\"app_version\": \"1.5.0-executive-intelligence\", \"commit\": \"a7b8783f0885320f6be054e19dd382874f3c1d94\", \"process\": {\"boot_id\": \"6e0e6c605c114177\", \"started_at\": 1788033231.4189112, \"uptime_seconds\": 12.1}}",
+  "summary": {
+    "attempted": 1,
+    "counted": 1,
+    "refused": 0,
+    "core_success": 1,
+    "deep_success": 0,
+    "no_result": 0,
+    "core_p50": 264.4,
+    "core_p90": 264.4,
+    "core_max": 264.4,
+    "deep_p50": null,
+    "deep_p90": null,
+    "deep_max": null,
+    "core_over_60s": [
+      "Apple Inc."
+    ]
+  },
+  "rows": [
+    {
+      "company": "Apple Inc.",
+      "domain": "apple.com",
+      "error": "",
+      "core_ready_seconds": 264.4,
+      "deep_ready_seconds": null,
+      "analyze_status": 200,
+      "run_id": "01M17HC6YNJVM638JW5YR21XSE",
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 6.5
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 33.5
+        }
+      ],
+      "progress_unreachable_polls": 3,
+      "deep_detection": "NO_PENDING_ON_FIRST_POLL",
+      "pages": {
+        "": {
+          "status": 200,
+          "chars": 29081,
+          "seconds": 4.8,
+          "deep_pending": false,
+          "outcome": ""
+        },
+        "/brief": {
+          "status": 200,
+          "chars": 52516,
+          "seconds": 10.2,
+          "deep_pending": false,
+          "outcome": ""
+        }
+      },
+      "evidence_citations": 0,
+      "status": "CORE_READY_DEEP_PENDING",
+      "total_seconds": 297.4
+    }
+  ]
+}

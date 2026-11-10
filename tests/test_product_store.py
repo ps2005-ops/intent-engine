@@ -84,12 +84,29 @@ def test_same_idempotency_key_with_different_content_is_refused(svc):
 
 
 def test_corrupt_log_fails_loudly(svc, tmp_path):
+    """Corruption is still loud -- but only where dropping it would LOSE
+    history.
+
+    A malformed line with good records AFTER it is interior corruption of a
+    file that is only ever appended to: the damage is unbounded and refusing
+    to read is right. A malformed line with nothing readable after it is a
+    torn TAIL -- a write killed part-way, which on the deployed preview
+    bricked every request for hours because one bad byte made the whole log
+    unreadable. That case is repaired and recorded, not refused.
+    """
     _problem(svc)
     path = tmp_path / "product.jsonl"
-    path.write_text(path.read_text() + "{not json\n")
-    store = ProductStore(path)
+    path.write_text("{not json\n" + path.read_text())   # interior
     with pytest.raises(ProductCorruptLogError, match="malformed"):
-        store.read_all()
+        ProductStore(path).read_all()
+
+
+def test_a_torn_tail_is_recovered_rather_than_bricking_the_log(svc, tmp_path):
+    _problem(svc)
+    path = tmp_path / "product.jsonl"
+    before = len(ProductStore(path).read_all())
+    path.write_text(path.read_text() + "{not json\n")   # tail
+    assert len(ProductStore(path).read_all()) == before
 
 
 def test_a_future_schema_version_is_refused_rather_than_guessed_at(tmp_path):

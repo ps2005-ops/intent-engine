@@ -1,0 +1,3072 @@
+contract: company_validation_manifest.v1
+manifest_version: 1.0.1
+created_at: '2026-08-11'
+governing_plan_version: V5_BATCH_9
+total_active: 100
+known_limitations:
+- id: COVERAGE_EXPECTATION_IS_NEARLY_CONSTANT
+  detail: >-
+    92 of 100 entries carry coverage_expectation HIGH_COVERAGE, because 90 of
+    them are listed North American companies that file with a regulator and
+    run an investor-relations site. That is an accurate description of the
+    universe, but it makes the field nearly useless as a STRATIFICATION axis
+    (§15) - stratifying on it separates 92 from 8. Written down rather than
+    quietly relabelled, because inventing a spread would be exactly the
+    inference §12 forbids.
+  consequence: >-
+    Waves larger than ten should stratify on sparse_or_withheld,
+    identity_difficulty, public_private and sector, not on
+    coverage_expectation. Revisit before the 30-company wave.
+- id: PRIVATE_REPRESENTATION_IS_THIN
+  detail: >-
+    10 private entries and 7 sparse-or-withheld. Enough for the breaker ten,
+    which takes two private companies including one withheld, but thin for
+    the later waves that are supposed to break the private and bounded paths.
+  consequence: >-
+    A v1.1 revision should add private and bounded companies rather than
+    reweight the existing ones; adding entries is a recorded change, and
+    silently moving a cohort is not.
+cohort_targets:
+  DEVELOPMENT: 60
+  REGRESSION: 20
+  BLIND_HOLDOUT: 20
+cohort_rule: Sort all active entries by (sector, company_id) and cycle DEVELOPMENT,
+  DEVELOPMENT, DEVELOPMENT, REGRESSION, BLIND_HOLDOUT. Sorting by sector first guarantees
+  every sector is spread across all three cohorts, so no cohort can accumulate a
+  single archetype; 100 entries over a 5-cycle lands exactly on 60/20/20. Deterministic
+  and re-derivable from these fields alone -- a test recomputes it and fails if
+  the stored cohorts drift.
+not_an_answer_key: This manifest records WHY a company is useful to test. It must
+  never record an expected recommendation, thesis, causal effect, confidence or
+  adversary output.
+change_history:
+- manifest_version: 1.0.1
+  at: '2026-08-14'
+  change: >-
+    stripe business_model_class corrected SUBSCRIPTION_SOFTWARE ->
+    BALANCE_SHEET_OR_NETWORK. A payment network earns a take rate on
+    intermediated volume, which is how visa and mastercard are already
+    classified here; the old value made the executive read describe
+    subscription revenue Stripe does not have. Sector left unchanged because
+    cohorts derive from it.
+  companies_added: 0
+  companies_removed: 0
+  cohort_moves: 0
+- manifest_version: 1.0.0
+  at: '2026-08-11'
+  change: initial manifest authored in V5 Batch 9
+  companies_added: 100
+  companies_removed: 0
+  cohort_moves: 0
+companies:
+- company_id: 1password
+  canonical_name: AgileBits Inc.
+  domain: 1password.com
+  aliases: []
+  ticker: null
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PRIVATE
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: MID
+  coverage_expectation: THIN
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: true
+  cohort: REGRESSION
+  cohort_locked: false
+  breaker_dimensions:
+  - identity
+  - private_company_path
+  - sparse_coverage
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: legal name differs from the product; domain begins with a digit
+- company_id: adobe
+  canonical_name: Adobe Inc.
+  domain: adobe.com
+  aliases: []
+  ticker: ADBE
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: BLIND_HOLDOUT
+  cohort_locked: true
+  breaker_dimensions:
+  - baseline_operating_company
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: subscription transition already completed; steady-state SaaS
+- company_id: advanced-micro-devices
+  canonical_name: Advanced Micro Devices, Inc.
+  domain: amd.com
+  aliases: []
+  ticker: AMD
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SEMICONDUCTOR
+  industry: UNKNOWN
+  business_model_class: DESIGN_AND_MANUFACTURE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: CYCLICAL
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - competitive_response
+  - demand_extraction
+  - macro_transmission
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: fabless challenger
+- company_id: agnico-eagle-mines
+  canonical_name: Agnico Eagle Mines Limited
+  domain: agnicoeagle.com
+  aliases: []
+  ticker: AEM
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: MATERIALS_ENERGY
+  industry: UNKNOWN
+  business_model_class: COMMODITY_PRODUCER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: CYCLICAL
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - demand_extraction
+  - macro_transmission
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: gold miner; commodity price is the dominant exposure
+- company_id: alimentation-couche-tard
+  canonical_name: Alimentation Couche-Tard Inc.
+  domain: couche-tard.com
+  aliases: []
+  ticker: ATD
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: CONSUMER
+  industry: UNKNOWN
+  business_model_class: BRANDED_CONSUMER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - identity
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: French legal name, English operating brands (Circle K)
+- company_id: america-movil
+  canonical_name: América Móvil, S.A.B. de C.V.
+  domain: americamovil.com
+  aliases: []
+  ticker: AMX
+  country: MEXICO
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INFRASTRUCTURE
+  industry: UNKNOWN
+  business_model_class: CONTRACTED_OR_RATE_BASE_ASSETS
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: REGRESSION
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - identity
+  - regulated_environment
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: accented legal name and a S.A.B. de C.V. suffix the parser must
+    not treat as part of the brand
+- company_id: american-tower
+  canonical_name: American Tower Corporation
+  domain: americantower.com
+  aliases: []
+  ticker: AMT
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INFRASTRUCTURE
+  industry: UNKNOWN
+  business_model_class: CONTRACTED_OR_RATE_BASE_ASSETS
+  regulatory_class: REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: BLIND_HOLDOUT
+  cohort_locked: true
+  breaker_dimensions:
+  - capital_intensity
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: REIT structure over communications infrastructure
+- company_id: applied-materials
+  canonical_name: Applied Materials, Inc.
+  domain: appliedmaterials.com
+  aliases: []
+  ticker: AMAT
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SEMICONDUCTOR
+  industry: UNKNOWN
+  business_model_class: DESIGN_AND_MANUFACTURE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: CYCLICAL
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - competitive_response
+  - demand_extraction
+  - macro_transmission
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: equipment supplier one step up the chain from chipmakers
+- company_id: bank-of-america
+  canonical_name: Bank of America Corporation
+  domain: bankofamerica.com
+  aliases: []
+  ticker: BAC
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: FINANCIAL_REGULATED
+  industry: UNKNOWN
+  business_model_class: BALANCE_SHEET_OR_NETWORK
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - regulated_environment
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: consumer-weighted universal bank
+- company_id: bank-of-montreal
+  canonical_name: Bank of Montreal
+  domain: bmo.com
+  aliases: []
+  ticker: BMO
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: FINANCIAL_REGULATED
+  industry: UNKNOWN
+  business_model_class: BALANCE_SHEET_OR_NETWORK
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: REGRESSION
+  cohort_locked: false
+  breaker_dimensions:
+  - regulated_environment
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: Canadian bank with US expansion
+- company_id: bank-of-nova-scotia
+  canonical_name: The Bank of Nova Scotia
+  domain: scotiabank.com
+  aliases: []
+  ticker: BNS
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: FINANCIAL_REGULATED
+  industry: UNKNOWN
+  business_model_class: BALANCE_SHEET_OR_NETWORK
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: BLIND_HOLDOUT
+  cohort_locked: true
+  breaker_dimensions:
+  - identity
+  - regulated_environment
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: legal name and operating brand differ entirely
+- company_id: barrick-mining
+  canonical_name: Barrick Mining Corporation
+  domain: barrick.com
+  aliases: []
+  ticker: ABX
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: MATERIALS_ENERGY
+  industry: UNKNOWN
+  business_model_class: COMMODITY_PRODUCER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: CYCLICAL
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - demand_extraction
+  - identity
+  - macro_transmission
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: recently renamed from Barrick Gold
+- company_id: basecamp
+  canonical_name: 37signals LLC
+  domain: basecamp.com
+  aliases: []
+  ticker: null
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PRIVATE
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: SMALL
+  coverage_expectation: SPARSE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: true
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - cold_start
+  - identity
+  - private_company_path
+  - sparse_coverage
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: legal name and product name differ; a genuinely small company
+- company_id: bce
+  canonical_name: BCE Inc.
+  domain: bce.ca
+  aliases: []
+  ticker: BCE
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INFRASTRUCTURE
+  industry: UNKNOWN
+  business_model_class: CONTRACTED_OR_RATE_BASE_ASSETS
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - identity
+  - regulated_environment
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: holding company whose operating brand is Bell
+- company_id: blackstone
+  canonical_name: Blackstone Inc.
+  domain: blackstone.com
+  aliases: []
+  ticker: BX
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: INVESTMENT_ORGANIZATION
+  parent_company_id: null
+  sector: FINANCIAL_REGULATED
+  industry: UNKNOWN
+  business_model_class: BALANCE_SHEET_OR_NETWORK
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - non_operating_entity_contract
+  - regulated_environment
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: an asset manager must not be analysed as an operating company
+- company_id: boeing
+  canonical_name: The Boeing Company
+  domain: boeing.com
+  aliases: []
+  ticker: BA
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INDUSTRIAL
+  industry: UNKNOWN
+  business_model_class: MANUFACTURE_AND_AFTERMARKET
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: CYCLICAL
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - demand_extraction
+  - macro_transmission
+  - multi_segment_ambiguity
+  - regulated_environment
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: commercial and defence segments under different regulators
+- company_id: broadcom
+  canonical_name: Broadcom Inc.
+  domain: broadcom.com
+  aliases: []
+  ticker: AVGO
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SEMICONDUCTOR
+  industry: UNKNOWN
+  business_model_class: DESIGN_AND_MANUFACTURE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: SECULAR
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: REGRESSION
+  cohort_locked: false
+  breaker_dimensions:
+  - competitive_response
+  - identity
+  - multi_segment_ambiguity
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: semiconductors plus acquired infrastructure software under one
+    name
+- company_id: brookfield-asset-management
+  canonical_name: Brookfield Asset Management Ltd.
+  domain: bam.brookfield.com
+  aliases: []
+  ticker: BAM
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: INVESTMENT_ORGANIZATION
+  parent_company_id: brookfield-corporation
+  sector: FINANCIAL_REGULATED
+  industry: UNKNOWN
+  business_model_class: BALANCE_SHEET_OR_NETWORK
+  regulatory_class: REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - competitor_ownership
+  - identity
+  - non_operating_entity_contract
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: separately listed manager under the same brand and parent domain;
+    an analysis that conflates the two is the defect being tested
+- company_id: brookfield-corporation
+  canonical_name: Brookfield Corporation
+  domain: bn.brookfield.com
+  aliases: []
+  ticker: BN
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: INVESTMENT_ORGANIZATION
+  parent_company_id: null
+  sector: FINANCIAL_REGULATED
+  industry: UNKNOWN
+  business_model_class: BALANCE_SHEET_OR_NETWORK
+  regulatory_class: REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - identity
+  - multi_segment_ambiguity
+  - non_operating_entity_contract
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: parent of a family of separately listed Brookfield entities;
+    the deliberate parent/subsidiary identity test in this manifest
+- company_id: cae
+  canonical_name: CAE Inc.
+  domain: cae.com
+  aliases: []
+  ticker: CAE
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INDUSTRIAL
+  industry: UNKNOWN
+  business_model_class: MANUFACTURE_AND_AFTERMARKET
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - identity
+  - regulated_environment
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: three-letter name; simulation and training, not aerospace hardware
+- company_id: canadian-national-railway
+  canonical_name: Canadian National Railway Company
+  domain: cn.ca
+  aliases: []
+  ticker: CNR
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INFRASTRUCTURE
+  industry: UNKNOWN
+  business_model_class: CONTRACTED_OR_RATE_BASE_ASSETS
+  regulatory_class: REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: CYCLICAL
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - demand_extraction
+  - identity
+  - macro_transmission
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: two-letter .ca domain; dual-listed
+- company_id: canadian-natural-resources
+  canonical_name: Canadian Natural Resources Limited
+  domain: cnrl.com
+  aliases: []
+  ticker: CNQ
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: MATERIALS_ENERGY
+  industry: UNKNOWN
+  business_model_class: COMMODITY_PRODUCER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: CYCLICAL
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: REGRESSION
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - demand_extraction
+  - identity
+  - macro_transmission
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: generic descriptive name; abbreviated domain; ticker matches
+    neither
+- company_id: canadian-pacific-kansas-city
+  canonical_name: Canadian Pacific Kansas City Limited
+  domain: cpkcr.com
+  aliases: []
+  ticker: CP
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INFRASTRUCTURE
+  industry: UNKNOWN
+  business_model_class: CONTRACTED_OR_RATE_BASE_ASSETS
+  regulatory_class: REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: CYCLICAL
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - demand_extraction
+  - identity
+  - macro_transmission
+  - subject_attribution
+  - ui_long_name_stress
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: post-merger renaming; most references predate the current entity
+- company_id: caterpillar
+  canonical_name: Caterpillar Inc.
+  domain: caterpillar.com
+  aliases: []
+  ticker: CAT
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INDUSTRIAL
+  industry: UNKNOWN
+  business_model_class: MANUFACTURE_AND_AFTERMARKET
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: CYCLICAL
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - demand_extraction
+  - macro_transmission
+  - multi_segment_ambiguity
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: construction, resources and energy segments on different cycles
+- company_id: cemex
+  canonical_name: CEMEX, S.A.B. de C.V.
+  domain: cemex.com
+  aliases: []
+  ticker: CX
+  country: MEXICO
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: MATERIALS_ENERGY
+  industry: UNKNOWN
+  business_model_class: COMMODITY_PRODUCER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: CYCLICAL
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: BLIND_HOLDOUT
+  cohort_locked: true
+  breaker_dimensions:
+  - capital_intensity
+  - demand_extraction
+  - macro_transmission
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: building materials; ticker and name diverge
+- company_id: cgi-inc
+  canonical_name: CGI Inc.
+  domain: cgi.com
+  aliases: []
+  ticker: GIB.A
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SERVICES
+  industry: UNKNOWN
+  business_model_class: PEOPLE_OR_ROUTE_BASED_SERVICES
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: BLIND_HOLDOUT
+  cohort_locked: true
+  breaker_dimensions:
+  - identity
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: three-letter name, dual-class ticker, IT services not software
+- company_id: charles-schwab
+  canonical_name: The Charles Schwab Corporation
+  domain: schwab.com
+  aliases: []
+  ticker: SCHW
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: FINANCIAL_REGULATED
+  industry: UNKNOWN
+  business_model_class: BALANCE_SHEET_OR_NETWORK
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: REGRESSION
+  cohort_locked: false
+  breaker_dimensions:
+  - identity
+  - regulated_environment
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: brokerage that is economically a bank; domain shortened
+- company_id: chevron
+  canonical_name: Chevron Corporation
+  domain: chevron.com
+  aliases: []
+  ticker: CVX
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: MATERIALS_ENERGY
+  industry: UNKNOWN
+  business_model_class: COMMODITY_PRODUCER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: CYCLICAL
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - demand_extraction
+  - macro_transmission
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: integrated oil and gas
+- company_id: cintas
+  canonical_name: Cintas Corporation
+  domain: cintas.com
+  aliases: []
+  ticker: CTAS
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SERVICES
+  industry: UNKNOWN
+  business_model_class: PEOPLE_OR_ROUTE_BASED_SERVICES
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - baseline_operating_company
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: route-based B2B services, an operating model unlike the rest
+- company_id: cloudflare
+  canonical_name: Cloudflare, Inc.
+  domain: cloudflare.com
+  aliases: []
+  ticker: NET
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - baseline_operating_company
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: software economics with real network capex
+- company_id: coca-cola
+  canonical_name: The Coca-Cola Company
+  domain: coca-colacompany.com
+  aliases: []
+  ticker: KO
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: CONSUMER
+  industry: UNKNOWN
+  business_model_class: BRANDED_CONSUMER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: DEFENSIVE
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - identity
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: brand site and corporate site are different properties
+- company_id: cohere
+  canonical_name: Cohere Inc.
+  domain: cohere.com
+  aliases: []
+  ticker: null
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PRIVATE
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: MID
+  coverage_expectation: NORMAL
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - identity
+  - private_company_path
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: private Canadian AI company; a common English word as a name
+- company_id: constellation-software
+  canonical_name: Constellation Software Inc.
+  domain: csisoftware.com
+  aliases: []
+  ticker: CSU
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: REGRESSION
+  cohort_locked: false
+  breaker_dimensions:
+  - identity
+  - multi_segment_ambiguity
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: holding company of hundreds of small software businesses; the
+    hardest subsidiary-attribution case in the set
+- company_id: costco
+  canonical_name: Costco Wholesale Corporation
+  domain: costco.com
+  aliases: []
+  ticker: COST
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: CONSUMER
+  industry: UNKNOWN
+  business_model_class: BRANDED_CONSUMER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: DEFENSIVE
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - baseline_operating_company
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: membership model, not margin on goods
+- company_id: databricks
+  canonical_name: Databricks, Inc.
+  domain: databricks.com
+  aliases: []
+  ticker: null
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PRIVATE
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: BLIND_HOLDOUT
+  cohort_locked: true
+  breaker_dimensions:
+  - private_company_path
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: private, heavy technical publishing
+- company_id: datadog
+  canonical_name: Datadog, Inc.
+  domain: datadoghq.com
+  aliases: []
+  ticker: DDOG
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: MID
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - identity
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: company name and primary domain differ, which the identity resolver
+    must survive
+- company_id: deere
+  canonical_name: Deere & Company
+  domain: deere.com
+  aliases: []
+  ticker: DE
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INDUSTRIAL
+  industry: UNKNOWN
+  business_model_class: MANUFACTURE_AND_AFTERMARKET
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: CYCLICAL
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: REGRESSION
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - demand_extraction
+  - identity
+  - macro_transmission
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: trades as John Deere, incorporated as Deere & Company
+- company_id: descartes-systems
+  canonical_name: The Descartes Systems Group Inc.
+  domain: descartes.com
+  aliases: []
+  ticker: DSG
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: MID
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - identity
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: named after a philosopher; a search-collision identity case
+- company_id: dollarama
+  canonical_name: Dollarama Inc.
+  domain: dollarama.com
+  aliases: []
+  ticker: DOL
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: CONSUMER
+  industry: UNKNOWN
+  business_model_class: BRANDED_CONSUMER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: DEFENSIVE
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: REGRESSION
+  cohort_locked: false
+  breaker_dimensions:
+  - baseline_operating_company
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: Canadian value retail, single banner
+- company_id: duke-energy
+  canonical_name: Duke Energy Corporation
+  domain: duke-energy.com
+  aliases: []
+  ticker: DUK
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INFRASTRUCTURE
+  industry: UNKNOWN
+  business_model_class: CONTRACTED_OR_RATE_BASE_ASSETS
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: REGRESSION
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - regulated_environment
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: rate-base regulated utility
+- company_id: eli-lilly
+  canonical_name: Eli Lilly and Company
+  domain: lilly.com
+  aliases: []
+  ticker: LLY
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: HEALTHCARE
+  industry: UNKNOWN
+  business_model_class: REGULATED_PRODUCT_OR_PROVIDER
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: BLIND_HOLDOUT
+  cohort_locked: true
+  breaker_dimensions:
+  - identity
+  - regulated_environment
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: domain drops the founder's first name
+- company_id: enbridge
+  canonical_name: Enbridge Inc.
+  domain: enbridge.com
+  aliases: []
+  ticker: ENB
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INFRASTRUCTURE
+  industry: UNKNOWN
+  business_model_class: CONTRACTED_OR_RATE_BASE_ASSETS
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: BLIND_HOLDOUT
+  cohort_locked: true
+  breaker_dimensions:
+  - capital_intensity
+  - regulated_environment
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: pipeline infrastructure with contracted cash flows
+- company_id: epic-systems
+  canonical_name: Epic Systems Corporation
+  domain: epic.com
+  aliases: []
+  ticker: null
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PRIVATE
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: PRIVATE_WITHHELD
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: true
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - bounded_or_withheld
+  - identity
+  - private_company_path
+  - private_data_absence
+  - regulated_environment
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: deliberately minimal public presence; a common-word domain
+- company_id: equinix
+  canonical_name: Equinix, Inc.
+  domain: equinix.com
+  aliases: []
+  ticker: EQIX
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INFRASTRUCTURE
+  industry: UNKNOWN
+  business_model_class: CONTRACTED_OR_RATE_BASE_ASSETS
+  regulatory_class: REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: data-centre REIT; capex-led growth
+- company_id: exxon-mobil
+  canonical_name: Exxon Mobil Corporation
+  domain: corporate.exxonmobil.com
+  aliases: []
+  ticker: XOM
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: MATERIALS_ENERGY
+  industry: UNKNOWN
+  business_model_class: COMMODITY_PRODUCER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: CYCLICAL
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - demand_extraction
+  - identity
+  - macro_transmission
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: corporate site on a subdomain
+- company_id: femsa
+  canonical_name: Fomento Económico Mexicano, S.A.B. de C.V.
+  domain: femsa.com
+  aliases: []
+  ticker: FMX
+  country: MEXICO
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: CONSUMER
+  industry: UNKNOWN
+  business_model_class: BRANDED_CONSUMER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: SECULAR
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: BLIND_HOLDOUT
+  cohort_locked: true
+  breaker_dimensions:
+  - identity
+  - multi_segment_ambiguity
+  - subject_attribution
+  - ui_long_name_stress
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: retail, bottling and logistics segments; the acronym is the
+    brand
+- company_id: freeport-mcmoran
+  canonical_name: Freeport-McMoRan Inc.
+  domain: fcx.com
+  aliases: []
+  ticker: FCX
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: MATERIALS_ENERGY
+  industry: UNKNOWN
+  business_model_class: COMMODITY_PRODUCER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: CYCLICAL
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - demand_extraction
+  - identity
+  - macro_transmission
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: copper miner; ticker-based domain
+- company_id: ge-aerospace
+  canonical_name: GE Aerospace
+  domain: geaerospace.com
+  aliases: []
+  ticker: GE
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INDUSTRIAL
+  industry: UNKNOWN
+  business_model_class: MANUFACTURE_AND_AFTERMARKET
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: BLIND_HOLDOUT
+  cohort_locked: true
+  breaker_dimensions:
+  - capital_intensity
+  - identity
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: renamed and split from General Electric; historical references
+    point at a company that no longer exists in that form
+- company_id: goldman-sachs
+  canonical_name: The Goldman Sachs Group, Inc.
+  domain: goldmansachs.com
+  aliases: []
+  ticker: GS
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: FINANCIAL_REGULATED
+  industry: UNKNOWN
+  business_model_class: BALANCE_SHEET_OR_NETWORK
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: BLIND_HOLDOUT
+  cohort_locked: true
+  breaker_dimensions:
+  - regulated_environment
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: markets-weighted bank with a different revenue shape to its
+    peers
+- company_id: grupo-bimbo
+  canonical_name: Grupo Bimbo, S.A.B. de C.V.
+  domain: grupobimbo.com
+  aliases: []
+  ticker: BIMBOA
+  country: MEXICO
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: CONSUMER
+  industry: UNKNOWN
+  business_model_class: BRANDED_CONSUMER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: DEFENSIVE
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - baseline_operating_company
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: global baker headquartered in Mexico with large US operations
+- company_id: grupo-mexico
+  canonical_name: Grupo México, S.A.B. de C.V.
+  domain: gmexico.com
+  aliases: []
+  ticker: GMEXICOB
+  country: MEXICO
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: MATERIALS_ENERGY
+  industry: UNKNOWN
+  business_model_class: COMMODITY_PRODUCER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: CYCLICAL
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: REGRESSION
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - demand_extraction
+  - identity
+  - macro_transmission
+  - multi_segment_ambiguity
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: mining, rail and infrastructure divisions under a country-named
+    holding company
+- company_id: hca-healthcare
+  canonical_name: HCA Healthcare, Inc.
+  domain: hcahealthcare.com
+  aliases: []
+  ticker: HCA
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: HEALTHCARE
+  industry: UNKNOWN
+  business_model_class: REGULATED_PRODUCT_OR_PROVIDER
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - regulated_environment
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: hospital operator; real estate heavy, unlike pharma peers
+- company_id: honeywell
+  canonical_name: Honeywell International Inc.
+  domain: honeywell.com
+  aliases: []
+  ticker: HON
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INDUSTRIAL
+  industry: UNKNOWN
+  business_model_class: MANUFACTURE_AND_AFTERMARKET
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: SECULAR
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - multi_segment_ambiguity
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: conglomerate spanning four segments
+- company_id: intel
+  canonical_name: Intel Corporation
+  domain: intel.com
+  aliases: []
+  ticker: INTC
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SEMICONDUCTOR
+  industry: UNKNOWN
+  business_model_class: DESIGN_AND_MANUFACTURE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: CYCLICAL
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: BLIND_HOLDOUT
+  cohort_locked: true
+  breaker_dimensions:
+  - capital_intensity
+  - competitive_response
+  - demand_extraction
+  - macro_transmission
+  - multi_segment_ambiguity
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: integrated device manufacturer; capital intensity unlike its
+    peers
+- company_id: intuitive-surgical
+  canonical_name: Intuitive Surgical, Inc.
+  domain: intuitive.com
+  aliases: []
+  ticker: ISRG
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: HEALTHCARE
+  industry: UNKNOWN
+  business_model_class: REGULATED_PRODUCT_OR_PROVIDER
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: MID
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - regulated_environment
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: razor-and-blade device model
+- company_id: johnson-and-johnson
+  canonical_name: Johnson & Johnson
+  domain: jnj.com
+  aliases: []
+  ticker: JNJ
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: HEALTHCARE
+  industry: UNKNOWN
+  business_model_class: REGULATED_PRODUCT_OR_PROVIDER
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - identity
+  - regulated_environment
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: ampersand in the legal name; consumer arm was separated
+- company_id: jpmorgan-chase
+  canonical_name: JPMorgan Chase & Co.
+  domain: jpmorganchase.com
+  aliases: []
+  ticker: JPM
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: FINANCIAL_REGULATED
+  industry: UNKNOWN
+  business_model_class: BALANCE_SHEET_OR_NETWORK
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - multi_segment_ambiguity
+  - regulated_environment
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: universal bank; consumer and investment banking in one entity
+- company_id: lam-research
+  canonical_name: Lam Research Corporation
+  domain: lamresearch.com
+  aliases: []
+  ticker: LRCX
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SEMICONDUCTOR
+  industry: UNKNOWN
+  business_model_class: DESIGN_AND_MANUFACTURE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: CYCLICAL
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - competitive_response
+  - demand_extraction
+  - macro_transmission
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: etch and deposition equipment
+- company_id: loblaw-companies
+  canonical_name: Loblaw Companies Limited
+  domain: loblaw.ca
+  aliases: []
+  ticker: L
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: CONSUMER
+  industry: UNKNOWN
+  business_model_class: BRANDED_CONSUMER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: DEFENSIVE
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - identity
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: single-letter ticker; many banners under one issuer
+- company_id: magna-international
+  canonical_name: Magna International Inc.
+  domain: magna.com
+  aliases: []
+  ticker: MG
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INDUSTRIAL
+  industry: UNKNOWN
+  business_model_class: MANUFACTURE_AND_AFTERMARKET
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: CYCLICAL
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - demand_extraction
+  - identity
+  - macro_transmission
+  - multi_segment_ambiguity
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: auto supplier selling to the manufacturers it is often mistaken
+    for
+- company_id: manulife
+  canonical_name: Manulife Financial Corporation
+  domain: manulife.com
+  aliases: []
+  ticker: MFC
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: FINANCIAL_REGULATED
+  industry: UNKNOWN
+  business_model_class: BALANCE_SHEET_OR_NETWORK
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - multi_segment_ambiguity
+  - regulated_environment
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: insurance and wealth across Canada, the US and Asia
+- company_id: mastercard
+  canonical_name: Mastercard Incorporated
+  domain: mastercard.com
+  aliases: []
+  ticker: MA
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: FINANCIAL_REGULATED
+  industry: UNKNOWN
+  business_model_class: BALANCE_SHEET_OR_NETWORK
+  regulatory_class: REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - baseline_operating_company
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: payment network, near-duopoly
+- company_id: mcdonalds
+  canonical_name: McDonald's Corporation
+  domain: mcdonalds.com
+  aliases: []
+  ticker: MCD
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: CONSUMER
+  industry: UNKNOWN
+  business_model_class: BRANDED_CONSUMER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - identity
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: apostrophe in the legal name; franchisor economics, not restaurants
+- company_id: mckinsey
+  canonical_name: McKinsey & Company
+  domain: mckinsey.com
+  aliases: []
+  ticker: null
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PRIVATE
+  entity_type: ADVISORY_ORGANIZATION
+  parent_company_id: null
+  sector: SERVICES
+  industry: UNKNOWN
+  business_model_class: PEOPLE_OR_ROUTE_BASED_SERVICES
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: PRIVATE_WITHHELD
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: true
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - bounded_or_withheld
+  - non_operating_entity_contract
+  - private_company_path
+  - private_data_absence
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: advisory partnership; no product and no financials to extract
+- company_id: micron-technology
+  canonical_name: Micron Technology, Inc.
+  domain: micron.com
+  aliases: []
+  ticker: MU
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SEMICONDUCTOR
+  industry: UNKNOWN
+  business_model_class: DESIGN_AND_MANUFACTURE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: CYCLICAL
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - competitive_response
+  - demand_extraction
+  - macro_transmission
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: memory commodity cycle, the sharpest cyclicality in the set
+- company_id: microsoft
+  canonical_name: Microsoft Corporation
+  domain: microsoft.com
+  aliases: []
+  ticker: MSFT
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: REGRESSION
+  cohort_locked: false
+  breaker_dimensions:
+  - identity
+  - multi_segment_ambiguity
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: 'multi-segment platform: cloud, productivity, gaming and hardware
+    under one name'
+- company_id: mongodb
+  canonical_name: MongoDB, Inc.
+  domain: mongodb.com
+  aliases: []
+  ticker: MDB
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: MID
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: BLIND_HOLDOUT
+  cohort_locked: true
+  breaker_dimensions:
+  - baseline_operating_company
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: open-source-core commercial model
+- company_id: nextera-energy
+  canonical_name: NextEra Energy, Inc.
+  domain: nexteraenergy.com
+  aliases: []
+  ticker: NEE
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INFRASTRUCTURE
+  industry: UNKNOWN
+  business_model_class: CONTRACTED_OR_RATE_BASE_ASSETS
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: SECULAR
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - multi_segment_ambiguity
+  - regulated_environment
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: regulated utility plus merchant renewables
+- company_id: nike
+  canonical_name: NIKE, Inc.
+  domain: nike.com
+  aliases: []
+  ticker: NKE
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: CONSUMER
+  industry: UNKNOWN
+  business_model_class: BRANDED_CONSUMER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: CYCLICAL
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: REGRESSION
+  cohort_locked: false
+  breaker_dimensions:
+  - demand_extraction
+  - macro_transmission
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: brand-led consumer with wholesale/DTC mix
+- company_id: nutrien
+  canonical_name: Nutrien Ltd.
+  domain: nutrien.com
+  aliases: []
+  ticker: NTR
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: MATERIALS_ENERGY
+  industry: UNKNOWN
+  business_model_class: COMMODITY_PRODUCER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: CYCLICAL
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: BLIND_HOLDOUT
+  cohort_locked: true
+  breaker_dimensions:
+  - capital_intensity
+  - demand_extraction
+  - macro_transmission
+  - multi_segment_ambiguity
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: fertiliser producer and agricultural retailer in one entity
+- company_id: nvidia
+  canonical_name: NVIDIA Corporation
+  domain: nvidia.com
+  aliases: []
+  ticker: NVDA
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SEMICONDUCTOR
+  industry: UNKNOWN
+  business_model_class: DESIGN_AND_MANUFACTURE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: CYCLICAL
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - competitive_response
+  - demand_extraction
+  - macro_transmission
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: fabless designer at the centre of an AI cycle
+- company_id: opentext
+  canonical_name: Open Text Corporation
+  domain: opentext.com
+  aliases: []
+  ticker: OTEX
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - identity
+  - multi_segment_ambiguity
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: legal name is two words, the brand is one
+- company_id: oracle
+  canonical_name: Oracle Corporation
+  domain: oracle.com
+  aliases: []
+  ticker: ORCL
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - multi_segment_ambiguity
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: legacy licence business alongside a cloud transition
+- company_id: palantir-technologies
+  canonical_name: Palantir Technologies Inc.
+  domain: palantir.com
+  aliases: []
+  ticker: PLTR
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: DEGRADED_SOURCE_EXPECTED
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - source_degradation
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: prior resilience work in this program used it as the blocked-domain
+    and SEC-EDGAR fallback case
+- company_id: pfizer
+  canonical_name: Pfizer Inc.
+  domain: pfizer.com
+  aliases: []
+  ticker: PFE
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: HEALTHCARE
+  industry: UNKNOWN
+  business_model_class: REGULATED_PRODUCT_OR_PROVIDER
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: DEFENSIVE
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: REGRESSION
+  cohort_locked: false
+  breaker_dimensions:
+  - regulated_environment
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: patent-cliff economics
+- company_id: procter-and-gamble
+  canonical_name: The Procter & Gamble Company
+  domain: pg.com
+  aliases: []
+  ticker: PG
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: CONSUMER
+  industry: UNKNOWN
+  business_model_class: BRANDED_CONSUMER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: DEFENSIVE
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: BLIND_HOLDOUT
+  cohort_locked: true
+  breaker_dimensions:
+  - identity
+  - multi_segment_ambiguity
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: two-letter domain; many brands, one issuer
+- company_id: progressive
+  canonical_name: The Progressive Corporation
+  domain: progressive.com
+  aliases: []
+  ticker: PGR
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: FINANCIAL_REGULATED
+  industry: UNKNOWN
+  business_model_class: BALANCE_SHEET_OR_NETWORK
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: REGRESSION
+  cohort_locked: false
+  breaker_dimensions:
+  - identity
+  - regulated_environment
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: common adjective as a company name
+- company_id: restaurant-brands-international
+  canonical_name: Restaurant Brands International Inc.
+  domain: rbi.com
+  aliases: []
+  ticker: QSR
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: CONSUMER
+  industry: UNKNOWN
+  business_model_class: BRANDED_CONSUMER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: SECULAR
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - identity
+  - multi_segment_ambiguity
+  - subject_attribution
+  - ui_long_name_stress
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: franchisor of four distinct global brands; the brand sites are
+    not the company
+- company_id: royal-bank-of-canada
+  canonical_name: Royal Bank of Canada
+  domain: rbc.com
+  aliases: []
+  ticker: RY
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: FINANCIAL_REGULATED
+  industry: UNKNOWN
+  business_model_class: BALANCE_SHEET_OR_NETWORK
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: BLIND_HOLDOUT
+  cohort_locked: true
+  breaker_dimensions:
+  - identity
+  - regulated_environment
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: brand initials as the domain; Canadian banking regime
+- company_id: salesforce
+  canonical_name: Salesforce, Inc.
+  domain: salesforce.com
+  aliases: []
+  ticker: CRM
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: REGRESSION
+  cohort_locked: false
+  breaker_dimensions:
+  - multi_segment_ambiguity
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: acquisition-heavy multi-cloud portfolio
+- company_id: servicenow
+  canonical_name: ServiceNow, Inc.
+  domain: servicenow.com
+  aliases: []
+  ticker: NOW
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: BLIND_HOLDOUT
+  cohort_locked: true
+  breaker_dimensions:
+  - baseline_operating_company
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: workflow platform selling to IT and beyond
+- company_id: shopify
+  canonical_name: Shopify Inc.
+  domain: shopify.com
+  aliases: []
+  ticker: SHOP
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - baseline_operating_company
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: Canadian commerce platform with a clear upmarket transition
+- company_id: snowflake
+  canonical_name: Snowflake Inc.
+  domain: snowflake.com
+  aliases: []
+  ticker: SNOW
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: MID
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - baseline_operating_company
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: consumption-priced model rather than seat-priced
+- company_id: spacex
+  canonical_name: Space Exploration Technologies Corp.
+  domain: spacex.com
+  aliases: []
+  ticker: null
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PRIVATE
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INDUSTRIAL
+  industry: UNKNOWN
+  business_model_class: MANUFACTURE_AND_AFTERMARKET
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: PRIVATE_WITHHELD
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: true
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - bounded_or_withheld
+  - capital_intensity
+  - identity
+  - private_company_path
+  - private_data_absence
+  - regulated_environment
+  - subject_attribution
+  - ui_long_name_stress
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: trades as SpaceX, incorporated otherwise; no public financials
+- company_id: stripe
+  canonical_name: Stripe, Inc.
+  domain: stripe.com
+  aliases: []
+  ticker: null
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PRIVATE
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  # Corrected in 1.0.1. Stripe earns a take rate on payment volume it
+  # intermediates -- the economics this manifest already assigns to Visa and
+  # Mastercard -- not a per-seat subscription that renews. Left as
+  # SUBSCRIPTION_SOFTWARE it produced an executive read describing "recurring
+  # software subscription" revenue and asking a seat-pricing question, which
+  # is wrong on its face to anyone who knows the company.
+  #
+  # SECTOR IS DELIBERATELY UNCHANGED. Cohorts are derived by sorting on
+  # sector, so moving Stripe out of SOFTWARE_PLATFORM reshuffles 42 of 100
+  # cohort assignments and silently invalidates the locked validation
+  # universe. `business_model_class` is read by no validator rule and by no
+  # cohort derivation, so correcting it alone moves nothing -- verified.
+  business_model_class: BALANCE_SHEET_OR_NETWORK
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - private_company_path
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: private with unusually strong public documentation
+- company_id: sun-life
+  canonical_name: Sun Life Financial Inc.
+  domain: sunlife.com
+  aliases: []
+  ticker: SLF
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: FINANCIAL_REGULATED
+  industry: UNKNOWN
+  business_model_class: BALANCE_SHEET_OR_NETWORK
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - regulated_environment
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: insurer and asset manager
+- company_id: suncor-energy
+  canonical_name: Suncor Energy Inc.
+  domain: suncor.com
+  aliases: []
+  ticker: SU
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: MATERIALS_ENERGY
+  industry: UNKNOWN
+  business_model_class: COMMODITY_PRODUCER
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: CYCLICAL
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - demand_extraction
+  - macro_transmission
+  - multi_segment_ambiguity
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: integrated oil sands producer with downstream retail
+- company_id: tailscale
+  canonical_name: Tailscale Inc.
+  domain: tailscale.com
+  aliases: []
+  ticker: null
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PRIVATE
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: SMALL
+  coverage_expectation: THIN
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: true
+  cohort: REGRESSION
+  cohort_locked: false
+  breaker_dimensions:
+  - private_company_path
+  - sparse_coverage
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: small private Canadian infrastructure company
+- company_id: tc-energy
+  canonical_name: TC Energy Corporation
+  domain: tcenergy.com
+  aliases: []
+  ticker: TRP
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INFRASTRUCTURE
+  industry: UNKNOWN
+  business_model_class: CONTRACTED_OR_RATE_BASE_ASSETS
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - identity
+  - regulated_environment
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: renamed from TransCanada; ticker still reflects the old name
+- company_id: telus
+  canonical_name: TELUS Corporation
+  domain: telus.com
+  aliases: []
+  ticker: T
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INFRASTRUCTURE
+  industry: UNKNOWN
+  business_model_class: CONTRACTED_OR_RATE_BASE_ASSETS
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: SECULAR
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: REGRESSION
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - identity
+  - multi_segment_ambiguity
+  - regulated_environment
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: single-letter Canadian ticker that collides with a US ticker
+- company_id: texas-instruments
+  canonical_name: Texas Instruments Incorporated
+  domain: ti.com
+  aliases: []
+  ticker: TXN
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SEMICONDUCTOR
+  industry: UNKNOWN
+  business_model_class: DESIGN_AND_MANUFACTURE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: CYCLICAL
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: REGRESSION
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - competitive_response
+  - demand_extraction
+  - identity
+  - macro_transmission
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: short domain unrelated to the legal name; owns its fabs
+- company_id: toronto-dominion-bank
+  canonical_name: The Toronto-Dominion Bank
+  domain: td.com
+  aliases: []
+  ticker: TD
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: FINANCIAL_REGULATED
+  industry: UNKNOWN
+  business_model_class: BALANCE_SHEET_OR_NETWORK
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - regulated_environment
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: cross-border Canadian bank with large US retail operations
+- company_id: union-pacific
+  canonical_name: Union Pacific Corporation
+  domain: up.com
+  aliases: []
+  ticker: UNP
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INFRASTRUCTURE
+  industry: UNKNOWN
+  business_model_class: CONTRACTED_OR_RATE_BASE_ASSETS
+  regulatory_class: REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: CYCLICAL
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: BLIND_HOLDOUT
+  cohort_locked: true
+  breaker_dimensions:
+  - capital_intensity
+  - demand_extraction
+  - identity
+  - macro_transmission
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: rail infrastructure; domain unrelated to the name
+- company_id: unitedhealth-group
+  canonical_name: UnitedHealth Group Incorporated
+  domain: unitedhealthgroup.com
+  aliases: []
+  ticker: UNH
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: HEALTHCARE
+  industry: UNKNOWN
+  business_model_class: REGULATED_PRODUCT_OR_PROVIDER
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: MODERATE
+  cyclicality_class: SECULAR
+  multi_segment: true
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: BLIND_HOLDOUT
+  cohort_locked: true
+  breaker_dimensions:
+  - multi_segment_ambiguity
+  - regulated_environment
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: insurer and care provider in one entity
+- company_id: visa
+  canonical_name: Visa Inc.
+  domain: visa.com
+  aliases: []
+  ticker: V
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: FINANCIAL_REGULATED
+  industry: UNKNOWN
+  business_model_class: BALANCE_SHEET_OR_NETWORK
+  regulatory_class: REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - identity
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: one-word common noun as a company name; a hard identity case
+- company_id: walmart
+  canonical_name: Walmart Inc.
+  domain: walmart.com
+  aliases: []
+  ticker: WMT
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: CONSUMER
+  industry: UNKNOWN
+  business_model_class: SCALE_RETAIL
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: DEFENSIVE
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: retail scale economics
+- company_id: waste-management
+  canonical_name: Waste Management, Inc.
+  domain: wm.com
+  aliases: []
+  ticker: WM
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: INFRASTRUCTURE
+  industry: UNKNOWN
+  business_model_class: CONTRACTED_OR_RATE_BASE_ASSETS
+  regulatory_class: REGULATED
+  capital_intensity_class: HIGH
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: IDENTITY_HARD
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - capital_intensity
+  - identity
+  - subject_attribution
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: generic two-word name and a two-letter domain
+- company_id: wealthsimple
+  canonical_name: Wealthsimple Financial Corp.
+  domain: wealthsimple.com
+  aliases: []
+  ticker: null
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PRIVATE
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: FINANCIAL_REGULATED
+  industry: UNKNOWN
+  business_model_class: BALANCE_SHEET_OR_NETWORK
+  regulatory_class: HEAVILY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: MID
+  coverage_expectation: THIN
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: true
+  cohort: REGRESSION
+  cohort_locked: false
+  breaker_dimensions:
+  - private_company_path
+  - regulated_environment
+  - sparse_coverage
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: private and regulated; the combination is rare in this set
+- company_id: workday
+  canonical_name: Workday, Inc.
+  domain: workday.com
+  aliases: []
+  ticker: WDAY
+  country: USA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SOFTWARE_PLATFORM
+  industry: UNKNOWN
+  business_model_class: SUBSCRIPTION_SOFTWARE
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: BLIND_HOLDOUT
+  cohort_locked: true
+  breaker_dimensions:
+  - baseline_operating_company
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: HR and finance suite with a long enterprise sales cycle
+- company_id: wsp-global
+  canonical_name: WSP Global Inc.
+  domain: wsp.com
+  aliases: []
+  ticker: WSP
+  country: CANADA
+  primary_geography: NORTH_AMERICA
+  public_private: PUBLIC
+  entity_type: OPERATING_COMPANY
+  parent_company_id: null
+  sector: SERVICES
+  industry: UNKNOWN
+  business_model_class: PEOPLE_OR_ROUTE_BASED_SERVICES
+  regulatory_class: LIGHTLY_REGULATED
+  capital_intensity_class: LOW
+  cyclicality_class: SECULAR
+  multi_segment: false
+  company_size_class: LARGE
+  coverage_expectation: HIGH_COVERAGE
+  source_difficulty: NORMAL
+  identity_difficulty: NORMAL
+  sparse_or_withheld: false
+  cohort: DEVELOPMENT
+  cohort_locked: false
+  breaker_dimensions:
+  - baseline_operating_company
+  manifest_source: BATCH_9_AUTHORED
+  inclusion_reason: professional engineering services; headcount-driven economics

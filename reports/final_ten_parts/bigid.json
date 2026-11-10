@@ -1,0 +1,287 @@
+{
+  "base": "https://intent-engine-preview-bridge.onrender.com",
+  "live_commit": "807a414361b0fbc1999b4595e875c67e2a20524a",
+  "rows": [
+    {
+      "company": "BigID",
+      "domain": "https://bigid.com",
+      "result": "PRODUCT_DEFECT",
+      "defects": [
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "/intro establishes the business model and /xray says it has not been established (decision_synthesis._select passes neither evidence_text nor published_text)"
+        }
+      ],
+      "instrument_notes": [],
+      "run_id": "01M272MM1J2VP0W3JTDHX9SPHY",
+      "core_s": 15.0,
+      "telemetry": {
+        "contract": "adaptive_intelligence.v1",
+        "company": "BigID",
+        "company_profile_status": "PROFILE_PARTIAL",
+        "company_profile_source": "SUBJECT_EVIDENCE",
+        "business_model_source": "SUBJECT_PUBLISHED_EVIDENCE",
+        "business_model_source_words": "this company's own published account of what it sells and how it is paid",
+        "business_model_alternatives": [
+          "PEOPLE_OR_ROUTE_BASED_SERVICES"
+        ],
+        "profile_available": true,
+        "lens_available": true,
+        "decision_reading_available": false,
+        "decision_map_state": "POTENTIAL_DOMAINS",
+        "causal_chain_kind": "INVESTIGATION_CHAIN",
+        "potential_domains": [
+          "what sensitive data exists and where",
+          "who may reach it",
+          "what regulation requires"
+        ],
+        "evidence_limitation": "the run did not retrieve enough independent material to test this company's own account of itself",
+        "what_would_unlock_a_decision": "a dated, third-party account of something this company has actually decided or changed -- a filing, a customer or competitor statement, or reporting that is not the company's own",
+        "business_model": "SUBSCRIPTION_SOFTWARE",
+        "business_model_confidence": "high",
+        "business_model_evidence": "Unmatched Coverage: Discover and secure data across 100s of sources \u2013 cloud, SaaS, on-prem, and development environments.",
+        "business_model_reason": "read from this company's own published material, which states how it is paid rather than only what it sells",
+        "customer_job": "",
+        "customer_job_provenance": "NOT_ESTABLISHED",
+        "strategic_assets": [],
+        "critical_dependencies": [
+          "Alation"
+        ],
+        "company_specificity_score": 0.235,
+        "company_specific_fields": [
+          "identity",
+          "self_description",
+          "technology_exposure",
+          "critical_dependencies"
+        ],
+        "decision_opportunity_count": 0,
+        "decision_opportunities_considered": 0,
+        "decision_opportunities_withheld": [],
+        "top_decision_domain": "",
+        "top_decision_owner": "",
+        "top_decision_priority": 0.0,
+        "top_decision_components": {},
+        "primary_lens": "data_security_governance",
+        "primary_lens_name": "Data Security & Governance",
+        "lens_confidence": "moderate",
+        "secondary_lenses": [
+          "enterprise_data_ai"
+        ],
+        "lens_selection_reasons": "This company's own material is about \u201cdspm\u201d, \u201csensitive data\u201d, \u201cdata governance\u201d, which is what data security & governance reads. It scored 52.5 against 24.5 for the next eligible lens.",
+        "lens_refusals": [
+          "Data Infrastructure & Decision Trust: scored 19.0 against 52.5, carried by data quality, data pipelines alone",
+          "Regulatory & Risk Intelligence: scored 16.5 against 52.5, carried by hipaa, pci alone",
+          "Revenue & Go-To-Market Strategy: scored 6.0 against 52.5, carried by pipeline, crm alone",
+          "Operational Intelligence: scored 5.5 against 52.5, carried by workflow, automation alone",
+          "Decision to Execution: scored 5.5 against 52.5, carried by adoption, training alone",
+          "Market & Competitive Strategy: scored 3.0 against 52.5, carried by consolidation alone"
+        ],
+        "causal_chain_nodes": 4,
+        "causal_chain_evidence_coverage": 0.25,
+        "causal_chain_stopped_because": "",
+        "genericity_flags": 1,
+        "differentiation_carried_by": [
+          "self_description",
+          "own_vocabulary",
+          "critical_dependencies",
+          "technology_exposure"
+        ],
+        "differentiation_flagged": true,
+        "differentiation_flag_reason": "24% of what this reading tries to establish about a company was learned from this one's own evidence; the rest is the economics of its business model, which every company of the same kind shares. The difference stated above is real but thin, and it is marked rather than dressed up.",
+        "counterevidence_present": false,
+        "information_priority": "",
+        "abstention_reason": "We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none.",
+        "role_lens": "ceo",
+        "role_module_order": [
+          "executive_change",
+          "strategic_thesis",
+          "why_this_is_different",
+          "decision_opportunity_map",
+          "causal_chain",
+          "what_would_change_our_mind",
+          "evidence",
+          "provenance",
+          "strategic_lens",
+          "data_ai_exposure",
+          "economic_exposure",
+          "information_priority",
+          "learning_state",
+          "ask_intent_engine"
+        ],
+        "role_promoted": [
+          "decision_opportunity_map",
+          "causal_chain",
+          "what_would_change_our_mind",
+          "evidence",
+          "provenance"
+        ],
+        "composition_modules": [
+          "executive_change",
+          "strategic_thesis",
+          "why_this_is_different",
+          "strategic_lens",
+          "decision_opportunity_map",
+          "causal_chain",
+          "data_ai_exposure",
+          "economic_exposure",
+          "information_priority",
+          "what_would_change_our_mind",
+          "learning_state",
+          "evidence",
+          "provenance",
+          "ask_intent_engine"
+        ],
+        "composition_excluded": [
+          "decision_delta",
+          "market_belief",
+          "customer_signals",
+          "competitive_response",
+          "supply_chain_exposure",
+          "financial_sensitivity",
+          "regulatory_exposure",
+          "client_portfolio",
+          "operational_intelligence",
+          "contradictions",
+          "alternative_interpretation",
+          "scenario_comparison"
+        ],
+        "composition_explained": 6,
+        "reasoning_provenance": "business model SUBSCRIPTION_SOFTWARE from subject evidence; executive priorities the levers a business of this kind has, since the evidence raised no decision of its own",
+        "errors": [],
+        "run_id": "01M272MM1J2VP0W3JTDHX9SPHY"
+      },
+      "resolved_identity": "BigID",
+      "business_model": "SUBSCRIPTION_SOFTWARE",
+      "profile_source": "SUBJECT_EVIDENCE",
+      "specificity": 0.235,
+      "primary_lens": "data_security_governance",
+      "secondary_lenses": [
+        "enterprise_data_ai"
+      ],
+      "lens_confidence": "moderate",
+      "decision_opportunity_count": 0,
+      "top_decision_domain": "",
+      "top_decision_priority": 0.0,
+      "causal_chain_nodes": 4,
+      "causal_evidence_coverage": 0.25,
+      "genericity_flags": 1,
+      "differentiation_carried_by": [
+        "self_description",
+        "own_vocabulary",
+        "critical_dependencies",
+        "technology_exposure"
+      ],
+      "abstention_reason": "We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none.",
+      "profile_available": true,
+      "lens_available": true,
+      "decision_reading_available": false,
+      "decision_map_state": "POTENTIAL_DOMAINS",
+      "causal_chain_kind": "INVESTIGATION_CHAIN",
+      "potential_domains": [
+        "what sensitive data exists and where",
+        "who may reach it",
+        "what regulation requires"
+      ],
+      "evidence_limitation": "the run did not retrieve enough independent material to test this company's own account of itself",
+      "what_would_unlock": "a dated, third-party account of something this company has actually decided or changed -- a filing, a customer or competitor statement, or reporting that is not the company's own",
+      "intro_status": 200,
+      "intro_chars": 49262,
+      "brief_status": 200,
+      "brief_chars": 42425,
+      "full_status": 200,
+      "full_chars": 51873,
+      "xray_status": 200,
+      "xray_chars": 26403,
+      "evidence_status": 200,
+      "evidence_chars": 19882,
+      "answer_status": 200,
+      "answer_chars": 32377,
+      "surface_s": 88.9,
+      "intro_words": 2264,
+      "sections": {
+        "why_this_company": "Why this analysis is different for BigID Generic interpretation A general reading of a company in this position would say that regulation is tightening and enterprises will buy more security software. It would reason from the economics every subscription software business shares -- recurring software subscription: revenue is contracted and renews, so the installed base carries next period's revenue before any new sale. What is different here In its own words: \u201cBigID is the first data management and governance platform designed for AI data workloads\u201d -- which is narrower, and more specific, than the general reading above. The material it publishes is about dspm, sensitive data, data governance, data discovery -- its own terms, not ours. It depends on Alation, which it names itself. Decision consequence So what management has to weigh is What sensitive data exists and where -- the decision area this company's own material points at, not a recommendation. Why Intent Engine reads it this way This company's own material is about \u201cdspm\u201d, \u201csensitive data\u201d, \u201cdata governance\u201d, which is what data security & governance reads. It scored 52.5 against 24.5 for the next eligible lens. 24% of what this reading tries to establish about a company was learned from this one's own evidence; the rest is the economics of its business model, which every company of the same kind shares. The difference stated above is real but thin, and it is marked rather than dressed up. The evidence this rests on BigID is the first data management and governance platform designed for AI data workloads: built to classify, catalog, and contextualize unstructured genAI data at scale. Scoped RBAC by person, team, or domain. Patented AI Classification: Classify, categorize, and contextualize data with 1,000s of pre-trained, AI-supervised classifiers spanning 100+ languages. BigID is the first and only true enterprise-grade data security and compliance platform that delivers industry leading DSPM, Risk Remediation, DLP, Access, Privacy, Labeling, Deletion and Data Protection in one unified Data Security Platform (DSP).",
+        "decision_or_domains": "Potential decision domains Areas this company model suggests are worth investigating \u2014 not current recommendations . We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none. 01 What sensitive data exists and where It describes itself as the first data management and governance platform designed for AI data workloads, which is what puts what sensitive data exists and where in scope. Would sit with: CEO What would make this a recommendation a dated, first-party statement from this company about what sensitive data exists and where, or a third-party account of it -- at present nothing in the retrieved record raises it 02 Who may reach it It describes itself as the first data management and governance platform designed for AI data workloads, which is what puts who may reach it in scope. Would sit with: CEO What would make this a recommendation a dated, first-party statement from this company about who may reach it, or a third-party account of it -- at present nothing in the retrieved record raises it 03 What regulation requires It describes itself as the first data management and governance platform designed for AI data workloads, which is what puts what regulation requires in scope. Would sit with: RISK What would make this a recommendation a dated, first-party statement from this company about what regulation requires, or a third-party account of it -- at present nothing in the retrieved record raises it",
+        "chain": "What would be worth investigating A line of enquiry, not a causal claim. Nothing below asserts that one thing caused another. What we can see In its own words: \u201cBigID is the first data management and governance platform designed for AI data workloads\u201d evidenced How it could reach this company A subscription software business is reached through market rate, labor, and this one names Alation as something it depends on inference What we would need to know A dated account, from someone other than this company, of something it has actually decided or changed, or a third-party view of Alation, which it names as a dependency. Nothing retrieved in this run carries one, which is why no mechanism is asserted above. open_question The decision it could bear on What sensitive data exists and where -- the decision area this company's own material points at, not a recommendation. open_question This is an investigation, not a conclusion. No mechanism connecting an outside change to this company was established, so nothing below claims one.",
+        "bounded": "What we can and cannot say about BigID What we know BigID is the first data management and governance platform designed for AI data workloads. It is a subscription software business, read from its own account of how it is paid. It names Alation as something it depends on. The lens this points to Data Security & Governance \u2014 This company's own material is about \u201cdspm\u201d, \u201csensitive data\u201d, \u201cdata governance\u201d, which is what data security & governance reads. It scored 52.5 against 24.5 for the next eligible lens. What we cannot yet conclude Which of these is live for this management, or which way it should go. Knowing what kind of business this is tells us which decisions tend to matter for a business like it \u2014 and any direction stated elsewhere on this page rests on that, not on anything this run established about this company in particular. Why not the run did not retrieve enough independent material to test this company's own account of itself What would unlock a decision a dated, third-party account of something this company has actually decided or changed -- a filing, a customer or competitor statement, or reporting that is not the company's own",
+        "lens": "The lens this analysis is using Data Security & Governance This company's own material is about \u201cdspm\u201d, \u201csensitive data\u201d, \u201cdata governance\u201d, which is what data security & governance reads. It scored 52.5 against 24.5 for the next eligible lens. BigID is the first and only true enterprise-grade data security and compliance platform that delivers industry leading DSPM, Risk Remediation, DLP, Access, Privacy, Labeling, Deletion and Data Protection in one unified Data Security Platform (DSP). What was considered and not selected Data Infrastructure & Decision Trust: scored 19.0 against 52.5, carried by data quality, data pipelines alone Regulatory & Risk Intelligence: scored 16.5 against 52.5, carried by hipaa, pci alone Revenue & Go-To-Market Strategy: scored 6.0 against 52.5, carried by pipeline, crm alone Operational Intelligence: scored 5.5 against 52.5, carried by workflow, automation alone Decision to Execution: scored 5.5 against 52.5, carried by adoption, training alone Market & Competitive Strategy: scored 3.0 against 52.5, carried by consolidation alone",
+        "role": "Read this as Chief Executive Strategy Finance future Operations future Product future Revenue future Marketing future Risk & Security future Consultant / Advisor future Chief Executive reads executive change, strategic thesis, why this is different first because the decision in front of that reader is what to change, what it costs to wait, and what would make it the wrong call. Nothing below is removed or reworded; the order changes and the facts do not. What this reader would ask What would make this recommendation wrong? What is the largest assumption here? What does a competitor do about this first? What should I decide this quarter rather than this year? Which regulation actually binds this decision? What sensitive data is in scope and who says so?",
+        "value": "Where Intent Engine could create value for BigID Current \u2014 external evidence only Monitoring the outside record for changes that reach this company through the mechanism above Testing the assumption the current plan rests on against what the record actually says Watching what sensitive data exists and where Watching who may reach it Provenance on every claim, so a disagreement is about the evidence rather than about the tool Future \u2014 with permissioned internal data not connected CRM and pipeline, to test whether the outside reading shows up in this company\u2019s own funnel Product usage and support, to see the same change from the customer side Finance, to attach a magnitude to an exposure that is currently directional Prior decisions, so a recommendation can be checked against what was already tried No return is claimed for any of this, because none has been measured."
+      },
+      "evidence_text": "BigID Home \u00b7 Log in Why this reading exists BigID X-Ray \u00b7 Full analysis \u00b7 Presentation \u00b7 Decision history Independent support 0 of 5 source(s) are both independent of BigID and say enough about it to support the reading. No independent source in this dossier supports the reading. That is a limit of what we retrieved, not evidence that no independent coverage exists. Search coverage: blocked \u2014 sources refused automated access \u00b7 reading: none retrieved \u2014 a limit of our search, not a finding about the company We searched 0 independent channel(s), found 0 filing(s) naming this company, judged 0 of them worth reading, and read 0 in full. Set aside \u2014 channel error:httperror: 1 Written by the company itself (5) Useful evidence, and often the best there is \u2014 but the company speaking about itself cannot corroborate itself. BigID: Enterprise Data Security Platform for DSPM & AI The company's own account of itself Discusses the company directly BigID delivers enterprise data security, DSPM, and AI governance to discover, classify, and protect sensitive data across cloud, on-prem, and AI systems. Trusted by Fortune 500. https://bigid.com Author BigID Host bigid.com Subject BigID Retrieved 2026-09-11T01:52:16.755661+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself AI Risk Management for Data, Models & Access | BigID Another document from a source already counted Discusses the company directly Manage AI risk with BigID. Discover sensitive AI data, detect shadow AI, govern access, reduce model exposure, monitor AI activity, and automate remediation. https://bigid.com/ai-risk-management/ Author BigID Host bigid.com Subject BigID Retrieved 2026-09-11T01:52:16.858939+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself Customer 360: Start With the Business Decision | BigID Another document from a source already counted Discusses the company directly Customer 360 should start with a business decision, not more data. Learn how to define the use case, data, governance, AI controls, and measurable value. https://bigid.com/blog/customer-360-business-decision/ Author BigID Host bigid.com Subject BigID Retrieved 2026-09-11T01:52:16.964076+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself Californians Vote Yes to the California Privacy Rights Act (CPRA) | BigID Another document from a source already counted Discusses the company directly Californians voted yes on Proposition 24 \u2014 also known as the California Privacy Rights Act of 2020 (CPRA). While the CPRA, an amendment to the California Consumer Privacy \u2026 https://bigid.com/blog/cpra-vote/ Author BigID Host bigid.com Subject BigID Retrieved 2026-09-11T01:52:17.061535+00:00 Freshness out of date Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself BigID Pricing Another document from a source already counted Discusses the company directly BigID pricing is based on a combination of factors, including number of data sources, apps, and connectors, deployment type, and level of services and support. Get a custom quote for you. https://home.bigid.com/pricing Author BigID Host home.bigid.com Subject BigID Retrieved 2026-09-11T01:52:17.069568+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself",
+      "xray_says_unclassified": true,
+      "profile_contradiction": true,
+      "ui_html": "reports/ui/bigid.html",
+      "identity_on_page": true,
+      "leaks": [],
+      "has_why_different": true,
+      "has_lens_block": true,
+      "has_role_switch": true,
+      "has_value_block": true,
+      "has_decision_map": false,
+      "has_causal_chain": false,
+      "has_potential_domains": true,
+      "has_not_a_recommendation": true,
+      "has_investigation_chain": true,
+      "has_bounded_block": true,
+      "quotes": [
+        "BigID is the first data management and governance platform designed for AI data workloads: built to classify, catalog, and contextualize unstructured genAI data at scale.",
+        "Scoped RBAC by person, team, or domain.",
+        "Patented AI Classification: Classify, categorize, and contextualize data with 1,000s of pre-trained, AI-supervised classifiers spanning 100+ languages.",
+        "BigID is the first and only true enterprise-grade data security and compliance platform that delivers industry leading DSPM, Risk Remediation, DLP, Access, Privacy, Labeling, Deletion and Data Protection in one unified Data Security Platform (DSP).",
+        "BigID is the first and only true enterprise-grade data security and compliance platform that delivers industry leading DSPM, Risk Remediation, DLP, Access, Privacy, Labeling, Deletion and Data Protection in one unified Data Security Platform (DSP)."
+      ],
+      "quote_count": 5,
+      "broken_quotes": [],
+      "headline_is_generic": false,
+      "lens_matches_expectation": true,
+      "role_ceo_status": 200,
+      "role_cso_status": 200,
+      "role_views_differ": true,
+      "role_facts_identical": true,
+      "qa": [
+        {
+          "q": "Why does this matter for this company specifically?",
+          "status": 200,
+          "words": 172,
+          "text": "Why does this matter for this company specifically? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo BigID Why does this matter for this company specifically? Yes \u2014 on balance the evidence supports that absorbing adjacent tools until the work lives inside it (low confidence). Evidence Strongest. \u201c\u2026Start in the Wrong Place. Customer 360 initiatives frequently begin with technology questions: Which customer data platform should we buy? Should we create a golden record? Do we need master data management? Which data should go into the lakehouse? How do we connect every customer source? Should we build a customer\u2026.\u201d \u2014 Customer 360: Start With the Business Decision | BigID Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the reading here? How is this transition similar to Notion, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What evidence most supports this reading?",
+          "status": 200,
+          "words": 160,
+          "text": "What evidence most supports this reading? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo BigID What evidence most supports this reading? Yes \u2014 on balance the evidence supports that absorbing adjacent tools until the work lives inside it (low confidence). Evidence Strongest. No independent source was found; everything rests on the company's own material. Weakest. 2026-09-11: BigID exposes a surface others can build on, so other people's work comes to depend on it, and that dependence is hard to unwind. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the reading here? How is this transition similar to Notion, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What would have to be true for this to be wrong?",
+          "status": 200,
+          "words": 151,
+          "text": "What would have to be true for this to be wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo BigID What would have to be true for this to be wrong? That was the whole of it: \u201cYes \u2014 on balance the evidence supports that absorbing adjacent tools until the work lives inside it (low confidence).\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the reading here? How is this transition similar to Notion, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What should management monitor next?",
+          "status": 200,
+          "words": 199,
+          "text": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo BigID What should management monitor next? customer count \u2014 revenue at a business of this kind moves with customer count.; seats or usage per customer \u2014 revenue at a business of this kind moves with seats or usage per customer.; list and realised price \u2014 revenue at a business of this kind moves with list and realised price. Evidence Strongest. \u201c\u2026Start in the Wrong Place. Customer 360 initiatives frequently begin with technology questions: Which customer data platform should we buy? Should we create a golden record? Do we need master data management? Which data should go into the lakehouse? How do we connect every customer source? Should we build a customer\u2026.\u201d \u2014 Customer 360: Start With the Business Decision | BigID Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the reading here? How is this transition similar to Notion, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "Which decision here is the most urgent, and why that one?",
+          "status": 200,
+          "words": 184,
+          "text": "Which decision here is the most urgent, and why that one? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo BigID Which decision here is the most urgent, and why that one? That was the whole of it: \u201ccustomer count \u2014 revenue at a business of this kind moves with customer count.; seats or usage per customer \u2014 revenue at a business of this kind moves with seats or usage per customer.; list and realised price \u2014 revenue at a business of this kind moves with list and realised price.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the reading here? How is this transition similar to Notion, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What is the biggest uncertainty in this analysis?",
+          "status": 200,
+          "words": 168,
+          "text": "What is the biggest uncertainty in this analysis? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo BigID What is the biggest uncertainty in this analysis? the public record carries what this company says about itself, not the mechanism behind it. Evidence Strongest. \u201c\u2026Start in the Wrong Place. Customer 360 initiatives frequently begin with technology questions: Which customer data platform should we buy? Should we create a golden record? Do we need master data management? Which data should go into the lakehouse? How do we connect every customer source? Should we build a customer\u2026.\u201d \u2014 Customer 360: Start With the Business Decision | BigID Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the reading here? How is this transition similar to Notion, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        }
+      ],
+      "qa_ok": 6,
+      "qa_company_specific": 6,
+      "followup_words": 149,
+      "followup_is_replay": false,
+      "followup_pass": true,
+      "wall_s": 236.2
+    }
+  ]
+}

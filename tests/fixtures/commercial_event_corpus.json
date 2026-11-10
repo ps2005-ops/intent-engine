@@ -1,0 +1,645 @@
+{
+ "provenance": {
+  "harvested_from": "production company_ingestion path (discover -> approve -> fetch), live, 2026-08-05",
+  "companies": [
+   "caterpillar",
+   "linear",
+   "microsoft",
+   "nvidia",
+   "palantir",
+   "shopify"
+  ],
+  "note": "Every sentence below is verbatim from a retrieved document. Nothing here was written for the test."
+ },
+ "positive": [
+  {
+   "company": "palantir",
+   "text": "Palantir CEO Alex Karp joins CNBC's 'Squawk Box' to discuss the new Nvidia partnership, frontier AI models, and more.",
+   "expected_type": "PARTNERSHIP"
+  },
+  {
+   "company": "microsoft",
+   "text": "REDMOND, Wash. — July 29, 2026 — Microsoft Corp. today announced the following results for the quarter ended June 30, 2026, as compared to the corresponding period of last fiscal year: Several discrete items impacted our financial results in the quarter when compared to our forward-looking guidance provided on April 29, 2026, resulting in a benefit of $0.27 on diluted earnings per share.",
+   "expected_type": "EARNINGS_RESULT"
+  },
+  {
+   "company": "microsoft",
+   "text": "When adjusting for these items, we exceeded expectations across revenue, operating income, and diluted earnings per share.",
+   "expected_type": "EARNINGS_SURPRISE"
+  },
+  {
+   "company": "microsoft",
+   "text": "“This year, Azure revenue surpassed $100 billion for the first time, and Microsoft 365 Copilot reached over 30 million paid seats, reflecting the confidence customers are placing in us to power their AI transformation.”.",
+   "expected_type": "EARNINGS_RESULT"
+  },
+  {
+   "company": "microsoft",
+   "text": "“We delivered a strong quarter to close out the fiscal year, highlighted by Microsoft Cloud revenue of $59.3 billion, up 27% year-over-year,” said Amy Hood, executive vice president and chief financial officer of Microsoft.",
+   "expected_type": "EARNINGS_RESULT"
+  },
+  {
+   "company": "microsoft",
+   "text": "Microsoft Cloud revenue was $59.3 billion and increased 27%, and commercial remaining performance obligation increased 84% to $678 billion.",
+   "expected_type": "EARNINGS_RESULT"
+  },
+  {
+   "company": "microsoft",
+   "text": "Revenue in Productivity and Business Processes was $37.8 billion and increased 14%, with the following business highlights: Revenue in Intelligent Cloud was $39.3 billion and increased 32% (up 31% in constant currency), with the following business highlights: Revenue in More Personal Computing was $12.9 billion and decreased 4% (down 5% in constant currency), with the following business highlights: Microsoft returned $10.2 billion to shareholders in the form of dividends and share repurchases in the fourth quarter of fiscal year 2026.",
+   "expected_type": "EARNINGS_RESULT"
+  },
+  {
+   "company": "microsoft",
+   "text": "In fiscal year 2026, net income and diluted earnings per share were impacted by net gains from investments in OpenAI, which resulted in an increase in net income and diluted earnings per share of $480 million and $0.07, respectively, in the fourth quarter, and $4,963 million and $0.67, respectively, for the full fiscal year.",
+   "expected_type": "EARNINGS_RESULT"
+  },
+  {
+   "company": "microsoft",
+   "text": "In fiscal year 2025, net income and diluted earnings per share were impacted by net losses from investments in OpenAI, which resulted in a decrease in net income and diluted earnings per share of $1,575 million and $0.21, respectively, in the fourth quarter, and $3,620 million and $0.49, respectively, for the full fiscal year.",
+   "expected_type": "EARNINGS_RESULT"
+  },
+  {
+   "company": "microsoft",
+   "text": "(b) On June 2, 2026, Reid Hoffman, a member of the Board of Directors of Microsoft Corporation (the “Company”) since 2017, informed the Company of his decision not to stand for re-election at the Company’s 2026 annual shareholder meeting (the “Annual Meeting”).",
+   "expected_type": "EXECUTIVE_CHANGE"
+  },
+  {
+   "company": "microsoft",
+   "text": "Mr. Hoffman will continue to serve as a director until the Annual Meeting.",
+   "expected_type": "EXECUTIVE_CHANGE"
+  },
+  {
+   "company": "microsoft",
+   "text": "His decision not to stand for re-election is not as a result of any disagreement with management on any matter relating to the Company’s operations, policies, or practices.",
+   "expected_type": "EXECUTIVE_CHANGE"
+  },
+  {
+   "company": "caterpillar",
+   "text": "IRVING, Texas, June 10, 2026 – The Board of Directors of Caterpillar Inc. (NYSE: CAT) voted today to raise the quarterly dividend by 12 cents, an eight percent increase, to one dollar and sixty-three cents ($1.63) per share of common stock payable Aug. 19, 2026, to shareholders of record at the close of business July 20, 2026.",
+   "expected_type": "CAPITAL_RETURN"
+  },
+  {
+   "company": "caterpillar",
+   "text": "Caterpillar expects to continue to return substantially all Machinery, Power & Energy (MP&E) free cash flow to shareholders over time through dividends and share repurchases.",
+   "expected_type": "CAPITAL_RETURN"
+  },
+  {
+   "company": "caterpillar",
+   "text": "“That’s driving profitable growth, strong MP&E free cash flow and a dividend increase that maintains our place on the S&P 500 Dividend Aristocrats Index.”.",
+   "expected_type": "CAPITAL_RETURN"
+  },
+  {
+   "company": "caterpillar",
+   "text": "Second-quarter 2026 sales and revenues increased 24% to $20.5 billion.",
+   "expected_type": "EARNINGS_RESULT"
+  },
+  {
+   "company": "caterpillar",
+   "text": "Second-quarter 2026 profit per share of $7.77; adjusted profit per share of $8.17.",
+   "expected_type": "EARNINGS_RESULT"
+  },
+  {
+   "company": "caterpillar",
+   "text": "Deployed $2.2 billion of cash for share repurchases and dividends in the second quarter.",
+   "expected_type": "CAPITAL_RETURN"
+  },
+  {
+   "company": "shopify",
+   "text": "Shopify Announces $3 Billion Increase to Share Repurchase Program.",
+   "expected_type": "CAPITAL_RETURN"
+  },
+  {
+   "company": "linear",
+   "text": "Completion of the arrangement, as set forth in the arrangement agreement and plan of arrangement dated Aug. 1, 2025, entered into between the company and Westlinear, was approved by the shareholders of the company on Oct. 22, 2025, and by the Supreme Court of British Columbia on Oct. 29, 2025, in accordance with Part 9 of the Business Corporations Act (British Columbia) and accepted by the Canadian Securities Exchange.",
+   "expected_type": "CONTRACT_AWARD"
+  },
+  {
+   "company": "linear",
+   "text": "The Company received 2,125,000 shares of Battery Age Minerals Ltd.. pursuant to the Falcon Lake option agreement (Note 6).",
+   "expected_type": "CONTRACT_AWARD"
+  },
+  {
+   "company": "linear",
+   "text": "On November 14, 2022, the Company entered into a joint venture agreement (the “Infini Joint Venture Agreement”) with Infini Resources Pty Ltd. (“Infini Resources”) whereby Infini Resources may earn a 100% interest in 230 of the 426 mineral claims comprising the Electron Lithium Property.",
+   "expected_type": "PARTNERSHIP"
+  },
+  {
+   "company": "linear",
+   "text": "On January 27, 2023, the Company executed a joint venture agreement (the \"Battery Age Minerals Joint Venture Agreement\") with Battery Age Minerals Limited (\"Battery Age Minerals\") whereby Battery Age Minerals may earn a 100% interest in the Falcon Lake Property.",
+   "expected_type": "PARTNERSHIP"
+  },
+  {
+   "company": "linear",
+   "text": "On August 1, 2025, the Company signed a plan of arrangement agreement (the “Agreement”) to spin out its Pontax West lithium property located in the province of Quebec to the company's subsidiary Westlinear Minerals Corp. (“Westlinear”).",
+   "expected_type": "CONTRACT_AWARD"
+  },
+  {
+   "company": "linear",
+   "text": "On December 9, 2022, the Company entered into amended option agreement to which the Company could acquire a 100% interest in the property by issuing 1,300,000 shares and granted the Company a 1% GMR.",
+   "expected_type": "CONTRACT_AWARD"
+  }
+ ],
+ "negative": [
+  {
+   "company": "palantir",
+   "text": "Palantir Ranked No. 1 Vendor in AI, Data Science, and Machine Learning. — Dresner Advisory Services, 2024 Wisdom of Crowds AI, Data Science, and Machine Learning Market Study."
+  },
+  {
+   "company": "palantir",
+   "text": "Palantir does not endorse, has not verified, and is not responsible for, any content, views, products, services, or policies of any third-party websites, or for any verification or updates of such websites."
+  },
+  {
+   "company": "palantir",
+   "text": "Palantir CEO Alex Karp sits down with CNBC’s Frank Holland to discuss joining the S&P 500, AIPCon, and more."
+  },
+  {
+   "company": "palantir",
+   "text": "Palantir Foundry offers an integrated suite of industry-agnostic capabilities for analysis, collaboration, and operations."
+  },
+  {
+   "company": "palantir",
+   "text": "The Sepsis Hub, developed with Tampa General Hospital in Florida, detects subtle changes in vital signs so antibiotics are given early."
+  },
+  {
+   "company": "palantir",
+   "text": "Palantir CEO Alex Karp says 'something has gone completely wrong' with how AI is sold."
+  },
+  {
+   "company": "palantir",
+   "text": "Fedstart allows companies to quickly accredit their software-as-a-service (SaaS) solutions (a requirement for selling to U.S. government agencies) by running their products within Palantir’s secure and accredited environment."
+  },
+  {
+   "company": "palantir",
+   "text": "Palantir’s participation in Project Convergence Capstone (PCC5) underscores our commitment to strengthening American military might by providing innovative solutions that meet the evolving needs of the defense community."
+  },
+  {
+   "company": "microsoft",
+   "text": "These include a $3.2 billion gain from our investment in Anthropic and lower-than-expected expenses related to the Voluntary Retirement Program which were partially offset by severance expense and impairment charges in XBOX."
+  },
+  {
+   "company": "microsoft",
+   "text": "“We are advancing the frontier on the cost-to-outcome curve, ensuring every customer can turn tokens into business results,” said Satya Nadella, chairman and chief executive officer of Microsoft."
+  },
+  {
+   "company": "microsoft",
+   "text": "Play, buy, and enjoy new releases, and sale deals on the Microsoft Store."
+  },
+  {
+   "company": "microsoft",
+   "text": "Microsoft Copilot is your companion to inform, entertain and inspire."
+  },
+  {
+   "company": "microsoft",
+   "text": "The Company thanks Mr. Hoffman for his contributions during his tenure as a director."
+  },
+  {
+   "company": "caterpillar",
+   "text": "“Our results reflect the execution of our enterprise strategy, combining world-class equipment with advanced technology to solve our customers’ toughest challenges,” said Caterpillar Chairman and CEO Joe Creed."
+  },
+  {
+   "company": "caterpillar",
+   "text": "Caterpillar has paid a cash dividend every year since the company was formed and has paid a quarterly dividend since 1933."
+  },
+  {
+   "company": "caterpillar",
+   "text": "Caterpillar has paid higher annual dividends to shareholders for 32 consecutive years and is recognized as a member of the S&P 500 Dividend Aristocrats Index."
+  },
+  {
+   "company": "caterpillar",
+   "text": "Restructuring costs - divestiture of certain non-U.S. entities."
+  },
+  {
+   "company": "caterpillar",
+   "text": "Diluted by assumed exercise of stock-based compensation awards using the treasury stock method."
+  },
+  {
+   "company": "shopify",
+   "text": "Built for commerce —fast, reliable, and with the world's best-converting checkout."
+  },
+  {
+   "company": "shopify",
+   "text": "Also the support team responds quickly and has helped so much. — Maison Rue."
+  },
+  {
+   "company": "shopify",
+   "text": "We love the clean and modern feel of the theme. — King + Curated."
+  },
+  {
+   "company": "shopify",
+   "text": "Shopify themes flex to fit every kind and size of business—including yours."
+  },
+  {
+   "company": "shopify",
+   "text": "You agree to receive Shopify marketing emails."
+  },
+  {
+   "company": "shopify",
+   "text": "A leading unified operating system powering the future of commerce for millions."
+  },
+  {
+   "company": "shopify",
+   "text": "Building the foundation to power the future of agentic commerce."
+  }
+ ],
+ "furniture": [
+  {
+   "company": "microsoft",
+   "text": "For more information, press only: Microsoft Media Relations, WE Communications for Microsoft, (425) 638-7777, rrt@we-worldwide.com.",
+   "reason": "contact_details"
+  },
+  {
+   "company": "caterpillar",
+   "text": "Caterpillar Contact: Tiffany Heikkila, tiffany.heikkila@cat.com, 832-573.0958.",
+   "reason": "contact_details"
+  },
+  {
+   "company": "linear",
+   "text": "The Company’s telephone is updated to: 604-375-6005.",
+   "reason": "contact_details"
+  },
+  {
+   "company": "linear",
+   "text": "Linear retained its working capital for its assets, remains listed on the exchange, continues to trade under the trading symbol of Linear as a junior exploration company, and continues to be a reporting issuer in the provinces of British Columbia, Alberta and Ontario.",
+   "reason": "cover_page_boilerplate"
+  },
+  {
+   "company": "microsoft",
+   "text": "If an emerging growth company, indicate by check mark if the registrant has elected not to use the extended transition period for complying with any new or revised financial accounting standards provided pursuant to Section 13(a) of the Exchange Act. ☐.",
+   "reason": "cover_page_boilerplate"
+  },
+  {
+   "company": "microsoft",
+   "text": "Indicate by check mark whether the registrant is an emerging growth company as defined in Rule 405 of the Securities Act of 1933 (§230.405 of this chapter) or Rule 12b-2 of the Securities Exchange Act of 1934 (§240.12b-2 of this chapter).",
+   "reason": "cover_page_boilerplate"
+  },
+  {
+   "company": "linear",
+   "text": "On December 31, 2024, FE Battery Metals Corp changed its name to Linear Minerals Corp. with a new trading symbol of ‘LINE’ on the Canadian Securities Exchange (LINE), the OTCBB Exchange (LINMF) and the Frankfurt Exchange (A4OY3E).",
+   "reason": "cover_page_boilerplate"
+  },
+  {
+   "company": "microsoft",
+   "text": "Check the appropriate box below if the Form 8-K filing is intended to simultaneously satisfy the filing obligation of the registrant under any of the following provisions (see General Instruction A.2. below): ☐.",
+   "reason": "cover_page_boilerplate"
+  },
+  {
+   "company": "microsoft",
+   "text": "Pursuant to the requirements of the Securities Exchange Act of 1934, the registrant has duly caused this report to be signed on its behalf by the undersigned hereunto duly authorized.",
+   "reason": "cover_page_boilerplate"
+  },
+  {
+   "company": "linear",
+   "text": "Check the appropriate box below if the Form 8-K is intended to simultaneously satisfy the filing obligation of the registrant under any of the following provisions: [ ].",
+   "reason": "cover_page_boilerplate"
+  },
+  {
+   "company": "palantir",
+   "text": "Pre-commencement communications pursuant to Rule 14d-2(b) under the Exchange Act (17 CFR 240.14d-2(b)).",
+   "reason": "cover_page_boilerplate"
+  },
+  {
+   "company": "palantir",
+   "text": "Pre-commencement communications pursuant to Rule 13e-4(c) under the Exchange Act (17 CFR 240.13e-4(c)).",
+   "reason": "cover_page_boilerplate"
+  },
+  {
+   "company": "palantir",
+   "text": "Soliciting material pursuant to Rule 14a-12 under the Exchange Act (17 CFR 240.14a-12).",
+   "reason": "cover_page_boilerplate"
+  },
+  {
+   "company": "palantir",
+   "text": "Written communications pursuant to Rule 425 under the Securities Act (17 CFR 230.425).",
+   "reason": "cover_page_boilerplate"
+  },
+  {
+   "company": "linear",
+   "text": "CURRENT REPORTPursuant to Section 13 or 15(d) of the Securities Exchange Act of 1934.",
+   "reason": "cover_page_boilerplate"
+  },
+  {
+   "company": "caterpillar",
+   "text": "Cash flow from operating activities: Adjustments to reconcile profit to net cash provided by operating activities: Depreciation and amortization.",
+   "reason": "financial_statement_line"
+  },
+  {
+   "company": "palantir",
+   "text": "Weighted-average shares of common stock outstanding used in computing earnings per share attributable to common stockholders, diluted.",
+   "reason": "financial_statement_line"
+  },
+  {
+   "company": "palantir",
+   "text": "Weighted-average shares of common stock outstanding used in computing earnings per share attributable to common stockholders, basic.",
+   "reason": "financial_statement_line"
+  },
+  {
+   "company": "palantir",
+   "text": "Adjustments to reconcile net income to net cash provided by operating activities: Depreciation and amortization.",
+   "reason": "financial_statement_line"
+  },
+  {
+   "company": "microsoft",
+   "text": "Acquisition of companies, net of cash acquired and divestitures, and purchases of intangible and other assets.",
+   "reason": "financial_statement_line"
+  },
+  {
+   "company": "microsoft",
+   "text": "Adjustments to reconcile net income to net cash from operations: Depreciation, amortization, and other.",
+   "reason": "financial_statement_line"
+  },
+  {
+   "company": "caterpillar",
+   "text": "Cash flow from investing activities: Capital expenditures – excluding equipment leased to others.",
+   "reason": "financial_statement_line"
+  },
+  {
+   "company": "microsoft",
+   "text": "June 30, Other comprehensive income (loss), net of tax: Net change related to derivatives.",
+   "reason": "financial_statement_line"
+  },
+  {
+   "company": "caterpillar",
+   "text": "Proceeds from intercompany borrowings (original maturities greater than three months).",
+   "reason": "financial_statement_line"
+  },
+  {
+   "company": "microsoft",
+   "text": "Property and equipment, net of accumulated depreciation of $118,691 and $93,653.",
+   "reason": "financial_statement_line"
+  },
+  {
+   "company": "palantir",
+   "text": "Weighted-average shares used in computing adjusted earnings per share, diluted.",
+   "reason": "financial_statement_line"
+  },
+  {
+   "company": "microsoft",
+   "text": "Accounts receivable, net of allowance for doubtful accounts of $1,040 and $944.",
+   "reason": "financial_statement_line"
+  },
+  {
+   "company": "microsoft",
+   "text": "Financial Performance Constant Currency Reconciliation.",
+   "reason": "fragment"
+  },
+  {
+   "company": "microsoft",
+   "text": "Segment Revenue Constant Currency Reconciliation.",
+   "reason": "fragment"
+  },
+  {
+   "company": "shopify",
+   "text": "Strong ecosystem and best-in-class partnerships.",
+   "reason": "fragment"
+  },
+  {
+   "company": "palantir",
+   "text": "Palantir's stockholders’ equity: Common stock.",
+   "reason": "fragment"
+  },
+  {
+   "company": "palantir",
+   "text": "(State or other jurisdiction ofincorporation).",
+   "reason": "fragment"
+  },
+  {
+   "company": "caterpillar",
+   "text": "Interest expense excluding Financial Products.",
+   "reason": "fragment"
+  },
+  {
+   "company": "caterpillar",
+   "text": "Accumulated other comprehensive income (loss).",
+   "reason": "fragment"
+  },
+  {
+   "company": "linear",
+   "text": "Exploration and Evaluation Assets (continued).",
+   "reason": "fragment"
+  },
+  {
+   "company": "palantir",
+   "text": "High-resolution version uploaded from script.",
+   "reason": "fragment"
+  },
+  {
+   "company": "caterpillar",
+   "text": "Selling, general and administrative expenses.",
+   "reason": "fragment"
+  },
+  {
+   "company": "linear",
+   "text": "Intangible Exploration and Evaluation Assets.",
+   "reason": "fragment"
+  },
+  {
+   "company": "microsoft",
+   "text": "Commercial remaining performance obligation.",
+   "reason": "fragment"
+  },
+  {
+   "company": "linear",
+   "text": "UNITED STATESSECURITIES AND EXCHANGE COMMISSIONWashington, D.C.",
+   "reason": "heading"
+  },
+  {
+   "company": "palantir",
+   "text": "CONTACT / DEMO REQUEST + PARTNERSHIP INQUIRY.",
+   "reason": "heading"
+  },
+  {
+   "company": "linear",
+   "text": "FOR THE NINE MONTHS ENDED DECEMBER 31, 2025.",
+   "reason": "heading"
+  },
+  {
+   "company": "linear",
+   "text": "The Board of Directors has not established quantitative capital structure criteria",
+   "reason": "incomplete_sentence"
+  },
+  {
+   "company": "palantir",
+   "text": "View of empty hospital room. © 2023 Palantir Technologies Inc. All rights reserved. an older man and woman, both wearing hats, sitting side by side on a bench looking at mountains. お問い合わせ / デモリクエスト / パートナーシップのご相談.",
+   "reason": "legal_boilerplate"
+  },
+  {
+   "company": "palantir",
+   "text": "If you don’t want to leave Palantir’s website, simply click ‘Back’. © 2025 Palantir Technologies Inc. All rights reserved. © 2025 The Palantir Foundation for Defense Policy and International Affairs.",
+   "reason": "legal_boilerplate"
+  },
+  {
+   "company": "palantir",
+   "text": "Third-party websites may also include \"forward-looking statements\" which are inherently subject to risks and uncertainties, some of which cannot be predicted or quantified.",
+   "reason": "legal_boilerplate"
+  },
+  {
+   "company": "palantir",
+   "text": "Palantir's US Public Policy Positions. © 2025 Palantir Technologies Inc. All rights reserved. © 2025 The Palantir Foundation for Defense Policy and International Affairs.",
+   "reason": "legal_boilerplate"
+  },
+  {
+   "company": "microsoft",
+   "text": "Statements in this release that are “forward-looking statements” are based on current expectations and assumptions that are subject to risks and uncertainties.",
+   "reason": "legal_boilerplate"
+  },
+  {
+   "company": "palantir",
+   "text": "Actual results could differ materially from those indicated in such forward-looking statements.",
+   "reason": "legal_boilerplate"
+  },
+  {
+   "company": "linear",
+   "text": "Take the guesswork out of product development with project updates, analytics, and dashboards that surface what needs your attention. iOS implementation is mostly complete, but Android updates are still work in progress.",
+   "reason": "marketing_imperative"
+  },
+  {
+   "company": "palantir",
+   "text": "Welcome to another installment of Building with Palantir AIP series, taking you through how to build end-to-end workflows using our Artificial Intelligence Platform (AIP).",
+   "reason": "marketing_imperative"
+  },
+  {
+   "company": "shopify",
+   "text": "Sign up for Shopify's free trial to access all of the tools and services you need to start, run, and grow your business.",
+   "reason": "marketing_imperative"
+  },
+  {
+   "company": "palantir",
+   "text": "Bring intelligence to your entire enterprise, and to the core of the decisions and operations that matter most.",
+   "reason": "marketing_imperative"
+  },
+  {
+   "company": "shopify",
+   "text": "Try Shopify for free, and explore all the tools you need to start, run, and grow your business.",
+   "reason": "marketing_imperative"
+  },
+  {
+   "company": "palantir",
+   "text": "Get Started: Marketo Form (Drawer). regarding how we will handle this information.",
+   "reason": "marketing_imperative"
+  },
+  {
+   "company": "linear",
+   "text": "Learn how to reference a file in markdown content, or upload with the API.",
+   "reason": "marketing_imperative"
+  },
+  {
+   "company": "palantir",
+   "text": "See Palantir’s suggestions to the White House on an AI Action Plan.",
+   "reason": "marketing_imperative"
+  },
+  {
+   "company": "linear",
+   "text": "Learn how to use the GraphQL API to query and mutate your data.",
+   "reason": "marketing_imperative"
+  },
+  {
+   "company": "shopify",
+   "text": "Get Shopify’s latest financial news, events, and key updates.",
+   "reason": "marketing_imperative"
+  },
+  {
+   "company": "linear",
+   "text": "Build and deploy AI agents that work alongside your team.",
+   "reason": "marketing_imperative"
+  },
+  {
+   "company": "microsoft",
+   "text": "Get advice, feedback and straightforward answers.",
+   "reason": "marketing_imperative"
+  },
+  {
+   "company": "palantir",
+   "text": "Our mission is to build powerful software that helps organizations integrate, manage, and analyze their data securely and responsibly.",
+   "reason": "mission_statement"
+  },
+  {
+   "company": "shopify",
+   "text": "It’s a new way for our story and product details to show up at the exact moment someone is asking real questions with real intent.",
+   "reason": "mission_statement"
+  },
+  {
+   "company": "palantir",
+   "text": "Learn more about life at Palantir from some of our Early Talent Hiring Managers, who share their own professional journeys and advice.",
+   "reason": "navigation"
+  },
+  {
+   "company": "palantir",
+   "text": "See all Engineering & Tech posts.",
+   "reason": "navigation"
+  },
+  {
+   "company": "palantir",
+   "text": "See all Life at Palantir posts.",
+   "reason": "navigation"
+  },
+  {
+   "company": "nvidia",
+   "text": "Grafické karty GeForce RTX Founders Edition: chladné, tiché a přetaktované z výroby Naše nejnovější grafické karty Founders Edition přinášejí náš zatím nejlepší průmyslový design a jsou z výroby přetaktované.",
+   "reason": "no_verb"
+  },
+  {
+   "company": "microsoft",
+   "text": "Games on Microsoft Store - Discover and play popular games for your Windows PC Microsoft Store - Download apps, games & more for your Windows PC Explore the ultimate collection of Xbox and PC games.",
+   "reason": "no_verb"
+  },
+  {
+   "company": "linear",
+   "text": "Financial instruments that potentially subject the Company to credit risk consist of cash, short-term investment, reclamation bonds and amounts receivable.",
+   "reason": "no_verb"
+  },
+  {
+   "company": "linear",
+   "text": "The product development system for teams and agentsThe product developmentsystem for teams and agentsThe product development system for teams and agents.",
+   "reason": "no_verb"
+  },
+  {
+   "company": "microsoft",
+   "text": "Note to editors: For more information, news and perspectives from Microsoft, please visit the Microsoft News Center at http://www.microsoft.com/news.",
+   "reason": "no_verb"
+  },
+  {
+   "company": "microsoft",
+   "text": "Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain Officers; Compensatory Arrangements of Certain Officers.",
+   "reason": "no_verb"
+  },
+  {
+   "company": "caterpillar",
+   "text": "Cash equivalents primarily represent short-term, highly liquid investments with original maturities of generally three months or less.",
+   "reason": "no_verb"
+  },
+  {
+   "company": "microsoft",
+   "text": "For more information, financial analysts and investors only: Jonathan Neilson, Vice President, Investor Relations, (425) 706-4400.",
+   "reason": "no_verb"
+  },
+  {
+   "company": "microsoft",
+   "text": "We share innovation updates on our product blogs across Azure, Microsoft 365, and more on our Official Microsoft blog.",
+   "reason": "no_verb"
+  },
+  {
+   "company": "palantir",
+   "text": "We build software that empowers organizations to effectively integrate their data, decisions, and operations.",
+   "reason": "no_verb"
+  },
+  {
+   "company": "linear",
+   "text": "You’ll probably build a better product, just because of the craft that using Linear infuses on your brain.",
+   "reason": "no_verb"
+  },
+  {
+   "company": "caterpillar",
+   "text": "Please see a reconciliation of GAAP to non-GAAP financial measures in the appendix on pages 12 and 13. ●.",
+   "reason": "no_verb"
+  },
+  {
+   "company": "palantir",
+   "text": "A featured collection of the latest Palantir blog posts.",
+   "reason": "page_index"
+  },
+  {
+   "company": "microsoft",
+   "text": "Actual results could differ materially because of factors such as: For more information about risks and uncertainties associated with Microsoft’s business, please refer to the “Management’s Discussion and Analysis of Financial Condition and Results of Operations” and “Risk Factors” sections of Microsoft’s SEC filings, including, but not limited to, its annual report on Form 10-K and quarterly reports on Form 10-Q, copies of which may be obtained by contacting Microsoft’s Investor Relations department at (800) 285-7772 or at Microsoft’s Investor Relations website at http://www.microsoft.com/en-us/investor.",
+   "reason": "unsegmented_block"
+  }
+ ]
+}

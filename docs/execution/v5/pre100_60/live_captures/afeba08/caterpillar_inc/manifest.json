@@ -1,0 +1,68 @@
+{
+  "company": "Caterpillar Inc.",
+  "deployed_sha": "afeba08",
+  "captured_at": "2026-08-21T00:50:55Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GWSAZXQXX4MJ2DWE5W6HNR/intro",
+      "chars": 5434,
+      "html_chars": 30969
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GWSAZXQXX4MJ2DWE5W6HNR/intro",
+      "chars": 5434,
+      "html_chars": 30969
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GWSAZXQXX4MJ2DWE5W6HNR/slides",
+      "chars": 6292,
+      "html_chars": 50316
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GWSAZXQXX4MJ2DWE5W6HNR/full",
+      "chars": 23442,
+      "html_chars": 65322
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GWSAZXQXX4MJ2DWE5W6HNR/story",
+      "chars": 4197,
+      "html_chars": 33710
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GWSAZXQXX4MJ2DWE5W6HNR/history",
+      "chars": 29240,
+      "html_chars": 109410
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0GWSAZXQXX4MJ2DWE5W6HNR/connect",
+      "chars": 3909,
+      "html_chars": 28815
+    }
+  },
+  "progress": [
+    {
+      "t": 0,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Caterpillar Inc. CAT \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connectin"
+    },
+    {
+      "t": 6,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Caterpillar Inc. CAT \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connectin"
+    },
+    {
+      "t": 13,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Caterpillar Inc. CAT \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connectin"
+    }
+  ],
+  "run_id": "01M0GWSAZXQXX4MJ2DWE5W6HNR",
+  "status": "RUN_LOST",
+  "seconds": 266,
+  "auto_advanced": true,
+  "answers_captured": 0
+}

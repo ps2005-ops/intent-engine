@@ -1,0 +1,4272 @@
+{
+  "capture_root": "docs/execution/v5/pre100_50/live_captures/8397d67",
+  "companies": [
+    {
+      "company": "Adobe Inc.",
+      "deployed_sha": "8397d67",
+      "run_id": "01M0HA4K4QRGXTM3Z5BY69Z63D",
+      "auto_advanced": true,
+      "seconds": 233,
+      "routes": [
+        {
+          "route": "intro",
+          "chars": 5329,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "slides",
+          "chars": 6827,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "full",
+          "chars": 24385,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "story",
+          "chars": 5590,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "history",
+          "chars": 28412,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "step6",
+          "chars": 4018,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        }
+      ],
+      "statements": {
+        "intro": {
+          "competitor": "The buyer's own engineering team and private companies, and customers can substitute automation absorbing the task itsel",
+          "central_question": "what to charge, and for what, without losing more customer count than the price gains?"
+        }
+      },
+      "contradictions": [],
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 9,
+        "ratio": 0.9
+      }
+    },
+    {
+      "company": "Alphabet Inc.",
+      "deployed_sha": "8397d67",
+      "run_id": "01M0H8HGXESBBWPZKED863FFZE",
+      "auto_advanced": true,
+      "seconds": 152,
+      "routes": [
+        {
+          "route": "intro",
+          "chars": 5911,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "slides",
+          "chars": 6600,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "full",
+          "chars": 24452,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "story",
+          "chars": 4559,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "history",
+          "chars": 28555,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "step6",
+          "chars": 4060,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        }
+      ],
+      "statements": {
+        "intro": {
+          "competitor": "Within Google Services, and customers can substitute another surface holding the same attention hour and automation abso",
+          "central_question": "how much of the audience's attention to convert into inventory, and where, given that ad load taken today is paid for out of users and their engagement tomorrow?"
+        }
+      },
+      "contradictions": [],
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 9,
+        "ratio": 0.9
+      }
+    },
+    {
+      "company": "Amazon.com, Inc.",
+      "deployed_sha": "8397d67",
+      "run_id": "01M0H983N63Q3V1SWHVSJ6RP2Z",
+      "auto_advanced": true,
+      "seconds": 297,
+      "routes": [
+        {
+          "route": "intro",
+          "chars": 5296,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "slides",
+          "chars": 7081,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "full",
+          "chars": 26250,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "story",
+          "chars": 5342,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "history",
+          "chars": 29667,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "step6",
+          "chars": 4089,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        }
+      ],
+      "statements": {
+        "intro": {
+          "competitor": "a specialist doing one engine better than the bundle, and customers can substitute publishers and distributors",
+          "central_question": "where the next increment of capital goes, given what the same capital would earn against segment mix elsewhere?"
+        }
+      },
+      "contradictions": [],
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 9,
+        "ratio": 0.9
+      }
+    },
+    {
+      "company": "Caterpillar Inc.",
+      "deployed_sha": "8397d67",
+      "run_id": "01M0H2H3TBAMJF5A4B5JFQWF98",
+      "auto_advanced": true,
+      "seconds": 252,
+      "routes": [
+        {
+          "route": "intro",
+          "chars": 5439,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "slides",
+          "chars": 6292,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "full",
+          "chars": 23442,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "story",
+          "chars": 4197,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "history",
+          "chars": 29240,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "step6",
+          "chars": 3909,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        }
+      ],
+      "statements": {
+        "intro": {
+          "competitor": "CNH Industrial N",
+          "central_question": "how much capacity to commit, and when, given that the commitment to supply chain and component availability is made before the orders and backlog it is meant to serve?"
+        }
+      },
+      "contradictions": [],
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 9,
+        "ratio": 0.9
+      }
+    },
+    {
+      "company": "Cloudflare, Inc.",
+      "deployed_sha": "8397d67",
+      "run_id": "01M0H1V4M6E85XX0KTHSBYW4BF",
+      "auto_advanced": true,
+      "seconds": 20,
+      "routes": [
+        {
+          "route": "intro",
+          "chars": 4543,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "slides",
+          "chars": 1917,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "full",
+          "chars": 1917,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "story",
+          "chars": 5108,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "history",
+          "chars": 27790,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "step6",
+          "chars": 4036,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        }
+      ],
+      "statements": {
+        "intro": {
+          "competitor": "on-premises network hardware vendors, point solution vendors and network security vendors, and the economics that decide",
+          "central_question": "what to charge, and for what, without losing more customer count than the price gains?"
+        }
+      },
+      "contradictions": [],
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 9,
+        "ratio": 0.9
+      }
+    },
+    {
+      "company": "JPMorgan Chase & Co.",
+      "deployed_sha": "8397d67",
+      "run_id": "01M0H2649J92VKGD80RBFP1NMX",
+      "auto_advanced": true,
+      "seconds": 157,
+      "routes": [
+        {
+          "route": "intro",
+          "chars": 4708,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "slides",
+          "chars": 4638,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "full",
+          "chars": 20705,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "story",
+          "chars": 3713,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "history",
+          "chars": 28217,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "step6",
+          "chars": 3974,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        }
+      ],
+      "statements": {
+        "intro": {
+          "competitor": "banks and brokerage firms, and customers can substitute non-bank providers reaching the customer directly",
+          "central_question": "what to charge, and for what, without losing more spread on assets and liabilities than the price gains?"
+        }
+      },
+      "contradictions": [],
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 9,
+        "ratio": 0.9
+      }
+    },
+    {
+      "company": "Meta Platforms, Inc.",
+      "deployed_sha": "8397d67",
+      "run_id": "01M0H1E7T09BN34KZQC3TTF0MF",
+      "auto_advanced": true,
+      "seconds": 220,
+      "routes": [
+        {
+          "route": "intro",
+          "chars": 6048,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "slides",
+          "chars": 6285,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "full",
+          "chars": 21671,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "story",
+          "chars": 4530,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "history",
+          "chars": 29234,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "step6",
+          "chars": 4074,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        }
+      ],
+      "statements": {
+        "intro": {
+          "central_question": "how much of the audience's attention to convert into inventory, and where, given that ad load taken today is paid for out of users and their engagement tomorrow?"
+        }
+      },
+      "contradictions": [],
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 9,
+        "ratio": 0.9
+      }
+    },
+    {
+      "company": "Microsoft Corporation",
+      "deployed_sha": "8397d67",
+      "run_id": "01M0H8WGT4D5DFBB41HXN9W0AZ",
+      "auto_advanced": true,
+      "seconds": 195,
+      "routes": [
+        {
+          "route": "intro",
+          "chars": 5593,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "slides",
+          "chars": 6428,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "full",
+          "chars": 25194,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "story",
+          "chars": 5521,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "history",
+          "chars": 28945,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "step6",
+          "chars": 4040,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        }
+      ],
+      "statements": {
+        "intro": {
+          "central_question": "what to charge, and for what, without losing more customer count than the price gains?"
+        }
+      },
+      "contradictions": [],
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 9,
+        "ratio": 0.9
+      }
+    },
+    {
+      "company": "Salesforce, Inc.",
+      "deployed_sha": "8397d67",
+      "run_id": "01M0H9Q82E16C4ZFET1E3CJ9WC",
+      "auto_advanced": true,
+      "seconds": 241,
+      "routes": [
+        {
+          "route": "intro",
+          "chars": 5633,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "slides",
+          "chars": 6578,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "full",
+          "chars": 24593,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "story",
+          "chars": 4210,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "history",
+          "chars": 28779,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "step6",
+          "chars": 4030,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        }
+      ],
+      "statements": {
+        "intro": {
+          "central_question": "what to charge, and for what, without losing more customer count than the price gains?"
+        }
+      },
+      "contradictions": [],
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 9,
+        "ratio": 0.9
+      }
+    },
+    {
+      "company": "ServiceNow, Inc.",
+      "deployed_sha": "8397d67",
+      "run_id": "01M0HAHDVDR0X0VKWQQN14ABYA",
+      "auto_advanced": true,
+      "seconds": 21,
+      "routes": [
+        {
+          "route": "intro",
+          "chars": 4644,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "slides",
+          "chars": 1679,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "full",
+          "chars": 1679,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "story",
+          "chars": 5148,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "history",
+          "chars": 29023,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "step6",
+          "chars": 4036,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        }
+      ],
+      "statements": {
+        "intro": {
+          "competitor": "The buyer's own engineering team, and customers can substitute automation absorbing the task itself, and customers can i",
+          "central_question": "what to charge, and for what, without losing more customer count than the price gains?"
+        }
+      },
+      "contradictions": [],
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 9,
+        "ratio": 0.9
+      }
+    },
+    {
+      "company": "Shopify Inc.",
+      "deployed_sha": "8397d67",
+      "run_id": "01M0HAWDM42YV5PAPBHE2FGRP5",
+      "auto_advanced": true,
+      "seconds": 367,
+      "routes": [
+        {
+          "route": "intro",
+          "chars": 5655,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "slides",
+          "chars": 7205,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "full",
+          "chars": 25542,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "story",
+          "chars": 5633,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "history",
+          "chars": 27835,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "step6",
+          "chars": 3957,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        }
+      ],
+      "statements": {
+        "intro": {
+          "central_question": "what to charge, and for what, without losing more customer count than the price gains?"
+        }
+      },
+      "contradictions": [],
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 9,
+        "ratio": 0.9
+      }
+    },
+    {
+      "company": "Stripe, Inc.",
+      "deployed_sha": "8397d67",
+      "run_id": "",
+      "auto_advanced": null,
+      "seconds": null,
+      "routes": [
+        {
+          "route": "intro",
+          "missing": true
+        },
+        {
+          "route": "slides",
+          "missing": true
+        },
+        {
+          "route": "full",
+          "missing": true
+        },
+        {
+          "route": "story",
+          "missing": true
+        },
+        {
+          "route": "history",
+          "missing": true
+        },
+        {
+          "route": "step6",
+          "missing": true
+        }
+      ],
+      "statements": {},
+      "contradictions": [],
+      "flags": [
+        "MISSING_ROUTE:full",
+        "MISSING_ROUTE:history",
+        "MISSING_ROUTE:intro",
+        "MISSING_ROUTE:slides",
+        "MISSING_ROUTE:step6",
+        "MISSING_ROUTE:story"
+      ],
+      "qa_within_company": {
+        "answers": 0,
+        "distinct": 0,
+        "ratio": null
+      }
+    }
+  ],
+  "collapse": {
+    "pairs": {
+      "intro": [
+        {
+          "a": "Adobe Inc.",
+          "b": "Alphabet Inc.",
+          "similarity": 0.572,
+          "chars": [
+            5222,
+            5793
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Amazon.com, Inc.",
+          "similarity": 0.442,
+          "chars": [
+            5222,
+            5160
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.296,
+          "chars": [
+            5222,
+            5313
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.429,
+          "chars": [
+            5222,
+            4414
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.378,
+          "chars": [
+            5222,
+            4556
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.375,
+          "chars": [
+            5222,
+            5906
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.363,
+          "chars": [
+            5222,
+            5437
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.749,
+          "chars": [
+            5222,
+            5496
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.439,
+          "chars": [
+            5222,
+            4515
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.359,
+          "chars": [
+            5222,
+            5540
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Amazon.com, Inc.",
+          "similarity": 0.237,
+          "chars": [
+            5793,
+            5160
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.214,
+          "chars": [
+            5793,
+            5313
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.305,
+          "chars": [
+            5793,
+            4414
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.335,
+          "chars": [
+            5793,
+            4556
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.542,
+          "chars": [
+            5793,
+            5906
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.271,
+          "chars": [
+            5793,
+            5437
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.443,
+          "chars": [
+            5793,
+            5496
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.299,
+          "chars": [
+            5793,
+            4515
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.269,
+          "chars": [
+            5793,
+            5540
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.225,
+          "chars": [
+            5160,
+            5313
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.262,
+          "chars": [
+            5160,
+            4414
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.252,
+          "chars": [
+            5160,
+            4556
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.617,
+          "chars": [
+            5160,
+            5906
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.453,
+          "chars": [
+            5160,
+            5437
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.251,
+          "chars": [
+            5160,
+            5496
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.266,
+          "chars": [
+            5160,
+            4515
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.25,
+          "chars": [
+            5160,
+            5540
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.31,
+          "chars": [
+            5313,
+            4414
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.272,
+          "chars": [
+            5313,
+            4556
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.258,
+          "chars": [
+            5313,
+            5906
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.337,
+          "chars": [
+            5313,
+            5437
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.293,
+          "chars": [
+            5313,
+            5496
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.312,
+          "chars": [
+            5313,
+            4515
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.293,
+          "chars": [
+            5313,
+            5540
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.402,
+          "chars": [
+            4414,
+            4556
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.397,
+          "chars": [
+            4414,
+            5906
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.375,
+          "chars": [
+            4414,
+            5437
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.418,
+          "chars": [
+            4414,
+            5496
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.951,
+          "chars": [
+            4414,
+            4515
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.415,
+          "chars": [
+            4414,
+            5540
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.435,
+          "chars": [
+            4556,
+            5906
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.307,
+          "chars": [
+            4556,
+            5437
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.308,
+          "chars": [
+            4556,
+            5496
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.364,
+          "chars": [
+            4556,
+            4515
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Shopify Inc.",
+          "similarity": 0.306,
+          "chars": [
+            4556,
+            5540
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.446,
+          "chars": [
+            5906,
+            5437
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.23,
+          "chars": [
+            5906,
+            5496
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.248,
+          "chars": [
+            5906,
+            4515
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.287,
+          "chars": [
+            5906,
+            5540
+          ]
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.265,
+          "chars": [
+            5437,
+            5496
+          ]
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.28,
+          "chars": [
+            5437,
+            4515
+          ]
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "Shopify Inc.",
+          "similarity": 0.26,
+          "chars": [
+            5437,
+            5540
+          ]
+        },
+        {
+          "a": "Salesforce, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.419,
+          "chars": [
+            5496,
+            4515
+          ]
+        },
+        {
+          "a": "Salesforce, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.351,
+          "chars": [
+            5496,
+            5540
+          ]
+        },
+        {
+          "a": "ServiceNow, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.418,
+          "chars": [
+            4515,
+            5540
+          ]
+        }
+      ],
+      "slides": [
+        {
+          "a": "Adobe Inc.",
+          "b": "Alphabet Inc.",
+          "similarity": 0.602,
+          "chars": [
+            6510,
+            6235
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Amazon.com, Inc.",
+          "similarity": 0.363,
+          "chars": [
+            6510,
+            6617
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.314,
+          "chars": [
+            6510,
+            5886
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.015,
+          "chars": [
+            6510,
+            1828
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.174,
+          "chars": [
+            6510,
+            4214
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.319,
+          "chars": [
+            6510,
+            5782
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.351,
+          "chars": [
+            6510,
+            5897
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.599,
+          "chars": [
+            6510,
+            6176
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.015,
+          "chars": [
+            6510,
+            1602
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.448,
+          "chars": [
+            6510,
+            6823
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Amazon.com, Inc.",
+          "similarity": 0.376,
+          "chars": [
+            6235,
+            6617
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.297,
+          "chars": [
+            6235,
+            5886
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.022,
+          "chars": [
+            6235,
+            1828
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.17,
+          "chars": [
+            6235,
+            4214
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.299,
+          "chars": [
+            6235,
+            5782
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.331,
+          "chars": [
+            6235,
+            5897
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.765,
+          "chars": [
+            6235,
+            6176
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.015,
+          "chars": [
+            6235,
+            1602
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.337,
+          "chars": [
+            6235,
+            6823
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.272,
+          "chars": [
+            6617,
+            5886
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.017,
+          "chars": [
+            6617,
+            1828
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.162,
+          "chars": [
+            6617,
+            4214
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.398,
+          "chars": [
+            6617,
+            5782
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.41,
+          "chars": [
+            6617,
+            5897
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.366,
+          "chars": [
+            6617,
+            6176
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.014,
+          "chars": [
+            6617,
+            1602
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.47,
+          "chars": [
+            6617,
+            6823
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.02,
+          "chars": [
+            5886,
+            1828
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.183,
+          "chars": [
+            5886,
+            4214
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.575,
+          "chars": [
+            5886,
+            5782
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.415,
+          "chars": [
+            5886,
+            5897
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.323,
+          "chars": [
+            5886,
+            6176
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.015,
+          "chars": [
+            5886,
+            1602
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.284,
+          "chars": [
+            5886,
+            6823
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.099,
+          "chars": [
+            1828,
+            4214
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.023,
+          "chars": [
+            1828,
+            5782
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.02,
+          "chars": [
+            1828,
+            5897
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.02,
+          "chars": [
+            1828,
+            6176
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.739,
+          "chars": [
+            1828,
+            1602
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.021,
+          "chars": [
+            1828,
+            6823
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.254,
+          "chars": [
+            4214,
+            5782
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.242,
+          "chars": [
+            4214,
+            5897
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.214,
+          "chars": [
+            4214,
+            6176
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.017,
+          "chars": [
+            4214,
+            1602
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Shopify Inc.",
+          "similarity": 0.206,
+          "chars": [
+            4214,
+            6823
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.596,
+          "chars": [
+            5782,
+            5897
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.338,
+          "chars": [
+            5782,
+            6176
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.016,
+          "chars": [
+            5782,
+            1602
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.338,
+          "chars": [
+            5782,
+            6823
+          ]
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.37,
+          "chars": [
+            5897,
+            6176
+          ]
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.015,
+          "chars": [
+            5897,
+            1602
+          ]
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "Shopify Inc.",
+          "similarity": 0.319,
+          "chars": [
+            5897,
+            6823
+          ]
+        },
+        {
+          "a": "Salesforce, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.015,
+          "chars": [
+            6176,
+            1602
+          ]
+        },
+        {
+          "a": "Salesforce, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.304,
+          "chars": [
+            6176,
+            6823
+          ]
+        },
+        {
+          "a": "ServiceNow, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.023,
+          "chars": [
+            1602,
+            6823
+          ]
+        }
+      ],
+      "full": [
+        {
+          "a": "Adobe Inc.",
+          "b": "Alphabet Inc.",
+          "similarity": 0.414,
+          "chars": [
+            23830,
+            23843
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Amazon.com, Inc.",
+          "similarity": 0.391,
+          "chars": [
+            23830,
+            25563
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.294,
+          "chars": [
+            23830,
+            22776
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.003,
+          "chars": [
+            23830,
+            1828
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.23,
+          "chars": [
+            23830,
+            19983
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.269,
+          "chars": [
+            23830,
+            20997
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.534,
+          "chars": [
+            23830,
+            24443
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.463,
+          "chars": [
+            23830,
+            23947
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.003,
+          "chars": [
+            23830,
+            1602
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.246,
+          "chars": [
+            23830,
+            24901
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Amazon.com, Inc.",
+          "similarity": 0.487,
+          "chars": [
+            23843,
+            25563
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.338,
+          "chars": [
+            23843,
+            22776
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.003,
+          "chars": [
+            23843,
+            1828
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.454,
+          "chars": [
+            23843,
+            19983
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.509,
+          "chars": [
+            23843,
+            20997
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.323,
+          "chars": [
+            23843,
+            24443
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.691,
+          "chars": [
+            23843,
+            23947
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.003,
+          "chars": [
+            23843,
+            1602
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.338,
+          "chars": [
+            23843,
+            24901
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.315,
+          "chars": [
+            25563,
+            22776
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.004,
+          "chars": [
+            25563,
+            1828
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.383,
+          "chars": [
+            25563,
+            19983
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.506,
+          "chars": [
+            25563,
+            20997
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.392,
+          "chars": [
+            25563,
+            24443
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.541,
+          "chars": [
+            25563,
+            23947
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.002,
+          "chars": [
+            25563,
+            1602
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.33,
+          "chars": [
+            25563,
+            24901
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.005,
+          "chars": [
+            22776,
+            1828
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.277,
+          "chars": [
+            22776,
+            19983
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.372,
+          "chars": [
+            22776,
+            20997
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.284,
+          "chars": [
+            22776,
+            24443
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.095,
+          "chars": [
+            22776,
+            23947
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.003,
+          "chars": [
+            22776,
+            1602
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.125,
+          "chars": [
+            22776,
+            24901
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.019,
+          "chars": [
+            1828,
+            19983
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.009,
+          "chars": [
+            1828,
+            20997
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.009,
+          "chars": [
+            1828,
+            24443
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.007,
+          "chars": [
+            1828,
+            23947
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.739,
+          "chars": [
+            1828,
+            1602
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.012,
+          "chars": [
+            1828,
+            24901
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.429,
+          "chars": [
+            19983,
+            20997
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.267,
+          "chars": [
+            19983,
+            24443
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.525,
+          "chars": [
+            19983,
+            23947
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.003,
+          "chars": [
+            19983,
+            1602
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Shopify Inc.",
+          "similarity": 0.448,
+          "chars": [
+            19983,
+            24901
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.327,
+          "chars": [
+            20997,
+            24443
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.396,
+          "chars": [
+            20997,
+            23947
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.003,
+          "chars": [
+            20997,
+            1602
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.364,
+          "chars": [
+            20997,
+            24901
+          ]
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.365,
+          "chars": [
+            24443,
+            23947
+          ]
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.002,
+          "chars": [
+            24443,
+            1602
+          ]
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "Shopify Inc.",
+          "similarity": 0.232,
+          "chars": [
+            24443,
+            24901
+          ]
+        },
+        {
+          "a": "Salesforce, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.004,
+          "chars": [
+            23947,
+            1602
+          ]
+        },
+        {
+          "a": "Salesforce, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.288,
+          "chars": [
+            23947,
+            24901
+          ]
+        },
+        {
+          "a": "ServiceNow, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.015,
+          "chars": [
+            1602,
+            24901
+          ]
+        }
+      ],
+      "story": [
+        {
+          "a": "Adobe Inc.",
+          "b": "Alphabet Inc.",
+          "similarity": 0.291,
+          "chars": [
+            5462,
+            4427
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Amazon.com, Inc.",
+          "similarity": 0.11,
+          "chars": [
+            5462,
+            5178
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.173,
+          "chars": [
+            5462,
+            4050
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.31,
+          "chars": [
+            5462,
+            4946
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.124,
+          "chars": [
+            5462,
+            3548
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.155,
+          "chars": [
+            5462,
+            4379
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.327,
+          "chars": [
+            5462,
+            5344
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.494,
+          "chars": [
+            5462,
+            4058
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.359,
+          "chars": [
+            5462,
+            4986
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.319,
+          "chars": [
+            5462,
+            5501
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Amazon.com, Inc.",
+          "similarity": 0.076,
+          "chars": [
+            4427,
+            5178
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.219,
+          "chars": [
+            4427,
+            4050
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.321,
+          "chars": [
+            4427,
+            4946
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.117,
+          "chars": [
+            4427,
+            3548
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.441,
+          "chars": [
+            4427,
+            4379
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.106,
+          "chars": [
+            4427,
+            5344
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.494,
+          "chars": [
+            4427,
+            4058
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.371,
+          "chars": [
+            4427,
+            4986
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.151,
+          "chars": [
+            4427,
+            5501
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.142,
+          "chars": [
+            5178,
+            4050
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.061,
+          "chars": [
+            5178,
+            4946
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.059,
+          "chars": [
+            5178,
+            3548
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.182,
+          "chars": [
+            5178,
+            4379
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.155,
+          "chars": [
+            5178,
+            5344
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.308,
+          "chars": [
+            5178,
+            4058
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.136,
+          "chars": [
+            5178,
+            4986
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.101,
+          "chars": [
+            5178,
+            5501
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.187,
+          "chars": [
+            4050,
+            4946
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.142,
+          "chars": [
+            4050,
+            3548
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.227,
+          "chars": [
+            4050,
+            4379
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.2,
+          "chars": [
+            4050,
+            5344
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.147,
+          "chars": [
+            4050,
+            4058
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.199,
+          "chars": [
+            4050,
+            4986
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.149,
+          "chars": [
+            4050,
+            5501
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.165,
+          "chars": [
+            4946,
+            3548
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.121,
+          "chars": [
+            4946,
+            4379
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.326,
+          "chars": [
+            4946,
+            5344
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.28,
+          "chars": [
+            4946,
+            4058
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.934,
+          "chars": [
+            4946,
+            4986
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.321,
+          "chars": [
+            4946,
+            5501
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.18,
+          "chars": [
+            3548,
+            4379
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.172,
+          "chars": [
+            3548,
+            5344
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.16,
+          "chars": [
+            3548,
+            4058
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.192,
+          "chars": [
+            3548,
+            4986
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Shopify Inc.",
+          "similarity": 0.17,
+          "chars": [
+            3548,
+            5501
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.346,
+          "chars": [
+            4379,
+            5344
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.098,
+          "chars": [
+            4379,
+            4058
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.41,
+          "chars": [
+            4379,
+            4986
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.199,
+          "chars": [
+            4379,
+            5501
+          ]
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.334,
+          "chars": [
+            5344,
+            4058
+          ]
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.385,
+          "chars": [
+            5344,
+            4986
+          ]
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "Shopify Inc.",
+          "similarity": 0.513,
+          "chars": [
+            5344,
+            5501
+          ]
+        },
+        {
+          "a": "Salesforce, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.322,
+          "chars": [
+            4058,
+            4986
+          ]
+        },
+        {
+          "a": "Salesforce, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.3,
+          "chars": [
+            4058,
+            5501
+          ]
+        },
+        {
+          "a": "ServiceNow, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.29,
+          "chars": [
+            4986,
+            5501
+          ]
+        }
+      ],
+      "history": [
+        {
+          "a": "Adobe Inc.",
+          "b": "Alphabet Inc.",
+          "similarity": 0.065,
+          "chars": [
+            28166,
+            28313
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Amazon.com, Inc.",
+          "similarity": 0.099,
+          "chars": [
+            28166,
+            29402
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.113,
+          "chars": [
+            28166,
+            28975
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.167,
+          "chars": [
+            28166,
+            27484
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.061,
+          "chars": [
+            28166,
+            27910
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.051,
+          "chars": [
+            28166,
+            28936
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.076,
+          "chars": [
+            28166,
+            28609
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.083,
+          "chars": [
+            28166,
+            28464
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.1,
+          "chars": [
+            28166,
+            28747
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.094,
+          "chars": [
+            28166,
+            27572
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Amazon.com, Inc.",
+          "similarity": 0.039,
+          "chars": [
+            28313,
+            29402
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.054,
+          "chars": [
+            28313,
+            28975
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.036,
+          "chars": [
+            28313,
+            27484
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.074,
+          "chars": [
+            28313,
+            27910
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.05,
+          "chars": [
+            28313,
+            28936
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.066,
+          "chars": [
+            28313,
+            28609
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.04,
+          "chars": [
+            28313,
+            28464
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.05,
+          "chars": [
+            28313,
+            28747
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.07,
+          "chars": [
+            28313,
+            27572
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.065,
+          "chars": [
+            29402,
+            28975
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.065,
+          "chars": [
+            29402,
+            27484
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.158,
+          "chars": [
+            29402,
+            27910
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.051,
+          "chars": [
+            29402,
+            28936
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.083,
+          "chars": [
+            29402,
+            28609
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.178,
+          "chars": [
+            29402,
+            28464
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.048,
+          "chars": [
+            29402,
+            28747
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.083,
+          "chars": [
+            29402,
+            27572
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.046,
+          "chars": [
+            28975,
+            27484
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.117,
+          "chars": [
+            28975,
+            27910
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.058,
+          "chars": [
+            28975,
+            28936
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.095,
+          "chars": [
+            28975,
+            28609
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.089,
+          "chars": [
+            28975,
+            28464
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.079,
+          "chars": [
+            28975,
+            28747
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.088,
+          "chars": [
+            28975,
+            27572
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.066,
+          "chars": [
+            27484,
+            27910
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.053,
+          "chars": [
+            27484,
+            28936
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.209,
+          "chars": [
+            27484,
+            28609
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.118,
+          "chars": [
+            27484,
+            28464
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.197,
+          "chars": [
+            27484,
+            28747
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.205,
+          "chars": [
+            27484,
+            27572
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.124,
+          "chars": [
+            27910,
+            28936
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.117,
+          "chars": [
+            27910,
+            28609
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.173,
+          "chars": [
+            27910,
+            28464
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.113,
+          "chars": [
+            27910,
+            28747
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Shopify Inc.",
+          "similarity": 0.047,
+          "chars": [
+            27910,
+            27572
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.103,
+          "chars": [
+            28936,
+            28609
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.082,
+          "chars": [
+            28936,
+            28464
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.044,
+          "chars": [
+            28936,
+            28747
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.04,
+          "chars": [
+            28936,
+            27572
+          ]
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.105,
+          "chars": [
+            28609,
+            28464
+          ]
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.124,
+          "chars": [
+            28609,
+            28747
+          ]
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "Shopify Inc.",
+          "similarity": 0.141,
+          "chars": [
+            28609,
+            27572
+          ]
+        },
+        {
+          "a": "Salesforce, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.061,
+          "chars": [
+            28464,
+            28747
+          ]
+        },
+        {
+          "a": "Salesforce, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.099,
+          "chars": [
+            28464,
+            27572
+          ]
+        },
+        {
+          "a": "ServiceNow, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.108,
+          "chars": [
+            28747,
+            27572
+          ]
+        }
+      ],
+      "step6": [
+        {
+          "a": "Adobe Inc.",
+          "b": "Alphabet Inc.",
+          "similarity": 0.221,
+          "chars": [
+            3911,
+            3957
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Amazon.com, Inc.",
+          "similarity": 0.215,
+          "chars": [
+            3911,
+            3980
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.146,
+          "chars": [
+            3911,
+            3795
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.226,
+          "chars": [
+            3911,
+            3917
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.138,
+          "chars": [
+            3911,
+            3857
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.221,
+          "chars": [
+            3911,
+            3957
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.999,
+          "chars": [
+            3911,
+            3911
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.999,
+          "chars": [
+            3911,
+            3911
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.226,
+          "chars": [
+            3911,
+            3917
+          ]
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.32,
+          "chars": [
+            3911,
+            3846
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Amazon.com, Inc.",
+          "similarity": 0.81,
+          "chars": [
+            3957,
+            3980
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.145,
+          "chars": [
+            3957,
+            3795
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.153,
+          "chars": [
+            3957,
+            3917
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.14,
+          "chars": [
+            3957,
+            3857
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 1.0,
+          "chars": [
+            3957,
+            3957
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.151,
+          "chars": [
+            3957,
+            3911
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.151,
+          "chars": [
+            3957,
+            3911
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.153,
+          "chars": [
+            3957,
+            3917
+          ]
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.153,
+          "chars": [
+            3957,
+            3846
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.144,
+          "chars": [
+            3980,
+            3795
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.14,
+          "chars": [
+            3980,
+            3917
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.144,
+          "chars": [
+            3980,
+            3857
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.814,
+          "chars": [
+            3980,
+            3957
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.14,
+          "chars": [
+            3980,
+            3911
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.14,
+          "chars": [
+            3980,
+            3911
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.14,
+          "chars": [
+            3980,
+            3917
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.141,
+          "chars": [
+            3980,
+            3846
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Cloudflare, Inc.",
+          "similarity": 0.143,
+          "chars": [
+            3795,
+            3917
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.143,
+          "chars": [
+            3795,
+            3857
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.808,
+          "chars": [
+            3795,
+            3957
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.143,
+          "chars": [
+            3795,
+            3911
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.143,
+          "chars": [
+            3795,
+            3911
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.143,
+          "chars": [
+            3795,
+            3917
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.144,
+          "chars": [
+            3795,
+            3846
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.138,
+          "chars": [
+            3917,
+            3857
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.702,
+          "chars": [
+            3917,
+            3957
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.228,
+          "chars": [
+            3917,
+            3911
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.228,
+          "chars": [
+            3917,
+            3911
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 1.0,
+          "chars": [
+            3917,
+            3917
+          ]
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.23,
+          "chars": [
+            3917,
+            3846
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.805,
+          "chars": [
+            3857,
+            3957
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.141,
+          "chars": [
+            3857,
+            3911
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.141,
+          "chars": [
+            3857,
+            3911
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.141,
+          "chars": [
+            3857,
+            3917
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Shopify Inc.",
+          "similarity": 0.143,
+          "chars": [
+            3857,
+            3846
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Microsoft Corporation",
+          "similarity": 0.151,
+          "chars": [
+            3957,
+            3911
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Salesforce, Inc.",
+          "similarity": 0.151,
+          "chars": [
+            3957,
+            3911
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.153,
+          "chars": [
+            3957,
+            3917
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.153,
+          "chars": [
+            3957,
+            3846
+          ]
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "Salesforce, Inc.",
+          "similarity": 1.0,
+          "chars": [
+            3911,
+            3911
+          ]
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.226,
+          "chars": [
+            3911,
+            3917
+          ]
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "Shopify Inc.",
+          "similarity": 0.321,
+          "chars": [
+            3911,
+            3846
+          ]
+        },
+        {
+          "a": "Salesforce, Inc.",
+          "b": "ServiceNow, Inc.",
+          "similarity": 0.226,
+          "chars": [
+            3911,
+            3917
+          ]
+        },
+        {
+          "a": "Salesforce, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.321,
+          "chars": [
+            3911,
+            3846
+          ]
+        },
+        {
+          "a": "ServiceNow, Inc.",
+          "b": "Shopify Inc.",
+          "similarity": 0.23,
+          "chars": [
+            3917,
+            3846
+          ]
+        }
+      ],
+      "qa": [
+        {
+          "a": "Adobe Inc.",
+          "b": "Alphabet Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Amazon.com, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Caterpillar Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Cloudflare, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Meta Platforms, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Microsoft Corporation",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Salesforce, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "ServiceNow, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Adobe Inc.",
+          "b": "Shopify Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Amazon.com, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Caterpillar Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Cloudflare, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Meta Platforms, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Microsoft Corporation",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Salesforce, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "ServiceNow, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Alphabet Inc.",
+          "b": "Shopify Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Caterpillar Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Cloudflare, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Microsoft Corporation",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Salesforce, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "ServiceNow, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Shopify Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Cloudflare, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Meta Platforms, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Microsoft Corporation",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Salesforce, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "ServiceNow, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Shopify Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "identical_answers": 2,
+          "of": 10
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Microsoft Corporation",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Salesforce, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "ServiceNow, Inc.",
+          "identical_answers": 3,
+          "of": 10
+        },
+        {
+          "a": "Cloudflare, Inc.",
+          "b": "Shopify Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Meta Platforms, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Microsoft Corporation",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Salesforce, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "ServiceNow, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Shopify Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Microsoft Corporation",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Salesforce, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "ServiceNow, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Shopify Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "Salesforce, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "ServiceNow, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Microsoft Corporation",
+          "b": "Shopify Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Salesforce, Inc.",
+          "b": "ServiceNow, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Salesforce, Inc.",
+          "b": "Shopify Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "ServiceNow, Inc.",
+          "b": "Shopify Inc.",
+          "identical_answers": 0,
+          "of": 10
+        }
+      ]
+    },
+    "worst": {
+      "intro": {
+        "a": "Cloudflare, Inc.",
+        "b": "ServiceNow, Inc.",
+        "similarity": 0.951,
+        "chars": [
+          4414,
+          4515
+        ]
+      },
+      "slides": {
+        "a": "Alphabet Inc.",
+        "b": "Salesforce, Inc.",
+        "similarity": 0.765,
+        "chars": [
+          6235,
+          6176
+        ]
+      },
+      "full": {
+        "a": "Cloudflare, Inc.",
+        "b": "ServiceNow, Inc.",
+        "similarity": 0.739,
+        "chars": [
+          1828,
+          1602
+        ]
+      },
+      "story": {
+        "a": "Cloudflare, Inc.",
+        "b": "ServiceNow, Inc.",
+        "similarity": 0.934,
+        "chars": [
+          4946,
+          4986
+        ]
+      },
+      "history": {
+        "a": "Cloudflare, Inc.",
+        "b": "Microsoft Corporation",
+        "similarity": 0.209,
+        "chars": [
+          27484,
+          28609
+        ]
+      },
+      "step6": {
+        "a": "Alphabet Inc.",
+        "b": "Meta Platforms, Inc.",
+        "similarity": 1.0,
+        "chars": [
+          3957,
+          3957
+        ]
+      },
+      "qa": {
+        "a": "Cloudflare, Inc.",
+        "b": "ServiceNow, Inc.",
+        "identical_answers": 3,
+        "of": 10
+      }
+    }
+  },
+  "summary": {
+    "captured": 12,
+    "with_flags": 1,
+    "flags": [
+      "MISSING_ROUTE"
+    ]
+  }
+}

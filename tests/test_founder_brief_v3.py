@@ -11,6 +11,7 @@ from intent_engine.founder_brief import build as B
 from intent_engine.founder_brief import contract as C
 from intent_engine.founder_brief import gate as G
 from intent_engine.founder_brief import render as R
+from tests import canonical_market as CM
 
 
 def _insight(**kw):
@@ -359,8 +360,10 @@ def test_the_answer_appears_before_the_evidence_links_in_the_markup():
     """Order is the product decision: a reader who stops early still has the
     consequence."""
     html = rendered(_rich())
-    assert html.index('id="executive_answer"') < html.index(
-        "Evidence and sources")
+    # "Evidence and sources" was the grid's label for the source list; the
+    # secondary nav calls it "Sources". The ORDER is the assertion and it is
+    # unchanged: the answer comes before any way out of the page.
+    assert html.index('id="executive_answer"') < html.index("Sources")
 
 
 def test_no_internal_terms_in_rendered_output():
@@ -372,9 +375,20 @@ def test_no_internal_terms_in_rendered_output():
 
 
 def test_depth_is_offered_but_never_required():
+    """Offered, and still never required.
+
+    The narrative is a SECONDARY surface now, so what it offers is the other
+    secondary surfaces and the way back into the six-step story -- not a grid
+    of six story destinations, which is the thing §16 removed. The story's own
+    steps are reachable in order from step 1, which `test_no_layer_is_orphaned`
+    proves.
+    """
+    from intent_engine.founder_brief import flow
+
     html = rendered(_rich())
-    for href in ("/story", "/brief", "/sources", "/full"):
-        assert href in html
+    for href in ("/sources", "/brief", "/xray"):
+        assert href in html, href
+    assert flow.STEPS[0].suffix in html
 
 
 def test_absent_market_data_teaches_rather_than_saying_unavailable():

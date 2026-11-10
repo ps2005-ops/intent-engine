@@ -57,8 +57,15 @@ def _report(company="Shopify"):
     from intent_engine.strategic_intelligence.shopify_fixture import (
         shopify_observations,
     )
-    return build_strategic_report(company_name=company,
-                                  observations=shopify_observations()).as_dict()
+    # THE BUSINESS MODEL IS PART OF THE REAL CALL. `tension_applies` fails
+    # closed on an unread model, so a fixture that omits it exercises the
+    # refusal rather than the report -- and here that would quietly weaken
+    # `test_break_two_unrelated_companies_receive_the_same_deep_report`,
+    # whose B side deliberately has no blind spots and whose whole point is
+    # the contrast with an A side that does.
+    return build_strategic_report(
+        company_name=company, observations=shopify_observations(),
+        business_model="SUBSCRIPTION_SOFTWARE").as_dict()
 
 
 def _brief(report, company="Shopify"):
@@ -564,7 +571,7 @@ def _served(tmp_path, decision):
             out["strategic_report"] = report
         return out
     app._real_result = patched
-    _, _, body = client.request("GET", f"/runs/{run_id}")
+    _, _, body = client.request("GET", f"/runs/{run_id}/answer")
     return body
 
 
@@ -599,7 +606,11 @@ def test_the_investigation_state_renders_on_the_served_default_route(tmp_path):
     assert "Reconsider once a source outside" in body
     # and no option comparison is fabricated to fill the space
     assert 'class="opt"' not in body
-    assert "No options are put forward" in body
+    # SCOPED TO THE RUN (D27). This read "No options are put forward", which
+    # is a claim about the system; the object rendering it only knows what one
+    # run retrieved, and beside a lead that asserts a supported reading exists
+    # it made one page contradict itself. The state under test is unchanged.
+    assert "puts no options forward" in body
 
 
 def test_the_withheld_state_renders_on_the_served_default_route(tmp_path):
@@ -611,7 +622,7 @@ def test_the_withheld_state_renders_on_the_served_default_route(tmp_path):
         limitation="No independent coverage was retrieved.")
     body = _served(tmp_path, decision)
     assert "cleared the evidence bar" in body
-    assert "No options are put forward" in body
+    assert "puts no options forward" in body
     assert 'class="opt"' not in body
     assert "No independent coverage was retrieved" in body
     # a withheld page is not one long disclaimer: it still prepares something

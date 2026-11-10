@@ -1,0 +1,238 @@
+[
+ {
+  "prospect_id": 18,
+  "host": "chronosphere.io",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "home",
+    "url": "https://chronosphere.io",
+    "text_chars": 9953
+   }
+  ],
+  "rejected": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://chronosphere.io/about",
+    "text_chars": 9953,
+    "why": "same body as homepage (SPA shell)"
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://chronosphere.io/platform",
+    "text_chars": 0,
+    "why": "fetch:unsafe_redirect"
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://chronosphere.io/newsroom",
+    "text_chars": 0,
+    "why": "fetch:unsafe_redirect"
+   }
+  ]
+ },
+ {
+  "prospect_id": 24,
+  "host": "kx.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://kx.com/about",
+    "text_chars": 26840
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://kx.com/products",
+    "text_chars": 17985
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://kx.com/customer-stories",
+    "text_chars": 7069
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://kx.com/pricing",
+    "text_chars": 13874
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 39,
+  "host": "www.rystadenergy.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.rystadenergy.com/about-us",
+    "text_chars": 2196
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.rystadenergy.com/newsroom",
+    "text_chars": 9599
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 65,
+  "host": "www.brex.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.brex.com/about",
+    "text_chars": 5290
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.brex.com/platform/budgets",
+    "text_chars": 6046
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.brex.com/customers",
+    "text_chars": 11252
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.brex.com/journal/press",
+    "text_chars": 3097
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://www.brex.com/pricing",
+    "text_chars": 7568
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 86,
+  "host": "www.tanium.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.tanium.com/about",
+    "text_chars": 4110
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.tanium.com/platform",
+    "text_chars": 4811
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.tanium.com/customers/sap",
+    "text_chars": 3894
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.tanium.com/newsroom",
+    "text_chars": 10804
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 89,
+  "host": "www.tines.com",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.tines.com/about",
+    "text_chars": 2914
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.tines.com/solutions",
+    "text_chars": 2978
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.tines.com/customers",
+    "text_chars": 4890
+   },
+   {
+    "kind": "newsroom",
+    "label": "news",
+    "url": "https://www.tines.com/newsroom",
+    "text_chars": 8051
+   },
+   {
+    "kind": "pricing",
+    "label": "pricing",
+    "url": "https://www.tines.com/pricing",
+    "text_chars": 2285
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "prospect_id": 1001,
+  "host": "www.observe.ai",
+  "home_ok": true,
+  "home_failure": "",
+  "home_status": 200,
+  "accepted": [
+   {
+    "kind": "corporate",
+    "label": "about",
+    "url": "https://www.observe.ai/about-us",
+    "text_chars": 6325
+   },
+   {
+    "kind": "segment",
+    "label": "platform",
+    "url": "https://www.observe.ai/platform/cobuilder",
+    "text_chars": 7725
+   },
+   {
+    "kind": "customers",
+    "label": "customers",
+    "url": "https://www.observe.ai/customers",
+    "text_chars": 8905
+   }
+  ],
+  "rejected": []
+ }
+]

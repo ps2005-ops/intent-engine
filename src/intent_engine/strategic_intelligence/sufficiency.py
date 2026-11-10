@@ -188,6 +188,7 @@ def near_misses(company, patterns, observations, *, fired_ids=(),
         present.update(observation.signals or ())
 
     out = []
+    said = set()
     for pattern in patterns:
         if pattern.pattern_id in set(fired_ids):
             continue
@@ -211,8 +212,12 @@ def near_misses(company, patterns, observations, *, fired_ids=(),
                 diagnosis.get("would_be_carried_by") or ()),
             "why_it_matters": pattern.mechanism,
             "falsifier": pattern.when_it_does_not_apply,
-            "safe_explanation": explain(company, pattern, diagnosis),
+            "safe_explanation": explain(company, pattern, diagnosis,
+                                        already_said=said),
         })
+        said.add(diagnosis["state"])
+        for carrier in (diagnosis.get("would_be_carried_by") or ())[:1]:
+            said.add(("carrier", carrier))
     return out[:limit]
 
 
@@ -265,8 +270,16 @@ def _in_readers_words(diagnosis) -> str:
     return " or ".join([", ".join(claims[:-1]), claims[-1]])
 
 
-def explain(company: str, pattern, diagnosis: dict) -> str:
-    """What a founder is told. Never the raw label, and never the pattern."""
+def explain(company: str, pattern, diagnosis: dict, *,
+            already_said=()) -> str:
+    """What a founder is told. Never the raw label, and never the pattern.
+
+    `already_said` holds the states whose standing caveat an earlier
+    explanation in the same list already gave. The caveat is said once: the
+    live prospect-100 pass printed "That distinction matters: this run did
+    not read a source that would show it, which is not the same as finding
+    it untrue." up to five times on one page, once per near miss.
+    """
     state = diagnosis.get("state")
     if state in (None, SUPPORTED):
         return ""
@@ -282,11 +295,24 @@ def explain(company: str, pattern, diagnosis: dict) -> str:
                 f"would show it were unavailable to this run.")
     if state == RETRIEVAL_MISSING:
         carriers = diagnosis.get("would_be_carried_by") or ()
-        where = f" It would usually appear in {carriers[0]}." if carriers else ""
+        where = (f" It would usually appear in {carriers[0]}."
+                 if carriers and ("carrier", carriers[0]) not in already_said
+                 else "")
+        if state in already_said:
+            # STANDS ON ITS OWN. A surface may drop the first explanation
+            # (the deck filters one that reads as pattern vocabulary), so the
+            # short form still says what was and was not verified -- it only
+            # stops repeating why that distinction matters.
+            return (f"For {company}, this run also did not verify that "
+                    f"{subject}; no source it read would show it, which is "
+                    f"not the same as finding it untrue.{where}")
         return (f"We found signs of this shape for {company}, but did not "
                 f"verify that {subject}. That distinction matters: this run "
                 f"did not read a source that would show it, which is not "
                 f"the same as finding it untrue.{where}")
+    if state in already_said:
+        return (f"The sources this run read do not establish that {subject} "
+                f"either, and they are the kind that would show it.")
     return (f"The sources this run read do not establish that {subject}. "
             f"They are the kind of sources that would show it, so treat the "
             f"absence as informative rather than incidental.")

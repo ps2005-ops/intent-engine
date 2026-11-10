@@ -55,6 +55,86 @@ _NOISE = ("/legal", "/privacy", "/terms", "/cookie", "/sitemap", "/search",
           "/rss", "/feed.xml", "/wp-", "/tag/", "/category/", "/author/")
 
 
+# ---------------------------------------------------------------------------
+# LOCALE PARTITIONS: the same page, in languages this analysis cannot read.
+# ---------------------------------------------------------------------------
+# MEASURED locally on a cold NVIDIA run (docs/PRE100_MINIMUM_CORE_PREREGISTRATION.md):
+# NINE of the fourteen CORE evidence slots went to non-English locale pages, and
+# ONE page -- a Broadcast app setup guide -- took THREE of them in Czech, Danish
+# and Austrian German. `readiness.is_english` then discarded four of them, so
+# the run paid 2.4MB and four slots for evidence its own gate refuses.
+#
+# The cause is here, not in ranking. `parse_sitemap` returned the FIRST
+# MAX_SITEMAP_CHILDREN children of the index in document order; NVIDIA lists its
+# locale sitemaps alphabetically, so the walk queued cs-cz, da-dk, de-at, de-ch,
+# de-de, en-gb and never reached en-us. The English pages were not out-ranked --
+# they were never discovered.
+#
+# THE RULE IS ABOUT THE SITE, NOT THE COMPANY. A locale segment is recognised
+# only in the unambiguous `xx-yy` LANGUAGE-REGION form, and only when the site
+# exposes AT LEAST TWO DISTINCT ones -- because partitioning by locale is by
+# definition plural, and a lone `/to-do/` slug matches the pattern by accident.
+# Where a company publishes in one language only, nothing here changes what is
+# discovered or in what order; the readable-language finding in `readiness`
+# remains the thing that reports it.
+_LOCALE_SEGMENT = re.compile(r"^([a-z]{2})-([a-z]{2})$")
+
+#: Locales this analysis can actually read. `readiness.MIN_ENGLISH_SHARE` is
+#: the gate that decides evidence is unreadable; this is the same fact applied
+#: one step earlier, where it still costs nothing to act on.
+_READABLE_LANGUAGES = ("en",)
+
+
+def locale_of(url: str) -> str:
+    """The `xx-yy` locale segment in a URL path, or "" if it carries none.
+
+    Any segment may hold it: NVIDIA's child sitemaps are
+    `/cs-cz/cs-cz.sitemap.xml`, and some publishers put the locale second.
+    """
+    for segment in (urlparse(url).path or "").lower().split("/"):
+        if _LOCALE_SEGMENT.match(segment):
+            return segment
+    return ""
+
+
+def _partitioned_by_locale(urls) -> bool:
+    """True when these URLs are a locale partition rather than a coincidence."""
+    return len({locale_of(u) for u in urls if locale_of(u)}) >= 2
+
+
+def _readable_locale(url: str) -> bool:
+    locale = locale_of(url)
+    return not locale or locale.split("-")[0] in _READABLE_LANGUAGES
+
+
+def prefer_readable_locales(urls, limit=None) -> list:
+    """Reorder a locale-partitioned URL set so readable locales come first.
+
+    Order-preserving within each group, so a site that is NOT locale-
+    partitioned comes back exactly as it went in. Nothing is dropped here;
+    `limit` is applied by the caller that owns the budget.
+    """
+    urls = list(urls)
+    if not _partitioned_by_locale(urls):
+        return urls[:limit] if limit else urls
+    readable = [u for u in urls if _readable_locale(u)]
+    other = [u for u in urls if not _readable_locale(u)]
+    ordered = readable + other
+    return ordered[:limit] if limit else ordered
+
+
+def locale_free_path(url: str) -> str:
+    """The URL path with its locale segment removed.
+
+    `/cs-cz/products/rtx-spark/` and `/da-dk/products/rtx-spark/` are the same
+    page, and a run that spends two of fourteen slots on it has bought one
+    piece of evidence twice.
+    """
+    parts = [seg for seg in (urlparse(url).path or "").split("/")
+             if not _LOCALE_SEGMENT.match(seg.lower())]
+    return "/".join(parts) or "/"
+
+
 def classify_family(url: str):
     """Return the evidence family for a URL path, or None if it is noise."""
     path = (urlparse(url).path or "/").lower()
@@ -122,7 +202,12 @@ def parse_sitemap(xml: str) -> dict:
     locs = re.findall(r"<loc>\s*([^<\s]+)\s*</loc>", xml or "", re.I)
     is_index = "<sitemapindex" in (xml or "").lower()
     if is_index:
-        return {"sitemaps": locs[:MAX_SITEMAP_CHILDREN], "urls": []}
+        # WHICH children, not just how many. Truncating an alphabetical list
+        # of locale sitemaps at eight is what stopped `en-us` from ever being
+        # queued -- see `prefer_readable_locales`.
+        return {"sitemaps": prefer_readable_locales(locs,
+                                                    MAX_SITEMAP_CHILDREN),
+                "urls": []}
     return {"sitemaps": [], "urls": locs[:MAX_SITEMAP_URLS]}
 
 
@@ -197,8 +282,25 @@ def discover_from_sitemap(company_url: str, *, fetcher) -> list:
 
     out = []
     for family, _patterns in FAMILY_PATTERNS:
-        group = sorted(dict.fromkeys(by_family.get(family, [])),
-                       key=lambda u: (len(urlparse(u).path), u))
-        for url in group[:MAX_URLS_PER_FAMILY]:
+        group = list(dict.fromkeys(by_family.get(family, [])))
+        partitioned = _partitioned_by_locale(group)
+        # Shortest path is the most canonical page in a family, and the tie
+        # was broken lexicographically -- which prefers `cs-cz` to `en-us`
+        # over two URLs of identical length. Readability breaks it first now,
+        # and only on a site that is actually locale-partitioned.
+        group.sort(key=lambda u: (
+            0 if (not partitioned or _readable_locale(u)) else 1,
+            len(urlparse(u).path), u))
+        # ONE PAGE, ONE SLOT. The same article in three languages is one piece
+        # of evidence bought three times; the family budget is the scarce
+        # resource, so a path already represented does not take a second.
+        seen_paths = set()
+        for url in group:
+            if len(seen_paths) >= MAX_URLS_PER_FAMILY:
+                break
+            key = locale_free_path(url) if partitioned else url
+            if key in seen_paths:
+                continue
+            seen_paths.add(key)
             out.append({"url": url, "family": family})
     return out

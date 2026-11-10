@@ -1,0 +1,18 @@
+{
+  "company": "Advanced Micro Devices, Inc.",
+  "deployed_sha": "ea55870",
+  "captured_at": "2026-08-21T23:36:25Z",
+  "routes": {},
+  "progress": [],
+  "process_before": {
+    "boot_id": "2f3bc74d6e2d4970",
+    "started_at": 1787354140.8714237,
+    "uptime_seconds": 1244.4
+  },
+  "status": "FAILED",
+  "run_id": "",
+  "capture_path": "docs/execution/v5/pre100_50/live_captures/ea55870/advanced_micro_devices_inc",
+  "entry_domain": "amd.com",
+  "failure": "analyze did not open a run (HTTP 500)",
+  "entry_text": "Something went wrong on our side Something went wrong on our side What did work. Your request was received and the company you entered was recorded. What did not. The analysis did not complete. Why. This is a fault in the product, not in what you entered or in the company. What to do next. Run it again. If it keeps happening, the reference below identifies this run in our logs. Run a new analysis "
+}

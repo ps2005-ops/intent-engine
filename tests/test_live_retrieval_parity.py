@@ -167,7 +167,14 @@ def test_curated_source_outranks_a_sitemap_url_and_a_guess():
     assert picked[0] == "c-curated", picked
 
 
-def test_a_guess_at_a_host_already_refusing_us_sorts_last():
+def test_a_guess_at_a_host_already_refusing_us_is_not_tried_at_all():
+    """Ranking it last was not enough: the leftover fill spent the slot.
+
+    This asserted an ORDER until the 50-company gauntlet measured what that
+    order cost -- Goldman Sachs made 26 fetch failures, 24 of them at
+    goldmansachs.com, every one after the homepage had already answered 403.
+    The regulatory source still gets its slot; the certain failure does not.
+    """
     candidates = [
         _candidate("c-guess", "https://blocked.example/products"),
         _candidate("c-edgar", "https://www.sec.gov/Archives/edgar/x.htm",
@@ -177,7 +184,8 @@ def test_a_guess_at_a_host_already_refusing_us_sorts_last():
     ]
     picked = WebApp._recommended_candidate_ids(
         candidates, refusing_hosts={"blocked.example"})
-    assert picked.index("c-edgar") < picked.index("c-guess"), picked
+    assert "c-guess" not in picked, picked
+    assert "c-edgar" in picked, picked
 
 
 def test_a_curated_source_is_still_tried_on_a_refusing_host():

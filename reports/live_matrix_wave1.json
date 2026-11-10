@@ -1,0 +1,521 @@
+{
+  "base": "https://intent-engine-preview-bridge.onrender.com",
+  "contract": "live_econ_matrix.v1",
+  "label": "wave1",
+  "readyz": {
+    "market_bridge": {
+      "config_source": "PREVIEW_CONFIG",
+      "configured": true,
+      "digest": "cb9c2caee1b1efde",
+      "directory": "/opt/render/project/src/reports/market/demo_snapshots",
+      "evidence_cutoff": "2026-08-14",
+      "freshness_days": 14,
+      "generated_at": "2026-08-14",
+      "invalid_files": 0,
+      "reason": "",
+      "root": "/opt/render/project/src",
+      "schema": "market_demo_snapshot.v1",
+      "snapshot_count": 26,
+      "state": "MARKET_BRIDGE_CURRENT"
+    },
+    "runtime_root": "data",
+    "storage": {
+      "accepting_feedback": false,
+      "boot_count": 1,
+      "durability": "EPHEMERAL_LIKELY",
+      "separate_filesystem": false,
+      "writable": true
+    }
+  },
+  "rows": [
+    {
+      "carried_csrf": true,
+      "company": "Costco Wholesale",
+      "domain": "costco.com",
+      "econ_excerpt": "Economic impact What changed This company's own evidence establishes no exposure to any condition the shared economic state measures, so no economic reading is asserted for it. That is a gap in this company's exposure map, not a quiet economy. Economic reading as of 2026-08-27 (current, 1 day old). no forward prediction has come due, so there is no accuracy record to quote yet. What this has prepared for you Investigation plan The one bounded check that would settle this, with what each result would favour. Drafted here and nothing more. Nothing is sent, published, scheduled or shared without your explicit approval. What this was built from The company's own pages \u2014 none Executive statements \u2014 none Filings and investor material \u00b7 5 Customer evidence \u2014 none Another registrant's filing \u2014 none Independent reporting \u00b7 4 We could not read anything the company publishes about itself, so its ow",
+      "failures": [],
+      "ready": true,
+      "requests": [
+        {
+          "path": "/demo",
+          "seconds": 0.4,
+          "status": 200
+        },
+        {
+          "landed": "https://intent-engine-preview-bridge.onrender.com/runs/01M14WNJX0CHSRVMT5ZP3RV5N5/progress",
+          "path": "/analyze",
+          "seconds": 5.1,
+          "status": 200
+        },
+        {
+          "chars": 37,
+          "path": "/runs/01M14WNJX0CHSRVMT5ZP3RV5N5",
+          "seconds": 90.1,
+          "status": 0
+        },
+        {
+          "chars": 36827,
+          "path": "/runs/01M14WNJX0CHSRVMT5ZP3RV5N5/brief",
+          "seconds": 45.1,
+          "status": 200
+        },
+        {
+          "chars": 37,
+          "path": "/runs/01M14WNJX0CHSRVMT5ZP3RV5N5/full",
+          "seconds": 90.1,
+          "status": 0
+        }
+      ],
+      "run_id": "01M14WNJX0CHSRVMT5ZP3RV5N5",
+      "score": {
+        "abstained": false,
+        "blocked_stated": false,
+        "cross_surface_contradiction": false,
+        "denies_exposure_then_shows_one": false,
+        "economic_section_present": true,
+        "internal_enums_leaked": [],
+        "pre_calibration_language": true,
+        "reading_called_unavailable": false,
+        "spoke": false,
+        "words": {
+          "": 6,
+          "/brief": 1692,
+          "/full": 6
+        }
+      },
+      "seconds_to_read": 91.3,
+      "slowest_seconds": 90.1,
+      "state": "READ",
+      "timeouts": [
+        {
+          "chars": 37,
+          "path": "/runs/01M14WNJX0CHSRVMT5ZP3RV5N5",
+          "seconds": 90.1,
+          "status": 0
+        },
+        {
+          "chars": 37,
+          "path": "/runs/01M14WNJX0CHSRVMT5ZP3RV5N5/full",
+          "seconds": 90.1,
+          "status": 0
+        }
+      ],
+      "total_seconds": 230.8
+    },
+    {
+      "carried_csrf": true,
+      "company": "JPMorgan Chase",
+      "domain": "jpmorganchase.com",
+      "econ_excerpt": "",
+      "failures": [],
+      "ready": false,
+      "requests": [
+        {
+          "path": "/demo",
+          "seconds": 1.4,
+          "status": 200
+        },
+        {
+          "landed": "https://intent-engine-preview-bridge.onrender.com/runs/01M14WZENYDPMF7300D6CS5926/progress",
+          "path": "/analyze",
+          "seconds": 13.8,
+          "status": 200
+        },
+        {
+          "chars": 16980,
+          "path": "/runs/01M14WZENYDPMF7300D6CS5926",
+          "seconds": 5.7,
+          "status": 200
+        },
+        {
+          "chars": 16980,
+          "path": "/runs/01M14WZENYDPMF7300D6CS5926/brief",
+          "seconds": 4.7,
+          "status": 200
+        },
+        {
+          "chars": 16980,
+          "path": "/runs/01M14WZENYDPMF7300D6CS5926/full",
+          "seconds": 3.3,
+          "status": 200
+        }
+      ],
+      "run_id": "01M14WZENYDPMF7300D6CS5926",
+      "score": {
+        "abstained": false,
+        "blocked_stated": false,
+        "cross_surface_contradiction": false,
+        "denies_exposure_then_shows_one": false,
+        "economic_section_present": false,
+        "internal_enums_leaked": [],
+        "pre_calibration_language": false,
+        "reading_called_unavailable": false,
+        "spoke": false,
+        "words": {
+          "": 129,
+          "/brief": 129,
+          "/full": 129
+        }
+      },
+      "seconds_to_read": 300,
+      "slowest_seconds": 13.8,
+      "state": "TIMED_OUT",
+      "timeouts": [],
+      "total_seconds": 28.9
+    },
+    {
+      "carried_csrf": true,
+      "company": "Mastercard",
+      "domain": "mastercard.com",
+      "econ_excerpt": "",
+      "failures": [],
+      "ready": false,
+      "requests": [
+        {
+          "path": "/demo",
+          "seconds": 1.7,
+          "status": 200
+        },
+        {
+          "landed": "https://intent-engine-preview-bridge.onrender.com/runs/01M14X9W9DQCZ7YETZT7VEVS4M/progress",
+          "path": "/analyze",
+          "seconds": 12.1,
+          "status": 200
+        },
+        {
+          "chars": 16972,
+          "path": "/runs/01M14X9W9DQCZ7YETZT7VEVS4M",
+          "seconds": 2.4,
+          "status": 200
+        },
+        {
+          "chars": 16972,
+          "path": "/runs/01M14X9W9DQCZ7YETZT7VEVS4M/brief",
+          "seconds": 0.6,
+          "status": 200
+        },
+        {
+          "chars": 16972,
+          "path": "/runs/01M14X9W9DQCZ7YETZT7VEVS4M/full",
+          "seconds": 1.5,
+          "status": 200
+        }
+      ],
+      "run_id": "01M14X9W9DQCZ7YETZT7VEVS4M",
+      "score": {
+        "abstained": false,
+        "blocked_stated": false,
+        "cross_surface_contradiction": false,
+        "denies_exposure_then_shows_one": false,
+        "economic_section_present": false,
+        "internal_enums_leaked": [],
+        "pre_calibration_language": false,
+        "reading_called_unavailable": false,
+        "spoke": false,
+        "words": {
+          "": 128,
+          "/brief": 128,
+          "/full": 128
+        }
+      },
+      "seconds_to_read": 300,
+      "slowest_seconds": 12.1,
+      "state": "TIMED_OUT",
+      "timeouts": [],
+      "total_seconds": 18.3
+    },
+    {
+      "carried_csrf": true,
+      "company": "Union Pacific",
+      "domain": "up.com",
+      "econ_excerpt": "",
+      "failures": [],
+      "ready": false,
+      "requests": [
+        {
+          "path": "/demo",
+          "seconds": 0.7,
+          "status": 200
+        },
+        {
+          "landed": "https://intent-engine-preview-bridge.onrender.com/runs/01M14XKYMRCZ1PDRBKSS0Y7CB4/progress",
+          "path": "/analyze",
+          "seconds": 3.8,
+          "status": 200
+        },
+        {
+          "chars": 16968,
+          "path": "/runs/01M14XKYMRCZ1PDRBKSS0Y7CB4",
+          "seconds": 0.4,
+          "status": 200
+        },
+        {
+          "chars": 16968,
+          "path": "/runs/01M14XKYMRCZ1PDRBKSS0Y7CB4/brief",
+          "seconds": 0.9,
+          "status": 200
+        },
+        {
+          "chars": 16968,
+          "path": "/runs/01M14XKYMRCZ1PDRBKSS0Y7CB4/full",
+          "seconds": 0.4,
+          "status": 200
+        }
+      ],
+      "run_id": "01M14XKYMRCZ1PDRBKSS0Y7CB4",
+      "score": {
+        "abstained": false,
+        "blocked_stated": false,
+        "cross_surface_contradiction": false,
+        "denies_exposure_then_shows_one": false,
+        "economic_section_present": false,
+        "internal_enums_leaked": [],
+        "pre_calibration_language": false,
+        "reading_called_unavailable": false,
+        "spoke": false,
+        "words": {
+          "": 129,
+          "/brief": 129,
+          "/full": 129
+        }
+      },
+      "seconds_to_read": 300,
+      "slowest_seconds": 3.8,
+      "state": "TIMED_OUT",
+      "timeouts": [],
+      "total_seconds": 6.2
+    },
+    {
+      "carried_csrf": true,
+      "company": "ASML Holding",
+      "domain": "asml.com",
+      "econ_excerpt": "Economic impact Current economic conditions do not materially change the strategic recommendation for this company. No condition the shared state measures reaches this business through an established mechanism. Economic reading as of 2026-08-27 (current, 1 day old). 3 forward prediction(s) are open and none has come due, so there is no accuracy record to quote yet. Macro and industry exposure US unemployment rate is falling: 4.1 percent (from 4.3, -0.2), compared with the same month a year earlier. The company's cost base or its customers' buying behaviour is tied to employment, so the labour market moves either what it pays to staff or what its customers are willing to commit to. A tight labour market raises the cost of the engineering and delivery capacity that growth plans assume, so the same plan costs more than budgeted rather than failing outright. The choice it bears on: whether t",
+      "failures": [],
+      "ready": true,
+      "requests": [
+        {
+          "path": "/demo",
+          "seconds": 0.3,
+          "status": 200
+        },
+        {
+          "landed": "https://intent-engine-preview-bridge.onrender.com/runs/01M14XXK7C3SSVVGW5ZD9QKWSR/progress",
+          "path": "/analyze",
+          "seconds": 0.6,
+          "status": 200
+        },
+        {
+          "chars": 29268,
+          "path": "/runs/01M14XXK7C3SSVVGW5ZD9QKWSR",
+          "seconds": 48.1,
+          "status": 200
+        },
+        {
+          "chars": 48245,
+          "path": "/runs/01M14XXK7C3SSVVGW5ZD9QKWSR/brief",
+          "seconds": 35.4,
+          "status": 200
+        },
+        {
+          "chars": 58678,
+          "path": "/runs/01M14XXK7C3SSVVGW5ZD9QKWSR/full",
+          "seconds": 26.6,
+          "status": 200
+        }
+      ],
+      "run_id": "01M14XXK7C3SSVVGW5ZD9QKWSR",
+      "score": {
+        "abstained": true,
+        "blocked_stated": false,
+        "cross_surface_contradiction": false,
+        "denies_exposure_then_shows_one": false,
+        "economic_section_present": true,
+        "internal_enums_leaked": [],
+        "pre_calibration_language": true,
+        "reading_called_unavailable": false,
+        "spoke": false,
+        "words": {
+          "": 640,
+          "/brief": 2342,
+          "/full": 2887
+        }
+      },
+      "seconds_to_read": 274.5,
+      "slowest_seconds": 48.1,
+      "state": "READ",
+      "timeouts": [],
+      "total_seconds": 111.0
+    },
+    {
+      "carried_csrf": true,
+      "company": "Cloudflare",
+      "domain": "cloudflare.com",
+      "econ_excerpt": "Economic impact What changed This company's own evidence establishes no exposure to any condition the shared economic state measures, so no economic reading is asserted for it. That is a gap in this company's exposure map, not a quiet economy. Economic reading as of 2026-08-27 (current, 1 day old). no forward prediction has come due, so there is no accuracy record to quote yet. What this has prepared for you Investigation plan The one bounded check that would settle this, with what each result would favour. Drafted here and nothing more. Nothing is sent, published, scheduled or shared without your explicit approval. What this was built from The company's own pages \u00b7 7 Executive statements \u00b7 1 Filings and investor material \u00b7 2 Customer evidence \u2014 none Another registrant's filing \u2014 none Independent reporting \u00b7 1 Nothing here reports what buying and using this actually costs a customer, so ",
+      "failures": [],
+      "ready": true,
+      "requests": [
+        {
+          "path": "/demo",
+          "seconds": 1.1,
+          "status": 200
+        },
+        {
+          "landed": "https://intent-engine-preview-bridge.onrender.com/runs/01M14Y9CNQ55MGFQEB13YMDAEB/progress",
+          "path": "/analyze",
+          "seconds": 3.6,
+          "status": 200
+        },
+        {
+          "chars": 37,
+          "path": "/runs/01M14Y9CNQ55MGFQEB13YMDAEB",
+          "seconds": 90.1,
+          "status": 0
+        },
+        {
+          "chars": 36733,
+          "path": "/runs/01M14Y9CNQ55MGFQEB13YMDAEB/brief",
+          "seconds": 33.9,
+          "status": 200
+        },
+        {
+          "chars": 77219,
+          "path": "/runs/01M14Y9CNQ55MGFQEB13YMDAEB/full",
+          "seconds": 43.6,
+          "status": 200
+        }
+      ],
+      "run_id": "01M14Y9CNQ55MGFQEB13YMDAEB",
+      "score": {
+        "abstained": false,
+        "blocked_stated": false,
+        "cross_surface_contradiction": false,
+        "denies_exposure_then_shows_one": false,
+        "economic_section_present": true,
+        "internal_enums_leaked": [],
+        "pre_calibration_language": true,
+        "reading_called_unavailable": false,
+        "spoke": true,
+        "words": {
+          "": 6,
+          "/brief": 1655,
+          "/full": 5352
+        }
+      },
+      "seconds_to_read": 70.5,
+      "slowest_seconds": 90.1,
+      "state": "READ",
+      "timeouts": [
+        {
+          "chars": 37,
+          "path": "/runs/01M14Y9CNQ55MGFQEB13YMDAEB",
+          "seconds": 90.1,
+          "status": 0
+        }
+      ],
+      "total_seconds": 172.3
+    },
+    {
+      "carried_csrf": true,
+      "company": "Exxon Mobil",
+      "domain": "exxonmobil.com",
+      "econ_excerpt": "Economic impact What changed This company's own evidence establishes no exposure to any condition the shared economic state measures, so no economic reading is asserted for it. That is a gap in this company's exposure map, not a quiet economy. Economic reading as of 2026-08-27 (current, 1 day old). no forward prediction has come due, so there is no accuracy record to quote yet. What this has prepared for you Evidence request A numbered request for exactly what is missing: every source here is published by the company itself, so nothing in this reading has been checked against an outside account of it. Investigation plan The one bounded check that would settle this, with what each result would favour. Diligence checklist every source here is published by the company itself, so nothing in this reading has been checked against an outside account of it. Drafted here and nothing more. Nothing",
+      "failures": [],
+      "ready": true,
+      "requests": [
+        {
+          "path": "/demo",
+          "seconds": 0.6,
+          "status": 200
+        },
+        {
+          "landed": "https://intent-engine-preview-bridge.onrender.com/runs/01M14YGRYNXQ90VHXT6C3M9WT5/progress",
+          "path": "/analyze",
+          "seconds": 0.8,
+          "status": 200
+        },
+        {
+          "chars": 30325,
+          "path": "/runs/01M14YGRYNXQ90VHXT6C3M9WT5",
+          "seconds": 4.8,
+          "status": 200
+        },
+        {
+          "chars": 35307,
+          "path": "/runs/01M14YGRYNXQ90VHXT6C3M9WT5/brief",
+          "seconds": 10.0,
+          "status": 200
+        },
+        {
+          "chars": 43457,
+          "path": "/runs/01M14YGRYNXQ90VHXT6C3M9WT5/full",
+          "seconds": 10.9,
+          "status": 200
+        }
+      ],
+      "run_id": "01M14YGRYNXQ90VHXT6C3M9WT5",
+      "score": {
+        "abstained": false,
+        "blocked_stated": false,
+        "cross_surface_contradiction": false,
+        "denies_exposure_then_shows_one": false,
+        "economic_section_present": true,
+        "internal_enums_leaked": [],
+        "pre_calibration_language": true,
+        "reading_called_unavailable": false,
+        "spoke": false,
+        "words": {
+          "": 840,
+          "/brief": 1451,
+          "/full": 1933
+        }
+      },
+      "seconds_to_read": 59.8,
+      "slowest_seconds": 10.9,
+      "state": "READ",
+      "timeouts": [],
+      "total_seconds": 27.1
+    },
+    {
+      "carried_csrf": true,
+      "company": "Olo Inc",
+      "detail": "Too many analyses for now Too many analyses for now What did work. Your session is active. What did not. This request was not carried out. Why. This preview limits how much one visitor can run, so it stays available to everyone. What to do next. Wait a little and try again. Run a new analysis Demo a",
+      "domain": "olo.com",
+      "requests": [
+        {
+          "path": "/demo",
+          "seconds": 0.4,
+          "status": 200
+        },
+        {
+          "landed": "https://intent-engine-preview-bridge.onrender.com/analyze",
+          "path": "/analyze",
+          "seconds": 0.2,
+          "status": 429
+        }
+      ],
+      "state": "QUOTA_EXHAUSTED"
+    }
+  ],
+  "summary": {
+    "abstained": 1,
+    "attempted": 8,
+    "client_timeouts": 2,
+    "contradictions": 0,
+    "denies_then_shows_exposure": 0,
+    "enum_leaks": 0,
+    "http_failures": 0,
+    "read": 4,
+    "reading_called_unavailable": 0,
+    "section": 4,
+    "spoke": 1
+  },
+  "version": {
+    "app_version": "1.5.0-executive-intelligence",
+    "commit": "e41e38dc10961ef8e1229dfadd66b18ea1479c34",
+    "process": {
+      "boot_id": "00378b069fe243f2",
+      "started_at": 1787938590.4654067,
+      "uptime_seconds": 5827.6
+    }
+  }
+}

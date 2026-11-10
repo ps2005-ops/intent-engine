@@ -36,13 +36,46 @@ def _submit(app, company="Acme"):
 
 
 def test_submission_returns_immediately_and_work_continues(tmp_path):
+    """The handler must return WHILE the analysis is still running.
+
+    This asserted `elapsed < 2.0`, which is a proxy for the property and a
+    wall-clock bound on a shared machine: it failed once inside a 6000-test
+    guard run while passing 3/3 alone, on a change that could not reach this
+    path at all. A timing threshold cannot tell a blocking handler from a busy
+    laptop.
+
+    The property itself is an ORDER, so it is asserted as one. The worker is
+    held on a latch that this test controls; if the POST carried the analysis
+    it could not return until the latch was released, and the latch is only
+    released after the response has been asserted. No duration is measured,
+    and the test is not slower for being correct.
+    """
+    import threading
+
     app = _async_app(tmp_path)
-    c, status, headers, elapsed = _submit(app)
+    holding = threading.Event()
+    released = threading.Event()
+    real = app._run_analysis
+
+    def _held(user_id, run_id):
+        holding.set()
+        # Bounded so a genuine regression fails the test instead of hanging
+        # the suite. The bound is a deadlock escape, never the assertion.
+        released.wait(timeout=30)
+        return real(user_id, run_id)
+
+    app._run_analysis = _held
+    c, status, headers, _ = _submit(app)
+
     assert status.startswith("303")
     assert headers["Location"].endswith("/progress")
-    # The request must not carry the analysis. This is the regression that
-    # would catch a return to the blocking POST.
-    assert elapsed < 2.0, f"submission blocked for {elapsed:.1f}s"
+    # THE REGRESSION THIS CATCHES: a return to the blocking POST. The worker
+    # has started and has NOT been allowed to finish, yet the handler already
+    # answered -- which a synchronous handler cannot do.
+    assert holding.wait(timeout=30), "the worker never started"
+    assert not released.is_set()
+
+    released.set()
     assert app.wait_for_analysis(headers["Location"].split("/runs/")[1]
                                  .split("/")[0], timeout=30)
 
@@ -142,7 +175,20 @@ def test_no_fake_percentage_or_countdown_anywhere_on_progress(tmp_path):
     import re
     app = _async_app(tmp_path)
     _, _, body = _in_flight_progress(app)
-    assert "Running for" in body, "the page must show real elapsed time"
+    # REAL ELAPSED TIME, now shown as a clock rather than a sentence.
+    #
+    # This asserted the literal string "Running for", which was the old
+    # phrasing. The page now renders `<span id="pg-timer">00:47</span>
+    # elapsed` and ticks between polls, which is MORE elapsed time on the
+    # page, not less -- so the assertion follows the requirement rather than
+    # the wording. The anti-countdown checks below are untouched and are the
+    # part of this proof that actually constrains the product.
+    assert 'id="pg-timer"' in body, "the page must show real elapsed time"
+    assert "elapsed" in body
+    # AND IT MUST BE SEEDED BY THE SERVER. A clock the browser starts at zero
+    # would reset on every reload and would count a wait that did not happen.
+    assert "var base=" in body, \
+        "the elapsed clock is not seeded from the server"
     # VISIBLE text only: `max-width:100%` in the stylesheet is not a claim
     # about completion, and a gate that trips on CSS gets deleted by the next
     # person rather than believed.
@@ -346,7 +392,18 @@ def test_gate_c_a_terminal_run_never_shows_an_active_stage(tmp_path):
     """
     app = _async_app(tmp_path)
     c, run_id, body = _in_flight_progress(app)
-    assert "Reading the most relevant material" in body     # active, polling
+    # ACTIVE, POLLING -- asserted against the canonical hydration vocabulary
+    # rather than one frozen sentence. This read "Reading the most relevant
+    # material", which was the generic lifecycle stage line the progress page
+    # showed before `hydration.assess` was wired to it. The intent of the gate
+    # is that an unfinished run shows an active stage and a finished one does
+    # not; which words say so is the product's business, and pinning the old
+    # sentence would have made this gate fail for a page that got better.
+    from intent_engine.founder_brief import hydration as _H
+    active = list(_H.TIER_COPY.values()) + ["Reading the most relevant "
+                                            "material"]
+    assert any(line in body for line in active), (
+        "the in-flight progress page shows no active stage at all")
     assert 'http-equiv="refresh"' in body
 
     meta = app.ci.run_meta(run_id)
@@ -585,9 +642,14 @@ def test_gate_g4_composition_failure_still_leaves_a_useful_bounded_result(
     real_compose = app._compose
     calls = {"n": 0}
 
-    def exploding_compose(run_id):
+    def exploding_compose(run_id, *, deep=True, trace=None):
+        # `deep` mirrors the production signature: composition is now two
+        # phases (core, then the strategic reading), and a double that does
+        # not accept the flag raises TypeError before the code under test
+        # runs -- which reports as "compose was never reached" and hides the
+        # very failure this gate exists to exercise.
         calls["n"] += 1
-        real_compose(run_id)                     # retrieval really happened
+        real_compose(run_id, deep=deep, trace=trace)   # retrieval really happened
         raise ValueError("claim text overclaims: ['always']")
 
     app._compose = exploding_compose
@@ -727,7 +789,13 @@ def test_every_terminal_state_stops_polling_and_drops_the_active_stage(
         app.wait_for_analysis(run_id, timeout=30)
         meta = app.ci.run_meta(run_id) or {}
         app.ci._transition(run_id, meta.get("domain", ""), state)
+        # A REDIRECT BODY WOULD SATISFY BOTH ASSERTIONS VACUOUSLY. Clear the
+        # result so this run genuinely has nothing to open and the progress
+        # page must actually render — otherwise the test passes on an empty
+        # string and can no longer fail for the reason it was written.
+        app._results.pop(run_id, None)
         _, _, html = c.request("GET", f"/runs/{run_id}/progress")
+        assert html.strip(), f"{state} rendered no page to check"
         assert 'http-equiv="refresh"' not in html, (
             f"{state} keeps polling a run that will never advance")
         assert "Reading the public evidence" not in html, (
@@ -735,12 +803,23 @@ def test_every_terminal_state_stops_polling_and_drops_the_active_stage(
 
 
 def test_interrupted_says_so_rather_than_implying_work_continues(tmp_path):
+    """An interrupted run WITH NOTHING TO SHOW says it stopped.
+
+    The result must be cleared first, and that is the point rather than a
+    fixture detail: a run that was interrupted after producing something
+    readable now OPENS that result instead of reporting a stop, because a
+    customer-ready result outranks stale worker metadata. Leaving the result
+    in place made this assertion read an empty redirect body and pass for a
+    reason that had nothing to do with the wording it checks.
+    """
     app = _async_app(tmp_path)
     c, _, headers, _ = _submit(app)
     run_id = headers["Location"].split("/runs/")[1].split("/")[0]
     app.wait_for_analysis(run_id, timeout=30)
     meta = app.ci.run_meta(run_id) or {}
     app.ci._transition(run_id, meta.get("domain", ""), "INTERRUPTED")
+    app._results.pop(run_id, None)
+    assert app.result_readiness(run_id)["opens_result"] is False
     _, _, html = c.request("GET", f"/runs/{run_id}/progress")
     assert "interrupt" in html.lower() or "stopped" in html.lower()
 

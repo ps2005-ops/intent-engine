@@ -1,0 +1,155 @@
+{
+  "company": "The Goldman Sachs Group, Inc.",
+  "deployed_sha": "cb9e6b7",
+  "captured_at": "2026-08-21T19:22:00Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JWBWJSK3V34J4MPJAFZMSR/intro",
+      "chars": 5156,
+      "html_chars": 30696,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JWBWJSK3V34J4MPJAFZMSR/intro",
+      "chars": 5156,
+      "html_chars": 30696,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JWBWJSK3V34J4MPJAFZMSR/slides",
+      "chars": 6019,
+      "html_chars": 50008,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JWBWJSK3V34J4MPJAFZMSR/full",
+      "chars": 23764,
+      "html_chars": 64692,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JWBWJSK3V34J4MPJAFZMSR/story",
+      "chars": 4428,
+      "html_chars": 33953,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JWBWJSK3V34J4MPJAFZMSR/history",
+      "chars": 27687,
+      "html_chars": 102358,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JWBWJSK3V34J4MPJAFZMSR/connect",
+      "chars": 3998,
+      "html_chars": 28904,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JWBWJSK3V34J4MPJAFZMSR/intro",
+      "chars": 5156,
+      "html_chars": 30696,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JWBWJSK3V34J4MPJAFZMSR/evidence",
+      "chars": 4752,
+      "html_chars": 21235,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JWBWJSK3V34J4MPJAFZMSR/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JWBWJSK3V34J4MPJAFZMSR/brief",
+      "chars": 19707,
+      "html_chars": 54211,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.6,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing The Goldman Sachs Group, Inc. GS \u00b7 goldmansachs.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current com",
+      "status": 200,
+      "html_bytes": 17030
+    },
+    {
+      "t": 15.7,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing The Goldman Sachs Group, Inc. GS \u00b7 goldmansachs.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current co",
+      "status": 200,
+      "html_bytes": 17026
+    },
+    {
+      "t": 74.5,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17026,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "cf-cache-status": "DYNAMIC",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JWBWJSK3V34J4MPJAFZMSR/progress",
+      "head": ""
+    },
+    {
+      "t": 201.1,
+      "text": "The Goldman Sachs Group, Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction The Goldman Sachs Group, Inc. GS \u00b7 USA \u00b7 goldmansachs.com \u00b7 SEC CIK 886982 The Goldman Sachs Group, Inc. is a financial regulated business that runs on earnings from a balance sheet or from",
+      "status": 200,
+      "html_bytes": 30765
+    }
+  ],
+  "process_before": {
+    "boot_id": "2e390503615a4d2d",
+    "started_at": 1787340052.1714675,
+    "uptime_seconds": 68.7
+  },
+  "run_id": "01M0JWBWJSK3V34J4MPJAFZMSR",
+  "status": "READY",
+  "seconds": 201,
+  "first_useful": 201,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 7.38,
+    "intro": 6.55,
+    "slides": 14.11,
+    "full": 23.61,
+    "story": 7.62,
+    "history": 0.27,
+    "connect": 4.94
+  },
+  "evidence_gate": "compose=5 usable=5 families=identity|investor|strategy|talent stored=5 attempt=3 failed=27/23 dropped=0/0/0/0 unexplained=0",
+  "outcome": "FULL_ANALYSIS",
+  "outcome_by_route": {
+    "run": "FULL_ANALYSIS",
+    "intro": "FULL_ANALYSIS",
+    "slides": "FULL_ANALYSIS",
+    "full": "FULL_ANALYSIS",
+    "story": "FULL_ANALYSIS",
+    "history": "FULL_ANALYSIS",
+    "connect": "FULL_ANALYSIS"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": [
+    "GET /runs/01M0JWBWJSK3V34J4MPJAFZMSR/progress: timeout",
+    "GET /runs/01M0JWBWJSK3V34J4MPJAFZMSR/progress: timeout",
+    "GET /runs/01M0JWBWJSK3V34J4MPJAFZMSR/progress: timeout"
+  ]
+}

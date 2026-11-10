@@ -206,7 +206,11 @@ def test_a_withheld_view_yields_a_withheld_decision():
     decision = compose_decision("Acme", None, evidence_gaps=["nothing dated"])
     assert decision.readiness == WITHHELD
     assert not decision.options
-    assert "not enough" in decision.unsafe_because.lower()
+    # Same migration as the bounded-run gate: the withheld reason describes
+    # THIS PASS rather than the company's disclosure. Still present, still
+    # about this company.
+    assert "no curated transition pattern matched" in \
+        decision.unsafe_because.lower()
 
 
 def test_unrelated_patterns_do_not_produce_the_same_decision():

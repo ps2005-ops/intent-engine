@@ -1,0 +1,65 @@
+{
+  "company": "RTX Corporation",
+  "deployed_sha": "743df06",
+  "run_id": "01M0JPNFXWM797X6QEDHECWPMF",
+  "analysis_seconds": 289,
+  "stage_transitions": [
+    {
+      "t": 0.3,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing RTX Corporation RTX \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecting",
+      "status": 200,
+      "html_bytes": 16997
+    },
+    {
+      "t": 44.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing RTX Corporation RTX \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Connecting m",
+      "status": 200,
+      "html_bytes": 16993
+    },
+    {
+      "t": 96.0,
+      "text": "",
+      "status": 0,
+      "html_bytes": 16993,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "cf-cache-status": "DYNAMIC",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JPNFXWM797X6QEDHECWPMF/progress",
+      "head": ""
+    },
+    {
+      "t": 289.1,
+      "text": "RTX Corporation \u2014 the decision Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo RTX Corporation We are a global premier systems provider of high technology products and services to the aerospace and defense industries. The answer Across the public record for RTX Corporation, the second buyer arr",
+      "status": 200,
+      "html_bytes": 33831
+    }
+  ],
+  "route_seconds": {
+    "run": 8.47,
+    "intro": 22.62,
+    "slides": 7.58,
+    "full": 2.66,
+    "story": 6.86,
+    "history": 0.33,
+    "connect": 4.67
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "d7df6481c13e43c7",
+    "started_at": 1787326618.1855707,
+    "uptime_seconds": 7527.4
+  },
+  "process_after": {
+    "boot_id": "d7df6481c13e43c7",
+    "started_at": 1787326618.1855707,
+    "uptime_seconds": 8011.2
+  },
+  "errors": [
+    "GET /runs/01M0JPNFXWM797X6QEDHECWPMF/progress: timeout",
+    "GET /runs/01M0JPNFXWM797X6QEDHECWPMF/progress: timeout",
+    "GET /runs/01M0JPNFXWM797X6QEDHECWPMF/progress: timeout",
+    "GET /runs/01M0JPNFXWM797X6QEDHECWPMF/progress: timeout"
+  ]
+}

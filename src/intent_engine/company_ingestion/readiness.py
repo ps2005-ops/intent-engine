@@ -122,10 +122,58 @@ _FOREIGN_MARKERS = (
     " de ", " het ", " een ", " voor ", " zijn ",               # nl
 )
 _FOREIGN_LETTERS = "äöüßàâçéèêëîïôùûñõáíóúåæø"
+#: Foreign function words per THOUSAND WORDS at which a document stops being
+#: readable English. German and French prose run far above this; English
+#: financial prose carrying "per share", "de minimis" and "El Paso" runs far
+#: below it at any length. Calibrated against real documents, not chosen:
+#: MEASURED, on real documents, through this product's own extractor:
+#:
+#:     Cloudflare 10-Q   0.50 markers / 1000 words   (71,377 words)
+#:     Cloudflare 10-K   0.56                        (85,567 words)
+#:     German page     371.08
+#:     French page     443.90
+#:
+#: A 600x separation. The bar is set at 40 -- eighty times the measured
+#: English rate and a ninth of the measured foreign rate -- so neither side
+#: is anywhere near it and a document has to be substantially foreign to
+#: cross. Chosen from the distribution above rather than picked.
+_FOREIGN_MARKER_DENSITY = 40.0
+#: Accented characters per thousand characters. Same idea: a German page is
+#: dense in umlauts; an English filing that names one French subsidiary is not.
+#: Both real filings measure 0.00.
+_FOREIGN_ACCENT_DENSITY = 5.0
 # Below this share of documents, the evidence is not in a language this
 # analysis can read. Set above a half deliberately: at exactly half, a report
 # would be built on the readable pages while silently ignoring as much again.
 MIN_ENGLISH_SHARE = 0.6
+
+
+def _densities(text: str, accented: int) -> tuple:
+    """The two numbers the language wall decides on. ONE producer.
+
+    Read by `is_english` to decide and by `readiness_inputs` to report, so a
+    document listed as language-rejected carries the same densities that
+    rejected it rather than a second opinion about them.
+    """
+    words = max(1, text.count(" "))
+    occurrences = sum(text.count(m) for m in _FOREIGN_MARKERS)
+    return (occurrences * 1000.0 / words,
+            accented * 1000.0 / max(1, len(text)))
+
+
+def _language_text(document: dict) -> tuple:
+    """Exactly the text and accent count `is_english` judges on."""
+    text = " " + " ".join((document.get("text_content") or "").lower().split()) \
+        + " "
+    return text, sum(1 for ch in text if ch in _FOREIGN_LETTERS)
+
+
+def _foreign_marker_density(document: dict) -> float:
+    return _densities(*_language_text(document))[0]
+
+
+def _accent_density(document: dict) -> float:
+    return _densities(*_language_text(document))[1]
 
 
 def is_english(document: dict) -> bool:
@@ -141,10 +189,79 @@ def is_english(document: dict) -> bool:
         return True                     # too short to judge; do not accuse it
     foreign_words = sum(1 for m in _FOREIGN_MARKERS if m in text)
     accented = sum(1 for ch in text if ch in _FOREIGN_LETTERS)
-    # Both signals, or a great deal of one. A single stray "de" in an English
-    # sentence about a French customer is not a language.
-    return not (foreign_words >= 4 or accented >= 6
-                or (foreign_words >= 2 and accented >= 2))
+
+    # PRESENCE IS NOT EVIDENCE IN A LONG DOCUMENT.
+    #
+    # `foreign_words` counts how many of the ~40 markers appear AT LEAST ONCE.
+    # That number can only rise as a document gets longer, and English
+    # financial prose contains several of them outright: " per " (per share),
+    # " de " (de minimis, de facto), " el " (El Paso), " la ", " il ", " lo ".
+    #
+    # Measured on Cloudflare's own 10-Q, through this product's extractor:
+    #
+    #      5,000 chars -> 1 marker      200,000 chars -> 1 marker
+    #     50,000 chars -> 1 marker      400,000 chars -> 2 markers
+    #    100,000 chars -> 1 marker      465,969 chars -> 3 markers
+    #
+    # An English SEC filing arrives at 3 against a threshold of 4. Nothing
+    # about the language changed between those rows; only the length did. The
+    # cost of crossing that line is not cosmetic -- a set-aside filing is
+    # evidence the analysis never sees, and a run that loses its 10-Q drops
+    # below the source floor and renders a Limited analysis. Cloudflare, the
+    # standing regression control, did exactly that live on 8397d67 with its
+    # 10-Q listed under "Sources found but not used".
+    #
+    # So a LONG document has to show foreign text DENSELY, not merely once.
+    # Short documents keep the original absolute test unchanged: a 300-word
+    # German blog post cannot reach a density threshold built for filings,
+    # and that is the case this check was written for.
+    #
+    # This can only move a document from foreign to English, never the other
+    # way -- the scaled thresholds are >= the originals for every length. A
+    # genuinely foreign document is dense in markers at any size.
+    # DENSITY, AND IT MUST BE COUNTED IN OCCURRENCES.
+    #
+    # A first version of this scaled the thresholds by length and kept
+    # counting DISTINCT markers. That was wrong in the dangerous direction and
+    # a positive control caught it: `foreign_words` can never exceed the ~40
+    # markers in the table, so a 280,000-character German document could not
+    # reach a bar of 56 and was reclassified ENGLISH -- the exact case this
+    # check exists for, broken by the repair.
+    #
+    # Occurrences scale with length; distinct markers saturate. So the measure
+    # is how much of the text is foreign, per thousand words, which is a
+    # property of the LANGUAGE rather than of the length.
+    marker_density, accent_density = _densities(text, accented)
+    # ACCENTS ALONE, WITH NO FOREIGN FUNCTION WORDS, ARE NOT PROOF.
+    #
+    # MEASURED live on 61a7981, NVIDIA: eight of twelve documents refused by
+    # this test, and the instrument named them:
+    #
+    #     m0.00/a55.84   589 chars      m168.58/a8.58    2,329 chars
+    #     m0.00/a41.19 9,977 chars      m123.96/a13.79  10,951 chars
+    #     m0.00/a59.50   435 chars
+    #
+    # The last two exceed BOTH bars and are foreign by any reading. The
+    # first three contain not one function word from any of the five
+    # languages this table covers -- German, French, Spanish, Italian,
+    # Dutch -- while 4-6% of their characters are accented. Prose in those
+    # languages cannot avoid " der ", " le ", " el ", " per ", " een ". A
+    # document with none of them is not prose in them, and what accents at
+    # that density usually mean is a page dense in accented product or place
+    # names.
+    #
+    # This module's own rule is that "refusing a real company is far worse
+    # than the silence it was meant to replace, so the burden of proof sits
+    # on the accusation". An accusation with no corroborating evidence does
+    # not meet it. Nothing is loosened for a document that shows BOTH
+    # signals, and the combined half-threshold branch below already required
+    # markers.
+    accented_and_foreign = (accent_density >= _FOREIGN_ACCENT_DENSITY
+                            and marker_density > 0)
+    return not (marker_density >= _FOREIGN_MARKER_DENSITY
+                or accented_and_foreign
+                or (marker_density >= _FOREIGN_MARKER_DENSITY / 2
+                    and accent_density >= _FOREIGN_ACCENT_DENSITY / 2))
 
 
 def english_share(documents) -> float:
@@ -247,6 +364,64 @@ def observations_as_documents(observations) -> list:
             "retrieval_status": "OK",
         })
     return out
+
+
+def readiness_inputs(documents, verdict, *, attempt: int = 1) -> dict:
+    """WHAT THE GATE WAS LOOKING AT, counted over the set it judged.
+
+    ONE READER, BECAUSE TWO DRIFTED. The four `dropped_*` counters used to be
+    computed at first composition while `documents_at_compose` and
+    `usable_at_compose` were later overwritten by the re-gate. The header
+    then described two different document sets at once, and its arithmetic
+    stopped closing:
+
+        UnitedHealth, 743df06:  compose=13 usable=9 dropped=0/0/2/0
+
+    Thirteen minus two is eleven, not nine. Two documents disappeared into a
+    gap between two measurements of different things -- which is exactly the
+    confusion the breakdown was added to end. Both callers now come here.
+    """
+    documents = list(documents)
+    ok = [d for d in documents if d.get("retrieval_status") == "OK"]
+    texted = [d for d in ok if (d.get("text_content") or "").strip()]
+    deduped = usable_documents(documents)
+    english = [d for d in deduped if is_english(d)]
+    inputs = {
+        "dropped_not_ok": len(documents) - len(ok),
+        "dropped_empty": len(ok) - len(texted),
+        "dropped_duplicate": max(0, len(texted) - len(deduped)),
+        "dropped_language": max(0, len(deduped) - len(english)),
+        "documents_at_compose": len(documents),
+        "usable_at_compose": verdict.get("document_count"),
+        "families_at_compose": list(verdict.get("families") or []),
+        "source_ids": [d.get("source_id") for d in documents][:40],
+        "attempt": attempt,
+    }
+    # THE COUNTERS MUST CLOSE, and when they do not that is the finding.
+    # `usable` is the gate's own number; anything it dropped that these four
+    # filters do not name is attrition nobody has instrumented yet, and it is
+    # reported as its own quantity rather than left to be inferred from a
+    # subtraction that does not work.
+    # WHICH DOCUMENTS THE LANGUAGE WALL TOOK, not just how many.
+    #
+    # MEASURED on 8fd6c82, NVIDIA: `dropped=0/0/0/8` -- eight of twelve
+    # refused by `is_english` alone. "Eight" cannot say whether they were
+    # genuinely localised pages discovery should never have proposed, or
+    # English pages the density heuristic misreads, and those are opposite
+    # repairs. Naming them costs one pass over text already in memory.
+    inputs["language_rejected"] = [
+        {"source_id": d.get("source_id"),
+         "url": (d.get("final_url") or d.get("original_url") or "")[:160],
+         "chars": len((d.get("text_content") or "")),
+         "marker_density": round(_foreign_marker_density(d), 2),
+         "accent_density": round(_accent_density(d), 2)}
+        for d in deduped if d not in english][:12]
+    named = (inputs["dropped_not_ok"] + inputs["dropped_empty"]
+             + inputs["dropped_duplicate"] + inputs["dropped_language"])
+    usable = inputs["usable_at_compose"]
+    if isinstance(usable, int):
+        inputs["dropped_unexplained"] = len(documents) - named - usable
+    return inputs
 
 
 def assess_readiness(*, documents, identity=None, failures=(),

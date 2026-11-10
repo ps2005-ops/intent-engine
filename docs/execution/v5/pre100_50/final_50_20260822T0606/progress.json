@@ -1,0 +1,14 @@
+{
+ "universe": 49,
+ "captured": 5,
+ "remaining": 44,
+ "stopped": false,
+ "updated_at": "2026-08-22T07:05:01Z",
+ "captured_companies": [
+  "Meta Platforms, Inc.",
+  "Alphabet Inc.",
+  "Microsoft Corporation",
+  "Amazon.com, Inc.",
+  "Salesforce, Inc."
+ ]
+}

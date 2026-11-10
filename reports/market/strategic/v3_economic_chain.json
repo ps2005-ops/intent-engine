@@ -1,0 +1,75 @@
+{
+ "contract": "economic_chain_reassessment.v2",
+ "as_of": "2026-08-08",
+ "candidates": [
+  {
+   "subject": "toyota",
+   "observations": 31,
+   "distinct_event_types": 5,
+   "primary_source_observations": 24,
+   "sequence_stages_covered": 3,
+   "resolved_expectations": 1,
+   "score": 42
+  },
+  {
+   "subject": "honda",
+   "observations": 33,
+   "distinct_event_types": 6,
+   "primary_source_observations": 24,
+   "sequence_stages_covered": 3,
+   "resolved_expectations": 1,
+   "score": 42
+  },
+  {
+   "subject": "jpmorgan",
+   "observations": 26,
+   "distinct_event_types": 6,
+   "primary_source_observations": 20,
+   "sequence_stages_covered": 4,
+   "resolved_expectations": 0,
+   "score": 38
+  },
+  {
+   "subject": "stripe",
+   "observations": 33,
+   "distinct_event_types": 3,
+   "primary_source_observations": 12,
+   "sequence_stages_covered": 3,
+   "resolved_expectations": 0,
+   "score": 27
+  },
+  {
+   "subject": "shopify",
+   "observations": 25,
+   "distinct_event_types": 4,
+   "primary_source_observations": 4,
+   "sequence_stages_covered": 3,
+   "resolved_expectations": 1,
+   "score": 21
+  },
+  {
+   "subject": "cloudflare",
+   "observations": 12,
+   "distinct_event_types": 4,
+   "primary_source_observations": 0,
+   "sequence_stages_covered": 2,
+   "resolved_expectations": 2,
+   "score": 15
+  }
+ ],
+ "top": "toyota",
+ "supported_links": [],
+ "hypothesized_links": [
+  "ORDERS->COMPANY_DEMAND",
+  "GUIDANCE->OUTCOME"
+ ],
+ "unknown_links": [
+  "MACRO_STATE->CUSTOMER_STATE",
+  "CUSTOMER_STATE->ORDERS",
+  "COMPANY_DEMAND->MARGIN",
+  "MARGIN->GUIDANCE"
+ ],
+ "weakest_link": "MARGIN->GUIDANCE",
+ "decision_relevance": "4 of 7 stages of the transmission are measured for toyota; a reader acting on the conclusion is relying on the unmeasured ones holding",
+ "note": "no company name is pinned in tests: the leader moved from honda to toyota on new evidence with no code change"
+}

@@ -41,17 +41,30 @@ either alone has been observed to be insufficient.
 """
 from __future__ import annotations
 
+import contextlib
 import dataclasses
 import hashlib
 import os
 import pathlib
 import shutil
 import subprocess
+import tempfile
 import time
 from typing import Dict, List, Optional, Sequence, Tuple
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-PY = "/Users/prathamsharma/intent-engine/.venv/bin/python"
+#: THE INTERPRETER MUST BELONG TO THE TREE BEING PROVEN.
+#:
+#: This was hardcoded to the MAIN worktree's venv. Run from any other
+#: worktree it imports `intent_engine` from a different checkout entirely, so
+#: every mutation lands in a mirror the interpreter never reads and twenty
+#: proofs report NOT_CAUGHT for a reason that has nothing to do with the
+#: guards. `GUARD_PYTHON` overrides; otherwise this worktree's own .venv wins
+#: and the old path remains only as a last resort.
+PY = (os.environ.get("GUARD_PYTHON")
+      or (str(ROOT / ".venv/bin/python")
+          if (ROOT / ".venv/bin/python").exists()
+          else "/Users/prathamsharma/intent-engine/.venv/bin/python"))
 
 # --- verdicts ---------------------------------------------------------------
 HELD = "HELD"                          # mutation caught, for the right reason
@@ -100,13 +113,50 @@ def _clear_bytecode(path: pathlib.Path) -> None:
         shutil.rmtree(cache, ignore_errors=True)
 
 
-def _run(target: str) -> Tuple[bool, str]:
+def _run(target: str, *, source_root: str = "src") -> Tuple[bool, str]:
+    # `-o pythonpath=` OVERRIDES pytest.ini, which pins `pythonpath = src` and
+    # inserts it at the FRONT of sys.path -- ahead of anything in the
+    # environment. Without this the real tree shadows the mirror, every
+    # mutation is silently inert, and twenty proofs report NOT_CAUGHT at once.
     done = subprocess.run(
-        [PY, "-m", "pytest", target, "-q", "--no-header", "-x"],
+        [PY, "-m", "pytest", target, "-q", "--no-header", "-x",
+         "-o", f"pythonpath={source_root}"],
         cwd=ROOT, capture_output=True, text=True,
-        env={"PYTHONPATH": "src", "PATH": "/usr/bin:/bin",
+        env={"PYTHONPATH": source_root, "PATH": "/usr/bin:/bin",
              "PYTHONDONTWRITEBYTECODE": "1"})
     return done.returncode == 0, (done.stdout + done.stderr)
+
+
+@contextlib.contextmanager
+def _mutated_tree(path: pathlib.Path, mutated: str):
+    """A PRIVATE copy of src/ with exactly one file changed.
+
+    WHY THE SHARED TREE IS NEVER TOUCHED.
+
+    This harness used to write the mutation into `src/` itself and restore it
+    in a `finally`. For the seconds that window is open, every other reader of
+    the repository sees deliberately broken source: the rest of the suite, an
+    editor, a concurrent agent session on the same checkout, or simply the
+    next proof if a restore is interrupted. A trust harness that makes the
+    working tree briefly wrong is buying its evidence with a hazard, and an
+    intermittent failure in the full run is exactly what that looks like from
+    the outside.
+
+    The copy is hard-linked, so it costs almost nothing for 419 files, and the
+    one mutated file is UNLINKED BEFORE IT IS WRITTEN -- writing through a
+    hard link would edit the shared inode and defeat the whole point.
+    """
+    tmp = pathlib.Path(tempfile.mkdtemp(prefix="break-proof-"))
+    try:
+        mirror = tmp / "src"
+        shutil.copytree(ROOT / "src", mirror, copy_function=os.link,
+                        ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+        target = mirror / path.relative_to(ROOT / "src")
+        target.unlink()
+        target.write_text(mutated, encoding="utf-8")
+        yield mirror
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
 
 
 def verify(proof: Proof) -> Result:
@@ -131,21 +181,17 @@ def verify(proof: Proof) -> Result:
         return Result(proof.label, ALREADY_RED,
                       "the paired test failed before any mutation")
 
-    try:
-        proof.path.write_text(mutated, encoding="utf-8")
-        _clear_bytecode(proof.path)
-        # CONDITION 3.
-        green_after, output = _run(proof.target)
-    finally:
-        proof.path.write_bytes(original_bytes)
-        now = time.time() + 1
-        os.utime(proof.path, (now, now))
-        _clear_bytecode(proof.path)
+    # CONDITION 3, run against a private tree so the shared one stays correct.
+    with _mutated_tree(proof.path, mutated) as mirror:
+        green_after, output = _run(proof.target, source_root=str(mirror))
 
-    # CONDITION 5, first half: the file came back exactly.
+    # CONDITION 5, now STRONGER than a restore check: the shared file was
+    # never written, so it cannot have come back wrong. Asserted rather than
+    # assumed, because "we no longer mutate the tree" is exactly the kind of
+    # claim that quietly stops being true.
     if _sha(proof.path) != original_hash:
         return Result(proof.label, DIRTY_RESTORE,
-                      "the file did not restore to its original bytes")
+                      "the shared source changed during an isolated proof")
     green_again, _ = _run(proof.target)
     if not green_again:
         return Result(proof.label, DIRTY_RESTORE,

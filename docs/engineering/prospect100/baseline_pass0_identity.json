@@ -1,0 +1,1972 @@
+[
+ {
+  "prospect_id": 1,
+  "tier": 1,
+  "name_as_listed": "Hammerspace",
+  "probes": [
+   {
+    "query": "Hammerspace",
+    "suggest_ms": 2.1,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Hammerspace",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 2,
+  "tier": 1,
+  "name_as_listed": "WEKA",
+  "probes": [
+   {
+    "query": "WEKA",
+    "suggest_ms": 2.05,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "WEKA",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 3,
+  "tier": 1,
+  "name_as_listed": "Reltio",
+  "probes": [
+   {
+    "query": "Reltio",
+    "suggest_ms": 3.73,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Reltio",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 4,
+  "tier": 1,
+  "name_as_listed": "Ataccama",
+  "probes": [
+   {
+    "query": "Ataccama",
+    "suggest_ms": 2.1,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Ataccama",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 5,
+  "tier": 1,
+  "name_as_listed": "Informatica",
+  "probes": [
+   {
+    "query": "Informatica",
+    "suggest_ms": 6.56,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Informatica",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 6,
+  "tier": 1,
+  "name_as_listed": "Qlik",
+  "probes": [
+   {
+    "query": "Qlik",
+    "suggest_ms": 1.35,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Qlik",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 7,
+  "tier": 1,
+  "name_as_listed": "Matillion",
+  "probes": [
+   {
+    "query": "Matillion",
+    "suggest_ms": 2.88,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Matillion",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 8,
+  "tier": 1,
+  "name_as_listed": "Keboola",
+  "probes": [
+   {
+    "query": "Keboola",
+    "suggest_ms": 1.59,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Keboola",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 9,
+  "tier": 1,
+  "name_as_listed": "CData Software",
+  "probes": [
+   {
+    "query": "CData Software",
+    "suggest_ms": 1.16,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "CData Software",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 10,
+  "tier": 1,
+  "name_as_listed": "Precisely",
+  "probes": [
+   {
+    "query": "Precisely",
+    "suggest_ms": 2.94,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Precisely",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 11,
+  "tier": 1,
+  "name_as_listed": "Securiti",
+  "probes": [
+   {
+    "query": "Securiti",
+    "suggest_ms": 2.78,
+    "suggestions": [
+     {
+      "legal_name": "Securitize Corp.",
+      "domain": "",
+      "cik": "2094496",
+      "ticker": "SECZ",
+      "source": "SEC registrant table",
+      "match": 1,
+      "entity_id": ""
+     },
+     {
+      "legal_name": "Central Securities Corp",
+      "domain": "",
+      "cik": "18748",
+      "ticker": "CET",
+      "source": "SEC registrant table",
+      "match": 3,
+      "entity_id": ""
+     },
+     {
+      "legal_name": "Daiwa Securities Group Inc.",
+      "domain": "",
+      "cik": "1481045",
+      "ticker": "DSEEY",
+      "source": "SEC registrant table",
+      "match": 3,
+      "entity_id": ""
+     },
+     {
+      "legal_name": "High Income Securities Fund",
+      "domain": "",
+      "cik": "810943",
+      "ticker": "PCF",
+      "source": "SEC registrant table",
+      "match": 3,
+      "entity_id": ""
+     },
+     {
+      "legal_name": "Total Return Securities Fund",
+      "domain": "",
+      "cik": "813623",
+      "ticker": "SWZ",
+      "source": "SEC registrant table",
+      "match": 3,
+      "entity_id": ""
+     },
+     {
+      "legal_name": "ARC Group Securities Acquisition I",
+      "domain": "",
+      "cik": "2094712",
+      "ticker": "FJDI",
+      "source": "SEC registrant table",
+      "match": 3,
+      "entity_id": ""
+     },
+     {
+      "legal_name": "John Hancock Income Securities Trust",
+      "domain": "",
+      "cik": "759866",
+      "ticker": "JHS",
+      "source": "SEC registrant table",
+      "match": 3,
+      "entity_id": ""
+     },
+     {
+      "legal_name": "Neuberger Real Estate Securities Income Fund Inc",
+      "domain": "",
+      "cik": "1261166",
+      "ticker": "NRO",
+      "source": "SEC registrant table",
+      "match": 3,
+      "entity_id": ""
+     }
+    ],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Securiti",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 12,
+  "tier": 1,
+  "name_as_listed": "Immuta",
+  "probes": [
+   {
+    "query": "Immuta",
+    "suggest_ms": 1.68,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Immuta",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 13,
+  "tier": 1,
+  "name_as_listed": "Privacera",
+  "probes": [
+   {
+    "query": "Privacera",
+    "suggest_ms": 2.74,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Privacera",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 14,
+  "tier": 1,
+  "name_as_listed": "Soda",
+  "probes": [
+   {
+    "query": "Soda",
+    "suggest_ms": 2.54,
+    "suggestions": [
+     {
+      "legal_name": "Jones Soda Co.",
+      "domain": "",
+      "cik": "1083522",
+      "ticker": "JSDA",
+      "source": "SEC registrant table",
+      "match": 3,
+      "entity_id": ""
+     }
+    ],
+    "resolve_state": "IDENTIFIED_NO_DOMAIN",
+    "resolve_name": "JONES SODA CO.",
+    "resolve_website": "",
+    "resolve_source": "SEC registrant table",
+    "resolve_company_id": "1083522"
+   }
+  ]
+ },
+ {
+  "prospect_id": 15,
+  "tier": 1,
+  "name_as_listed": "Acceldata",
+  "probes": [
+   {
+    "query": "Acceldata",
+    "suggest_ms": 5.37,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Acceldata",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 16,
+  "tier": 1,
+  "name_as_listed": "Anomalo",
+  "probes": [
+   {
+    "query": "Anomalo",
+    "suggest_ms": 1.85,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Anomalo",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 17,
+  "tier": 1,
+  "name_as_listed": "Observe",
+  "probes": [
+   {
+    "query": "Observe",
+    "suggest_ms": 1.47,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Observe",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 18,
+  "tier": 1,
+  "name_as_listed": "Chronosphere",
+  "probes": [
+   {
+    "query": "Chronosphere",
+    "suggest_ms": 2.3,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Chronosphere",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 19,
+  "tier": 1,
+  "name_as_listed": "CrateDB",
+  "probes": [
+   {
+    "query": "CrateDB",
+    "suggest_ms": 2.22,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "CrateDB",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 20,
+  "tier": 1,
+  "name_as_listed": "SingleStore",
+  "probes": [
+   {
+    "query": "SingleStore",
+    "suggest_ms": 2.25,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "SingleStore",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 21,
+  "tier": 1,
+  "name_as_listed": "TigerGraph",
+  "probes": [
+   {
+    "query": "TigerGraph",
+    "suggest_ms": 1.69,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "TigerGraph",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 22,
+  "tier": 1,
+  "name_as_listed": "Neo4j",
+  "probes": [
+   {
+    "query": "Neo4j",
+    "suggest_ms": 2.54,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Neo4j",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 23,
+  "tier": 1,
+  "name_as_listed": "Arango",
+  "probes": [
+   {
+    "query": "Arango",
+    "suggest_ms": 2.08,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Arango",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 24,
+  "tier": 1,
+  "name_as_listed": "KX",
+  "probes": [
+   {
+    "query": "KX",
+    "suggest_ms": 1.33,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "KX",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 25,
+  "tier": 1,
+  "name_as_listed": "Tecton",
+  "probes": [
+   {
+    "query": "Tecton",
+    "suggest_ms": 4.16,
+    "suggestions": [
+     {
+      "legal_name": "Tectonic Metals Inc.",
+      "domain": "",
+      "cik": "1783432",
+      "ticker": "TETOF",
+      "source": "SEC registrant table",
+      "match": 1,
+      "entity_id": ""
+     },
+     {
+      "legal_name": "Tectonic Therapeutic, Inc.",
+      "domain": "",
+      "cik": "1681087",
+      "ticker": "TECX",
+      "source": "SEC registrant table",
+      "match": 1,
+      "entity_id": ""
+     }
+    ],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Tecton",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 26,
+  "tier": 2,
+  "name_as_listed": "Interos",
+  "probes": [
+   {
+    "query": "Interos",
+    "suggest_ms": 6.43,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Interos",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 27,
+  "tier": 2,
+  "name_as_listed": "Everstream Analytics",
+  "probes": [
+   {
+    "query": "Everstream Analytics",
+    "suggest_ms": 1.26,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Everstream Analytics",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 28,
+  "tier": 2,
+  "name_as_listed": "Resilinc",
+  "probes": [
+   {
+    "query": "Resilinc",
+    "suggest_ms": 3.82,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Resilinc",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 29,
+  "tier": 2,
+  "name_as_listed": "Altana",
+  "probes": [
+   {
+    "query": "Altana",
+    "suggest_ms": 2.22,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Altana",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 30,
+  "tier": 2,
+  "name_as_listed": "Exiger",
+  "probes": [
+   {
+    "query": "Exiger",
+    "suggest_ms": 1.6,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Exiger",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 31,
+  "tier": 2,
+  "name_as_listed": "Sayari",
+  "probes": [
+   {
+    "query": "Sayari",
+    "suggest_ms": 2.23,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Sayari",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 32,
+  "tier": 2,
+  "name_as_listed": "Kharon",
+  "probes": [
+   {
+    "query": "Kharon",
+    "suggest_ms": 1.41,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Kharon",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 33,
+  "tier": 2,
+  "name_as_listed": "Moody's",
+  "probes": [
+   {
+    "query": "Moody's",
+    "suggest_ms": 2.65,
+    "suggestions": [
+     {
+      "legal_name": "Moodys Corp",
+      "domain": "",
+      "cik": "1059556",
+      "ticker": "MCO",
+      "source": "SEC registrant table",
+      "match": 1,
+      "entity_id": ""
+     }
+    ],
+    "resolve_state": "IDENTIFIED_NO_DOMAIN",
+    "resolve_name": "MOODYS CORP /DE",
+    "resolve_website": "",
+    "resolve_source": "SEC registrant table",
+    "resolve_company_id": "1059556"
+   }
+  ]
+ },
+ {
+  "prospect_id": 34,
+  "tier": 2,
+  "name_as_listed": "S&P Global",
+  "probes": [
+   {
+    "query": "S&P Global",
+    "suggest_ms": 0.99,
+    "suggestions": [
+     {
+      "legal_name": "S&P Global Inc.",
+      "domain": "",
+      "cik": "64040",
+      "ticker": "SPGI",
+      "source": "SEC registrant table",
+      "match": 0,
+      "entity_id": ""
+     }
+    ],
+    "resolve_state": "IDENTIFIED_NO_DOMAIN",
+    "resolve_name": "S&P Global Inc.",
+    "resolve_website": "",
+    "resolve_source": "SEC registrant table",
+    "resolve_company_id": "64040"
+   }
+  ]
+ },
+ {
+  "prospect_id": 35,
+  "tier": 2,
+  "name_as_listed": "MSCI",
+  "probes": [
+   {
+    "query": "MSCI",
+    "suggest_ms": 1.66,
+    "suggestions": [
+     {
+      "legal_name": "MSCI Inc.",
+      "domain": "",
+      "cik": "1408198",
+      "ticker": "MSCI",
+      "source": "SEC registrant table",
+      "match": 0,
+      "entity_id": ""
+     }
+    ],
+    "resolve_state": "IDENTIFIED_NO_DOMAIN",
+    "resolve_name": "MSCI Inc.",
+    "resolve_website": "",
+    "resolve_source": "SEC registrant table",
+    "resolve_company_id": "1408198"
+   }
+  ]
+ },
+ {
+  "prospect_id": 36,
+  "tier": 2,
+  "name_as_listed": "FactSet",
+  "probes": [
+   {
+    "query": "FactSet",
+    "suggest_ms": 1.85,
+    "suggestions": [
+     {
+      "legal_name": "Factset Research Systems Inc",
+      "domain": "",
+      "cik": "1013237",
+      "ticker": "FDS",
+      "source": "SEC registrant table",
+      "match": 1,
+      "entity_id": ""
+     }
+    ],
+    "resolve_state": "IDENTIFIED_NO_DOMAIN",
+    "resolve_name": "FACTSET RESEARCH SYSTEMS INC",
+    "resolve_website": "",
+    "resolve_source": "SEC registrant table",
+    "resolve_company_id": "1013237"
+   }
+  ]
+ },
+ {
+  "prospect_id": 37,
+  "tier": 2,
+  "name_as_listed": "Morningstar",
+  "probes": [
+   {
+    "query": "Morningstar",
+    "suggest_ms": 2.76,
+    "suggestions": [
+     {
+      "legal_name": "Morningstar, Inc.",
+      "domain": "",
+      "cik": "1289419",
+      "ticker": "MORN",
+      "source": "SEC registrant table",
+      "match": 0,
+      "entity_id": ""
+     }
+    ],
+    "resolve_state": "IDENTIFIED_NO_DOMAIN",
+    "resolve_name": "Morningstar, Inc.",
+    "resolve_website": "",
+    "resolve_source": "SEC registrant table",
+    "resolve_company_id": "1289419"
+   }
+  ]
+ },
+ {
+  "prospect_id": 38,
+  "tier": 2,
+  "name_as_listed": "Enverus",
+  "probes": [
+   {
+    "query": "Enverus",
+    "suggest_ms": 3.24,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Enverus",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 39,
+  "tier": 2,
+  "name_as_listed": "Rystad Energy",
+  "probes": [
+   {
+    "query": "Rystad Energy",
+    "suggest_ms": 1.1,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Rystad Energy",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 40,
+  "tier": 2,
+  "name_as_listed": "Wood Mackenzie",
+  "probes": [
+   {
+    "query": "Wood Mackenzie",
+    "suggest_ms": 1.21,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Wood Mackenzie",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 41,
+  "tier": 2,
+  "name_as_listed": "Verisk",
+  "probes": [
+   {
+    "query": "Verisk",
+    "suggest_ms": 1.94,
+    "suggestions": [
+     {
+      "legal_name": "Verisk Analytics, Inc.",
+      "domain": "",
+      "cik": "1442145",
+      "ticker": "VRSK",
+      "source": "SEC registrant table",
+      "match": 1,
+      "entity_id": ""
+     }
+    ],
+    "resolve_state": "IDENTIFIED_NO_DOMAIN",
+    "resolve_name": "Verisk Analytics, Inc.",
+    "resolve_website": "",
+    "resolve_source": "SEC registrant table",
+    "resolve_company_id": "1442145"
+   }
+  ]
+ },
+ {
+  "prospect_id": 42,
+  "tier": 2,
+  "name_as_listed": "Jupiter Intelligence",
+  "probes": [
+   {
+    "query": "Jupiter Intelligence",
+    "suggest_ms": 1.07,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Jupiter Intelligence",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 43,
+  "tier": 2,
+  "name_as_listed": "Cervest",
+  "probes": [
+   {
+    "query": "Cervest",
+    "suggest_ms": 1.95,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Cervest",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 44,
+  "tier": 2,
+  "name_as_listed": "Watershed",
+  "probes": [
+   {
+    "query": "Watershed",
+    "suggest_ms": 1.82,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Watershed",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 45,
+  "tier": 2,
+  "name_as_listed": "Persefoni",
+  "probes": [
+   {
+    "query": "Persefoni",
+    "suggest_ms": 2.01,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Persefoni",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 46,
+  "tier": 2,
+  "name_as_listed": "Benchmark Gensuite",
+  "probes": [
+   {
+    "query": "Benchmark Gensuite",
+    "suggest_ms": 1.51,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Benchmark Gensuite",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 47,
+  "tier": 2,
+  "name_as_listed": "Cority",
+  "probes": [
+   {
+    "query": "Cority",
+    "suggest_ms": 3.84,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Cority",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 48,
+  "tier": 2,
+  "name_as_listed": "Assent",
+  "probes": [
+   {
+    "query": "Assent",
+    "suggest_ms": 2.36,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Assent",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 49,
+  "tier": 2,
+  "name_as_listed": "EcoVadis",
+  "probes": [
+   {
+    "query": "EcoVadis",
+    "suggest_ms": 1.67,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "EcoVadis",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 50,
+  "tier": 2,
+  "name_as_listed": "Dun & Bradstreet",
+  "probes": [
+   {
+    "query": "Dun & Bradstreet",
+    "suggest_ms": 1.14,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Dun & Bradstreet",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 51,
+  "tier": 3,
+  "name_as_listed": "Planful",
+  "probes": [
+   {
+    "query": "Planful",
+    "suggest_ms": 1.96,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Planful",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 52,
+  "tier": 3,
+  "name_as_listed": "Vena Solutions",
+  "probes": [
+   {
+    "query": "Vena Solutions",
+    "suggest_ms": 1.43,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Vena Solutions",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 53,
+  "tier": 3,
+  "name_as_listed": "Cube",
+  "probes": [
+   {
+    "query": "Cube",
+    "suggest_ms": 1.62,
+    "suggestions": [
+     {
+      "legal_name": "CubeSmart",
+      "domain": "",
+      "cik": "1298675",
+      "ticker": "CUBE",
+      "source": "SEC registrant table",
+      "match": 0,
+      "entity_id": ""
+     }
+    ],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Cube",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 54,
+  "tier": 3,
+  "name_as_listed": "Mosaic Tech",
+  "probes": [
+   {
+    "query": "Mosaic Tech",
+    "suggest_ms": 1.89,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Mosaic Tech",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 55,
+  "tier": 3,
+  "name_as_listed": "Aleph",
+  "probes": [
+   {
+    "query": "Aleph",
+    "suggest_ms": 2.26,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Aleph",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 56,
+  "tier": 3,
+  "name_as_listed": "Pigment",
+  "probes": [
+   {
+    "query": "Pigment",
+    "suggest_ms": 1.8,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Pigment",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 57,
+  "tier": 3,
+  "name_as_listed": "Anaplan",
+  "probes": [
+   {
+    "query": "Anaplan",
+    "suggest_ms": 1.8,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Anaplan",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 58,
+  "tier": 3,
+  "name_as_listed": "Workday",
+  "probes": [
+   {
+    "query": "Workday",
+    "suggest_ms": 1.66,
+    "suggestions": [
+     {
+      "legal_name": "Workday, Inc.",
+      "domain": "workday.com",
+      "cik": "1327811",
+      "ticker": "WDAY",
+      "source": "validation manifest",
+      "match": 0,
+      "entity_id": "workday"
+     }
+    ],
+    "resolve_state": "HIGH_CONFIDENCE_MATCH",
+    "resolve_name": "Workday, Inc.",
+    "resolve_website": "https://workday.com",
+    "resolve_source": "validation manifest",
+    "resolve_company_id": "workday"
+   }
+  ]
+ },
+ {
+  "prospect_id": 59,
+  "tier": 3,
+  "name_as_listed": "Dayforce",
+  "probes": [
+   {
+    "query": "Dayforce",
+    "suggest_ms": 1.88,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Dayforce",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 60,
+  "tier": 3,
+  "name_as_listed": "Paycor",
+  "probes": [
+   {
+    "query": "Paycor",
+    "suggest_ms": 2.81,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Paycor",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 61,
+  "tier": 3,
+  "name_as_listed": "Rippling",
+  "probes": [
+   {
+    "query": "Rippling",
+    "suggest_ms": 1.87,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Rippling",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 62,
+  "tier": 3,
+  "name_as_listed": "Deel",
+  "probes": [
+   {
+    "query": "Deel",
+    "suggest_ms": 2.26,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Deel",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 63,
+  "tier": 3,
+  "name_as_listed": "Gusto",
+  "probes": [
+   {
+    "query": "Gusto",
+    "suggest_ms": 1.53,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Gusto",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 64,
+  "tier": 3,
+  "name_as_listed": "Ramp",
+  "probes": [
+   {
+    "query": "Ramp",
+    "suggest_ms": 1.95,
+    "suggestions": [
+     {
+      "legal_name": "LiveRamp Holdings, Inc.",
+      "domain": "",
+      "cik": "733269",
+      "ticker": "RAMP",
+      "source": "SEC registrant table",
+      "match": 0,
+      "entity_id": ""
+     }
+    ],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Ramp",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 65,
+  "tier": 3,
+  "name_as_listed": "Brex",
+  "probes": [
+   {
+    "query": "Brex",
+    "suggest_ms": 2.4,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Brex",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 66,
+  "tier": 3,
+  "name_as_listed": "BILL",
+  "probes": [
+   {
+    "query": "BILL",
+    "suggest_ms": 2.74,
+    "suggestions": [
+     {
+      "legal_name": "BILL Holdings, Inc.",
+      "domain": "",
+      "cik": "1786352",
+      "ticker": "BILL",
+      "source": "SEC registrant table",
+      "match": 0,
+      "entity_id": ""
+     },
+     {
+      "legal_name": "BillionToOne, Inc.",
+      "domain": "",
+      "cik": "2070849",
+      "ticker": "BLLN",
+      "source": "SEC registrant table",
+      "match": 1,
+      "entity_id": ""
+     }
+    ],
+    "resolve_state": "IDENTIFIED_NO_DOMAIN",
+    "resolve_name": "BILL Holdings, Inc.",
+    "resolve_website": "",
+    "resolve_source": "SEC registrant table",
+    "resolve_company_id": "1786352"
+   }
+  ]
+ },
+ {
+  "prospect_id": 67,
+  "tier": 3,
+  "name_as_listed": "FloQast",
+  "probes": [
+   {
+    "query": "FloQast",
+    "suggest_ms": 1.89,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "FloQast",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 68,
+  "tier": 3,
+  "name_as_listed": "BlackLine",
+  "probes": [
+   {
+    "query": "BlackLine",
+    "suggest_ms": 2.18,
+    "suggestions": [
+     {
+      "legal_name": "Blackline, Inc.",
+      "domain": "",
+      "cik": "1666134",
+      "ticker": "BL",
+      "source": "SEC registrant table",
+      "match": 0,
+      "entity_id": ""
+     }
+    ],
+    "resolve_state": "IDENTIFIED_NO_DOMAIN",
+    "resolve_name": "BLACKLINE, INC.",
+    "resolve_website": "",
+    "resolve_source": "SEC registrant table",
+    "resolve_company_id": "1666134"
+   }
+  ]
+ },
+ {
+  "prospect_id": 69,
+  "tier": 3,
+  "name_as_listed": "Datarails",
+  "probes": [
+   {
+    "query": "Datarails",
+    "suggest_ms": 1.81,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Datarails",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 70,
+  "tier": 3,
+  "name_as_listed": "Centage",
+  "probes": [
+   {
+    "query": "Centage",
+    "suggest_ms": 1.99,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Centage",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 71,
+  "tier": 3,
+  "name_as_listed": "Acumatica",
+  "probes": [
+   {
+    "query": "Acumatica",
+    "suggest_ms": 5.57,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Acumatica",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 72,
+  "tier": 3,
+  "name_as_listed": "Epicor",
+  "probes": [
+   {
+    "query": "Epicor",
+    "suggest_ms": 1.56,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Epicor",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 73,
+  "tier": 3,
+  "name_as_listed": "Plex (Rockwell Automation)",
+  "probes": [
+   {
+    "query": "Plex (Rockwell Automation)",
+    "suggest_ms": 1.55,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Plex (Rockwell Automation)",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 74,
+  "tier": 3,
+  "name_as_listed": "IFS North America",
+  "probes": [
+   {
+    "query": "IFS North America",
+    "suggest_ms": 1.1,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "IFS North America",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 75,
+  "tier": 3,
+  "name_as_listed": "QAD",
+  "probes": [
+   {
+    "query": "QAD",
+    "suggest_ms": 1.44,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "QAD",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 76,
+  "tier": 4,
+  "name_as_listed": "Auvik",
+  "probes": [
+   {
+    "query": "Auvik",
+    "suggest_ms": 1.73,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Auvik",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 77,
+  "tier": 4,
+  "name_as_listed": "Kaseya",
+  "probes": [
+   {
+    "query": "Kaseya",
+    "suggest_ms": 1.64,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Kaseya",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 78,
+  "tier": 4,
+  "name_as_listed": "ConnectWise",
+  "probes": [
+   {
+    "query": "ConnectWise",
+    "suggest_ms": 3.94,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "ConnectWise",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 79,
+  "tier": 4,
+  "name_as_listed": "N-able",
+  "probes": [
+   {
+    "query": "N-able",
+    "suggest_ms": 1.41,
+    "suggestions": [
+     {
+      "legal_name": "N-able, Inc.",
+      "domain": "",
+      "cik": "1834488",
+      "ticker": "NABL",
+      "source": "SEC registrant table",
+      "match": 0,
+      "entity_id": ""
+     }
+    ],
+    "resolve_state": "IDENTIFIED_NO_DOMAIN",
+    "resolve_name": "N-able, Inc.",
+    "resolve_website": "",
+    "resolve_source": "SEC registrant table",
+    "resolve_company_id": "1834488"
+   }
+  ]
+ },
+ {
+  "prospect_id": 80,
+  "tier": 4,
+  "name_as_listed": "Datto",
+  "probes": [
+   {
+    "query": "Datto",
+    "suggest_ms": 1.72,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Datto",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 81,
+  "tier": 4,
+  "name_as_listed": "Barracuda Networks",
+  "probes": [
+   {
+    "query": "Barracuda Networks",
+    "suggest_ms": 2.72,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Barracuda Networks",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 82,
+  "tier": 4,
+  "name_as_listed": "Arctic Wolf Networks' peer, eSentire",
+  "probes": [
+   {
+    "query": "Arctic Wolf Networks' peer, eSentire",
+    "suggest_ms": 1.89,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Arctic Wolf Networks' peer, eSentire",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 83,
+  "tier": 4,
+  "name_as_listed": "Blackpoint Cyber",
+  "probes": [
+   {
+    "query": "Blackpoint Cyber",
+    "suggest_ms": 1.54,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Blackpoint Cyber",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 84,
+  "tier": 4,
+  "name_as_listed": "Red Canary",
+  "probes": [
+   {
+    "query": "Red Canary",
+    "suggest_ms": 2.57,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Red Canary",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 85,
+  "tier": 4,
+  "name_as_listed": "ReliaQuest",
+  "probes": [
+   {
+    "query": "ReliaQuest",
+    "suggest_ms": 3.91,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "ReliaQuest",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 86,
+  "tier": 4,
+  "name_as_listed": "Tanium",
+  "probes": [
+   {
+    "query": "Tanium",
+    "suggest_ms": 1.95,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Tanium",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 87,
+  "tier": 4,
+  "name_as_listed": "Lansweeper",
+  "probes": [
+   {
+    "query": "Lansweeper",
+    "suggest_ms": 2.27,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Lansweeper",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 88,
+  "tier": 4,
+  "name_as_listed": "Torq",
+  "probes": [
+   {
+    "query": "Torq",
+    "suggest_ms": 1.81,
+    "suggestions": [
+     {
+      "legal_name": "Torq Resources Inc.",
+      "domain": "",
+      "cik": "1406944",
+      "ticker": "TRBMF",
+      "source": "SEC registrant table",
+      "match": 1,
+      "entity_id": ""
+     }
+    ],
+    "resolve_state": "IDENTIFIED_NO_DOMAIN",
+    "resolve_name": "TORQ RESOURCES INC.",
+    "resolve_website": "",
+    "resolve_source": "SEC registrant table",
+    "resolve_company_id": "1406944"
+   }
+  ]
+ },
+ {
+  "prospect_id": 89,
+  "tier": 4,
+  "name_as_listed": "Tines",
+  "probes": [
+   {
+    "query": "Tines",
+    "suggest_ms": 1.67,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Tines",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 90,
+  "tier": 4,
+  "name_as_listed": "Swimlane",
+  "probes": [
+   {
+    "query": "Swimlane",
+    "suggest_ms": 1.58,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Swimlane",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 91,
+  "tier": 4,
+  "name_as_listed": "Pax8",
+  "probes": [
+   {
+    "query": "Pax8",
+    "suggest_ms": 2.71,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Pax8",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 92,
+  "tier": 4,
+  "name_as_listed": "Sherweb",
+  "probes": [
+   {
+    "query": "Sherweb",
+    "suggest_ms": 1.92,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Sherweb",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 93,
+  "tier": 4,
+  "name_as_listed": "Softchoice",
+  "probes": [
+   {
+    "query": "Softchoice",
+    "suggest_ms": 2.63,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Softchoice",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 94,
+  "tier": 4,
+  "name_as_listed": "CDW",
+  "probes": [
+   {
+    "query": "CDW",
+    "suggest_ms": 1.58,
+    "suggestions": [
+     {
+      "legal_name": "CDW Corp",
+      "domain": "",
+      "cik": "1402057",
+      "ticker": "CDW",
+      "source": "SEC registrant table",
+      "match": 0,
+      "entity_id": ""
+     }
+    ],
+    "resolve_state": "IDENTIFIED_NO_DOMAIN",
+    "resolve_name": "CDW Corp",
+    "resolve_website": "",
+    "resolve_source": "SEC registrant table",
+    "resolve_company_id": "1402057"
+   }
+  ]
+ },
+ {
+  "prospect_id": 95,
+  "tier": 4,
+  "name_as_listed": "Presidio",
+  "probes": [
+   {
+    "query": "Presidio",
+    "suggest_ms": 2.86,
+    "suggestions": [
+     {
+      "legal_name": "PRESIDIO PRODUCTION Co",
+      "domain": "",
+      "cik": "2083125",
+      "ticker": "FTW",
+      "source": "SEC registrant table",
+      "match": 1,
+      "entity_id": ""
+     },
+     {
+      "legal_name": "Presidio Property Trust, Inc.",
+      "domain": "",
+      "cik": "1080657",
+      "ticker": "SQFT",
+      "source": "SEC registrant table",
+      "match": 1,
+      "entity_id": ""
+     }
+    ],
+    "resolve_state": "IDENTIFIED_NO_DOMAIN",
+    "resolve_name": "PRESIDIO PRODUCTION Co",
+    "resolve_website": "",
+    "resolve_source": "SEC registrant table",
+    "resolve_company_id": "2083125"
+   }
+  ]
+ },
+ {
+  "prospect_id": 96,
+  "tier": 4,
+  "name_as_listed": "Trace3",
+  "probes": [
+   {
+    "query": "Trace3",
+    "suggest_ms": 3.98,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Trace3",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 97,
+  "tier": 4,
+  "name_as_listed": "World Wide Technology",
+  "probes": [
+   {
+    "query": "World Wide Technology",
+    "suggest_ms": 1.29,
+    "suggestions": [],
+    "resolve_state": "IDENTIFIED_NO_DOMAIN",
+    "resolve_name": "WOLVERINE WORLD WIDE INC /DE",
+    "resolve_website": "",
+    "resolve_source": "SEC registrant table",
+    "resolve_company_id": "110471"
+   }
+  ]
+ },
+ {
+  "prospect_id": 98,
+  "tier": 4,
+  "name_as_listed": "Ahead",
+  "probes": [
+   {
+    "query": "Ahead",
+    "suggest_ms": 1.6,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Ahead",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 99,
+  "tier": 4,
+  "name_as_listed": "Onica / Rackspace Technology",
+  "probes": [
+   {
+    "query": "Onica / Rackspace Technology",
+    "suggest_ms": 1.47,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Onica / Rackspace Technology",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ },
+ {
+  "prospect_id": 100,
+  "tier": 4,
+  "name_as_listed": "Converge Technology Solutions",
+  "probes": [
+   {
+    "query": "Converge Technology Solutions",
+    "suggest_ms": 3.05,
+    "suggestions": [],
+    "resolve_state": "COMPANY_NOT_FOUND",
+    "resolve_name": "Converge Technology Solutions",
+    "resolve_website": "",
+    "resolve_source": "none",
+    "resolve_company_id": ""
+   }
+  ]
+ }
+]

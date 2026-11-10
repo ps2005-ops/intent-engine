@@ -1,0 +1,285 @@
+"""A metric that cannot report the negative is not evidence.
+
+THE DEFECT THESE PIN, MEASURED ON ALL 59 LIVE DOSSIERS
+------------------------------------------------------
+25 were available and every one graded MEANINGFUL or DECISION_CHANGING —
+sixteen the latter, nine the former, and NOT ONE `NONE`.
+
+The cause is not a threshold. The production call site builds its BEFORE as
+`build_context(strategic=None)`, whose `semantic_state` is EMPTY on all five
+fields. Every field therefore goes empty → populated, every field counts as
+changed, and an available dossier is structurally incapable of grading NONE.
+
+So the metric answered "was a dossier attached", which was already known, and
+read 100% forever — the failure this module's own docstring predicted by
+name. The founder question is whether the NEW learning changed anything, so
+the BEFORE has to be the previous revision of the same dossier.
+"""
+from __future__ import annotations
+
+import pathlib
+
+import pytest
+
+from intent_engine.external_intel import decision_impact as di
+
+STRATEGIC = pathlib.Path("/Users/prathamsharma/intent-engine-market/reports/"
+                         "market/strategic")
+
+
+def state(**fields):
+    base = {field: [] for field in di.IMPACT_TYPES}
+    base.update(fields)
+    return base
+
+
+# --- the three outcomes -----------------------------------------------------
+
+def test_no_prior_revision_is_not_an_impact(tmp_path):
+    """FIRST_OBSERVATION is neither a change nor a non-change."""
+    got = di.assess_against_prior(
+        tmp_path, analysis_id="a1", company_id="acme",
+        after=state(ASSUMPTION=["Market evidence supports rising demand"]),
+        provenance=["ev_1"])
+    assert got.materiality == di.FIRST_OBSERVATION
+    assert "nothing for this learning to change" in got.reason
+
+
+def test_an_identical_dossier_grades_none(tmp_path):
+    """The reading the metric could not previously produce."""
+    after = state(ASSUMPTION=["Market evidence supports rising demand"])
+    di.record_revision(tmp_path, company_id="acme", state=after)
+    got = di.assess_against_prior(tmp_path, analysis_id="a2",
+                                  company_id="acme", after=after,
+                                  provenance=["ev_1"])
+    assert got.materiality == di.NONE
+    assert got.changed is False
+
+
+def test_a_changed_dossier_still_grades_an_impact(tmp_path):
+    """The fix must not simply refuse everything."""
+    di.record_revision(
+        tmp_path, company_id="acme",
+        state=state(ASSUMPTION=["Market evidence supports rising demand"]))
+    got = di.assess_against_prior(
+        tmp_path, analysis_id="a2", company_id="acme",
+        after=state(ASSUMPTION=["Market evidence supports falling demand"],
+                    BOUNDED_CONCLUSION=["one period is not a trend"]),
+        provenance=["ev_2"])
+    assert got.materiality in (di.MEANINGFUL, di.DECISION_CHANGING)
+    assert got.changed is True
+
+
+# --- the store --------------------------------------------------------------
+
+def test_an_unchanged_revision_is_not_appended_twice(tmp_path):
+    after = state(ASSUMPTION=["a"])
+    assert di.record_revision(tmp_path, company_id="acme", state=after) is True
+    assert di.record_revision(tmp_path, company_id="acme", state=after) is False
+
+
+def test_a_changed_revision_is_appended(tmp_path):
+    assert di.record_revision(tmp_path, company_id="acme",
+                              state=state(ASSUMPTION=["a"])) is True
+    assert di.record_revision(tmp_path, company_id="acme",
+                              state=state(ASSUMPTION=["b"])) is True
+
+
+def test_the_revision_key_is_content_addressed():
+    assert di.revision_key(state(ASSUMPTION=["a"])) == \
+        di.revision_key(state(ASSUMPTION=["a"]))
+    assert di.revision_key(state(ASSUMPTION=["a"])) != \
+        di.revision_key(state(ASSUMPTION=["b"]))
+
+
+def test_a_revision_needs_the_company_it_belongs_to(tmp_path):
+    with pytest.raises(ValueError, match="company"):
+        di.record_revision(tmp_path, company_id="", state=state())
+
+
+# --- non-impacts must be persisted, or the rate has no denominator ----------
+
+def test_a_none_impact_is_recorded_too(tmp_path):
+    """The production receipt records an impact only `if impact.changed`,
+    which makes the file a success log a rate cannot be taken over."""
+    after = state(ASSUMPTION=["a"])
+    di.record_revision(tmp_path, company_id="acme", state=after)
+    got = di.assess_against_prior(tmp_path, analysis_id="a2",
+                                  company_id="acme", after=after,
+                                  provenance=["ev_1"])
+    assert got.materiality == di.NONE
+    assert di.record_impact(tmp_path, impact=got) is True
+    rows = di.load_impacts(tmp_path)
+    assert len(rows) == 1
+    assert rows[0]["materiality"] == di.NONE
+
+
+def test_the_same_comparison_is_not_recorded_twice(tmp_path):
+    after = state(ASSUMPTION=["a"])
+    di.record_revision(tmp_path, company_id="acme", state=after)
+    got = di.assess_against_prior(tmp_path, analysis_id="a2",
+                                  company_id="acme", after=after)
+    assert di.record_impact(tmp_path, impact=got) is True
+    assert di.record_impact(tmp_path, impact=got) is False
+
+
+# --- against the real corpus ------------------------------------------------
+
+@pytest.mark.skipif(not STRATEGIC.exists(), reason="no live dossiers")
+def test_the_live_corpus_grades_none_on_a_second_identical_pass(tmp_path):
+    """The measured defect and its repair, on production's own dossiers.
+
+    First pass: every available dossier is a FIRST_OBSERVATION. Second pass
+    over the SAME files: every one grades NONE. Before this change the same
+    two passes both graded MEANINGFUL or DECISION_CHANGING, 25 out of 25.
+    """
+    from intent_engine.external_intel import pack as ep
+    from intent_engine.external_intel import strategic_contract as sc
+
+    states = []
+    for path in sorted(STRATEGIC.glob("*.json")):
+        try:
+            intel = sc.load(path, today="2026-08-09")
+        except Exception:                                  # noqa: BLE001
+            continue
+        if not getattr(intel, "available", False):
+            continue
+        context = ep.build_context(strategic=intel, as_of="2026-08-09")
+        states.append((path.stem, di.semantic_state(context),
+                       di.evidence_of(context)))
+    if not states:                                         # pragma: no cover
+        pytest.skip("no available dossier in the live corpus")
+
+    first = set()
+    for company, after, provenance in states:
+        first.add(di.assess_against_prior(
+            tmp_path, analysis_id="p1", company_id=company, after=after,
+            provenance=provenance).materiality)
+        di.record_revision(tmp_path, company_id=company, state=after)
+    assert first == {di.FIRST_OBSERVATION}
+
+    second = set()
+    for company, after, provenance in states:
+        second.add(di.assess_against_prior(
+            tmp_path, analysis_id="p2", company_id=company, after=after,
+            provenance=provenance).materiality)
+    assert second == {di.NONE}, (
+        "an unchanged dossier must grade NONE; anything else means the "
+        "comparison is measuring the dossier's presence again")
+
+
+# --- identity walls ---------------------------------------------------------
+
+def test_another_companys_prior_is_not_a_prior(tmp_path):
+    """A comparison is only meaningful against THIS company's own history."""
+    di.record_revision(tmp_path, company_id="acme",
+                       state=state(ASSUMPTION=["acme reading"]))
+    got = di.assess_against_prior(
+        tmp_path, analysis_id="a1", company_id="globex",
+        after=state(ASSUMPTION=["globex reading"]), provenance=["ev_1"])
+    assert got.materiality == di.FIRST_OBSERVATION, (
+        "globex has no prior of its own; borrowing acme's would compare two "
+        "different companies and grade the difference as learning")
+
+
+def test_an_unprovenanced_change_gets_no_credit(tmp_path):
+    """A field that moved with no market evidence behind it is not the
+    market engine's doing — it could be a different retrieval or sample."""
+    di.record_revision(tmp_path, company_id="acme",
+                       state=state(ASSUMPTION=["old reading"]))
+    got = di.assess_against_prior(
+        tmp_path, analysis_id="a2", company_id="acme",
+        after=state(ASSUMPTION=["new reading"],
+                    BOUNDED_CONCLUSION=["one period is not a trend"]),
+        provenance=[])
+    assert got.materiality == di.NONE
+    assert "unprovenanced" in got.reason
+
+
+def test_a_wording_only_change_is_not_meaningful(tmp_path):
+    """Whitespace and case are not decisions."""
+    di.record_revision(tmp_path, company_id="acme",
+                       state=state(ASSUMPTION=["Market evidence supports X"]))
+    got = di.assess_against_prior(
+        tmp_path, analysis_id="a2", company_id="acme",
+        after=state(ASSUMPTION=["  market   evidence supports x  "]),
+        provenance=["ev_1"])
+    assert got.materiality == di.NONE
+
+
+# --- what changed your mind: three states, three answers --------------------
+
+class _Intel:
+    def __init__(self, history=None, revisions=()):
+        self.thesis_history = history
+        self.thesis_revisions = revisions
+
+
+def moved_revision(**kwargs) -> dict:
+    row = {"revision_id": "rev_2", "thesis_id": "th_1",
+           "transition": "WEAKENED", "changed_at": "2026-08-09",
+           "previous_standing": "SUPPORTED", "new_standing": "CONTESTED",
+           "reason": "two filings disagreed",
+           "knowledge_effect_ids": ["ke_1"], "triggering_evidence": ["ev_1"]}
+    row.update(kwargs)
+    return row
+
+
+def test_missing_history_is_not_no_movement():
+    """The defect this whole transport exists to close.
+
+    A producer that sends no history at all must not be read as one
+    reporting a quiet thesis. Those need opposite answers and an older
+    producer would have produced the confident wrong one.
+    """
+    got = di.what_changed_your_mind(_Intel(history=None))
+    assert got["state"] == di.HISTORY_UNAVAILABLE
+    assert "not enough revision history" in got["answer"]
+    assert got["supported"] is False
+
+
+def test_created_only_says_nothing_has_changed_it():
+    got = di.what_changed_your_mind(
+        _Intel(history={"status": di.HISTORY_AVAILABLE_NO_MOVEMENT},
+               revisions=({"transition": "CREATED"},)))
+    assert got["state"] == di.HISTORY_AVAILABLE_NO_MOVEMENT
+    assert "Nothing has changed this view yet" in got["answer"]
+    assert got["supported"] is True
+
+
+def test_a_real_transition_is_answered_from_the_record():
+    got = di.what_changed_your_mind(
+        _Intel(history={"status": di.HISTORY_AVAILABLE_MOVED},
+               revisions=(moved_revision(),)))
+    assert got["state"] == di.HISTORY_AVAILABLE_MOVED
+    assert "SUPPORTED to CONTESTED" in got["answer"]
+    assert got["effects"] == ["ke_1"]
+    assert got["evidence"] == ["ev_1"]
+    assert got["supported"] is True
+
+
+def test_a_transition_with_no_cause_is_not_a_supported_answer():
+    """The record says the view moved and cannot say what moved it."""
+    got = di.what_changed_your_mind(
+        _Intel(history={"status": di.HISTORY_AVAILABLE_MOVED},
+               revisions=(moved_revision(knowledge_effect_ids=[],
+                                         triggering_evidence=[]),)))
+    assert got["supported"] is False
+    assert "does not name the evidence" in got["answer"]
+
+
+def test_an_unknown_status_is_treated_as_unavailable():
+    got = di.what_changed_your_mind(_Intel(history={"status": "WHATEVER"}))
+    assert got["state"] == di.HISTORY_UNAVAILABLE
+
+
+def test_the_latest_transition_wins():
+    got = di.what_changed_your_mind(
+        _Intel(history={"status": di.HISTORY_AVAILABLE_MOVED},
+               revisions=(moved_revision(changed_at="2026-07-01",
+                                         reason="older"),
+                          moved_revision(revision_id="rev_3",
+                                         changed_at="2026-08-09",
+                                         reason="newer"))))
+    assert "newer" in got["answer"]
+    assert got["revisions"] == ["rev_3"]

@@ -1,0 +1,1280 @@
+{
+  "live_commit": "807a414361b0fbc1999b4595e875c67e2a20524a",
+  "companies": [
+    "Highspot",
+    "BigID",
+    "Cyera",
+    "Veeam",
+    "Druva",
+    "Slalom",
+    "Sigma Computing",
+    "ZoomInfo",
+    "Point B"
+  ],
+  "collapse_threshold": 0.92,
+  "inspect_threshold": 0.75,
+  "collapses": 2,
+  "inspect": 13,
+  "pairs": [
+    {
+      "left": "Highspot",
+      "right": "BigID",
+      "same_lens": false,
+      "lens": [
+        "revenue_gtm",
+        "data_security_governance"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.384,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.375,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.74,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.674,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.263,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.329,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Highspot",
+      "right": "Cyera",
+      "same_lens": false,
+      "lens": [
+        "revenue_gtm",
+        "data_security_governance"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.262,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.358,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.505,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.706,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.323,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.329,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Highspot",
+      "right": "Veeam",
+      "same_lens": false,
+      "lens": [
+        "revenue_gtm",
+        "enterprise_data_ai"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.385,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.366,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.732,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.649,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.243,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.909,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Highspot",
+      "right": "Druva",
+      "same_lens": false,
+      "lens": [
+        "revenue_gtm",
+        "enterprise_data_ai"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.27,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.347,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.491,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.707,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.09,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.909,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Highspot",
+      "right": "Slalom",
+      "same_lens": false,
+      "lens": [
+        "revenue_gtm",
+        "consulting_portfolio"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.302,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.337,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.64,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.659,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.143,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.914,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Highspot",
+      "right": "Sigma Computing",
+      "same_lens": false,
+      "lens": [
+        "revenue_gtm",
+        "data_infrastructure"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.38,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.334,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.507,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.668,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.07,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.912,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Highspot",
+      "right": "ZoomInfo",
+      "same_lens": true,
+      "lens": [
+        "revenue_gtm",
+        "revenue_gtm"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.362,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.797,
+          "verdict": "INSPECT"
+        },
+        "chain": {
+          "ratio": 0.542,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.687,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.185,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 1.0,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Highspot",
+      "right": "Point B",
+      "same_lens": false,
+      "lens": [
+        "revenue_gtm",
+        ""
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.041,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.007,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.008,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.098,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.055,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.948,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "BigID",
+      "right": "Cyera",
+      "same_lens": true,
+      "lens": [
+        "data_security_governance",
+        "data_security_governance"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.599,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.857,
+          "verdict": "INSPECT"
+        },
+        "chain": {
+          "ratio": 0.548,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.939,
+          "verdict": "COLLAPSE"
+        },
+        "lens": {
+          "ratio": 0.441,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 1.0,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "BigID",
+      "right": "Veeam",
+      "same_lens": false,
+      "lens": [
+        "data_security_governance",
+        "enterprise_data_ai"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.405,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.456,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.749,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.677,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.345,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.918,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "BigID",
+      "right": "Druva",
+      "same_lens": false,
+      "lens": [
+        "data_security_governance",
+        "enterprise_data_ai"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.281,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.438,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.52,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.738,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.13,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.918,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "BigID",
+      "right": "Slalom",
+      "same_lens": false,
+      "lens": [
+        "data_security_governance",
+        "consulting_portfolio"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.496,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.445,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.662,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.687,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.192,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.927,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "BigID",
+      "right": "Sigma Computing",
+      "same_lens": false,
+      "lens": [
+        "data_security_governance",
+        "data_infrastructure"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.387,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.514,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.522,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.805,
+          "verdict": "INSPECT"
+        },
+        "lens": {
+          "ratio": 0.179,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.921,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "BigID",
+      "right": "ZoomInfo",
+      "same_lens": false,
+      "lens": [
+        "data_security_governance",
+        "revenue_gtm"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.158,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.446,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.537,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.665,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.076,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.924,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "BigID",
+      "right": "Point B",
+      "same_lens": false,
+      "lens": [
+        "data_security_governance",
+        ""
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.045,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.008,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.008,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.117,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.066,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.956,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Cyera",
+      "right": "Veeam",
+      "same_lens": false,
+      "lens": [
+        "data_security_governance",
+        "enterprise_data_ai"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.328,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.448,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.663,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.814,
+          "verdict": "INSPECT"
+        },
+        "lens": {
+          "ratio": 0.317,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.918,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Cyera",
+      "right": "Druva",
+      "same_lens": false,
+      "lens": [
+        "data_security_governance",
+        "enterprise_data_ai"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.513,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.641,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.558,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.927,
+          "verdict": "COLLAPSE"
+        },
+        "lens": {
+          "ratio": 0.141,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.918,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Cyera",
+      "right": "Slalom",
+      "same_lens": false,
+      "lens": [
+        "data_security_governance",
+        "consulting_portfolio"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.462,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.44,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.67,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.833,
+          "verdict": "INSPECT"
+        },
+        "lens": {
+          "ratio": 0.361,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.927,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Cyera",
+      "right": "Sigma Computing",
+      "same_lens": false,
+      "lens": [
+        "data_security_governance",
+        "data_infrastructure"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.328,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.505,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.503,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.875,
+          "verdict": "INSPECT"
+        },
+        "lens": {
+          "ratio": 0.067,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.921,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Cyera",
+      "right": "ZoomInfo",
+      "same_lens": false,
+      "lens": [
+        "data_security_governance",
+        "revenue_gtm"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.186,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.437,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.519,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.778,
+          "verdict": "INSPECT"
+        },
+        "lens": {
+          "ratio": 0.104,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.924,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Cyera",
+      "right": "Point B",
+      "same_lens": false,
+      "lens": [
+        "data_security_governance",
+        ""
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.06,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.009,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.008,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.11,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.074,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.956,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Veeam",
+      "right": "Druva",
+      "same_lens": true,
+      "lens": [
+        "enterprise_data_ai",
+        "enterprise_data_ai"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.62,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.837,
+          "verdict": "INSPECT"
+        },
+        "chain": {
+          "ratio": 0.552,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.878,
+          "verdict": "INSPECT"
+        },
+        "lens": {
+          "ratio": 0.331,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 1.0,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Veeam",
+      "right": "Slalom",
+      "same_lens": false,
+      "lens": [
+        "enterprise_data_ai",
+        "consulting_portfolio"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.488,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.541,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.696,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.741,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.222,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.91,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Veeam",
+      "right": "Sigma Computing",
+      "same_lens": false,
+      "lens": [
+        "enterprise_data_ai",
+        "data_infrastructure"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.581,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.379,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.627,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.668,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.338,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.914,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Veeam",
+      "right": "ZoomInfo",
+      "same_lens": false,
+      "lens": [
+        "enterprise_data_ai",
+        "revenue_gtm"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.395,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.523,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.628,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.715,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.112,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.909,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Veeam",
+      "right": "Point B",
+      "same_lens": false,
+      "lens": [
+        "enterprise_data_ai",
+        ""
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.042,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.008,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.008,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.099,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.113,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.942,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Druva",
+      "right": "Slalom",
+      "same_lens": false,
+      "lens": [
+        "enterprise_data_ai",
+        "consulting_portfolio"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.471,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.418,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.655,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.819,
+          "verdict": "INSPECT"
+        },
+        "lens": {
+          "ratio": 0.289,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.91,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Druva",
+      "right": "Sigma Computing",
+      "same_lens": false,
+      "lens": [
+        "enterprise_data_ai",
+        "data_infrastructure"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.56,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.39,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.552,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.862,
+          "verdict": "INSPECT"
+        },
+        "lens": {
+          "ratio": 0.139,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.914,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Druva",
+      "right": "ZoomInfo",
+      "same_lens": false,
+      "lens": [
+        "enterprise_data_ai",
+        "revenue_gtm"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.412,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.505,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.507,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.845,
+          "verdict": "INSPECT"
+        },
+        "lens": {
+          "ratio": 0.135,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.909,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Druva",
+      "right": "Point B",
+      "same_lens": false,
+      "lens": [
+        "enterprise_data_ai",
+        ""
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.058,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.008,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.008,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.11,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.123,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.942,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Slalom",
+      "right": "Sigma Computing",
+      "same_lens": false,
+      "lens": [
+        "consulting_portfolio",
+        "data_infrastructure"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.303,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.354,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.586,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.679,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.133,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.913,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Slalom",
+      "right": "ZoomInfo",
+      "same_lens": false,
+      "lens": [
+        "consulting_portfolio",
+        "revenue_gtm"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.221,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.361,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.516,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.654,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.084,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.914,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Slalom",
+      "right": "Point B",
+      "same_lens": false,
+      "lens": [
+        "consulting_portfolio",
+        ""
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.052,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.007,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.008,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.1,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.063,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.947,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Sigma Computing",
+      "right": "ZoomInfo",
+      "same_lens": false,
+      "lens": [
+        "data_infrastructure",
+        "revenue_gtm"
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.186,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.346,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.511,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.818,
+          "verdict": "INSPECT"
+        },
+        "lens": {
+          "ratio": 0.102,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.912,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "Sigma Computing",
+      "right": "Point B",
+      "same_lens": false,
+      "lens": [
+        "data_infrastructure",
+        ""
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.043,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.007,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.008,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.101,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.073,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.945,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    },
+    {
+      "left": "ZoomInfo",
+      "right": "Point B",
+      "same_lens": false,
+      "lens": [
+        "revenue_gtm",
+        ""
+      ],
+      "aspects": {
+        "why_this_company": {
+          "ratio": 0.043,
+          "verdict": "DISTINCT"
+        },
+        "decision_or_domains": {
+          "ratio": 0.007,
+          "verdict": "DISTINCT"
+        },
+        "chain": {
+          "ratio": 0.008,
+          "verdict": "DISTINCT"
+        },
+        "bounded": {
+          "ratio": 0.105,
+          "verdict": "DISTINCT"
+        },
+        "lens": {
+          "ratio": 0.064,
+          "verdict": "DISTINCT"
+        },
+        "value": {
+          "ratio": 0.948,
+          "verdict": "FRAMEWORK_SHARED_BY_DESIGN"
+        }
+      }
+    }
+  ]
+}

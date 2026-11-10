@@ -142,6 +142,51 @@ class OfficialSource:
                 "note": self.note}
 
 
+#: OWNERSHIP AND OPERATING STATUS, as identity -- never as analysis.
+#:
+#: MEASURED 2026-11-09 on the 100-company prospect list: 16 of 100 had changed
+#: owner or form, and five no longer publish as themselves at all --
+#: redcanary.com redirects to zscaler.com, tecton.ai to databricks.com,
+#: mosaic.tech to hibob.com, observeinc.com to snowflake.com, and Cervest
+#: stopped trading in 2023. Opening an analysis on one of those reads the
+#: ACQUIRER's pages under the acquired company's name, or reads nothing and
+#: reports a company that "publishes nothing" -- both are a confident report
+#: about something that is not the company asked about.
+#:
+#: Two of the states stop entry before any run is opened; the rest are shown
+#: beside the name so a reader knows whose company it now is.
+ACQUIRED_OPERATING = "ACQUIRED_OPERATING"   # owned by another, publishes as itself
+TAKEN_PRIVATE = "TAKEN_PRIVATE"             # delisted; its own filings stop
+ACQUIRED_ABSORBED = "ACQUIRED_ABSORBED"     # no longer publishes as itself
+CEASED_OPERATING = "CEASED_OPERATING"       # no longer trading
+RENAMED_SUCCESSOR = "RENAMED_SUCCESSOR"     # this entity succeeds a renamed one
+CORPORATE_STATES = (ACQUIRED_OPERATING, TAKEN_PRIVATE, ACQUIRED_ABSORBED,
+                    CEASED_OPERATING, RENAMED_SUCCESSOR)
+#: The states with no independent publishing surface left to analyse.
+NOT_INDEPENDENTLY_ANALYSABLE = frozenset({ACQUIRED_ABSORBED, CEASED_OPERATING})
+
+
+@dataclass(frozen=True)
+class CorporateStatus:
+    """What happened to a company, who it happened with, and the evidence."""
+    state: str
+    effective: str = ""          # ISO date, or year-month where that is all
+    counterparty: str = ""       # acquirer, owner, or predecessor name
+    counterparty_domain: str = ""
+    summary: str = ""            # one plain sentence a reader can be shown
+    evidence: tuple = ()         # URLs of the announcement(s)
+
+    @property
+    def stops_entry(self) -> bool:
+        return self.state in NOT_INDEPENDENTLY_ANALYSABLE
+
+    def as_dict(self) -> dict:
+        return {"state": self.state, "effective": self.effective,
+                "counterparty": self.counterparty,
+                "counterparty_domain": self.counterparty_domain,
+                "summary": self.summary, "evidence": list(self.evidence)}
+
+
 @dataclass(frozen=True)
 class EntityProfile:
     """A company we can name precisely, with its official publishing surface."""
@@ -162,6 +207,13 @@ class EntityProfile:
     official_sources: tuple = field(default_factory=tuple)
     # Sibling/child entities a bare common name could also mean.
     disambiguation_group: str = ""
+    # None for a company that is simply itself; see CorporateStatus.
+    corporate_status: "CorporateStatus | None" = None
+    # WHY THIS ENTRY CARRIES NO OFFICIAL SOURCE, when it carries none: the
+    # measured refusal ("403 to the product's fetcher on 2026-11-09"). An
+    # identity-only entry still stops a wrong-company match; it must say why
+    # it cannot also help a blocked run, rather than look like an omission.
+    retrieval_note: str = ""
 
     # -- derived ------------------------------------------------------------
     @property
@@ -196,6 +248,8 @@ class EntityProfile:
             "ambiguity_notes": self.ambiguity_notes,
             "aliases": list(self.aliases),
             "official_sources": [s.as_dict() for s in self.official_sources],
+            "corporate_status": (self.corporate_status.as_dict()
+                                 if self.corporate_status else None),
             "registry_version": ENTITY_REGISTRY_VERSION,
         }
 
@@ -413,8 +467,25 @@ _SHOPIFY = EntityProfile(
     ),
 )
 
+#: Hand-written entries above; curated catalog rows below.
+#:
+#: WHY THE CATALOG IS SPLICED IN HERE RATHER THAN KEPT SEPARATE. Three
+#: different consumers reach identity through this tuple -- `suggest` (via
+#: `_registry_profiles`), `resolve_entity` by name, and `_domain_match` by
+#: host. A catalog that only the suggestion list could see would offer a
+#: company the resolver then failed to open, which is a worse experience than
+#: not offering it. One registry, one answer, three readers.
+#:
+#: Imported lazily-but-eagerly at module import: the catalog imports
+#: EntityProfile and OfficialSource FROM here, so the import must come after
+#: both are defined. That is why it sits at the bottom of the module and not
+#: at the top with the others.
+from intent_engine.company_ingestion.catalog import (            # noqa: E402
+    CATALOG_REGISTRY as _CATALOG,
+)
+
 REGISTRY = (_SONY_GROUP, _SONY_INTERACTIVE, _SONY_ELECTRONICS, _PALANTIR,
-            _SHOPIFY)
+            _SHOPIFY) + _CATALOG
 
 
 def _by_id(entity_id: str):
@@ -477,6 +548,51 @@ def _name_match(profile: EntityProfile, name: str) -> str:
         if typed == _tokens(candidate):
             return "exact"
     return ""
+
+
+def declared_cik(company_name: str = "", website: str = ""):
+    """What a CURATED identity says this company's SEC CIK is.
+
+    Three answers, and the third is the one that matters:
+
+        "0001943896"  curated, and it files -- use this
+        ""            curated, and it does NOT file -- DO NOT GUESS
+        None          not curated -- the caller may resolve as it always has
+
+    WHY AN EMPTY STRING IS AN ANSWER AND NOT A GAP.
+    MEASURED on Adastra, cohort A, across three separate builds. Adastra
+    Corporation is a Toronto data and analytics consultancy that files with no
+    US regulator, and "Adastra" matches ADASTRA HOLDINGS LTD. in the SEC
+    register -- a Canadian cannabis company whose SIC code is pharmaceutical
+    preparations. Every layer that could not find a CIK fell back to a fuzzy
+    name match and found that company:
+
+      1. `suggest` merged the two rows          -> the picker offered its CIK
+      2. `subject_cik` fuzzy-resolved the name  -> PHARMA classification
+      3. `propose_edgar_candidates` did the same-> its Form 20-F was RETRIEVED
+                                                   and read as the consultancy's
+                                                   own evidence
+
+    Doors one and two were closed one at a time, and each repair routed the
+    run into the next door: making `subject_cik` return "" is precisely what
+    sent `propose_edgar_candidates` down its `else` branch. A defect with four
+    doors is not four defects, and closing them one per deploy is how three
+    builds in a row shipped with a cannabis company's filing under a
+    consultancy's name.
+
+    So the question is answered ONCE, here, and every door asks it. Forty-four
+    of the fifty curated entries declare no CIK, which is the measure of how
+    wide this is: each of them reaches a fuzzy resolver with an empty CIK.
+    """
+    try:
+        resolution = resolve_entity(company_name=company_name,
+                                    website=website)
+    except Exception:                                       # noqa: BLE001
+        return None
+    profile = getattr(resolution, "profile", None)
+    if profile is None:
+        return None
+    return str(getattr(profile, "sec_cik", "") or "").strip()
 
 
 def resolve_entity(*, company_name: str = "", website: str = "") \

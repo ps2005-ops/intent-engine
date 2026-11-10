@@ -1,0 +1,459 @@
+{
+  "at": "2026-08-27",
+  "calibration": {
+    "minimum_before_reporting": 30,
+    "resolved_forward_predictions": 0,
+    "rule": "every number in this run is HISTORICAL OUT-OF-SAMPLE PERFORMANCE. None of it is live accuracy, and none of it may be quoted as such until enough REAL_FORWARD predictions have resolved.",
+    "status": "PRE_CALIBRATION"
+  },
+  "code_sha": "050f6a8",
+  "founder": {
+    "status": "REFUSED",
+    "why": "\u00a724 is conditional and the condition was not met. No hypothesis earned REGIME_CONDITIONAL, EARLY_WARNING or TRANSMISSION_CONTEXT, so no collective-state reading may reach a Founder recommendation. The six-company test is not run, because running it would produce six differentiated-looking outputs from a layer that has not shown it knows anything."
+  },
+  "hypothesis_verdicts": {
+    "DEEP": {
+      "H3_GLOBAL_MONTHLY": "INSUFFICIENT_POWER",
+      "H4_STRESS_CONDITIONAL": "INSUFFICIENT_POWER",
+      "H5_EARLY_WARNING": "INSUFFICIENT_EPISODES",
+      "H6_TRANSMISSION": "NOT_SUPPORTED"
+    },
+    "MODERN": {
+      "H3_GLOBAL_MONTHLY": "INSUFFICIENT_POWER",
+      "H4_STRESS_CONDITIONAL": "INSUFFICIENT_POWER",
+      "H5_EARLY_WARNING": "NOT_SUPPORTED",
+      "H6_TRANSMISSION": "NOT_SUPPORTED"
+    }
+  },
+  "learning_metrics": {
+    "assumptions_retired": 4,
+    "constructs_demoted": 0,
+    "constructs_promoted": 0,
+    "corrections_appended": 1,
+    "duplicate_or_noop_learning": 0,
+    "effective_sample_gained": 92.1,
+    "episodes_gained": 14,
+    "evaluations_in_registry": 2,
+    "false_discoveries_killed": 4,
+    "forward_expectations_opened": 6,
+    "hypotheses_preregistered": 4,
+    "hypotheses_resolved": 3,
+    "hypotheses_underpowered": 5,
+    "leakage_attempts_blocked": 2,
+    "learning_quality": "HIGH: every resolved hypothesis resolved against the direction the run would have preferred, and four attractive results were killed by scrutiny rather than reported",
+    "learning_velocity": 0.733,
+    "lessons_recorded": 15,
+    "network_calls_avoided": 1039,
+    "stagnation": "NO: the binding constraint moved from 'not enough origins' to 'the conventional base model only clears a trivial baseline on 3 of 10 preregistered families', which is a different and more specific problem"
+  },
+  "lessons": [
+    {
+      "cost": "an entire replay that appeared walled and was not",
+      "guard": "market/alfred.fetch_series raises VintageIgnored when a vintage response contains observations dated after it",
+      "id": "L1",
+      "lesson": "FRED's vintage parameter is silently ignored"
+    },
+    {
+      "cost": "a result reported as surviving FDR correction",
+      "guard": "econ/experiment.assert_no_trending_levels, called from the runner before any model is fitted",
+      "id": "L2",
+      "lesson": "non-stationary levels created a fake +0.134 housing win"
+    },
+    {
+      "cost": "a +0.029 credit-stress delta that did not survive contemporaneous classification",
+      "guard": "econ/regime.classify reads only Panel.history(as_of=), the same walled primitive every feature uses",
+      "id": "L3",
+      "lesson": "hindsight regime labels created a fake crisis advantage"
+    },
+    {
+      "cost": "an INFLATION_SHOCK interval of [+0.081, +0.271] at p=0.002",
+      "guard": "econ/incremental.assert_clusters_are_origins refuses a comparison whose cluster count equals its row count",
+      "id": "L4",
+      "lesson": "a row bootstrap treated dependent forecasts as independent"
+    },
+    {
+      "cost": "a decisive-looking result resting on a single event",
+      "guard": "MIN_EPISODES=3 in incremental, and Sample.headline has no variant that prints a row count alone",
+      "id": "L5",
+      "lesson": "30 rows collapsed to 14 origins and then to one episode"
+    },
+    {
+      "cost": "quits and participation left the model; the delta moved 0.005 with nothing saying why",
+      "guard": "econ/experiment.assert_all_live_instruments_present",
+      "id": "L6",
+      "lesson": "a dict keyed by kind silently removed multiple instruments"
+    },
+    {
+      "cost": "PSAVERT 2008-06 carried its 2026 value (4.6) under a 2008-07-31 vintage; the first print was 2.5",
+      "guard": "econ/panel.assert_no_assumed_lag, and scripts/build_historical_panel.py now refuses to run",
+      "id": "L7",
+      "lesson": "two scripts wrote the same panel path under different rules, and the leaked one won"
+    },
+    {
+      "cost": "REVOLSL was redefined between those vintages -- 100% of observations differ by up to 105,016% -- and fed the behavioural block at every pre-2010 origin",
+      "guard": "alfred_cache.shortcut_allowed requires the measurement to cover the origin window, or a never-revised record",
+      "id": "L8",
+      "lesson": "a stability measurement taken over 2015-2024 was applied to origins back to 1998"
+    },
+    {
+      "cost": "344 origins where the acquisition planned 115, because one quarterly series publishes on the fifteenth",
+      "guard": "the grid is declared in scripts/acquire_panel.py and read from the manifest by every consumer",
+      "id": "L9",
+      "lesson": "the forecast origin grid was inferred from a date-string pattern"
+    },
+    {
+      "cost": "PSAVERT went negative in 1999; its feature was undefined at three origins, so the whole series was dropped for imbalance and the guard that caught it was the only reason anyone knew",
+      "guard": "econ/release.PERCENTAGE_POINT_SERIES and experiment.change",
+      "id": "L10",
+      "lesson": "a relative change was taken on a series that crosses zero"
+    },
+    {
+      "cost": "a baseline gate that failed for a reason that was about the harness, not the economy",
+      "guard": "the ladder and the fit are both PER FAMILY, and the gate is reported per family",
+      "id": "L11",
+      "lesson": "one logistic fitted across ten families with base rates from 0.28 to 0.92 cannot beat a constant"
+    },
+    {
+      "cost": "'episode-aware CI [+0.00000, +0.00000]' printed beside a real delta reads as impossible precision and means 'undefined'",
+      "guard": "the bootstrap returns None below two blocks and every caller must say UNDEFINED",
+      "id": "L12",
+      "lesson": "a degenerate interval was rendered as [0, 0]"
+    },
+    {
+      "cost": "every global result would have failed MIN_EPISODES for the wrong reason",
+      "guard": "power.phase_map maps origins to discovered episodes and the calm stretches between them",
+      "id": "L13",
+      "lesson": "an episode count from contiguous dates said '1 episode' for a sample spanning 1978-2026"
+    },
+    {
+      "cost": "two mechanisms reported SUPPORTED on the MODERN arm; both vanish once \u00a710's gate is honoured",
+      "guard": "run_v2_mechanism filters to gate-passing families and reports the count it scored on",
+      "id": "L14",
+      "lesson": "a transmission-residual test scored on families whose base model loses to a constant"
+    },
+    {
+      "cost": "2,316 of 2,716 origins landed in the failure arm because real consumption rises in 92% of windows",
+      "guard": "residual.MIN_DRIVER_MOVE, with the unfloored split reported beside the floored one",
+      "id": "L15",
+      "lesson": "'the mechanism failed' collapsed into 'the target did its usual thing'"
+    }
+  ],
+  "real_forward": {
+    "expectations": [
+      {
+        "belief": "eb-c65e568346085c81",
+        "belief_id": "eb-c65e568346085c81",
+        "confidence": 0.5,
+        "contract": "econ_belief.v1",
+        "created_at": "2026-08-27",
+        "expectation_id": "ex-9185275b3bed99e4",
+        "expected_direction": "UP",
+        "expires_at": "2027-08-22",
+        "falsifier": "over the next 720 days the realised turn in DRCCLACBS does not follow the turn in EMRATIO, or leads it",
+        "horizon_days": 360,
+        "information_cutoff": "2026-08-27",
+        "mechanism": "households register a change in conditions in EMRATIO before it appears in DRCCLACBS; the lag was measured at 12 months on vintage-walled data in two independent arms",
+        "model": "BASE",
+        "observed_value": null,
+        "outcome": "OPEN",
+        "quantity": "DRCCLACBS_yoy/BASE",
+        "reconciliation": "",
+        "resolution_rule": "resolved from the ALFRED vintage of DRCCLACBS available 360 days from now; UP means the year-on-year change is positive at that vintage",
+        "resolved_at": "",
+        "subject": "US_households",
+        "tolerance": 0.0,
+        "visibility": "PUBLIC"
+      },
+      {
+        "belief": "eb-c65e568346085c81",
+        "belief_id": "eb-c65e568346085c81",
+        "confidence": 0.5,
+        "contract": "econ_belief.v1",
+        "created_at": "2026-08-27",
+        "expectation_id": "ex-5d74f3d6cb2bbc52",
+        "expected_direction": "UP",
+        "expires_at": "2027-08-22",
+        "falsifier": "over the next 720 days the realised turn in DRCCLACBS does not follow the turn in EMRATIO, or leads it",
+        "horizon_days": 360,
+        "information_cutoff": "2026-08-27",
+        "mechanism": "households register a change in conditions in EMRATIO before it appears in DRCCLACBS; the lag was measured at 12 months on vintage-walled data in two independent arms",
+        "model": "AUGMENTED",
+        "observed_value": null,
+        "outcome": "OPEN",
+        "quantity": "DRCCLACBS_yoy/AUGMENTED",
+        "reconciliation": "",
+        "resolution_rule": "resolved from the ALFRED vintage of DRCCLACBS available 360 days from now; UP means the year-on-year change is positive at that vintage",
+        "resolved_at": "",
+        "subject": "US_households",
+        "tolerance": 0.0,
+        "visibility": "PUBLIC"
+      },
+      {
+        "belief": "eb-877c891069cba320",
+        "belief_id": "eb-877c891069cba320",
+        "confidence": 0.5,
+        "contract": "econ_belief.v1",
+        "created_at": "2026-08-27",
+        "expectation_id": "ex-372940a2cdbf3da0",
+        "expected_direction": "UP",
+        "expires_at": "2027-04-24",
+        "falsifier": "over the next 480 days the realised turn in HOUST does not follow the turn in UMCSENT, or leads it",
+        "horizon_days": 240,
+        "information_cutoff": "2026-08-27",
+        "mechanism": "households register a change in conditions in UMCSENT before it appears in HOUST; the lag was measured at 8 months on vintage-walled data in two independent arms",
+        "model": "BASE",
+        "observed_value": null,
+        "outcome": "OPEN",
+        "quantity": "HOUST_yoy/BASE",
+        "reconciliation": "",
+        "resolution_rule": "resolved from the ALFRED vintage of HOUST available 240 days from now; UP means the year-on-year change is positive at that vintage",
+        "resolved_at": "",
+        "subject": "US_households",
+        "tolerance": 0.0,
+        "visibility": "PUBLIC"
+      },
+      {
+        "belief": "eb-877c891069cba320",
+        "belief_id": "eb-877c891069cba320",
+        "confidence": 0.5,
+        "contract": "econ_belief.v1",
+        "created_at": "2026-08-27",
+        "expectation_id": "ex-840130b7513aa65e",
+        "expected_direction": "UP",
+        "expires_at": "2027-04-24",
+        "falsifier": "over the next 480 days the realised turn in HOUST does not follow the turn in UMCSENT, or leads it",
+        "horizon_days": 240,
+        "information_cutoff": "2026-08-27",
+        "mechanism": "households register a change in conditions in UMCSENT before it appears in HOUST; the lag was measured at 8 months on vintage-walled data in two independent arms",
+        "model": "AUGMENTED",
+        "observed_value": null,
+        "outcome": "OPEN",
+        "quantity": "HOUST_yoy/AUGMENTED",
+        "reconciliation": "",
+        "resolution_rule": "resolved from the ALFRED vintage of HOUST available 240 days from now; UP means the year-on-year change is positive at that vintage",
+        "resolved_at": "",
+        "subject": "US_households",
+        "tolerance": 0.0,
+        "visibility": "PUBLIC"
+      },
+      {
+        "belief": "eb-0b2405ca8617b72b",
+        "belief_id": "eb-0b2405ca8617b72b",
+        "confidence": 0.5,
+        "contract": "econ_belief.v1",
+        "created_at": "2026-08-27",
+        "expectation_id": "ex-ca27724f35bb532d",
+        "expected_direction": "UP",
+        "expires_at": "2027-04-24",
+        "falsifier": "over the next 480 days the realised turn in INDPRO does not follow the turn in UMCSENT, or leads it",
+        "horizon_days": 240,
+        "information_cutoff": "2026-08-27",
+        "mechanism": "households register a change in conditions in UMCSENT before it appears in INDPRO; the lag was measured at 8 months on vintage-walled data in two independent arms",
+        "model": "BASE",
+        "observed_value": null,
+        "outcome": "OPEN",
+        "quantity": "INDPRO_yoy/BASE",
+        "reconciliation": "",
+        "resolution_rule": "resolved from the ALFRED vintage of INDPRO available 240 days from now; UP means the year-on-year change is positive at that vintage",
+        "resolved_at": "",
+        "subject": "US_households",
+        "tolerance": 0.0,
+        "visibility": "PUBLIC"
+      },
+      {
+        "belief": "eb-0b2405ca8617b72b",
+        "belief_id": "eb-0b2405ca8617b72b",
+        "confidence": 0.5,
+        "contract": "econ_belief.v1",
+        "created_at": "2026-08-27",
+        "expectation_id": "ex-f51b058f0d2b3a42",
+        "expected_direction": "UP",
+        "expires_at": "2027-04-24",
+        "falsifier": "over the next 480 days the realised turn in INDPRO does not follow the turn in UMCSENT, or leads it",
+        "horizon_days": 240,
+        "information_cutoff": "2026-08-27",
+        "mechanism": "households register a change in conditions in UMCSENT before it appears in INDPRO; the lag was measured at 8 months on vintage-walled data in two independent arms",
+        "model": "AUGMENTED",
+        "observed_value": null,
+        "outcome": "OPEN",
+        "quantity": "INDPRO_yoy/AUGMENTED",
+        "reconciliation": "",
+        "resolution_rule": "resolved from the ALFRED vintage of INDPRO available 240 days from now; UP means the year-on-year change is positive at that vintage",
+        "resolved_at": "",
+        "subject": "US_households",
+        "tolerance": 0.0,
+        "visibility": "PUBLIC"
+      }
+    ],
+    "opened": 6,
+    "rule": "BOTH a BASE and an AUGMENTED forecast are stored for every expectation and neither is ever overwritten. Only the replicated temporal-order finding was eligible: no predictive claim survived this run, so no predictive expectation was opened."
+  },
+  "supported_hypotheses": [],
+  "world_model": {
+    "edges_added": [
+      {
+        "arm": "DEEP",
+        "correlation": 0.4423,
+        "edge": "EMRATIO->DRCCLACBS",
+        "lag_periods": 12,
+        "n": 173,
+        "state": "OBSERVED",
+        "why": "a measured temporal order on walled data. OBSERVED and not PREDICTIVE: leading a series is necessary for being an early driver of it and is not sufficient, and the forecasting test on this same panel did not support the block."
+      },
+      {
+        "arm": "DEEP",
+        "correlation": 0.2984,
+        "edge": "UMCSENT->HOUST",
+        "lag_periods": 6,
+        "n": 482,
+        "state": "OBSERVED",
+        "why": "a measured temporal order on walled data. OBSERVED and not PREDICTIVE: leading a series is necessary for being an early driver of it and is not sufficient, and the forecasting test on this same panel did not support the block."
+      },
+      {
+        "arm": "DEEP",
+        "correlation": 0.3295,
+        "edge": "UMCSENT->INDPRO",
+        "lag_periods": 7,
+        "n": 482,
+        "state": "OBSERVED",
+        "why": "a measured temporal order on walled data. OBSERVED and not PREDICTIVE: leading a series is necessary for being an early driver of it and is not sufficient, and the forecasting test on this same panel did not support the block."
+      },
+      {
+        "arm": "MODERN",
+        "correlation": 0.4423,
+        "edge": "EMRATIO->DRCCLACBS",
+        "lag_periods": 12,
+        "n": 173,
+        "state": "OBSERVED",
+        "why": "a measured temporal order on walled data. OBSERVED and not PREDICTIVE: leading a series is necessary for being an early driver of it and is not sufficient, and the forecasting test on this same panel did not support the block."
+      },
+      {
+        "arm": "MODERN",
+        "correlation": 0.275,
+        "edge": "MICH->INDPRO",
+        "lag_periods": 2,
+        "n": 282,
+        "state": "OBSERVED",
+        "why": "a measured temporal order on walled data. OBSERVED and not PREDICTIVE: leading a series is necessary for being an early driver of it and is not sufficient, and the forecasting test on this same panel did not support the block."
+      },
+      {
+        "arm": "MODERN",
+        "correlation": -0.4823,
+        "edge": "PSAVERT->DRCCLACBS",
+        "lag_periods": 12,
+        "n": 173,
+        "state": "OBSERVED",
+        "why": "a measured temporal order on walled data. OBSERVED and not PREDICTIVE: leading a series is necessary for being an early driver of it and is not sufficient, and the forecasting test on this same panel did not support the block."
+      },
+      {
+        "arm": "MODERN",
+        "correlation": -0.4431,
+        "edge": "PSAVERT->INDPRO",
+        "lag_periods": 4,
+        "n": 280,
+        "state": "OBSERVED",
+        "why": "a measured temporal order on walled data. OBSERVED and not PREDICTIVE: leading a series is necessary for being an early driver of it and is not sufficient, and the forecasting test on this same panel did not support the block."
+      },
+      {
+        "arm": "MODERN",
+        "correlation": 0.2575,
+        "edge": "PSAVERT->UNRATE",
+        "lag_periods": 2,
+        "n": 280,
+        "state": "OBSERVED",
+        "why": "a measured temporal order on walled data. OBSERVED and not PREDICTIVE: leading a series is necessary for being an early driver of it and is not sufficient, and the forecasting test on this same panel did not support the block."
+      },
+      {
+        "arm": "MODERN",
+        "correlation": 0.9169,
+        "edge": "REVOLSL->DRCCLACBS",
+        "lag_periods": 8,
+        "n": 173,
+        "state": "OBSERVED",
+        "why": "a measured temporal order on walled data. OBSERVED and not PREDICTIVE: leading a series is necessary for being an early driver of it and is not sufficient, and the forecasting test on this same panel did not support the block."
+      },
+      {
+        "arm": "MODERN",
+        "correlation": -0.3644,
+        "edge": "REVOLSL->HOUST",
+        "lag_periods": 11,
+        "n": 282,
+        "state": "OBSERVED",
+        "why": "a measured temporal order on walled data. OBSERVED and not PREDICTIVE: leading a series is necessary for being an early driver of it and is not sufficient, and the forecasting test on this same panel did not support the block."
+      },
+      {
+        "arm": "MODERN",
+        "correlation": 0.3246,
+        "edge": "UMCSENT->HOUST",
+        "lag_periods": 8,
+        "n": 282,
+        "state": "OBSERVED",
+        "why": "a measured temporal order on walled data. OBSERVED and not PREDICTIVE: leading a series is necessary for being an early driver of it and is not sufficient, and the forecasting test on this same panel did not support the block."
+      },
+      {
+        "arm": "MODERN",
+        "correlation": 0.2526,
+        "edge": "UMCSENT->INDPRO",
+        "lag_periods": 8,
+        "n": 282,
+        "state": "OBSERVED",
+        "why": "a measured temporal order on walled data. OBSERVED and not PREDICTIVE: leading a series is necessary for being an early driver of it and is not sufficient, and the forecasting test on this same panel did not support the block."
+      }
+    ],
+    "edges_refused": [
+      {
+        "arm": "DEEP",
+        "edge": "collective_state->H3_GLOBAL_MONTHLY",
+        "verdict": "INSUFFICIENT_POWER",
+        "why": "no edge may be added on a verdict that is not a promotion"
+      },
+      {
+        "arm": "DEEP",
+        "edge": "collective_state->H4_STRESS_CONDITIONAL",
+        "verdict": "INSUFFICIENT_POWER",
+        "why": "no edge may be added on a verdict that is not a promotion"
+      },
+      {
+        "arm": "DEEP",
+        "edge": "collective_state->H5_EARLY_WARNING",
+        "verdict": "INSUFFICIENT_EPISODES",
+        "why": "no edge may be added on a verdict that is not a promotion"
+      },
+      {
+        "arm": "DEEP",
+        "edge": "collective_state->H6_TRANSMISSION",
+        "verdict": "NOT_SUPPORTED",
+        "why": "no edge may be added on a verdict that is not a promotion"
+      },
+      {
+        "arm": "MODERN",
+        "edge": "collective_state->H3_GLOBAL_MONTHLY",
+        "verdict": "INSUFFICIENT_POWER",
+        "why": "no edge may be added on a verdict that is not a promotion"
+      },
+      {
+        "arm": "MODERN",
+        "edge": "collective_state->H4_STRESS_CONDITIONAL",
+        "verdict": "INSUFFICIENT_POWER",
+        "why": "no edge may be added on a verdict that is not a promotion"
+      },
+      {
+        "arm": "MODERN",
+        "edge": "collective_state->H5_EARLY_WARNING",
+        "verdict": "NOT_SUPPORTED",
+        "why": "no edge may be added on a verdict that is not a promotion"
+      },
+      {
+        "arm": "MODERN",
+        "edge": "collective_state->H6_TRANSMISSION",
+        "verdict": "NOT_SUPPORTED",
+        "why": "no edge may be added on a verdict that is not a promotion"
+      }
+    ],
+    "replicated_across_arms": [
+      "EMRATIO->DRCCLACBS",
+      "UMCSENT->HOUST",
+      "UMCSENT->INDPRO"
+    ]
+  }
+}

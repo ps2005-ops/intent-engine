@@ -1,0 +1,155 @@
+{
+ "contract": "near_miss_labels.v1",
+ "as_of": "2026-08-08",
+ "adjudicator": "hand-read against the retrieved documents",
+ "labels": {
+  "Starting June 1, 2026, BigCommerce is updating its plan structure and pricing.": {
+   "adjudication": "TRUNCATED_CONTEXT",
+   "note": "real dated price change; tier and buyer are in the plan table further down the same page"
+  },
+  "Shopify is widely known for its ease of use, especially for businesses launching their first online store.": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "BigCommerce's page describing a rival; not an action by anyone"
+  },
+  "Localize with ease: craft buyer-specific experiences across segments, locations, verticals, languages, currencies, and more by easily launching multiple storefronts.": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "feature marketing copy, no change announced"
+  },
+  "Our curated set of third-party party applications boasts multiple partners with strong B2B applications that provide additional advanced B2B functionality.": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "capability description, no change announced"
+  },
+  "Join our Year-End Innovation Review to explore the top features from 2025 alongside an exclusive look at the Winter '26 and upcoming 2026 releases.": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "event invitation"
+  },
+  "Winter ’26 Release: New Agentforce Sales Features Unveiled at Dreamforce.": {
+   "adjudication": "EXTRACTION_RECOVERABLE",
+   "note": "product Agentforce and workflow Sales are both in the sentence"
+  },
+  "Salesforce releases are major platform updates delivered three times a year—Winter, Spring, and Summer—that introduce new features, enhancements, and improvements across the platform.": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "definition of the release programme, not a release"
+  },
+  "To see what’s coming soon, visit Release Notes for Features Released Monthly.": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "navigation"
+  },
+  "Salesforce delivers three seasonal releases every year.": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "cadence statement"
+  },
+  "Regular releases keep your org secure, scalable, and innovative—without manual upgrades or downtime.": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "benefit copy"
+  },
+  "Each release introduces features that help admins, developers, and users work smarter and deliver more value.": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "generic benefit; names roles but announces nothing"
+  },
+  "Patch or maintenance updates are smaller, targeted fixes released between major updates.": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "definition"
+  },
+  "Salesforce announces sign-up opportunities through the Release Readiness Trailblazer Community.": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "announces sign-ups to a community, not a product change"
+  },
+  "Use multiple channels: Slack, the Release in a Box deck, short training sessions for teams impacted by new releases and executive walkthroughs.": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "internal-adoption advice"
+  },
+  "You can access the latest version on Salesforce Releases and the Release Readiness Trailblazer Community.": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "navigation"
+  },
+  "Bundled with Unlimited Edition.": {
+   "adjudication": "EXTRACTION_RECOVERABLE",
+   "note": "Unlimited Edition is a named priced tier and satisfies WHAT"
+  },
+  "Whether you’re launching new campaigns, improving personalization, or optimizing performance, Marketing Cloud gives you the tools to move faster.": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "conditional marketing copy"
+  },
+  "VCARB Partners with Salesforce to Supercharge Fan Engagement with AI, Deploying Agentforce 360.": {
+   "adjudication": "EXTRACTION_RECOVERABLE",
+   "note": "use case fan engagement is stated; actor is VCARB, unknown to the attribution gate"
+  },
+  "Missionforce National Security Unveils IL5-Authorized AI Agents and Apps to Drive Decision Advantage, Readiness, and Enhanced Warfighter Effectiveness.": {
+   "adjudication": "EXTRACTION_RECOVERABLE",
+   "note": "buyer national security / warfighter is stated; actor is Missionforce"
+  },
+  "Salesforce has released its 2026 Agentic Enterprise Index, which analyzes aggregated AI usage data from the Agentforce platform to uncover how enterprises are adopting AI agents.": {
+   "adjudication": "SOURCE_MISSING_INFORMATION",
+   "note": "a research report; real publication, contests no buying decision"
+  },
+  "Coming soon, you can set up bundles with the new Shopify Bundles app or any of the upcoming bundles apps built on Shopify Functions in the Shopify App Store.": {
+   "adjudication": "SOURCE_MISSING_INFORMATION",
+   "note": "real forthcoming launch; sentence names no buyer"
+  },
+  "Since launching 6 months ago, we’ve already improved B2B on Shopify with dozens of enhancements.": {
+   "adjudication": "SOURCE_MISSING_INFORMATION",
+   "note": "retrospective summary; dozens of enhancements is not a change"
+  },
+  "Introducing 10 new granular permissions, including view-only permissions, so store owners have better control over staff access to products, orders, and settings.": {
+   "adjudication": "EXTRACTION_RECOVERABLE",
+   "note": "buyer store owners is in the sentence"
+  },
+  "Our latest releases help speed up your build and give you more ways to customize commerce.": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "section blurb"
+  },
+  "Introducing JavaScript for Shopify Functions.": {
+   "adjudication": "SOURCE_MISSING_INFORMATION",
+   "note": "real launch; buyer developers only implied"
+  },
+  "Introducing Commerce Components.": {
+   "adjudication": "SOURCE_MISSING_INFORMATION",
+   "note": "real launch; title only, no buyer"
+  },
+  "Introducing Tinker: Play with AI, bring your ideas to life.": {
+   "adjudication": "SOURCE_MISSING_INFORMATION",
+   "note": "real launch; no buyer named"
+  },
+  "Google Analytics 4 to create an annotation on the day the new live site launches and validate key events (purchases, add-to-cart) post-launch.": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "instruction fragment from a migration checklist"
+  },
+  "Shopify launches more new features than WooCommerce.": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "comparative marketing claim on a rival's page"
+  },
+  "Build the product bundles, order routing logic, checkout and cart validation rules, or delivery and payment options": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "imperative capability copy on a developer page; nobody announced a change"
+  },
+  "We’re providing unthrottled API calls for our newly launched Commerce Components": {
+   "adjudication": "SOURCE_MISSING_INFORMATION",
+   "note": "real change to a named product; the sentence names no buyer"
+  },
+  "We partner with Stripe Payments Company for money transmission services": {
+   "adjudication": "SOURCE_MISSING_INFORMATION",
+   "note": "real partnership with a stated use case; no buyer, and PARTNERSHIP needs one"
+  },
+  "The Help Agent, Salesforce’s implementation of Agentforce on help.salesforce.com, launched in October 2024": {
+   "adjudication": "SOURCE_MISSING_INFORMATION",
+   "note": "real dated launch; buyer not named, and it is two years old"
+  },
+  "If you're on a monthly plan, switching to annual billing locks in your pricing": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "describes how existing billing works; not a change"
+  },
+  "Upgrading to a higher plan reduces your fee rate; moving to a contracted Performance plan": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "describes the existing plan ladder; not a change"
+  },
+  "“Launching on BigCommerce allowed us to personalize the customer journey": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "customer testimonial; the customer acted, not BigCommerce"
+  },
+  "“BigCommerce and Contentful have opened up opportunities for us": {
+   "adjudication": "WRONG_DOCUMENT",
+   "note": "customer testimonial"
+  }
+ }
+}

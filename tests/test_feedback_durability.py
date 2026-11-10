@@ -258,15 +258,21 @@ def test_the_form_is_switched_off_rather_than_shown_and_broken(tmp_path):
     c.request("POST", "/demo")
     run_id = _demo_run(c)
     _, _, body = c.request("GET", f"/runs/{run_id}")
-    assert "Feedback is switched off here for now" in body
+    # The WORDING moved, the BEHAVIOUR did not. The notice no longer explains
+    # our filesystem at the foot of someone's report on their competitor; the
+    # operator detail lives at /readyz. What this test exists to protect is
+    # that an undurable deployment shows a plain notice instead of a control
+    # that looks live and silently loses what it is given.
+    assert "Feedback is temporarily unavailable" in body
     assert "Send feedback" not in body
-    # The honesty is the point and stays; the hosting post-mortem does not.
+    # NO INFRASTRUCTURE POST-MORTEM AT THE FOOT OF SOMEONE'S REPORT. Neither
     # "Storage is writable but sits on the same filesystem as the application
-    # image, which is usually replaced on redeploy" is a paragraph about our
-    # infrastructure at the foot of someone's report on their competitor.
-    assert "could not promise to keep what you sent" in body
+    # image, which is usually replaced on redeploy" nor the shorter apology
+    # that replaced it belongs on a page about someone's competitor. The
+    # operator detail is at /readyz, where the person who can act on it looks.
     assert "filesystem" not in body and "redeploy" not in body
     assert "Durable storage" not in body
+    assert "disk" not in body.lower()
 
 
 def test_the_form_is_offered_when_storage_is_proven(tmp_path):

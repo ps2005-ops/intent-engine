@@ -1,0 +1,2260 @@
+{
+ "rows": [
+  {
+   "company": "Axonius",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 308,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Axonius",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 506,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Axonius",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 556,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Axonius",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 556,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Axonius",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 342,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Axonius",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 805,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Arctic Wolf",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 769,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Arctic Wolf",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 573,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Arctic Wolf",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 783,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Arctic Wolf",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 733,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Arctic Wolf",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 827,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Arctic Wolf",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 801,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Cribl",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 286,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Cribl",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 484,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Cribl",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 645,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Cribl",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 645,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Cribl",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 364,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Cribl",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 783,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "1Password",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 461,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "1Password",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 659,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "1Password",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 811,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "1Password",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 811,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "1Password",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 392,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "1Password",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 459,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Illumio",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 468,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Illumio",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 666,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Illumio",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 808,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Illumio",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 808,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Illumio",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 387,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Illumio",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 466,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Abnormal AI",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 852,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Abnormal AI",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 658,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Abnormal AI",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 861,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Abnormal AI",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 810,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Abnormal AI",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 909,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Abnormal AI",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 884,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Netskope",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 725,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Netskope",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 562,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Netskope",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 848,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Netskope",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 798,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Netskope",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 782,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Netskope",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 756,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Clio",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 324,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Clio",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 522,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Clio",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 572,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Clio",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 572,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Clio",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 358,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Clio",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 821,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Coveo",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 908,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Coveo",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 690,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Coveo",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 853,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Coveo",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 792,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Coveo",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 922,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Coveo",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 907,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Procore",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 614,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Procore",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 573,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Procore",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 884,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Procore",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 834,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Procore",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 685,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Procore",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 646,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "ServiceTitan",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 626,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "ServiceTitan",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 575,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "ServiceTitan",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 850,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "ServiceTitan",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 800,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "ServiceTitan",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 687,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "ServiceTitan",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 648,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Motive",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 592,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Motive",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 636,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Motive",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 990,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Motive",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 921,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Motive",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 667,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Motive",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 660,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Verkada",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 448,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Verkada",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 646,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Verkada",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 900,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Verkada",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 847,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Verkada",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 491,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Verkada",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 468,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Vanta",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 835,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Vanta",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 639,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Vanta",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 823,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Vanta",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 772,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Vanta",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 892,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Vanta",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 867,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Snyk",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 445,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Snyk",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 643,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Snyk",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 805,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Snyk",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 805,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Snyk",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 365,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Snyk",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 443,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Chainguard",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 809,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Chainguard",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 645,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Chainguard",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 835,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Chainguard",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 784,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Chainguard",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 866,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Chainguard",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 841,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Island",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 852,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Island",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 651,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Island",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 857,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Island",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 806,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Island",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 909,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Island",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 884,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "NinjaOne",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 751,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "NinjaOne",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 561,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "NinjaOne",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 757,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "NinjaOne",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 707,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "NinjaOne",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 808,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "NinjaOne",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 782,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Huntress",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 811,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Huntress",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 696,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Huntress",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 873,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Huntress",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 812,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Huntress",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 825,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Huntress",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 810,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Veza",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 373,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Veza",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 571,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Veza",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 880,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Veza",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 825,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Veza",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 430,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Veza",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 409,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Expel",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 443,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Expel",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 641,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Expel",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 802,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Expel",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 802,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Expel",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 364,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Expel",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 441,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Dragos",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 445,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Dragos",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 643,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Dragos",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 797,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Dragos",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 797,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Dragos",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 365,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Dragos",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 443,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Material Security",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 467,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Material Security",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 665,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Material Security",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 847,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Material Security",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 847,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Material Security",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 376,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Material Security",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 465,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Obsidian Security",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 467,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Obsidian Security",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 665,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Obsidian Security",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 828,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Obsidian Security",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 828,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Obsidian Security",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 376,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Obsidian Security",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 465,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Okta",
+   "class": "WHY THIS DECISION",
+   "q": "Why was this decision selected for this company rather than another?",
+   "status": 200,
+   "body_chars": 559,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Okta",
+   "class": "WHY THIS COMPANY",
+   "q": "Why is this reading specific to this company rather than to any company like it?",
+   "status": 200,
+   "body_chars": 601,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Okta",
+   "class": "SUPPORTING EVIDENCE",
+   "q": "What evidence supports this reading?",
+   "status": 200,
+   "body_chars": 704,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Okta",
+   "class": "WHAT CONTRADICTS IT",
+   "q": "What evidence argues against it?",
+   "status": 200,
+   "body_chars": 654,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Okta",
+   "class": "WHAT WOULD CHANGE IT",
+   "q": "What would change the recommendation or posture?",
+   "status": 200,
+   "body_chars": 586,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  },
+  {
+   "company": "Okta",
+   "class": "WHAT TO LEARN NEXT",
+   "q": "What should management learn next, and why that first?",
+   "status": 200,
+   "body_chars": 547,
+   "checks": {
+    "STATUS_200": true,
+    "NAMES_THIS_COMPANY": true,
+    "ANSWERS_THE_QUESTION": true,
+    "CARRIES_SUBSTANCE": true,
+    "NO_FOREIGN_SUBJECT": true
+   },
+   "semantic": true
+  }
+ ],
+ "primary_total": 150,
+ "primary_status": 150,
+ "primary_semantic": 150,
+ "followup_total": 25,
+ "followup_pass": 25,
+ "contamination": []
+}

@@ -1,0 +1,206 @@
+{
+  "pairs": [
+    {
+      "left": "Highspot",
+      "right": "BigID",
+      "aspects": {
+        "business model explanation": {
+          "verdict": "EXPECTED_SHARED",
+          "provenance": [
+            "CLASS_PRIOR",
+            "CLASS_PRIOR"
+          ]
+        },
+        "self description": {
+          "ratio": 0.432,
+          "collapsed": false,
+          "shared": []
+        },
+        "why this company": {
+          "ratio": 0.594,
+          "collapsed": false,
+          "shared": []
+        },
+        "decision domain": {
+          "ratio": 0.078,
+          "collapsed": false,
+          "shared": []
+        },
+        "causal mechanism": {
+          "ratio": 0.189,
+          "collapsed": false,
+          "shared": [
+            "nothing retrieved in this run carries one, which is why no mechanism is asserted above."
+          ]
+        },
+        "lens": {
+          "left": "revenue_gtm",
+          "right": "data_security_governance",
+          "verdict": "DIFFERENT"
+        }
+      }
+    },
+    {
+      "left": "BigID",
+      "right": "Cyera",
+      "aspects": {
+        "business model explanation": {
+          "verdict": "EXPECTED_SHARED",
+          "provenance": [
+            "CLASS_PRIOR",
+            "CLASS_PRIOR"
+          ]
+        },
+        "self description": {
+          "ratio": 0.0,
+          "collapsed": false,
+          "shared": []
+        },
+        "why this company": {
+          "ratio": 0.499,
+          "collapsed": false,
+          "shared": []
+        },
+        "decision domain": {
+          "ratio": 0.114,
+          "collapsed": false,
+          "shared": []
+        },
+        "causal mechanism": {
+          "ratio": 0.367,
+          "collapsed": false,
+          "shared": [
+            "what sensitive data exists and where -- the decision area this company's own material points at, not a recommendation.",
+            "nothing retrieved in this run carries one, which is why no mechanism is asserted above."
+          ]
+        },
+        "lens": {
+          "left": "data_security_governance",
+          "right": "data_security_governance",
+          "verdict": "SHARED_AND_DISTINCT"
+        }
+      }
+    },
+    {
+      "left": "Cyera",
+      "right": "Slalom",
+      "aspects": {
+        "business model explanation": {
+          "verdict": "EXPECTED_SHARED",
+          "provenance": [
+            "CLASS_PRIOR",
+            "CLASS_PRIOR"
+          ]
+        },
+        "self description": {
+          "ratio": 0.0,
+          "collapsed": false,
+          "shared": []
+        },
+        "why this company": {
+          "ratio": 0.026,
+          "collapsed": false,
+          "shared": []
+        },
+        "decision domain": {
+          "ratio": 0.076,
+          "collapsed": false,
+          "shared": []
+        },
+        "causal mechanism": {
+          "ratio": 0.138,
+          "collapsed": false,
+          "shared": [
+            "nothing retrieved in this run carries one, which is why no mechanism is asserted above."
+          ]
+        },
+        "lens": {
+          "left": "data_security_governance",
+          "right": "consulting_portfolio",
+          "verdict": "DIFFERENT"
+        }
+      }
+    },
+    {
+      "left": "ZoomInfo",
+      "right": "Veeam",
+      "aspects": {
+        "business model explanation": {
+          "verdict": "EXPECTED_SHARED",
+          "provenance": [
+            "CLASS_PRIOR",
+            "CLASS_PRIOR"
+          ]
+        },
+        "self description": {
+          "ratio": 0.0,
+          "collapsed": false,
+          "shared": []
+        },
+        "why this company": {
+          "ratio": 0.308,
+          "collapsed": false,
+          "shared": []
+        },
+        "decision domain": {
+          "ratio": 0.292,
+          "collapsed": false,
+          "shared": []
+        },
+        "causal mechanism": {
+          "ratio": 0.138,
+          "collapsed": false,
+          "shared": [
+            "nothing retrieved in this run carries one, which is why no mechanism is asserted above."
+          ]
+        },
+        "lens": {
+          "left": "revenue_gtm",
+          "right": "enterprise_data_ai",
+          "verdict": "DIFFERENT"
+        }
+      }
+    },
+    {
+      "left": "Sigma Computing",
+      "right": "Druva",
+      "aspects": {
+        "business model explanation": {
+          "verdict": "EXPECTED_SHARED",
+          "provenance": [
+            "CLASS_PRIOR",
+            "CLASS_PRIOR"
+          ]
+        },
+        "self description": {
+          "ratio": 0.0,
+          "collapsed": false,
+          "shared": []
+        },
+        "why this company": {
+          "ratio": 0.397,
+          "collapsed": false,
+          "shared": []
+        },
+        "decision domain": {
+          "ratio": 0.056,
+          "collapsed": false,
+          "shared": []
+        },
+        "causal mechanism": {
+          "ratio": 0.153,
+          "collapsed": false,
+          "shared": [
+            "nothing retrieved in this run carries one, which is why no mechanism is asserted above."
+          ]
+        },
+        "lens": {
+          "left": "data_infrastructure",
+          "right": "enterprise_data_ai",
+          "verdict": "DIFFERENT"
+        }
+      }
+    }
+  ],
+  "failures": 0
+}

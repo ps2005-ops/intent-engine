@@ -207,6 +207,22 @@ def _mechanism_evidence(pattern, observations):
         for observation in observations:
             if signal not in (observation.signals or ()):
                 continue
+            # "THE COMPANY'S OWN WORDS" MUST BE THE COMPANY'S OWN WORDS.
+            #
+            # MEASURED LIVE on cec9b2f. Meta's page carried, sourced to
+            # NETWORK-1 TECHNOLOGIES' 2024 10-K — a patent litigant whose
+            # filing says "our case against Meta Platforms, Inc." — the line
+            # "Meta Platforms, Inc. is committing capital to capacity ahead
+            # of the demand for it". `narrative.py` renders this quote as
+            # "The company's own words:", and it was whoever's words the
+            # observation happened to carry.
+            #
+            # Filtering here fixes every consumer at once: the narrative, the
+            # decision's grounding, and the citations all read from this one
+            # producer. `subject_owned` is decided in `derive_observations`,
+            # where the URL still exists.
+            if not getattr(observation, "subject_owned", True):
+                continue
             quote = (getattr(observation, "signal_spans", None)
                      or {}).get(signal, "")
             if not quote:
@@ -390,14 +406,34 @@ def _build_shifts(observations):
     return shifts
 
 
-def _build_blind_spots(observations):
+def _build_blind_spots(observations, business_model: str = ""):
+    """Tensions this company's evidence shows AND its business model can have.
+
+    TWO CONDITIONS, AND THE SECOND WAS MISSING. A tension used to fire on
+    signal names alone, and signal names are generic: NVIDIA's partner and
+    platform language matched a marketplace's, so its founder analysis led
+    with "Consolidating checkout/identity/data rails may encroach on layers
+    partners currently monetize" -- and, through the Baseline A fallback, that
+    sentence became its `top_priority`.
+
+    `patterns.tension_applies` decides, and it fails CLOSED: an undeclared
+    applicability or an unread business model produces no blind spot rather
+    than a confident sentence about the wrong kind of company. The refusals
+    are returned beside the results so the absence is legible as a decision.
+    """
+    from intent_engine.strategic_intelligence.patterns import tension_applies
     present = _signals_present(observations)
-    blind = []
+    blind, refused = [], []
     for t in TENSIONS:
         left = [s for s in t["left"] if s in present]
         right = [s for s in t["right"] if s in present]
         if not (left and right):
             continue                      # a tension needs BOTH sides observed
+        ok, kind = tension_applies(t, business_model)
+        if not ok:
+            refused.append({"tension_id": t["tension_id"], "kind": kind,
+                            "business_model": business_model or "UNKNOWN"})
+            continue
         supp = [o.observation_id for o in
                 _obs_with_any(observations, t["left"] + t["right"])]
         blind.append(BlindSpot(
@@ -407,8 +443,9 @@ def _build_blind_spots(observations):
             counter_explanation=t["counter_explanation"],
             evidence_needed=list(t["evidence_needed"]),
             decision_affected=t["decision_affected"],
+            kind=kind,
             supporting_observation_ids=supp))
-    return blind
+    return blind, refused
 
 
 # --- portfolio selection ------------------------------------------------------
@@ -540,7 +577,7 @@ def _build_questions(hypotheses, observations):
 
 
 def _build_thesis(company_name, hypotheses, blind_spots, observations=(),
-                  evidence_gaps=()):
+                  evidence_gaps=(), economic_history=None):
     from intent_engine.strategic_intelligence.decision import (
         compose_decision, decide_across,
     )
@@ -561,14 +598,48 @@ def _build_thesis(company_name, hypotheses, blind_spots, observations=(),
         # "Approved strategic evidence" and "defensible outside-in view" are
         # the pipeline's words for its own steps. The reader needs the fact,
         # which is that the public record did not carry enough to read from.
-        return {"view": f"What {company_name} has published is not enough to "
-                        f"read a strategy from, so none is put forward here.",
+        # NEVER A NAMELESS SENTENCE. Measured live on Caterpillar, whose
+        # brief opened "what has published is not enough to read a strategy
+        # from" -- the single most-read line in the product, ungrammatical,
+        # because `company_name` arrived empty on the domainless path while
+        # the page title resolved the name from elsewhere.
+        #
+        # This degrades the wording; it does not repair the emptiness, which
+        # is a separate upstream defect and is recorded as one. A subject
+        # that cannot be named still must not be printed as a hole.
+        subject = str(company_name or "").strip() or "this company"
+        # THE ONE DECISION OBJECT, built once and carrying the measured
+        # history state. Composing it twice was how the surfaces and the
+        # withheld sentence started describing different runs.
+        _withheld = compose_decision(
+            company_name, None, blind_spots, evidence_gaps=evidence_gaps,
+            verified=verified)
+        if isinstance(economic_history, dict) and economic_history:
+            _withheld.economic_history = dict(economic_history)
+        # THIS SENTENCE MAY DESCRIBE THIS PASS. IT MAY NOT DESCRIBE THE
+        # PRODUCT.
+        #
+        # It used to read "What X has published is not enough to read a
+        # strategy from, so none is put forward here." Both halves were
+        # wrong. The first is a claim about the company's disclosure when
+        # what actually happened is that the curated pattern library matched
+        # no transition -- a fact about a twelve-entry library, not about a
+        # public company's filings. The second became false outright once
+        # `executive.strategic_read` began composing a bounded read for every
+        # identified operating company: a strategy IS put forward, three
+        # clicks of this same product away.
+        #
+        # Gating the library by business model made this MORE frequent, not
+        # less: Cloudflare stopped being handed an industrial capacity
+        # mechanism, and a clean no-match is the correct outcome. So the
+        # sentence now says what this stage did and stops there. The strategic
+        # reading is elsewhere, and this sentence no longer denies it.
+        return {"view": f"No curated transition pattern matched {subject} in "
+                        f"this pass, so the reading below is not built from "
+                        f"one.",
                 "transition": "", "tension": "", "why_care": "",
                 "view_withheld": True,
-                "decision": compose_decision(
-                    company_name, None, blind_spots,
-                    evidence_gaps=evidence_gaps,
-                    verified=verified).as_dict()}
+                "decision": _withheld.as_dict()}
     top = hypotheses[0]
     # NO FABRICATED TENSION.
     #
@@ -874,7 +945,12 @@ def _latest_date(observations):
 def build_strategic_report(*, company_name, observations,
                            patterns=None, scaffolds=None,
                            user_accepts_limited_scope=False,
-                           previous_model=None, now=None) -> StrategicReport:
+                           previous_model=None, now=None,
+                           discovery_coverage=None,
+                           retrieval_failures=None,
+                           economic_history=None,
+                           source_coverage=None,
+                           business_model: str = "") -> StrategicReport:
     """Compose a StrategicReport from structured observations. Status is left
     to the quality gate (:func:`quality.evaluate_report`), which the caller
     should apply; this function sets a provisional status of the gate result."""
@@ -946,7 +1022,8 @@ def build_strategic_report(*, company_name, observations,
     fired_pattern_ids = {h.pattern_id for h in hypotheses}
     used_patterns = [p for p in patterns if p.pattern_id in fired_pattern_ids]
 
-    blind_spots = _build_blind_spots(observations)
+    blind_spots, blind_spots_refused = _build_blind_spots(
+        observations, business_model)
     questions = _build_questions(hypotheses, observations)
     shifts = _build_shifts(observations)
 
@@ -996,7 +1073,8 @@ def build_strategic_report(*, company_name, observations,
     # see.
     thesis = _build_thesis(company_name, hypotheses, blind_spots,
                            observations=observations,
-                           evidence_gaps=evidence_gaps)
+                           evidence_gaps=evidence_gaps,
+                           economic_history=economic_history)
 
     graph = _build_evidence_graph(company_name, observations, hypotheses,
                                   used_patterns, blind_spots, questions)
@@ -1018,10 +1096,12 @@ def build_strategic_report(*, company_name, observations,
     model = build_mental_model(company_name, observations, hypotheses,
                                now=when, previous=prev, blind_spots=blind_spots)
     surprises = [s.as_dict() for s in
-                 _ins.detect_surprises(company_name, observations, hypotheses)]
+                 _ins.detect_surprises(company_name, observations, hypotheses,
+                                          business_model)]
     opportunities = [o.as_dict() for o in
                      _ins.detect_opportunities(company_name, observations,
-                                               hypotheses)]
+                                               hypotheses,
+                                               business_model)]
     vulnerabilities = [v.as_dict() for v in
                        _ins.detect_vulnerabilities(company_name, observations,
                                                    hypotheses)]
@@ -1037,8 +1117,17 @@ def build_strategic_report(*, company_name, observations,
         evidence_gaps=evidence_gaps, near_misses=misses,
         decision_implications=_decision_implications(hypotheses, blind_spots),
         observations=list(observations), source_class_coverage=coverage,
+        # Carried, never derived here: this layer reasons over evidence and
+        # has no standing to say how hard the search for it worked.
+        discovery_coverage=(discovery_coverage
+                            if isinstance(discovery_coverage, dict) else {}),
+        retrieval_failures=(retrieval_failures
+                            if isinstance(retrieval_failures, dict) else {}),
+        source_coverage=(source_coverage
+                         if isinstance(source_coverage, dict) else {}),
         limited_scope_accepted=user_accepts_limited_scope, evidence_graph=graph,
         timeline=timeline, agenda=agenda, source_library=source_library,
+        blind_spots_refused=blind_spots_refused,
         mental_model=model.as_dict(), surprises=surprises,
         opportunities=opportunities, vulnerabilities=vulnerabilities,
         underexamined_questions=underexamined, what_changed=changes, feed=feed)

@@ -1,0 +1,195 @@
+{
+  "company": "Apple Inc.",
+  "website": "https://www.apple.com",
+  "run_id": "01M15C4YTA4GY2VM2H8C2KP471",
+  "warm": false,
+  "run_state": "PARTIAL",
+  "total_seconds": 12.58,
+  "candidates": 47,
+  "approved": 14,
+  "retrieved": 11,
+  "network_calls": 15,
+  "network_seconds": 4.9,
+  "network_share": 0.389,
+  "cpu_seconds": 7.69,
+  "duplicate_urls": {},
+  "duplicate_fetch_seconds": 0,
+  "stage_inclusive": {
+    "total": 12.58,
+    "compose": 6.59,
+    "discover": 3.71,
+    "fetch_approved": 2.28,
+    "create_run": 0.0
+  },
+  "stage_network": {
+    "unattributed": 4.66,
+    "discover": 0.24
+  },
+  "by_host": {
+    "www.apple.com": {
+      "calls": 14,
+      "seconds": 4.79,
+      "ok": 11,
+      "failed": 3
+    },
+    "support.apple.com": {
+      "calls": 1,
+      "seconds": 0.12,
+      "ok": 1,
+      "failed": 0
+    }
+  },
+  "slowest_calls": [
+    {
+      "stage": "unattributed",
+      "host": "www.apple.com",
+      "url": "https://www.apple.com/api",
+      "seconds": 0.692,
+      "ok": false,
+      "failure": "http_status",
+      "status": 404,
+      "bytes": 0
+    },
+    {
+      "stage": "unattributed",
+      "host": "www.apple.com",
+      "url": "https://www.apple.com/plans",
+      "seconds": 0.524,
+      "ok": false,
+      "failure": "http_status",
+      "status": 404,
+      "bytes": 0
+    },
+    {
+      "stage": "unattributed",
+      "host": "www.apple.com",
+      "url": "https://www.apple.com/case-studies",
+      "seconds": 0.482,
+      "ok": false,
+      "failure": "http_status",
+      "status": 404,
+      "bytes": 0
+    },
+    {
+      "stage": "unattributed",
+      "host": "www.apple.com",
+      "url": "https://www.apple.com/business/success-stories",
+      "seconds": 0.447,
+      "ok": true,
+      "failure": "",
+      "status": 200,
+      "bytes": 160039
+    },
+    {
+      "stage": "unattributed",
+      "host": "www.apple.com",
+      "url": "https://www.apple.com/shop/sitemap.xml",
+      "seconds": 0.355,
+      "ok": true,
+      "failure": "",
+      "status": 200,
+      "bytes": 3776
+    },
+    {
+      "stage": "unattributed",
+      "host": "www.apple.com",
+      "url": "https://www.apple.com/robots.txt",
+      "seconds": 0.309,
+      "ok": true,
+      "failure": "",
+      "status": 200,
+      "bytes": 1018
+    },
+    {
+      "stage": "unattributed",
+      "host": "www.apple.com",
+      "url": "https://www.apple.com/newsroom/sitemap.xml",
+      "seconds": 0.307,
+      "ok": true,
+      "failure": "",
+      "status": 200,
+      "bytes": 803548
+    },
+    {
+      "stage": "unattributed",
+      "host": "www.apple.com",
+      "url": "https://www.apple.com/newsroom/2024/06/wwdc24-highlights/",
+      "seconds": 0.268,
+      "ok": true,
+      "failure": "",
+      "status": 200,
+      "bytes": 274428
+    },
+    {
+      "stage": "unattributed",
+      "host": "www.apple.com",
+      "url": "https://www.apple.com/apple-vision-pro/",
+      "seconds": 0.266,
+      "ok": true,
+      "failure": "",
+      "status": 200,
+      "bytes": 361808
+    },
+    {
+      "stage": "discover",
+      "host": "www.apple.com",
+      "url": "https://www.apple.com",
+      "seconds": 0.236,
+      "ok": true,
+      "failure": "",
+      "status": 200,
+      "bytes": 257018
+    },
+    {
+      "stage": "unattributed",
+      "host": "www.apple.com",
+      "url": "https://www.apple.com/newsroom/2025/11/developers-decode-their-journeys-from-app-ideas-to-app-store/",
+      "seconds": 0.234,
+      "ok": true,
+      "failure": "",
+      "status": 200,
+      "bytes": 200165
+    },
+    {
+      "stage": "unattributed",
+      "host": "www.apple.com",
+      "url": "https://www.apple.com/autopush/sitemap/sitemap-index.xml",
+      "seconds": 0.225,
+      "ok": true,
+      "failure": "",
+      "status": 200,
+      "bytes": 26555
+    },
+    {
+      "stage": "unattributed",
+      "host": "www.apple.com",
+      "url": "https://www.apple.com/airpods/",
+      "seconds": 0.219,
+      "ok": true,
+      "failure": "",
+      "status": 200,
+      "bytes": 231184
+    },
+    {
+      "stage": "unattributed",
+      "host": "www.apple.com",
+      "url": "https://www.apple.com/newsroom/2024/08/developers-can-soon-offer-in-app-nfc-transactions-using-the-secure-element/",
+      "seconds": 0.211,
+      "ok": true,
+      "failure": "",
+      "status": 200,
+      "bytes": 133863
+    },
+    {
+      "stage": "unattributed",
+      "host": "support.apple.com",
+      "url": "https://support.apple.com/?cid=gn-ols-home-hp-tab",
+      "seconds": 0.12,
+      "ok": true,
+      "failure": "",
+      "status": 200,
+      "bytes": 130085
+    }
+  ],
+  "documents": 0
+}

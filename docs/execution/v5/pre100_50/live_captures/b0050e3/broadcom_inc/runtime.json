@@ -1,0 +1,58 @@
+{
+  "company": "Broadcom Inc.",
+  "deployed_sha": "b0050e3",
+  "run_id": "01M0J4M8P6PRFFJ6VGH9BEFQ2Z",
+  "analysis_seconds": 217,
+  "stage_transitions": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Broadcom Inc. AVGO \u00b7 broadcom.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence work",
+      "status": 200,
+      "html_bytes": 17012
+    },
+    {
+      "t": 79.9,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17013,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "cf-cache-status": "DYNAMIC",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J4M8P6PRFFJ6VGH9BEFQ2Z/progress",
+      "head": ""
+    },
+    {
+      "t": 217.2,
+      "text": "Broadcom Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Broadcom Inc. AVGO \u00b7 USA \u00b7 broadcom.com \u00b7 SEC CIK 0001730168 Broadcom Inc. is a semiconductor business that runs on design and manufacture of a physical product sold into a capacity-constrained supply chai",
+      "status": 200,
+      "html_bytes": 30851
+    }
+  ],
+  "route_seconds": {
+    "run": 11.02,
+    "intro": 6.19,
+    "slides": 9.21,
+    "full": 14.34,
+    "story": 8.36,
+    "history": 0.26,
+    "connect": 4.8
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "a66b8bb687154bfa",
+    "started_at": 1787314134.5251167,
+    "uptime_seconds": 1098.0
+  },
+  "process_after": {
+    "boot_id": "a66b8bb687154bfa",
+    "started_at": 1787314134.5251167,
+    "uptime_seconds": 1519.4
+  },
+  "errors": [
+    "GET /runs/01M0J4M8P6PRFFJ6VGH9BEFQ2Z/progress: timeout",
+    "GET /runs/01M0J4M8P6PRFFJ6VGH9BEFQ2Z/progress: timeout",
+    "GET /runs/01M0J4M8P6PRFFJ6VGH9BEFQ2Z/progress: timeout"
+  ]
+}

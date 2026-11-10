@@ -1,0 +1,133 @@
+contract: v3_retroactive_audit.v1
+audited_at: '2026-08-10'
+audited_against: the upgraded V3→V5 master plan, not the V3 closure record
+method: 'V3 is frozen and is NOT reopened here. What is audited is whether each requirement the upgraded
+  plan introduces is REPRESENTED somewhere — in V3, in V4 infrastructure, or in an explicit handoff. Where
+  a V3-era requirement is better served by V4 infrastructure, that is recorded as SUPERSEDED rather than
+  mutated into the frozen layer.
+
+  Every status below was checked against code or a live artifact in this run. None is carried over from
+  a previous audit, because two of the ones that were carried over turned out to be false.
+
+  '
+states:
+- DONE
+- DONE_WITH_V4_HARDENING
+- PARTIAL
+- MISSING
+- SUPERSEDED
+- NOT_APPLICABLE
+requirements:
+  adversarial_strategy_testing:
+    status: DONE_WITH_V4_HARDENING
+    v3: core/premortem_prediction_bridge.py derives resolvable predictions from a premortem's failure
+      modes.
+    v4: L-ADV-001. AdversaryCase adds what the premortem had no vocabulary for — the separation of CAPABILITY
+      from INCENTIVE from OBSERVED_ACTION from HYPOTHESIZED_RESPONSE. The V3 bridge is untouched.
+    note: 'The V3 premortem asks what could go wrong. It has no way to say how well the answer is evidenced,
+      so a move somebody thought of and a move a rival has actually made read identically. That is the
+      gap V4 fills, and it is additive.
+
+      '
+  evidence_provenance:
+    status: DONE_WITH_V4_HARDENING
+    v3: MicroEvidence carries source, source_role, reliability and limitations.
+    v4: 'Two hardenings this run. An unrecognised source class defaulted to independent_reporting — the
+      most independent role in the table — so a document whose publisher could not be named counted towards
+      the independence total that decides whether a thesis may be asserted. And a blank line is now a
+      hard sentence boundary, after a system-role frame was found merged into the same evidence fact as
+      a legitimate sentence.
+
+      '
+    note: neither changed a V3 contract; both changed what fills it.
+  temporal_truth:
+    status: DONE
+    v3: vintage wall, occurrence_time vs observation_time, publication_basis.
+    v4: D-REP-001 verified; D-REP-002 BLOCKED_DATA at 1/6 macro months.
+    note: 'The gate is measured from the live ledger and clears itself when the data arrives. Nothing
+      here is asserted.
+
+      '
+  counterfactuals:
+    status: DONE
+    v3: counterfactual.py and counterfactual_memory.py.
+    v4: no change required; no defect found this run.
+  strategic_interactions:
+    status: DONE
+    v3: strategic_interaction.py, reactions.py with ten named factors, each either evidenced or explicitly
+      unassessed.
+    v4: L-ADV-001 reuses the same discipline rather than adding a second one.
+  response_expectations:
+    status: DONE_WITH_V4_HARDENING
+    v3: reaction trees, assert_no_equilibrium_claim.
+    v4: the four response standings make "a rival could" and "a rival did" different records rather than
+      different wordings.
+  information_priorities:
+    status: PARTIAL
+    v3: value_of_information.py, research_priorities.py.
+    v4: B-VOI-002 BLOCKED_DATA at 26/50 prospective decisions.
+    note: 'Recorded honestly as blocked rather than scored on a reconstructed log. A VOI calibration computed
+      over reconstructed decisions is biased toward success by construction, because the actions that
+      produced nothing left nothing to reconstruct from.
+
+      '
+  no_change_learning:
+    status: DONE
+    v3: KnowledgeEffect.NO_CHANGE is a first-class record.
+    v4: J-ADV-001 attack 34 pins it — an effect reporting the same state before and after raises NotAChange,
+      so an object the evidence was merely ABOUT cannot be counted as an object it changed.
+  source_degradation_semantics:
+    status: DONE
+    v3: none; there was no source lifecycle.
+    v4: L-SRC-001. Verified independently this run — 30 rows in the live ledger across HEALTHY, DEGRADED
+      and UNAVAILABLE, with last_success and failure_streak.
+    note: SUPERSEDED nothing; this requirement had no V3 implementation at all.
+  security_boundaries:
+    status: SATISFIED_BY_V4
+    v3: internal_state permission wall, runtime/redaction.py
+    v4: L-SAN-001 guard; L-TEN-001 authority wall.
+    note: 'Was PARTIAL on the grounds that the wall had no production caller — ''a component, not a system''.
+      tenant_scope is now that caller and the only one. The wall checked the right thing and trusted the
+      wrong type: a bare string, in an engine whose most plentiful strings are company names parsed from
+      documents. TenantScope carries the authority that established an identity, from_evidence raises,
+      and permitted_facts accepts nothing else. The multi-tenant retrieval half remains V4-I9/I10.
+
+      '
+  cold_start_assumptions:
+    status: SATISFIED_BY_V4
+    v3: none
+    v4: L-CLD-001, Founder 2dbc31a.
+    note: 'Was MISSING and is now built. Six coverage states, each with its own sentence and its own must-not-conclude;
+      every state short of OBSERVED licenses no assertion. Every value carries its origin, and COMPANY_OBSERVATION
+      is the only one speakable in the indicative — it must cite evidence, and a prior carrying evidence
+      ids is refused outright. LIVE on 25 dossiers.
+
+      '
+  regulatory_antitrust_boundaries:
+    status: PARTIAL
+    v3: company-published sources never name rivals; COMPETES_WITH requires a third-party publisher.
+    v4: L-ANT-001 reason sharpened; the checkable cross-company claims are now checked.
+    note: the multi-tenant half needs two tenants and is V4-I10.
+false_completions_corrected_this_run:
+- id: L-BAR-001
+  was: NOT_APPLICABLE — "no internal Business Graph exists on this branch"
+  is: PARTIAL — the graph analogue exists and the wall is enforced; no production caller
+- id: L-ANT-001
+  was: NOT_APPLICABLE — "single-tenant by construction"
+  is: PARTIAL — the tenant unit is the company, and three cross-tenant claims were checkable and are now
+    checked
+- id: H-CEO-003
+  was: invisible — its id was reused by a later node, so the frontier never saw it
+  is: COMPLETE, with the planner now refusing to run on a duplicate id
+- id: thesis_history
+  was: '"34 of 59 dossiers still show ABSENT history, stale files that will clear as cycles run"'
+  is: 34 of those files are engineering audit reports sharing the directory, not dossiers; the real corpus
+    is 25 companies, and 22 of them were reporting an absence of analysis as a settled view
+- id: C-MET-003
+  was: READY on macro_observations >= 24, satisfied 2347 times
+  is: BLOCKED_DATA on macro_retrieval_months >= 6 — the old gate measured how many observations we hold,
+    and the acceptance asks what we could have seen
+- id: TASK_GRAPH keys
+  was: 'nine nodes carrying a trailing completion_evidence: null'
+  is: detected from raw text before YAML parse, since a loader collapses duplicate keys before any reader
+    sees them

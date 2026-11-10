@@ -1,0 +1,2320 @@
+{
+  "arms": {
+    "DEEP": {
+      "arm": {
+        "base_series": [
+          "UNRATE",
+          "CPIAUCSL",
+          "DFF",
+          "DGS2",
+          "DGS10",
+          "HOUST",
+          "INDPRO",
+          "BAA"
+        ],
+        "behavioural_series": [
+          "UMCSENT"
+        ],
+        "name": "DEEP",
+        "note": "1978-01 onward",
+        "origins": 584,
+        "span": [
+          "1978-01-15",
+          "2026-08-15"
+        ]
+      },
+      "eligibility": {
+        "HOUST_180d": {
+          "eligibility": {
+            "base_rate": 0.527,
+            "baseline_clear": false,
+            "baseline_reason": "the macro baseline (Brier 0.27345) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "effective_origins": 223.45,
+            "eligible_for_human_test": false,
+            "episodes": 18,
+            "mde": null,
+            "target_id": "HOUST_180d",
+            "usable_origins": 575,
+            "why_not": "BASELINE_INVALID: the macro baseline (Brier 0.27345) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block."
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.25177,
+              "directional_accuracy": 0.4562,
+              "features": 0,
+              "n": 480,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.25248,
+              "directional_accuracy": 0.4396,
+              "features": 0,
+              "n": 480,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.27345,
+              "directional_accuracy": 0.5563,
+              "features": 20,
+              "n": 480,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.3543,
+              "directional_accuracy": 0.4188,
+              "features": 0,
+              "n": 480,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.28404,
+              "directional_accuracy": 0.525,
+              "features": 0,
+              "n": 480,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "HOUST_240d": {
+          "eligibility": {
+            "base_rate": 0.5288,
+            "baseline_clear": false,
+            "baseline_reason": "the macro baseline (Brier 0.29682) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "effective_origins": 190.41,
+            "eligible_for_human_test": false,
+            "episodes": 18,
+            "mde": null,
+            "target_id": "HOUST_240d",
+            "usable_origins": 573,
+            "why_not": "BASELINE_INVALID: the macro baseline (Brier 0.29682) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block."
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.25516,
+              "directional_accuracy": 0.4505,
+              "features": 0,
+              "n": 475,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.25377,
+              "directional_accuracy": 0.4168,
+              "features": 0,
+              "n": 475,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.29682,
+              "directional_accuracy": 0.5453,
+              "features": 20,
+              "n": 475,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.33421,
+              "directional_accuracy": 0.4589,
+              "features": 0,
+              "n": 475,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.31375,
+              "directional_accuracy": 0.52,
+              "features": 0,
+              "n": 475,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "INDPRO_180d": {
+          "eligibility": {
+            "base_rate": 0.7183,
+            "baseline_clear": true,
+            "baseline_reason": "the macro baseline (Brier 0.18838) beats every trivial rung (BASE_RATE, PERSISTENCE, AR), so a delta measured against it means something",
+            "effective_origins": 78.9,
+            "eligible_for_human_test": true,
+            "episodes": 18,
+            "mde": null,
+            "target_id": "INDPRO_180d",
+            "usable_origins": 575,
+            "why_not": ""
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.20583,
+              "directional_accuracy": 0.7083,
+              "features": 0,
+              "n": 480,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.20284,
+              "directional_accuracy": 0.7312,
+              "features": 0,
+              "n": 480,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.18838,
+              "directional_accuracy": 0.7354,
+              "features": 20,
+              "n": 480,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.23646,
+              "directional_accuracy": 0.6521,
+              "features": 0,
+              "n": 480,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.19429,
+              "directional_accuracy": 0.7479,
+              "features": 0,
+              "n": 480,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "INDPRO_240d": {
+          "eligibility": {
+            "base_rate": 0.726,
+            "baseline_clear": true,
+            "baseline_reason": "the macro baseline (Brier 0.19006) beats every trivial rung (BASE_RATE, PERSISTENCE, AR), so a delta measured against it means something",
+            "effective_origins": 67.66,
+            "eligible_for_human_test": true,
+            "episodes": 18,
+            "mde": null,
+            "target_id": "INDPRO_240d",
+            "usable_origins": 573,
+            "why_not": ""
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.20393,
+              "directional_accuracy": 0.7284,
+              "features": 0,
+              "n": 475,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.20125,
+              "directional_accuracy": 0.7368,
+              "features": 0,
+              "n": 475,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.19006,
+              "directional_accuracy": 0.7474,
+              "features": 20,
+              "n": 475,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.23934,
+              "directional_accuracy": 0.6463,
+              "features": 0,
+              "n": 475,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.19965,
+              "directional_accuracy": 0.7432,
+              "features": 0,
+              "n": 475,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        }
+      },
+      "eligible": [
+        "INDPRO_180d",
+        "INDPRO_240d"
+      ],
+      "episode_stability": {
+        "by_class": {
+          "credit_crisis": {
+            "delta": 0.00521,
+            "episodes": [
+              "EP_201706"
+            ],
+            "n": 18,
+            "sign": "+"
+          },
+          "inflationary_recession": {
+            "delta": -0.00548,
+            "episodes": [
+              "EP_198710",
+              "EP_200801",
+              "EP_202004"
+            ],
+            "n": 296,
+            "sign": "-"
+          },
+          "liquidity_squeeze": {
+            "delta": -0.00044,
+            "episodes": [
+              "EP_200511"
+            ],
+            "n": 38,
+            "sign": "-"
+          },
+          "ordinary_slowdown": {
+            "delta": -0.00527,
+            "episodes": [
+              "EP_200002",
+              "EP_200307"
+            ],
+            "n": 68,
+            "sign": "-"
+          }
+        },
+        "classification": "REGIME_DEPENDENT",
+        "why": "the sign flips between episode classes, so this is not one stable mechanism"
+      },
+      "episodes": [
+        {
+          "end_as_known": "1983-07-15",
+          "episode_id": "EP_197801",
+          "information_cutoff": "1983-07-15",
+          "normalization": "1984-01-15",
+          "origins": 67,
+          "peak_stress": 3,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "INFLATION_SHOCK",
+            "LIQUIDITY_STRESS",
+            "LABOUR_DETERIORATION"
+          ],
+          "resolved": true,
+          "start_as_known": "1978-01-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 0.41,
+            "inflation_yoy": 0.06713,
+            "policy_change_pp": 0.25,
+            "unemployment_change_pp": -1.4
+          }
+        },
+        {
+          "end_as_known": "1985-02-15",
+          "episode_id": "EP_198403",
+          "information_cutoff": "1985-02-15",
+          "normalization": "1985-08-15",
+          "origins": 12,
+          "peak_stress": 1,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "INFLATION_SHOCK"
+          ],
+          "resolved": true,
+          "start_as_known": "1984-03-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 1.05,
+            "inflation_yoy": 0.0429,
+            "policy_change_pp": 0.21,
+            "unemployment_change_pp": -2.6
+          }
+        },
+        {
+          "end_as_known": "1992-11-15",
+          "episode_id": "EP_198710",
+          "information_cutoff": "1992-11-15",
+          "normalization": "1993-05-15",
+          "origins": 57,
+          "peak_stress": 2,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "INFLATION_SHOCK",
+            "LIQUIDITY_STRESS",
+            "LABOUR_DETERIORATION"
+          ],
+          "resolved": true,
+          "start_as_known": "1987-10-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 0.99,
+            "inflation_yoy": 0.04288,
+            "policy_change_pp": 0.17,
+            "unemployment_change_pp": -1.1
+          }
+        },
+        {
+          "end_as_known": "2002-10-15",
+          "episode_id": "EP_200002",
+          "information_cutoff": "2002-10-15",
+          "normalization": "2003-04-15",
+          "origins": 28,
+          "peak_stress": 1,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "LIQUIDITY_STRESS",
+            "LABOUR_DETERIORATION"
+          ],
+          "resolved": true,
+          "start_as_known": "2000-02-15",
+          "trigger_evidence": {
+            "curve_slope_pp": -0.06,
+            "inflation_yoy": 0.02676,
+            "policy_change_pp": 0.15,
+            "unemployment_change_pp": -0.3
+          }
+        },
+        {
+          "end_as_known": "2003-07-15",
+          "episode_id": "EP_200307",
+          "information_cutoff": "2003-07-15",
+          "normalization": "2004-01-15",
+          "origins": 1,
+          "peak_stress": 1,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "LABOUR_DETERIORATION"
+          ],
+          "resolved": true,
+          "start_as_known": "2003-07-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 2.39,
+            "inflation_yoy": 0.01894,
+            "policy_change_pp": 0.06,
+            "unemployment_change_pp": 0.6
+          }
+        },
+        {
+          "end_as_known": "2007-05-15",
+          "episode_id": "EP_200511",
+          "information_cutoff": "2007-05-15",
+          "normalization": "2007-11-15",
+          "origins": 15,
+          "peak_stress": 2,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "INFLATION_SHOCK",
+            "LIQUIDITY_STRESS"
+          ],
+          "resolved": true,
+          "start_as_known": "2005-11-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 0.11,
+            "inflation_yoy": 0.04742,
+            "policy_change_pp": 0.04,
+            "unemployment_change_pp": -0.5
+          }
+        },
+        {
+          "end_as_known": "2010-05-15",
+          "episode_id": "EP_200801",
+          "information_cutoff": "2010-05-15",
+          "normalization": "2010-11-15",
+          "origins": 29,
+          "peak_stress": 2,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "INFLATION_SHOCK",
+            "LABOUR_DETERIORATION"
+          ],
+          "resolved": true,
+          "start_as_known": "2008-01-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 1.23,
+            "inflation_yoy": 0.04373,
+            "policy_change_pp": 0.13,
+            "unemployment_change_pp": 0.6
+          }
+        },
+        {
+          "end_as_known": "2018-02-15",
+          "episode_id": "EP_201706",
+          "information_cutoff": "2018-02-15",
+          "normalization": "2018-08-15",
+          "origins": 9,
+          "peak_stress": 1,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "CREDIT_STRESS"
+          ],
+          "resolved": true,
+          "start_as_known": "2017-06-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 0.8,
+            "delinquency_yoy": 0.12558,
+            "inflation_yoy": 0.02176,
+            "policy_change_pp": 0.0,
+            "unemployment_change_pp": -0.4
+          }
+        },
+        {
+          "end_as_known": "2024-12-15",
+          "episode_id": "EP_202004",
+          "information_cutoff": "2024-12-15",
+          "normalization": "2025-06-15",
+          "origins": 56,
+          "peak_stress": 3,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "LABOUR_DETERIORATION",
+            "INFLATION_SHOCK",
+            "LIQUIDITY_STRESS",
+            "CREDIT_STRESS"
+          ],
+          "resolved": true,
+          "start_as_known": "2020-04-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 0.53,
+            "delinquency_yoy": 0.02756,
+            "inflation_yoy": 0.02341,
+            "policy_change_pp": 0.0,
+            "unemployment_change_pp": 0.6
+          }
+        },
+        {
+          "end_as_known": "2026-07-15",
+          "episode_id": "EP_202607",
+          "information_cutoff": "2026-07-15",
+          "normalization": "",
+          "origins": 1,
+          "peak_stress": 1,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "INFLATION_SHOCK"
+          ],
+          "resolved": false,
+          "start_as_known": "2026-07-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 0.4,
+            "delinquency_yoy": -0.04575,
+            "inflation_yoy": 0.0427,
+            "policy_change_pp": 0.0,
+            "unemployment_change_pp": -0.1
+          }
+        }
+      ],
+      "features": {
+        "base": [
+          "BAA_q",
+          "BAA_yoy",
+          "CPIAUCSL_q",
+          "CPIAUCSL_yoy",
+          "DFF_lvl",
+          "DFF_q",
+          "DFF_yoy",
+          "DGS10_lvl",
+          "DGS10_q",
+          "DGS10_yoy",
+          "DGS2_lvl",
+          "DGS2_q",
+          "DGS2_yoy",
+          "HOUST_q",
+          "HOUST_yoy",
+          "INDPRO_q",
+          "INDPRO_yoy",
+          "UNRATE_lvl",
+          "UNRATE_q",
+          "UNRATE_yoy"
+        ],
+        "sentiment": [
+          "UMCSENT_q",
+          "UMCSENT_yoy"
+        ]
+      },
+      "h7_verdict": "INSUFFICIENT_POWER",
+      "incremental": {
+        "augmented_score": 0.19169,
+        "base_score": 0.18922,
+        "ci": [
+          -0.00763,
+          0.00248
+        ],
+        "delta": -0.00247,
+        "dimension": "sentiment",
+        "episode_ci": [
+          -0.0075,
+          0.00333
+        ],
+        "episode_ci_note": null,
+        "fdr_adjusted": false,
+        "horizon_days": 0,
+        "mde": 0.00506,
+        "n_clusters": 480,
+        "n_episodes": 15,
+        "n_paired": 955,
+        "name": "H7_INCREMENTAL",
+        "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+        "p_value": 0.305,
+        "population": "US_households",
+        "pseudo_replication": false,
+        "regime": "ALL",
+        "robust": false,
+        "sample": {
+          "effective_origins": 190.12,
+          "headline": "955 rows / 480 origins / 190.1 effective / 15 episodes",
+          "horizons": 2,
+          "icc": 0.7451,
+          "independent_episodes": 15,
+          "mean_rows_per_origin": 1.99,
+          "origin_autocorrelation": 0.4326,
+          "origins_per_episode": [
+            22,
+            86,
+            8,
+            27,
+            7,
+            84,
+            25,
+            11,
+            62,
+            33,
+            1,
+            19,
+            29,
+            9,
+            57
+          ],
+          "pseudo_replication_factor": 5.02,
+          "raw_rows": 955,
+          "rows_per_episode": [
+            44,
+            172,
+            16,
+            54,
+            14,
+            168,
+            50,
+            17,
+            124,
+            66,
+            2,
+            38,
+            58,
+            18,
+            114
+          ],
+          "span": [
+            "1985-12-15",
+            "2025-11-15"
+          ],
+          "targets": 2,
+          "unique_origins": 480
+        },
+        "single_cluster": false,
+        "survives_fdr": null,
+        "too_few_episodes": false,
+        "underpowered": true,
+        "verdict": "NO_IMPROVEMENT"
+      },
+      "lead_time": {
+        "INDPRO_180d/ALARM_MATCHED": {
+          "alarm_origins_augmented": 23,
+          "alarm_origins_base": 24,
+          "augmented_threshold": 0.4815,
+          "base_threshold": 0.5,
+          "episodes": 1,
+          "false_alarms_augmented": 1,
+          "false_alarms_base": 0,
+          "lead_delta_days": 0.0,
+          "median_lead_augmented": 365.0,
+          "median_lead_base": 0.0,
+          "mode": "ALARM_MATCHED",
+          "per_episode": [
+            {
+              "augmented": {
+                "episode_id": "EP_197801",
+                "episode_start": "1978-01-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.4815
+              },
+              "base": {
+                "episode_id": "EP_197801",
+                "episode_start": "1978-01-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_197801",
+              "episode_start": "1978-01-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_198403",
+                "episode_start": "1984-03-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.4815
+              },
+              "base": {
+                "episode_id": "EP_198403",
+                "episode_start": "1984-03-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_198403",
+              "episode_start": "1984-03-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_198710",
+                "episode_start": "1987-10-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.4815
+              },
+              "base": {
+                "episode_id": "EP_198710",
+                "episode_start": "1987-10-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_198710",
+              "episode_start": "1987-10-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_200002",
+                "episode_start": "2000-02-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.4815
+              },
+              "base": {
+                "episode_id": "EP_200002",
+                "episode_start": "2000-02-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_200002",
+              "episode_start": "2000-02-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_200307",
+                "episode_start": "2003-07-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.4815
+              },
+              "base": {
+                "episode_id": "EP_200307",
+                "episode_start": "2003-07-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_200307",
+              "episode_start": "2003-07-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_200511",
+                "episode_start": "2005-11-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.4815
+              },
+              "base": {
+                "episode_id": "EP_200511",
+                "episode_start": "2005-11-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_200511",
+              "episode_start": "2005-11-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_200801",
+                "episode_start": "2008-01-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.4815
+              },
+              "base": {
+                "episode_id": "EP_200801",
+                "episode_start": "2008-01-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_200801",
+              "episode_start": "2008-01-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_201706",
+                "episode_start": "2017-06-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.4815
+              },
+              "base": {
+                "episode_id": "EP_201706",
+                "episode_start": "2017-06-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_201706",
+              "episode_start": "2017-06-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_202004",
+                "episode_start": "2020-04-15",
+                "first_warning": "2020-04-15",
+                "lead_days": 0,
+                "model": "AUGMENTED",
+                "threshold": 0.4815
+              },
+              "base": {
+                "episode_id": "EP_202004",
+                "episode_start": "2020-04-15",
+                "first_warning": "2020-04-15",
+                "lead_days": 0,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": 0,
+              "episode_id": "EP_202004",
+              "episode_start": "2020-04-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_202607",
+                "episode_start": "2026-07-15",
+                "first_warning": "2024-07-15",
+                "lead_days": 730,
+                "model": "AUGMENTED",
+                "threshold": 0.4815
+              },
+              "base": {
+                "episode_id": "EP_202607",
+                "episode_start": "2026-07-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_202607",
+              "episode_start": "2026-07-15"
+            }
+          ],
+          "statement": "ALARM_MATCHED: augmented median lead 365d vs base 0d (delta +0d) over 1 episode(s); false alarms 1 vs 0; alarm origins 23 vs 24. LEAD_BOUGHT_WITH_FALSE_ALARMS",
+          "verdict": "LEAD_BOUGHT_WITH_FALSE_ALARMS",
+          "warned_episodes_augmented": 2,
+          "warned_episodes_base": 1
+        },
+        "INDPRO_180d/RAW": {
+          "alarm_origins_augmented": 17,
+          "alarm_origins_base": 24,
+          "augmented_threshold": 0.5,
+          "base_threshold": 0.5,
+          "episodes": 1,
+          "false_alarms_augmented": 1,
+          "false_alarms_base": 0,
+          "lead_delta_days": 0.0,
+          "median_lead_augmented": 213.0,
+          "median_lead_base": 0.0,
+          "mode": "RAW",
+          "per_episode": [
+            {
+              "augmented": {
+                "episode_id": "EP_197801",
+                "episode_start": "1978-01-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5
+              },
+              "base": {
+                "episode_id": "EP_197801",
+                "episode_start": "1978-01-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_197801",
+              "episode_start": "1978-01-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_198403",
+                "episode_start": "1984-03-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5
+              },
+              "base": {
+                "episode_id": "EP_198403",
+                "episode_start": "1984-03-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_198403",
+              "episode_start": "1984-03-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_198710",
+                "episode_start": "1987-10-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5
+              },
+              "base": {
+                "episode_id": "EP_198710",
+                "episode_start": "1987-10-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_198710",
+              "episode_start": "1987-10-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_200002",
+                "episode_start": "2000-02-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5
+              },
+              "base": {
+                "episode_id": "EP_200002",
+                "episode_start": "2000-02-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_200002",
+              "episode_start": "2000-02-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_200307",
+                "episode_start": "2003-07-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5
+              },
+              "base": {
+                "episode_id": "EP_200307",
+                "episode_start": "2003-07-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_200307",
+              "episode_start": "2003-07-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_200511",
+                "episode_start": "2005-11-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5
+              },
+              "base": {
+                "episode_id": "EP_200511",
+                "episode_start": "2005-11-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_200511",
+              "episode_start": "2005-11-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_200801",
+                "episode_start": "2008-01-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5
+              },
+              "base": {
+                "episode_id": "EP_200801",
+                "episode_start": "2008-01-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_200801",
+              "episode_start": "2008-01-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_201706",
+                "episode_start": "2017-06-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5
+              },
+              "base": {
+                "episode_id": "EP_201706",
+                "episode_start": "2017-06-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_201706",
+              "episode_start": "2017-06-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_202004",
+                "episode_start": "2020-04-15",
+                "first_warning": "2020-04-15",
+                "lead_days": 0,
+                "model": "AUGMENTED",
+                "threshold": 0.5
+              },
+              "base": {
+                "episode_id": "EP_202004",
+                "episode_start": "2020-04-15",
+                "first_warning": "2020-04-15",
+                "lead_days": 0,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": 0,
+              "episode_id": "EP_202004",
+              "episode_start": "2020-04-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_202607",
+                "episode_start": "2026-07-15",
+                "first_warning": "2025-05-15",
+                "lead_days": 426,
+                "model": "AUGMENTED",
+                "threshold": 0.5
+              },
+              "base": {
+                "episode_id": "EP_202607",
+                "episode_start": "2026-07-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_202607",
+              "episode_start": "2026-07-15"
+            }
+          ],
+          "statement": "RAW: augmented median lead 213d vs base 0d (delta +0d) over 1 episode(s); false alarms 1 vs 0; alarm origins 17 vs 24. LEAD_BOUGHT_WITH_FALSE_ALARMS",
+          "verdict": "LEAD_BOUGHT_WITH_FALSE_ALARMS",
+          "warned_episodes_augmented": 2,
+          "warned_episodes_base": 1
+        },
+        "INDPRO_240d/ALARM_MATCHED": {
+          "alarm_origins_augmented": 28,
+          "alarm_origins_base": 29,
+          "augmented_threshold": 0.5344,
+          "base_threshold": 0.5,
+          "episodes": 1,
+          "false_alarms_augmented": 1,
+          "false_alarms_base": 1,
+          "lead_delta_days": -517.0,
+          "median_lead_augmented": 213.0,
+          "median_lead_base": 487.0,
+          "mode": "ALARM_MATCHED",
+          "per_episode": [
+            {
+              "augmented": {
+                "episode_id": "EP_197801",
+                "episode_start": "1978-01-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5344
+              },
+              "base": {
+                "episode_id": "EP_197801",
+                "episode_start": "1978-01-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_197801",
+              "episode_start": "1978-01-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_198403",
+                "episode_start": "1984-03-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5344
+              },
+              "base": {
+                "episode_id": "EP_198403",
+                "episode_start": "1984-03-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_198403",
+              "episode_start": "1984-03-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_198710",
+                "episode_start": "1987-10-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5344
+              },
+              "base": {
+                "episode_id": "EP_198710",
+                "episode_start": "1987-10-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_198710",
+              "episode_start": "1987-10-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_200002",
+                "episode_start": "2000-02-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5344
+              },
+              "base": {
+                "episode_id": "EP_200002",
+                "episode_start": "2000-02-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_200002",
+              "episode_start": "2000-02-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_200307",
+                "episode_start": "2003-07-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5344
+              },
+              "base": {
+                "episode_id": "EP_200307",
+                "episode_start": "2003-07-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_200307",
+              "episode_start": "2003-07-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_200511",
+                "episode_start": "2005-11-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5344
+              },
+              "base": {
+                "episode_id": "EP_200511",
+                "episode_start": "2005-11-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_200511",
+              "episode_start": "2005-11-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_200801",
+                "episode_start": "2008-01-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5344
+              },
+              "base": {
+                "episode_id": "EP_200801",
+                "episode_start": "2008-01-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_200801",
+              "episode_start": "2008-01-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_201706",
+                "episode_start": "2017-06-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5344
+              },
+              "base": {
+                "episode_id": "EP_201706",
+                "episode_start": "2017-06-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_201706",
+              "episode_start": "2017-06-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_202004",
+                "episode_start": "2020-04-15",
+                "first_warning": "2020-05-15",
+                "lead_days": -30,
+                "model": "AUGMENTED",
+                "threshold": 0.5344
+              },
+              "base": {
+                "episode_id": "EP_202004",
+                "episode_start": "2020-04-15",
+                "first_warning": "2018-12-15",
+                "lead_days": 487,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": -517,
+              "episode_id": "EP_202004",
+              "episode_start": "2020-04-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_202607",
+                "episode_start": "2026-07-15",
+                "first_warning": "2025-04-15",
+                "lead_days": 456,
+                "model": "AUGMENTED",
+                "threshold": 0.5344
+              },
+              "base": {
+                "episode_id": "EP_202607",
+                "episode_start": "2026-07-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_202607",
+              "episode_start": "2026-07-15"
+            }
+          ],
+          "statement": "ALARM_MATCHED: augmented median lead 213d vs base 487d (delta -517d) over 1 episode(s); false alarms 1 vs 1; alarm origins 28 vs 29. LATER",
+          "verdict": "LATER",
+          "warned_episodes_augmented": 2,
+          "warned_episodes_base": 1
+        },
+        "INDPRO_240d/RAW": {
+          "alarm_origins_augmented": 34,
+          "alarm_origins_base": 29,
+          "augmented_threshold": 0.5,
+          "base_threshold": 0.5,
+          "episodes": 1,
+          "false_alarms_augmented": 2,
+          "false_alarms_base": 1,
+          "lead_delta_days": 0.0,
+          "median_lead_augmented": 487.0,
+          "median_lead_base": 487.0,
+          "mode": "RAW",
+          "per_episode": [
+            {
+              "augmented": {
+                "episode_id": "EP_197801",
+                "episode_start": "1978-01-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5
+              },
+              "base": {
+                "episode_id": "EP_197801",
+                "episode_start": "1978-01-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_197801",
+              "episode_start": "1978-01-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_198403",
+                "episode_start": "1984-03-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5
+              },
+              "base": {
+                "episode_id": "EP_198403",
+                "episode_start": "1984-03-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_198403",
+              "episode_start": "1984-03-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_198710",
+                "episode_start": "1987-10-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5
+              },
+              "base": {
+                "episode_id": "EP_198710",
+                "episode_start": "1987-10-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_198710",
+              "episode_start": "1987-10-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_200002",
+                "episode_start": "2000-02-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5
+              },
+              "base": {
+                "episode_id": "EP_200002",
+                "episode_start": "2000-02-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_200002",
+              "episode_start": "2000-02-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_200307",
+                "episode_start": "2003-07-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5
+              },
+              "base": {
+                "episode_id": "EP_200307",
+                "episode_start": "2003-07-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_200307",
+              "episode_start": "2003-07-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_200511",
+                "episode_start": "2005-11-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5
+              },
+              "base": {
+                "episode_id": "EP_200511",
+                "episode_start": "2005-11-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_200511",
+              "episode_start": "2005-11-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_200801",
+                "episode_start": "2008-01-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5
+              },
+              "base": {
+                "episode_id": "EP_200801",
+                "episode_start": "2008-01-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_200801",
+              "episode_start": "2008-01-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_201706",
+                "episode_start": "2017-06-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "AUGMENTED",
+                "threshold": 0.5
+              },
+              "base": {
+                "episode_id": "EP_201706",
+                "episode_start": "2017-06-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_201706",
+              "episode_start": "2017-06-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_202004",
+                "episode_start": "2020-04-15",
+                "first_warning": "2018-12-15",
+                "lead_days": 487,
+                "model": "AUGMENTED",
+                "threshold": 0.5
+              },
+              "base": {
+                "episode_id": "EP_202004",
+                "episode_start": "2020-04-15",
+                "first_warning": "2018-12-15",
+                "lead_days": 487,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": 0,
+              "episode_id": "EP_202004",
+              "episode_start": "2020-04-15"
+            },
+            {
+              "augmented": {
+                "episode_id": "EP_202607",
+                "episode_start": "2026-07-15",
+                "first_warning": "2025-03-15",
+                "lead_days": 487,
+                "model": "AUGMENTED",
+                "threshold": 0.5
+              },
+              "base": {
+                "episode_id": "EP_202607",
+                "episode_start": "2026-07-15",
+                "first_warning": "",
+                "lead_days": null,
+                "model": "BASE",
+                "threshold": 0.5
+              },
+              "delta_days": null,
+              "episode_id": "EP_202607",
+              "episode_start": "2026-07-15"
+            }
+          ],
+          "statement": "RAW: augmented median lead 487d vs base 487d (delta +0d) over 1 episode(s); false alarms 2 vs 1; alarm origins 34 vs 29. LEAD_BOUGHT_WITH_FALSE_ALARMS",
+          "verdict": "LEAD_BOUGHT_WITH_FALSE_ALARMS",
+          "warned_episodes_augmented": 2,
+          "warned_episodes_base": 1
+        }
+      },
+      "paired_all": 1910,
+      "paired_scored": 955,
+      "per_family": {
+        "INDPRO_180d": {
+          "augmented_score": 0.18998,
+          "base_score": 0.18838,
+          "ci": [
+            -0.00779,
+            0.00436
+          ],
+          "delta": -0.0016,
+          "dimension": "sentiment",
+          "episode_ci": [
+            -0.00731,
+            0.00544
+          ],
+          "episode_ci_note": null,
+          "fdr_adjusted": false,
+          "horizon_days": 0,
+          "mde": 0.00607,
+          "n_clusters": 480,
+          "n_episodes": 15,
+          "n_paired": 480,
+          "name": "INDPRO_180d",
+          "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+          "p_value": 0.565,
+          "population": "US_households",
+          "pseudo_replication": false,
+          "regime": "ALL",
+          "robust": false,
+          "sample": {
+            "effective_origins": 189.06,
+            "headline": "480 rows / 480 origins / 189.1 effective / 15 episodes",
+            "horizons": 1,
+            "icc": 0.0,
+            "independent_episodes": 15,
+            "mean_rows_per_origin": 1.0,
+            "origin_autocorrelation": 0.4349,
+            "origins_per_episode": [
+              22,
+              86,
+              8,
+              27,
+              7,
+              84,
+              25,
+              11,
+              62,
+              33,
+              1,
+              19,
+              29,
+              9,
+              57
+            ],
+            "pseudo_replication_factor": 2.54,
+            "raw_rows": 480,
+            "rows_per_episode": [
+              22,
+              86,
+              8,
+              27,
+              7,
+              84,
+              25,
+              11,
+              62,
+              33,
+              1,
+              19,
+              29,
+              9,
+              57
+            ],
+            "span": [
+              "1985-12-15",
+              "2025-11-15"
+            ],
+            "targets": 1,
+            "unique_origins": 480
+          },
+          "single_cluster": false,
+          "survives_fdr": null,
+          "too_few_episodes": false,
+          "underpowered": true,
+          "verdict": "NO_IMPROVEMENT"
+        },
+        "INDPRO_240d": {
+          "augmented_score": 0.19341,
+          "base_score": 0.19006,
+          "ci": [
+            -0.00824,
+            0.00109
+          ],
+          "delta": -0.00335,
+          "dimension": "sentiment",
+          "episode_ci": [
+            -0.0089,
+            0.00186
+          ],
+          "episode_ci_note": null,
+          "fdr_adjusted": false,
+          "horizon_days": 0,
+          "mde": 0.00467,
+          "n_clusters": 475,
+          "n_episodes": 15,
+          "n_paired": 475,
+          "name": "INDPRO_240d",
+          "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+          "p_value": 0.13,
+          "population": "US_households",
+          "pseudo_replication": false,
+          "regime": "ALL",
+          "robust": false,
+          "sample": {
+            "effective_origins": 210.72,
+            "headline": "475 rows / 475 origins / 210.7 effective / 15 episodes",
+            "horizons": 1,
+            "icc": 0.0,
+            "independent_episodes": 15,
+            "mean_rows_per_origin": 1.0,
+            "origin_autocorrelation": 0.3854,
+            "origins_per_episode": [
+              22,
+              86,
+              8,
+              27,
+              7,
+              84,
+              25,
+              6,
+              62,
+              33,
+              1,
+              19,
+              29,
+              9,
+              57
+            ],
+            "pseudo_replication_factor": 2.25,
+            "raw_rows": 475,
+            "rows_per_episode": [
+              22,
+              86,
+              8,
+              27,
+              7,
+              84,
+              25,
+              6,
+              62,
+              33,
+              1,
+              19,
+              29,
+              9,
+              57
+            ],
+            "span": [
+              "1985-12-15",
+              "2025-06-15"
+            ],
+            "targets": 1,
+            "unique_origins": 475
+          },
+          "single_cluster": false,
+          "survives_fdr": null,
+          "too_few_episodes": false,
+          "underpowered": true,
+          "verdict": "NO_IMPROVEMENT"
+        }
+      },
+      "rows": 2296,
+      "skipped": {
+        "no_outcome": 40,
+        "thin_base": 0,
+        "thin_extra": 0
+      }
+    },
+    "MODERN": {
+      "arm": {
+        "base_series": [
+          "UNRATE",
+          "CPIAUCSL",
+          "DFF",
+          "DGS2",
+          "DGS10",
+          "HOUST",
+          "INDPRO",
+          "PCEC96",
+          "BAA",
+          "BAA10Y",
+          "AAA10Y",
+          "T10Y3M"
+        ],
+        "behavioural_series": [
+          "UMCSENT"
+        ],
+        "name": "MODERN",
+        "note": "1998-02 onward",
+        "origins": 343,
+        "span": [
+          "1998-02-15",
+          "2026-08-15"
+        ]
+      },
+      "eligibility": {
+        "HOUST_180d": {
+          "eligibility": {
+            "base_rate": 0.5299,
+            "baseline_clear": false,
+            "baseline_reason": "the macro baseline (Brier 0.30712) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "effective_origins": 168.29,
+            "eligible_for_human_test": false,
+            "episodes": 13,
+            "mde": null,
+            "target_id": "HOUST_180d",
+            "usable_origins": 334,
+            "why_not": "BASELINE_INVALID: the macro baseline (Brier 0.30712) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block."
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.27073,
+              "directional_accuracy": 0.5345,
+              "features": 0,
+              "n": 275,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.25609,
+              "directional_accuracy": 0.4582,
+              "features": 0,
+              "n": 275,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.30712,
+              "directional_accuracy": 0.5782,
+              "features": 28,
+              "n": 275,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.36864,
+              "directional_accuracy": 0.3891,
+              "features": 0,
+              "n": 275,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.3268,
+              "directional_accuracy": 0.5782,
+              "features": 0,
+              "n": 275,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "HOUST_240d": {
+          "eligibility": {
+            "base_rate": 0.5392,
+            "baseline_clear": false,
+            "baseline_reason": "the macro baseline (Brier 0.30549) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "effective_origins": 141.13,
+            "eligible_for_human_test": false,
+            "episodes": 13,
+            "mde": null,
+            "target_id": "HOUST_240d",
+            "usable_origins": 332,
+            "why_not": "BASELINE_INVALID: the macro baseline (Brier 0.30549) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block."
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.26563,
+              "directional_accuracy": 0.48,
+              "features": 0,
+              "n": 275,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.25638,
+              "directional_accuracy": 0.44,
+              "features": 0,
+              "n": 275,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.30549,
+              "directional_accuracy": 0.5273,
+              "features": 28,
+              "n": 275,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.33227,
+              "directional_accuracy": 0.4618,
+              "features": 0,
+              "n": 275,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.30147,
+              "directional_accuracy": 0.5527,
+              "features": 0,
+              "n": 275,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "INDPRO_180d": {
+          "eligibility": {
+            "base_rate": 0.6737,
+            "baseline_clear": false,
+            "baseline_reason": "the macro baseline (Brier 0.27643) does not beat BASE_RATE, PERSISTENCE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "effective_origins": 44.04,
+            "eligible_for_human_test": false,
+            "episodes": 13,
+            "mde": null,
+            "target_id": "INDPRO_180d",
+            "usable_origins": 334,
+            "why_not": "BASELINE_INVALID: the macro baseline (Brier 0.27643) does not beat BASE_RATE, PERSISTENCE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block."
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.24281,
+              "directional_accuracy": 0.6327,
+              "features": 0,
+              "n": 275,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.23401,
+              "directional_accuracy": 0.6691,
+              "features": 0,
+              "n": 275,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.27643,
+              "directional_accuracy": 0.6545,
+              "features": 28,
+              "n": 275,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.25159,
+              "directional_accuracy": 0.6218,
+              "features": 0,
+              "n": 275,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.31775,
+              "directional_accuracy": 0.5891,
+              "features": 0,
+              "n": 275,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "INDPRO_240d": {
+          "eligibility": {
+            "base_rate": 0.6807,
+            "baseline_clear": false,
+            "baseline_reason": "the macro baseline (Brier 0.26326) does not beat BASE_RATE, PERSISTENCE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "effective_origins": 44.63,
+            "eligible_for_human_test": false,
+            "episodes": 13,
+            "mde": null,
+            "target_id": "INDPRO_240d",
+            "usable_origins": 332,
+            "why_not": "BASELINE_INVALID: the macro baseline (Brier 0.26326) does not beat BASE_RATE, PERSISTENCE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block."
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.24468,
+              "directional_accuracy": 0.6509,
+              "features": 0,
+              "n": 275,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.22958,
+              "directional_accuracy": 0.6764,
+              "features": 0,
+              "n": 275,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.26326,
+              "directional_accuracy": 0.6545,
+              "features": 28,
+              "n": 275,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.25159,
+              "directional_accuracy": 0.6218,
+              "features": 0,
+              "n": 275,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.30648,
+              "directional_accuracy": 0.6036,
+              "features": 0,
+              "n": 275,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        }
+      },
+      "eligible": [],
+      "episodes": [
+        {
+          "end_as_known": "2002-10-15",
+          "episode_id": "EP_200002",
+          "information_cutoff": "2002-10-15",
+          "normalization": "2003-04-15",
+          "origins": 28,
+          "peak_stress": 1,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "LIQUIDITY_STRESS",
+            "LABOUR_DETERIORATION"
+          ],
+          "resolved": true,
+          "start_as_known": "2000-02-15",
+          "trigger_evidence": {
+            "curve_slope_pp": -0.06,
+            "inflation_yoy": 0.02676,
+            "policy_change_pp": 0.15,
+            "unemployment_change_pp": -0.3
+          }
+        },
+        {
+          "end_as_known": "2003-07-15",
+          "episode_id": "EP_200307",
+          "information_cutoff": "2003-07-15",
+          "normalization": "2004-01-15",
+          "origins": 1,
+          "peak_stress": 1,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "LABOUR_DETERIORATION"
+          ],
+          "resolved": true,
+          "start_as_known": "2003-07-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 2.39,
+            "inflation_yoy": 0.01894,
+            "policy_change_pp": 0.06,
+            "unemployment_change_pp": 0.6
+          }
+        },
+        {
+          "end_as_known": "2007-05-15",
+          "episode_id": "EP_200511",
+          "information_cutoff": "2007-05-15",
+          "normalization": "2007-11-15",
+          "origins": 15,
+          "peak_stress": 2,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "INFLATION_SHOCK",
+            "LIQUIDITY_STRESS"
+          ],
+          "resolved": true,
+          "start_as_known": "2005-11-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 0.11,
+            "inflation_yoy": 0.04742,
+            "policy_change_pp": 0.04,
+            "unemployment_change_pp": -0.5
+          }
+        },
+        {
+          "end_as_known": "2010-05-15",
+          "episode_id": "EP_200801",
+          "information_cutoff": "2010-05-15",
+          "normalization": "2010-11-15",
+          "origins": 29,
+          "peak_stress": 2,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "INFLATION_SHOCK",
+            "LABOUR_DETERIORATION"
+          ],
+          "resolved": true,
+          "start_as_known": "2008-01-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 1.23,
+            "inflation_yoy": 0.04373,
+            "policy_change_pp": 0.13,
+            "unemployment_change_pp": 0.6
+          }
+        },
+        {
+          "end_as_known": "2018-02-15",
+          "episode_id": "EP_201706",
+          "information_cutoff": "2018-02-15",
+          "normalization": "2018-08-15",
+          "origins": 9,
+          "peak_stress": 1,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "CREDIT_STRESS"
+          ],
+          "resolved": true,
+          "start_as_known": "2017-06-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 0.8,
+            "delinquency_yoy": 0.12558,
+            "inflation_yoy": 0.02176,
+            "policy_change_pp": 0.0,
+            "unemployment_change_pp": -0.4
+          }
+        },
+        {
+          "end_as_known": "2024-12-15",
+          "episode_id": "EP_202004",
+          "information_cutoff": "2024-12-15",
+          "normalization": "2025-06-15",
+          "origins": 56,
+          "peak_stress": 3,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "LABOUR_DETERIORATION",
+            "INFLATION_SHOCK",
+            "LIQUIDITY_STRESS",
+            "CREDIT_STRESS"
+          ],
+          "resolved": true,
+          "start_as_known": "2020-04-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 0.53,
+            "delinquency_yoy": 0.02756,
+            "inflation_yoy": 0.02341,
+            "policy_change_pp": 0.0,
+            "unemployment_change_pp": 0.6
+          }
+        },
+        {
+          "end_as_known": "2026-07-15",
+          "episode_id": "EP_202607",
+          "information_cutoff": "2026-07-15",
+          "normalization": "",
+          "origins": 1,
+          "peak_stress": 1,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "INFLATION_SHOCK"
+          ],
+          "resolved": false,
+          "start_as_known": "2026-07-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 0.4,
+            "delinquency_yoy": -0.04575,
+            "inflation_yoy": 0.0427,
+            "policy_change_pp": 0.0,
+            "unemployment_change_pp": -0.1
+          }
+        }
+      ],
+      "features": {
+        "base": [
+          "AAA10Y_q",
+          "AAA10Y_yoy",
+          "BAA10Y_q",
+          "BAA10Y_yoy",
+          "BAA_q",
+          "BAA_yoy",
+          "CPIAUCSL_q",
+          "CPIAUCSL_yoy",
+          "DFF_lvl",
+          "DFF_q",
+          "DFF_yoy",
+          "DGS10_lvl",
+          "DGS10_q",
+          "DGS10_yoy",
+          "DGS2_lvl",
+          "DGS2_q",
+          "DGS2_yoy",
+          "HOUST_q",
+          "HOUST_yoy",
+          "INDPRO_q",
+          "INDPRO_yoy",
+          "PCEC96_q",
+          "PCEC96_yoy",
+          "T10Y3M_q",
+          "T10Y3M_yoy",
+          "UNRATE_lvl",
+          "UNRATE_q",
+          "UNRATE_yoy"
+        ],
+        "sentiment": [
+          "UMCSENT_q",
+          "UMCSENT_yoy"
+        ]
+      },
+      "h7_verdict": "NOT_SCORED_NO_ELIGIBLE_TARGET",
+      "paired_all": 1100,
+      "paired_scored": 0,
+      "rows": 1332,
+      "skipped": {
+        "no_outcome": 40,
+        "thin_base": 0,
+        "thin_extra": 0
+      }
+    }
+  },
+  "code_sha": "277bec62",
+  "elapsed_seconds": 64.1,
+  "h7_hash": "3a5c4d36259e08a2",
+  "panel": {
+    "cells": 195886,
+    "cells_by_revision_state": {
+      "MEASURED_STABLE": 92680,
+      "PUBLISHER_VINTAGE": 103206
+    },
+    "content_hash": "ae00e04e2bcccfd1",
+    "contract": "econ_panel.v1",
+    "earliest": "1919-01-01",
+    "latest": "2026-08-27",
+    "periods_with_more_than_one_vintage": 8833,
+    "series": 32,
+    "spans": {
+      "AAA10Y": [
+        "1983-01-03",
+        "2026-08-26"
+      ],
+      "BAA": [
+        "1919-01-01",
+        "2026-07-01"
+      ],
+      "BAA10Y": [
+        "1986-01-02",
+        "2026-08-26"
+      ],
+      "BABATOTALSAUS": [
+        "2004-07-01",
+        "2026-07-01"
+      ],
+      "BAMLH0A0HYM2": [
+        "2023-08-28",
+        "2026-08-14"
+      ],
+      "BOGZ1FL153064486Q": [
+        "1945-10-01",
+        "2026-01-01"
+      ],
+      "CIVPART": [
+        "1948-01-01",
+        "2026-07-01"
+      ],
+      "CORCACBS": [
+        "1985-01-01",
+        "2026-01-01"
+      ],
+      "CPIAUCSL": [
+        "1947-01-01",
+        "2026-07-01"
+      ],
+      "DFF": [
+        "1954-07-01",
+        "2026-08-25"
+      ],
+      "DGORDER": [
+        "1958-02-01",
+        "2026-06-01"
+      ],
+      "DGS10": [
+        "1962-01-02",
+        "2026-08-25"
+      ],
+      "DGS2": [
+        "1976-06-01",
+        "2026-08-25"
+      ],
+      "DRCCLACBS": [
+        "1991-01-01",
+        "2026-01-01"
+      ],
+      "DRSFRMACBS": [
+        "1991-01-01",
+        "2026-01-01"
+      ],
+      "EMRATIO": [
+        "1948-01-01",
+        "2026-07-01"
+      ],
+      "GDPC1": [
+        "1947-01-01",
+        "2026-04-01"
+      ],
+      "HOUST": [
+        "1959-01-01",
+        "2026-06-01"
+      ],
+      "HSN1F": [
+        "1963-01-01",
+        "2026-06-01"
+      ],
+      "INDPRO": [
+        "1919-01-01",
+        "2026-06-01"
+      ],
+      "JTSQUR": [
+        "2000-12-01",
+        "2026-06-01"
+      ],
+      "MICH": [
+        "1978-01-01",
+        "2026-06-01"
+      ],
+      "PCEC96": [
+        "1959-01-01",
+        "2026-06-01"
+      ],
+      "PSAVERT": [
+        "1959-01-01",
+        "2026-06-01"
+      ],
+      "REVOLSL": [
+        "1968-01-01",
+        "2026-06-01"
+      ],
+      "T10Y3M": [
+        "1982-01-04",
+        "2026-08-27"
+      ],
+      "TDSP": [
+        "1980-01-01",
+        "2026-01-01"
+      ],
+      "U6RATE": [
+        "1994-01-01",
+        "2026-07-01"
+      ],
+      "UEMP15OV": [
+        "1948-01-01",
+        "2026-07-01"
+      ],
+      "UMCSENT": [
+        "1952-11-01",
+        "2026-06-01"
+      ],
+      "UNRATE": [
+        "1948-01-01",
+        "2026-07-01"
+      ],
+      "USACSCICP02STSAM": [
+        "1960-01-01",
+        "2026-06-01"
+      ]
+    }
+  }
+}

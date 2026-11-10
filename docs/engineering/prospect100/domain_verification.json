@@ -1,0 +1,1837 @@
+[
+ {
+  "prospect_id": 1,
+  "candidate_domain": "hammerspace.com",
+  "followed": {
+   "final_url": "https://hammerspace.com/",
+   "status": 200
+  },
+  "final_host": "hammerspace.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Hammerspace - The Data Platform for AI Anywhere",
+  "text_chars": 13270,
+  "body_sha1": "1292852dee2309b53fb91e4f97311d342bb45e3f",
+  "text_head": "Hammerspace - The Data Platform for AI Anywhere Skip to main content Skip to footer Opens in a new tab Something big is coming to SC26. Get the first look at booth #4238 . Book a Meeting Product Platform Platform Overview Product Architecture Competitive Advantage How to Deploy AI Solutions AI Data "
+ },
+ {
+  "prospect_id": 2,
+  "candidate_domain": "weka.io",
+  "followed": {
+   "final_url": "https://www.weka.io/",
+   "status": 200
+  },
+  "final_host": "www.weka.io",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "WEKA | Accelerated AI Storage for Purpose-Built Compute",
+  "text_chars": 1694,
+  "body_sha1": "27157623193ccb44b2d9c4064975a33a6aff46a3",
+  "text_head": "WEKA | Accelerated AI Storage for Purpose-Built Compute Skip to content Products Solutions Customers Partners Company The Cache Resources Contact Us Product Tour Scale fast, efficient AI for Insights | Faster AI output. Lower cost per token. More tokens per watt. More memory in the infrastructure fo"
+ },
+ {
+  "prospect_id": 3,
+  "candidate_domain": "reltio.com",
+  "followed": {
+   "final_url": "https://www.reltio.com/",
+   "status": 200
+  },
+  "final_host": "www.reltio.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Context Intelligence & AI-Powered Data Unification for the Enterprise",
+  "text_chars": 10518,
+  "body_sha1": "382e8b6e3443708b886b3eb4b239108bbb60303d",
+  "text_head": "Context Intelligence & AI-Powered Data Unification for the Enterprise Skip to main content Join us at DataDriven 2027 Register now X Support Documentation Trust Center Learn Community Search for: Platform Customers Use Cases Company Resources REQUEST A DEMO Reltio Context Intelligence Platform Trust"
+ },
+ {
+  "prospect_id": 4,
+  "candidate_domain": "ataccama.com",
+  "followed": {
+   "final_url": "https://www.ataccama.com/",
+   "status": 200
+  },
+  "final_host": "www.ataccama.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Ataccama \u2013 Agentic Data Trust Software | AI built on quality data",
+  "text_chars": 15010,
+  "body_sha1": "3074bd3ca45167a2c996c0b9eaa5b0bd412ceb50",
+  "text_head": "Ataccama \u2013 Agentic Data Trust Software | AI built on quality data Press play on what\u2019s next in data trust FWRD 2026 | NOW ON DEMAND Look back at what changed in 2026. Get ready for what\u2019s next. Watch now Platform Explore our platform An agentic platform, with data quality at its core. Ataccama ONE A"
+ },
+ {
+  "prospect_id": 5,
+  "candidate_domain": "informatica.com",
+  "followed": {
+   "final_url": "https://www.informatica.com/",
+   "status": 200
+  },
+  "final_host": "www.informatica.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Informatica from Salesforce",
+  "text_chars": 8380,
+  "body_sha1": "7dec26800c888df64b287b889f2ec5fd7ad1ca40",
+  "text_head": "Informatica from Salesforce Skip to main content Just in from Dreamforce! Stream Informatica\u2019s keynote on demand. Watch Now Informatica Navigator Find all Informatica sites here, including customer portals, community forums and general resources. Informatica Website Success Portal Informatica Univer"
+ },
+ {
+  "prospect_id": 6,
+  "candidate_domain": "qlik.com",
+  "followed": {
+   "final_url": "https://www.qlik.com/us",
+   "status": 200
+  },
+  "final_host": "www.qlik.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Qlik Data Integration, Data Quality, and Analytics Solutions",
+  "text_chars": 10386,
+  "body_sha1": "2b1cbd896fb829706f82aa959c7259440df70acd",
+  "text_head": "Qlik Data Integration, Data Quality, and Analytics Solutions Back English Deutsch Espa\u00f1ol Fran\u00e7ais Italiano Portugu\u00eas \u65e5\u672c\u8a9e Why Qlik Why Qlik Get the AI you were promised by making your data work for AI. Meet the Moment Product Tours Technology Partners Check out our top cloud partners. AWS Azure SAP "
+ },
+ {
+  "prospect_id": 7,
+  "candidate_domain": "matillion.com",
+  "followed": {
+   "final_url": "https://www.matillion.com/",
+   "status": 200
+  },
+  "final_host": "www.matillion.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Matillion: Data Integration and ETL, Now Autonomous",
+  "text_chars": 7308,
+  "body_sha1": "8686912d845a2b2145a13fd66be091edeec27c67",
+  "text_head": "Matillion: Data Integration and ETL, Now Autonomous Customer Knowledge Center Contact Login Matillion Matillion Corporate & Careers Maia Product & Sales Products Maia Maia Foundation Connect Transform Orchestrate Matillion ETL Connectors Pricing Security About Us Careers Partners Trust Center Invest"
+ },
+ {
+  "prospect_id": 8,
+  "candidate_domain": "keboola.com",
+  "followed": {
+   "final_url": "https://www.keboola.com/",
+   "status": 200
+  },
+  "final_host": "www.keboola.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Keboola \u2014 AI-ready data foundation for finance",
+  "text_chars": 16934,
+  "body_sha1": "ae36cd6cf974ca5b29bbd801b072eba00af85dae",
+  "text_head": "Keboola \u2014 AI-ready data foundation for finance Skip to content New Introducing Agnes: give your company a brain See how it works Upcoming webinar AI that knows your business \u00b7 Nov 10, 11 AM ET Save your seat Solutions Product Resources Customer Stories Pricing Solutions Financial Intelligence Financ"
+ },
+ {
+  "prospect_id": 9,
+  "candidate_domain": "cdata.com",
+  "followed": {
+   "final_url": "",
+   "status": 0,
+   "error": "HTTPError: HTTP Error 403: Forbidden"
+  },
+  "final_host": "cdata.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": false,
+  "safe_fetch_status": 403,
+  "safe_fetch_failure": "http_status",
+  "title": "",
+  "text_chars": 0,
+  "body_sha1": "",
+  "text_head": ""
+ },
+ {
+  "prospect_id": 10,
+  "candidate_domain": "precisely.com",
+  "followed": {
+   "final_url": "https://www.precisely.com/",
+   "status": 200
+  },
+  "final_host": "www.precisely.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Unified data management for AI-ready data | Precisely",
+  "text_chars": 15231,
+  "body_sha1": "02b01f92d89198adad92dc94a5fe714b2308e5cb",
+  "text_head": "Unified data management for AI-ready data | Precisely Search For: Close Precisely Advances Agentic-Ready Data with a New AI Agent, Data Product Marketplace, and MCP-Enabled APIs Read press release Build solutions faster with Precisely APIs, pre-linked data, and MCP Start free trial \u00d7 Privacy Notice "
+ },
+ {
+  "prospect_id": 11,
+  "candidate_domain": "securiti.ai",
+  "followed": {
+   "final_url": "https://securiti.ai/",
+   "status": 200
+  },
+  "final_host": "securiti.ai",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Securiti: DSPM | Data Security | AI Security | PrivacyOps",
+  "text_chars": 21700,
+  "body_sha1": "7eb33ae5fd00ea2bb30decb86db5cfa56d5b287a",
+  "text_head": "Securiti: DSPM | Data Security | AI Security | PrivacyOps Events Webinars Spotlight Talks Education Gencore AI DSPM What is DSPM DSPM Use Cases Industry Report Securiti Tops DSPM Ratings Again View Report View Report en AR Contact Us See a demo Products DataAI Command Platform View Data+AI Security "
+ },
+ {
+  "prospect_id": 12,
+  "candidate_domain": "immuta.com",
+  "followed": {
+   "final_url": "https://www.immuta.com/",
+   "status": 200
+  },
+  "final_host": "www.immuta.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "The Authorization Layer for Data Access | Immuta",
+  "text_chars": 15387,
+  "body_sha1": "978df0c350bc4d4b084f1fd562476d2c5bb8a100",
+  "text_head": "The Authorization Layer for Data Access | Immuta NEW Introducing the Immuta Data Authorization Platform. The authorization layer for every human and every agent. Learn more Platform Platform Govern Provision Comply Agentic Data Access Integrations Integrations Resources Resources Resources Documenta"
+ },
+ {
+  "prospect_id": 13,
+  "candidate_domain": "privacera.com",
+  "followed": {
+   "final_url": "https://privacera.com/",
+   "status": 200
+  },
+  "final_host": "privacera.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Splash Page - Trust3 AI by PrivaceraTrust3 AI by Privacera",
+  "text_chars": 6277,
+  "body_sha1": "971a93ec1ee3c7657c6503839da46b1d29d78c15",
+  "text_head": "Splash Page - Trust3 AI by PrivaceraTrust3 AI by Privacera Splash Page - Trust3 AI by Privacera Why Trust3 AI? Overview Privacera\u2019s cloud-native, open standards based platform enables application of uniform policies at scale, faster data delivery, more responsibly, today and into the future. Native "
+ },
+ {
+  "prospect_id": 14,
+  "candidate_domain": "soda.io",
+  "followed": {
+   "final_url": "https://soda.io/",
+   "status": 200
+  },
+  "final_host": "soda.io",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Soda Data Quality",
+  "text_chars": 17509,
+  "body_sha1": "55564ce674da97d54b25fc1638491af4c049606c",
+  "text_head": "Soda Data Quality Data Quality is Solved. Register for the Nov 17th launch Data Quality is Solved. Join us Nov 17th S t o p d a t a i n c i d e n t s b e f o r e t h e y h i t p r o d u c t i o n S t o p d a t a i n c i d e n t s b e f o r e t h e y h i t p r o d u c t i o n S t o p d a t a i n c i "
+ },
+ {
+  "prospect_id": 15,
+  "candidate_domain": "acceldata.io",
+  "followed": {
+   "final_url": "https://www.acceldata.io/",
+   "status": 200
+  },
+  "final_host": "www.acceldata.io",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Autonomous Data & AI Platform for Hybrid Clouds | Acceldata",
+  "text_chars": 34967,
+  "body_sha1": "bd78ae9ef71b1a7be9f23426c3cfa2f179f79a41",
+  "text_head": "Autonomous Data & AI Platform for Hybrid Clouds | Acceldata Acceldata recognized as an Exemplary Leader in 2026 ISG Buyers Guide\u2122 for Data Quality and Data Observability. Read the Report\u2192 Why Acceldata Products Industry Resources Company Book a Demo Book a Demo Platform Overview Data & AI Observabil"
+ },
+ {
+  "prospect_id": 16,
+  "candidate_domain": "anomalo.com",
+  "followed": {
+   "final_url": "https://www.anomalo.com:443/",
+   "status": 200
+  },
+  "final_host": "www.anomalo.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Home - Anomalo",
+  "text_chars": 12849,
+  "body_sha1": "3be849ee6522c9e6854cf542c8ccdd919816dc07",
+  "text_head": "Home - Anomalo Skip to content See Autonomous Agents In Action Platform Solutions Integrations Customers Resources Company Request a Demo Product Overview Meet your all-in-one autonomous data management system Learn More Agents Data Quality Data Insights Table Observability Data Documentation Experi"
+ },
+ {
+  "prospect_id": 17,
+  "candidate_domain": "observe.ai",
+  "followed": {
+   "final_url": "https://www.observe.ai/",
+   "status": 200
+  },
+  "final_host": "www.observe.ai",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Observe.AI | Purpose-Built AI Agents. One CX Platform.",
+  "text_chars": 12115,
+  "body_sha1": "e478c62e0ac6405863852c4b177e31ff89bb1a1d",
+  "text_head": "Observe.AI | Purpose-Built AI Agents. One CX Platform. AI Agents For customers AI Agents That Handle Customer Support End-to-End Voice AI Autonomous voice resolution Chat AI Digital & messaging resolution Frontline AI Agent That Empowers Every Frontline Employee companion Agent Real-time assist for "
+ },
+ {
+  "prospect_id": 17,
+  "candidate_domain": "observeinc.com",
+  "followed": {
+   "final_url": "https://www.snowflake.com/en/product/observe/",
+   "status": 200
+  },
+  "final_host": "www.snowflake.com",
+  "redirected_off_domain": true,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Snowflake AI Data Cloud",
+  "text_chars": 8101,
+  "body_sha1": "973982538bd606fab9f66943df7ed637d71c5939",
+  "text_head": "Snowflake AI Data Cloud Skip to content Expedition. Free, on-demand. Technical tracks for practitioners, outcomes for leaders. Watch now Product Solutions Why Snowflake Resources Developers Pricing Language Languages English \u65e5\u672c\u8a9e \ud55c\uad6d\uc5b4 \u4e2d\u6587\uff08\u7b80\u4f53\uff09 Portugu\u00eas Deutsch Fran\u00e7ais Espa\u00f1ol Italiano Sign in CONTACT "
+ },
+ {
+  "prospect_id": 18,
+  "candidate_domain": "chronosphere.io",
+  "followed": {
+   "final_url": "https://chronosphere.io/",
+   "status": 200
+  },
+  "final_host": "chronosphere.io",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Chronosphere | Observability Purpose Built for Kubernetes",
+  "text_chars": 9953,
+  "body_sha1": "ea65485d40f5eda4992c03b25ac99f845f1c12a1",
+  "text_head": "Chronosphere | Observability Purpose Built for Kubernetes We\u2019re a 3X Leader in the Gartner\u00ae Magic Quadrant\u2122 for Observability Platforms We\u2019re a 3X Leader in the Gartner\u00ae Magic Qu... READ MORE Request Demo Request a Demo Products Recent News Observability in transition: Building confidence on the pat"
+ },
+ {
+  "prospect_id": 19,
+  "candidate_domain": "crate.io",
+  "followed": {
+   "final_url": "https://cratedb.com/",
+   "status": 200
+  },
+  "final_host": "cratedb.com",
+  "redirected_off_domain": true,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "CrateDB: European Real-Time Analytics Database | Live operational data",
+  "text_chars": 11759,
+  "body_sha1": "202074c63f0a8bcedf5120281b5b00a74562bf0a",
+  "text_head": "CrateDB: European Real-Time Analytics Database | Live operational data Skip to content Product Editions CrateDB Cloud CrateDB Enterprise CrateDB OSS Features Overview High cardinality SQL syntax Integrations Security Data models Time-series Document/JSON Vector Full-text Spatial Relational Solutions"
+ },
+ {
+  "prospect_id": 19,
+  "candidate_domain": "cratedb.com",
+  "followed": {
+   "final_url": "https://cratedb.com/",
+   "status": 200
+  },
+  "final_host": "cratedb.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "CrateDB: European Real-Time Analytics Database | Live operational data",
+  "text_chars": 11759,
+  "body_sha1": "202074c63f0a8bcedf5120281b5b00a74562bf0a",
+  "text_head": "CrateDB: European Real-Time Analytics Database | Live operational data Skip to content Product Editions CrateDB Cloud CrateDB Enterprise CrateDB OSS Features Overview High cardinality SQL syntax Integrations Security Data models Time-series Document/JSON Vector Full-text Spatial Relational Solutions"
+ },
+ {
+  "prospect_id": 20,
+  "candidate_domain": "singlestore.com",
+  "followed": {
+   "final_url": "https://www.singlestore.com/",
+   "status": 200
+  },
+  "final_host": "www.singlestore.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "SingleStore | The Real-Time AI Database for Enterprise. Answers Included.",
+  "text_chars": 5704,
+  "body_sha1": "d04cd52645479b949af2d504f7c0d81d2f0c6a4b",
+  "text_head": "SingleStore | The Real-Time AI Database for Enterprise. Answers Included. Product Solutions Resources Company Pricing Search Login L Start free Search Answers Included. AI starts with the database. The answers your users and AI agents need are already in your data. Which makes the database the most "
+ },
+ {
+  "prospect_id": 21,
+  "candidate_domain": "tigergraph.com",
+  "followed": {
+   "final_url": "https://www.tigergraph.com/",
+   "status": 200
+  },
+  "final_host": "www.tigergraph.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Graph Database for Real-Time AI & Analytics | TigerGraph",
+  "text_chars": 12753,
+  "body_sha1": "25d1275c85985f56bca6b78810343fb474a8d5e7",
+  "text_head": "Graph Database for Real-Time AI & Analytics | TigerGraph Products TigerGraph Savanna TIGERGRAPH DB Community Edition AI & Graph Intelligence Agentic AI GraphRAG Hybrid Graph + Vector Search Graph Data Science Library Languages and Tools Solution Kits GSQL Query Language openCypher Query Language Gra"
+ },
+ {
+  "prospect_id": 22,
+  "candidate_domain": "neo4j.com",
+  "followed": {
+   "final_url": "https://neo4j.com/",
+   "status": 200
+  },
+  "final_host": "neo4j.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Neo4j Graph Intelligence Platform",
+  "text_chars": 13096,
+  "body_sha1": "5a5c8bc35dfed15fb20f6bf0cee45ec3f97ee656",
+  "text_head": "Neo4j Graph Intelligence Platform Skip to content Join us for NODES 2026: Engineering better intelligence | Nov 12 | Register today Menu Search Close Menu Products FULLY-MANAGED AuraDB Store and query connected data at scale Virtual Graph Create and query a knowledge graph on existing data Aura Grap"
+ },
+ {
+  "prospect_id": 23,
+  "candidate_domain": "arango.ai",
+  "followed": {
+   "final_url": "https://arango.ai/",
+   "status": 200
+  },
+  "final_host": "arango.ai",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Arango Contextual Data Platform",
+  "text_chars": 10544,
+  "body_sha1": "bf94e2a8c5955272b87ce42c21c7e7cdda789aea",
+  "text_head": "Arango Contextual Data Platform Skip to Content Skip to Menu Skip to Footer Arango for AI Products Open Products submenu Arango Contextual Data Platform A single platform that unifies graph, vector, document, and search so you can build and scale AI powered applications without gluing tools together"
+ },
+ {
+  "prospect_id": 23,
+  "candidate_domain": "arangodb.com",
+  "followed": {
+   "final_url": "https://arango.ai/",
+   "status": 200
+  },
+  "final_host": "arango.ai",
+  "redirected_off_domain": true,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Arango Contextual Data Platform",
+  "text_chars": 10544,
+  "body_sha1": "e76a583990af72580b6ba7b8cd23306e85e68f6c",
+  "text_head": "Arango Contextual Data Platform Skip to Content Skip to Menu Skip to Footer Arango for AI Products Open Products submenu Arango Contextual Data Platform A single platform that unifies graph, vector, document, and search so you can build and scale AI powered applications without gluing tools together"
+ },
+ {
+  "prospect_id": 24,
+  "candidate_domain": "kx.com",
+  "followed": {
+   "final_url": "https://kx.com/",
+   "status": 200
+  },
+  "final_host": "kx.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "The Data Intelligence AI Platform Built For Capital Markets",
+  "text_chars": 24685,
+  "body_sha1": "c50b0fd66546efed472ab2e7ba91196b38597d31",
+  "text_head": "The Data Intelligence AI Platform Built For Capital Markets Skip to content New KX Delivers GPU-Accelerated Advantage for Real-Time AI in Capital Markets Learn more Close Alert Language English Japanese Contact Us Pricing Partners Community NYSE Benchmark Support Search Menu Products Toggle the Prod"
+ },
+ {
+  "prospect_id": 25,
+  "candidate_domain": "tecton.ai",
+  "followed": {
+   "final_url": "https://www.databricks.com/",
+   "status": 200
+  },
+  "final_host": "www.databricks.com",
+  "redirected_off_domain": true,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Databricks: Leading Data and AI Platform for Enterprises",
+  "text_chars": 12160,
+  "body_sha1": "83cfc0efb036f577b6704af46ce4c28839ab7382",
+  "text_head": "Databricks: Leading Data and AI Platform for Enterprises Skip to main content Login Why Databricks Discover For App Developers For Executives For Startups Lakehouse Architecture Databricks AI Research Customers Customer Stories Partners Partner Overview Explore the Databricks partner ecosystem Partn"
+ },
+ {
+  "prospect_id": 26,
+  "candidate_domain": "interos.ai",
+  "followed": {
+   "final_url": "https://www.interos.ai/",
+   "status": 200
+  },
+  "final_host": "www.interos.ai",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Supply Chain Risk Management Software | interos.ai",
+  "text_chars": 6588,
+  "body_sha1": "36c2191b6ddc98a9bf5314a3e01856324c19f572",
+  "text_head": "Supply Chain Risk Management Software | interos.ai Our Software Solutions \u25bc \u2014 Industries Financial Services Aerospace and Defense Airlines Federal Government Energy \u2014 Solutions i reputation i tracing i tariffs Resilience Watchtower \u00ae Procurement Cyber Compliance Operational Resilience Catastrophic R"
+ },
+ {
+  "prospect_id": 27,
+  "candidate_domain": "everstream.ai",
+  "followed": {
+   "final_url": "https://www.everstream.ai/",
+   "status": 200
+  },
+  "final_host": "www.everstream.ai",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Everstream Analytics, a Leader in Supply Chain Risk Management",
+  "text_chars": 8446,
+  "body_sha1": "9098ab627eb740b8911da4c7810605c41d1df707",
+  "text_head": "Everstream Analytics, a Leader in Supply Chain Risk Management Skip to content Platform Supply Chain Risk Management Integrating real-time data, expertise, data science, and AI & NLP for complete supply chain risk management. See it in action Products Network Mapping Create a digital twin to optimiz"
+ },
+ {
+  "prospect_id": 28,
+  "candidate_domain": "resilinc.ai",
+  "followed": {
+   "final_url": "https://resilinc.ai/",
+   "status": 200
+  },
+  "final_host": "resilinc.ai",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Supply Chain Risk Management Solutions \u2013 Agentic Supply Chain Resiliency | Resilinc",
+  "text_chars": 10251,
+  "body_sha1": "be5156337433a12f0801db4e6d5602e222c924b0",
+  "text_head": "Supply Chain Risk Management Solutions \u2013 Agentic Supply Chain Resiliency | Resilinc Skip to content Join us for our upcoming webinar: Every Disruption Demands a Different Response | Nov. 12, 10 AM PT \u2014 Register Now Products AGENTIC AI SUITE AI Suite Overview Autonomous risk and compliance management"
+ },
+ {
+  "prospect_id": 28,
+  "candidate_domain": "resilinc.com",
+  "followed": {
+   "final_url": "https://resilinc.ai/",
+   "status": 200
+  },
+  "final_host": "resilinc.ai",
+  "redirected_off_domain": true,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Supply Chain Risk Management Solutions \u2013 Agentic Supply Chain Resiliency | Resilinc",
+  "text_chars": 10251,
+  "body_sha1": "be5156337433a12f0801db4e6d5602e222c924b0",
+  "text_head": "Supply Chain Risk Management Solutions \u2013 Agentic Supply Chain Resiliency | Resilinc Skip to content Join us for our upcoming webinar: Every Disruption Demands a Different Response | Nov. 12, 10 AM PT \u2014 Register Now Products AGENTIC AI SUITE AI Suite Overview Autonomous risk and compliance management"
+ },
+ {
+  "prospect_id": 29,
+  "candidate_domain": "altana.ai",
+  "followed": {
+   "final_url": "https://altana.ai/",
+   "status": 200
+  },
+  "final_host": "altana.ai",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": false,
+  "safe_fetch_status": null,
+  "safe_fetch_failure": "too_large",
+  "title": "",
+  "text_chars": 0,
+  "body_sha1": "",
+  "text_head": ""
+ },
+ {
+  "prospect_id": 30,
+  "candidate_domain": "exiger.com",
+  "followed": {
+   "final_url": "https://www.exiger.com/",
+   "status": 200
+  },
+  "final_host": "www.exiger.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Exiger is the AI partner for supply chain and procurement automation. - Exiger",
+  "text_chars": 13609,
+  "body_sha1": "05840ed287c9e50185fadf1814833f4fadf1c655",
+  "text_head": "Exiger is the AI partner for supply chain and procurement automation. - Exiger Products ProductS 1EXIGER.AI The AI-native operating system for supply chain execution Supply Chain Mitigate risk and disruption, optimize cost, speed and sustainability Risk and Compliance Delivering regulator-grade comp"
+ },
+ {
+  "prospect_id": 31,
+  "candidate_domain": "sayari.com",
+  "followed": {
+   "final_url": "https://sayari.com/",
+   "status": 200
+  },
+  "final_host": "sayari.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Sovereign AI for Risk Intelligence | Sayari",
+  "text_chars": 8990,
+  "body_sha1": "adbd5ea3a961befe7d7fbed1c392eda0d21c820e",
+  "text_head": "Sovereign AI for Risk Intelligence | Sayari Skip to content Navigation Menu Foundation Foundation World Model Ontology Superconductor Platform Sayari Signal Graph Pilot Sayari Guide Solutions TPRM Financial Crime & AML KYC & Beneficial Ownership Forced Labor Screening Export Controls & Sanctions Fin"
+ },
+ {
+  "prospect_id": 32,
+  "candidate_domain": "kharon.com",
+  "followed": {
+   "final_url": "https://www.kharon.com/",
+   "status": 200
+  },
+  "final_host": "www.kharon.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "The premier global risk analytics platform | Kharon",
+  "text_chars": 9819,
+  "body_sha1": "c62fbce5b7be1d302fa1e4ffe7aed845ee7d05d9",
+  "text_head": "The premier global risk analytics platform | Kharon Products API ClearView Kharon CoreStream GraphCast Kharon Core Solutions Forced Labor Investment Risk Military End Use Research Security Risk Intelligence for AI Apps and Agents Sanctions and Financial Crimes Compliance Industries Aerospace & Defen"
+ },
+ {
+  "prospect_id": 33,
+  "candidate_domain": "moodys.com",
+  "followed": {
+   "final_url": "https://www.moodys.com/",
+   "status": 200
+  },
+  "final_host": "www.moodys.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Moody's - credit ratings, research, and data for global capital markets",
+  "text_chars": 8994,
+  "body_sha1": "710af1418ea552e64e1c17266d9ac2ead04860c4",
+  "text_head": "Moody's - credit ratings, research, and data for global capital markets Who We Serve Solutions Capabilities Insights About Us Support Who We Serve Solutions Capabilities Insights About Us Support My Moody's My Moody's \u00d7 Sign in to My Moody's to search companies, sectors, ratings and research and get"
+ },
+ {
+  "prospect_id": 34,
+  "candidate_domain": "spglobal.com",
+  "followed": {
+   "final_url": "",
+   "status": 0,
+   "error": "HTTPError: HTTP Error 403: Forbidden"
+  },
+  "final_host": "spglobal.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": false,
+  "safe_fetch_status": 403,
+  "safe_fetch_failure": "http_status",
+  "title": "",
+  "text_chars": 0,
+  "body_sha1": "",
+  "text_head": ""
+ },
+ {
+  "prospect_id": 35,
+  "candidate_domain": "msci.com",
+  "followed": {
+   "final_url": "https://www.msci.com/",
+   "status": 200
+  },
+  "final_host": "www.msci.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Bringing clarity to investment decisions | MSCI",
+  "text_chars": 6280,
+  "body_sha1": "e0a4e8832832212e54577ef4cd90228ca7b7cbdb",
+  "text_head": "Bringing clarity to investment decisions | MSCI Global Client Support Client Log In Featured Solutions Featured solutions bring together a variety of products to create approaches customized to your needs Rules-based Index Solutions Fixed Income Offerings Private Asset Solutions Real Estate Data and"
+ },
+ {
+  "prospect_id": 36,
+  "candidate_domain": "factset.com",
+  "followed": {
+   "final_url": "https://www.factset.com/",
+   "status": 200
+  },
+  "final_host": "www.factset.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "FactSet | Financial Data, Market Analytics & AI Solutions",
+  "text_chars": 57,
+  "body_sha1": "2afa223378fad704b9e84d6460739347a582a219",
+  "text_head": "FactSet | Financial Data, Market Analytics & AI Solutions"
+ },
+ {
+  "prospect_id": 37,
+  "candidate_domain": "morningstar.com",
+  "followed": {
+   "final_url": "",
+   "status": 0,
+   "error": "HTTPError: HTTP Error 403: Forbidden"
+  },
+  "final_host": "morningstar.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": false,
+  "safe_fetch_status": 403,
+  "safe_fetch_failure": "http_status",
+  "title": "",
+  "text_chars": 0,
+  "body_sha1": "",
+  "text_head": ""
+ },
+ {
+  "prospect_id": 38,
+  "candidate_domain": "enverus.com",
+  "followed": {
+   "final_url": "",
+   "status": 0,
+   "error": "URLError: <urlopen error [SSL: TLSV1_ALERT_PROTOCOL_VERSION] tlsv1 alert protocol version (_ssl.c:1129)>"
+  },
+  "final_host": "enverus.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": false,
+  "safe_fetch_status": null,
+  "safe_fetch_failure": "connection",
+  "title": "",
+  "text_chars": 0,
+  "body_sha1": "",
+  "text_head": ""
+ },
+ {
+  "prospect_id": 39,
+  "candidate_domain": "rystadenergy.com",
+  "followed": {
+   "final_url": "",
+   "status": 0,
+   "error": "HTTPError: HTTP Error 308: Permanent Redirect"
+  },
+  "final_host": "rystadenergy.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Rystad Energy - Navigating the future of energy",
+  "text_chars": 5782,
+  "body_sha1": "acea1764c0514a1af43040bd73bed34a3158d8e4",
+  "text_head": "Rystad Energy - Navigating the future of energy Energy intelligence engineered for the AI era We are an independent research and energy intelligence company, equipping clients with data, insights and education that power better decision-making. Book a demo Our solutions Report Global Energy Scenario"
+ },
+ {
+  "prospect_id": 40,
+  "candidate_domain": "woodmac.com",
+  "followed": {
+   "final_url": "https://www.woodmac.com/",
+   "status": 200
+  },
+  "final_host": "www.woodmac.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Wood Mackenzie | Data & analytics solutions",
+  "text_chars": 12370,
+  "body_sha1": "0a94a3f77527351ddcce5eef0905a733c6d5c9d1",
+  "text_head": "Wood Mackenzie | Data & analytics solutions Skip to main content Contact us Registration Sign in Toggle subsection visibility dd4c19ae5d59 Contact us Registration Sign in Sign in Toggle subsection visibility Wood Mackenzie Lens\u00ae Lens Direct Trading Analytics Supply Chain Analytics platform (previous"
+ },
+ {
+  "prospect_id": 41,
+  "candidate_domain": "verisk.com",
+  "followed": {
+   "final_url": "https://www.verisk.com/",
+   "status": 200
+  },
+  "final_host": "www.verisk.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Leading source of information about insurance risk",
+  "text_chars": 21331,
+  "body_sha1": "2ff2d28979727a3ca7eaa00afb82b2f091869831",
+  "text_head": "Leading source of information about insurance risk Skip to main content United States (EN) Show submenu for language selector Select a Language Canada (EN) Canada (FR) United Kingdom (EN) Germany (EN) Deutschland (DE) Sweden (EN) Sverige (SV) Denmark (EN) Danmark (DK) Norway (EN) Norge (NB) ISOnet A"
+ },
+ {
+  "prospect_id": 42,
+  "candidate_domain": "jupiterintel.com",
+  "followed": {
+   "final_url": "https://www.jupiterintel.com/",
+   "status": 200
+  },
+  "final_host": "www.jupiterintel.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Jupiter Intelligence | Climate Resilience Experts",
+  "text_chars": 12423,
+  "body_sha1": "15e8036bc444b45bc3a6fd5dab3cc9fd9f1efdc1",
+  "text_head": "Jupiter Intelligence | Climate Resilience Experts By clicking \u201cAccept All Cookies\u201d , you agree to the storing of cookies on your device to enhance site navigation, analyze site usage, and assist in our marketing efforts. View our Privacy Policy for more information. Preferences Accept Deny Privacy P"
+ },
+ {
+  "prospect_id": 43,
+  "candidate_domain": "cervest.earth",
+  "followed": {
+   "final_url": "https://www.earth-scan.com/",
+   "status": 200
+  },
+  "final_host": "www.earth-scan.com",
+  "redirected_off_domain": true,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "EarthScan\u2122 | Climate Risk Analytics & Intelligence Software",
+  "text_chars": 16584,
+  "body_sha1": "8155d492426edbebdcbf829a8b094d9605e608c9",
+  "text_head": "EarthScan\u2122 | Climate Risk Analytics & Intelligence Software UPDATE Disclose now delivers physical climate risk reports aligned with IFRS S2 Learn more \u2794 WEBINAR How we survived the first wave of CSRD reporting Sign up now \u2794 by Mitiga Solutions Home Platform Features How it works Use Cases Testimonia"
+ },
+ {
+  "prospect_id": 44,
+  "candidate_domain": "watershed.com",
+  "followed": {
+   "final_url": "https://watershed.com/",
+   "status": 200
+  },
+  "final_host": "watershed.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Watershed \u2014 The sustainability AI platform",
+  "text_chars": 10003,
+  "body_sha1": "45450d5c6f7b7cb90fdf865ff8f0dc1d6d68a113",
+  "text_head": "Watershed \u2014 The sustainability AI platform Guide Get the 2027 policy guide: prepare for California scope 3 reporting, simplified ESRS, and new reporting rules in the UK and Australia. Download \u2192 Product Resources Company Customers Sign in Book a demo 4.4Gt CO\u2082e Global EUM 4 . 4 G t C O \u2082 e G l o b a"
+ },
+ {
+  "prospect_id": 45,
+  "candidate_domain": "persefoni.com",
+  "followed": {
+   "final_url": "https://www.persefoni.com/",
+   "status": 200
+  },
+  "final_host": "www.persefoni.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Persefoni AI \u2013 Carbon Accounting and Sustainability Management Platform",
+  "text_chars": 5312,
+  "body_sha1": "b6b97e8e21e8c97b759f4008381eb8d9cd648657",
+  "text_head": "Persefoni AI \u2013 Carbon Accounting and Sustainability Management Platform Persefoni SpydySense AI WEBINAR On-Demand: See Persefoni Data Agent in Action Watch now \uf061 Persefoni for Business \uf078 Overview Carbon Footprint Measurement & Analytics Sustainability Reporting Regulatory Emissions Reporting Stakeho"
+ },
+ {
+  "prospect_id": 46,
+  "candidate_domain": "benchmarkgensuite.com",
+  "followed": {
+   "final_url": "https://benchmarkgensuite.com/",
+   "status": 200
+  },
+  "final_host": "benchmarkgensuite.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "EHS Management & Sustainability Software | Benchmark Gensuite",
+  "text_chars": 19410,
+  "body_sha1": "a9b6c1b824a81028217f73b370c4740de74dc8e9",
+  "text_head": "EHS Management & Sustainability Software | Benchmark Gensuite Skip to content Why Us? Close Why Us? Open Why Us? Why Benchmark Gensuite Awards Subscriber Success Council of Strategic Advisors Why Switch? Data Security & Privacy Multilingual EHS Software ROI International Offices European Union (EU) "
+ },
+ {
+  "prospect_id": 47,
+  "candidate_domain": "cority.com",
+  "followed": {
+   "final_url": "https://www.cority.com/",
+   "status": 200
+  },
+  "final_host": "www.cority.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "EHS Software Solutions | Applied AI for EHS Management",
+  "text_chars": 17864,
+  "body_sha1": "f94655f4ce05298cfe6bbc31bd03a99cac67b2fb",
+  "text_head": "EHS Software Solutions | Applied AI for EHS Management Skip to content \u25b6\ufe0f Real Customers Using AI in the Real World \u2013 Catch it LIVE at Converge Studio | Register Now \ud83c\udfc6 Cority Named a Leader in the 2026 Verdantix Green Quadrant for EHS Software \u2013 Explore Now \ud83d\ude80 See the LIVE unveiling of our AI Bluepri"
+ },
+ {
+  "prospect_id": 48,
+  "candidate_domain": "assent.com",
+  "followed": {
+   "final_url": "https://www.assent.com/",
+   "status": 200
+  },
+  "final_host": "www.assent.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": false,
+  "safe_fetch_status": null,
+  "safe_fetch_failure": "too_large",
+  "title": "",
+  "text_chars": 0,
+  "body_sha1": "",
+  "text_head": ""
+ },
+ {
+  "prospect_id": 49,
+  "candidate_domain": "ecovadis.com",
+  "followed": {
+   "final_url": "https://ecovadis.com/",
+   "status": 200
+  },
+  "final_host": "ecovadis.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "The Global Standard for Resilient, Sustainable Supply Chains | EcoVadis",
+  "text_chars": 12145,
+  "body_sha1": "3211d0ea00b8a05f920d64e9e5df5493f6662063",
+  "text_head": "The Global Standard for Resilient, Sustainable Supply Chains | EcoVadis Skip to content Select a language Buyers Procurement and Resilience Sustainability Intelligence Platform Scope 3 Carbon Management Trusted Sustainability Ratings Direct Worker Engagement Supply Chain Risk Management Risk Managem"
+ },
+ {
+  "prospect_id": 50,
+  "candidate_domain": "dnb.com",
+  "followed": {
+   "final_url": "https://www.dnb.com/en-ca/",
+   "status": 200
+  },
+  "final_host": "www.dnb.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Dun & Bradstreet Canada: Intelligent Data for Business Performance",
+  "text_chars": 4981,
+  "body_sha1": "ebef5e412c01c001d2b28fe2a825d7e6b9858d21",
+  "text_head": "Dun & Bradstreet Canada: Intelligent Data for Business Performance Enterprise Small Business Public Sector Fran\u00e7ais Search Options D\u2011U\u2011N\u2011S Number Business Directory Log In Solutions Why Dun & Bradstreet Our Company Drive Business Performance with Intelligent Data Leverage the world's most comprehens"
+ },
+ {
+  "prospect_id": 51,
+  "candidate_domain": "planful.com",
+  "followed": {
+   "final_url": "https://planful.com/",
+   "status": 200
+  },
+  "final_host": "planful.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Drive Financial Performance with Planful",
+  "text_chars": 7553,
+  "body_sha1": "2a3172385f246b088cc8617ba6158d7686bc2190",
+  "text_head": "Drive Financial Performance with Planful Financial Performance Management Every decision starts with a number. Every number should start here. Planful connects planning, close, consolidation, and reporting in one financial performance management platform. Book a Demo \u2192 Trusted by 1500+ companies How"
+ },
+ {
+  "prospect_id": 52,
+  "candidate_domain": "venasolutions.com",
+  "followed": {
+   "final_url": "https://www.venasolutions.com/",
+   "status": 200
+  },
+  "final_host": "www.venasolutions.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Vena: The #1 Microsoft-Native Financial and Operational Planning Platform",
+  "text_chars": 7111,
+  "body_sha1": "70cd50420aed7b1bcf66e8d15f0ecb4e1f51a9bc",
+  "text_head": "Vena: The #1 Microsoft-Native Financial and Operational Planning Platform Skip to Content Introducing New Analytics Agent and Enhanced Vena MCP Capabilities Learn More , View on our Newsroom Close notification banner Vena AI Platform Solutions Resources Partners Company Log In Request Demo Vena AI P"
+ },
+ {
+  "prospect_id": 53,
+  "candidate_domain": "cube.dev",
+  "followed": {
+   "final_url": "https://cube.dev/",
+   "status": 200
+  },
+  "final_host": "cube.dev",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Cube \u2014 The agentic analytics platform built on a semantic layer",
+  "text_chars": 6902,
+  "body_sha1": "a1c5a8191688c18b28bee1cf532bfd28079472f1",
+  "text_head": "Cube \u2014 The agentic analytics platform built on a semantic layer Product Platform Agentic AI Business Intelligence Embedded Analytics Capabilities AI Context Layer Data Modeling Self-serve Analytics Caching and Query Performance Solutions Industries Financial Services Technology Healthcare Media and "
+ },
+ {
+  "prospect_id": 53,
+  "candidate_domain": "cubesoftware.com",
+  "followed": {
+   "final_url": "https://www.cubesoftware.com/",
+   "status": 200
+  },
+  "final_host": "www.cubesoftware.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Agentic FP&A Platform | Cube",
+  "text_chars": 11586,
+  "body_sha1": "db7316421cb4c2c15115b248fe8ac66aef016650",
+  "text_head": "Agentic FP&A Platform | Cube Cube AI Product Solutions Resources Pricing Log In Get a Demo AI & Agents Cube AI makes financial data decision-ready across every FP&A tool and workflow. Learn more about AI at Cube \u2192 The Data Agents Clean, governed, AI-ready data. The Analyst Agents Understand what hap"
+ },
+ {
+  "prospect_id": 54,
+  "candidate_domain": "mosaic.tech",
+  "followed": {
+   "final_url": "",
+   "status": 0,
+   "error": "URLError: <urlopen error [SSL: TLSV1_ALERT_PROTOCOL_VERSION] tlsv1 alert protocol version (_ssl.c:1129)>"
+  },
+  "final_host": "mosaic.tech",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": false,
+  "safe_fetch_status": null,
+  "safe_fetch_failure": "connection",
+  "title": "",
+  "text_chars": 0,
+  "body_sha1": "",
+  "text_head": ""
+ },
+ {
+  "prospect_id": 55,
+  "candidate_domain": "getaleph.com",
+  "followed": {
+   "final_url": "https://www.getaleph.com/",
+   "status": 200
+  },
+  "final_host": "www.getaleph.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Aleph | AI-native FP&A software & data management for finance",
+  "text_chars": 11602,
+  "body_sha1": "acce52e1ea4de7f78475bb08ebf3c1fe905bd4d3",
+  "text_head": "Aleph | AI-native FP&A software & data management for finance Meet the Aleph Agent AI-native FP&A that connects your data, strategy, and spreadsheets Automate the busywork with end-to-end intelligence \u2014 a web platform, your spreadsheets, and AI in one system. Book a demo Start a free trial 4.9 ratin"
+ },
+ {
+  "prospect_id": 56,
+  "candidate_domain": "pigment.com",
+  "followed": {
+   "final_url": "https://www.pigment.com/",
+   "status": 200
+  },
+  "final_host": "www.pigment.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Agentic AI for enterprise business planning | Pigment",
+  "text_chars": 15748,
+  "body_sha1": "971c0385cccb12ec963d604f8725c6fe98903568",
+  "text_head": "Agentic AI for enterprise business planning | Pigment \ud83c\udf89 Pigment raises $250M Series E funding round to accelerate its move toward autonomous planning. Learn more \u2192 Copy icon as SVG Copy logo as SVG Download media kit Copied to clipboard! Platform pigment Platform overview Platform Overview Pigment A"
+ },
+ {
+  "prospect_id": 57,
+  "candidate_domain": "anaplan.com",
+  "followed": {
+   "final_url": "https://www.anaplan.com/",
+   "status": 200
+  },
+  "final_host": "www.anaplan.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Decision Infrastructure for Agentic Enterprises | Anaplan",
+  "text_chars": 15843,
+  "body_sha1": "3243c37b687fd615130e9dd9a8869e3f42eafea3",
+  "text_head": "Decision Infrastructure for Agentic Enterprises | Anaplan Anaplan CEO Charlie Gottdiener joins Erik Bissonnette for Blue Owl\u2019s Executive Perspectives series Watch now Products Customer Success Resources Company English English \u65e5\u672c\u8a9e Fran\u00e7ais Deutsch Italiano Espa\u00f1ol Support Contact Login Get a demo Lo"
+ },
+ {
+  "prospect_id": 58,
+  "candidate_domain": "workday.com",
+  "followed": {
+   "final_url": "https://www.workday.com/",
+   "status": 200
+  },
+  "final_host": "www.workday.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "The Enterprise AI Platform for HR, Finance, and IT | Workday",
+  "text_chars": 7435,
+  "body_sha1": "454381670dad2a7573e87c682f3a59359d531a22",
+  "text_head": "The Enterprise AI Platform for HR, Finance, and IT | Workday Skip to main content Agents Platform Products Customers More Workday Sites More Workday Sites Community , opens in a new tab Marketplace , opens in a new tab Developers , opens in a new tab Sign In Sign In NEED HELP SIGNING IN? To access y"
+ },
+ {
+  "prospect_id": 59,
+  "candidate_domain": "dayforce.com",
+  "followed": {
+   "final_url": "https://www.dayforce.com/",
+   "status": 200
+  },
+  "final_host": "www.dayforce.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Dayforce - Global HCM Software | HR, Pay, Time, Talent, Analytics",
+  "text_chars": 8292,
+  "body_sha1": "2168daeba5d640de4e12af8d5a2ca001fb0e2a5b",
+  "text_head": "Dayforce - Global HCM Software | HR, Pay, Time, Talent, Analytics Discover new ways to get more from Dayforce. Learn how AI, automation, and the latest innovations can help simplify work and improve efficiency. AI changed work. The Dayforce Agentic HCM Platform changes what AI can do. Read about wha"
+ },
+ {
+  "prospect_id": 60,
+  "candidate_domain": "paycor.com",
+  "followed": {
+   "final_url": "https://www.paycor.com/",
+   "status": 200
+  },
+  "final_host": "www.paycor.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "HR and Payroll Solutions | Empowering Leaders",
+  "text_chars": 18631,
+  "body_sha1": "6b05e7f201d4ae3af1c37e155afbb0281e682522",
+  "text_head": "HR and Payroll Solutions | Empowering Leaders Skip to content Customer Hub Customer Hub Contact Support Professional Services Sign In HCM Software HR Services Who We Serve Partners Resource Center Company Get Started Take a Guided Tour Search Search Paycor WISE HR + Payroll Software Talent Acquisiti"
+ },
+ {
+  "prospect_id": 61,
+  "candidate_domain": "rippling.com",
+  "followed": {
+   "final_url": "https://www.rippling.com/",
+   "status": 200
+  },
+  "final_host": "www.rippling.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Rippling: #1 Workforce Management System | HR, IT, Finance",
+  "text_chars": 9701,
+  "body_sha1": "d57c01d42e07a52ffd408e696dc22412dd08d8db",
+  "text_head": "Rippling: #1 Workforce Management System | HR, IT, Finance Skip to main content Back to main menu Products Platform Solutions Global Resources Pricing Login EN Login See a demo Manage your entire workforce on one system Increase savings and automate busy work with global HR, Payroll, IT, and Finance"
+ },
+ {
+  "prospect_id": 62,
+  "candidate_domain": "deel.com",
+  "followed": {
+   "final_url": "https://www.deel.com/",
+   "status": 200
+  },
+  "final_host": "www.deel.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Deel | Global Payroll, Compliance, HR Solutions | HRIS",
+  "text_chars": 6070,
+  "body_sha1": "c0312c4a364d2a2336046143d952d28812fd41a3",
+  "text_head": "Deel | Global Payroll, Compliance, HR Solutions | HRIS Special Offer Get 3 months free of PEO* Claim offer Solutions Use cases Who we serve Resources Pricing EN Log in Book a demo Hire, manage, pay, & equip anyone, anywhere. What would you like to do with Deel? Hire anywhere Run payroll Secure visas"
+ },
+ {
+  "prospect_id": 63,
+  "candidate_domain": "gusto.com",
+  "followed": {
+   "final_url": "",
+   "status": 0,
+   "error": "HTTPError: HTTP Error 403: Forbidden"
+  },
+  "final_host": "gusto.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": false,
+  "safe_fetch_status": 403,
+  "safe_fetch_failure": "http_status",
+  "title": "",
+  "text_chars": 0,
+  "body_sha1": "",
+  "text_head": ""
+ },
+ {
+  "prospect_id": 64,
+  "candidate_domain": "ramp.com",
+  "followed": {
+   "final_url": "https://ramp.com/",
+   "status": 200
+  },
+  "final_host": "ramp.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Spend Management, Corporate Cards & Accounts Payable Solutions | Ramp",
+  "text_chars": 6925,
+  "body_sha1": "6df44e17aee51feb12a18edd27d8b5535e09570e",
+  "text_head": "Spend Management, Corporate Cards & Accounts Payable Solutions | Ramp Ramp raises $1.85B to get you more from every dollar, hour, and token. Learn more Ramp raises $1.85B to get you more from every dollar, hour, and token. Learn more Products Solutions Partners Resources Pricing Sign in See a demo G"
+ },
+ {
+  "prospect_id": 65,
+  "candidate_domain": "brex.com",
+  "followed": {
+   "final_url": "",
+   "status": 0,
+   "error": "HTTPError: HTTP Error 308: Permanent Redirect"
+  },
+  "final_host": "brex.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Brex: The Modern Finance Software Platform | Spend Smarter",
+  "text_chars": 10846,
+  "body_sha1": "61d799fd99ec17164d2e780014da63296ead1f38",
+  "text_head": "Brex: The Modern Finance Software Platform | Spend Smarter October is our biggest drop of Early Access features yet. See what\u2019s new \u2192 Products Solutions Resources Customers Pricing Sign in See a demo Get started Get started Finance built for speed and control. Modern cards, banking, expenses, accoun"
+ },
+ {
+  "prospect_id": 66,
+  "candidate_domain": "bill.com",
+  "followed": {
+   "final_url": "https://www.bill.com:443/",
+   "status": 200
+  },
+  "final_host": "www.bill.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "BILL | Financial Operations Platform for Businesses & Firms",
+  "text_chars": 13318,
+  "body_sha1": "bfc4f305d696479a42aa31bcad4df5c1d128087d",
+  "text_head": "BILL | Financial Operations Platform for Businesses & Firms AP & AR Overview Accounts Payable Accounts Receivable Cash Flow Forecasting Integrations Features Pay By Card ACH Payments Int'l Payments Approvals Invoicing Procurement AP Controls Security AI API Explore BILL's Integrated Platform Support"
+ },
+ {
+  "prospect_id": 67,
+  "candidate_domain": "floqast.com",
+  "followed": {
+   "final_url": "https://www.floqast.com/",
+   "status": 200
+  },
+  "final_host": "www.floqast.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "FloQast | Accounting Workflow Automation",
+  "text_chars": 6069,
+  "body_sha1": "5d77b775d86034c62852cf7ace4148d2263c1158",
+  "text_head": "FloQast | Accounting Workflow Automation See FloQast In Action See FloQast In Action Earn CPE Support LOGIN Products Close Management Manage checklists, reconciliations, operations, and projects in one platform Close Checklist Task management for every close Account Reconciliations Rec prep, tie-out"
+ },
+ {
+  "prospect_id": 68,
+  "candidate_domain": "blackline.com",
+  "followed": {
+   "final_url": "https://www.blackline.com/",
+   "status": 200
+  },
+  "final_host": "www.blackline.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": false,
+  "safe_fetch_status": null,
+  "safe_fetch_failure": "too_large",
+  "title": "",
+  "text_chars": 0,
+  "body_sha1": "",
+  "text_head": ""
+ },
+ {
+  "prospect_id": 69,
+  "candidate_domain": "datarails.com",
+  "followed": {
+   "final_url": "https://www.datarails.com/",
+   "status": 200
+  },
+  "final_host": "www.datarails.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Datarails FinanceOS: Trusted AI for Finance Teams - Datarails",
+  "text_chars": 9373,
+  "body_sha1": "ac9d658fffcb4daa45b0d438be76cc902c7cf6ef",
+  "text_head": "Datarails FinanceOS: Trusted AI for Finance Teams - Datarails Skip to content Menu Solutions Use Cases Consolidation Planning, Budgeting & Forecasting Financial reporting Data visualization Industries Retail Construction & Real Estate Professional & Business Services Healthcare Manufacturing Non-Pro"
+ },
+ {
+  "prospect_id": 70,
+  "candidate_domain": "centage.com",
+  "followed": {
+   "final_url": "https://www.centage.com/",
+   "status": 200
+  },
+  "final_host": "www.centage.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "FP&A Software for Mid-Market Finance Teams | Centage",
+  "text_chars": 23429,
+  "body_sha1": "24e3dc97fe3109b05955873cce076da7cd8bad53",
+  "text_head": "FP&A Software for Mid-Market Finance Teams | Centage NEW Centage Launches Spotlights. Custom reports tailored to your business. Learn more Product Product Overview AI Automations Budgeting Forecasting Reporting Scenario Planning Multi-Entity Workforce Planning Workflow FP&A as a Service Advisors Sol"
+ },
+ {
+  "prospect_id": 71,
+  "candidate_domain": "acumatica.com",
+  "followed": {
+   "final_url": "https://www.acumatica.com/",
+   "status": 200
+  },
+  "final_host": "www.acumatica.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Acumatica | Cloud ERP Business Management System",
+  "text_chars": 11526,
+  "body_sha1": "cf81e3bb4012db62ac983b47b5e1afbaab2baacb",
+  "text_head": "Acumatica | Cloud ERP Business Management System Register now for Acumatica Summit 2027 in Seattle \u2192 English Language Country SELECT YOUR LANGUAGE English Espa\u00f1ol Fran\u00e7ais SELECT YOUR COUNTRY Canada (English) Canada (French) Colombia Caribbean and Puerto Rico Ecuador India Indonesia Ireland Malaysia"
+ },
+ {
+  "prospect_id": 72,
+  "candidate_domain": "epicor.com",
+  "followed": {
+   "final_url": "",
+   "status": 0,
+   "error": "HTTPError: HTTP Error 403: Forbidden"
+  },
+  "final_host": "epicor.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": false,
+  "safe_fetch_status": 403,
+  "safe_fetch_failure": "http_status",
+  "title": "",
+  "text_chars": 0,
+  "body_sha1": "",
+  "text_head": ""
+ },
+ {
+  "prospect_id": 73,
+  "candidate_domain": "plex.com",
+  "followed": {
+   "final_url": "",
+   "status": 0,
+   "error": "HTTPError: HTTP Error 403: Forbidden"
+  },
+  "final_host": "plex.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": false,
+  "safe_fetch_status": null,
+  "safe_fetch_failure": "unsafe_redirect",
+  "title": "",
+  "text_chars": 0,
+  "body_sha1": "",
+  "text_head": ""
+ },
+ {
+  "prospect_id": 74,
+  "candidate_domain": "ifs.com",
+  "followed": {
+   "final_url": "",
+   "status": 0,
+   "error": "HTTPError: HTTP Error 429: Too Many Requests"
+  },
+  "final_host": "ifs.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": false,
+  "safe_fetch_status": 429,
+  "safe_fetch_failure": "http_status",
+  "title": "",
+  "text_chars": 0,
+  "body_sha1": "",
+  "text_head": ""
+ },
+ {
+  "prospect_id": 75,
+  "candidate_domain": "qad.com",
+  "followed": {
+   "final_url": "https://www.qad.com/",
+   "status": 200
+  },
+  "final_host": "www.qad.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "QAD | Redzone: The #1 Manufacturing Platform Powered by Agentic AI",
+  "text_chars": 4546,
+  "body_sha1": "59c3922061ba4086a77e839c0a580cb4b6e643bc",
+  "text_head": "QAD | Redzone: The #1 Manufacturing Platform Powered by Agentic AI BUSINESS CHALLENGES Platform INDUSTRIES RESOURCES ABOUT PARTNERs Support Get started Solutions / ERP Solve My Business Challenge Learn More Modernize My Business Improve Financial Performance Improve Operations Improve Customer Exper"
+ },
+ {
+  "prospect_id": 76,
+  "candidate_domain": "auvik.com",
+  "followed": {
+   "final_url": "https://www.auvik.com/",
+   "status": 200
+  },
+  "final_host": "www.auvik.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Auvik Networks: Best Network Management Software Solution",
+  "text_chars": 10771,
+  "body_sha1": "9bca03e008d8fcb5d5aab2faa97d3bafff52083b",
+  "text_head": "Auvik Networks: Best Network Management Software Solution Skip to content Try Auvik Free Solutions Network Management With Auvik, you get real-time network visibility and AI-powered guidance at your fingertips in under and hour. Learn more Discovery & Mapping Discovery & Inventory Topology Mapping M"
+ },
+ {
+  "prospect_id": 77,
+  "candidate_domain": "kaseya.com",
+  "followed": {
+   "final_url": "https://www.kaseya.com/",
+   "status": 200
+  },
+  "final_host": "www.kaseya.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Kaseya: IT Management Software & Solutions for IT Pros",
+  "text_chars": 11477,
+  "body_sha1": "9d4cf37c056e31155f3a3fc28fae4beeb64e7854",
+  "text_head": "Kaseya: IT Management Software & Solutions for IT Pros Platform IT Service Delivery Manage, support and automate every endpoint. Remote monitoring & Endpoint management Datto RMM Helpdesk & Service desk automation Autotask PSA IT documentation & knowledge management IT Glue Explore IT service delive"
+ },
+ {
+  "prospect_id": 78,
+  "candidate_domain": "connectwise.com",
+  "followed": {
+   "final_url": "https://www.connectwise.com/",
+   "status": 200
+  },
+  "final_host": "www.connectwise.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "IT Management Software - ITSM & MSP Solutions | ConnectWise",
+  "text_chars": 8621,
+  "body_sha1": "d479dcb727fced8027a864d4504f564a0ba5c713",
+  "text_head": "IT Management Software - ITSM & MSP Solutions | ConnectWise Trust Center Contact Us Sign In ConnectWise Sign In Cloud Services Sign In Platform Solutions Resources About Us Helpful Resources Live demos Trials Resources Request pricing Watch a Demo Get Pricing Platform IT Service & Endpoint Managemen"
+ },
+ {
+  "prospect_id": 79,
+  "candidate_domain": "n-able.com",
+  "followed": {
+   "final_url": "",
+   "status": 0,
+   "error": "HTTPError: HTTP Error 403: Forbidden"
+  },
+  "final_host": "n-able.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": false,
+  "safe_fetch_status": 403,
+  "safe_fetch_failure": "http_status",
+  "title": "",
+  "text_chars": 0,
+  "body_sha1": "",
+  "text_head": ""
+ },
+ {
+  "prospect_id": 80,
+  "candidate_domain": "datto.com",
+  "followed": {
+   "final_url": "https://www.datto.com/",
+   "status": 200
+  },
+  "final_host": "www.datto.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Datto | IT Solutions Built for You",
+  "text_chars": 15742,
+  "body_sha1": "c8d1a0b943d861d5f799ce13b51f83091f2a05b5",
+  "text_head": "Datto | IT Solutions Built for You Skip to content Why Datto Products BACKUP, RESTORE, AND PROTECT DATA Protect clients from downtime and data loss with a comprehensive set of business continuity and disaster recovery tools. Datto SIRIS High performance business continuity ALTO Business continuity f"
+ },
+ {
+  "prospect_id": 81,
+  "candidate_domain": "barracuda.com",
+  "followed": {
+   "final_url": "https://www.barracuda.com/",
+   "status": 200
+  },
+  "final_host": "www.barracuda.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "",
+  "text_chars": 14562,
+  "body_sha1": "87d63240d56851b34b8ad84de45ada3a64f93061",
+  "text_head": "\ufffd\b\u0000\u0000\u0000\u0000\u0000\u0000\u0003\ufffd\ufffd\ufffdn\ufffdH\ufffd(\ufffdl\u0003\ufffd\u000f\ufffdjtK\ufffd\u0016\ufffd\ufffd\ufffd)[\ufffd\ufffd\ufffd*\ufffd\ufffd\ufffd.\ufffd\ufffd\ufffdw\ufffd\u0010$\ufffdJ\ufffdL2\ufffddJVU\u0017\ufffd \ufffd \ufffd\u0000\ufffd\u0003 \ufffda\ufffd\ufffd`\u0006\ufffd\u0003\ufffd/\ufffd\ufffd'\ufffd0\ufffd\u03d8\ufffd\"\ufffd\ufffdd\ufffd/\ufffd\ufffdrw\ufffd\ufffd`0b\u014a\u0015\ufffd\u0016+V |2\u0207\ufffd\u0014\ufffd\ufffd\ufffdd\ufffd\ufffd{X@\ufffd\u000f\ufffd iN\ufffdA\ufffd\ufffdd\ufffd\ufffd8\ufffd:\ufffd;K\ufffd\u01b9\ufffd\u07cc\ufffdt\ufffd\ufffd\ufffd\ufffd\ufffdo\u079f\ufffd\ufffd\ufffdS\ufffd\ufffdF \ufffdI\u0780\ufffd\u0019\ufffdO\ufffd\ufffd{\ufffdBv\ufffdz]\ufffd\ufffdE\ufffd\ufffd|\ufffd G$\u000f\ufffd\bZ\ufffdx\ufffd'{/\ufffd\ufffdP\ufffd\ufffd B3i2\ufffd'jw\u0003\ufffd\ufffd\ufffd0\ufffd\ufffde\ufffd\u0005\u0018@\ufffdI\u0007,y\ufffdG\ufffd\ufffd\ufffd\u01a5\ufffd\ufffd\u001b\ufffda~#\ufffd'\ufffd8\u000f\ufffd8;\ufffd\ufffd\u000fI\u0018 JOG\ufffd\ufffdPzC\ufffd\ufffd$\ufffdx(=#\ufffd\ufffd\u07e5\ufffdH\ufffd\u0012o\ufffd\ufffdM\ufffd\ufffd\ufffd\ufffd\u0013\ufffd\ufffd\u0004@\ufffdcE5\ufffd6\ufffd\u0019"
+ },
+ {
+  "prospect_id": 82,
+  "candidate_domain": "esentire.com",
+  "followed": {
+   "final_url": "https://www.esentire.com/",
+   "status": 200
+  },
+  "final_host": "www.esentire.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Managed Detection and Response Services & Security Operations Platform | eSentire",
+  "text_chars": 14233,
+  "body_sha1": "296ea8a87a51b0afaf8c821c79659005664444a4",
+  "text_head": "Managed Detection and Response Services & Security Operations Platform | eSentire Get Started What We Do How We Do It Resources Company Partners Pricing Login Let's Talk Security What we do How we do it Resources Company Partners PRICING Get Started Back What We Do CONTROLLED AUTONOMY SECOPS Atlas P"
+ },
+ {
+  "prospect_id": 83,
+  "candidate_domain": "blackpointcyber.com",
+  "followed": {
+   "final_url": "https://blackpointcyber.com/",
+   "status": 200
+  },
+  "final_host": "blackpointcyber.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Managed Detection and Response (MDR) Platform - Blackpoint Cyber",
+  "text_chars": 8079,
+  "body_sha1": "4eea2b99c7c2ffd03025f80e60850711a591b731",
+  "text_head": "Managed Detection and Response (MDR) Platform - Blackpoint Cyber Close Search Close Search Partner Login Contact us Platform Explore the CompassOne Platform Security Posture Rating NEW Measure cybersecurity maturity and get clear, actionable insights that expose gaps, prioritize improvements, and de"
+ },
+ {
+  "prospect_id": 84,
+  "candidate_domain": "redcanary.com",
+  "followed": {
+   "final_url": "https://www.zscaler.com/products-and-solutions/managed-detection-and-response",
+   "status": 200
+  },
+  "final_host": "www.zscaler.com",
+  "redirected_off_domain": true,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Leading Cloud Enterprise Security Provider for Zero Trust",
+  "text_chars": 9278,
+  "body_sha1": "e7708950dd74ae05836256247037e1db6e77e09f",
+  "text_head": "Leading Cloud Enterprise Security Provider for Zero Trust Zscaler ThreatLabz 2026 Ransomware Report Download Now Close Request a demo Contact Us Show Sign In Zscaler Cloud Portal Zscaler Cloud Portal One Zscaler Cloud Portal Two Zscaler Cloud Portal Three Zscaler Cloud Portal Beta admin.zscloud.net "
+ },
+ {
+  "prospect_id": 85,
+  "candidate_domain": "reliaquest.com",
+  "followed": {
+   "final_url": "https://reliaquest.com/",
+   "status": 200
+  },
+  "final_host": "reliaquest.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Home | ReliaQuest GreyMatter: The Agentic AI Security Operations Platform for Agentic Defense",
+  "text_chars": 6438,
+  "body_sha1": "128bafdab8a82de1377a7e1abf2da46889e279a2",
+  "text_head": "Home | ReliaQuest GreyMatter: The Agentic AI Security Operations Platform for Agentic Defense Skip to Content ReliaQuest Named a Leader in the IDC MarketScape: Worldwide Standalone AI SOC Platforms 2026 Vendor Assessment ReliaQuest Named a Leader in the IDC MarketScape: Worldwide Standalone AI SOC P"
+ },
+ {
+  "prospect_id": 86,
+  "candidate_domain": "tanium.com",
+  "followed": {
+   "final_url": "",
+   "status": 0,
+   "error": "HTTPError: HTTP Error 308: Permanent Redirect"
+  },
+  "final_host": "tanium.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Autonomous IT, endpoint intelligence and control | Tanium",
+  "text_chars": 5281,
+  "body_sha1": "3bb306d3a62d96f9cfbd1f3ba3072b8c523426d8",
+  "text_head": "Autonomous IT, endpoint intelligence and control | Tanium Skip to main content You patched PHP. But did you patch every copy? Uncover every exposure Login Platform Solutions Customers Partners Resources Company Contact us See a demo THE AUTONOMOUS IT COMPANY Every endpoint, managed at machine speed."
+ },
+ {
+  "prospect_id": 87,
+  "candidate_domain": "lansweeper.com",
+  "followed": {
+   "final_url": "",
+   "status": 0,
+   "error": "HTTPError: HTTP Error 403: Forbidden"
+  },
+  "final_host": "lansweeper.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": false,
+  "safe_fetch_status": 403,
+  "safe_fetch_failure": "http_status",
+  "title": "",
+  "text_chars": 0,
+  "body_sha1": "",
+  "text_head": ""
+ },
+ {
+  "prospect_id": 88,
+  "candidate_domain": "torq.io",
+  "followed": {
+   "final_url": "https://torq.io/",
+   "status": 200
+  },
+  "final_host": "torq.io",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Torq AI SOC Platform | AI Agents and Agentic SecOps",
+  "text_chars": 8616,
+  "body_sha1": "f1b2543e7d8b19f3acd7f68b986f8478f80712ca",
+  "text_head": "Torq AI SOC Platform | AI Agents and Agentic SecOps Skip to content Get a Demo Platform Column One Torq AI SOC Platform Torq AI SOC Platform Expand SOC capacity and velocity with agentic AI that acts across triage, investigation, and response. Platform Overview Torq AI SOC Platform Column Two Produc"
+ },
+ {
+  "prospect_id": 89,
+  "candidate_domain": "tines.com",
+  "followed": {
+   "final_url": "",
+   "status": 0,
+   "error": "HTTPError: HTTP Error 308: Permanent Redirect"
+  },
+  "final_host": "tines.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Tines | The secure environment for AI agents, apps and automation",
+  "text_chars": 3769,
+  "body_sha1": "2cffeeb6e6d77648e5924a4d21db723f671aaaa5",
+  "text_head": "Tines | The secure environment for AI agents, apps and automation Skip to content Product Solutions Customers Discover Pricing Log in Sign up free Book a demo Blog The point of no return AI made everyone a builder. Now give them somewhere to build. Apps, agents and automations, in the complete envir"
+ },
+ {
+  "prospect_id": 90,
+  "candidate_domain": "swimlane.com",
+  "followed": {
+   "final_url": "https://swimlane.com/",
+   "status": 200
+  },
+  "final_host": "swimlane.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Agentic AI Security Automation & AI SOC Platform | Swimlane",
+  "text_chars": 20083,
+  "body_sha1": "a3618daff1a71d0998ad28f7df294fee3c17d6ef",
+  "text_head": "Agentic AI Security Automation & AI SOC Platform | Swimlane Request a Demo Why Swimlane Solutions By Use Case Common and creative use cases for low-code automation See all SOC Essentials Phishing Incident Response SIEM Triage Threat Hunting EDR Alert Triage Outside the SOC Vulnerability Management C"
+ },
+ {
+  "prospect_id": 91,
+  "candidate_domain": "pax8.com",
+  "followed": {
+   "final_url": "https://www.pax8.com/en-ca/",
+   "status": 200
+  },
+  "final_host": "www.pax8.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "The Cloud Marketplace That Unlocks a Universe of Possibility | Pax8 Canada (EN)",
+  "text_chars": 5759,
+  "body_sha1": "e48d8926426aef82e453fd46df87ea8999c8c515",
+  "text_head": "The Cloud Marketplace That Unlocks a Universe of Possibility | Pax8 Canada (EN) Skip to content Search... Marketplace Explore the Marketplace Marketplace Explore the Marketplace All vendors Marketplace for vendors Log in Get started Join the Marketplace Build the perfect stack Register for an event "
+ },
+ {
+  "prospect_id": 92,
+  "candidate_domain": "sherweb.com",
+  "followed": {
+   "final_url": "https://www.sherweb.com/",
+   "status": 200
+  },
+  "final_host": "www.sherweb.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "More than a cloud distributor | Sherweb",
+  "text_chars": 7746,
+  "body_sha1": "a16818bc50f159bb34f9d346b940a3e1c1405942",
+  "text_head": "More than a cloud distributor | Sherweb Marketplace Platform Partner platform Your control panel for billing, provisioning and more Self-Service Portal Your clients\u2019 storefront for managing licenses, users and subscriptions Integrations See how we connect to your existing systems to simplify your wo"
+ },
+ {
+  "prospect_id": 93,
+  "candidate_domain": "softchoice.com",
+  "followed": {
+   "final_url": "https://www.softchoice.com/",
+   "status": 200
+  },
+  "final_host": "www.softchoice.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Softchoice: Success. Fully realized.",
+  "text_chars": 155,
+  "body_sha1": "6cb508c4d76632976a320d9aad88d279baa0dfea",
+  "text_head": "Softchoice: Success. Fully realized. Browser not supported Sorry, softchoice.com is not compatible with Internet Explorer. Please try one of these options."
+ },
+ {
+  "prospect_id": 94,
+  "candidate_domain": "cdw.com",
+  "followed": {
+   "final_url": "https://www.cdw.com/",
+   "status": 200
+  },
+  "final_host": "www.cdw.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "CDW: IT Solutions and Services, Hardware, Software for Business",
+  "text_chars": 9508,
+  "body_sha1": "88095b27c56f08cd2ec9e36c4743555b824056c2",
+  "text_head": "CDW: IT Solutions and Services, Hardware, Software for Business Skip to Main Content Cancel Notifications Notifications Sign In Cart Hardware Software Solutions Services Industries Partners Insights Why CDW Amazing happens when AI is private on any desk. Mac mini is every professional\u2019s private, alw"
+ },
+ {
+  "prospect_id": 95,
+  "candidate_domain": "presidio.com",
+  "followed": {
+   "final_url": "https://www.presidio.com/",
+   "status": 200
+  },
+  "final_host": "www.presidio.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Home | Presidio",
+  "text_chars": 11524,
+  "body_sha1": "a3272cd745e7e8e3c4591aa8f3daaedb97c3a44c",
+  "text_head": "Home | Presidio Skip to main content How We Help Back Consult & Advise Build & Modernize Secure & Operate Experience & Enable Procure & Scale Industries Back Consult & Advise Overview AI Consulting Services Strategy Consulting Professional Services Presidio Capital Back Build & Modernize Overview AI"
+ },
+ {
+  "prospect_id": 96,
+  "candidate_domain": "trace3.com",
+  "followed": {
+   "final_url": "https://www.trace3.com/",
+   "status": 200
+  },
+  "final_host": "www.trace3.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Trace3 | All Possibilities Live in Technology",
+  "text_chars": 14732,
+  "body_sha1": "ee6c6386c431d30af294655585757f5e074f27cc",
+  "text_head": "Trace3 | All Possibilities Live in Technology Paramount Pixel ANNOUNCEMENT: Trace3 completes acquisition of Calian Group\u2019s U.S. Commercial IT Assets, adding talent and capabilities to its growing organization. Zivaro joins the Trace3 brand, expanding the company\u2019s verticalization efforts into federa"
+ },
+ {
+  "prospect_id": 97,
+  "candidate_domain": "wwt.com",
+  "followed": {
+   "final_url": "https://wwt.com/",
+   "status": 200
+  },
+  "final_host": "wwt.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "",
+  "text_chars": 0,
+  "body_sha1": "8af022d062fa6aed4497e0ab448981b25a278d44",
+  "text_head": ""
+ },
+ {
+  "prospect_id": 98,
+  "candidate_domain": "ahead.com",
+  "followed": {
+   "final_url": "https://www.ahead.com/",
+   "status": 200
+  },
+  "final_host": "www.ahead.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "AHEAD | Digital Platforms Engineered for Modern Enterprises",
+  "text_chars": 14062,
+  "body_sha1": "0ffda25a82c83291941e081a6db7736c414ee543",
+  "text_head": "AHEAD | Digital Platforms Engineered for Modern Enterprises Expertise AI Strategy and Transformation AI Enabled Infrastructure Data Platform Modernization Platform & Workload Modernization Secure & Resilient Architectures Operational Excellence Services Business IT Consulting IT Financial Consulting"
+ },
+ {
+  "prospect_id": 99,
+  "candidate_domain": "onica.com",
+  "followed": {
+   "final_url": "",
+   "status": 0,
+   "error": "HTTPError: HTTP Error 500: Internal Server Error"
+  },
+  "final_host": "onica.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": false,
+  "safe_fetch_status": 500,
+  "safe_fetch_failure": "http_status",
+  "title": "",
+  "text_chars": 0,
+  "body_sha1": "",
+  "text_head": ""
+ },
+ {
+  "prospect_id": 99,
+  "candidate_domain": "rackspace.com",
+  "followed": {
+   "final_url": "https://www.rackspace.com:443/",
+   "status": 200
+  },
+  "final_host": "www.rackspace.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Rackspace",
+  "text_chars": 7505,
+  "body_sha1": "1cdda93a10b56e170b7273fadb0af74ac7343e99",
+  "text_head": "Rackspace Skip to main content Skip to footer Opens in a new tab Enterprise AI Enterprise AI Cloud GPU-as-a-Service Inference-as-a-Service Fine-Tuning-as-a-Service Forward Deployed Engineering Private Cloud Dedicated Multi-Tenant Bare Metal Sovereign Hybrid Cloud On-Premises Services Managed Operati"
+ },
+ {
+  "prospect_id": 100,
+  "candidate_domain": "convergetp.com",
+  "followed": {
+   "final_url": "https://convergetp.com/",
+   "status": 200
+  },
+  "final_host": "convergetp.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "Converge Technology Solutions: IT for Business",
+  "text_chars": 6982,
+  "body_sha1": "8bfe07e5394af8c692457d6e75ab55aafa373472",
+  "text_head": "Converge Technology Solutions: IT for Business Converge and Mainline Information Systems are now one company \u2013 introducing Pellera Technologies, an IT solutions provider creating and sustaining momentum for clients. Visit Pellera.com . Solutions Advanced Analytics Business Analytics & Data Visualiza"
+ },
+ {
+  "prospect_id": 100,
+  "candidate_domain": "pellera.com",
+  "followed": {
+   "final_url": "https://pellera.com/",
+   "status": 200
+  },
+  "final_host": "pellera.com",
+  "redirected_off_domain": false,
+  "safe_fetch_ok": true,
+  "safe_fetch_status": 200,
+  "safe_fetch_failure": "",
+  "title": "IT Solutions for Businesses - Pellera Technologies",
+  "text_chars": 12420,
+  "body_sha1": "2e1d245456d6d5abac3d3d0ba1d7e1db59ad0b90",
+  "text_head": "IT Solutions for Businesses - Pellera Technologies Our Solutions AI AI Design Studio Contact Center AI Cybersecurity Digital Workplace Hybrid Cloud and App Modernization EVS IQ IP4G Managed Services Next Gen Data Center Who We Serve Enterprise IT Solutions & Services Manufacturing IT Solutions & Ser"
+ }
+]

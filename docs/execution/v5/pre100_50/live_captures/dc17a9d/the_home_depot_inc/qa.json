@@ -1,0 +1,62 @@
+[
+  {
+    "question": "What should management do?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What should management do? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo The Home Depot, Inc. What should management do? Do not act on this reading. Re-run once the market engine publishes a snapshot this side will read. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "Why now?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "Why now? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo The Home Depot, Inc. Why now? what to charge, and for what is a standing decision for this business model. It was ranked above supply chain on the same evidence. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What's the biggest risk?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What's the biggest risk? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo The Home Depot, Inc. What's the biggest risk? comparable sales, split into traffic and basket is not disclosed at the granularity the decision needs. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What would prove this wrong?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What would prove this wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo The Home Depot, Inc. What would prove this wrong? a disclosure in comparable sales and traffic disclosures showing the mechanism moving in the opposite direction would overturn this reading. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "Who's the real competitor?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "Who's the real competitor? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo The Home Depot, Inc. Who's the real competitor? The shopper buying the same basket somewhere cheaper: The shopper buying the same basket somewhere cheaper does not respond at all, because it is not watching this market \u2014 which is what makes it dangerous. Watch The substitute's share of the job rising in accounts where our usage is flat.; The supplier selling to the shopper directly: The supplier selling to the shopper directly reaches the customer directly and keeps the relationship, whether or not the economics are better. Watch Direct volume growing at the channel's expense in the same cohort. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What does the market believe?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What does the market believe? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo The Home Depot, Inc. What does the market believe? That The Home Depot, Inc.'s current weakness is a cyclical trough rather than a structural reset, and the prior trajectory resumes.: The Home Depot, Inc.'s own filed results show growth slowing and margin narrowing. This is what a reader of that record carries into next year; nobody published it in these words and it is not a consensus estimate.; That the contest The Home Depot, Inc. has to win is against the shopper buying the same basket somewhere cheaper, and that holding that ground is what protects the economics.: read from the business model, not retrieved. Read from how this business model competes. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What's the weakest assumption?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What's the weakest assumption? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo The Home Depot, Inc. What's the weakest assumption? The Home Depot, Inc.'s filed results: The filed series is what this reading is computed from. Buying scale converted into price, and price into traffic is what the economics rest on Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What impossible hypothesis should we investigate?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What impossible hypothesis should we investigate? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo The Home Depot, Inc. What impossible hypothesis should we investigate? A holder of this view is reading the record correctly as far as it goes: what it implies is whether the slowdown is arriving through volume or through price, because only one of those recovers with the cycle, and nothing in what this run retrieved contradicts that.; A holder of this view is reading the record correctly as far as it goes: what it implies is wins and losses are decided against the shopper buying the same basket somewhere cheaper rather than somewhere else, and nothing in what this run retrieved contradicts that. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What should we measure next?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What should we measure next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo The Home Depot, Inc. What should we measure next? store and site traffic \u2014 revenue at a business of this kind moves with store and site traffic.; average ticket \u2014 revenue at a business of this kind moves with average ticket.; comparable sales \u2014 revenue at a business of this kind moves with comparable sales. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What would you tell the board?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What would you tell the board? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo The Home Depot, Inc. What would you tell the board? Do not act on this reading. Re-run once the market engine publishes a snapshot this side will read. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  }
+]

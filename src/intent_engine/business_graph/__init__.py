@@ -1,4 +1,12 @@
-"""The one substrate every subsystem projects into. See `model` for why."""
+"""The one substrate every subsystem projects into. See `model` for why.
+
+`internal` is not re-exported wholesale here on purpose: its names collide with
+the public vocabulary by design (`CONTRACT`, `EXPERIMENT`, `PRIVATE_PRODUCT`
+versus `PRODUCT`), and a flat namespace holding both is exactly the confusion
+the `private.` prefix exists to prevent. Import it as
+`from intent_engine.business_graph import internal as private` and the two
+worlds stay legible in the reading code.
+"""
 from intent_engine.business_graph.model import (  # noqa: F401
     ACTION,
     ACYCLIC_EDGES,
@@ -38,7 +46,26 @@ from intent_engine.business_graph.model import (  # noqa: F401
     BusinessGraph,
     Edge,
     GraphError,
+    GraphRead,
     Node,
+    PrivateGraphRefused,
+    TenantOwned,
     assert_graph_invariants,
     detect_cycles,
+    read_decision,
+    read_scope,
+)
+from intent_engine.business_graph.model import (  # noqa: F401
+    CROSS_TENANT,
+    CROSS_VISIBILITY,
+    EXPLICIT_NULL,
+    MISSING_REQUIRED_FIELD,
+    PRIVATE_GRAPH_FAILURE_STATES,
+    READ_DECISIONS,
+    REFUSED,
+    SHOWN,
+    STALE_CONTRACT,
+    TENANT_BINDING_BROKEN,
+    UNKNOWN_ENDPOINT,
+    WITHHELD,
 )

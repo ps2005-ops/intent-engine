@@ -133,14 +133,27 @@ def passes_specificity(text: str, company: str) -> bool:
     return sum(1 for w in specific if w in low) >= 1
 
 
-def _live_tensions(observations):
+def _live_tensions(observations, business_model: str = ""):
+    """Tensions both observed AND applicable to this kind of business.
+
+    The same gate `reasoning._build_blind_spots` applies, and for the same
+    reason: a tension fires on signal names, and signal names are generic
+    enough that a chip designer's partner and platform language matched a
+    marketplace's. Surprises and opportunities are built from these, so an
+    ungated tension leaked commerce language onto every surface that renders
+    them, not just the blind-spot section.
+    """
+    from intent_engine.strategic_intelligence.patterns import tension_applies
     present = set()
     for o in observations:
         present.update(o.signals)
     live = []
     for t in TENSIONS:
-        if any(s in present for s in t["left"]) and \
-                any(s in present for s in t["right"]):
+        if not (any(s in present for s in t["left"])
+                and any(s in present for s in t["right"])):
+            continue
+        ok, _kind = tension_applies(t, business_model)
+        if ok:
             live.append(t)
     return live
 
@@ -159,13 +172,14 @@ def _cite(obs, limit=2):
             for o in obs[:limit]]
 
 
-def detect_surprises(company, observations, hypotheses):
+def detect_surprises(company, observations, hypotheses,
+                     business_model: str = ""):
     """A surprise is a meaningful mismatch, not a fact. Built from live tensions
     plus a cross-source-class emphasis check."""
     surprises = []
     classes = {o.source_class for o in observations}
     exec_present = "executive_statement" in classes
-    for t in _live_tensions(observations):
+    for t in _live_tensions(observations, business_model):
         a = _obs_for(observations, t["left"])
         b = _obs_for(observations, t["right"])
         if not (a and b):
@@ -231,9 +245,10 @@ _OPPORTUNITY_PLAYBOOK = {
 }
 
 
-def detect_opportunities(company, observations, hypotheses):
+def detect_opportunities(company, observations, hypotheses,
+                         business_model: str = ""):
     opps = []
-    for t in _live_tensions(observations):
+    for t in _live_tensions(observations, business_model):
         play = _OPPORTUNITY_PLAYBOOK.get(t["tension_id"])
         if not play:
             continue
@@ -257,14 +272,15 @@ def detect_opportunities(company, observations, hypotheses):
 
 _VULNERABILITY_PLAYBOOK = {
     "human_to_agent_workflow": dict(
-        layer="demand capture at the storefront",
-        mechanism="if buying is mediated by AI agents, the owned human-facing "
-                  "storefront matters less than the rails an agent calls",
-        why="agentic-commerce signals are appearing before the interface moat "
-            "is replaced",
-        force="AI shopping agents / answer engines",
-        impact="erosion of the interface advantage that drives acquisition",
-        indicator="share of orders originating from agent surfaces"),
+        layer="the interface customers work through",
+        mechanism="if AI agents do the work, the screens a person used "
+                  "matter less than the interfaces and records an agent "
+                  "acts through",
+        why="agent-execution signals are appearing before the interface "
+            "advantage is replaced",
+        force="AI agents and the platforms that host them",
+        impact="erosion of the interface advantage that drives adoption",
+        indicator="share of the work completed by agents rather than people"),
     "ecosystem_control_vs_openness": dict(
         layer="the partner ecosystem",
         mechanism="consolidating checkout/identity/data can turn partners into "
@@ -328,9 +344,10 @@ def underexamined_questions(company, observations, hypotheses, blind_spots):
                  f"quietly become competitors — and does that shrink the "
                  f"ecosystem faster than rails revenue grows?")
         elif h.pattern_id == "human_to_agent_workflow":
-            q = (f"If AI agents mediate buying, does {company} still own the "
-                 f"customer relationship, or does the agent platform capture "
-                 f"it — and what does that do to merchant demand?")
+            q = (f"If AI agents do the work {company}'s customers do "
+                 f"today, does {company} still own the customer "
+                 f"relationship, or does the platform hosting the agent "
+                 f"capture it?")
         elif h.pattern_id == "smb_wedge_to_enterprise":
             q = (f"Is enterprise focus quietly raising the complexity SMBs "
                  f"experience in {company}'s core flows, eroding the wedge "

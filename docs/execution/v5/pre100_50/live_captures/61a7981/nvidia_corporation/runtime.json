@@ -1,0 +1,41 @@
+{
+  "company": "NVIDIA Corporation",
+  "deployed_sha": "61a7981",
+  "run_id": "01M0K8257DY98105ZXY0ZZP8Y1",
+  "analysis_seconds": 67,
+  "stage_transitions": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing NVIDIA Corporation NVDA \u00b7 nvidia.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence w",
+      "status": 200,
+      "html_bytes": 17015
+    },
+    {
+      "t": 67.0,
+      "text": "Limited analysis of NVIDIA Corporation Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of NVIDIA Corporation A supported reading of NVIDIA Corporation exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen it. Rather than sh",
+      "status": 200,
+      "html_bytes": 18396
+    }
+  ],
+  "route_seconds": {
+    "run": 10.75,
+    "intro": 6.54,
+    "slides": 7.98,
+    "full": 8.6,
+    "story": 6.91,
+    "history": 0.24,
+    "connect": 4.84
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "193067c66f6744a2",
+    "started_at": 1787350461.0625536,
+    "uptime_seconds": 1925.4
+  },
+  "process_after": {
+    "boot_id": "193067c66f6744a2",
+    "started_at": 1787350461.0625536,
+    "uptime_seconds": 2287.8
+  },
+  "errors": []
+}

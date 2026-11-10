@@ -82,10 +82,30 @@ class MacroObservation:
 
     @property
     def change_text(self) -> str:
-        if self.current_value is None or self.prior_value is None:
+        if self.current_value is None:
             return ""
+        if self.prior_value is None:
+            return f"{self.current_value:,.1f} {self.unit}"
         delta = self.current_value - self.prior_value
         return f"{self.current_value:,.1f} {self.unit} (from {self.prior_value:,.1f}, {delta:+,.1f})"
+
+    @property
+    def sentence(self) -> str:
+        """The reading as one grammatical sentence, every case.
+
+        A missing year-earlier value is NOT "has not moved materially": that
+        is a claim of stability nobody measured, and the live prospect-100
+        pass printed it -- "US unemployment rate is has not moved materially:
+        , compared with the same month a year earlier." -- on 15 pages.
+        """
+        if self.current_value is None:
+            return f"{self.label}: no current reading was available."
+        if self.prior_value is None or not self.direction:
+            return (f"{self.label} stood at {self.change_text}; no "
+                    f"comparable earlier reading was available, so no "
+                    f"direction is stated.")
+        note = f", {self.comparison_note}" if self.comparison_note else ""
+        return f"{self.label} is {self.direction}: {self.change_text}{note}."
 
     def age_days(self, today: str) -> Optional[int]:
         try:
@@ -147,6 +167,7 @@ class MacroFactor:
             "unit": o.unit,
             "direction": o.direction,
             "change_text": o.change_text,
+            "sentence": o.sentence,
             "observation_date": o.observation_date,
             "frequency": o.frequency,
             "source": o.source,

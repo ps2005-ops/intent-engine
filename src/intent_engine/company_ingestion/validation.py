@@ -65,22 +65,60 @@ def registrable(host: str) -> str:
 
 
 def redirect_allowed(from_url: str, to_url: str) -> bool:
-    """Allowed without new approval: same host, apex↔www of the same
-    registrable domain, and http→https upgrades. Everything else —
-    unrelated domains, IP literals, scheme downgrades to non-HTTP —
-    is refused."""
+    """Allowed without new approval: the approved host, its `www.` twin, and
+    anything BENEATH it. Everything else is refused.
+
+    SUBTREE CONTAINMENT, NOT REGISTRABLE EQUALITY
+    ----------------------------------------------
+    This used to require exact host equality after a registrable-domain
+    check, which refused `cloudflare.com -> blog.cloudflare.com` while
+    `same_domain()` — the function that APPROVES candidates — accepted the
+    same host. Two definitions of "the same company" in one module, and the
+    hosts caught between them (blog., docs., investor., ir.) are where
+    strategy and customer evidence lives: it was missing for 8 of the 10
+    breaker companies.
+
+    The obvious repair is `registrable(from) == registrable(to)`. It is
+    refused here. `registrable()` is deliberately coarse — the last two
+    labels — so on a multi-label public suffix it returns `co.uk`, and
+    registrable equality would admit every unrelated `.co.uk` host into a
+    navigation NOBODY APPROVED. That coarseness is tolerable where a human
+    approves the candidate; it is not tolerable as the gate on a redirect.
+
+    So the test is containment in the subtree of the host already approved:
+    you may descend, and `www.` is the apex. It never consults
+    `registrable()`, and it is strictly narrower than registrable equality on
+    every input — `cloudflare.com.evil.example` is not beneath
+    `cloudflare.com`, because the match is anchored on a label boundary.
+
+    The SSRF wall is unchanged and still runs first: scheme, credentials,
+    ports, localhost, loopback, link-local and private literals are all
+    refused before the host is even considered.
+    """
     try:
         validate_candidate_url(to_url)
     except UnsafeURLRejected:
         return False
-    f, t = urlparse(from_url), urlparse(to_url)
-    from_host = (f.hostname or "").lower()
-    to_host = (t.hostname or "").lower()
-    if registrable(from_host) != registrable(to_host):
+    from_host = (urlparse(from_url).hostname or "").lower().rstrip(".")
+    to_host = (urlparse(to_url).hostname or "").lower().rstrip(".")
+    if not from_host or not to_host:
         return False
-    stripped_from = from_host[4:] if from_host.startswith("www.") else from_host
-    stripped_to = to_host[4:] if to_host.startswith("www.") else to_host
-    return stripped_from == stripped_to
+    # AN EMPTY LABEL BREAKS THE ANCHOR. `.cloudflare.com` ends with
+    # `.cloudflare.com`, so a leading dot would satisfy the suffix test and
+    # smuggle a malformed host through a rule that exists to pin one. The
+    # previous exact-equality check refused it for free; the widened rule has
+    # to refuse it on purpose. Caught by this file's own negative control.
+    if any(not label for label in from_host.split(".")) or \
+            any(not label for label in to_host.split(".")):
+        return False
+    base = from_host[4:] if from_host.startswith("www.") else from_host
+    target = to_host[4:] if to_host.startswith("www.") else to_host
+    if not base or not target:
+        return False
+    # The dot is the whole guarantee: `evilcloudflare.com` does not end with
+    # `.cloudflare.com`, and `cloudflare.com.evil.example` ends with
+    # `.evil.example`.
+    return target == base or target.endswith("." + base)
 
 
 def same_domain(company_url: str, candidate_url: str) -> bool:

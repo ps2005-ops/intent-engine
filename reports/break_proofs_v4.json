@@ -1,0 +1,94 @@
+{
+  "caught": 14,
+  "contract": "econ_break_proofs_v4.v1",
+  "not_applied": 0,
+  "not_caught": 0,
+  "proofs": 14,
+  "results": [
+    {
+      "description": "the immutability check on the ledger is removed",
+      "detail": "LedgerViolation: the ledger accepted a changed horizon on an existing expectation; the forward record is editable",
+      "proof": "01_rewrite_open_expectation",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "the horizon check is removed from the state machine",
+      "detail": "AssertionError: an expectation expiring 2027-01-01 resolved on 2026-03-01 as RESOLVED; the horizon no longer gates resolution",
+      "proof": "02_resolve_before_eligibility",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "the ladder counts unresolved predictions",
+      "detail": "AssertionError: fifty UNRESOLVED predictions moved the ladder to EARLY_CALIBRATION; an accuracy figure would be reported from predictions that have not happened yet",
+      "proof": "03_unresolved_in_calibration",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "the origin count stops deduplicating",
+      "detail": "AssertionError: twenty predictions from ONE origin reported 20 origins; the forward record would repeat the row-bootstrap mistake the historical programme spent two runs correcting",
+      "proof": "04_correlated_forward_as_independent",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "the first-release branch is removed from the resolver",
+      "detail": "AssertionError: a FIRST_RELEASE contract resolved with 200.0, the later revision. The prediction was about what the world would print, and a better estimate of the truth is the wrong answer to it",
+      "proof": "05_future_revision_for_first_release",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "a human-state series is marked for promotion to a driver",
+      "detail": "AssertionError: ['UMCSENT'] appear in the company driver table while CollectiveHumanState is FROZEN_CANDIDATE with zero promoted constructs; an unsupported construct would reach a Founder recommendation",
+      "proof": "06_unsupported_human_state_reaches_founder",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "the lineage walk stops finding ancestors",
+      "detail": "AssertionError: a corroborator two hops up the lineage was not found; a derived aggregate can corroborate its own input as long as one intermediate hides it",
+      "proof": "07_derived_aggregate_double_counted",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "the visibility check is removed from the state builder",
+      "detail": "AssertionError: EconomicState.build no longer checks node visibility; a tenant-private observation could enter the shared public state",
+      "proof": "08_private_evidence_reaches_public_state",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "an unmeasured dimension stops reporting BLOCKED",
+      "detail": "AssertionError: a dimension with no producer and no source reports PARTIAL; an unmeasured dimension would leave the denominator and coverage would inflate",
+      "proof": "09_state_field_loses_provenance",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "the candidate-status check on a bleed is removed",
+      "detail": "WorldModelDefect: a causal bleed carries status 'PROVEN_CAUSE'. A bleed is a measured non-response with a CANDIDATE explanation. Rates fell, demand did not respond, therefore fear -- is a story, and the whole point of the object is that it stays one until something tests it.",
+      "proof": "10_bleed_presented_as_proven",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "the scenario type is collapsed into the causal one",
+      "detail": "AssertionError: the counterfactual type wall no longer separates a scenario assumption from a causal estimate; a History Rewind what-if would render with the standing of a measured effect",
+      "proof": "11_scenario_rendered_as_causal",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "the no-change branch of the stagnation detector is removed",
+      "detail": "AssertionError: the stagnation detector no longer alerts when no company analysis changes; evidence arriving with nothing moving would be recorded as a healthy cycle",
+      "proof": "12_duplicate_evidence_as_learning",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "the channel requirement on an implication is removed",
+      "detail": "AssertionError: an implication with no channel and no driver was accepted; a founder recommendation could change with nothing to attribute it to",
+      "proof": "13_recommendation_without_attributable_input",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "the append becomes a whole-file write",
+      "detail": "AssertionError: after a resolution the ledger holds 1 record(s) and the original OPEN record is gone; the prediction was overwritten by its own outcome",
+      "proof": "14_resolution_rewrites_original",
+      "verdict": "CAUGHT"
+    }
+  ],
+  "unreliable": 0
+}

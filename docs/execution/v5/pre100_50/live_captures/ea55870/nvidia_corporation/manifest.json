@@ -1,0 +1,152 @@
+{
+  "company": "NVIDIA Corporation",
+  "deployed_sha": "ea55870",
+  "captured_at": "2026-08-21T23:16:18Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K9RVTG00FD1VZAKYP905MD/intro",
+      "chars": 4787,
+      "html_chars": 30089,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K9RVTG00FD1VZAKYP905MD/intro",
+      "chars": 4787,
+      "html_chars": 30089,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K9RVTG00FD1VZAKYP905MD/intro",
+      "chars": 4787,
+      "html_chars": 30089,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K9RVTG00FD1VZAKYP905MD/full",
+      "chars": 19741,
+      "html_chars": 58711,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K9RVTG00FD1VZAKYP905MD/story",
+      "chars": 4659,
+      "html_chars": 34179,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K9RVTG00FD1VZAKYP905MD/history",
+      "chars": 28327,
+      "html_chars": 107926,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K9RVTG00FD1VZAKYP905MD/connect",
+      "chars": 3857,
+      "html_chars": 28768,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K9RVTG00FD1VZAKYP905MD/intro",
+      "chars": 4787,
+      "html_chars": 30089,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K9RVTG00FD1VZAKYP905MD/evidence",
+      "chars": 9021,
+      "html_chars": 28170,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K9RVTG00FD1VZAKYP905MD/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K9RVTG00FD1VZAKYP905MD/brief",
+      "chars": 18001,
+      "html_chars": 52315,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.3,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing NVIDIA Corporation NVDA \u00b7 nvidia.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence w",
+      "status": 200,
+      "html_bytes": 17015
+    },
+    {
+      "t": 83.1,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17016,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K9RVTG00FD1VZAKYP905MD/progress",
+      "head": ""
+    },
+    {
+      "t": 226.6,
+      "text": "NVIDIA Corporation \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction NVIDIA Corporation NVDA \u00b7 USA \u00b7 nvidia.com \u00b7 SEC CIK 1045810 NVIDIA Corporation is a semiconductor business that runs on design and manufacture of a physical product sold into a capacity-constrained s",
+      "status": 200,
+      "html_bytes": 30156
+    }
+  ],
+  "process_before": {
+    "boot_id": "2f3bc74d6e2d4970",
+    "started_at": 1787354140.8714237,
+    "uptime_seconds": 37.4
+  },
+  "run_id": "01M0K9RVTG00FD1VZAKYP905MD",
+  "status": "READY",
+  "seconds": 227,
+  "first_useful": 227,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 23.19,
+    "intro": 22.65,
+    "slides": 27.76,
+    "full": 37.89,
+    "story": 7.08,
+    "history": 0.27,
+    "connect": 5.63
+  },
+  "evidence_gate": "compose=13 usable=9 families=customers|identity|investor|product|strategy stored=13 attempt=1 failed=3/2 dropped=0/0/0/4 unexplained=0 regated=no lang_rejected=src-64665f8e9d8d@m9.54/a20.37/10063c;src-b59d30e1f452@m168.58/a8.58/2329c;src-b18a02146d04@m123.96/a13.79/10951c;src-4b73abf5ab9b@m24.52/a14.65/4024c",
+  "outcome": "FULL_ANALYSIS",
+  "outcome_by_route": {
+    "run": "FULL_ANALYSIS_REFRESHING",
+    "intro": "FULL_ANALYSIS_REFRESHING",
+    "slides": "FULL_ANALYSIS_REFRESHING",
+    "full": "FULL_ANALYSIS_REFRESHING",
+    "story": "FULL_ANALYSIS",
+    "history": "FULL_ANALYSIS",
+    "connect": "FULL_ANALYSIS"
+  },
+  "outcome_disagreement": [
+    "FULL_ANALYSIS",
+    "FULL_ANALYSIS_REFRESHING"
+  ],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": [
+    "GET /runs/01M0K9RVTG00FD1VZAKYP905MD/progress: timeout",
+    "GET /runs/01M0K9RVTG00FD1VZAKYP905MD/progress: timeout",
+    "GET /runs/01M0K9RVTG00FD1VZAKYP905MD/progress: timeout"
+  ]
+}

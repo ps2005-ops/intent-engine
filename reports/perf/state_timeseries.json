@@ -1,0 +1,40 @@
+{
+ "run_id": "01M1MMMEJ9SQK5V5AB2KZZHAS5",
+ "samples": [
+  {
+   "t": 1.0,
+   "result_state": null,
+   "deep_status": null,
+   "run_state": "DISCOVERING_SOURCES",
+   "evidence": 0
+  },
+  {
+   "t": 4.9,
+   "result_state": null,
+   "deep_status": null,
+   "run_state": "PARSING_SOURCES",
+   "evidence": 0
+  },
+  {
+   "t": 8.2,
+   "result_state": null,
+   "deep_status": null,
+   "run_state": "PARSING_SOURCES",
+   "evidence": 1
+  },
+  {
+   "t": 11.6,
+   "result_state": null,
+   "deep_status": null,
+   "run_state": "DISCOVERING_SOURCES",
+   "evidence": 3
+  },
+  {
+   "t": 14.7,
+   "result_state": null,
+   "deep_status": null,
+   "run_state": "FAILED",
+   "evidence": 4
+  }
+ ]
+}

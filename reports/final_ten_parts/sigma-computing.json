@@ -1,0 +1,290 @@
+{
+  "base": "https://intent-engine-preview-bridge.onrender.com",
+  "live_commit": "807a414361b0fbc1999b4595e875c67e2a20524a",
+  "rows": [
+    {
+      "company": "Sigma Computing",
+      "domain": "https://www.sigmacomputing.com",
+      "result": "PRODUCT_DEFECT",
+      "defects": [
+        {
+          "kind": "PRODUCT_DEFECT",
+          "detail": "/intro establishes the business model and /xray says it has not been established (decision_synthesis._select passes neither evidence_text nor published_text)"
+        }
+      ],
+      "instrument_notes": [],
+      "run_id": "01M273TSPPPRRXT3MJTAY5H5QM",
+      "core_s": 24.4,
+      "telemetry": {
+        "contract": "adaptive_intelligence.v1",
+        "company": "Sigma Computing",
+        "company_profile_status": "PROFILE_PARTIAL",
+        "company_profile_source": "SUBJECT_EVIDENCE",
+        "business_model_source": "SUBJECT_PUBLISHED_EVIDENCE",
+        "business_model_source_words": "this company's own published account of what it sells and how it is paid",
+        "business_model_alternatives": [],
+        "profile_available": true,
+        "lens_available": true,
+        "decision_reading_available": false,
+        "decision_map_state": "POTENTIAL_DOMAINS",
+        "causal_chain_kind": "INVESTIGATION_CHAIN",
+        "potential_domains": [
+          "whether the numbers can be relied on",
+          "who is allowed to answer a question",
+          "what breaks when the data is wrong"
+        ],
+        "evidence_limitation": "the run did not retrieve enough independent material to test this company's own account of itself",
+        "what_would_unlock_a_decision": "a dated, third-party account of something this company has actually decided or changed -- a filing, a customer or competitor statement, or reporting that is not the company's own",
+        "business_model": "SUBSCRIPTION_SOFTWARE",
+        "business_model_confidence": "high",
+        "business_model_evidence": "You\u2019ll find REST APIs powering microservices, SaaS integrations, and even low-code tools that don\u2019t look technical on the surface.",
+        "business_model_reason": "read from this company's own published material, which states how it is paid rather than only what it sells",
+        "customer_job": "",
+        "customer_job_provenance": "NOT_ESTABLISHED",
+        "strategic_assets": [
+          "clue you get is"
+        ],
+        "critical_dependencies": [],
+        "company_specificity_score": 0.294,
+        "company_specific_fields": [
+          "identity",
+          "self_description",
+          "technology_exposure",
+          "strategic_assets",
+          "data_assets"
+        ],
+        "decision_opportunity_count": 0,
+        "decision_opportunities_considered": 0,
+        "decision_opportunities_withheld": [],
+        "top_decision_domain": "",
+        "top_decision_owner": "",
+        "top_decision_priority": 0.0,
+        "top_decision_components": {},
+        "primary_lens": "data_infrastructure",
+        "primary_lens_name": "Data Infrastructure & Decision Trust",
+        "lens_confidence": "moderate",
+        "secondary_lenses": [
+          "planning_assumption",
+          "data_security_governance"
+        ],
+        "lens_selection_reasons": "This company's own material is about \u201cdata quality\u201d, \u201cdata warehouse\u201d, \u201clineage\u201d, which is what data infrastructure & decision trust reads. It scored 28.0 against 16.0 for the next eligible lens.",
+        "lens_refusals": [
+          "Operational Intelligence: scored 8.5 against 28.0, carried by workflow, orchestration alone",
+          "Regulatory & Risk Intelligence: scored 6.0 against 28.0, carried by sox, audit alone",
+          "Decision to Execution: scored 6.0 against 28.0, carried by execution, adoption alone",
+          "Financial & Capital Allocation: scored 3.5 against 28.0, carried by working capital alone",
+          "Revenue & Go-To-Market Strategy: scored 3.0 against 28.0, carried by pipeline alone",
+          "Enterprise Data & AI Strategy: scored 1.5 against 28.0, and pipeline argues the match is about the product rather than the firm"
+        ],
+        "causal_chain_nodes": 4,
+        "causal_chain_evidence_coverage": 0.25,
+        "causal_chain_stopped_because": "",
+        "genericity_flags": 1,
+        "differentiation_carried_by": [
+          "self_description",
+          "own_vocabulary",
+          "strategic_assets",
+          "technology_exposure"
+        ],
+        "differentiation_flagged": true,
+        "differentiation_flag_reason": "29% of what this reading tries to establish about a company was learned from this one's own evidence; the rest is the economics of its business model, which every company of the same kind shares. The difference stated above is real but thin, and it is marked rather than dressed up.",
+        "counterevidence_present": false,
+        "information_priority": "",
+        "abstention_reason": "We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none.",
+        "role_lens": "ceo",
+        "role_module_order": [
+          "executive_change",
+          "strategic_thesis",
+          "why_this_is_different",
+          "decision_opportunity_map",
+          "causal_chain",
+          "what_would_change_our_mind",
+          "evidence",
+          "provenance",
+          "strategic_lens",
+          "data_ai_exposure",
+          "economic_exposure",
+          "information_priority",
+          "learning_state",
+          "ask_intent_engine"
+        ],
+        "role_promoted": [
+          "executive_change",
+          "strategic_thesis",
+          "why_this_is_different",
+          "decision_opportunity_map",
+          "what_would_change_our_mind",
+          "evidence",
+          "provenance"
+        ],
+        "composition_modules": [
+          "causal_chain",
+          "executive_change",
+          "strategic_thesis",
+          "why_this_is_different",
+          "strategic_lens",
+          "decision_opportunity_map",
+          "data_ai_exposure",
+          "economic_exposure",
+          "information_priority",
+          "what_would_change_our_mind",
+          "learning_state",
+          "evidence",
+          "provenance",
+          "ask_intent_engine"
+        ],
+        "composition_excluded": [
+          "decision_delta",
+          "market_belief",
+          "customer_signals",
+          "competitive_response",
+          "supply_chain_exposure",
+          "financial_sensitivity",
+          "regulatory_exposure",
+          "client_portfolio",
+          "operational_intelligence",
+          "contradictions",
+          "alternative_interpretation",
+          "scenario_comparison"
+        ],
+        "composition_explained": 6,
+        "reasoning_provenance": "business model SUBSCRIPTION_SOFTWARE from subject evidence; executive priorities the levers a business of this kind has, since the evidence raised no decision of its own",
+        "errors": [],
+        "run_id": "01M273TSPPPRRXT3MJTAY5H5QM"
+      },
+      "resolved_identity": "Sigma Computing",
+      "business_model": "SUBSCRIPTION_SOFTWARE",
+      "profile_source": "SUBJECT_EVIDENCE",
+      "specificity": 0.294,
+      "primary_lens": "data_infrastructure",
+      "secondary_lenses": [
+        "planning_assumption",
+        "data_security_governance"
+      ],
+      "lens_confidence": "moderate",
+      "decision_opportunity_count": 0,
+      "top_decision_domain": "",
+      "top_decision_priority": 0.0,
+      "causal_chain_nodes": 4,
+      "causal_evidence_coverage": 0.25,
+      "genericity_flags": 1,
+      "differentiation_carried_by": [
+        "self_description",
+        "own_vocabulary",
+        "strategic_assets",
+        "technology_exposure"
+      ],
+      "abstention_reason": "We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none.",
+      "profile_available": true,
+      "lens_available": true,
+      "decision_reading_available": false,
+      "decision_map_state": "POTENTIAL_DOMAINS",
+      "causal_chain_kind": "INVESTIGATION_CHAIN",
+      "potential_domains": [
+        "whether the numbers can be relied on",
+        "who is allowed to answer a question",
+        "what breaks when the data is wrong"
+      ],
+      "evidence_limitation": "the run did not retrieve enough independent material to test this company's own account of itself",
+      "what_would_unlock": "a dated, third-party account of something this company has actually decided or changed -- a filing, a customer or competitor statement, or reporting that is not the company's own",
+      "intro_status": 200,
+      "intro_chars": 49454,
+      "brief_status": 200,
+      "brief_chars": 47670,
+      "full_status": 200,
+      "full_chars": 55391,
+      "xray_status": 200,
+      "xray_chars": 26400,
+      "evidence_status": 200,
+      "evidence_chars": 20168,
+      "answer_status": 200,
+      "answer_chars": 29793,
+      "surface_s": 88.0,
+      "intro_words": 2303,
+      "sections": {
+        "why_this_company": "Why this analysis is different for Sigma Computing Generic interpretation A general reading of a company in this position would say that data volumes are growing and quality tooling will follow. It would reason from the economics every subscription software business shares -- recurring software subscription: revenue is contracted and renews, so the installed base carries next period's revenue before any new sale. What is different here In its own words: \u201cSigma is an agentic execution layer, AI Applications platform, and spreadsheet UI on top of your Snowflake AI Data Cloud\u201d -- which is narrower, and more specific, than the general reading above. The material it publishes is about data quality, data warehouse, lineage, business intelligence -- its own terms, not ours. It names clue you get is as its own. Decision consequence So what management has to weigh is Whether the numbers can be relied on -- the decision area this company's own material points at, not a recommendation. Why Intent Engine reads it this way This company's own material is about \u201cdata quality\u201d, \u201cdata warehouse\u201d, \u201clineage\u201d, which is what data infrastructure & decision trust reads. It scored 28.0 against 16.0 for the next eligible lens. 29% of what this reading tries to establish about a company was learned from this one's own evidence; the rest is the economics of its business model, which every company of the same kind shares. The difference stated above is real but thin, and it is marked rather than dressed up. The evidence this rests on Sigma is an agentic execution layer, AI Applications platform, and spreadsheet UI on top of your Snowflake AI Data Cloud. With APIs, sometimes, the only clue you get is that number. Give trading desks one live workspace to track vessels, cargo, and prices, ask an AI agent, and capture broker intel that writes straight back to the warehouse for the whole team, not one trader\u2019s inbox. Operationalize curated outputs from the warehouse into downstream tools.",
+        "decision_or_domains": "Potential decision domains Areas this company model suggests are worth investigating \u2014 not current recommendations . We can say what KIND of decisions matter for a company like this one. We cannot yet say what this management should do about them, because the retrieved record raised none. 01 Whether the numbers can be relied on It describes itself as an agentic execution layer, AI Applications platform, and spreadsheet UI on top of your Snowflake AI Data Cloud, which is what puts whether the numbers can be relied on in scope. Would sit with: CEO What would make this a recommendation a dated, first-party statement from this company about whether the numbers can be relied on, or a third-party account of it -- at present nothing in the retrieved record raises it 02 Who is allowed to answer a question It describes itself as an agentic execution layer, AI Applications platform, and spreadsheet UI on top of your Snowflake AI Data Cloud, which is what puts who is allowed to answer a question in scope. Would sit with: CEO What would make this a recommendation a dated, first-party statement from this company about who is allowed to answer a question, or a third-party account of it -- at present nothing in the retrieved record raises it 03 What breaks when the data is wrong It describes itself as an agentic execution layer, AI Applications platform, and spreadsheet UI on top of your Snowflake AI Data Cloud, which is what puts what breaks when the data is wrong in scope. Would sit with: CEO What would make this a recommendation a dated, first-party statement from this company about what breaks when the data is wrong, or a third-party account of it -- at present nothing in the retrieved record raises it",
+        "chain": "What would be worth investigating A line of enquiry, not a causal claim. Nothing below asserts that one thing caused another. What we can see In its own words: \u201cSigma is an agentic execution layer, AI Applications platform, and spreadsheet UI on top of your Snowflake AI Data Cloud\u201d evidenced How it could reach this company A subscription software business is reached through market rate, labor, reaching this one through what it sells: data quality, data warehouse inference What we would need to know A dated account, from someone other than this company, of something it has actually decided or changed, or anyone other than Sigma Computing writing about data quality or data warehouse. Nothing retrieved in this run carries one, which is why no mechanism is asserted above. open_question The decision it could bear on Whether the numbers can be relied on -- the decision area this company's own material points at, not a recommendation. open_question This is an investigation, not a conclusion. No mechanism connecting an outside change to this company was established, so nothing below claims one.",
+        "bounded": "What we can and cannot say about Sigma Computing What we know Sigma is an agentic execution layer, AI Applications platform, and spreadsheet UI on top of your Snowflake AI Data Cloud. It is a subscription software business, read from its own account of how it is paid. The lens this points to Data Infrastructure & Decision Trust \u2014 This company's own material is about \u201cdata quality\u201d, \u201cdata warehouse\u201d, \u201clineage\u201d, which is what data infrastructure & decision trust reads. It scored 28.0 against 16.0 for the next eligible lens. What we cannot yet conclude Which of these is live for this management, or which way it should go. Knowing what kind of business this is tells us which decisions tend to matter for a business like it \u2014 and any direction stated elsewhere on this page rests on that, not on anything this run established about this company in particular. Why not the run did not retrieve enough independent material to test this company's own account of itself What would unlock a decision a dated, third-party account of something this company has actually decided or changed -- a filing, a customer or competitor statement, or reporting that is not the company's own",
+        "lens": "The lens this analysis is using Data Infrastructure & Decision Trust This company's own material is about \u201cdata quality\u201d, \u201cdata warehouse\u201d, \u201clineage\u201d, which is what data infrastructure & decision trust reads. It scored 28.0 against 16.0 for the next eligible lens. Operationalize curated outputs from the warehouse into downstream tools. What was considered and not selected Operational Intelligence: scored 8.5 against 28.0, carried by workflow, orchestration alone Regulatory & Risk Intelligence: scored 6.0 against 28.0, carried by sox, audit alone Decision to Execution: scored 6.0 against 28.0, carried by execution, adoption alone Financial & Capital Allocation: scored 3.5 against 28.0, carried by working capital alone Revenue & Go-To-Market Strategy: scored 3.0 against 28.0, carried by pipeline alone Enterprise Data & AI Strategy: scored 1.5 against 28.0, and pipeline argues the match is about the product rather than the firm",
+        "role": "Read this as Chief Executive Strategy Finance future Operations future Product future Revenue future Marketing future Risk & Security future Consultant / Advisor future Chief Executive reads executive change, strategic thesis, why this is different first because the decision in front of that reader is what to change, what it costs to wait, and what would make it the wrong call. Nothing below is removed or reworded; the order changes and the facts do not. What this reader would ask What would make this recommendation wrong? What is the largest assumption here? What does a competitor do about this first? What should I decide this quarter rather than this year? What decision goes wrong when this data is wrong? Who inside the customer actually owns this?",
+        "value": "Where Intent Engine could create value for Sigma Computing Current \u2014 external evidence only Monitoring the outside record for changes that reach this company through the mechanism above Testing the assumption the current plan rests on against what the record actually says Watching whether the numbers can be relied on Watching who is allowed to answer a question Provenance on every claim, so a disagreement is about the evidence rather than about the tool Future \u2014 with permissioned internal data not connected CRM and pipeline, to test whether the outside reading shows up in this company\u2019s own funnel Product usage and support, to see the same change from the customer side Finance, to attach a magnitude to an exposure that is currently directional Prior decisions, so a recommendation can be checked against what was already tried No return is claimed for any of this, because none has been measured."
+      },
+      "evidence_text": "Sigma Computing Home \u00b7 Log in Why this reading exists Sigma Computing X-Ray \u00b7 Full analysis \u00b7 Presentation \u00b7 Decision history Independent support 0 of 5 source(s) are both independent of Sigma Computing and say enough about it to support the reading. We searched for independent coverage of this company and found none that bears on this question. That is a finding about the company. Search coverage: exhausted \u2014 everything findable was read \u00b7 reading: searched thoroughly and none exists We searched 1 independent channel(s), found 4 filing(s) naming this company, judged 3 of them worth reading, and read 3 in full. Set aside \u2014 duplicate origin: 1 \u00b7 irrelevant: 3 Written by the company itself (5) Useful evidence, and often the best there is \u2014 but the company speaking about itself cannot corroborate itself. Executive Briefing | Sigma The company's own account of itself Discusses the company directly An exec workbook that runs on a natural language interface. Ask, get a one line recap, and escalate to the right person without leaving the page. https://www.sigmacomputing.com/resources/executive-recap-escalation Author Sigma Computing Host www.sigmacomputing.com Subject Sigma Computing Retrieved 2026-09-11T02:13:19.171005+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself Sigma for Finance Teams | Real Time financial analytics, reporting and forecasting at scale | Sigma Another document from a source already counted Discusses the company directly Build live analytics, reports, forecasts, and planning workflows directly on your cloud data. Sigma gives finance teams the governance, automation, and collaboration tools to eliminate manual processes and achieve profitable decision-making. https://www.sigmacomputing.com/use-cases/finance Author Sigma Computing Host www.sigmacomputing.com Subject Sigma Computing Retrieved 2026-09-11T02:13:19.359941+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself AI Toolkit | Sigma Another document from a source already counted Discusses the company directly Bring AI to analysis and workflows on live warehouse data. Ask questions, build faster, and use LLM functions in spreadsheet cells. https://www.sigmacomputing.com/product/ai Author Sigma Computing Host www.sigmacomputing.com Subject Sigma Computing Retrieved 2026-09-11T02:13:19.560052+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself Partners - Snowflake | Sigma Another document from a source already counted Discusses the company directly Sigma automatically respects Snowflake Role-Based Access Control (RBAC), RLS, and OAuth. Deliver reproducible, governed results in AI Applications with Sigma Agents for automated action. https://www.sigmacomputing.com/partners/snowflake Author Sigma Computing Host www.sigmacomputing.com Subject Sigma Computing Retrieved 2026-09-11T02:13:19.667745+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself The Anatomy Of A REST API: Methods, Endpoints, And Status Codes | Sigma Another document from a source already counted Discusses the company directly Learn the essentials of REST APIs and how they power data-driven tools, apps, and analytics platforms. https://www.sigmacomputing.com/blog/rest-api Author Sigma Computing Host www.sigmacomputing.com Subject Sigma Computing Retrieved 2026-09-11T02:13:19.859252+00:00 Freshness current Independent voice: no \u00b7 Relevance: directly about this company \u00b7 Counts as corroboration: no the company's own account of itself",
+      "xray_says_unclassified": true,
+      "profile_contradiction": true,
+      "ui_html": "reports/ui/sigma-computing.html",
+      "identity_on_page": true,
+      "leaks": [],
+      "has_why_different": true,
+      "has_lens_block": true,
+      "has_role_switch": true,
+      "has_value_block": true,
+      "has_decision_map": false,
+      "has_causal_chain": false,
+      "has_potential_domains": true,
+      "has_not_a_recommendation": true,
+      "has_investigation_chain": true,
+      "has_bounded_block": true,
+      "quotes": [
+        "Sigma is an agentic execution layer, AI Applications platform, and spreadsheet UI on top of your Snowflake AI Data Cloud.",
+        "With APIs, sometimes, the only clue you get is that number.",
+        "Give trading desks one live workspace to track vessels, cargo, and prices, ask an AI agent, and capture broker intel that writes straight back to the warehouse for the whole team, not one trader\u2019s inbox.",
+        "Operationalize curated outputs from the warehouse into downstream tools.",
+        "Operationalize curated outputs from the warehouse into downstream tools."
+      ],
+      "quote_count": 5,
+      "broken_quotes": [],
+      "headline_is_generic": false,
+      "lens_matches_expectation": true,
+      "role_ceo_status": 200,
+      "role_cso_status": 200,
+      "role_views_differ": true,
+      "role_facts_identical": true,
+      "qa": [
+        {
+          "q": "Why does this matter for this company specifically?",
+          "status": 200,
+          "words": 120,
+          "text": "Why does this matter for this company specifically? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Sigma Computing Why does this matter for this company specifically? A supported reading of Sigma Computing exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen it. This particular question is not answerable from what this run retrieved. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What evidence most supports this reading?",
+          "status": 200,
+          "words": 185,
+          "text": "What evidence most supports this reading? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Sigma Computing What evidence most supports this reading? A supported reading of Sigma Computing exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen it. This particular question is not answerable from what this run retrieved. Evidence Strongest. 2026-09-11: Sigma Computing sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. Weakest. 2026-09-11: Sigma Computing positions itself as replacing several separate tools, so a customer who leaves later has to rebuild more than one workflow to do it. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What would have to be true for this to be wrong?",
+          "status": 200,
+          "words": 162,
+          "text": "What would have to be true for this to be wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Sigma Computing What would have to be true for this to be wrong? That was the whole of it: \u201cA supported reading of Sigma Computing exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen it. This particular question is not answerable from what this run retrieved.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What should management monitor next?",
+          "status": 200,
+          "words": 129,
+          "text": "What should management monitor next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Sigma Computing What should management monitor next? customer count \u2014 revenue at a business of this kind moves with customer count.; seats or usage per customer \u2014 revenue at a business of this kind moves with seats or usage per customer.; list and realised price \u2014 revenue at a business of this kind moves with list and realised price. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "Which decision here is the most urgent, and why that one?",
+          "status": 200,
+          "words": 177,
+          "text": "Which decision here is the most urgent, and why that one? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Sigma Computing Which decision here is the most urgent, and why that one? That was the whole of it: \u201ccustomer count \u2014 revenue at a business of this kind moves with customer count.; seats or usage per customer \u2014 revenue at a business of this kind moves with seats or usage per customer.; list and realised price \u2014 revenue at a business of this kind moves with list and realised price.\u201d. Nothing further about it is established by what this run retrieved, and the honest answer to why it matters most is that this run cannot rank it against the alternatives. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        },
+        {
+          "q": "What is the biggest uncertainty in this analysis?",
+          "status": 200,
+          "words": 106,
+          "text": "What is the biggest uncertainty in this analysis? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Sigma Computing What is the biggest uncertainty in this analysis? every source here is published by the company itself, so nothing in this reading has been checked against an outside account of it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+        }
+      ],
+      "qa_ok": 6,
+      "qa_company_specific": 6,
+      "followup_words": 150,
+      "followup_is_replay": false,
+      "followup_pass": true,
+      "wall_s": 224.0
+    }
+  ]
+}

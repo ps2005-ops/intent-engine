@@ -1,0 +1,54 @@
+{
+  "company": "Adobe Inc.",
+  "deployed_sha": "8397d67",
+  "run_id": "01M0HA4K4QRGXTM3Z5BY69Z63D",
+  "analysis_seconds": 233,
+  "stage_transitions": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Adobe Inc. ADBE \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecting mac",
+      "status": 200,
+      "html_bytes": 16993
+    },
+    {
+      "t": 35.3,
+      "text": "",
+      "status": 303,
+      "html_bytes": 16994,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HA4K4QRGXTM3Z5BY69Z63D/progress",
+      "head": ""
+    },
+    {
+      "t": 232.8,
+      "text": "Adobe Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Adobe Inc. ADBE \u00b7 USA \u00b7 SEC CIK 0000796343 Adobe Inc. is a software platform business that runs on recurring software subscription: revenue is contracted and renews, so the installed base carries next period'",
+      "status": 200,
+      "html_bytes": 30960
+    }
+  ],
+  "route_seconds": {
+    "run": 6.69,
+    "intro": 5.5,
+    "slides": 8.34,
+    "full": 12.72,
+    "story": 6.25,
+    "history": 0.25,
+    "connect": 4.07
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "777e281ac5714ef8",
+    "started_at": 1787285577.8327832,
+    "uptime_seconds": 1878.3
+  },
+  "process_after": {
+    "boot_id": "777e281ac5714ef8",
+    "started_at": 1787285577.8327832,
+    "uptime_seconds": 2298.6
+  },
+  "errors": []
+}

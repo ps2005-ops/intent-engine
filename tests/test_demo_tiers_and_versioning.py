@@ -155,7 +155,11 @@ def guest(tmp_path):
 
 
 def test_prepared_examples_are_offered_before_a_guest_has_to_guess(guest):
-    _, _, page = guest.request("GET", "/")
+    # The company form (and so the examples beside it) moved from "/" to
+    # "/demo" when the landing page became the pitch rather than the form.
+    # The invariant is unchanged: a guest is offered examples before having
+    # to invent a company name.
+    _, _, page = guest.request("GET", "/demo")
     for company in GOLDEN_COMPANIES:
         assert company["name"] in page
     # Still offered before a guest has to guess -- now as one quiet line
@@ -203,10 +207,20 @@ def test_a_stale_result_cannot_trap_the_user(guest):
         f"&website=https://thin.example")
     run_id = headers["Location"].split("/runs/")[1].split("/")[0]
     guest.app._results[run_id] = {"stale": True}
-    status, _, _ = guest.request("POST", f"/runs/{run_id}/fresh",
-                                 f"csrf={guest.csrf()}")
+    status, headers, _ = guest.request("POST", f"/runs/{run_id}/fresh",
+                                       f"csrf={guest.csrf()}")
     assert status.startswith("303")
-    assert guest.app._results.get(run_id, {}).get("stale") is None
+    # WHERE THE READER LANDS IS THE TEST, not which dict got cleared. This
+    # asserted that /fresh popped this run's cached result, which was the only
+    # available mechanism while a fresh analysis reused the same run id. It now
+    # gets its own run, and popping the old one deleted the earlier reading the
+    # new one is compared against -- so the second iteration reported a
+    # baseline forever. The reader's escape from a stale report is what must
+    # hold, and it holds more strongly now: they are taken somewhere else.
+    landed = headers["Location"].split("/runs/")[1].split("/")[0]
+    assert landed != run_id or \
+        guest.app._results.get(run_id, {}).get("stale") is None, (
+        "the fresh button returned the reader to the stale result")
 
 
 def test_repeated_same_day_analysis_never_500s(guest):

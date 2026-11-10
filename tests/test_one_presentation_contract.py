@@ -33,9 +33,13 @@ _ACQUISITION = dict(
 
 
 def _report():
+    # Examplecorp's fixture documents are commerce pages, which is the
+    # business these tensions are declared for. Production supplies the class
+    # from the profile; the fixture states it for the same reason.
     return build_strategic_report(
         company_name="Examplecorp",
-        observations=derive_observations(list(COMMERCE_DOCS) + [_ACQUISITION]))
+        observations=derive_observations(list(COMMERCE_DOCS) + [_ACQUISITION]),
+        business_model="SUBSCRIPTION_SOFTWARE")
 
 
 def _deck():

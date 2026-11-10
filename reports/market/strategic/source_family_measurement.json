@@ -1,0 +1,665 @@
+{
+ "families": {
+  "government_award": {
+   "contract": "counterparty_source.v1",
+   "family": "government_award",
+   "documents_attempted": 28,
+   "documents_retrieved": 64,
+   "named_actor_mentions": 128,
+   "relationship_candidates": 64,
+   "identity_resolved": 61,
+   "identity_resolved_via_subsidiary": 32,
+   "relationships_accepted": 11,
+   "relationships_refused": 3,
+   "yield_per_document": 0.1719,
+   "duplicate_rate": 0.8197,
+   "latency_seconds": 14.14,
+   "verdict": "INTEGRATE",
+   "verdict_reason": "11 accepted relationship(s) from 64 documents (0.172/doc)",
+   "refusal_reasons": {
+    "recipient_is_not_the_subject": 3
+   },
+   "errors": []
+  },
+  "partnership_release": {
+   "contract": "counterparty_source.v1",
+   "family": "partnership_release",
+   "documents_attempted": 28,
+   "documents_retrieved": 54,
+   "named_actor_mentions": 16,
+   "relationship_candidates": 31,
+   "identity_resolved": 3,
+   "identity_resolved_via_subsidiary": 0,
+   "relationships_accepted": 3,
+   "relationships_refused": 132,
+   "yield_per_document": 0.0556,
+   "duplicate_rate": 0.0,
+   "latency_seconds": 521.39,
+   "verdict": "INTEGRATE",
+   "verdict_reason": "3 accepted relationship(s) from 54 documents (0.056/doc)",
+   "refusal_reasons": {
+    "counterparty_is_a_common_noun_or_place": 4,
+    "counterparty_is_the_subject": 6,
+    "no_named_counterparty": 15,
+    "one_word_name_appearing_once": 3,
+    "states_no_commercial_relation": 104
+   },
+   "errors": []
+  },
+  "customer_case_study": {
+   "contract": "counterparty_source.v1",
+   "family": "customer_case_study",
+   "documents_attempted": 28,
+   "documents_retrieved": 22,
+   "named_actor_mentions": 12,
+   "relationship_candidates": 11,
+   "identity_resolved": 11,
+   "identity_resolved_via_subsidiary": 0,
+   "relationships_accepted": 11,
+   "relationships_refused": 11,
+   "yield_per_document": 0.5,
+   "duplicate_rate": 0.0,
+   "latency_seconds": 311.27,
+   "verdict": "INTEGRATE",
+   "verdict_reason": "11 accepted relationship(s) from 22 documents (0.500/doc)",
+   "refusal_reasons": {
+    "page_states_no_use_of_a_product_or_service": 1,
+    "title_names_no_customer": 10
+   },
+   "errors": []
+  }
+ },
+ "relationships": [
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_9bf2f4bfd6739d",
+   "subject_actor_id": "CLOUDFLARE, INC.",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "Federal Acquisition Service",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "GOVERNMENT",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "usaspending:47QFRA23C0001"
+   ],
+   "source_document_ids": [
+    "https://www.usaspending.gov/award/47QFRA23C0001"
+   ],
+   "subject_span": "CLOUDFLARE, INC.",
+   "object_span": "Federal Acquisition Service",
+   "relationship_span": "CLOUDFLARE, INC. received award 47QFRA23C0001 from Federal Acquisition Service (General Services Administration) for GOV TOP LEVEL DOMAIN REGISTRY AND DNS SERVICE",
+   "valid_from": "2022-11-29",
+   "valid_to": "2026-11-28",
+   "created_at": "2022-11-29",
+   "last_confirmed_at": "2022-11-29"
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_d70d61ec7ab2cb",
+   "subject_actor_id": "CLOUDFLARE, INC.",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "Missile Defense Agency",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "GOVERNMENT",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "usaspending:HQ085926FG106"
+   ],
+   "source_document_ids": [
+    "https://www.usaspending.gov/award/HQ085926FG106"
+   ],
+   "subject_span": "CLOUDFLARE, INC.",
+   "object_span": "Missile Defense Agency",
+   "relationship_span": "CLOUDFLARE, INC. received award HQ085926FG106 from Missile Defense Agency (Department of Defense) for SCALABLE HOMELAND INNOVATIVE ENTERPRISE LAYERED DEFENSE (SHIELD) INITIAL ORDER.",
+   "valid_from": "2026-01-21",
+   "valid_to": "2035-12-28",
+   "created_at": "2026-01-21",
+   "last_confirmed_at": "2026-01-21"
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_d7c0bf6db3e366",
+   "subject_actor_id": "DUOLINGO INC",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "Agency for International Development",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "GOVERNMENT",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "usaspending:72062124P00072"
+   ],
+   "source_document_ids": [
+    "https://www.usaspending.gov/award/72062124P00072"
+   ],
+   "subject_span": "DUOLINGO INC",
+   "object_span": "Agency for International Development",
+   "relationship_span": "DUOLINGO INC received award 72062124P00072 from Agency for International Development for DUOLINGO ENGLISH LANGUAGE PROFICIENCY TESTING SERVICES (QUANTITY: 150 COUPONS, PRICE: $45 EACH). THE TOTAL AMOUNT IS $6,",
+   "valid_from": "2024-09-20",
+   "valid_to": "2025-09-30",
+   "created_at": "2024-09-20",
+   "last_confirmed_at": "2024-09-20"
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_03a3333d77cc0d",
+   "subject_actor_id": "JOHNSON & JOHNSON HEALTH CARE SYSTEMS INC.",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "Defense Logistics Agency",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "GOVERNMENT",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "usaspending:SPE2D625F1LZG"
+   ],
+   "source_document_ids": [
+    "https://www.usaspending.gov/award/SPE2D625F1LZG"
+   ],
+   "subject_span": "JOHNSON & JOHNSON HEALTH CARE SYSTEMS INC.",
+   "object_span": "Defense Logistics Agency",
+   "relationship_span": "JOHNSON & JOHNSON HEALTH CARE SYSTEMS INC. received award SPE2D625F1LZG from Defense Logistics Agency (Department of Defense) for 4569174801!2.7MM/3.5MM VA-LCP ANKLE",
+   "valid_from": "2025-08-20",
+   "valid_to": "2025-08-25",
+   "created_at": "2025-08-20",
+   "last_confirmed_at": "2025-08-20"
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_330d77ed5b667b",
+   "subject_actor_id": "CATERPILLAR INC",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "Defense Logistics Agency",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "GOVERNMENT",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "usaspending:SPE8EC25F0653"
+   ],
+   "source_document_ids": [
+    "https://www.usaspending.gov/award/SPE8EC25F0653"
+   ],
+   "subject_span": "CATERPILLAR INC",
+   "object_span": "Defense Logistics Agency",
+   "relationship_span": "CATERPILLAR INC received award SPE8EC25F0653 from Defense Logistics Agency (Department of Defense) for 8511390294!D9R TRACTOR DOZER",
+   "valid_from": "2025-05-21",
+   "valid_to": "2026-07-31",
+   "created_at": "2025-05-21",
+   "last_confirmed_at": "2025-05-21"
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_98dc5c9b1a548b",
+   "subject_actor_id": "CATERPILLAR INC",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "Department of the Army",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "GOVERNMENT",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "usaspending:W912ER20C0016"
+   ],
+   "source_document_ids": [
+    "https://www.usaspending.gov/award/W912ER20C0016"
+   ],
+   "subject_span": "CATERPILLAR INC",
+   "object_span": "Department of the Army",
+   "relationship_span": "CATERPILLAR INC received award W912ER20C0016 from Department of the Army (Department of Defense) for PROCUREMENT OF ARMORED CONSTRUCTION BULLDOZERS IN EGYPT",
+   "valid_from": "2020-07-24",
+   "valid_to": "2024-05-05",
+   "created_at": "2020-07-24",
+   "last_confirmed_at": "2020-07-24"
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_c0aabf3dd3f6e3",
+   "subject_actor_id": "CATERPILLAR INC",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "Defense Contract Management Agency",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "GOVERNMENT",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "usaspending:SPE8EC24F0895"
+   ],
+   "source_document_ids": [
+    "https://www.usaspending.gov/award/SPE8EC24F0895"
+   ],
+   "subject_span": "CATERPILLAR INC",
+   "object_span": "Defense Contract Management Agency",
+   "relationship_span": "CATERPILLAR INC received award SPE8EC24F0895 from Defense Contract Management Agency (Department of Defense) for 8510840154!D9R DOZERS",
+   "valid_from": "2024-08-22",
+   "valid_to": "2025-07-18",
+   "created_at": "2024-08-22",
+   "last_confirmed_at": "2024-08-22"
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_f0f65a567515f2",
+   "subject_actor_id": "CATERPILLAR INC",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "Federal Acquisition Service",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "GOVERNMENT",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "usaspending:47QSWC22F0048"
+   ],
+   "source_document_ids": [
+    "https://www.usaspending.gov/award/47QSWC22F0048"
+   ],
+   "subject_span": "CATERPILLAR INC",
+   "object_span": "Federal Acquisition Service",
+   "relationship_span": "CATERPILLAR INC received award 47QSWC22F0048 from Federal Acquisition Service (General Services Administration) for BPA CALL ORDER 13K FORKLIFT",
+   "valid_from": "2022-04-19",
+   "valid_to": "2025-07-15",
+   "created_at": "2022-04-19",
+   "last_confirmed_at": "2022-04-19"
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_c5b22922e53d3d",
+   "subject_actor_id": "TOYOTA MOTOR CORPORATION",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "Department of the Air Force",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "GOVERNMENT",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "usaspending:FA520925P0120"
+   ],
+   "source_document_ids": [
+    "https://www.usaspending.gov/award/FA520925P0120"
+   ],
+   "subject_span": "TOYOTA MOTOR CORPORATION",
+   "object_span": "Department of the Air Force",
+   "relationship_span": "TOYOTA MOTOR CORPORATION received award FA520925P0120 from Department of the Air Force (Department of Defense) for TWO VEHICLES AS PER ATTACHED VEHICLE SPECIFICATIONS FOR JAPAN FIELD OFFICE. THIS REQUIREMENT DOES NOT CONTAIN A SW OR LI",
+   "valid_from": "2025-09-29",
+   "valid_to": "2025-11-04",
+   "created_at": "2025-09-29",
+   "last_confirmed_at": "2025-09-29"
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_61d3810a4a2b86",
+   "subject_actor_id": "AMERICA MOVIL PERU SAC",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "Department of State",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "GOVERNMENT",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "usaspending:19PE5023C0001"
+   ],
+   "source_document_ids": [
+    "https://www.usaspending.gov/award/19PE5023C0001"
+   ],
+   "subject_span": "AMERICA MOVIL PERU SAC",
+   "object_span": "Department of State",
+   "relationship_span": "AMERICA MOVIL PERU SAC received award 19PE5023C0001 from Department of State for TELECOMMUNICATIONS SERVICES CONTRACT",
+   "valid_from": "2023-08-04",
+   "valid_to": "2026-08-03",
+   "created_at": "2023-08-04",
+   "last_confirmed_at": "2023-08-04"
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_17d5ac41d1655a",
+   "subject_actor_id": "AMERICA MOVIL PERU SAC",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "Department of the Navy",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "GOVERNMENT",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "usaspending:N4485225P0002"
+   ],
+   "source_document_ids": [
+    "https://www.usaspending.gov/award/N4485225P0002"
+   ],
+   "subject_span": "AMERICA MOVIL PERU SAC",
+   "object_span": "Department of the Navy",
+   "relationship_span": "AMERICA MOVIL PERU SAC received award N4485225P0002 from Department of the Navy (Department of Defense) for NIM-1MFT-T1/E1 CISCO NET CARD PVDM4-64",
+   "valid_from": "2024-11-21",
+   "valid_to": "2025-09-30",
+   "created_at": "2024-11-21",
+   "last_confirmed_at": "2024-11-21"
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_a369ab2255db42",
+   "subject_actor_id": "Stripe, Inc.",
+   "predicate": "PARTNERS_WITH",
+   "object_actor_id": "OpenAI",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "LEGAL_ENTITY",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "release:https://stripe.com/en-ca/newsroom/news/stripe-2025-update"
+   ],
+   "source_document_ids": [
+    "https://stripe.com/en-ca/newsroom/news/stripe-2025-update"
+   ],
+   "subject_span": "Stripe, Inc.",
+   "object_span": "OpenAI",
+   "relationship_span": "Stripe partnered with OpenAI to power the first shopping experiences inside ChatGPT. [a stated partnership, of unstated commercial content]",
+   "valid_from": "",
+   "valid_to": "",
+   "created_at": "",
+   "last_confirmed_at": ""
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_66f2e32e7e2c1b",
+   "subject_actor_id": "JPMorgan Chase & Co.",
+   "predicate": "PARTNERS_WITH",
+   "object_actor_id": "Momentum Miami",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "LEGAL_ENTITY",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "release:https://www.jpmorganchase.com/newsroom/stories/by-closing-the-skills-gap-and-opening-doors-jpmorganchase-is-helping-to-strengthen-miamis-workforce-pipeline"
+   ],
+   "source_document_ids": [
+    "https://www.jpmorganchase.com/newsroom/stories/by-closing-the-skills-gap-and-opening-doors-jpmorganchase-is-helping-to-strengthen-miamis-workforce-pipeline"
+   ],
+   "subject_span": "JPMorgan Chase & Co.",
+   "object_span": "Momentum Miami",
+   "relationship_span": "Through The Idea Center, and in collaboration with Momentum Miami, the College oversees a student-internship program encompassing some 40 companies, mostly start-ups or small businesses in the tech and business sectors. [a stated collaboration, which is weaker than a supply relationship]",
+   "valid_from": "",
+   "valid_to": "",
+   "created_at": "",
+   "last_confirmed_at": ""
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_776c66b145b75c",
+   "subject_actor_id": "ASML Holding N.V.",
+   "predicate": "PARTNERS_WITH",
+   "object_actor_id": "Tata Electronics",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "LEGAL_ENTITY",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "release:https://www.asml.com/en/news/press-releases/2026/tata-electronics-and-asml-announce-strategic-partnership"
+   ],
+   "source_document_ids": [
+    "https://www.asml.com/en/news/press-releases/2026/tata-electronics-and-asml-announce-strategic-partnership"
+   ],
+   "subject_span": "ASML Holding N.V.",
+   "object_span": "Tata Electronics",
+   "relationship_span": "Signing this Memorandum of Understanding today marks an important milestone, and we look forward to close collaboration with Tata Electronics and its broader ecosystem. [a stated collaboration, which is weaker than a supply relationship]",
+   "valid_from": "",
+   "valid_to": "",
+   "created_at": "",
+   "last_confirmed_at": ""
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_4d0c88c3756c05",
+   "subject_actor_id": "Shopify Inc.",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "Cocunat",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "LEGAL_ENTITY",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "case_study:https://www.shopify.com/case-studies/cocunat"
+   ],
+   "source_document_ids": [
+    "https://www.shopify.com/case-studies/cocunat"
+   ],
+   "subject_span": "published by www.shopify.com",
+   "object_span": "Cocunat",
+   "relationship_span": "How Cocunat shifted from platform maintenance to business building - Shopify \u2014 As a headless implementation, Cocunat manages its own frontend\u2014but Shopify Analytics is built into the platform and used extensively for acquisition analysis, retention tracking, and comparing new ver [a stated customer relationship; states nothing about revenue contribution, dependence, materiality or renewal]",
+   "valid_from": "",
+   "valid_to": "",
+   "created_at": "",
+   "last_confirmed_at": ""
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_d16578afc86700",
+   "subject_actor_id": "Shopify Inc.",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "Claire",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "LEGAL_ENTITY",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "case_study:https://www.shopify.com/case-studies/claires"
+   ],
+   "source_document_ids": [
+    "https://www.shopify.com/case-studies/claires"
+   ],
+   "subject_span": "published by www.shopify.com",
+   "object_span": "Claire",
+   "relationship_span": "How Claire\u2019s is building a playground for Gen Alpha on Shopify - Shopify \u2014 Claire\u2019s chose Shopify to relaunch its ecommerce presence, and chose to start small on purpose. [a stated customer relationship; states nothing about revenue contribution, dependence, materiality or renewal]",
+   "valid_from": "",
+   "valid_to": "",
+   "created_at": "",
+   "last_confirmed_at": ""
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_277f8be74a45f2",
+   "subject_actor_id": "Shopify Inc.",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "BrainGain",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "LEGAL_ENTITY",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "case_study:https://www.shopify.com/case-studies/braingain"
+   ],
+   "source_document_ids": [
+    "https://www.shopify.com/case-studies/braingain"
+   ],
+   "subject_span": "published by www.shopify.com",
+   "object_span": "BrainGain",
+   "relationship_span": "From first Shopify sale to 30+ countries: why BrainGain upgraded - Shopify \u2014 Even if we use none of the other features, we\u2019re actually in a better position by moving than by not moving. [a stated customer relationship; states nothing about revenue contribution, dependence, materiality or renewal]",
+   "valid_from": "",
+   "valid_to": "",
+   "created_at": "",
+   "last_confirmed_at": ""
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_fd08a975a9219f",
+   "subject_actor_id": "Stripe, Inc.",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "FreshBooks",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "LEGAL_ENTITY",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "case_study:https://stripe.com/en-ca/customers/freshbooks"
+   ],
+   "source_document_ids": [
+    "https://stripe.com/en-ca/customers/freshbooks"
+   ],
+   "subject_span": "published by stripe.com",
+   "object_span": "FreshBooks",
+   "relationship_span": "FreshBooks launches FreshBooks Payments, an Embedded End-to-End Payment Solution | Stripe \u2014 In 2003, running a small design firm out of his mother's Toronto basement, Mike McDerment used Word and Excel to send rudimentary invoices to his clients. [a stated customer relationship; states nothing about revenue contribution, dependence, materiality or renewal]",
+   "valid_from": "",
+   "valid_to": "",
+   "created_at": "",
+   "last_confirmed_at": ""
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_73cac4a619e4af",
+   "subject_actor_id": "Stripe, Inc.",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "Figma",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "LEGAL_ENTITY",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "case_study:https://stripe.com/en-ca/customers/figma"
+   ],
+   "source_document_ids": [
+    "https://stripe.com/en-ca/customers/figma"
+   ],
+   "subject_span": "published by stripe.com",
+   "object_span": "Figma",
+   "relationship_span": "Figma case study | Stripe \u2014 Figma launched in 2012 with the goal of building a collaborative design tool that could be used by everyone. [a stated customer relationship; states nothing about revenue contribution, dependence, materiality or renewal]",
+   "valid_from": "",
+   "valid_to": "",
+   "created_at": "",
+   "last_confirmed_at": ""
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_34113aa8b808bb",
+   "subject_actor_id": "Stripe, Inc.",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "Jobber",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "LEGAL_ENTITY",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "case_study:https://stripe.com/en-ca/customers/jobber"
+   ],
+   "source_document_ids": [
+    "https://stripe.com/en-ca/customers/jobber"
+   ],
+   "subject_span": "published by stripe.com",
+   "object_span": "Jobber",
+   "relationship_span": "Jobber Expands With New Financial Products | Stripe \u2014 By offering financial services to address its users cash flow needs, Jobber has expanded and differentiated its platform, and further cemented its role as the primary tool used by its customers to bot [a stated customer relationship; states nothing about revenue contribution, dependence, materiality or renewal]",
+   "valid_from": "",
+   "valid_to": "",
+   "created_at": "",
+   "last_confirmed_at": ""
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_d07f14207c9753",
+   "subject_actor_id": "ASML Holding N.V.",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "CustomerNet",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "LEGAL_ENTITY",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "case_study:https://www.asml.com/en/products/customernet"
+   ],
+   "source_document_ids": [
+    "https://www.asml.com/en/products/customernet"
+   ],
+   "subject_span": "published by www.asml.com",
+   "object_span": "CustomerNet",
+   "relationship_span": "CustomerNet - Customer Support portal | ASML \u2014 Use the format name@example. [a stated customer relationship; states nothing about revenue contribution, dependence, materiality or renewal]",
+   "valid_from": "",
+   "valid_to": "",
+   "created_at": "",
+   "last_confirmed_at": ""
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_cd27da88266076",
+   "subject_actor_id": "Olo Inc.",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "Captain D",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "LEGAL_ENTITY",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "case_study:https://www.olo.com/case-studies/captain-ds"
+   ],
+   "source_document_ids": [
+    "https://www.olo.com/case-studies/captain-ds"
+   ],
+   "subject_span": "published by www.olo.com",
+   "object_span": "Captain D",
+   "relationship_span": "Captain D's | Olo Case Study \u2014 With more than 520 locations across the United States, the brand needed online ordering and loyalty tools that were easy for guests to use and easy for the team to manage\u2014without getting locked into t [a stated customer relationship; states nothing about revenue contribution, dependence, materiality or renewal]",
+   "valid_from": "",
+   "valid_to": "",
+   "created_at": "",
+   "last_confirmed_at": ""
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_9ccc23cc50aea4",
+   "subject_actor_id": "Olo Inc.",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "Thompson Restaurants",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "LEGAL_ENTITY",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "case_study:https://www.olo.com/case-studies/thompson-restaurants"
+   ],
+   "source_document_ids": [
+    "https://www.olo.com/case-studies/thompson-restaurants"
+   ],
+   "subject_span": "published by www.olo.com",
+   "object_span": "Thompson Restaurants",
+   "relationship_span": "Thompson Restaurants | Olo Case Study \u2014 Now, unified guest data drives nearly 200 automated journeys, and Thompson has rich first-party data that shows more known guests, more frequent visits, and higher average checks\u2014resulting in a 90% in [a stated customer relationship; states nothing about revenue contribution, dependence, materiality or renewal]",
+   "valid_from": "",
+   "valid_to": "",
+   "created_at": "",
+   "last_confirmed_at": ""
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_ad81bb7a4a6d5d",
+   "subject_actor_id": "Olo Inc.",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "Paris Baguette",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "LEGAL_ENTITY",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "case_study:https://www.olo.com/case-studies/paris-baguette"
+   ],
+   "source_document_ids": [
+    "https://www.olo.com/case-studies/paris-baguette"
+   ],
+   "subject_span": "published by www.olo.com",
+   "object_span": "Paris Baguette",
+   "relationship_span": "Paris Baguette | Olo Case Study \u2014 With Catering+, every order type flows into a single dashboard on the same tablet operators already use every day. [a stated customer relationship; states nothing about revenue contribution, dependence, materiality or renewal]",
+   "valid_from": "",
+   "valid_to": "",
+   "created_at": "",
+   "last_confirmed_at": ""
+  },
+  {
+   "contract": "actor_relationship.v1",
+   "relationship_id": "rel_ce10750c296e06",
+   "subject_actor_id": "Olo Inc.",
+   "predicate": "SELLS_TO",
+   "object_actor_id": "Kahala Brands",
+   "subject_kind": "LEGAL_ENTITY",
+   "object_kind": "LEGAL_ENTITY",
+   "epistemic_status": "OBSERVED",
+   "evidence_ids": [
+    "case_study:https://www.olo.com/case-studies/kahala-brands"
+   ],
+   "source_document_ids": [
+    "https://www.olo.com/case-studies/kahala-brands"
+   ],
+   "subject_span": "published by www.olo.com",
+   "object_span": "Kahala Brands",
+   "relationship_span": "Kahala Brands | Olo Case Study \u2014 By implementing Olo Loyalty's simple, phone-first strategy, Kahala unified its brand portfolio under a single loyalty program, driving loyalty adoption to around 40% for some brands, increasing guest  [a stated customer relationship; states nothing about revenue contribution, dependence, materiality or renewal]",
+   "valid_from": "",
+   "valid_to": "",
+   "created_at": "",
+   "last_confirmed_at": ""
+  }
+ ],
+ "totals": {
+  "relationships": 25,
+  "by_predicate": {
+   "SELLS_TO": 22,
+   "PARTNERS_WITH": 3
+  },
+  "distinct_actors": 34,
+  "predicate_types": 2
+ },
+ "interaction_rerun": {
+  "competitor_map_entries": 0,
+  "interactions": 0,
+  "refused": {
+   "no_competitor_relationships_available": 1
+  }
+ }
+}

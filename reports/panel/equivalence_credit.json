@@ -1,0 +1,110 @@
+{
+  "by_verdict": {
+    "UNUSABLE": [
+      "TOTCI"
+    ],
+    "WEAK_PROXY": [
+      "DRTSCLCC",
+      "DRTSCILM",
+      "NPTLTL"
+    ]
+  },
+  "contract": "econ_equivalence.v1",
+  "detail": [
+    {
+      "candidate": "DRTSCLCC",
+      "construct": "household_credit_stress",
+      "crisis_agreement": 0.3876,
+      "direction_agreement": 0.5868,
+      "expected_sign": 1,
+      "identical": false,
+      "incumbent": "DRCCLACBS",
+      "note": "crisis agreement computed on the origins the contemporaneous classifier read as stressed",
+      "overlap": 122,
+      "rank_correlation": 0.4897,
+      "span": [
+        "1996-01-01",
+        "2026-04-01"
+      ],
+      "splice_allowed": false,
+      "statement": "DRTSCLCC for DRCCLACBS (household_credit_stress): WEAK_PROXY on 122 overlapping periods. direction 0.59, rank +0.49, turning points 0.57, crisis 0.39. The weakest is crisis at 0.39, and it is the weakest that decides. SPLICE REFUSED -- it enters as its own column.",
+      "turning_point_agreement": 0.566,
+      "verdict": "WEAK_PROXY",
+      "weakest": "crisis",
+      "weakest_score": 0.3876
+    },
+    {
+      "candidate": "DRTSCILM",
+      "construct": "household_credit_stress",
+      "crisis_agreement": 0.288,
+      "direction_agreement": 0.5035,
+      "expected_sign": 1,
+      "identical": false,
+      "incumbent": "DRCCLACBS",
+      "note": "crisis agreement computed on the origins the contemporaneous classifier read as stressed",
+      "overlap": 142,
+      "rank_correlation": 0.3203,
+      "span": [
+        "1991-01-01",
+        "2026-04-01"
+      ],
+      "splice_allowed": false,
+      "statement": "DRTSCILM for DRCCLACBS (household_credit_stress): WEAK_PROXY on 142 overlapping periods. direction 0.50, rank +0.32, turning points 0.53, crisis 0.29. The weakest is crisis at 0.29, and it is the weakest that decides. SPLICE REFUSED -- it enters as its own column.",
+      "turning_point_agreement": 0.5294,
+      "verdict": "WEAK_PROXY",
+      "weakest": "crisis",
+      "weakest_score": 0.288
+    },
+    {
+      "candidate": "NPTLTL",
+      "construct": "household_credit_stress",
+      "crisis_agreement": 0.8907,
+      "direction_agreement": 0.6441,
+      "expected_sign": 1,
+      "identical": false,
+      "incumbent": "DRCCLACBS",
+      "note": "crisis agreement computed on the origins the contemporaneous classifier read as stressed",
+      "overlap": 119,
+      "rank_correlation": 0.1533,
+      "span": [
+        "1991-01-01",
+        "2020-07-01"
+      ],
+      "splice_allowed": false,
+      "statement": "NPTLTL for DRCCLACBS (household_credit_stress): WEAK_PROXY on 119 overlapping periods. direction 0.64, rank +0.15, turning points 0.74, crisis 0.89. The weakest is rank at 0.15, and it is the weakest that decides. SPLICE REFUSED -- it enters as its own column.",
+      "turning_point_agreement": 0.7368,
+      "verdict": "WEAK_PROXY",
+      "weakest": "rank",
+      "weakest_score": 0.1533
+    },
+    {
+      "candidate": "TOTCI",
+      "construct": "household_credit_stress",
+      "crisis_agreement": 0.0,
+      "direction_agreement": 0.5319,
+      "expected_sign": 1,
+      "identical": false,
+      "incumbent": "DRCCLACBS",
+      "note": "crisis agreement computed on the origins the contemporaneous classifier read as stressed",
+      "overlap": 142,
+      "rank_correlation": -0.6644,
+      "span": [
+        "1991-01-01",
+        "2026-04-01"
+      ],
+      "splice_allowed": false,
+      "statement": "TOTCI for DRCCLACBS (household_credit_stress): UNUSABLE on 142 overlapping periods. direction 0.53, rank -0.66, turning points 0.44, crisis 0.00. The weakest is crisis at 0.00, and it is the weakest that decides. SPLICE REFUSED -- it enters as its own column.",
+      "turning_point_agreement": 0.44,
+      "verdict": "UNUSABLE",
+      "weakest": "crisis",
+      "weakest_score": 0.0
+    }
+  ],
+  "splice_allowed": [],
+  "tested": 4,
+  "thresholds": {
+    "direct": 0.75,
+    "min_overlap": 24,
+    "proxy": 0.6
+  }
+}

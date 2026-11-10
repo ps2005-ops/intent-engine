@@ -1,0 +1,2687 @@
+{
+ "blocked": {
+  "customer_voice": 28,
+  "industry": 84,
+  "institutional": 28,
+  "regulatory": 28,
+  "macro": 28,
+  "analyst": 28,
+  "alternative": 28
+ },
+ "marginal": {
+  "industry": 84,
+  "customer_voice": 28,
+  "regulatory": 28,
+  "institutional": 28,
+  "macro": 28,
+  "analyst": 28,
+  "alternative": 28
+ },
+ "independence_failures": 140,
+ "relevance_failures": 0,
+ "viable": {
+  "price_behaviour": 28
+ },
+ "per_company": {
+  "shopify": {
+   "categories": [
+    "company"
+   ],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "cloudflare": {
+   "categories": [
+    "company"
+   ],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "duolingo": {
+   "categories": [],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "stripe": {
+   "categories": [
+    "company"
+   ],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "johnson_johnson": {
+   "categories": [],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "jpmorgan": {
+   "categories": [
+    "company"
+   ],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "exxon_mobil": {
+   "categories": [
+    "company"
+   ],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "caterpillar": {
+   "categories": [],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "nextera": {
+   "categories": [
+    "company"
+   ],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "procter_gamble": {
+   "categories": [
+    "company"
+   ],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "linde": {
+   "categories": [],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "asml": {
+   "categories": [
+    "company"
+   ],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "toyota": {
+   "categories": [],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "infosys": {
+   "categories": [],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "etsy": {
+   "categories": [
+    "company"
+   ],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "olo": {
+   "categories": [
+    "company"
+   ],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "comcast": {
+   "categories": [],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "mercadolibre": {
+   "categories": [
+    "company"
+   ],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "vale": {
+   "categories": [
+    "company"
+   ],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "bhp": {
+   "categories": [],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "honda": {
+   "categories": [],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "hdfc_bank": {
+   "categories": [],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "checkpoint": {
+   "categories": [
+    "company"
+   ],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "canadian_national": {
+   "categories": [],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "america_movil": {
+   "categories": [],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "sea_limited": {
+   "categories": [],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "sasol": {
+   "categories": [
+    "company"
+   ],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [
+      "company"
+     ],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  },
+  "grifols": {
+   "categories": [],
+   "independent": [],
+   "kinds": {
+    "customer_adoption": {
+     "hypothesis_kind": "customer_adoption",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "customer_voice",
+      "industry"
+     ],
+     "missing": [
+      "customer_voice",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a customer_adoption claim needs customer_voice or industry; independent evidence present: none"
+    },
+    "governance": {
+     "hypothesis_kind": "governance",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "institutional",
+      "regulatory"
+     ],
+     "missing": [
+      "institutional",
+      "regulatory"
+     ],
+     "satisfied": false,
+     "reason": "a governance claim needs institutional or regulatory; independent evidence present: none"
+    },
+    "macro_sensitivity": {
+     "hypothesis_kind": "macro_sensitivity",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "macro"
+     ],
+     "missing": [
+      "macro"
+     ],
+     "satisfied": false,
+     "reason": "a macro_sensitivity claim needs macro; independent evidence present: none"
+    },
+    "expectation_shift": {
+     "hypothesis_kind": "expectation_shift",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "analyst",
+      "industry"
+     ],
+     "missing": [
+      "analyst",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a expectation_shift claim needs analyst or industry; independent evidence present: none"
+    },
+    "competitive_position": {
+     "hypothesis_kind": "competitive_position",
+     "present": [],
+     "independent_present": [],
+     "required": [
+      "alternative",
+      "industry"
+     ],
+     "missing": [
+      "alternative",
+      "industry"
+     ],
+     "satisfied": false,
+     "reason": "a competitive_position claim needs alternative or industry; independent evidence present: none"
+    },
+    "price_behaviour": {
+     "hypothesis_kind": "price_behaviour",
+     "present": [],
+     "independent_present": [],
+     "required": [],
+     "missing": [],
+     "satisfied": true,
+     "reason": "corroborated for a price_behaviour claim by "
+    }
+   }
+  }
+ }
+}

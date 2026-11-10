@@ -1,0 +1,125 @@
+{
+  "company": "Shopify Inc.",
+  "deployed_sha": "8397d67",
+  "captured_at": "2026-08-21T04:57:16Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HAWDM42YV5PAPBHE2FGRP5/intro",
+      "chars": 5655,
+      "html_chars": 31215
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HAWDM42YV5PAPBHE2FGRP5/intro",
+      "chars": 5655,
+      "html_chars": 31215
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HAWDM42YV5PAPBHE2FGRP5/slides",
+      "chars": 7205,
+      "html_chars": 60753
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HAWDM42YV5PAPBHE2FGRP5/full",
+      "chars": 25542,
+      "html_chars": 66997
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HAWDM42YV5PAPBHE2FGRP5/story",
+      "chars": 5633,
+      "html_chars": 35449
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HAWDM42YV5PAPBHE2FGRP5/history",
+      "chars": 27835,
+      "html_chars": 95001
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HAWDM42YV5PAPBHE2FGRP5/connect",
+      "chars": 3957,
+      "html_chars": 28843
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HAWDM42YV5PAPBHE2FGRP5/intro",
+      "chars": 5655,
+      "html_chars": 31215
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HAWDM42YV5PAPBHE2FGRP5/evidence",
+      "chars": 7401,
+      "html_chars": 25262
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HAWDM42YV5PAPBHE2FGRP5/report",
+      "chars": 307,
+      "html_chars": 14888
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HAWDM42YV5PAPBHE2FGRP5/brief",
+      "chars": 18299,
+      "html_chars": 52094
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Shopify Inc. SHOP \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecting m",
+      "status": 200,
+      "html_bytes": 16995
+    },
+    {
+      "t": 83.1,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Shopify Inc. SHOP \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Connecting mac",
+      "status": 200,
+      "html_bytes": 16994
+    },
+    {
+      "t": 93.2,
+      "text": "",
+      "status": 303,
+      "html_bytes": 16994,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HAWDM42YV5PAPBHE2FGRP5/progress",
+      "head": ""
+    },
+    {
+      "t": 367.1,
+      "text": "Shopify Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Shopify Inc. SHOP \u00b7 Canada \u00b7 SEC CIK 0001594805 Shopify Inc. is a software platform business that runs on recurring software subscription: revenue is contracted and renews, so the installed base carries nex",
+      "status": 200,
+      "html_bytes": 31287
+    }
+  ],
+  "process_before": {
+    "boot_id": "777e281ac5714ef8",
+    "started_at": 1787285577.8327832,
+    "uptime_seconds": 2658.9
+  },
+  "run_id": "01M0HAWDM42YV5PAPBHE2FGRP5",
+  "status": "READY",
+  "seconds": 367,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 6.06,
+    "intro": 5.94,
+    "slides": 7.9,
+    "full": 13.11,
+    "story": 6.63,
+    "history": 0.26,
+    "connect": 4.57
+  },
+  "errors": []
+}

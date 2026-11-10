@@ -1,0 +1,28 @@
+# H. Weekly evaluation — walk-forward, out-of-sample candidate evaluation.
+# Human-gated: it evaluates and records; it promotes nothing.
+name: weekly-evaluation
+
+on:
+  schedule:
+    - cron: "23 5 * * 6"      # Saturdays
+  workflow_dispatch:
+    inputs:
+      as_of:
+        description: "Override date (YYYY-MM-DD); blank = today (NY)"
+        required: false
+
+concurrency:
+  group: weekly-evaluation
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  call:
+    uses: ./.github/workflows/_hosted-job.yml
+    secrets: inherit
+    with:
+      job: weekly-evaluation
+      as_of: ${{ github.event.inputs.as_of }}
+      timeout_minutes: 30

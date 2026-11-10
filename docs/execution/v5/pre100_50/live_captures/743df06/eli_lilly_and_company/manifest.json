@@ -1,0 +1,132 @@
+{
+  "company": "Eli Lilly and Company",
+  "deployed_sha": "743df06",
+  "captured_at": "2026-08-21T16:14:28Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JHMD053A7DCTHWHR1HXJ8F",
+      "chars": 2037,
+      "html_chars": 17777,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JHMD053A7DCTHWHR1HXJ8F/intro",
+      "chars": 4717,
+      "html_chars": 29969,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JHMD053A7DCTHWHR1HXJ8F",
+      "chars": 2037,
+      "html_chars": 17777,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JHMD053A7DCTHWHR1HXJ8F/full",
+      "chars": 2037,
+      "html_chars": 17777,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JHMD053A7DCTHWHR1HXJ8F/story",
+      "chars": 5174,
+      "html_chars": 34832,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JHMD053A7DCTHWHR1HXJ8F/history",
+      "chars": 27795,
+      "html_chars": 108202,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JHMD053A7DCTHWHR1HXJ8F/connect",
+      "chars": 3849,
+      "html_chars": 28734,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JHMD053A7DCTHWHR1HXJ8F",
+      "chars": 2037,
+      "html_chars": 17777,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JHMD053A7DCTHWHR1HXJ8F/evidence",
+      "chars": 3251,
+      "html_chars": 19004,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JHMD053A7DCTHWHR1HXJ8F/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JHMD053A7DCTHWHR1HXJ8F/brief",
+      "chars": 13414,
+      "html_chars": 41676,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Loading what we already know. Analysing Eli Lilly and Company lilly.com \u2014 not this company? Identifying the company done Loading prior intelligence working Reading current company evidence ",
+      "status": 200,
+      "html_bytes": 17015
+    },
+    {
+      "t": 52.4,
+      "text": "Limited analysis of Eli Lilly and Company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of Eli Lilly and Company There is not enough public evidence to build a briefing on this company. Rather than show a briefing that looks complete and is not, here is exactly where it stand",
+      "status": 200,
+      "html_bytes": 17813
+    }
+  ],
+  "process_before": {
+    "boot_id": "d7df6481c13e43c7",
+    "started_at": 1787326618.1855707,
+    "uptime_seconds": 2250.3
+  },
+  "run_id": "01M0JHMD053A7DCTHWHR1HXJ8F",
+  "status": "READY",
+  "seconds": 52,
+  "first_useful": 52,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 2.91,
+    "intro": 10.8,
+    "slides": 3.87,
+    "full": 3.21,
+    "story": 6.1,
+    "history": 0.44,
+    "connect": 4.95
+  },
+  "evidence_gate": "compose=3 usable=3 families=investor stored=3 attempt=3 failed=20/17 dropped=0/0/0/0",
+  "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+  "outcome_by_route": {
+    "run": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "intro": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "slides": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "full": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "story": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "history": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "connect": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": []
+}

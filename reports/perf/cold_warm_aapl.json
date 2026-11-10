@@ -1,0 +1,37 @@
+{
+  "company": "Apple Inc.",
+  "cold": {
+    "label": "COLD",
+    "run_id": "01M191WZYTF9Y76YCBFT28YCP9",
+    "core_latency_s": 61.28,
+    "usable_s": 66.2,
+    "evidence_count": 11,
+    "run_state": "PARTIAL",
+    "result_state": "DEEP_PENDING",
+    "discovery_ms": 23879.0,
+    "retrieval_ms": 14113.3,
+    "composition_ms": 23205.8,
+    "documents": 11,
+    "text_chars": 457220,
+    "observations": 7,
+    "has_report": true
+  },
+  "warm": {
+    "label": "WARM",
+    "run_id": "01M191Z6805GYEEWWSGYT81XE5",
+    "core_latency_s": 80.2,
+    "usable_s": 82.1,
+    "evidence_count": 11,
+    "run_state": "PARTIAL",
+    "result_state": "DEEP_PENDING",
+    "discovery_ms": 228.8,
+    "retrieval_ms": 14271.6,
+    "composition_ms": 31500.3,
+    "documents": 11,
+    "text_chars": 585450,
+    "observations": 9,
+    "has_report": true
+  },
+  "durability": "EPHEMERAL",
+  "at": 1788084289.015946
+}

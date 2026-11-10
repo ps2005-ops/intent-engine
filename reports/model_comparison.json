@@ -1,0 +1,1730 @@
+{
+  "base_economic_model_score": 0.22664,
+  "base_plus_collective_score": 0.23612,
+  "base_series": [
+    "UNRATE",
+    "CPIAUCSL",
+    "DFF",
+    "DGS2",
+    "DGS10",
+    "HOUST",
+    "INDPRO",
+    "PCEC96"
+  ],
+  "baseline_gate": "FAIL",
+  "behavioural_series": [
+    "BABATOTALSAUS",
+    "BOGZ1FL153064486Q",
+    "CORCACBS",
+    "DGORDER",
+    "DRCCLACBS",
+    "DRSFRMACBS",
+    "EMRATIO",
+    "HSN1F",
+    "JTSQUR",
+    "MICH",
+    "PSAVERT",
+    "REVOLSL",
+    "TDSP",
+    "U6RATE",
+    "UMCSENT",
+    "USACSCICP02STSAM"
+  ],
+  "by_dimension": {
+    "collective_block": {
+      "best_delta": null,
+      "robust": 0,
+      "tested": 10,
+      "verdicts": [
+        "NO_IMPROVEMENT",
+        "NO_IMPROVEMENT",
+        "NOT_ROBUST",
+        "NO_IMPROVEMENT",
+        "NO_IMPROVEMENT",
+        "NOT_ROBUST",
+        "NO_IMPROVEMENT",
+        "NOT_ROBUST",
+        "NOT_ROBUST",
+        "NO_IMPROVEMENT"
+      ]
+    }
+  },
+  "ci_level": 0.95,
+  "comparisons": 10,
+  "construct_verdicts": {
+    "financial_anxiety": {
+      "best_delta": 0.02122,
+      "construct": "financial_anxiety",
+      "deltas": {
+        "financial_anxiety/consumption_180d": -0.0242,
+        "financial_anxiety/consumption_360d": -0.00093,
+        "financial_anxiety/credit_stress_180d": -0.00344,
+        "financial_anxiety/credit_stress_360d": -0.09218,
+        "financial_anxiety/housing_180d": 0.02122,
+        "financial_anxiety/housing_360d": 0.01293
+      },
+      "families_resolvable": 1,
+      "families_robust": 0,
+      "families_tested": 6,
+      "median_mde": 0.0386,
+      "series": [
+        "CORCACBS",
+        "DRCCLACBS",
+        "DRSFRMACBS",
+        "PSAVERT",
+        "REVOLSL",
+        "TDSP",
+        "UMCSENT"
+      ],
+      "underpowered": 5,
+      "verdict": "INSUFFICIENT_DATA"
+    },
+    "future_orientation": {
+      "best_delta": null,
+      "construct": "future_orientation",
+      "deltas": {},
+      "families_resolvable": 0,
+      "families_robust": 0,
+      "families_tested": 0,
+      "median_mde": null,
+      "series": [
+        "USACSCICP02STSAM"
+      ],
+      "underpowered": 0,
+      "verdict": "INSUFFICIENT_DATA"
+    },
+    "perceived_control": {
+      "best_delta": 0.00229,
+      "construct": "perceived_control",
+      "deltas": {
+        "perceived_control/labour_180d": -0.00041,
+        "perceived_control/labour_360d": 0.00229
+      },
+      "families_resolvable": 0,
+      "families_robust": 0,
+      "families_tested": 2,
+      "median_mde": 0.01316,
+      "series": [
+        "BABATOTALSAUS",
+        "JTSQUR",
+        "MICH",
+        "U6RATE"
+      ],
+      "underpowered": 2,
+      "verdict": "INSUFFICIENT_DATA"
+    },
+    "perceived_security": {
+      "best_delta": 0.01338,
+      "construct": "perceived_security",
+      "deltas": {
+        "perceived_security/credit_stress_180d": -0.00267,
+        "perceived_security/credit_stress_360d": -0.00813,
+        "perceived_security/labour_180d": 0.01338,
+        "perceived_security/labour_360d": -0.00436
+      },
+      "families_resolvable": 0,
+      "families_robust": 0,
+      "families_tested": 4,
+      "median_mde": 0.02887,
+      "series": [
+        "EMRATIO",
+        "U6RATE"
+      ],
+      "underpowered": 4,
+      "verdict": "INSUFFICIENT_DATA"
+    },
+    "risk_appetite": {
+      "best_delta": null,
+      "construct": "risk_appetite",
+      "deltas": {},
+      "families_resolvable": 0,
+      "families_robust": 0,
+      "families_tested": 0,
+      "median_mde": null,
+      "series": [
+        "BOGZ1FL153064486Q"
+      ],
+      "underpowered": 0,
+      "verdict": "INSUFFICIENT_DATA"
+    },
+    "time_horizon": {
+      "best_delta": 0.01835,
+      "construct": "time_horizon",
+      "deltas": {
+        "time_horizon/consumption_180d": 0.00729,
+        "time_horizon/consumption_360d": 0.00147,
+        "time_horizon/housing_180d": 0.0034,
+        "time_horizon/housing_360d": 0.01835,
+        "time_horizon/industrial_180d": -0.00562,
+        "time_horizon/industrial_360d": 0.00211
+      },
+      "families_resolvable": 0,
+      "families_robust": 0,
+      "families_tested": 6,
+      "median_mde": 0.01678,
+      "series": [
+        "DGORDER",
+        "HSN1F"
+      ],
+      "underpowered": 6,
+      "verdict": "INSUFFICIENT_DATA"
+    }
+  },
+  "contract": "econ_incremental.v1",
+  "detail": [
+    {
+      "augmented_score": 0.17574,
+      "base_score": 0.14178,
+      "ci": [
+        -0.07361,
+        0.00211
+      ],
+      "delta": -0.03396,
+      "dimension": "collective_block",
+      "fdr_adjusted": true,
+      "horizon_days": 180,
+      "mde": 0.03786,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "consumption_180d",
+      "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+      "p_value": 0.08,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NO_IMPROVEMENT"
+    },
+    {
+      "augmented_score": 0.10983,
+      "base_score": 0.10863,
+      "ci": [
+        -0.01411,
+        0.01494
+      ],
+      "delta": -0.00119,
+      "dimension": "collective_block",
+      "fdr_adjusted": true,
+      "horizon_days": 360,
+      "mde": 0.01453,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "consumption_360d",
+      "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+      "p_value": 0.822,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NO_IMPROVEMENT"
+    },
+    {
+      "augmented_score": 0.248,
+      "base_score": 0.25309,
+      "ci": [
+        -0.04589,
+        0.05023
+      ],
+      "delta": 0.00509,
+      "dimension": "collective_block",
+      "fdr_adjusted": true,
+      "horizon_days": 180,
+      "mde": 0.04806,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "credit_stress_180d",
+      "note": "positive point estimate, interval includes zero; consistent with no effect",
+      "p_value": 0.812,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NOT_ROBUST"
+    },
+    {
+      "augmented_score": 0.39328,
+      "base_score": 0.35661,
+      "ci": [
+        -0.11619,
+        0.04475
+      ],
+      "delta": -0.03667,
+      "dimension": "collective_block",
+      "fdr_adjusted": true,
+      "horizon_days": 360,
+      "mde": 0.08047,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "credit_stress_360d",
+      "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+      "p_value": 0.375,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NO_IMPROVEMENT"
+    },
+    {
+      "augmented_score": 0.36518,
+      "base_score": 0.31216,
+      "ci": [
+        -0.12488,
+        0.01979
+      ],
+      "delta": -0.05302,
+      "dimension": "collective_block",
+      "fdr_adjusted": true,
+      "horizon_days": 180,
+      "mde": 0.07233,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "housing_180d",
+      "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+      "p_value": 0.151,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NO_IMPROVEMENT"
+    },
+    {
+      "augmented_score": 0.27089,
+      "base_score": 0.29565,
+      "ci": [
+        -0.03263,
+        0.08412
+      ],
+      "delta": 0.02476,
+      "dimension": "collective_block",
+      "fdr_adjusted": true,
+      "horizon_days": 360,
+      "mde": 0.05837,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "housing_360d",
+      "note": "positive point estimate, interval includes zero; consistent with no effect",
+      "p_value": 0.374,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NOT_ROBUST"
+    },
+    {
+      "augmented_score": 0.25568,
+      "base_score": 0.24927,
+      "ci": [
+        -0.05921,
+        0.05513
+      ],
+      "delta": -0.00641,
+      "dimension": "collective_block",
+      "fdr_adjusted": true,
+      "horizon_days": 180,
+      "mde": 0.05717,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "industrial_180d",
+      "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+      "p_value": 0.791,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NO_IMPROVEMENT"
+    },
+    {
+      "augmented_score": 0.26407,
+      "base_score": 0.28704,
+      "ci": [
+        -0.02827,
+        0.07675
+      ],
+      "delta": 0.02297,
+      "dimension": "collective_block",
+      "fdr_adjusted": true,
+      "horizon_days": 360,
+      "mde": 0.05251,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "industrial_360d",
+      "note": "positive point estimate, interval includes zero; consistent with no effect",
+      "p_value": 0.402,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NOT_ROBUST"
+    },
+    {
+      "augmented_score": 0.13018,
+      "base_score": 0.14977,
+      "ci": [
+        -0.01441,
+        0.05364
+      ],
+      "delta": 0.01959,
+      "dimension": "collective_block",
+      "fdr_adjusted": true,
+      "horizon_days": 180,
+      "mde": 0.03403,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "labour_180d",
+      "note": "positive point estimate, interval includes zero; consistent with no effect",
+      "p_value": 0.248,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NOT_ROBUST"
+    },
+    {
+      "augmented_score": 0.14835,
+      "base_score": 0.1124,
+      "ci": [
+        -0.06279,
+        -0.01286
+      ],
+      "delta": -0.03595,
+      "dimension": "collective_block",
+      "fdr_adjusted": true,
+      "horizon_days": 360,
+      "mde": 0.02496,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "labour_360d",
+      "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+      "p_value": 0.0,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": false,
+      "verdict": "NO_IMPROVEMENT"
+    }
+  ],
+  "families_total": 10,
+  "families_with_a_valid_baseline": 3,
+  "fdr_q": 0.1,
+  "incremental_delta": -0.00948,
+  "median_mde": 0.05251,
+  "min_paired": 30,
+  "not_tested": 0,
+  "origins": 115,
+  "panel": {
+    "cells": 420942,
+    "contract": "econ_panel.v1",
+    "earliest": "1919-01-01",
+    "latest": "2026-08-25",
+    "periods_with_more_than_one_vintage": 5356,
+    "series": 23,
+    "spans": {
+      "CIVPART": [
+        "1948-01-01",
+        "2026-07-01"
+      ],
+      "CORCACBS": [
+        "1985-01-01",
+        "2026-01-01"
+      ],
+      "CPIAUCSL": [
+        "1947-01-01",
+        "2026-07-01"
+      ],
+      "DFF": [
+        "1954-07-01",
+        "2026-08-25"
+      ],
+      "DGORDER": [
+        "1958-02-01",
+        "2026-06-01"
+      ],
+      "DGS10": [
+        "1962-01-02",
+        "2026-08-25"
+      ],
+      "DGS2": [
+        "1976-06-01",
+        "2026-08-25"
+      ],
+      "DRCCLACBS": [
+        "1991-01-01",
+        "2026-01-01"
+      ],
+      "DRSFRMACBS": [
+        "1991-01-01",
+        "2026-01-01"
+      ],
+      "EMRATIO": [
+        "1948-01-01",
+        "2026-07-01"
+      ],
+      "GDPC1": [
+        "1947-01-01",
+        "2026-04-01"
+      ],
+      "HOUST": [
+        "1959-01-01",
+        "2026-07-01"
+      ],
+      "HSN1F": [
+        "1963-01-01",
+        "2026-07-01"
+      ],
+      "INDPRO": [
+        "1919-01-01",
+        "2026-06-01"
+      ],
+      "JTSQUR": [
+        "2000-12-01",
+        "2026-06-01"
+      ],
+      "MICH": [
+        "1978-01-01",
+        "2026-06-01"
+      ],
+      "PCEC96": [
+        "1959-01-01",
+        "2026-06-01"
+      ],
+      "PSAVERT": [
+        "1959-01-01",
+        "2026-06-01"
+      ],
+      "REVOLSL": [
+        "1968-01-01",
+        "2026-06-01"
+      ],
+      "TDSP": [
+        "1980-01-01",
+        "2026-01-01"
+      ],
+      "U6RATE": [
+        "1994-01-01",
+        "2026-07-01"
+      ],
+      "UMCSENT": [
+        "1952-11-01",
+        "2026-06-01"
+      ],
+      "UNRATE": [
+        "1948-01-01",
+        "2026-07-01"
+      ]
+    }
+  },
+  "per_construct": [
+    {
+      "augmented_score": 0.16598,
+      "base_score": 0.14178,
+      "ci": [
+        -0.0541,
+        0.00297
+      ],
+      "delta": -0.0242,
+      "dimension": "financial_anxiety",
+      "fdr_adjusted": true,
+      "horizon_days": 180,
+      "mde": 0.02853,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "financial_anxiety/consumption_180d",
+      "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+      "p_value": 0.09,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NO_IMPROVEMENT"
+    },
+    {
+      "augmented_score": 0.10956,
+      "base_score": 0.10863,
+      "ci": [
+        -0.01024,
+        0.00883
+      ],
+      "delta": -0.00093,
+      "dimension": "financial_anxiety",
+      "fdr_adjusted": true,
+      "horizon_days": 360,
+      "mde": 0.00953,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "financial_anxiety/consumption_360d",
+      "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+      "p_value": 0.835,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NO_IMPROVEMENT"
+    },
+    {
+      "augmented_score": 0.25653,
+      "base_score": 0.25309,
+      "ci": [
+        -0.03682,
+        0.0226
+      ],
+      "delta": -0.00344,
+      "dimension": "financial_anxiety",
+      "fdr_adjusted": true,
+      "horizon_days": 180,
+      "mde": 0.02971,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "financial_anxiety/credit_stress_180d",
+      "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+      "p_value": 0.87,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NO_IMPROVEMENT"
+    },
+    {
+      "augmented_score": 0.44879,
+      "base_score": 0.35661,
+      "ci": [
+        -0.16043,
+        -0.02936
+      ],
+      "delta": -0.09218,
+      "dimension": "financial_anxiety",
+      "fdr_adjusted": true,
+      "horizon_days": 360,
+      "mde": 0.06554,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "financial_anxiety/credit_stress_360d",
+      "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+      "p_value": 0.009,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": false,
+      "verdict": "NO_IMPROVEMENT"
+    },
+    {
+      "augmented_score": 0.29093,
+      "base_score": 0.31216,
+      "ci": [
+        -0.01593,
+        0.06126
+      ],
+      "delta": 0.02122,
+      "dimension": "financial_anxiety",
+      "fdr_adjusted": true,
+      "horizon_days": 180,
+      "mde": 0.0386,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "financial_anxiety/housing_180d",
+      "note": "positive point estimate, interval includes zero; consistent with no effect",
+      "p_value": 0.282,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NOT_ROBUST"
+    },
+    {
+      "augmented_score": 0.28272,
+      "base_score": 0.29565,
+      "ci": [
+        -0.03318,
+        0.06092
+      ],
+      "delta": 0.01293,
+      "dimension": "financial_anxiety",
+      "fdr_adjusted": true,
+      "horizon_days": 360,
+      "mde": 0.04705,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "financial_anxiety/housing_360d",
+      "note": "positive point estimate, interval includes zero; consistent with no effect",
+      "p_value": 0.55,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NOT_ROBUST"
+    },
+    {
+      "augmented_score": 0.15018,
+      "base_score": 0.14977,
+      "ci": [
+        -0.01406,
+        0.01226
+      ],
+      "delta": -0.00041,
+      "dimension": "perceived_control",
+      "fdr_adjusted": true,
+      "horizon_days": 180,
+      "mde": 0.01316,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "perceived_control/labour_180d",
+      "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+      "p_value": 0.984,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NO_IMPROVEMENT"
+    },
+    {
+      "augmented_score": 0.11011,
+      "base_score": 0.1124,
+      "ci": [
+        -0.00231,
+        0.00882
+      ],
+      "delta": 0.00229,
+      "dimension": "perceived_control",
+      "fdr_adjusted": true,
+      "horizon_days": 360,
+      "mde": 0.00557,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "perceived_control/labour_360d",
+      "note": "positive point estimate, interval includes zero; consistent with no effect",
+      "p_value": 0.539,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NOT_ROBUST"
+    },
+    {
+      "augmented_score": 0.13639,
+      "base_score": 0.14977,
+      "ci": [
+        -0.01273,
+        0.045
+      ],
+      "delta": 0.01338,
+      "dimension": "perceived_security",
+      "fdr_adjusted": true,
+      "horizon_days": 180,
+      "mde": 0.02887,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "perceived_security/labour_180d",
+      "note": "positive point estimate, interval includes zero; consistent with no effect",
+      "p_value": 0.389,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NOT_ROBUST"
+    },
+    {
+      "augmented_score": 0.11676,
+      "base_score": 0.1124,
+      "ci": [
+        -0.02081,
+        0.00745
+      ],
+      "delta": -0.00436,
+      "dimension": "perceived_security",
+      "fdr_adjusted": true,
+      "horizon_days": 360,
+      "mde": 0.01413,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "perceived_security/labour_360d",
+      "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+      "p_value": 0.535,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NO_IMPROVEMENT"
+    },
+    {
+      "augmented_score": 0.25576,
+      "base_score": 0.25309,
+      "ci": [
+        -0.01038,
+        0.00517
+      ],
+      "delta": -0.00267,
+      "dimension": "perceived_security",
+      "fdr_adjusted": true,
+      "horizon_days": 180,
+      "mde": 0.00778,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "perceived_security/credit_stress_180d",
+      "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+      "p_value": 0.495,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NO_IMPROVEMENT"
+    },
+    {
+      "augmented_score": 0.36474,
+      "base_score": 0.35661,
+      "ci": [
+        -0.05743,
+        0.04913
+      ],
+      "delta": -0.00813,
+      "dimension": "perceived_security",
+      "fdr_adjusted": true,
+      "horizon_days": 360,
+      "mde": 0.05328,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "perceived_security/credit_stress_360d",
+      "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+      "p_value": 0.72,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NO_IMPROVEMENT"
+    },
+    {
+      "augmented_score": 0.13449,
+      "base_score": 0.14178,
+      "ci": [
+        -0.0005,
+        0.01697
+      ],
+      "delta": 0.00729,
+      "dimension": "time_horizon",
+      "fdr_adjusted": true,
+      "horizon_days": 180,
+      "mde": 0.00873,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "time_horizon/consumption_180d",
+      "note": "positive point estimate, interval includes zero; consistent with no effect",
+      "p_value": 0.063,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NOT_ROBUST"
+    },
+    {
+      "augmented_score": 0.10716,
+      "base_score": 0.10863,
+      "ci": [
+        -0.00647,
+        0.0101
+      ],
+      "delta": 0.00147,
+      "dimension": "time_horizon",
+      "fdr_adjusted": true,
+      "horizon_days": 360,
+      "mde": 0.00828,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "time_horizon/consumption_360d",
+      "note": "positive point estimate, interval includes zero; consistent with no effect",
+      "p_value": 0.73,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NOT_ROBUST"
+    },
+    {
+      "augmented_score": 0.30876,
+      "base_score": 0.31216,
+      "ci": [
+        -0.01647,
+        0.02417
+      ],
+      "delta": 0.0034,
+      "dimension": "time_horizon",
+      "fdr_adjusted": true,
+      "horizon_days": 180,
+      "mde": 0.02032,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "time_horizon/housing_180d",
+      "note": "positive point estimate, interval includes zero; consistent with no effect",
+      "p_value": 0.729,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NOT_ROBUST"
+    },
+    {
+      "augmented_score": 0.2773,
+      "base_score": 0.29565,
+      "ci": [
+        -0.01243,
+        0.05095
+      ],
+      "delta": 0.01835,
+      "dimension": "time_horizon",
+      "fdr_adjusted": true,
+      "horizon_days": 360,
+      "mde": 0.03169,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "time_horizon/housing_360d",
+      "note": "positive point estimate, interval includes zero; consistent with no effect",
+      "p_value": 0.236,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NOT_ROBUST"
+    },
+    {
+      "augmented_score": 0.25489,
+      "base_score": 0.24927,
+      "ci": [
+        -0.01363,
+        0.00118
+      ],
+      "delta": -0.00562,
+      "dimension": "time_horizon",
+      "fdr_adjusted": true,
+      "horizon_days": 180,
+      "mde": 0.0074,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "time_horizon/industrial_180d",
+      "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+      "p_value": 0.106,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NO_IMPROVEMENT"
+    },
+    {
+      "augmented_score": 0.28493,
+      "base_score": 0.28704,
+      "ci": [
+        -0.01552,
+        0.01804
+      ],
+      "delta": 0.00211,
+      "dimension": "time_horizon",
+      "fdr_adjusted": true,
+      "horizon_days": 360,
+      "mde": 0.01678,
+      "n_clusters": 50,
+      "n_episodes": 1,
+      "n_paired": 50,
+      "name": "time_horizon/industrial_360d",
+      "note": "positive point estimate, interval includes zero; consistent with no effect",
+      "p_value": 0.781,
+      "population": "US_households",
+      "pseudo_replication": false,
+      "regime": "ALL",
+      "robust": false,
+      "survives_fdr": false,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NOT_ROBUST"
+    }
+  ],
+  "per_family": {
+    "consumption_180d": {
+      "augmented": {
+        "base_rate": 0.84,
+        "brier": 0.17574,
+        "directional_accuracy": 0.76,
+        "false_negatives": 6,
+        "false_positives": 6,
+        "n": 50,
+        "true_positives": 36
+      },
+      "augmented_beats_trivial": false,
+      "augmented_features": 25,
+      "base": {
+        "base_rate": 0.84,
+        "brier": 0.14178,
+        "directional_accuracy": 0.86,
+        "false_negatives": 1,
+        "false_positives": 6,
+        "n": 50,
+        "true_positives": 41
+      },
+      "base_beats_trivial": false,
+      "base_features": 12,
+      "baselines": {
+        "always_base_rate_brier": 0.1344,
+        "base_rate": 0.84,
+        "persistence_brier": 0.06122
+      },
+      "expected_constructs": [
+        "financial_anxiety",
+        "future_orientation",
+        "time_horizon"
+      ],
+      "partition": {
+        "holdout": 20,
+        "holdout_reads": 0,
+        "seal": "f81987318990f0e8",
+        "train": 64,
+        "validation": 28
+      }
+    },
+    "consumption_360d": {
+      "augmented": {
+        "base_rate": 0.86,
+        "brier": 0.10983,
+        "directional_accuracy": 0.88,
+        "false_negatives": 1,
+        "false_positives": 5,
+        "n": 50,
+        "true_positives": 42
+      },
+      "augmented_beats_trivial": true,
+      "augmented_features": 25,
+      "base": {
+        "base_rate": 0.86,
+        "brier": 0.10863,
+        "directional_accuracy": 0.88,
+        "false_negatives": 1,
+        "false_positives": 5,
+        "n": 50,
+        "true_positives": 42
+      },
+      "base_beats_trivial": true,
+      "base_features": 12,
+      "baselines": {
+        "always_base_rate_brier": 0.1204,
+        "base_rate": 0.86,
+        "persistence_brier": 0.06122
+      },
+      "expected_constructs": [
+        "financial_anxiety",
+        "future_orientation",
+        "time_horizon"
+      ],
+      "partition": {
+        "holdout": 18,
+        "holdout_reads": 0,
+        "seal": "0b404940b983ab9a",
+        "train": 64,
+        "validation": 28
+      }
+    },
+    "credit_stress_180d": {
+      "augmented": {
+        "base_rate": 0.38,
+        "brier": 0.248,
+        "directional_accuracy": 0.72,
+        "false_negatives": 6,
+        "false_positives": 8,
+        "n": 50,
+        "true_positives": 13
+      },
+      "augmented_beats_trivial": false,
+      "augmented_features": 25,
+      "base": {
+        "base_rate": 0.38,
+        "brier": 0.25309,
+        "directional_accuracy": 0.7,
+        "false_negatives": 8,
+        "false_positives": 7,
+        "n": 50,
+        "true_positives": 11
+      },
+      "base_beats_trivial": false,
+      "base_features": 12,
+      "baselines": {
+        "always_base_rate_brier": 0.2356,
+        "base_rate": 0.38,
+        "persistence_brier": 0.06122
+      },
+      "expected_constructs": [
+        "financial_anxiety",
+        "perceived_security"
+      ],
+      "partition": {
+        "holdout": 14,
+        "holdout_reads": 0,
+        "seal": "da1264bd7ffc1d20",
+        "train": 64,
+        "validation": 28
+      }
+    },
+    "credit_stress_360d": {
+      "augmented": {
+        "base_rate": 0.32,
+        "brier": 0.39328,
+        "directional_accuracy": 0.56,
+        "false_negatives": 7,
+        "false_positives": 15,
+        "n": 50,
+        "true_positives": 9
+      },
+      "augmented_beats_trivial": false,
+      "augmented_features": 25,
+      "base": {
+        "base_rate": 0.32,
+        "brier": 0.35661,
+        "directional_accuracy": 0.48,
+        "false_negatives": 8,
+        "false_positives": 18,
+        "n": 50,
+        "true_positives": 8
+      },
+      "base_beats_trivial": false,
+      "base_features": 12,
+      "baselines": {
+        "always_base_rate_brier": 0.2176,
+        "base_rate": 0.32,
+        "persistence_brier": 0.06122
+      },
+      "expected_constructs": [
+        "financial_anxiety",
+        "perceived_security"
+      ],
+      "partition": {
+        "holdout": 8,
+        "holdout_reads": 0,
+        "seal": "b979bab31f959461",
+        "train": 64,
+        "validation": 28
+      }
+    },
+    "housing_180d": {
+      "augmented": {
+        "base_rate": 0.6,
+        "brier": 0.36518,
+        "directional_accuracy": 0.48,
+        "false_negatives": 14,
+        "false_positives": 12,
+        "n": 50,
+        "true_positives": 16
+      },
+      "augmented_beats_trivial": false,
+      "augmented_features": 25,
+      "base": {
+        "base_rate": 0.6,
+        "brier": 0.31216,
+        "directional_accuracy": 0.48,
+        "false_negatives": 10,
+        "false_positives": 16,
+        "n": 50,
+        "true_positives": 20
+      },
+      "base_beats_trivial": false,
+      "base_features": 12,
+      "baselines": {
+        "always_base_rate_brier": 0.24,
+        "base_rate": 0.6,
+        "persistence_brier": 0.38776
+      },
+      "expected_constructs": [
+        "financial_anxiety",
+        "time_horizon"
+      ],
+      "partition": {
+        "holdout": 20,
+        "holdout_reads": 0,
+        "seal": "fe1ecc12737925c2",
+        "train": 64,
+        "validation": 28
+      }
+    },
+    "housing_360d": {
+      "augmented": {
+        "base_rate": 0.7,
+        "brier": 0.27089,
+        "directional_accuracy": 0.58,
+        "false_negatives": 10,
+        "false_positives": 11,
+        "n": 50,
+        "true_positives": 25
+      },
+      "augmented_beats_trivial": false,
+      "augmented_features": 25,
+      "base": {
+        "base_rate": 0.7,
+        "brier": 0.29565,
+        "directional_accuracy": 0.5,
+        "false_negatives": 11,
+        "false_positives": 14,
+        "n": 50,
+        "true_positives": 24
+      },
+      "base_beats_trivial": false,
+      "base_features": 12,
+      "baselines": {
+        "always_base_rate_brier": 0.21,
+        "base_rate": 0.7,
+        "persistence_brier": 0.34694
+      },
+      "expected_constructs": [
+        "financial_anxiety",
+        "time_horizon"
+      ],
+      "partition": {
+        "holdout": 18,
+        "holdout_reads": 0,
+        "seal": "e151d6cef75b3c81",
+        "train": 64,
+        "validation": 28
+      }
+    },
+    "industrial_180d": {
+      "augmented": {
+        "base_rate": 0.62,
+        "brier": 0.25568,
+        "directional_accuracy": 0.64,
+        "false_negatives": 7,
+        "false_positives": 11,
+        "n": 50,
+        "true_positives": 24
+      },
+      "augmented_beats_trivial": false,
+      "augmented_features": 25,
+      "base": {
+        "base_rate": 0.62,
+        "brier": 0.24927,
+        "directional_accuracy": 0.62,
+        "false_negatives": 7,
+        "false_positives": 12,
+        "n": 50,
+        "true_positives": 24
+      },
+      "base_beats_trivial": false,
+      "base_features": 12,
+      "baselines": {
+        "always_base_rate_brier": 0.2356,
+        "base_rate": 0.62,
+        "persistence_brier": 0.10204
+      },
+      "expected_constructs": [
+        "future_orientation",
+        "time_horizon"
+      ],
+      "partition": {
+        "holdout": 20,
+        "holdout_reads": 0,
+        "seal": "13c12937f95aa079",
+        "train": 64,
+        "validation": 28
+      }
+    },
+    "industrial_360d": {
+      "augmented": {
+        "base_rate": 0.62,
+        "brier": 0.26407,
+        "directional_accuracy": 0.62,
+        "false_negatives": 6,
+        "false_positives": 13,
+        "n": 50,
+        "true_positives": 25
+      },
+      "augmented_beats_trivial": false,
+      "augmented_features": 25,
+      "base": {
+        "base_rate": 0.62,
+        "brier": 0.28704,
+        "directional_accuracy": 0.58,
+        "false_negatives": 6,
+        "false_positives": 15,
+        "n": 50,
+        "true_positives": 25
+      },
+      "base_beats_trivial": false,
+      "base_features": 12,
+      "baselines": {
+        "always_base_rate_brier": 0.2356,
+        "base_rate": 0.62,
+        "persistence_brier": 0.10204
+      },
+      "expected_constructs": [
+        "future_orientation",
+        "time_horizon"
+      ],
+      "partition": {
+        "holdout": 18,
+        "holdout_reads": 0,
+        "seal": "e6c46c4200d7da60",
+        "train": 64,
+        "validation": 28
+      }
+    },
+    "labour_180d": {
+      "augmented": {
+        "base_rate": 0.24,
+        "brier": 0.13018,
+        "directional_accuracy": 0.86,
+        "false_negatives": 6,
+        "false_positives": 1,
+        "n": 50,
+        "true_positives": 6
+      },
+      "augmented_beats_trivial": true,
+      "augmented_features": 25,
+      "base": {
+        "base_rate": 0.24,
+        "brier": 0.14977,
+        "directional_accuracy": 0.8,
+        "false_negatives": 7,
+        "false_positives": 3,
+        "n": 50,
+        "true_positives": 5
+      },
+      "base_beats_trivial": true,
+      "base_features": 12,
+      "baselines": {
+        "always_base_rate_brier": 0.1824,
+        "base_rate": 0.24,
+        "persistence_brier": 0.14286
+      },
+      "expected_constructs": [
+        "perceived_control",
+        "perceived_security"
+      ],
+      "partition": {
+        "holdout": 20,
+        "holdout_reads": 0,
+        "seal": "21b20a686106013a",
+        "train": 64,
+        "validation": 28
+      }
+    },
+    "labour_360d": {
+      "augmented": {
+        "base_rate": 0.2,
+        "brier": 0.14835,
+        "directional_accuracy": 0.82,
+        "false_negatives": 5,
+        "false_positives": 4,
+        "n": 50,
+        "true_positives": 5
+      },
+      "augmented_beats_trivial": true,
+      "augmented_features": 25,
+      "base": {
+        "base_rate": 0.2,
+        "brier": 0.1124,
+        "directional_accuracy": 0.86,
+        "false_negatives": 5,
+        "false_positives": 2,
+        "n": 50,
+        "true_positives": 5
+      },
+      "base_beats_trivial": true,
+      "base_features": 12,
+      "baselines": {
+        "always_base_rate_brier": 0.16,
+        "base_rate": 0.2,
+        "persistence_brier": 0.06122
+      },
+      "expected_constructs": [
+        "perceived_control",
+        "perceived_security"
+      ],
+      "partition": {
+        "holdout": 18,
+        "holdout_reads": 0,
+        "seal": "6d072013d6e3dee8",
+        "train": 64,
+        "validation": 28
+      }
+    }
+  },
+  "pooled": {
+    "augmented_score": 0.23612,
+    "base_score": 0.22664,
+    "ci": [
+      -0.02586,
+      0.00643
+    ],
+    "delta": -0.00948,
+    "dimension": "collective_block",
+    "fdr_adjusted": false,
+    "horizon_days": 0,
+    "mde": 0.01615,
+    "n_clusters": 50,
+    "n_episodes": 1,
+    "n_paired": 500,
+    "name": "POOLED_ALL_FAMILIES",
+    "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+    "p_value": 0.261,
+    "population": "US_households",
+    "pseudo_replication": true,
+    "regime": "ALL",
+    "robust": false,
+    "survives_fdr": null,
+    "too_few_episodes": true,
+    "underpowered": true,
+    "verdict": "NO_IMPROVEMENT"
+  },
+  "pooled_by_regime": {
+    "COVID_SHOCK": {
+      "augmented_score": 0.0,
+      "base_score": 0.0,
+      "ci": [
+        0.0,
+        0.0
+      ],
+      "delta": 0.0,
+      "dimension": "collective_block",
+      "fdr_adjusted": false,
+      "horizon_days": 0,
+      "mde": null,
+      "n_clusters": 0,
+      "n_episodes": 0,
+      "n_paired": 20,
+      "name": "POOLED/COVID_SHOCK",
+      "note": "20 paired forecasts; the floor is 30. A delta measured on fewer is not a weak result, it is not a result.",
+      "p_value": 1.0,
+      "population": "US_households",
+      "pseudo_replication": 0,
+      "regime": "COVID_SHOCK",
+      "robust": false,
+      "survives_fdr": null,
+      "too_few_episodes": false,
+      "underpowered": false,
+      "verdict": "INSUFFICIENT_SAMPLE"
+    },
+    "CREDIT_CRISIS": {
+      "augmented_score": 0.19837,
+      "base_score": 0.22994,
+      "ci": [
+        -0.00287,
+        0.06746
+      ],
+      "delta": 0.03158,
+      "dimension": "collective_block",
+      "fdr_adjusted": false,
+      "horizon_days": 0,
+      "mde": 0.03516,
+      "n_clusters": 8,
+      "n_episodes": 1,
+      "n_paired": 80,
+      "name": "POOLED/CREDIT_CRISIS",
+      "note": "positive point estimate, interval includes zero; consistent with no effect",
+      "p_value": 0.089,
+      "population": "US_households",
+      "pseudo_replication": true,
+      "regime": "CREDIT_CRISIS",
+      "robust": false,
+      "survives_fdr": null,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NOT_ROBUST"
+    },
+    "LOW_RATE": {
+      "augmented_score": 0.30403,
+      "base_score": 0.28043,
+      "ci": [
+        -0.04705,
+        -0.00014
+      ],
+      "delta": -0.0236,
+      "dimension": "collective_block",
+      "fdr_adjusted": false,
+      "horizon_days": 0,
+      "mde": 0.02346,
+      "n_clusters": 24,
+      "n_episodes": 1,
+      "n_paired": 240,
+      "name": "POOLED/LOW_RATE",
+      "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+      "p_value": 0.049,
+      "population": "US_households",
+      "pseudo_replication": true,
+      "regime": "LOW_RATE",
+      "robust": false,
+      "survives_fdr": null,
+      "too_few_episodes": true,
+      "underpowered": false,
+      "verdict": "NO_IMPROVEMENT"
+    },
+    "POST_CRISIS": {
+      "augmented_score": 0.11654,
+      "base_score": 0.10599,
+      "ci": [
+        -0.04359,
+        0.01408
+      ],
+      "delta": -0.01055,
+      "dimension": "collective_block",
+      "fdr_adjusted": false,
+      "horizon_days": 0,
+      "mde": 0.02883,
+      "n_clusters": 16,
+      "n_episodes": 1,
+      "n_paired": 160,
+      "name": "POOLED/POST_CRISIS",
+      "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+      "p_value": 0.53,
+      "population": "US_households",
+      "pseudo_replication": true,
+      "regime": "POST_CRISIS",
+      "robust": false,
+      "survives_fdr": null,
+      "too_few_episodes": true,
+      "underpowered": true,
+      "verdict": "NO_IMPROVEMENT"
+    }
+  },
+  "preregistration_hash": "4ae395b62fb60f85",
+  "promotion_register": {
+    "active": [
+      "financial_anxiety",
+      "future_orientation",
+      "perceived_control",
+      "perceived_security",
+      "risk_appetite",
+      "time_horizon"
+    ],
+    "by_state": {
+      "OBSERVED": [
+        "financial_anxiety",
+        "future_orientation",
+        "perceived_control",
+        "perceived_security",
+        "risk_appetite",
+        "time_horizon"
+      ]
+    },
+    "contract": "econ_construct.v1",
+    "detail": [
+      {
+        "active": true,
+        "best_delta": null,
+        "dimension": "financial_anxiety",
+        "failures": 1,
+        "passes": 0,
+        "proposed_by": "behavioural-economics",
+        "proxy": "CORCACBS,DRCCLACBS,DRSFRMACBS,PSAVERT,REVOLSL,TDSP,UMCSENT",
+        "regimes_passed": [],
+        "retired_reason": "",
+        "state": "OBSERVED",
+        "trials": [
+          {
+            "at": "2026-08-27",
+            "comparison_name": "financial_anxiety/credit_stress_360d",
+            "delta": -0.09218,
+            "horizon_days": 360,
+            "n_paired": 50,
+            "passed": false,
+            "population": "US_households",
+            "regime": "ALL",
+            "survived_fdr": false,
+            "verdict": "NO_IMPROVEMENT"
+          }
+        ],
+        "usable_in_causal_graph": false
+      },
+      {
+        "active": true,
+        "best_delta": null,
+        "dimension": "future_orientation",
+        "failures": 0,
+        "passes": 0,
+        "proposed_by": "behavioural-economics",
+        "proxy": "USACSCICP02STSAM",
+        "regimes_passed": [],
+        "retired_reason": "",
+        "state": "OBSERVED",
+        "trials": [],
+        "usable_in_causal_graph": false
+      },
+      {
+        "active": true,
+        "best_delta": null,
+        "dimension": "perceived_control",
+        "failures": 0,
+        "passes": 0,
+        "proposed_by": "behavioural-economics",
+        "proxy": "BABATOTALSAUS,JTSQUR,MICH,U6RATE",
+        "regimes_passed": [],
+        "retired_reason": "",
+        "state": "OBSERVED",
+        "trials": [],
+        "usable_in_causal_graph": false
+      },
+      {
+        "active": true,
+        "best_delta": null,
+        "dimension": "perceived_security",
+        "failures": 0,
+        "passes": 0,
+        "proposed_by": "behavioural-economics",
+        "proxy": "EMRATIO,U6RATE",
+        "regimes_passed": [],
+        "retired_reason": "",
+        "state": "OBSERVED",
+        "trials": [],
+        "usable_in_causal_graph": false
+      },
+      {
+        "active": true,
+        "best_delta": null,
+        "dimension": "risk_appetite",
+        "failures": 0,
+        "passes": 0,
+        "proposed_by": "behavioural-economics",
+        "proxy": "BOGZ1FL153064486Q",
+        "regimes_passed": [],
+        "retired_reason": "",
+        "state": "OBSERVED",
+        "trials": [],
+        "usable_in_causal_graph": false
+      },
+      {
+        "active": true,
+        "best_delta": null,
+        "dimension": "time_horizon",
+        "failures": 0,
+        "passes": 0,
+        "proposed_by": "behavioural-economics",
+        "proxy": "DGORDER,HSN1F",
+        "regimes_passed": [],
+        "retired_reason": "",
+        "state": "OBSERVED",
+        "trials": [],
+        "usable_in_causal_graph": false
+      }
+    ],
+    "promoted": [],
+    "retired": [],
+    "total": 6,
+    "usable_in_causal_graph": []
+  },
+  "robust_improvements": 0,
+  "rows": 1094,
+  "skipped": {
+    "no_outcome": 56,
+    "thin_features": 0
+  },
+  "statements": [
+    "collective_block / US_households / ALL / 180d (n=50): adding this construct did NOT improve forecast skill (delta -0.0340).",
+    "collective_block / US_households / ALL / 360d (n=50): adding this construct did NOT improve forecast skill (delta -0.0012).",
+    "collective_block / US_households / ALL / 180d (n=50): point estimate favours the augmented model (delta +0.0051) but the 95% interval [-0.0459, +0.0502] includes zero. Not evidence of value.",
+    "collective_block / US_households / ALL / 360d (n=50): adding this construct did NOT improve forecast skill (delta -0.0367).",
+    "collective_block / US_households / ALL / 180d (n=50): adding this construct did NOT improve forecast skill (delta -0.0530).",
+    "collective_block / US_households / ALL / 360d (n=50): point estimate favours the augmented model (delta +0.0248) but the 95% interval [-0.0326, +0.0841] includes zero. Not evidence of value.",
+    "collective_block / US_households / ALL / 180d (n=50): adding this construct did NOT improve forecast skill (delta -0.0064).",
+    "collective_block / US_households / ALL / 360d (n=50): point estimate favours the augmented model (delta +0.0230) but the 95% interval [-0.0283, +0.0767] includes zero. Not evidence of value.",
+    "collective_block / US_households / ALL / 180d (n=50): point estimate favours the augmented model (delta +0.0196) but the 95% interval [-0.0144, +0.0536] includes zero. Not evidence of value.",
+    "collective_block / US_households / ALL / 360d (n=50): adding this construct did NOT improve forecast skill (delta -0.0360)."
+  ],
+  "tested": 10,
+  "underpowered": 9
+}

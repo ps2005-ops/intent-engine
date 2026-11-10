@@ -1,0 +1,131 @@
+{
+ "contract": "episode_candidates.v1",
+ "as_of": "2026-08-08",
+ "observed_actions_per_actor": {
+  "Shopify": 16,
+  "Salesforce": 6,
+  "BigCommerce": 1
+ },
+ "established_objects_per_actor": {
+  "Shopify": 1
+ },
+ "candidates": [
+  {
+   "contract": "strategic_episode_candidate.v1",
+   "candidate_id": "epi_128936217734",
+   "actor_a": "Salesforce",
+   "actor_b": "Shopify",
+   "relationship_id": "rel_w5_1",
+   "competitive_object": "E-commerce platform",
+   "relationship_standing": "SUPPORTED_BUT_NOT_PERSISTED",
+   "action_history_a": 6,
+   "action_history_b": 16,
+   "established_object_count_a": 0,
+   "established_object_count_b": 1,
+   "partial_object_count": 4,
+   "temporal_overlap": true,
+   "source_maturity": "PROVISIONAL",
+   "response_observability": "BOTH_SIDES_PUBLISH",
+   "founder_relevance": "UNKNOWN",
+   "voi": 0.0,
+   "standing": "MEDIUM",
+   "reason": "both actors publish, an object is established, and their histories overlap in time; held at MEDIUM because the source family behind it is still PROVISIONAL",
+   "provenance": [
+    "observability: both actors have observed actions",
+    "overlapping histories with an established object",
+    "source maturity caps the standing"
+   ]
+  },
+  {
+   "contract": "strategic_episode_candidate.v1",
+   "candidate_id": "epi_950208942757",
+   "actor_a": "Magento",
+   "actor_b": "Shopify",
+   "relationship_id": "rel_w5_2",
+   "competitive_object": "E-commerce platform",
+   "relationship_standing": "SUPPORTED_BUT_NOT_PERSISTED",
+   "action_history_a": 0,
+   "action_history_b": 16,
+   "established_object_count_a": 0,
+   "established_object_count_b": 1,
+   "partial_object_count": 4,
+   "temporal_overlap": false,
+   "source_maturity": "PROVISIONAL",
+   "response_observability": "ONE_SIDE_SILENT",
+   "founder_relevance": "UNKNOWN",
+   "voi": 0.0,
+   "standing": "NOT_OBSERVABLE",
+   "reason": "actor_a has no observed action, so a response from them could never be seen",
+   "provenance": [
+    "observability: actor_a has no observed action, so a response from them could never be seen"
+   ]
+  },
+  {
+   "contract": "strategic_episode_candidate.v1",
+   "candidate_id": "epi_707577773102",
+   "actor_a": "Magento",
+   "actor_b": "Shopify Plus",
+   "relationship_id": "rel_w5_3",
+   "competitive_object": "E-commerce platform",
+   "relationship_standing": "SUPPORTED_BUT_NOT_PERSISTED",
+   "action_history_a": 0,
+   "action_history_b": 0,
+   "established_object_count_a": 0,
+   "established_object_count_b": 0,
+   "partial_object_count": 4,
+   "temporal_overlap": false,
+   "source_maturity": "PROVISIONAL",
+   "response_observability": "NEITHER_SIDE_PUBLISHES",
+   "founder_relevance": "UNKNOWN",
+   "voi": 0.0,
+   "standing": "NOT_OBSERVABLE",
+   "reason": "neither actor has an observed action",
+   "provenance": [
+    "observability: neither actor has an observed action"
+   ]
+  }
+ ],
+ "summary": {
+  "contract": "strategic_episode_candidate.v1",
+  "candidates": 3,
+  "by_standing": {
+   "MEDIUM": 1,
+   "NOT_OBSERVABLE": 2
+  },
+  "best_learnable": {
+   "contract": "strategic_episode_candidate.v1",
+   "candidate_id": "epi_128936217734",
+   "actor_a": "Salesforce",
+   "actor_b": "Shopify",
+   "relationship_id": "rel_w5_1",
+   "competitive_object": "E-commerce platform",
+   "relationship_standing": "SUPPORTED_BUT_NOT_PERSISTED",
+   "action_history_a": 6,
+   "action_history_b": 16,
+   "established_object_count_a": 0,
+   "established_object_count_b": 1,
+   "partial_object_count": 4,
+   "temporal_overlap": true,
+   "source_maturity": "PROVISIONAL",
+   "response_observability": "BOTH_SIDES_PUBLISH",
+   "founder_relevance": "UNKNOWN",
+   "voi": 0.0,
+   "standing": "MEDIUM",
+   "reason": "both actors publish, an object is established, and their histories overlap in time; held at MEDIUM because the source family behind it is still PROVISIONAL",
+   "provenance": [
+    "observability: both actors have observed actions",
+    "overlapping histories with an established object",
+    "source maturity caps the standing"
+   ]
+  },
+  "note": "relationship validity and response observability are separate judgements. A pair can be a real rivalry and NOT_OBSERVABLE, and ranking on validity alone sends the next wave to watch a company that does not publish."
+ },
+ "input_caveat": "The three rivalry edges are named from the checkpoint, not read from a store. `interaction_rerun.competitor_map_entries` is 0 and COMPETES_WITH has zero edges in the actor-relationship graph: the claims were produced during a wave-5 run and never persisted. That is the ranker's missing input, and it is a storage gap rather than an evidence gap.",
+ "timelines_and_sequences": {
+  "built": false,
+  "blocker": "Every observed action carries event_time = the RETRIEVAL date. Across 23 live actions there is exactly ONE distinct event time, 2026-08-08, because `action_object_acquisition` passes `event_time=document.retrieved_at` \u2014 when WE looked, not when the actor acted.",
+  "why_it_blocks": "\u00a77 asks what happened when, and \u00a78 asks for 'A followed by B within a plausible window'. Neither has meaning when every delta is zero. A timeline built on retrieval dates would order actions by the order we happened to fetch them and would look exactly like a real one.",
+  "class_of_defect": "observation time used as occurrence time \u2014 the same class as the wave-5 evidence_id hashing observed_at, and the reason event_identity exists. It survived because nothing downstream had ever ordered actions.",
+  "what_a_fix_needs": "a dated-announcement extractor: changelog entries carry '06.17' and 'July 30, 2026' in titles and list markers. That is a new pattern family with real precision risk and no negative corpus yet, so it is located and not shipped."
+ }
+}

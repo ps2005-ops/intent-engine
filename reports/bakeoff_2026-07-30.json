@@ -1,0 +1,30 @@
+[
+ {
+  "signal": "momentum_persists.v1",
+  "n": 66,
+  "declined": 18,
+  "accuracy": 0.5,
+  "verdict": "indistinguishable from 0.500"
+ },
+ {
+  "signal": "mean_reversion.v1",
+  "n": 66,
+  "declined": 18,
+  "accuracy": 0.5,
+  "verdict": "indistinguishable from 0.500"
+ },
+ {
+  "signal": "strong_trend.v1",
+  "n": 34,
+  "declined": 50,
+  "accuracy": 0.4706,
+  "verdict": "indistinguishable from 0.500"
+ },
+ {
+  "signal": "calm_trend.v1",
+  "n": 24,
+  "declined": 60,
+  "accuracy": 0.5,
+  "verdict": "indistinguishable from 0.500"
+ }
+]

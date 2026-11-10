@@ -1,0 +1,18 @@
+01:24:36 BATCH START 052436 deployed_sha=f8c183f
+01:24:36 universe=7 todo=7 per_window=10/3600s concurrency=1
+01:24:36 START Meta Platforms, Inc.
+01:24:37 NO RUN  Meta Platforms, Inc.: analyze did not open a run (HTTP 500)
+01:24:38 START Microsoft Corporation
+01:24:38 NO RUN  Microsoft Corporation: analyze did not open a run (HTTP 429)
+01:24:38 START Amazon.com, Inc.
+01:24:39 NO RUN  Amazon.com, Inc.: analyze did not open a run (HTTP 429)
+01:26:55 BATCH START 052655 deployed_sha=f8c183f
+01:26:55 universe=49 todo=49 per_window=10/3600s concurrency=1
+01:26:55 START Meta Platforms, Inc.
+01:26:56 QUOTA  Meta Platforms, Inc. deferred; sleeping 600s
+01:36:56 START Meta Platforms, Inc.
+01:36:57 NO RUN  Meta Platforms, Inc.: analyze did not open a run (HTTP 500)
+01:36:57 START Alphabet Inc.
+01:36:58 NO RUN  Alphabet Inc.: analyze did not open a run (HTTP 500)
+01:36:58 START Microsoft Corporation
+01:36:59 NO RUN  Microsoft Corporation: analyze did not open a run (HTTP 500)

@@ -1,0 +1,61 @@
+[
+  {
+    "company": "Amazon.com, Inc.",
+    "deployed_sha": "743df06",
+    "status": "READY",
+    "run_id": "01M0JSDB29G093HGPZEVSFT5PQ",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/743df06/amazon_com_inc",
+    "process_before": {
+      "boot_id": "d7df6481c13e43c7",
+      "started_at": 1787326618.1855707,
+      "uptime_seconds": 10405.9
+    },
+    "entry_domain": "",
+    "seconds": 192,
+    "first_useful": 192,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JSDB29G093HGPZEVSFT5PQ/intro",
+    "outcome": "FULL_ANALYSIS_REFRESHING",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS_REFRESHING",
+      "intro": "FULL_ANALYSIS_REFRESHING",
+      "slides": "FULL_ANALYSIS_REFRESHING",
+      "full": "FULL_ANALYSIS_REFRESHING",
+      "story": "FULL_ANALYSIS_REFRESHING",
+      "history": "FULL_ANALYSIS_REFRESHING",
+      "connect": "FULL_ANALYSIS_REFRESHING"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0JSDB29G093HGPZEVSFT5PQ/progress: timeout",
+      "GET /runs/01M0JSDB29G093HGPZEVSFT5PQ/progress: timeout"
+    ]
+  },
+  {
+    "company": "ServiceNow, Inc.",
+    "deployed_sha": "743df06",
+    "status": "FAILED",
+    "run_id": "01M0JSXAQQP5CG7ZPKTH5248EQ",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/743df06/servicenow_inc",
+    "process_before": {
+      "boot_id": "d7df6481c13e43c7",
+      "started_at": 1787326618.1855707,
+      "uptime_seconds": 10929.5
+    },
+    "entry_domain": "servicenow.com",
+    "seconds": 405,
+    "first_useful": null,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JSXAQQP5CG7ZPKTH5248EQ/progress"
+  },
+  {
+    "company": "Advanced Micro Devices, Inc.",
+    "deployed_sha": "743df06",
+    "status": "FAILED",
+    "run_id": "",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/743df06/advanced_micro_devices_inc",
+    "process_before": {},
+    "failure": "no csrf on the entry page"
+  }
+]

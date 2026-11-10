@@ -1,0 +1,16 @@
+{
+ "contract": "wave10_performance.v1",
+ "as_of": "2026-08-08",
+ "stages_ms": {
+  "action context build (entry page)": 0.0691,
+  "action context build (index refusal)": 0.001,
+  "episode candidate score": 0.0025,
+  "episode rank + summarise": 0.0026,
+  "source maturity": 0.0006,
+  "learning channel report": 0.007,
+  "url canonicalisation": 0.0026
+ },
+ "total_ms": 0.0854,
+ "note": "All wave-10 additions are in-memory work on already-retrieved documents. The index refusal is the CHEAPEST context path, because it returns before scanning the document at all.",
+ "benchmark_shape": "measured with production call shapes: contexts built against a real retrieved changelog entry, candidates scored with live action counts. Wave 9 recorded a 41-second corroboration figure that was a wrong argument list, and this run avoids repeating that."
+}

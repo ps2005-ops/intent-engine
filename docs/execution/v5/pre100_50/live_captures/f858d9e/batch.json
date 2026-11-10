@@ -1,0 +1,171 @@
+[
+  {
+    "company": "Cloudflare, Inc.",
+    "deployed_sha": "f858d9e",
+    "status": "READY",
+    "run_id": "01M0KGV5FCMVTMG0C9Q2KEP54P",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/f858d9e/cloudflare_inc",
+    "process_before": {
+      "boot_id": "09ebfe74fa56405b",
+      "started_at": 1787361572.2305908,
+      "uptime_seconds": 21.3
+    },
+    "entry_domain": "cloudflare.com",
+    "seconds": 110,
+    "first_useful": 110,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KGV5FCMVTMG0C9Q2KEP54P/intro",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS_REFRESHING",
+      "intro": "FULL_ANALYSIS_REFRESHING",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [
+      "FULL_ANALYSIS",
+      "FULL_ANALYSIS_REFRESHING"
+    ],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0KGV5FCMVTMG0C9Q2KEP54P/progress: timeout"
+    ]
+  },
+  {
+    "company": "Microsoft Corporation",
+    "deployed_sha": "f858d9e",
+    "status": "READY",
+    "run_id": "01M0KH7YVZM349D8Z7KB0N5TET",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/f858d9e/microsoft_corporation",
+    "process_before": {
+      "boot_id": "09ebfe74fa56405b",
+      "started_at": 1787361572.2305908,
+      "uptime_seconds": 441.0
+    },
+    "entry_domain": "microsoft.com",
+    "seconds": 110,
+    "first_useful": 110,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KH7YVZM349D8Z7KB0N5TET/intro",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS_REFRESHING",
+      "intro": "FULL_ANALYSIS_REFRESHING",
+      "slides": "FULL_ANALYSIS_REFRESHING",
+      "full": "FULL_ANALYSIS_REFRESHING",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [
+      "FULL_ANALYSIS",
+      "FULL_ANALYSIS_REFRESHING"
+    ],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0KH7YVZM349D8Z7KB0N5TET/progress: timeout"
+    ]
+  },
+  {
+    "company": "The Goldman Sachs Group, Inc.",
+    "deployed_sha": "f858d9e",
+    "status": "READY",
+    "run_id": "01M0KHMXCBKZBH4ZDP97RJPRH9",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/f858d9e/the_goldman_sachs_group_inc",
+    "process_before": {
+      "boot_id": "09ebfe74fa56405b",
+      "started_at": 1787361572.2305908,
+      "uptime_seconds": 865.8
+    },
+    "entry_domain": "goldmansachs.com",
+    "seconds": 203,
+    "first_useful": 203,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KHMXCBKZBH4ZDP97RJPRH9/intro",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS_REFRESHING",
+      "intro": "FULL_ANALYSIS_REFRESHING",
+      "slides": "FULL_ANALYSIS_REFRESHING",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [
+      "FULL_ANALYSIS",
+      "FULL_ANALYSIS_REFRESHING"
+    ],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0KHMXCBKZBH4ZDP97RJPRH9/progress: timeout",
+      "GET /runs/01M0KHMXCBKZBH4ZDP97RJPRH9/progress: timeout",
+      "GET /runs/01M0KHMXCBKZBH4ZDP97RJPRH9/progress: timeout"
+    ]
+  },
+  {
+    "company": "Meta Platforms, Inc.",
+    "deployed_sha": "f858d9e",
+    "status": "FAILED",
+    "run_id": "01M0KJ5VSA9GXA3K2X0GMF2ZR0",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/f858d9e/meta_platforms_inc",
+    "process_before": {
+      "boot_id": "09ebfe74fa56405b",
+      "started_at": 1787361572.2305908,
+      "uptime_seconds": 1421.4
+    },
+    "entry_domain": "",
+    "seconds": 66,
+    "first_useful": null,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KJ5VSA9GXA3K2X0GMF2ZR0/progress"
+  },
+  {
+    "company": "Amazon.com, Inc.",
+    "deployed_sha": "f858d9e",
+    "status": "FAILED",
+    "run_id": "",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/f858d9e/amazon_com_inc",
+    "process_before": {
+      "boot_id": "09ebfe74fa56405b",
+      "started_at": 1787361572.2305908,
+      "uptime_seconds": 1721.4
+    },
+    "entry_domain": "",
+    "failure": "analyze did not open a run (HTTP 500)",
+    "entry_text": "Something went wrong on our side Something went wrong on our side What did work. Your request was received and the company you entered was recorded. What did not. The analysis did not complete. Why. This is a fault in the product, not in what you entered or in the company. What to do next. Run it again. If it keeps happening, the reference below identifies this run in our logs. Run a new analysis "
+  },
+  {
+    "company": "JPMorgan Chase & Co.",
+    "deployed_sha": "f858d9e",
+    "status": "FAILED",
+    "run_id": "",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/f858d9e/jpmorgan_chase_co",
+    "process_before": {
+      "boot_id": "09ebfe74fa56405b",
+      "started_at": 1787361572.2305908,
+      "uptime_seconds": 2021.5
+    },
+    "entry_domain": "jpmorganchase.com",
+    "failure": "analyze did not open a run (HTTP 500)",
+    "entry_text": "Something went wrong on our side Something went wrong on our side What did work. Your request was received and the company you entered was recorded. What did not. The analysis did not complete. Why. This is a fault in the product, not in what you entered or in the company. What to do next. Run it again. If it keeps happening, the reference below identifies this run in our logs. Run a new analysis "
+  },
+  {
+    "company": "Caterpillar Inc.",
+    "deployed_sha": "f858d9e",
+    "status": "FAILED",
+    "run_id": "",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/f858d9e/caterpillar_inc",
+    "process_before": {
+      "boot_id": "09ebfe74fa56405b",
+      "started_at": 1787361572.2305908,
+      "uptime_seconds": 2321.5
+    },
+    "entry_domain": "caterpillar.com",
+    "failure": "analyze did not open a run (HTTP 500)",
+    "entry_text": "Something went wrong on our side Something went wrong on our side What did work. Your request was received and the company you entered was recorded. What did not. The analysis did not complete. Why. This is a fault in the product, not in what you entered or in the company. What to do next. Run it again. If it keeps happening, the reference below identifies this run in our logs. Run a new analysis "
+  }
+]

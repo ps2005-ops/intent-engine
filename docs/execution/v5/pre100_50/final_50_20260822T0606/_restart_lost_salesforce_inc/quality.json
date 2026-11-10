@@ -1,0 +1,160 @@
+{
+ "company": "Salesforce, Inc.",
+ "deployed_sha": "02f4644",
+ "outcome": "",
+ "dimensions": [
+  {
+   "dimension": "intro",
+   "surface": "intro",
+   "score": 0,
+   "why": "no passage for this dimension on the surface",
+   "passage": ""
+  },
+  {
+   "dimension": "business_model",
+   "surface": "intro",
+   "score": 0,
+   "why": "no passage for this dimension on the surface",
+   "passage": ""
+  },
+  {
+   "dimension": "revenue_drivers",
+   "surface": "story",
+   "score": 0,
+   "why": "no passage for this dimension on the surface",
+   "passage": ""
+  },
+  {
+   "dimension": "margin_drivers",
+   "surface": "story",
+   "score": 0,
+   "why": "no passage for this dimension on the surface",
+   "passage": ""
+  },
+  {
+   "dimension": "capital_intensity",
+   "surface": "brief",
+   "score": 0,
+   "why": "no passage for this dimension on the surface",
+   "passage": ""
+  },
+  {
+   "dimension": "macro",
+   "surface": "full",
+   "score": 0,
+   "why": "no passage for this dimension on the surface",
+   "passage": ""
+  },
+  {
+   "dimension": "micro",
+   "surface": "full",
+   "score": 0,
+   "why": "no passage for this dimension on the surface",
+   "passage": ""
+  },
+  {
+   "dimension": "market_belief",
+   "surface": "brief",
+   "score": 0,
+   "why": "no passage for this dimension on the surface",
+   "passage": ""
+  },
+  {
+   "dimension": "belief_challenge",
+   "surface": "brief",
+   "score": 0,
+   "why": "no passage for this dimension on the surface",
+   "passage": ""
+  },
+  {
+   "dimension": "competition",
+   "surface": "intro",
+   "score": 0,
+   "why": "no passage for this dimension on the surface",
+   "passage": ""
+  },
+  {
+   "dimension": "adversary",
+   "surface": "full",
+   "score": 0,
+   "why": "no passage for this dimension on the surface",
+   "passage": ""
+  },
+  {
+   "dimension": "impossible_hypothesis",
+   "surface": "full",
+   "score": 0,
+   "why": "no passage for this dimension on the surface",
+   "passage": ""
+  },
+  {
+   "dimension": "economic_reasoning",
+   "surface": "full",
+   "score": 0,
+   "why": "no passage for this dimension on the surface",
+   "passage": ""
+  },
+  {
+   "dimension": "recommendation",
+   "surface": "brief",
+   "score": 6,
+   "why": "present but not specific to this company",
+   "passage": "What to do next"
+  },
+  {
+   "dimension": "falsifier",
+   "surface": "brief",
+   "score": 0,
+   "why": "no passage for this dimension on the surface",
+   "passage": ""
+  },
+  {
+   "dimension": "mve",
+   "surface": "brief",
+   "score": 0,
+   "why": "no passage for this dimension on the surface",
+   "passage": ""
+  },
+  {
+   "dimension": "presentation",
+   "surface": "slides",
+   "score": 10,
+   "why": "company-specific and substantiated",
+   "passage": "Something went wrong on our side Something went wrong on our side What did work. Your request was received and the company you entered was recorded. What did not. The analysis did not complete. Why. This is a fault in the product, not in what you entered or in the company. What to do next. Run it ag"
+  },
+  {
+   "dimension": "full_analysis",
+   "surface": "full",
+   "score": 10,
+   "why": "company-specific and substantiated",
+   "passage": "Something went wrong on our side Something went wrong on our side What did work. Your request was received and the company you entered was recorded. What did not. The analysis did not complete. Why. This is a fault in the product, not in what you entered or in the company. What to do next. Run it ag"
+  },
+  {
+   "dimension": "history",
+   "surface": "history",
+   "score": 0,
+   "why": "no passage for this dimension on the surface",
+   "passage": ""
+  },
+  {
+   "dimension": "qa",
+   "surface": "qa",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "step6",
+   "surface": "connect",
+   "score": 6,
+   "why": "present but not specific to this company",
+   "passage": "internal error occurred and has been recorded (reference 6745d4675fc7)"
+  }
+ ],
+ "core_mean": 2.6,
+ "core_min": 0,
+ "core_unmeasured": [
+  "qa"
+ ],
+ "all_mean": 1.6
+}

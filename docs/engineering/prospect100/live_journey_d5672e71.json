@@ -1,0 +1,16 @@
+{
+ "deployed_commit": "d5672e714d65235b37efa73a74142589711190c3",
+ "service": "https://intent-engine-preview-bridge.onrender.com",
+ "verified": "2026-11-09",
+ "search_all_100": "see live_search_acceptance.json: 99 correct top-1, 0 wrong, 1 empty (#82 sentence)",
+ "red_canary_picked_suggestion": {"page_title": "Red Canary, Inc. is now part of Zscaler", "run_opened": false, "offers": "Analyse Zscaler instead"},
+ "hammerspace_live_run": {
+  "run_id": "01M70HE9K4G0CYFKDD4P419NZR",
+  "entry": "typed 'Hammerspace', picked the suggestion 'Hammerspace / United States / hammerspace.com'",
+  "steps": {"intro": [200, 10169], "slides": [200, 8875], "full": [200, 10556], "story": [200, 5044], "history": [200, 199], "connect": [200, 4439]},
+  "steps_note": "[HTTP status, ms to fetch] sequentially from the browser immediately after completion",
+  "foreign_company_names_found": [],
+  "answer_head": "No option is safe to commit to yet: the public record carries what this company says about itself ... every source here is published by the company itself",
+  "cites": ["AI Data Platform for HPC & AI Workloads - Hammerspace", "AI Training & Model Development | Hammerspace", "Data Assimilation | Unify Storage Without Migrating - Hammerspace"]
+ }
+}

@@ -1,0 +1,436 @@
+{
+  "DEEP": {
+    "episodes": [
+      {
+        "augmented_brier": 0.27479,
+        "base_brier": 0.2689,
+        "base_directional_calls_correct": 0.645,
+        "collective_contribution": -0.00589,
+        "contemporaneous_regimes": [
+          "INFLATION_SHOCK",
+          "LIQUIDITY_STRESS",
+          "LABOUR_DETERIORATION"
+        ],
+        "end_as_known": "1992-11-15",
+        "episode_id": "EP_198710",
+        "information_available_at": "1992-11-15",
+        "information_cutoff": "1992-11-15",
+        "n": 186,
+        "normalization": "1993-05-15",
+        "origins": 57,
+        "peak_stress": 2,
+        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+        "regime_sequence": [
+          "INFLATION_SHOCK",
+          "LIQUIDITY_STRESS",
+          "LABOUR_DETERIORATION"
+        ],
+        "resolved": true,
+        "start_as_known": "1987-10-15",
+        "trigger_evidence": {
+          "curve_slope_pp": 0.99,
+          "inflation_yoy": 0.04288,
+          "policy_change_pp": 0.17,
+          "unemployment_change_pp": -1.1
+        },
+        "verdict": "BOTH_WRONG"
+      },
+      {
+        "augmented_brier": 0.29119,
+        "base_brier": 0.31314,
+        "base_directional_calls_correct": 0.525,
+        "collective_contribution": 0.02195,
+        "contemporaneous_regimes": [
+          "LIQUIDITY_STRESS",
+          "LABOUR_DETERIORATION"
+        ],
+        "end_as_known": "2002-10-15",
+        "episode_id": "EP_200002",
+        "information_available_at": "2002-10-15",
+        "information_cutoff": "2002-10-15",
+        "n": 99,
+        "normalization": "2003-04-15",
+        "origins": 28,
+        "peak_stress": 1,
+        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+        "regime_sequence": [
+          "LIQUIDITY_STRESS",
+          "LABOUR_DETERIORATION"
+        ],
+        "resolved": true,
+        "start_as_known": "2000-02-15",
+        "trigger_evidence": {
+          "curve_slope_pp": -0.06,
+          "inflation_yoy": 0.02676,
+          "policy_change_pp": 0.15,
+          "unemployment_change_pp": -0.3
+        },
+        "verdict": "BASE_UNINFORMATIVE_LAYER_HELPED"
+      },
+      {
+        "augmented_brier": 3e-05,
+        "base_brier": 0.0001,
+        "base_directional_calls_correct": 1.0,
+        "collective_contribution": 6e-05,
+        "contemporaneous_regimes": [
+          "LABOUR_DETERIORATION"
+        ],
+        "end_as_known": "2003-07-15",
+        "episode_id": "EP_200307",
+        "information_available_at": "2003-07-15",
+        "information_cutoff": "2003-07-15",
+        "n": 3,
+        "normalization": "2004-01-15",
+        "origins": 1,
+        "peak_stress": 1,
+        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+        "regime_sequence": [
+          "LABOUR_DETERIORATION"
+        ],
+        "resolved": true,
+        "start_as_known": "2003-07-15",
+        "trigger_evidence": {
+          "curve_slope_pp": 2.39,
+          "inflation_yoy": 0.01894,
+          "policy_change_pp": 0.06,
+          "unemployment_change_pp": 0.6
+        },
+        "verdict": "BOTH_INFORMATIVE_LAYER_HELPED"
+      },
+      {
+        "augmented_brier": 0.14166,
+        "base_brier": 0.13269,
+        "base_directional_calls_correct": 0.772,
+        "collective_contribution": -0.00897,
+        "contemporaneous_regimes": [
+          "INFLATION_SHOCK",
+          "LIQUIDITY_STRESS"
+        ],
+        "end_as_known": "2007-05-15",
+        "episode_id": "EP_200511",
+        "information_available_at": "2007-05-15",
+        "information_cutoff": "2007-05-15",
+        "n": 57,
+        "normalization": "2007-11-15",
+        "origins": 15,
+        "peak_stress": 2,
+        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+        "regime_sequence": [
+          "INFLATION_SHOCK",
+          "LIQUIDITY_STRESS"
+        ],
+        "resolved": true,
+        "start_as_known": "2005-11-15",
+        "trigger_evidence": {
+          "curve_slope_pp": 0.11,
+          "inflation_yoy": 0.04742,
+          "policy_change_pp": 0.04,
+          "unemployment_change_pp": -0.5
+        },
+        "verdict": "BASE_INFORMATIVE_LAYER_HURT"
+      },
+      {
+        "augmented_brier": 0.36886,
+        "base_brier": 0.39548,
+        "base_directional_calls_correct": 0.517,
+        "collective_contribution": 0.02662,
+        "contemporaneous_regimes": [
+          "INFLATION_SHOCK",
+          "LABOUR_DETERIORATION"
+        ],
+        "end_as_known": "2010-05-15",
+        "episode_id": "EP_200801",
+        "information_available_at": "2010-05-15",
+        "information_cutoff": "2010-05-15",
+        "n": 87,
+        "normalization": "2010-11-15",
+        "origins": 29,
+        "peak_stress": 2,
+        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+        "regime_sequence": [
+          "INFLATION_SHOCK",
+          "LABOUR_DETERIORATION"
+        ],
+        "resolved": true,
+        "start_as_known": "2008-01-15",
+        "trigger_evidence": {
+          "curve_slope_pp": 1.23,
+          "inflation_yoy": 0.04373,
+          "policy_change_pp": 0.13,
+          "unemployment_change_pp": 0.6
+        },
+        "verdict": "BASE_UNINFORMATIVE_LAYER_HELPED"
+      },
+      {
+        "augmented_brier": 0.06743,
+        "base_brier": 0.0737,
+        "base_directional_calls_correct": 1.0,
+        "collective_contribution": 0.00627,
+        "contemporaneous_regimes": [
+          "CREDIT_STRESS"
+        ],
+        "end_as_known": "2018-02-15",
+        "episode_id": "EP_201706",
+        "information_available_at": "2018-02-15",
+        "information_cutoff": "2018-02-15",
+        "n": 27,
+        "normalization": "2018-08-15",
+        "origins": 9,
+        "peak_stress": 1,
+        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+        "regime_sequence": [
+          "CREDIT_STRESS"
+        ],
+        "resolved": true,
+        "start_as_known": "2017-06-15",
+        "trigger_evidence": {
+          "curve_slope_pp": 0.8,
+          "delinquency_yoy": 0.12558,
+          "inflation_yoy": 0.02176,
+          "policy_change_pp": 0.0,
+          "unemployment_change_pp": -0.4
+        },
+        "verdict": "BOTH_INFORMATIVE_LAYER_HELPED"
+      },
+      {
+        "augmented_brier": 0.20529,
+        "base_brier": 0.14232,
+        "base_directional_calls_correct": 0.819,
+        "collective_contribution": -0.06297,
+        "contemporaneous_regimes": [
+          "LABOUR_DETERIORATION",
+          "INFLATION_SHOCK",
+          "LIQUIDITY_STRESS",
+          "CREDIT_STRESS"
+        ],
+        "end_as_known": "2024-12-15",
+        "episode_id": "EP_202004",
+        "information_available_at": "2024-12-15",
+        "information_cutoff": "2024-12-15",
+        "n": 171,
+        "normalization": "2025-06-15",
+        "origins": 56,
+        "peak_stress": 3,
+        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+        "regime_sequence": [
+          "LABOUR_DETERIORATION",
+          "INFLATION_SHOCK",
+          "LIQUIDITY_STRESS",
+          "CREDIT_STRESS"
+        ],
+        "resolved": true,
+        "start_as_known": "2020-04-15",
+        "trigger_evidence": {
+          "curve_slope_pp": 0.53,
+          "delinquency_yoy": 0.02756,
+          "inflation_yoy": 0.02341,
+          "policy_change_pp": 0.0,
+          "unemployment_change_pp": 0.6
+        },
+        "verdict": "BASE_INFORMATIVE_LAYER_HURT"
+      }
+    ],
+    "layer_helped": 4,
+    "reading": "the layer improved the Brier in 4 of 7 episodes. On a coin flip you would expect about 4; this is a descriptive count, not a test -- the tests are H3-H6 and none of them was supported.",
+    "scored": 7
+  },
+  "MODERN": {
+    "episodes": [
+      {
+        "augmented_brier": 0.49906,
+        "base_brier": 0.49812,
+        "base_directional_calls_correct": 0.5,
+        "collective_contribution": -0.00094,
+        "contemporaneous_regimes": [
+          "LABOUR_DETERIORATION"
+        ],
+        "end_as_known": "2002-10-15",
+        "episode_id": "EP_200207",
+        "information_available_at": "2002-10-15",
+        "information_cutoff": "2002-10-15",
+        "n": 6,
+        "normalization": "2003-04-15",
+        "origins": 4,
+        "peak_stress": 1,
+        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+        "regime_sequence": [
+          "LABOUR_DETERIORATION"
+        ],
+        "resolved": true,
+        "start_as_known": "2002-07-15",
+        "trigger_evidence": {
+          "curve_slope_pp": 2.07,
+          "inflation_yoy": 0.01241,
+          "policy_change_pp": -0.01,
+          "unemployment_change_pp": 1.3
+        },
+        "verdict": "BOTH_WRONG"
+      },
+      {
+        "augmented_brier": 0.0,
+        "base_brier": 0.0,
+        "base_directional_calls_correct": 1.0,
+        "collective_contribution": 0.0,
+        "contemporaneous_regimes": [
+          "LABOUR_DETERIORATION"
+        ],
+        "end_as_known": "2003-07-15",
+        "episode_id": "EP_200307",
+        "information_available_at": "2003-07-15",
+        "information_cutoff": "2003-07-15",
+        "n": 2,
+        "normalization": "2004-01-15",
+        "origins": 1,
+        "peak_stress": 1,
+        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+        "regime_sequence": [
+          "LABOUR_DETERIORATION"
+        ],
+        "resolved": true,
+        "start_as_known": "2003-07-15",
+        "trigger_evidence": {
+          "curve_slope_pp": 2.39,
+          "inflation_yoy": 0.01894,
+          "policy_change_pp": 0.06,
+          "unemployment_change_pp": 0.6
+        },
+        "verdict": "BOTH_INFORMATIVE_LAYER_HELPED"
+      },
+      {
+        "augmented_brier": 0.17531,
+        "base_brier": 0.20276,
+        "base_directional_calls_correct": 0.658,
+        "collective_contribution": 0.02744,
+        "contemporaneous_regimes": [
+          "INFLATION_SHOCK",
+          "LIQUIDITY_STRESS"
+        ],
+        "end_as_known": "2007-05-15",
+        "episode_id": "EP_200511",
+        "information_available_at": "2007-05-15",
+        "information_cutoff": "2007-05-15",
+        "n": 38,
+        "normalization": "2007-11-15",
+        "origins": 15,
+        "peak_stress": 2,
+        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+        "regime_sequence": [
+          "INFLATION_SHOCK",
+          "LIQUIDITY_STRESS"
+        ],
+        "resolved": true,
+        "start_as_known": "2005-11-15",
+        "trigger_evidence": {
+          "curve_slope_pp": 0.11,
+          "inflation_yoy": 0.04742,
+          "policy_change_pp": 0.04,
+          "unemployment_change_pp": -0.5
+        },
+        "verdict": "BOTH_INFORMATIVE_LAYER_HELPED"
+      },
+      {
+        "augmented_brier": 0.23151,
+        "base_brier": 0.20675,
+        "base_directional_calls_correct": 0.776,
+        "collective_contribution": -0.02476,
+        "contemporaneous_regimes": [
+          "INFLATION_SHOCK",
+          "LABOUR_DETERIORATION"
+        ],
+        "end_as_known": "2010-05-15",
+        "episode_id": "EP_200801",
+        "information_available_at": "2010-05-15",
+        "information_cutoff": "2010-05-15",
+        "n": 58,
+        "normalization": "2010-11-15",
+        "origins": 29,
+        "peak_stress": 2,
+        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+        "regime_sequence": [
+          "INFLATION_SHOCK",
+          "LABOUR_DETERIORATION"
+        ],
+        "resolved": true,
+        "start_as_known": "2008-01-15",
+        "trigger_evidence": {
+          "curve_slope_pp": 1.23,
+          "inflation_yoy": 0.04373,
+          "policy_change_pp": 0.13,
+          "unemployment_change_pp": 0.6
+        },
+        "verdict": "BASE_INFORMATIVE_LAYER_HURT"
+      },
+      {
+        "augmented_brier": 0.27704,
+        "base_brier": 0.14226,
+        "base_directional_calls_correct": 0.778,
+        "collective_contribution": -0.13479,
+        "contemporaneous_regimes": [
+          "CREDIT_STRESS"
+        ],
+        "end_as_known": "2018-02-15",
+        "episode_id": "EP_201706",
+        "information_available_at": "2018-02-15",
+        "information_cutoff": "2018-02-15",
+        "n": 18,
+        "normalization": "2018-08-15",
+        "origins": 9,
+        "peak_stress": 1,
+        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+        "regime_sequence": [
+          "CREDIT_STRESS"
+        ],
+        "resolved": true,
+        "start_as_known": "2017-06-15",
+        "trigger_evidence": {
+          "curve_slope_pp": 0.8,
+          "delinquency_yoy": 0.12558,
+          "inflation_yoy": 0.02176,
+          "policy_change_pp": 0.0,
+          "unemployment_change_pp": -0.4
+        },
+        "verdict": "BASE_INFORMATIVE_LAYER_HURT"
+      },
+      {
+        "augmented_brier": 0.12095,
+        "base_brier": 0.1366,
+        "base_directional_calls_correct": 0.842,
+        "collective_contribution": 0.01564,
+        "contemporaneous_regimes": [
+          "LABOUR_DETERIORATION",
+          "INFLATION_SHOCK",
+          "LIQUIDITY_STRESS",
+          "CREDIT_STRESS"
+        ],
+        "end_as_known": "2024-12-15",
+        "episode_id": "EP_202004",
+        "information_available_at": "2024-12-15",
+        "information_cutoff": "2024-12-15",
+        "n": 114,
+        "normalization": "2025-06-15",
+        "origins": 56,
+        "peak_stress": 3,
+        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+        "regime_sequence": [
+          "LABOUR_DETERIORATION",
+          "INFLATION_SHOCK",
+          "LIQUIDITY_STRESS",
+          "CREDIT_STRESS"
+        ],
+        "resolved": true,
+        "start_as_known": "2020-04-15",
+        "trigger_evidence": {
+          "curve_slope_pp": 0.53,
+          "delinquency_yoy": 0.02756,
+          "inflation_yoy": 0.02341,
+          "policy_change_pp": 0.0,
+          "unemployment_change_pp": 0.6
+        },
+        "verdict": "BOTH_INFORMATIVE_LAYER_HELPED"
+      }
+    ],
+    "layer_helped": 2,
+    "reading": "the layer improved the Brier in 2 of 6 episodes. On a coin flip you would expect about 3; this is a descriptive count, not a test -- the tests are H3-H6 and none of them was supported.",
+    "scored": 6
+  }
+}

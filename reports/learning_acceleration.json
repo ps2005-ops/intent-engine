@@ -1,0 +1,22 @@
+{
+  "abstentions": 36,
+  "comparisons": 60,
+  "damage": 0,
+  "drivers_moved": [
+    "BAA10Y",
+    "CPIAUCSL",
+    "HOUST",
+    "MORTGAGE30US",
+    "PERMIT",
+    "T10Y3M"
+  ],
+  "material_deltas": 24,
+  "stagnation": [
+    {
+      "evidence": "6/10 drivers moved, 24/60 decisions changed",
+      "kind": "LEGITIMATE_STABILITY",
+      "next_diagnostic": "none required; re-check next cycle",
+      "reason": "every producer advanced, evidence was considered, and decisions changed where the state bore on them"
+    }
+  ]
+}

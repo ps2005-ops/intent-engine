@@ -1,0 +1,41 @@
+{
+  "as_of": "2026-08-27",
+  "ledger": {
+    "all_seven_hold": true,
+    "contract": "econ_forward_ledger.v1",
+    "due_now": 0,
+    "expectations": 13,
+    "open": 13,
+    "path": "reports/real_forward_expectations.jsonl",
+    "records": 25,
+    "resolved": 0
+  },
+  "opened": [],
+  "skipped": [
+    {
+      "relation": "DFF->MORTGAGE30US",
+      "why": "state CANDIDATE"
+    },
+    {
+      "relation": "MORTGAGE30US->PERMIT",
+      "why": "already covered by an open expectation"
+    },
+    {
+      "relation": "PERMIT->HOUST",
+      "why": "state CANDIDATE"
+    },
+    {
+      "relation": "BAA10Y->INDPRO",
+      "why": "state CANDIDATE"
+    },
+    {
+      "relation": "T10Y3M->BAA10Y",
+      "why": "state CANDIDATE"
+    },
+    {
+      "relation": "UNRATE->PCEC96",
+      "why": "state CANDIDATE"
+    }
+  ],
+  "trigger": 0.05
+}

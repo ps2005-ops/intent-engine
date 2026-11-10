@@ -1,0 +1,85 @@
+{
+  "company": "Freeport-McMoRan Inc.",
+  "deployed_sha": "743df06",
+  "run_id": "01M0JRA4ETHXPZTJW8PGFR1RKH",
+  "analysis_seconds": 469,
+  "stage_transitions": [
+    {
+      "t": 2.5,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Freeport-McMoRan Inc. FCX \u00b7 fcx.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence wo",
+      "status": 200,
+      "html_bytes": 17015
+    },
+    {
+      "t": 83.7,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17015,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "cf-cache-status": "DYNAMIC",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JRA4ETHXPZTJW8PGFR1RKH/progress",
+      "head": ""
+    },
+    {
+      "t": 94.1,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Freeport-McMoRan Inc. FCX \u00b7 fcx.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence wo",
+      "status": 200,
+      "html_bytes": 17018
+    },
+    {
+      "t": 145.3,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Freeport-McMoRan Inc. FCX \u00b7 fcx.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence d",
+      "status": 200,
+      "html_bytes": 17013
+    },
+    {
+      "t": 274.3,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17013,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "cf-cache-status": "DYNAMIC",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JRA4ETHXPZTJW8PGFR1RKH/progress",
+      "head": ""
+    },
+    {
+      "t": 468.9,
+      "text": "Freeport-McMoRan Inc. \u2014 the decision Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Freeport-McMoRan Inc. The answer No strategic reading of Freeport-McMoRan Inc. cleared the evidence bar, so none is asserted here. That absence is itself the finding: no curated transition pattern matched this ",
+      "status": 200,
+      "html_bytes": 28654
+    }
+  ],
+  "route_seconds": {
+    "run": 22.79,
+    "intro": 5.71,
+    "slides": 8.27,
+    "full": 12.74,
+    "story": 6.17,
+    "history": 0.27,
+    "connect": 4.32
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "d7df6481c13e43c7",
+    "started_at": 1787326618.1855707,
+    "uptime_seconds": 9251.5
+  },
+  "process_after": {
+    "boot_id": "d7df6481c13e43c7",
+    "started_at": 1787326618.1855707,
+    "uptime_seconds": 9939.4
+  },
+  "errors": [
+    "GET /runs/01M0JRA4ETHXPZTJW8PGFR1RKH/progress: timeout",
+    "GET /runs/01M0JRA4ETHXPZTJW8PGFR1RKH/progress: timeout",
+    "GET /runs/01M0JRA4ETHXPZTJW8PGFR1RKH/progress: timeout",
+    "GET /runs/01M0JRA4ETHXPZTJW8PGFR1RKH/progress: timeout",
+    "GET /runs/01M0JRA4ETHXPZTJW8PGFR1RKH/progress: timeout"
+  ]
+}

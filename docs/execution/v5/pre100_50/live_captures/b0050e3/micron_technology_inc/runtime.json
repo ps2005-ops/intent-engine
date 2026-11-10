@@ -1,0 +1,57 @@
+{
+  "company": "Micron Technology, Inc.",
+  "deployed_sha": "b0050e3",
+  "run_id": "01M0J514BBV2N3NP1N5J92WK83",
+  "analysis_seconds": 155,
+  "stage_transitions": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Micron Technology, Inc. MU \u00b7 micron.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidenc",
+      "status": 200,
+      "html_bytes": 17018
+    },
+    {
+      "t": 83.8,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17019,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J514BBV2N3NP1N5J92WK83/progress",
+      "head": ""
+    },
+    {
+      "t": 154.8,
+      "text": "Micron Technology, Inc. \u2014 the decision Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Micron Technology, Inc. For an overview of our business, see Part I, Item 1. AI-driven demand is accelerating and is outpacing industry supply. The answer Across the public record for Micron Technology, Inc.,",
+      "status": 200,
+      "html_bytes": 32079
+    }
+  ],
+  "route_seconds": {
+    "run": 2.04,
+    "intro": 10.24,
+    "slides": 9.02,
+    "full": 2.55,
+    "story": 7.52,
+    "history": 0.27,
+    "connect": 5.13
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "a66b8bb687154bfa",
+    "started_at": 1787314134.5251167,
+    "uptime_seconds": 1519.6
+  },
+  "process_after": {
+    "boot_id": "a66b8bb687154bfa",
+    "started_at": 1787314134.5251167,
+    "uptime_seconds": 1867.4
+  },
+  "errors": [
+    "GET /runs/01M0J514BBV2N3NP1N5J92WK83/progress: timeout",
+    "GET /runs/01M0J514BBV2N3NP1N5J92WK83/progress: timeout"
+  ]
+}

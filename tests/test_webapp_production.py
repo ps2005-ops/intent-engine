@@ -29,8 +29,12 @@ def test_server_startup_smoke(tmp_path):
         with urllib.request.urlopen(
                 f"http://127.0.0.1:{port}/", timeout=5) as resp:
             body = resp.read().decode()
-            # the landing page serves its actual job: the analysis form
-            assert 'action="/analyze"' in body
+            # The landing page serves its actual job. That job is no longer
+            # the analysis form -- the form moved to /demo -- it is telling a
+            # visitor what this is and giving them a way in. A real page,
+            # rendered from a real server, not just the health endpoints.
+            assert "<h1" in body
+            assert "/login" in body
     finally:
         server.shutdown()
         server.server_close()

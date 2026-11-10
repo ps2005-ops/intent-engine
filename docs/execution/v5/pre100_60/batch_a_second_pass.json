@@ -1,0 +1,750 @@
+[
+  {
+    "company": "Meta Platforms, Inc.",
+    "cik": "1326801",
+    "ticker": "META",
+    "reliability": {
+      "connection_reset": 0,
+      "quota_block": false,
+      "retry_required": 0,
+      "manual_recovery": 0
+    },
+    "blocked_external": true,
+    "blocked_sources": [],
+    "run_id": "01M09Z896GA620CSBXEA5847Q3",
+    "seconds": 39,
+    "auto_advanced": false,
+    "landed_on": null,
+    "claimed_failure": true,
+    "failure_text": "This analysis stopped early Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo This analysis stopped early We stopped before there was anything worth showing you. No approved source could be retrieved (rate limited). Public sites can refuse automated access or require JavaScript; a failed retrieval is not evidence of real-world absence. Analyse a different company",
+    "steps": {
+      "intro": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09Z896GA620CSBXEA5847Q3/intro",
+        "chars": 775,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "slides": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09Z896GA620CSBXEA5847Q3/slides",
+        "chars": 775,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "full": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09Z896GA620CSBXEA5847Q3/full",
+        "chars": 775,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "story": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09Z896GA620CSBXEA5847Q3/story",
+        "chars": 5217,
+        "absence": []
+      },
+      "history": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09Z896GA620CSBXEA5847Q3/history",
+        "chars": 775,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "connect": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09Z896GA620CSBXEA5847Q3/connect",
+        "chars": 775,
+        "absence": [
+          "could not be completed"
+        ]
+      }
+    },
+    "intro_head": "Analysis could not be completed Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo This analysis could not be completed Run 01M09Z896GA620CSBXEA5847Q3 did not produce a report because no approved source could be retrieved. There is no result to show \u2014 we do not invent one. Public websites can refuse automated access, rate-limit requests, or require JavaScript to render. A failed retrieval is not evidence that anything is missing in the real world. What happened to each source SEC 10-K (2026-01-29) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) SEC 10-Q (2026-07-30) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) SEC 8-K (2026-07-29) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) Start a new analysis",
+    "position_sentence": "",
+    "model_sentence": "",
+    "competition": {
+      "basis_note": "",
+      "rows": []
+    },
+    "belief": "",
+    "history_paths": [],
+    "history_vintages": [
+      "2026"
+    ],
+    "connect_text": "Analysis could not be completed Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo This analysis could not be completed Run 01M09Z896GA620CSBXEA5847Q3 did not produce a report because no approved source could be retrieved. There is no result to show \u2014 we do not invent one. Public websites can refuse automated access, rate-limit requests, or require JavaScript to render. A failed retrieval is not evidence that anything is missing in the real world. What happened to each source SEC 10-K (2026-01-29) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) SEC 10-Q (2026-07-30) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) SEC 8-K (2026-07-29) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) Start a new analysis",
+    "qa": {
+      "What should management do?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. What should management do? I am not going to give you a strategic read on this company, because the public evidence does not support one \u2014 the same reason the summary above withheld it. Why this matters What can be established is what a customer, partner or investor can verify from outside. That is a different and smaller question, and it is answerable. Decision affected Whether to publish more verifiable proof, or accept that every buyer conversation starts from zero. What could change this answer Independent coverage, dated customer evidence, or public pricing would all move this. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "Why now?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. Why now? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What would prove this wrong?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. What would prove this wrong? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What's the biggest risk?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. What's the biggest risk? revenue growth is not disclosed at the granularity the decision needs. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "Who's the real competitor?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. Who's the real competitor? The customer's own engineering: The customer's own engineering gets funded for one quarter, ships something that works, and then meets the maintenance cost nobody budgeted. Watch Build projects appearing in the accounts with the largest engineering teams first.; Renewing nothing and keeping the current process: This reasserts itself every time a budget cycle tightens, without anyone choosing it. Watch The share of evaluations reaching a decision at all. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What does the market believe?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. What does the market believe? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What's the weakest assumption?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. What's the weakest assumption? There is not enough public evidence to answer that confidently. Evidence Strongest. No independent source was found; everything rests on the company's own material. Weakest. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What impossible hypothesis should we test?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. What impossible hypothesis should we test? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What should we measure next?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. What should we measure next? I am not going to give you a strategic read on this company, because the public evidence does not support one \u2014 the same reason the summary above withheld it. Why this matters What can be established is what a customer, partner or investor can verify from outside. That is a different and smaller question, and it is answerable. Decision affected Whether to publish more verifiable proof, or accept that every buyer conversation starts from zero. What could change this answer Independent coverage, dated customer evidence, or public pricing would all move this. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What would you tell the board?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. What would you tell the board? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      }
+    },
+    "transport_errors": []
+  },
+  {
+    "company": "Walmart Inc.",
+    "cik": "104169",
+    "ticker": "WMT",
+    "reliability": {
+      "connection_reset": 0,
+      "quota_block": false,
+      "retry_required": 0,
+      "manual_recovery": 0
+    },
+    "blocked_external": true,
+    "blocked_sources": [],
+    "run_id": "01M09ZDBGWRH9J59788MJB69DZ",
+    "seconds": 9,
+    "auto_advanced": false,
+    "landed_on": null,
+    "claimed_failure": true,
+    "failure_text": "This analysis stopped early Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo This analysis stopped early We stopped before there was anything worth showing you. No approved source could be retrieved (rate limited). Public sites can refuse automated access or require JavaScript; a failed retrieval is not evidence of real-world absence. Analyse a different company",
+    "steps": {
+      "intro": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZDBGWRH9J59788MJB69DZ/intro",
+        "chars": 775,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "slides": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZDBGWRH9J59788MJB69DZ/slides",
+        "chars": 775,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "full": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZDBGWRH9J59788MJB69DZ/full",
+        "chars": 775,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "story": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZDBGWRH9J59788MJB69DZ/story",
+        "chars": 5167,
+        "absence": []
+      },
+      "history": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZDBGWRH9J59788MJB69DZ/history",
+        "chars": 775,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "connect": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZDBGWRH9J59788MJB69DZ/connect",
+        "chars": 775,
+        "absence": [
+          "could not be completed"
+        ]
+      }
+    },
+    "intro_head": "Analysis could not be completed Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo This analysis could not be completed Run 01M09ZDBGWRH9J59788MJB69DZ did not produce a report because no approved source could be retrieved. There is no result to show \u2014 we do not invent one. Public websites can refuse automated access, rate-limit requests, or require JavaScript to render. A failed retrieval is not evidence that anything is missing in the real world. What happened to each source SEC 10-K (2026-03-13) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) SEC 10-Q (2026-05-29) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) SEC 8-K (2026-06-05) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) Start a new analysis",
+    "position_sentence": "",
+    "model_sentence": "",
+    "competition": {
+      "basis_note": "",
+      "rows": []
+    },
+    "belief": "",
+    "history_paths": [],
+    "history_vintages": [
+      "2026"
+    ],
+    "connect_text": "Analysis could not be completed Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo This analysis could not be completed Run 01M09ZDBGWRH9J59788MJB69DZ did not produce a report because no approved source could be retrieved. There is no result to show \u2014 we do not invent one. Public websites can refuse automated access, rate-limit requests, or require JavaScript to render. A failed retrieval is not evidence that anything is missing in the real world. What happened to each source SEC 10-K (2026-03-13) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) SEC 10-Q (2026-05-29) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) SEC 8-K (2026-06-05) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) Start a new analysis",
+    "qa": {
+      "What should management do?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Walmart Inc. What should management do? I am not going to give you a strategic read on this company, because the public evidence does not support one \u2014 the same reason the summary above withheld it. Why this matters What can be established is what a customer, partner or investor can verify from outside. That is a different and smaller question, and it is answerable. Decision affected Whether to publish more verifiable proof, or accept that every buyer conversation starts from zero. What could change this answer Independent coverage, dated customer evidence, or public pricing would all move this. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "Why now?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Walmart Inc. Why now? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What would prove this wrong?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Walmart Inc. What would prove this wrong? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What's the biggest risk?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Walmart Inc. What's the biggest risk? the size of the effect is not disclosed. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "Who's the real competitor?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Walmart Inc. Who's the real competitor? No competitor has been selected for this company from the evidence. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What does the market believe?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Walmart Inc. What does the market believe? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What's the weakest assumption?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Walmart Inc. What's the weakest assumption? There is not enough public evidence to answer that confidently. Evidence Strongest. No independent source was found; everything rests on the company's own material. Weakest. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What impossible hypothesis should we test?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Walmart Inc. What impossible hypothesis should we test? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What should we measure next?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Walmart Inc. What should we measure next? I am not going to give you a strategic read on this company, because the public evidence does not support one \u2014 the same reason the summary above withheld it. Why this matters What can be established is what a customer, partner or investor can verify from outside. That is a different and smaller question, and it is answerable. Decision affected Whether to publish more verifiable proof, or accept that every buyer conversation starts from zero. What could change this answer Independent coverage, dated customer evidence, or public pricing would all move this. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What would you tell the board?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Walmart Inc. What would you tell the board? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      }
+    },
+    "transport_errors": []
+  },
+  {
+    "company": "NVIDIA Corporation",
+    "cik": "1045810",
+    "ticker": "NVDA",
+    "reliability": {
+      "connection_reset": 0,
+      "quota_block": false,
+      "retry_required": 0,
+      "manual_recovery": 0
+    },
+    "blocked_external": true,
+    "blocked_sources": [],
+    "run_id": "01M09ZGJA801G532NZ7SAA262T",
+    "seconds": 13,
+    "auto_advanced": false,
+    "landed_on": null,
+    "claimed_failure": true,
+    "failure_text": "This analysis stopped early Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo This analysis stopped early We stopped before there was anything worth showing you. No approved source could be retrieved (rate limited). Public sites can refuse automated access or require JavaScript; a failed retrieval is not evidence of real-world absence. Analyse a different company",
+    "steps": {
+      "intro": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZGJA801G532NZ7SAA262T/intro",
+        "chars": 775,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "slides": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZGJA801G532NZ7SAA262T/slides",
+        "chars": 775,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "full": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZGJA801G532NZ7SAA262T/full",
+        "chars": 775,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "story": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZGJA801G532NZ7SAA262T/story",
+        "chars": 5017,
+        "absence": []
+      },
+      "history": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZGJA801G532NZ7SAA262T/history",
+        "chars": 775,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "connect": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZGJA801G532NZ7SAA262T/connect",
+        "chars": 775,
+        "absence": [
+          "could not be completed"
+        ]
+      }
+    },
+    "intro_head": "Analysis could not be completed Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo This analysis could not be completed Run 01M09ZGJA801G532NZ7SAA262T did not produce a report because no approved source could be retrieved. There is no result to show \u2014 we do not invent one. Public websites can refuse automated access, rate-limit requests, or require JavaScript to render. A failed retrieval is not evidence that anything is missing in the real world. What happened to each source SEC 10-K (2026-02-25) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) SEC 10-Q (2026-05-20) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) SEC 8-K (2026-08-17) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) Start a new analysis",
+    "position_sentence": "",
+    "model_sentence": "",
+    "competition": {
+      "basis_note": "",
+      "rows": []
+    },
+    "belief": "",
+    "history_paths": [],
+    "history_vintages": [
+      "2026"
+    ],
+    "connect_text": "Analysis could not be completed Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo This analysis could not be completed Run 01M09ZGJA801G532NZ7SAA262T did not produce a report because no approved source could be retrieved. There is no result to show \u2014 we do not invent one. Public websites can refuse automated access, rate-limit requests, or require JavaScript to render. A failed retrieval is not evidence that anything is missing in the real world. What happened to each source SEC 10-K (2026-02-25) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) SEC 10-Q (2026-05-20) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) SEC 8-K (2026-08-17) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) Start a new analysis",
+    "qa": {
+      "What should management do?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NVIDIA Corporation What should management do? I am not going to give you a strategic read on this company, because the public evidence does not support one \u2014 the same reason the summary above withheld it. Why this matters What can be established is what a customer, partner or investor can verify from outside. That is a different and smaller question, and it is answerable. Decision affected Whether to publish more verifiable proof, or accept that every buyer conversation starts from zero. What could change this answer Independent coverage, dated customer evidence, or public pricing would all move this. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "Why now?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NVIDIA Corporation Why now? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What would prove this wrong?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NVIDIA Corporation What would prove this wrong? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What's the biggest risk?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NVIDIA Corporation What's the biggest risk? unit volume and mix is not disclosed at the granularity the decision needs. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "Who's the real competitor?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NVIDIA Corporation Who's the real competitor? No competitor has been selected for this company from the evidence. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What does the market believe?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NVIDIA Corporation What does the market believe? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What's the weakest assumption?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NVIDIA Corporation What's the weakest assumption? There is not enough public evidence to answer that confidently. Evidence Strongest. No independent source was found; everything rests on the company's own material. Weakest. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What impossible hypothesis should we test?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NVIDIA Corporation What impossible hypothesis should we test? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What should we measure next?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NVIDIA Corporation What should we measure next? I am not going to give you a strategic read on this company, because the public evidence does not support one \u2014 the same reason the summary above withheld it. Why this matters What can be established is what a customer, partner or investor can verify from outside. That is a different and smaller question, and it is answerable. Decision affected Whether to publish more verifiable proof, or accept that every buyer conversation starts from zero. What could change this answer Independent coverage, dated customer evidence, or public pricing would all move this. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What would you tell the board?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NVIDIA Corporation What would you tell the board? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      }
+    },
+    "transport_errors": []
+  },
+  {
+    "company": "Amazon.com, Inc.",
+    "cik": "1018724",
+    "ticker": "AMZN",
+    "reliability": {
+      "connection_reset": 0,
+      "quota_block": false,
+      "retry_required": 0,
+      "manual_recovery": 0
+    },
+    "blocked_external": true,
+    "blocked_sources": [],
+    "run_id": "01M09ZM4E2F51C5G766TQWKB0R",
+    "seconds": 13,
+    "auto_advanced": false,
+    "landed_on": null,
+    "claimed_failure": true,
+    "failure_text": "This analysis stopped early Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo This analysis stopped early We stopped before there was anything worth showing you. No approved source could be retrieved (rate limited). Public sites can refuse automated access or require JavaScript; a failed retrieval is not evidence of real-world absence. Analyse a different company",
+    "steps": {
+      "intro": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZM4E2F51C5G766TQWKB0R/intro",
+        "chars": 775,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "slides": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZM4E2F51C5G766TQWKB0R/slides",
+        "chars": 775,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "full": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZM4E2F51C5G766TQWKB0R/full",
+        "chars": 775,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "story": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZM4E2F51C5G766TQWKB0R/story",
+        "chars": 5181,
+        "absence": []
+      },
+      "history": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZM4E2F51C5G766TQWKB0R/history",
+        "chars": 775,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "connect": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZM4E2F51C5G766TQWKB0R/connect",
+        "chars": 775,
+        "absence": [
+          "could not be completed"
+        ]
+      }
+    },
+    "intro_head": "Analysis could not be completed Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo This analysis could not be completed Run 01M09ZM4E2F51C5G766TQWKB0R did not produce a report because no approved source could be retrieved. There is no result to show \u2014 we do not invent one. Public websites can refuse automated access, rate-limit requests, or require JavaScript to render. A failed retrieval is not evidence that anything is missing in the real world. What happened to each source SEC 10-K (2026-02-06) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) SEC 10-Q (2026-07-31) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) SEC 8-K (2026-07-30) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) Start a new analysis",
+    "position_sentence": "",
+    "model_sentence": "",
+    "competition": {
+      "basis_note": "",
+      "rows": []
+    },
+    "belief": "",
+    "history_paths": [],
+    "history_vintages": [
+      "2026"
+    ],
+    "connect_text": "Analysis could not be completed Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo This analysis could not be completed Run 01M09ZM4E2F51C5G766TQWKB0R did not produce a report because no approved source could be retrieved. There is no result to show \u2014 we do not invent one. Public websites can refuse automated access, rate-limit requests, or require JavaScript to render. A failed retrieval is not evidence that anything is missing in the real world. What happened to each source SEC 10-K (2026-02-06) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) SEC 10-Q (2026-07-31) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) SEC 8-K (2026-07-30) \u2014 rate limited : the site rate-limited automated requests (HTTP 429) Start a new analysis",
+    "qa": {
+      "What should management do?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. What should management do? I am not going to give you a strategic read on this company, because the public evidence does not support one \u2014 the same reason the summary above withheld it. Why this matters What can be established is what a customer, partner or investor can verify from outside. That is a different and smaller question, and it is answerable. Decision affected Whether to publish more verifiable proof, or accept that every buyer conversation starts from zero. What could change this answer Independent coverage, dated customer evidence, or public pricing would all move this. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "Why now?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. Why now? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What would prove this wrong?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. What would prove this wrong? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What's the biggest risk?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. What's the biggest risk? the size of the effect is not disclosed. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "Who's the real competitor?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. Who's the real competitor? The shopper buying the same basket somewhere cheaper: The shopper buying the same basket somewhere cheaper does not respond at all, because it is not watching this market \u2014 which is what makes it dangerous. Watch The substitute's share of the job rising in accounts where our usage is flat.; The supplier selling to the shopper directly: The supplier selling to the shopper directly reaches the customer directly and keeps the relationship, whether or not the economics are better. Watch Direct volume growing at the channel's expense in the same cohort. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What does the market believe?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. What does the market believe? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What's the weakest assumption?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. What's the weakest assumption? There is not enough public evidence to answer that confidently. Evidence Strongest. No independent source was found; everything rests on the company's own material. Weakest. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What impossible hypothesis should we test?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. What impossible hypothesis should we test? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What should we measure next?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. What should we measure next? I am not going to give you a strategic read on this company, because the public evidence does not support one \u2014 the same reason the summary above withheld it. Why this matters What can be established is what a customer, partner or investor can verify from outside. That is a different and smaller question, and it is answerable. Decision affected Whether to publish more verifiable proof, or accept that every buyer conversation starts from zero. What could change this answer Independent coverage, dated customer evidence, or public pricing would all move this. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What would you tell the board?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. What would you tell the board? There is not enough public evidence to answer that confidently. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      }
+    },
+    "transport_errors": []
+  },
+  {
+    "company": "JPMorgan Chase & Co.",
+    "cik": "19617",
+    "ticker": "JPM",
+    "reliability": {
+      "connection_reset": 0,
+      "quota_block": false,
+      "retry_required": 0,
+      "manual_recovery": 0
+    },
+    "blocked_external": false,
+    "blocked_sources": [],
+    "run_id": "01M09ZQT7W00QMD75P21TYP08P",
+    "seconds": 502,
+    "auto_advanced": false,
+    "landed_on": null,
+    "claimed_failure": true,
+    "failure_text": "This analysis could not be completed Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo This analysis could not be completed This analysis could not be completed, so there is no result to open. No approved source could be retrieved, so there was not enough evidence to produce a report. See the failure details \u00b7 Start a new analysis",
+    "steps": {
+      "intro": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZQT7W00QMD75P21TYP08P/intro",
+        "chars": 474,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "slides": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZQT7W00QMD75P21TYP08P/slides",
+        "chars": 474,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "full": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZQT7W00QMD75P21TYP08P/full",
+        "chars": 474,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "story": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZQT7W00QMD75P21TYP08P/story",
+        "chars": 4931,
+        "absence": []
+      },
+      "history": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZQT7W00QMD75P21TYP08P/history",
+        "chars": 474,
+        "absence": [
+          "could not be completed"
+        ]
+      },
+      "connect": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M09ZQT7W00QMD75P21TYP08P/connect",
+        "chars": 474,
+        "absence": [
+          "could not be completed"
+        ]
+      }
+    },
+    "intro_head": "Analysis could not be completed Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo This analysis could not be completed Run 01M09ZQT7W00QMD75P21TYP08P did not produce a report because no approved source could be retrieved. There is no result to show \u2014 we do not invent one. Public websites can refuse automated access, rate-limit requests, or require JavaScript to render. A failed retrieval is not evidence that anything is missing in the real world. Start a new analysis",
+    "position_sentence": "",
+    "model_sentence": "",
+    "competition": {
+      "basis_note": "",
+      "rows": []
+    },
+    "belief": "",
+    "history_paths": [],
+    "history_vintages": [],
+    "connect_text": "Analysis could not be completed Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo This analysis could not be completed Run 01M09ZQT7W00QMD75P21TYP08P did not produce a report because no approved source could be retrieved. There is no result to show \u2014 we do not invent one. Public websites can refuse automated access, rate-limit requests, or require JavaScript to render. A failed retrieval is not evidence that anything is missing in the real world. Start a new analysis",
+    "qa": {
+      "What should management do?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What should management do? A supported reading of JPMorgan Chase & Co. exists and is set out on the Executive X-Ray. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "Why now?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. Why now? A supported reading of JPMorgan Chase & Co. exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. This particular question is not answerable from what this run retrieved. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What would prove this wrong?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What would prove this wrong? A supported reading of JPMorgan Chase & Co. exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. This particular question is not answerable from what this run retrieved. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What's the biggest risk?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What's the biggest risk? net interest margin or take rate is not disclosed at the granularity the decision needs. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "Who's the real competitor?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. Who's the real competitor? No competitor has been selected for this company from the evidence. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What does the market believe?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What does the market believe? A supported reading of JPMorgan Chase & Co. exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. This particular question is not answerable from what this run retrieved. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What's the weakest assumption?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What's the weakest assumption? A supported reading of JPMorgan Chase & Co. exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. This particular question is not answerable from what this run retrieved. Evidence Strongest. No independent source was found; everything rests on the company's own material. Weakest. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What impossible hypothesis should we test?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What impossible hypothesis should we test? A supported reading of JPMorgan Chase & Co. exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. This particular question is not answerable from what this run retrieved. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What should we measure next?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What should we measure next? A supported reading of JPMorgan Chase & Co. exists and is set out on the Executive X-Ray. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What would you tell the board?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What would you tell the board? A supported reading of JPMorgan Chase & Co. exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. This particular question is not answerable from what this run retrieved. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      }
+    },
+    "transport_errors": []
+  },
+  {
+    "company": "Eli Lilly and Company",
+    "error": "ConnectionResetError: [Errno 54] Connection reset by peer"
+  },
+  {
+    "company": "Exxon Mobil Corporation",
+    "cik": "34088",
+    "ticker": "XOM",
+    "reliability": {
+      "connection_reset": 0,
+      "quota_block": false,
+      "retry_required": 0,
+      "manual_recovery": 0
+    },
+    "blocked_external": false,
+    "blocked_sources": [],
+    "run_id": "01M0A0D95793WTRRJD82B687VH",
+    "seconds": 187,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0A0D95793WTRRJD82B687VH/intro",
+    "claimed_failure": false,
+    "failure_text": "",
+    "steps": {
+      "intro": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0A0D95793WTRRJD82B687VH/intro",
+        "chars": 5350,
+        "absence": []
+      },
+      "slides": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0A0D95793WTRRJD82B687VH/slides",
+        "chars": 6017,
+        "absence": []
+      },
+      "full": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0A0D95793WTRRJD82B687VH/full",
+        "chars": 20141,
+        "absence": []
+      },
+      "story": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0A0D95793WTRRJD82B687VH/story",
+        "chars": 4108,
+        "absence": []
+      },
+      "history": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0A0D95793WTRRJD82B687VH/history",
+        "chars": 27226,
+        "absence": []
+      },
+      "connect": {
+        "status": 200,
+        "url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0A0D95793WTRRJD82B687VH/connect",
+        "chars": 3774,
+        "absence": []
+      }
+    },
+    "intro_head": "Exxon Mobil Corporation \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Exxon Mobil Corporation XOM \u00b7 USA \u00b7 SEC CIK 34088 Exxon Mobil Corporation is a materials energy business that runs on production of an undifferentiated output sold at a price the producer does not set. Its position is contested less by a named firm than by the alternatives its customers already have: customers can substitute substitute materials at the customer's plant and automation absorbing the task itself, and the economics that decide the contest are high operating leverage \u2014 cost per unit is largely fixed against a price that is not, so margin swings by more than price does. The strategic read The question worth arguing about is where the next increment of capital goes, given what the same capital would earn against produced volume elsewhere? fixed cost is committed in large inc",
+    "position_sentence": "customers can substitute substitute materials at the customer's plant and automation absorbing the task itself, and the economics that decide the contest are high operating leverage \u2014 cost per unit is largely fixed against a price that is not, so margin swings by ",
+    "model_sentence": "materials energy | production of an undifferentiated output sold at a price the producer does not set",
+    "competition": {
+      "basis_note": "",
+      "rows": []
+    },
+    "belief": "",
+    "history_paths": [
+      "Actual",
+      "Better strategy",
+      "Market expectation",
+      "What the market expected"
+    ],
+    "history_vintages": [
+      "2009",
+      "2010",
+      "2011",
+      "2012",
+      "2013",
+      "2014",
+      "2015",
+      "2016",
+      "2017",
+      "2018",
+      "2019",
+      "2020",
+      "2021",
+      "2022"
+    ],
+    "connect_text": "Exxon Mobil Corporation \u2014 connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone. That is deliberate \u2014 it is what makes it checkable. It is also what puts a boundary on it, and the boundary is visible in the analysis itself. Public intelligence \u2014 what it could establish Exxon Mobil Corporation is a materials energy business that runs on production of an undifferentiated output sold at a price the producer does not set. The reading follows from an established classification of this business and from what the company publishes about itself; 4 source(s) outside the company's control were read, which is not enough to size the effect, so it is held in direction only. 4 of the passages read came from a source the company does not control. Internal intelligence \u2014 what is still bounded These are the measures a business of this kind is judged on that the public record did not supply. Each one is a magnitude the analysis above had to leave in direction only. produced volume \u2014 the half of revenue the company controls. realised price versus benchmark \u2014 the other half, which it does not. unit cash cost \u2014 position on the industry cost curve. reserve life or resource base \u2014 how long the volume lasts. sustaining capital \u2014 what it costs to keep volume flat. What can be connected Connected now Public filings and disclosures Regulatory filings, the company's own pages, and independent sources \u2014 everything the analysis you just read was built from. Connected now Published market intelligence The economy, the competitive record and the learning ledger this system maintains between runs. Available next Your documents Board packs, strategy decks and plans. The system reads what management actually decided rather than inferring it from the outside. Available next Financial plan and internal metrics The numbers the public record does not contain \u2014 the ones that turn every bounded magnitude above into a measured one. On the roadmap CRM and pipeline Which deals moved, which stalled, and why. This is what separates a pricing hypothesis from a pricing answer. On the roadmap Customer feedback What buyers say when they are not filling in a renewal form. On the roadmap Decision log What leadership considered, chose, and rejected \u2014 with the reasons, so the next decision starts from the last one. What a private company intelligence keeps A recommendation is not a decision, and a decision is not an act. The system keeps them separate and remembers each one as its own kind of thing. Recommendation What the analysis put forward, and the evidence standing behind it at the time. Human decision What leadership actually chose \u2014 including choosing not to act, which is a decision and is usually recorded nowhere. Action What was then done, by whom, and when. Nothing is ever done by this system on its own authority. Outcome What followed, measure",
+    "qa": {
+      "What should management do?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What should management do? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "Why now?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation Why now? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What would prove this wrong?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What would prove this wrong? The strongest case against it: Net profits income for 2023 was $12,300,176 as compared with $12,493,727 for 2022. The 2 percent decrease in net profits income from 2022 to 2023 was primarily the result of lower gas prices ($2.6 million), decreased oil production ($2.4 million), increased production expenses ($1.4 million), and increased taxes, transportation and other costs ($0.3 million), partially offset by net excess costs a. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What's the biggest risk?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What's the biggest risk? Utilisation, order books and take-or-pay terms are not public. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "Who's the real competitor?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation Who's the real competitor? No competitor has been selected for this company from the evidence. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What does the market believe?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What does the market believe? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What's the weakest assumption?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What's the weakest assumption? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence). Evidence Strongest. 2026-08-18: Exxon Mobil Corporation sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. Weakest. No company-stated material is being relied on. Verified fact only \u2014 no interpretation is offered because the evidence does not support one. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What impossible hypothesis should we test?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What impossible hypothesis should we test? The decision this most affects: Whether a supply commitment should be treated as fixed or renegotiable. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What should we measure next?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What should we measure next? The decision this most affects: Whether a supply commitment should be treated as fixed or renegotiable. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      },
+      "What would you tell the board?": {
+        "status": 200,
+        "text": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What would you tell the board? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence). Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? What evidence most weakens the committing capital to capacity ahead of uncertain demand thesis? How is this transition similar to Memory and sensor fabrication cycles, and where does the comparison break down? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+      }
+    },
+    "transport_errors": []
+  }
+]

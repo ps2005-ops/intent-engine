@@ -414,7 +414,12 @@ def test_progress_page_terminal_styled_stops_refresh(tmp_path):
     # rendering a status page with an "Open the result" link on it.
     assert st.startswith("303")
     assert not hdrs2["Location"].endswith("/slides"), hdrs2["Location"]
-    st, _, body = c.request("GET", hdrs2["Location"])
+    # THE DEFAULT ROUTE IS NOW STEP 1 of the six-step story, so completion
+    # lands on a redirect into it. The property under test -- the finished run
+    # is reachable and renders -- is unchanged; it takes one more hop.
+    st, hdrs3, body = c.request("GET", hdrs2["Location"])
+    if st.startswith("303"):
+        st, _, body = c.request("GET", hdrs3["Location"])
     assert st == "200 OK"
     assert "<style" in body and "<nav" in body         # styled product shell
     assert "http-equiv=\"refresh\"" not in body        # terminal → refresh off

@@ -1,0 +1,130 @@
+{
+  "company": "Meta Platforms, Inc.",
+  "deployed_sha": "cb9e6b7",
+  "captured_at": "2026-08-21T20:10:56Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JZ5E1XN8MC7PPXQ0MJJ29Y/intro",
+      "chars": 5962,
+      "html_chars": 31527,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JZ5E1XN8MC7PPXQ0MJJ29Y/intro",
+      "chars": 5962,
+      "html_chars": 31527,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JZ5E1XN8MC7PPXQ0MJJ29Y/intro",
+      "chars": 5962,
+      "html_chars": 31527,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "full": {
+      "status": 502,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JZ5E1XN8MC7PPXQ0MJJ29Y/full",
+      "chars": 217,
+      "html_chars": 223036,
+      "outcome": ""
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JZ5E1XN8MC7PPXQ0MJJ29Y/story",
+      "chars": 738,
+      "html_chars": 15608,
+      "outcome": "WORKING"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JZ5E1XN8MC7PPXQ0MJJ29Y/history",
+      "chars": 738,
+      "html_chars": 15608,
+      "outcome": "WORKING"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JZ5E1XN8MC7PPXQ0MJJ29Y/connect",
+      "chars": 738,
+      "html_chars": 15608,
+      "outcome": "WORKING"
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Meta Platforms, Inc. META \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Conn",
+      "status": 200,
+      "html_bytes": 17003
+    },
+    {
+      "t": 32.7,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Meta Platforms, Inc. META \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Connec",
+      "status": 200,
+      "html_bytes": 16999
+    },
+    {
+      "t": 84.6,
+      "text": "",
+      "status": 0,
+      "html_bytes": 16999,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "cf-cache-status": "DYNAMIC",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JZ5E1XN8MC7PPXQ0MJJ29Y/progress",
+      "head": ""
+    },
+    {
+      "t": 278.5,
+      "text": "Meta Platforms, Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Meta Platforms, Inc. META \u00b7 SEC CIK 1326801 Meta Platforms, Inc. is a software platform business that runs on attention resold to advertisers: revenue is an auction price per impression, so nothing ",
+      "status": 200,
+      "html_bytes": 31600
+    }
+  ],
+  "process_before": {
+    "boot_id": "2e390503615a4d2d",
+    "started_at": 1787340052.1714675,
+    "uptime_seconds": 3004.4
+  },
+  "run_id": "01M0JZ5E1XN8MC7PPXQ0MJJ29Y",
+  "status": "RUN_LOST",
+  "seconds": 279,
+  "first_useful": 279,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 24.21,
+    "intro": 26.92,
+    "slides": 26.28,
+    "full": 19.28,
+    "story": 0.2,
+    "history": 0.31,
+    "connect": 0.16
+  },
+  "evidence_gate": "compose=? usable=? families=- stored=0 attempt=? failed=0/0 dropped=?/?/?/? unexplained=?",
+  "outcome": "FULL_ANALYSIS_REFRESHING",
+  "outcome_by_route": {
+    "run": "FULL_ANALYSIS_REFRESHING",
+    "intro": "FULL_ANALYSIS_REFRESHING",
+    "slides": "FULL_ANALYSIS_REFRESHING",
+    "story": "WORKING",
+    "history": "WORKING",
+    "connect": "WORKING"
+  },
+  "outcome_disagreement": [
+    "FULL_ANALYSIS_REFRESHING",
+    "WORKING"
+  ],
+  "run_lost_after_routes": true,
+  "answers_captured": 0,
+  "process_after": {
+    "boot_id": "460f73b07edf4631",
+    "started_at": 1787343427.880808,
+    "uptime_seconds": 7.9
+  },
+  "restart_observed": true
+}

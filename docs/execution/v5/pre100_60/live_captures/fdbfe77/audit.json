@@ -1,0 +1,2376 @@
+{
+  "capture_root": "docs/execution/v5/pre100_60/live_captures/fdbfe77",
+  "companies": [
+    {
+      "company": "Amazon.com, Inc.",
+      "deployed_sha": "",
+      "run_id": "01M0GC3RD1TVSG3A1R28FFGZBV",
+      "auto_advanced": true,
+      "seconds": 303,
+      "routes": [
+        {
+          "route": "intro",
+          "chars": 5293,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "slides",
+          "chars": 7081,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "full",
+          "chars": 26250,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "story",
+          "chars": 5342,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "history",
+          "chars": 29667,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "step6",
+          "chars": 4089,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        }
+      ],
+      "statements": {
+        "intro": {
+          "competitor": "a specialist doing one engine better than the bundle, and customers can substitute publishers and distributors",
+          "central_question": "where the next increment of capital goes, given what the same capital would earn against segment mix elsewhere?"
+        }
+      },
+      "contradictions": [],
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 5,
+        "ratio": 0.5
+      }
+    },
+    {
+      "company": "Caterpillar Inc.",
+      "deployed_sha": "",
+      "run_id": "01M0GDTG9A6CEJRW6XR7T1GGXV",
+      "auto_advanced": true,
+      "seconds": 260,
+      "routes": [
+        {
+          "route": "intro",
+          "chars": 5434,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "slides",
+          "chars": 6292,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "full",
+          "chars": 23442,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "story",
+          "chars": 4197,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "history",
+          "chars": 29240,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "step6",
+          "chars": 3909,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        }
+      ],
+      "statements": {
+        "intro": {
+          "competitor": "CNH Industrial N",
+          "central_question": "how much capacity to commit, and when, given that the commitment to supply chain and component availability is made before the orders and backlog it is meant to serve?"
+        }
+      },
+      "contradictions": [],
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 6,
+        "ratio": 0.6
+      }
+    },
+    {
+      "company": "Eli Lilly and Company",
+      "deployed_sha": "",
+      "run_id": "01M0GDFKMQZG4VVQSX8ERJWY70",
+      "auto_advanced": true,
+      "seconds": 193,
+      "routes": [
+        {
+          "route": "intro",
+          "chars": 5093,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "slides",
+          "chars": 4404,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "full",
+          "chars": 20378,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "story",
+          "chars": 4362,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "history",
+          "chars": 27795,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "step6",
+          "chars": 3843,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        }
+      ],
+      "statements": {
+        "intro": {
+          "competitor": "large number of multinational pharmaceutical companies and biotechnology companies, and customers can substitute generic",
+          "central_question": "which development programmes to fund and which to stop, given how long it takes a programme to reach approved products and indications?"
+        }
+      },
+      "contradictions": [],
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 5,
+        "ratio": 0.5
+      }
+    },
+    {
+      "company": "Exxon Mobil Corporation",
+      "deployed_sha": "",
+      "run_id": "01M0GE7ZZEEBD3H5TPT0JK7897",
+      "auto_advanced": true,
+      "seconds": 177,
+      "routes": [
+        {
+          "route": "intro",
+          "chars": 5339,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "slides",
+          "chars": 6017,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "full",
+          "chars": 20254,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "story",
+          "chars": 4108,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "history",
+          "chars": 27226,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "step6",
+          "chars": 3774,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        }
+      ],
+      "statements": {
+        "intro": {
+          "central_question": "where the next increment of capital goes, given what the same capital would earn against produced volume elsewhere?"
+        }
+      },
+      "contradictions": [],
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 6,
+        "ratio": 0.6
+      }
+    },
+    {
+      "company": "JPMorgan Chase & Co.",
+      "deployed_sha": "",
+      "run_id": "01M0GCZE49MCYSYQ731V45ANZ6",
+      "auto_advanced": true,
+      "seconds": 164,
+      "routes": [
+        {
+          "route": "intro",
+          "chars": 4703,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "slides",
+          "chars": 4638,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "full",
+          "chars": 20705,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "story",
+          "chars": 3713,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "history",
+          "chars": 28217,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "step6",
+          "chars": 3974,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        }
+      ],
+      "statements": {
+        "intro": {
+          "competitor": "banks and brokerage firms, and customers can substitute non-bank providers reaching the customer directly",
+          "central_question": "what to charge, and for what, without losing more spread on assets and liabilities than the price gains?"
+        }
+      },
+      "contradictions": [],
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 5,
+        "ratio": 0.5
+      }
+    },
+    {
+      "company": "Meta Platforms, Inc.",
+      "deployed_sha": "",
+      "run_id": "01M0GBP4ZWF8TFFPD9N6W9ME7N",
+      "auto_advanced": true,
+      "seconds": 263,
+      "routes": [
+        {
+          "route": "intro",
+          "chars": 6045,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "slides",
+          "chars": 6333,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "full",
+          "chars": 21565,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "story",
+          "chars": 4530,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "history",
+          "chars": 29234,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "step6",
+          "chars": 4074,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        }
+      ],
+      "statements": {
+        "intro": {
+          "central_question": "how much of the audience's attention to convert into inventory, and where, given that ad load taken today is paid for out of users and their engagement tomorrow?"
+        }
+      },
+      "contradictions": [],
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 6,
+        "ratio": 0.6
+      }
+    },
+    {
+      "company": "NVIDIA Corporation",
+      "deployed_sha": "",
+      "run_id": "01M0GCJC6A4ND4R24B7GAABNCN",
+      "auto_advanced": true,
+      "seconds": 257,
+      "routes": [
+        {
+          "route": "intro",
+          "chars": 5190,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "slides",
+          "chars": 6069,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "full",
+          "chars": 24146,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "story",
+          "chars": 4106,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "history",
+          "chars": 28327,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "step6",
+          "chars": 3851,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        }
+      ],
+      "statements": {
+        "intro": {
+          "competitor": "Huawei Technologies Co and Open-source AI, and customers can substitute rental and used equipment in place of a new purc",
+          "central_question": "how much capacity to commit, and when, given that the commitment to manufacturing and foundry cost is made before the unit volume it is meant to serve?"
+        }
+      },
+      "contradictions": [],
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 6,
+        "ratio": 0.6
+      }
+    },
+    {
+      "company": "Walmart Inc.",
+      "deployed_sha": "",
+      "run_id": "01M0GD8WTPXZF57FEND7V6FF9H",
+      "auto_advanced": true,
+      "seconds": 66,
+      "routes": [
+        {
+          "route": "intro",
+          "chars": 4672,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "slides",
+          "chars": 2190,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "full",
+          "chars": 2190,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "story",
+          "chars": 5209,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "history",
+          "chars": 28037,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        },
+        {
+          "route": "step6",
+          "chars": 4114,
+          "empty": false,
+          "failure_language": [],
+          "absence_language": [],
+          "raw_enums": [],
+          "trailing_ellipsis": 0
+        }
+      ],
+      "statements": {
+        "intro": {
+          "competitor": "social commerce platforms and delivery services, and customers can substitute the shopper buying the same basket somewhe",
+          "central_question": "what to charge, and for what, without losing more store and site traffic than the price gains?"
+        }
+      },
+      "contradictions": [],
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 5,
+        "ratio": 0.5
+      }
+    }
+  ],
+  "collapse": {
+    "pairs": {
+      "intro": [
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.223,
+          "chars": [
+            5157,
+            5308
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Eli Lilly and Company",
+          "similarity": 0.231,
+          "chars": [
+            5157,
+            4937
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Exxon Mobil Corporation",
+          "similarity": 0.305,
+          "chars": [
+            5157,
+            5175
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.25,
+          "chars": [
+            5157,
+            4551
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.617,
+          "chars": [
+            5157,
+            5903
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.349,
+          "chars": [
+            5157,
+            5054
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Walmart Inc.",
+          "similarity": 0.308,
+          "chars": [
+            5157,
+            4560
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Eli Lilly and Company",
+          "similarity": 0.232,
+          "chars": [
+            5308,
+            4937
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Exxon Mobil Corporation",
+          "similarity": 0.466,
+          "chars": [
+            5308,
+            5175
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.271,
+          "chars": [
+            5308,
+            4551
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.258,
+          "chars": [
+            5308,
+            5903
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.473,
+          "chars": [
+            5308,
+            5054
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Walmart Inc.",
+          "similarity": 0.301,
+          "chars": [
+            5308,
+            4560
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Exxon Mobil Corporation",
+          "similarity": 0.309,
+          "chars": [
+            4937,
+            5175
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.405,
+          "chars": [
+            4937,
+            4551
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.439,
+          "chars": [
+            4937,
+            5903
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.306,
+          "chars": [
+            4937,
+            5054
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Walmart Inc.",
+          "similarity": 0.393,
+          "chars": [
+            4937,
+            4560
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.275,
+          "chars": [
+            5175,
+            4551
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.275,
+          "chars": [
+            5175,
+            5903
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.476,
+          "chars": [
+            5175,
+            5054
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "Walmart Inc.",
+          "similarity": 0.297,
+          "chars": [
+            5175,
+            4560
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.435,
+          "chars": [
+            4551,
+            5903
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.326,
+          "chars": [
+            4551,
+            5054
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Walmart Inc.",
+          "similarity": 0.428,
+          "chars": [
+            4551,
+            4560
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.282,
+          "chars": [
+            5903,
+            5054
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Walmart Inc.",
+          "similarity": 0.241,
+          "chars": [
+            5903,
+            4560
+          ]
+        },
+        {
+          "a": "NVIDIA Corporation",
+          "b": "Walmart Inc.",
+          "similarity": 0.31,
+          "chars": [
+            5054,
+            4560
+          ]
+        }
+      ],
+      "slides": [
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.234,
+          "chars": [
+            6617,
+            5886
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Eli Lilly and Company",
+          "similarity": 0.162,
+          "chars": [
+            6617,
+            3978
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Exxon Mobil Corporation",
+          "similarity": 0.264,
+          "chars": [
+            6617,
+            5450
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.162,
+          "chars": [
+            6617,
+            4214
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.364,
+          "chars": [
+            6617,
+            5830
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.229,
+          "chars": [
+            6617,
+            5653
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Walmart Inc.",
+          "similarity": 0.015,
+          "chars": [
+            6617,
+            2121
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Eli Lilly and Company",
+          "similarity": 0.175,
+          "chars": [
+            5886,
+            3978
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Exxon Mobil Corporation",
+          "similarity": 0.452,
+          "chars": [
+            5886,
+            5450
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.183,
+          "chars": [
+            5886,
+            4214
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.54,
+          "chars": [
+            5886,
+            5830
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.385,
+          "chars": [
+            5886,
+            5653
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Walmart Inc.",
+          "similarity": 0.018,
+          "chars": [
+            5886,
+            2121
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Exxon Mobil Corporation",
+          "similarity": 0.231,
+          "chars": [
+            3978,
+            5450
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.514,
+          "chars": [
+            3978,
+            4214
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.418,
+          "chars": [
+            3978,
+            5830
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.247,
+          "chars": [
+            3978,
+            5653
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Walmart Inc.",
+          "similarity": 0.015,
+          "chars": [
+            3978,
+            2121
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.191,
+          "chars": [
+            5450,
+            4214
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.331,
+          "chars": [
+            5450,
+            5830
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.403,
+          "chars": [
+            5450,
+            5653
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "Walmart Inc.",
+          "similarity": 0.02,
+          "chars": [
+            5450,
+            2121
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.238,
+          "chars": [
+            4214,
+            5830
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.096,
+          "chars": [
+            4214,
+            5653
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Walmart Inc.",
+          "similarity": 0.017,
+          "chars": [
+            4214,
+            2121
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.259,
+          "chars": [
+            5830,
+            5653
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Walmart Inc.",
+          "similarity": 0.011,
+          "chars": [
+            5830,
+            2121
+          ]
+        },
+        {
+          "a": "NVIDIA Corporation",
+          "b": "Walmart Inc.",
+          "similarity": 0.016,
+          "chars": [
+            5653,
+            2121
+          ]
+        }
+      ],
+      "full": [
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.315,
+          "chars": [
+            25563,
+            22776
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Eli Lilly and Company",
+          "similarity": 0.119,
+          "chars": [
+            25563,
+            19541
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Exxon Mobil Corporation",
+          "similarity": 0.444,
+          "chars": [
+            25563,
+            19482
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.383,
+          "chars": [
+            25563,
+            19983
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.528,
+          "chars": [
+            25563,
+            20891
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.515,
+          "chars": [
+            25563,
+            23505
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Walmart Inc.",
+          "similarity": 0.002,
+          "chars": [
+            25563,
+            2121
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Eli Lilly and Company",
+          "similarity": 0.162,
+          "chars": [
+            22776,
+            19541
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Exxon Mobil Corporation",
+          "similarity": 0.305,
+          "chars": [
+            22776,
+            19482
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.277,
+          "chars": [
+            22776,
+            19983
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.39,
+          "chars": [
+            22776,
+            20891
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.395,
+          "chars": [
+            22776,
+            23505
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Walmart Inc.",
+          "similarity": 0.002,
+          "chars": [
+            22776,
+            2121
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Exxon Mobil Corporation",
+          "similarity": 0.189,
+          "chars": [
+            19541,
+            19482
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.223,
+          "chars": [
+            19541,
+            19983
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.108,
+          "chars": [
+            19541,
+            20891
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.12,
+          "chars": [
+            19541,
+            23505
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Walmart Inc.",
+          "similarity": 0.002,
+          "chars": [
+            19541,
+            2121
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.056,
+          "chars": [
+            19482,
+            19983
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.282,
+          "chars": [
+            19482,
+            20891
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.495,
+          "chars": [
+            19482,
+            23505
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "Walmart Inc.",
+          "similarity": 0.003,
+          "chars": [
+            19482,
+            2121
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.428,
+          "chars": [
+            19983,
+            20891
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.499,
+          "chars": [
+            19983,
+            23505
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Walmart Inc.",
+          "similarity": 0.002,
+          "chars": [
+            19983,
+            2121
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.426,
+          "chars": [
+            20891,
+            23505
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Walmart Inc.",
+          "similarity": 0.002,
+          "chars": [
+            20891,
+            2121
+          ]
+        },
+        {
+          "a": "NVIDIA Corporation",
+          "b": "Walmart Inc.",
+          "similarity": 0.002,
+          "chars": [
+            23505,
+            2121
+          ]
+        }
+      ],
+      "story": [
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.142,
+          "chars": [
+            5178,
+            4050
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Eli Lilly and Company",
+          "similarity": 0.057,
+          "chars": [
+            5178,
+            4168
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Exxon Mobil Corporation",
+          "similarity": 0.114,
+          "chars": [
+            5178,
+            3940
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.059,
+          "chars": [
+            5178,
+            3548
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.182,
+          "chars": [
+            5178,
+            4379
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.114,
+          "chars": [
+            5178,
+            3949
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Walmart Inc.",
+          "similarity": 0.139,
+          "chars": [
+            5178,
+            5077
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Eli Lilly and Company",
+          "similarity": 0.154,
+          "chars": [
+            4050,
+            4168
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Exxon Mobil Corporation",
+          "similarity": 0.519,
+          "chars": [
+            4050,
+            3940
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.142,
+          "chars": [
+            4050,
+            3548
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.227,
+          "chars": [
+            4050,
+            4379
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.538,
+          "chars": [
+            4050,
+            3949
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Walmart Inc.",
+          "similarity": 0.185,
+          "chars": [
+            4050,
+            5077
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Exxon Mobil Corporation",
+          "similarity": 0.254,
+          "chars": [
+            4168,
+            3940
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.271,
+          "chars": [
+            4168,
+            3548
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.257,
+          "chars": [
+            4168,
+            4379
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.197,
+          "chars": [
+            4168,
+            3949
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Walmart Inc.",
+          "similarity": 0.228,
+          "chars": [
+            4168,
+            5077
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.167,
+          "chars": [
+            3940,
+            3548
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.194,
+          "chars": [
+            3940,
+            4379
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.549,
+          "chars": [
+            3940,
+            3949
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "Walmart Inc.",
+          "similarity": 0.155,
+          "chars": [
+            3940,
+            5077
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.18,
+          "chars": [
+            3548,
+            4379
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.227,
+          "chars": [
+            3548,
+            3949
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Walmart Inc.",
+          "similarity": 0.186,
+          "chars": [
+            3548,
+            5077
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.346,
+          "chars": [
+            4379,
+            3949
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Walmart Inc.",
+          "similarity": 0.27,
+          "chars": [
+            4379,
+            5077
+          ]
+        },
+        {
+          "a": "NVIDIA Corporation",
+          "b": "Walmart Inc.",
+          "similarity": 0.138,
+          "chars": [
+            3949,
+            5077
+          ]
+        }
+      ],
+      "history": [
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.065,
+          "chars": [
+            29402,
+            28975
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Eli Lilly and Company",
+          "similarity": 0.058,
+          "chars": [
+            29402,
+            27469
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Exxon Mobil Corporation",
+          "similarity": 0.071,
+          "chars": [
+            29402,
+            26884
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.158,
+          "chars": [
+            29402,
+            27910
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.051,
+          "chars": [
+            29402,
+            28936
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.097,
+          "chars": [
+            29402,
+            27966
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Walmart Inc.",
+          "similarity": 0.11,
+          "chars": [
+            29402,
+            27786
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Eli Lilly and Company",
+          "similarity": 0.195,
+          "chars": [
+            28975,
+            27469
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Exxon Mobil Corporation",
+          "similarity": 0.072,
+          "chars": [
+            28975,
+            26884
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.117,
+          "chars": [
+            28975,
+            27910
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.058,
+          "chars": [
+            28975,
+            28936
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.207,
+          "chars": [
+            28975,
+            27966
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Walmart Inc.",
+          "similarity": 0.206,
+          "chars": [
+            28975,
+            27786
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Exxon Mobil Corporation",
+          "similarity": 0.056,
+          "chars": [
+            27469,
+            26884
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.096,
+          "chars": [
+            27469,
+            27910
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.131,
+          "chars": [
+            27469,
+            28936
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.081,
+          "chars": [
+            27469,
+            27966
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Walmart Inc.",
+          "similarity": 0.075,
+          "chars": [
+            27469,
+            27786
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.044,
+          "chars": [
+            26884,
+            27910
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.162,
+          "chars": [
+            26884,
+            28936
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.129,
+          "chars": [
+            26884,
+            27966
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "Walmart Inc.",
+          "similarity": 0.123,
+          "chars": [
+            26884,
+            27786
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.124,
+          "chars": [
+            27910,
+            28936
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.055,
+          "chars": [
+            27910,
+            27966
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Walmart Inc.",
+          "similarity": 0.087,
+          "chars": [
+            27910,
+            27786
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.062,
+          "chars": [
+            28936,
+            27966
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Walmart Inc.",
+          "similarity": 0.058,
+          "chars": [
+            28936,
+            27786
+          ]
+        },
+        {
+          "a": "NVIDIA Corporation",
+          "b": "Walmart Inc.",
+          "similarity": 0.175,
+          "chars": [
+            27966,
+            27786
+          ]
+        }
+      ],
+      "step6": [
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Caterpillar Inc.",
+          "similarity": 0.144,
+          "chars": [
+            3980,
+            3795
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Eli Lilly and Company",
+          "similarity": 0.142,
+          "chars": [
+            3980,
+            3724
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Exxon Mobil Corporation",
+          "similarity": 0.144,
+          "chars": [
+            3980,
+            3651
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.144,
+          "chars": [
+            3980,
+            3857
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.814,
+          "chars": [
+            3980,
+            3957
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.141,
+          "chars": [
+            3980,
+            3728
+          ]
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Walmart Inc.",
+          "similarity": 0.137,
+          "chars": [
+            3980,
+            4013
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Eli Lilly and Company",
+          "similarity": 0.146,
+          "chars": [
+            3795,
+            3724
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Exxon Mobil Corporation",
+          "similarity": 0.147,
+          "chars": [
+            3795,
+            3651
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.143,
+          "chars": [
+            3795,
+            3857
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.808,
+          "chars": [
+            3795,
+            3957
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.143,
+          "chars": [
+            3795,
+            3728
+          ]
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Walmart Inc.",
+          "similarity": 0.141,
+          "chars": [
+            3795,
+            4013
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Exxon Mobil Corporation",
+          "similarity": 0.148,
+          "chars": [
+            3724,
+            3651
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.285,
+          "chars": [
+            3724,
+            3857
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.821,
+          "chars": [
+            3724,
+            3957
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.143,
+          "chars": [
+            3724,
+            3728
+          ]
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Walmart Inc.",
+          "similarity": 0.179,
+          "chars": [
+            3724,
+            4013
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "JPMorgan Chase & Co.",
+          "similarity": 0.296,
+          "chars": [
+            3651,
+            3857
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.106,
+          "chars": [
+            3651,
+            3957
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.304,
+          "chars": [
+            3651,
+            3728
+          ]
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "Walmart Inc.",
+          "similarity": 0.186,
+          "chars": [
+            3651,
+            4013
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Meta Platforms, Inc.",
+          "similarity": 0.805,
+          "chars": [
+            3857,
+            3957
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.142,
+          "chars": [
+            3857,
+            3728
+          ]
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Walmart Inc.",
+          "similarity": 0.136,
+          "chars": [
+            3857,
+            4013
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "NVIDIA Corporation",
+          "similarity": 0.142,
+          "chars": [
+            3957,
+            3728
+          ]
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Walmart Inc.",
+          "similarity": 0.137,
+          "chars": [
+            3957,
+            4013
+          ]
+        },
+        {
+          "a": "NVIDIA Corporation",
+          "b": "Walmart Inc.",
+          "similarity": 0.139,
+          "chars": [
+            3728,
+            4013
+          ]
+        }
+      ],
+      "qa": [
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Caterpillar Inc.",
+          "identical_answers": 1,
+          "of": 10
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Eli Lilly and Company",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Exxon Mobil Corporation",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Meta Platforms, Inc.",
+          "identical_answers": 8,
+          "of": 10
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "NVIDIA Corporation",
+          "identical_answers": 1,
+          "of": 10
+        },
+        {
+          "a": "Amazon.com, Inc.",
+          "b": "Walmart Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Eli Lilly and Company",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Exxon Mobil Corporation",
+          "identical_answers": 8,
+          "of": 10
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "JPMorgan Chase & Co.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Meta Platforms, Inc.",
+          "identical_answers": 1,
+          "of": 10
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "NVIDIA Corporation",
+          "identical_answers": 9,
+          "of": 10
+        },
+        {
+          "a": "Caterpillar Inc.",
+          "b": "Walmart Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Exxon Mobil Corporation",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "JPMorgan Chase & Co.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Meta Platforms, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "NVIDIA Corporation",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Eli Lilly and Company",
+          "b": "Walmart Inc.",
+          "identical_answers": 7,
+          "of": 10
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "JPMorgan Chase & Co.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "Meta Platforms, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "NVIDIA Corporation",
+          "identical_answers": 8,
+          "of": 10
+        },
+        {
+          "a": "Exxon Mobil Corporation",
+          "b": "Walmart Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Meta Platforms, Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "NVIDIA Corporation",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "JPMorgan Chase & Co.",
+          "b": "Walmart Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "NVIDIA Corporation",
+          "identical_answers": 1,
+          "of": 10
+        },
+        {
+          "a": "Meta Platforms, Inc.",
+          "b": "Walmart Inc.",
+          "identical_answers": 0,
+          "of": 10
+        },
+        {
+          "a": "NVIDIA Corporation",
+          "b": "Walmart Inc.",
+          "identical_answers": 0,
+          "of": 10
+        }
+      ]
+    },
+    "worst": {
+      "intro": {
+        "a": "Amazon.com, Inc.",
+        "b": "Meta Platforms, Inc.",
+        "similarity": 0.617,
+        "chars": [
+          5157,
+          5903
+        ]
+      },
+      "slides": {
+        "a": "Caterpillar Inc.",
+        "b": "Meta Platforms, Inc.",
+        "similarity": 0.54,
+        "chars": [
+          5886,
+          5830
+        ]
+      },
+      "full": {
+        "a": "Amazon.com, Inc.",
+        "b": "Meta Platforms, Inc.",
+        "similarity": 0.528,
+        "chars": [
+          25563,
+          20891
+        ]
+      },
+      "story": {
+        "a": "Exxon Mobil Corporation",
+        "b": "NVIDIA Corporation",
+        "similarity": 0.549,
+        "chars": [
+          3940,
+          3949
+        ]
+      },
+      "history": {
+        "a": "Caterpillar Inc.",
+        "b": "NVIDIA Corporation",
+        "similarity": 0.207,
+        "chars": [
+          28975,
+          27966
+        ]
+      },
+      "step6": {
+        "a": "Eli Lilly and Company",
+        "b": "Meta Platforms, Inc.",
+        "similarity": 0.821,
+        "chars": [
+          3724,
+          3957
+        ]
+      },
+      "qa": {
+        "a": "Caterpillar Inc.",
+        "b": "NVIDIA Corporation",
+        "identical_answers": 9,
+        "of": 10
+      }
+    }
+  },
+  "summary": {
+    "captured": 8,
+    "with_flags": 0,
+    "flags": []
+  }
+}

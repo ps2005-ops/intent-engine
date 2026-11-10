@@ -1,0 +1,62 @@
+[
+  {
+    "question": "What should management do?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What should management do? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Union Pacific Corporation What should management do? Do not act on this reading. Re-run once the market engine publishes a snapshot this side will read. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "Why now?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "Why now? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Union Pacific Corporation Why now? where the next increment of capital goes is a standing decision for this business model. It was ranked above capacity on the same evidence. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What's the biggest risk?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What's the biggest risk? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Union Pacific Corporation What's the biggest risk? contracted revenue and remaining term is not disclosed at the granularity the decision needs. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What would prove this wrong?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What would prove this wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Union Pacific Corporation What would prove this wrong? a disclosure in capital projects and commissioning showing the mechanism moving in the opposite direction would overturn this reading. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "Who's the real competitor?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "Who's the real competitor? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Union Pacific Corporation Who's the real competitor? American Tower Corporation: operates the same business model (contracted or rate base assets) in the same sector (infrastructure), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR; Am\u00e9rica M\u00f3vil, S.A.B. de C.V.: operates the same business model (contracted or rate base assets) in the same sector (infrastructure), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR; BCE Inc.: operates the same business model (contracted or rate base assets) in the same sector (infrastructure), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What does the market believe?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What does the market believe? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Union Pacific Corporation What does the market believe? That Union Pacific Corporation's growth and margin can improve together for another year, because they just did.: Union Pacific Corporation's own filed results show growth accelerating and margin widening. This is what a reader of that record carries into next year; nobody published it in these words and it is not a consensus estimate.; That the contest Union Pacific Corporation has to win is against transportation providers, and that holding that ground is what protects the economics.: Union Pacific Corporation's own words \u2014 not independent, and it is the company's account of its market. Union Pacific Corporation names it directly. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What's the weakest assumption?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What's the weakest assumption? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Union Pacific Corporation What's the weakest assumption? Union Pacific Corporation's filed results: The filed series is what this reading is computed from. Contracted cash flows on assets with long lives is what the economics rest on Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What impossible hypothesis should we investigate?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What impossible hypothesis should we investigate? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Union Pacific Corporation What impossible hypothesis should we investigate? A holder of this view is reading the record correctly as far as it goes: what it implies is the incremental margin on the next block of revenue, which is what separates operating leverage from a favourable mix, and nothing in what this run retrieved contradicts that.; A holder of this view is reading the record correctly as far as it goes: what it implies is wins and losses are decided against transportation providers rather than somewhere else, and nothing in what this run retrieved contradicts that. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What should we measure next?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What should we measure next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Union Pacific Corporation What should we measure next? contracted or regulated volume \u2014 revenue at a business of this kind moves with contracted or regulated volume.; tariff or rate \u2014 revenue at a business of this kind moves with tariff or rate.; asset base in service \u2014 revenue at a business of this kind moves with asset base in service. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What would you tell the board?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What would you tell the board? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Union Pacific Corporation What would you tell the board? Do not act on this reading. Re-run once the market engine publishes a snapshot this side will read. Low, by construction Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  }
+]

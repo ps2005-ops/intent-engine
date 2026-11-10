@@ -1,0 +1,159 @@
+{
+  "company": "JPMorgan Chase & Co.",
+  "deployed_sha": "b0050e3",
+  "captured_at": "2026-08-21T13:02:23Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J6MP98PG9PJNHBM3834BGX",
+      "chars": 3960,
+      "html_chars": 29869,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J6MP98PG9PJNHBM3834BGX/intro",
+      "chars": 4697,
+      "html_chars": 30030,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J6MP98PG9PJNHBM3834BGX/slides",
+      "chars": 3914,
+      "html_chars": 40110,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J6MP98PG9PJNHBM3834BGX/full",
+      "chars": 3960,
+      "html_chars": 29869,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J6MP98PG9PJNHBM3834BGX/story",
+      "chars": 4497,
+      "html_chars": 34042,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J6MP98PG9PJNHBM3834BGX/history",
+      "chars": 28217,
+      "html_chars": 108742,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J6MP98PG9PJNHBM3834BGX/connect",
+      "chars": 3980,
+      "html_chars": 28894,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J6MP98PG9PJNHBM3834BGX",
+      "chars": 3960,
+      "html_chars": 29869,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J6MP98PG9PJNHBM3834BGX/evidence",
+      "chars": 9196,
+      "html_chars": 27806,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J6MP98PG9PJNHBM3834BGX/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J6MP98PG9PJNHBM3834BGX/brief",
+      "chars": 15109,
+      "html_chars": 47746,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing JPMorgan Chase & Co. JPM \u00b7 jpmorganchase.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company ev",
+      "status": 200,
+      "html_bytes": 17027
+    },
+    {
+      "t": 27.1,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing JPMorgan Chase & Co. JPM \u00b7 jpmorganchase.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company e",
+      "status": 200,
+      "html_bytes": 17023
+    },
+    {
+      "t": 78.7,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17023,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J6MP98PG9PJNHBM3834BGX/progress",
+      "head": ""
+    },
+    {
+      "t": 130.9,
+      "text": "Something went wrong on our side Something went wrong on our side What did work. Your request was received and the company you entered was recorded. What did not. The analysis did not complete. Why. This is a fault in the product, not in what you entered or in the company. What to do next. Run it ag",
+      "status": 500,
+      "html_bytes": 17023
+    },
+    {
+      "t": 157.1,
+      "text": "JPMorgan Chase & Co. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction JPMorgan Chase & Co. JPM \u00b7 USA \u00b7 jpmorganchase.com \u00b7 SEC CIK 0000019617 JPMorgan Chase & Co. is a financial regulated business that runs on earnings from a balance sheet or from a transaction networ",
+      "status": 200,
+      "html_bytes": 30105
+    }
+  ],
+  "process_before": {
+    "boot_id": "a66b8bb687154bfa",
+    "started_at": 1787314134.5251167,
+    "uptime_seconds": 3208.9
+  },
+  "run_id": "01M0J6MP98PG9PJNHBM3834BGX",
+  "status": "READY",
+  "seconds": 157,
+  "first_useful": 157,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 3.49,
+    "intro": 5.47,
+    "slides": 6.51,
+    "full": 2.5,
+    "story": 7.12,
+    "history": 0.23,
+    "connect": 3.96
+  },
+  "evidence_gate": "compose=11 usable=7 families=customers|identity|investor|product|talent stored=11 attempt=2",
+  "outcome": "FULL_ANALYSIS",
+  "outcome_by_route": {
+    "run": "FULL_ANALYSIS",
+    "intro": "FULL_ANALYSIS",
+    "slides": "FULL_ANALYSIS",
+    "full": "FULL_ANALYSIS",
+    "story": "FULL_ANALYSIS",
+    "history": "FULL_ANALYSIS",
+    "connect": "FULL_ANALYSIS"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": [
+    "GET /runs/01M0J6MP98PG9PJNHBM3834BGX/progress: timeout"
+  ]
+}

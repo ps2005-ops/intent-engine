@@ -1,0 +1,176 @@
+{
+  "company": "Freeport-McMoRan Inc.",
+  "deployed_sha": "743df06",
+  "captured_at": "2026-08-21T18:11:09Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JRA4ETHXPZTJW8PGFR1RKH/intro",
+      "chars": 5080,
+      "html_chars": 30575,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JRA4ETHXPZTJW8PGFR1RKH/intro",
+      "chars": 5080,
+      "html_chars": 30575,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JRA4ETHXPZTJW8PGFR1RKH/slides",
+      "chars": 5481,
+      "html_chars": 49084,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JRA4ETHXPZTJW8PGFR1RKH/full",
+      "chars": 19974,
+      "html_chars": 58923,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JRA4ETHXPZTJW8PGFR1RKH/story",
+      "chars": 4324,
+      "html_chars": 33859,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JRA4ETHXPZTJW8PGFR1RKH/history",
+      "chars": 26848,
+      "html_chars": 101274,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JRA4ETHXPZTJW8PGFR1RKH/connect",
+      "chars": 3776,
+      "html_chars": 28657,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JRA4ETHXPZTJW8PGFR1RKH/intro",
+      "chars": 5080,
+      "html_chars": 30575,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JRA4ETHXPZTJW8PGFR1RKH/evidence",
+      "chars": 4221,
+      "html_chars": 20555,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JRA4ETHXPZTJW8PGFR1RKH/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JRA4ETHXPZTJW8PGFR1RKH/brief",
+      "chars": 16116,
+      "html_chars": 48928,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 2.5,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Freeport-McMoRan Inc. FCX \u00b7 fcx.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence wo",
+      "status": 200,
+      "html_bytes": 17015
+    },
+    {
+      "t": 83.7,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17015,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "cf-cache-status": "DYNAMIC",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JRA4ETHXPZTJW8PGFR1RKH/progress",
+      "head": ""
+    },
+    {
+      "t": 94.1,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Freeport-McMoRan Inc. FCX \u00b7 fcx.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence wo",
+      "status": 200,
+      "html_bytes": 17018
+    },
+    {
+      "t": 145.3,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Freeport-McMoRan Inc. FCX \u00b7 fcx.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence d",
+      "status": 200,
+      "html_bytes": 17013
+    },
+    {
+      "t": 274.3,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17013,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "cf-cache-status": "DYNAMIC",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JRA4ETHXPZTJW8PGFR1RKH/progress",
+      "head": ""
+    },
+    {
+      "t": 468.9,
+      "text": "Freeport-McMoRan Inc. \u2014 the decision Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Freeport-McMoRan Inc. The answer No strategic reading of Freeport-McMoRan Inc. cleared the evidence bar, so none is asserted here. That absence is itself the finding: no curated transition pattern matched this ",
+      "status": 200,
+      "html_bytes": 28654
+    }
+  ],
+  "process_before": {
+    "boot_id": "d7df6481c13e43c7",
+    "started_at": 1787326618.1855707,
+    "uptime_seconds": 9251.5
+  },
+  "run_id": "01M0JRA4ETHXPZTJW8PGFR1RKH",
+  "status": "READY",
+  "seconds": 469,
+  "first_useful": 469,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 22.79,
+    "intro": 5.71,
+    "slides": 8.27,
+    "full": 12.74,
+    "story": 6.17,
+    "history": 0.27,
+    "connect": 4.32
+  },
+  "evidence_gate": "compose=5 usable=4 families=identity|investor|strategy stored=5 attempt=3 failed=16/15 dropped=0/0/1/0",
+  "outcome": "FULL_ANALYSIS",
+  "outcome_by_route": {
+    "run": "FULL_ANALYSIS",
+    "intro": "FULL_ANALYSIS",
+    "slides": "FULL_ANALYSIS",
+    "full": "FULL_ANALYSIS",
+    "story": "FULL_ANALYSIS",
+    "history": "FULL_ANALYSIS",
+    "connect": "FULL_ANALYSIS"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": [
+    "GET /runs/01M0JRA4ETHXPZTJW8PGFR1RKH/progress: timeout",
+    "GET /runs/01M0JRA4ETHXPZTJW8PGFR1RKH/progress: timeout",
+    "GET /runs/01M0JRA4ETHXPZTJW8PGFR1RKH/progress: timeout",
+    "GET /runs/01M0JRA4ETHXPZTJW8PGFR1RKH/progress: timeout",
+    "GET /runs/01M0JRA4ETHXPZTJW8PGFR1RKH/progress: timeout"
+  ]
+}

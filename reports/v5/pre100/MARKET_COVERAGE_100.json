@@ -1,0 +1,919 @@
+{
+  "contract": "market_coverage_100.v1",
+  "generated_at": "2026-08-14",
+  "manifest_version": "1.0.1",
+  "total": 100,
+  "explicit_state_count": 100,
+  "market_state_tally": {
+    "MARKET_PRIVATE": 9,
+    "MARKET_NOT_YET_RUN": 81,
+    "MARKET_READY": 10
+  },
+  "class_tally": {
+    "D_PRIVATE_OR_SPARSE": 9,
+    "A_ACQUISITION_SUPPORTED_NOW": 91
+  },
+  "note": "Every one of the 100 carries an explicit market state; there is no implicit absence. MARKET_NOT_YET_RUN is a statement about the market runtime's publication schedule, NOT about the company -- these companies are all PROFILE_AVAILABLE and specialise correctly; they simply cross no market intelligence yet.",
+  "rows": [
+    {
+      "company_id": "1password",
+      "market_state": "MARKET_PRIVATE",
+      "class": "D_PRIVATE_OR_SPARSE",
+      "public_private": "PRIVATE",
+      "has_domain": true,
+      "cohort": "REGRESSION",
+      "why": "privately held: no regulator filing obligation, so market acquisition cannot be assumed and depends on what the company chooses to publish"
+    },
+    {
+      "company_id": "adobe",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "BLIND_HOLDOUT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "advanced-micro-devices",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "agnico-eagle-mines",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "alimentation-couche-tard",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "america-movil",
+      "market_state": "MARKET_READY",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "REGRESSION",
+      "why": "a current market snapshot exists and crosses to the founder side"
+    },
+    {
+      "company_id": "american-tower",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "BLIND_HOLDOUT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "applied-materials",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "bank-of-america",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "bank-of-montreal",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "REGRESSION",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "bank-of-nova-scotia",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "BLIND_HOLDOUT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "barrick-mining",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "basecamp",
+      "market_state": "MARKET_PRIVATE",
+      "class": "D_PRIVATE_OR_SPARSE",
+      "public_private": "PRIVATE",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "privately held: no regulator filing obligation, so market acquisition cannot be assumed and depends on what the company chooses to publish"
+    },
+    {
+      "company_id": "bce",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "blackstone",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "boeing",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "broadcom",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "REGRESSION",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "brookfield-asset-management",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "brookfield-corporation",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "cae",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "canadian-national-railway",
+      "market_state": "MARKET_READY",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "a current market snapshot exists and crosses to the founder side"
+    },
+    {
+      "company_id": "canadian-natural-resources",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "REGRESSION",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "canadian-pacific-kansas-city",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "caterpillar",
+      "market_state": "MARKET_READY",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "a current market snapshot exists and crosses to the founder side"
+    },
+    {
+      "company_id": "cemex",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "BLIND_HOLDOUT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "cgi-inc",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "BLIND_HOLDOUT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "charles-schwab",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "REGRESSION",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "chevron",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "cintas",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "cloudflare",
+      "market_state": "MARKET_READY",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "a current market snapshot exists and crosses to the founder side"
+    },
+    {
+      "company_id": "coca-cola",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "cohere",
+      "market_state": "MARKET_PRIVATE",
+      "class": "D_PRIVATE_OR_SPARSE",
+      "public_private": "PRIVATE",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "privately held: no regulator filing obligation, so market acquisition cannot be assumed and depends on what the company chooses to publish"
+    },
+    {
+      "company_id": "constellation-software",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "REGRESSION",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "costco",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "databricks",
+      "market_state": "MARKET_PRIVATE",
+      "class": "D_PRIVATE_OR_SPARSE",
+      "public_private": "PRIVATE",
+      "has_domain": true,
+      "cohort": "BLIND_HOLDOUT",
+      "why": "privately held: no regulator filing obligation, so market acquisition cannot be assumed and depends on what the company chooses to publish"
+    },
+    {
+      "company_id": "datadog",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "deere",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "REGRESSION",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "descartes-systems",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "dollarama",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "REGRESSION",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "duke-energy",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "REGRESSION",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "eli-lilly",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "BLIND_HOLDOUT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "enbridge",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "BLIND_HOLDOUT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "epic-systems",
+      "market_state": "MARKET_PRIVATE",
+      "class": "D_PRIVATE_OR_SPARSE",
+      "public_private": "PRIVATE",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "privately held: no regulator filing obligation, so market acquisition cannot be assumed and depends on what the company chooses to publish"
+    },
+    {
+      "company_id": "equinix",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "exxon-mobil",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "femsa",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "BLIND_HOLDOUT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "freeport-mcmoran",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "ge-aerospace",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "BLIND_HOLDOUT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "goldman-sachs",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "BLIND_HOLDOUT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "grupo-bimbo",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "grupo-mexico",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "REGRESSION",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "hca-healthcare",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "honeywell",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "intel",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "BLIND_HOLDOUT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "intuitive-surgical",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "johnson-and-johnson",
+      "market_state": "MARKET_READY",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "a current market snapshot exists and crosses to the founder side"
+    },
+    {
+      "company_id": "jpmorgan-chase",
+      "market_state": "MARKET_READY",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "a current market snapshot exists and crosses to the founder side"
+    },
+    {
+      "company_id": "lam-research",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "loblaw-companies",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "magna-international",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "manulife",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "mastercard",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "mcdonalds",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "mckinsey",
+      "market_state": "MARKET_PRIVATE",
+      "class": "D_PRIVATE_OR_SPARSE",
+      "public_private": "PRIVATE",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "privately held: no regulator filing obligation, so market acquisition cannot be assumed and depends on what the company chooses to publish"
+    },
+    {
+      "company_id": "micron-technology",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "microsoft",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "REGRESSION",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "mongodb",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "BLIND_HOLDOUT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "nextera-energy",
+      "market_state": "MARKET_READY",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "a current market snapshot exists and crosses to the founder side"
+    },
+    {
+      "company_id": "nike",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "REGRESSION",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "nutrien",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "BLIND_HOLDOUT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "nvidia",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "opentext",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "oracle",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "palantir-technologies",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "pfizer",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "REGRESSION",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "procter-and-gamble",
+      "market_state": "MARKET_READY",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "BLIND_HOLDOUT",
+      "why": "a current market snapshot exists and crosses to the founder side"
+    },
+    {
+      "company_id": "progressive",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "REGRESSION",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "restaurant-brands-international",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "royal-bank-of-canada",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "BLIND_HOLDOUT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "salesforce",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "REGRESSION",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "servicenow",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "BLIND_HOLDOUT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "shopify",
+      "market_state": "MARKET_READY",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "a current market snapshot exists and crosses to the founder side"
+    },
+    {
+      "company_id": "snowflake",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "spacex",
+      "market_state": "MARKET_PRIVATE",
+      "class": "D_PRIVATE_OR_SPARSE",
+      "public_private": "PRIVATE",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "privately held: no regulator filing obligation, so market acquisition cannot be assumed and depends on what the company chooses to publish"
+    },
+    {
+      "company_id": "stripe",
+      "market_state": "MARKET_READY",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PRIVATE",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "a current market snapshot exists and crosses to the founder side"
+    },
+    {
+      "company_id": "sun-life",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "suncor-energy",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "tailscale",
+      "market_state": "MARKET_PRIVATE",
+      "class": "D_PRIVATE_OR_SPARSE",
+      "public_private": "PRIVATE",
+      "has_domain": true,
+      "cohort": "REGRESSION",
+      "why": "privately held: no regulator filing obligation, so market acquisition cannot be assumed and depends on what the company chooses to publish"
+    },
+    {
+      "company_id": "tc-energy",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "telus",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "REGRESSION",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "texas-instruments",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "REGRESSION",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "toronto-dominion-bank",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "union-pacific",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "BLIND_HOLDOUT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "unitedhealth-group",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "BLIND_HOLDOUT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "visa",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "walmart",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "waste-management",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "wealthsimple",
+      "market_state": "MARKET_PRIVATE",
+      "class": "D_PRIVATE_OR_SPARSE",
+      "public_private": "PRIVATE",
+      "has_domain": true,
+      "cohort": "REGRESSION",
+      "why": "privately held: no regulator filing obligation, so market acquisition cannot be assumed and depends on what the company chooses to publish"
+    },
+    {
+      "company_id": "workday",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "BLIND_HOLDOUT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    },
+    {
+      "company_id": "wsp-global",
+      "market_state": "MARKET_NOT_YET_RUN",
+      "class": "A_ACQUISITION_SUPPORTED_NOW",
+      "public_private": "PUBLIC",
+      "has_domain": true,
+      "cohort": "DEVELOPMENT",
+      "why": "public with a domain on record: both the website and the regulator path are available; the market runtime simply has not run it"
+    }
+  ]
+}

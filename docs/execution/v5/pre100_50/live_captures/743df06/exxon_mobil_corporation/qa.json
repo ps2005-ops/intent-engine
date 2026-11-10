@@ -1,0 +1,62 @@
+[
+  {
+    "question": "What should management do?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What should management do? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What should management do? Do not act on this reading. Re-run once the market engine publishes a snapshot this side will read. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "Why now?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "Why now? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation Why now? where the next increment of capital goes is a standing decision for this business model. It was ranked above capacity on the same evidence. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What's the biggest risk?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What's the biggest risk? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What's the biggest risk? the company's filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What would prove this wrong?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What would prove this wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What would prove this wrong? a disclosure in production and operating results showing the mechanism moving in the opposite direction would overturn this reading. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "Who's the real competitor?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "Who's the real competitor? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation Who's the real competitor? Agnico Eagle Mines Limited: operates the same business model (commodity producer) in the same sector (materials energy), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR; Barrick Mining Corporation: operates the same business model (commodity producer) in the same sector (materials energy), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR; CEMEX, S.A.B. de C.V.: operates the same business model (commodity producer) in the same sector (materials energy), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What does the market believe?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What does the market believe? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What does the market believe? That the contest Exxon Mobil Corporation has to win is against substitute materials at the customer's plant, and that holding that ground is what protects the economics.: read from the business model, not retrieved. Read from how this business model competes.; That Exxon Mobil Corporation's economics rest on volume sold into a price nobody in the industry sets, so that is where a change would show up first.: Follows from how a commodity producer business earns its return; not a statement Exxon Mobil Corporation made. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What's the weakest assumption?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What's the weakest assumption? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What's the weakest assumption? Exxon Mobil Corporation's filed results: The filed series is what this reading is computed from. Volume sold into a price nobody in the industry sets is what the economics rest on Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What impossible hypothesis should we investigate?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What impossible hypothesis should we investigate? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What impossible hypothesis should we investigate? A holder of this view is reading the record correctly as far as it goes: what it implies is wins and losses are decided against substitute materials at the customer's plant rather than somewhere else, and nothing in what this run retrieved contradicts that.; A holder of this view is reading the record correctly as far as it goes: what it implies is cash cost per unit against the marginal producer's is the measure that moves before the headline does, and nothing in what this run retrieved contradicts that. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What should we measure next?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What should we measure next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What should we measure next? produced volume \u2014 revenue at a business of this kind moves with produced volume.; realised commodity price \u2014 revenue at a business of this kind moves with realised commodity price.; grade or quality of output \u2014 revenue at a business of this kind moves with grade or quality of output. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What would you tell the board?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What would you tell the board? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Exxon Mobil Corporation What would you tell the board? Do not act on this reading. Re-run once the market engine publishes a snapshot this side will read. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  }
+]

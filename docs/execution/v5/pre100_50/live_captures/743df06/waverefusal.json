@@ -1,0 +1,125 @@
+[
+  {
+    "company": "The Goldman Sachs Group, Inc.",
+    "deployed_sha": "743df06",
+    "status": "READY",
+    "run_id": "01M0JFH666JK7F54T1949DBAC1",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/743df06/the_goldman_sachs_group_inc",
+    "process_before": {
+      "boot_id": "d7df6481c13e43c7",
+      "started_at": 1787326618.1855707,
+      "uptime_seconds": 47.9
+    },
+    "entry_domain": "goldmansachs.com",
+    "seconds": 54,
+    "first_useful": 54,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JFH666JK7F54T1949DBAC1",
+    "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "outcome_by_route": {
+      "run": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "intro": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "slides": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "full": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "story": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "history": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "connect": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "Mastercard Incorporated",
+    "deployed_sha": "743df06",
+    "status": "READY",
+    "run_id": "01M0JFWMDRA7DRH9AZHVSWDXDP",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/743df06/mastercard_incorporated",
+    "process_before": {
+      "boot_id": "d7df6481c13e43c7",
+      "started_at": 1787326618.1855707,
+      "uptime_seconds": 422.8
+    },
+    "entry_domain": "mastercard.com",
+    "seconds": 65,
+    "first_useful": 65,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JFWMDRA7DRH9AZHVSWDXDP",
+    "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "outcome_by_route": {
+      "run": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "intro": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "slides": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "full": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "story": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "history": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "connect": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "Costco Wholesale Corporation",
+    "deployed_sha": "743df06",
+    "status": "READY",
+    "run_id": "01M0JG82RYWQ2NJRTKBZ31KAVA",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/743df06/costco_wholesale_corporation",
+    "process_before": {
+      "boot_id": "d7df6481c13e43c7",
+      "started_at": 1787326618.1855707,
+      "uptime_seconds": 797.9
+    },
+    "entry_domain": "costco.com",
+    "seconds": 90,
+    "first_useful": 90,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JG82RYWQ2NJRTKBZ31KAVA",
+    "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "outcome_by_route": {
+      "run": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "intro": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "slides": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "full": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "story": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "history": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "connect": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "NIKE, Inc.",
+    "deployed_sha": "743df06",
+    "status": "READY",
+    "run_id": "01M0JGKJV9529PPAXJ2DK2E8WB",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/743df06/nike_inc",
+    "process_before": {
+      "boot_id": "d7df6481c13e43c7",
+      "started_at": 1787326618.1855707,
+      "uptime_seconds": 1172.9
+    },
+    "entry_domain": "nike.com",
+    "seconds": 159,
+    "first_useful": 159,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JGKJV9529PPAXJ2DK2E8WB/intro",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0JGKJV9529PPAXJ2DK2E8WB/progress: timeout",
+      "GET /runs/01M0JGKJV9529PPAXJ2DK2E8WB/progress: timeout"
+    ]
+  }
+]

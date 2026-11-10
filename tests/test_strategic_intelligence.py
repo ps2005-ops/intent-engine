@@ -41,8 +41,15 @@ Show evidence: artifact-id src-01H..., replay-id replay-01H...
 
 @pytest.fixture
 def shopify_report():
+    # THE BUSINESS MODEL IS PART OF THE REAL CALL NOW, and passing it is not a
+    # concession to the gate -- it is what production supplies. A tension
+    # fires on signal names, and signal names are generic enough that a chip
+    # designer's partner and platform language matched a marketplace's, so
+    # `patterns.tension_applies` fails closed on an unread model. A fixture
+    # that omits it is testing the refusal, not the reasoning.
     return build_strategic_report(company_name=SHOPIFY_COMPANY,
-                                  observations=shopify_observations())
+                                  observations=shopify_observations(),
+                                  business_model="SUBSCRIPTION_SOFTWARE")
 
 
 # --- J1: at least 3 non-generic strategic hypotheses ------------------------
@@ -708,11 +715,18 @@ def test_webapp_strategic_run_defaults_to_the_founder_brief(tmp_path):
     founder-brief markers do not.
     """
     app, c, rid = _strategic_webapp_run(tmp_path)
+    # THE DEFAULT IS NOW STEP 1 of the six-step story, reached by a redirect.
+    # What this test protects -- that the default is not the eleven-section
+    # report -- is asserted on the page actually served.
     status, headers, body = c.request("GET", f"/runs/{rid}")
+    assert status == "303 See Other"
+    assert headers["Location"] == f"/runs/{rid}/intro"
+    status, headers, body = c.request("GET", f"/runs/{rid}/intro")
     assert status == "200 OK"
 
-    # it IS the founder brief
-    assert "Why this matters" in body
+    # it IS the introduction: what the company is, and what is at stake
+    assert "The strategic read" in body
+    assert "What matters now" in body
 
     # ... and it is NOT the full report — the original failure this catches
     assert "Executive Overview" not in body
@@ -721,8 +735,14 @@ def test_webapp_strategic_run_defaults_to_the_founder_brief(tmp_path):
     assert not re.search(r"\[(?:u|mv|c)\.[a-z_]+", body), \
         "an internal claim id reached the default view"
 
-    # depth remains reachable, never required
-    assert f"/runs/{rid}/full" in body
+    # DEPTH REMAINS REACHABLE, NEVER REQUIRED -- now in order rather than as
+    # a grid. Step 1 offers exactly one way onward, and the full analysis is
+    # step 3, reachable along the chain.
+    assert f"/runs/{rid}/slides" in body
+    from intent_engine.founder_brief import flow
+    assert "Step 1 of 6" in body
+    _s, _h, deck = c.request("GET", f"/runs/{rid}/slides")
+    assert f"/runs/{rid}/full" in deck
 
 
 def test_the_default_route_never_reverts_to_a_deeper_layer(tmp_path):
@@ -734,20 +754,29 @@ def test_the_default_route_never_reverts_to_a_deeper_layer(tmp_path):
     pages render perfectly well -- they are just not a 60-second answer.
     """
     app, c, rid = _strategic_webapp_run(tmp_path)
-    status, headers, body = c.request("GET", f"/runs/{rid}")
-    assert not status.startswith("30"), (
-        "the default must be served directly; a redirect to a deeper layer is "
-        "the reversion this guards")
-    assert "Location" not in headers
-    # The default is the scrollable decision narrative. Asserted by SECTION
-    # ID rather than by heading text: the headings are copy and will be
-    # reworded, and a guard that fails on rewording is a guard people delete.
+    status, headers, _body = c.request("GET", f"/runs/{rid}")
+    # THE REVERSION THIS GUARDS IS UNCHANGED: the default must never become
+    # the executive brief or the full analysis. v5 sends it to STEP 1 of the
+    # six-step story, which is shorter than both and is the first page of a
+    # narrative rather than a deeper layer -- so the redirect is permitted
+    # and its DESTINATION is pinned.
+    assert status == "303 See Other"
+    assert headers["Location"] == f"/runs/{rid}/intro", headers["Location"]
+    for deeper in ("/full", "/brief", "/slides", "/dashboard"):
+        assert not headers["Location"].endswith(deeper), headers["Location"]
+
+    _s, _h, body = c.request("GET", f"/runs/{rid}/intro")
+    # The scrollable decision narrative keeps its section ids and is served
+    # at /answer, one click from step 1. Both are checked, so neither can be
+    # quietly emptied.
+    assert f"/runs/{rid}/answer" in body
+    _s, _h, narrative = c.request("GET", f"/runs/{rid}/answer")
     for marker in ('id="executive_answer"', 'id="the_decision"',
                    'id="next_move"', 'id="prepared"'):
-        assert marker in body, marker
+        assert marker in narrative, marker
     # ...and it is a scroll, not a deck: no pager stands between the reader
     # and any of it.
-    assert "Next →" not in body and "Slide 1 of" not in body
+    assert "Slide 1 of" not in narrative
 
 
 def test_a_run_that_matches_no_signal_gets_the_honest_page(tmp_path,
@@ -1107,11 +1136,22 @@ def test_the_deck_and_every_other_layer_stay_reachable(tmp_path):
 
 
 def test_the_default_run_page_is_the_founder_brief(tmp_path):
-    """The destination itself must be the brief, not a redirect back to it."""
+    """The destination itself must be a READING, not a redirect back to a
+    deeper layer.
+
+    v5: the default redirects ONCE, into step 1. The property this test
+    protects -- that a reader lands on something they can act on rather than
+    on a document they have to work through -- is asserted there.
+    """
     app, c, rid = _strategic_webapp_run(tmp_path)
-    status, _, body = c.request("GET", f"/runs/{rid}")
+    status, headers, body = c.request("GET", f"/runs/{rid}")
+    assert status == "303 See Other"
+    assert headers["Location"] == f"/runs/{rid}/intro"
+    status, _, body = c.request("GET", f"/runs/{rid}/intro")
     assert status == "200 OK"
-    assert "Why this matters" in body
+    # Step 1 answers "what is this company and what is the argument about",
+    # which is what "Why this matters" was standing in for.
+    assert "The strategic read" in body
     assert body.count("<main") == 1
 
 

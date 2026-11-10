@@ -1,0 +1,47 @@
+{
+  "company": "Alphabet Inc.",
+  "deployed_sha": "5d43053",
+  "run_id": "01M0HN4JNN0Z8K7ZRWFWN5M7B1",
+  "analysis_seconds": 159,
+  "stage_transitions": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Alphabet Inc. GOOG \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecting ",
+      "status": 200,
+      "html_bytes": 16996
+    },
+    {
+      "t": 26.9,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Alphabet Inc. GOOG \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Connecting ma",
+      "status": 200,
+      "html_bytes": 16992
+    },
+    {
+      "t": 159.2,
+      "text": "Alphabet Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Alphabet Inc. GOOG \u00b7 SEC CIK 0001652044 Alphabet Inc. is a software platform business that runs on attention resold to advertisers: revenue is an auction price per impression, so nothing is contracted forw",
+      "status": 200,
+      "html_bytes": 31542
+    }
+  ],
+  "route_seconds": {
+    "run": 5.2,
+    "intro": 6.21,
+    "slides": 8.48,
+    "full": 2.59,
+    "story": 7.2,
+    "history": 0.24,
+    "connect": 4.57
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "1a03e19590ee4c01",
+    "started_at": 1787298504.401148,
+    "uptime_seconds": 483.9
+  },
+  "process_after": {
+    "boot_id": "1a03e19590ee4c01",
+    "started_at": 1787298504.401148,
+    "uptime_seconds": 823.3
+  },
+  "errors": []
+}

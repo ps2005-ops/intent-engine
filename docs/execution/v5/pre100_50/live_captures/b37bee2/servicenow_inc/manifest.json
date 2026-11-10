@@ -1,0 +1,138 @@
+{
+  "company": "ServiceNow, Inc.",
+  "deployed_sha": "b37bee2",
+  "captured_at": "2026-08-21T10:02:28Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HWB82YW9DQG9M1SKGJHS92",
+      "chars": 2127,
+      "html_chars": 17979,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HWB82YW9DQG9M1SKGJHS92/intro",
+      "chars": 4661,
+      "html_chars": 29928,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HWB82YW9DQG9M1SKGJHS92",
+      "chars": 2127,
+      "html_chars": 17979,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HWB82YW9DQG9M1SKGJHS92/full",
+      "chars": 2127,
+      "html_chars": 17979,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HWB82YW9DQG9M1SKGJHS92/story",
+      "chars": 5148,
+      "html_chars": 34821,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HWB82YW9DQG9M1SKGJHS92/history",
+      "chars": 29023,
+      "html_chars": 104809,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HWB82YW9DQG9M1SKGJHS92/connect",
+      "chars": 4036,
+      "html_chars": 28952,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HWB82YW9DQG9M1SKGJHS92",
+      "chars": 2127,
+      "html_chars": 17979,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HWB82YW9DQG9M1SKGJHS92/evidence",
+      "chars": 3551,
+      "html_chars": 19613,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HWB82YW9DQG9M1SKGJHS92/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HWB82YW9DQG9M1SKGJHS92/brief",
+      "chars": 20674,
+      "html_chars": 57712,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing ServiceNow, Inc. NOW \u00b7 servicenow.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence ",
+      "status": 200,
+      "html_bytes": 17016
+    },
+    {
+      "t": 32.1,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing ServiceNow, Inc. NOW \u00b7 servicenow.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence",
+      "status": 200,
+      "html_bytes": 17012
+    },
+    {
+      "t": 66.9,
+      "text": "Limited analysis of ServiceNow, Inc. Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of ServiceNow, Inc. There is not enough public evidence to build a briefing on this company. Rather than show a briefing that looks complete and is not, here is exactly where it stands. What wa",
+      "status": 200,
+      "html_bytes": 18015
+    }
+  ],
+  "process_before": {
+    "boot_id": "1d80da0ebd18404e",
+    "started_at": 1787306143.9528165,
+    "uptime_seconds": 404.5
+  },
+  "run_id": "01M0HWB82YW9DQG9M1SKGJHS92",
+  "status": "READY",
+  "seconds": 67,
+  "first_useful": 67,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 3.2,
+    "intro": 11.81,
+    "slides": 3.17,
+    "full": 3.28,
+    "story": 5.94,
+    "history": 0.19,
+    "connect": 3.7
+  },
+  "evidence_gate": "compose=4 usable=3 families=investor stored=4 attempt=3",
+  "outcome": "TRUE_EVIDENCE_SCARCITY",
+  "outcome_by_route": {
+    "run": "TRUE_EVIDENCE_SCARCITY",
+    "intro": "TRUE_EVIDENCE_SCARCITY",
+    "slides": "TRUE_EVIDENCE_SCARCITY",
+    "full": "TRUE_EVIDENCE_SCARCITY",
+    "story": "TRUE_EVIDENCE_SCARCITY",
+    "history": "TRUE_EVIDENCE_SCARCITY",
+    "connect": "TRUE_EVIDENCE_SCARCITY"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": []
+}

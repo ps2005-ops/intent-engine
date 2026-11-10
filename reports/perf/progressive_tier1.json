@@ -1,0 +1,187 @@
+{
+  "base": "https://intent-engine-preview-bridge.onrender.com",
+  "cohort": "tier1",
+  "version": "{\"app_version\": \"1.5.0-executive-intelligence\", \"commit\": \"a7b8783f0885320f6be054e19dd382874f3c1d94\", \"process\": {\"boot_id\": \"6e0e6c605c114177\", \"started_at\": 1788033231.4189112, \"uptime_seconds\": 734.8}}",
+  "summary": {
+    "attempted": 4,
+    "counted": 4,
+    "refused": 0,
+    "core_success": 4,
+    "deep_success": 0,
+    "no_result": 0,
+    "core_p50": 212.0,
+    "core_p90": 214.8,
+    "core_max": 214.8,
+    "deep_p50": null,
+    "deep_p90": null,
+    "deep_max": null,
+    "core_over_60s": [
+      "NVIDIA",
+      "Amazon",
+      "Alphabet",
+      "Meta Platforms"
+    ]
+  },
+  "rows": [
+    {
+      "company": "NVIDIA",
+      "domain": "nvidia.com",
+      "error": "",
+      "core_ready_seconds": 214.8,
+      "deep_ready_seconds": null,
+      "analyze_status": 200,
+      "run_id": "01M17J28TNB0T33BDXSA8NYAA4",
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 1.2
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 37.0
+        }
+      ],
+      "progress_unreachable_polls": 2,
+      "deep_detection": "NO_PENDING_ON_FIRST_POLL",
+      "pages": {
+        "": {
+          "status": 200,
+          "chars": 30698,
+          "seconds": 31.6,
+          "deep_pending": false,
+          "outcome": ""
+        },
+        "/brief": {
+          "status": 200,
+          "chars": 58756,
+          "seconds": 41.1,
+          "deep_pending": false,
+          "outcome": ""
+        }
+      },
+      "evidence_citations": 0,
+      "status": "CORE_READY_DEEP_PENDING",
+      "total_seconds": 340.8
+    },
+    {
+      "company": "Amazon",
+      "domain": "amazon.com",
+      "error": "",
+      "core_ready_seconds": 187.3,
+      "deep_ready_seconds": null,
+      "analyze_status": 200,
+      "run_id": "01M17JCQ95SJPC7F7CGYY4VE9A",
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 5.1
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 26.5
+        }
+      ],
+      "progress_unreachable_polls": 2,
+      "deep_detection": "NO_PENDING_ON_FIRST_POLL",
+      "pages": {
+        "": {
+          "status": 200,
+          "chars": 29276,
+          "seconds": 12.7,
+          "deep_pending": false,
+          "outcome": ""
+        },
+        "/brief": {
+          "status": 200,
+          "chars": 55732,
+          "seconds": 21.5,
+          "deep_pending": false,
+          "outcome": ""
+        }
+      },
+      "evidence_citations": 0,
+      "status": "CORE_READY_DEEP_PENDING",
+      "total_seconds": 256.8
+    },
+    {
+      "company": "Alphabet",
+      "domain": "abc.xyz",
+      "error": "",
+      "core_ready_seconds": 212.0,
+      "deep_ready_seconds": null,
+      "analyze_status": 200,
+      "run_id": "01M17JMJCCQYG6VK75BZD4KP9H",
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 1.5
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 32.0
+        }
+      ],
+      "progress_unreachable_polls": 2,
+      "deep_detection": "NO_PENDING_ON_FIRST_POLL",
+      "pages": {
+        "": {
+          "status": 200,
+          "chars": 29337,
+          "seconds": 4.6,
+          "deep_pending": false,
+          "outcome": ""
+        },
+        "/brief": {
+          "status": 200,
+          "chars": 55913,
+          "seconds": 9.1,
+          "deep_pending": false,
+          "outcome": ""
+        }
+      },
+      "evidence_citations": 0,
+      "status": "CORE_READY_DEEP_PENDING",
+      "total_seconds": 262.5
+    },
+    {
+      "company": "Meta Platforms",
+      "domain": "meta.com",
+      "error": "",
+      "core_ready_seconds": 209.8,
+      "deep_ready_seconds": null,
+      "analyze_status": 200,
+      "run_id": "01M17JWK32CP6BT63ZWAFBPGAW",
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 1.0
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 32.4
+        }
+      ],
+      "progress_unreachable_polls": 2,
+      "deep_detection": "NO_PENDING_ON_FIRST_POLL",
+      "pages": {
+        "": {
+          "status": 200,
+          "chars": 29379,
+          "seconds": 5.3,
+          "deep_pending": false,
+          "outcome": ""
+        },
+        "/brief": {
+          "status": 502,
+          "chars": 223036,
+          "seconds": 9.9,
+          "deep_pending": false,
+          "outcome": ""
+        }
+      },
+      "evidence_citations": 0,
+      "status": "CORE_READY_DEEP_PENDING",
+      "total_seconds": 248.4
+    }
+  ]
+}

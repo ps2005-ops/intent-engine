@@ -1,0 +1,132 @@
+{
+  "company": "Exxon Mobil Corporation",
+  "deployed_sha": "743df06",
+  "captured_at": "2026-08-21T17:50:29Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JQ4732J0ZF4537XB8FB5B9/intro",
+      "chars": 5021,
+      "html_chars": 30338,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JQ4732J0ZF4537XB8FB5B9/intro",
+      "chars": 5021,
+      "html_chars": 30338,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JQ4732J0ZF4537XB8FB5B9/slides",
+      "chars": 3905,
+      "html_chars": 36102,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JQ4732J0ZF4537XB8FB5B9/full",
+      "chars": 12583,
+      "html_chars": 44010,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JQ4732J0ZF4537XB8FB5B9/story",
+      "chars": 4424,
+      "html_chars": 33959,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JQ4732J0ZF4537XB8FB5B9/history",
+      "chars": 5646,
+      "html_chars": 35279,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JQ4732J0ZF4537XB8FB5B9/connect",
+      "chars": 3780,
+      "html_chars": 28661,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JQ4732J0ZF4537XB8FB5B9/intro",
+      "chars": 5021,
+      "html_chars": 30338,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JQ4732J0ZF4537XB8FB5B9/evidence",
+      "chars": 3542,
+      "html_chars": 19612,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JQ4732J0ZF4537XB8FB5B9/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JQ4732J0ZF4537XB8FB5B9/brief",
+      "chars": 10195,
+      "html_chars": 36734,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Loading what we already know. Analysing Exxon Mobil Corporation corporate.exxonmobil.com \u2014 not this company? Identifying the company done Loading prior intelligence working Reading current ",
+      "status": 200,
+      "html_bytes": 17032
+    },
+    {
+      "t": 107.5,
+      "text": "Exxon Mobil Corporation \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Exxon Mobil Corporation XOM \u00b7 USA \u00b7 corporate.exxonmobil.com \u00b7 SEC CIK 0002115436 Exxon Mobil Corporation is a materials energy business that runs on production of an undifferentiated output sold",
+      "status": 200,
+      "html_bytes": 30409
+    }
+  ],
+  "process_before": {
+    "boot_id": "d7df6481c13e43c7",
+    "started_at": 1787326618.1855707,
+    "uptime_seconds": 8011.4
+  },
+  "run_id": "01M0JQ4732J0ZF4537XB8FB5B9",
+  "status": "READY",
+  "seconds": 108,
+  "first_useful": 108,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 4.86,
+    "intro": 4.4,
+    "slides": 8.03,
+    "full": 13.24,
+    "story": 5.02,
+    "history": 0.19,
+    "connect": 3.39
+  },
+  "evidence_gate": "compose=4 usable=4 families=identity|investor|strategy stored=4 attempt=3 failed=16/14 dropped=0/0/0/0",
+  "outcome": "FULL_ANALYSIS",
+  "outcome_by_route": {
+    "run": "FULL_ANALYSIS",
+    "intro": "FULL_ANALYSIS",
+    "slides": "FULL_ANALYSIS",
+    "full": "FULL_ANALYSIS",
+    "story": "FULL_ANALYSIS",
+    "history": "FULL_ANALYSIS",
+    "connect": "FULL_ANALYSIS"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": []
+}

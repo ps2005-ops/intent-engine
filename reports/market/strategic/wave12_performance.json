@@ -1,0 +1,13 @@
+{
+ "contract": "wave12_performance.v1",
+ "as_of": "2026-08-08",
+ "stages_ms": {
+  "evidence_trust.assess": 0.0018,
+  "evidence_trust.summarise (167)": 0.305,
+  "retention audit with production counts": 0.0029,
+  "relationship_scope": 0.0008,
+  "occurrence_time.read": 0.0033
+ },
+ "total_ms": 0.3138,
+ "note": "evidence trust is a per-event translation of an answer the market layer already computed, so it adds no traversal. The one cost that scales is relationships() re-reading the ledger, recorded in wave 11 and unchanged."
+}

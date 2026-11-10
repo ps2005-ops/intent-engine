@@ -1,0 +1,3046 @@
+{
+  "frozen": {
+    "contract": "breaker_wave_baseline.v1",
+    "label": "baseline",
+    "runtime_sha": "e6347e9d6053378b18cd8e90cb1ff2df37000321",
+    "runtime_tree_dirty": false,
+    "manifest_version": "1.0.0",
+    "dossier_contract_version": "company_demo_dossier.v1",
+    "analyst": {
+      "configured": true,
+      "key_in_env": true,
+      "detail": ""
+    },
+    "max_approved_sources": 14,
+    "started_at": "2026-08-13T09:18:40.984509+00:00",
+    "cohort": [
+      "cloudflare",
+      "advanced-micro-devices",
+      "boeing",
+      "bank-of-america",
+      "alimentation-couche-tard",
+      "agnico-eagle-mines",
+      "bce",
+      "stripe",
+      "mckinsey",
+      "johnson-and-johnson"
+    ],
+    "finished_at": "2026-08-13T09:22:58.115625+00:00"
+  },
+  "runtime_root": "/var/folders/9h/11c66kl14ssds_w88hg7w5_c0000gn/T/breaker-wave-wzws7sjb",
+  "cohort_summary": {
+    "companies": 10,
+    "independence_measured_for": 10,
+    "retrieval": {
+      "attempted": 140,
+      "successful_documents": 68,
+      "retrieval_yield": 0.4857,
+      "failure_types": {
+        "host_unreachable": 16,
+        "http_status": 41,
+        "timeout": 4,
+        "too_large": 11
+      },
+      "http_status_counts": {
+        "HTTP 403": 13,
+        "HTTP 404": 28
+      },
+      "fetch_seconds": 102.1
+    },
+    "evidence": {
+      "documents": 71,
+      "observations": 0,
+      "observations_per_document": 0.0,
+      "observations_state": {
+        "state": "MEASURED",
+        "companies_with_usable_report": 1,
+        "of": 10
+      }
+    },
+    "independence": {
+      "independent_documents": 22,
+      "duplicate_documents": 0,
+      "republications": 1,
+      "company_self_reports": 7,
+      "unknown_lineage": 0,
+      "independent_document_share": 0.3099,
+      "mean_source_concentration": 0.64,
+      "seconds_per_independent_document": 4.6409
+    },
+    "learning_conversion": {
+      "state": "BLOCKED_EXTERNAL_CREDITS",
+      "reason": "9 of 10 compan(ies) produced no knowledge state for evidence to change, so learning conversion is downstream of the reasoning backend and is NOT a measurement of the evidence",
+      "attribution_states": {
+        "BLOCKED_EXTERNAL_CREDITS": 9,
+        "NOT_ATTEMPTED": 1
+      },
+      "companies_measured": 0,
+      "of": 10,
+      "evidence_rows": "UNAVAILABLE",
+      "effect_producing_evidence_rows": "UNAVAILABLE",
+      "independent_effect_producing_evidence_rows": "UNAVAILABLE",
+      "zero_effect_evidence_rows": "UNAVAILABLE",
+      "learning_conversion": "UNAVAILABLE"
+    },
+    "high_activity_low_learning": {
+      "detected": false,
+      "status": "STABLE",
+      "documents": 71,
+      "independent_documents": 22,
+      "independent_document_share": 0.3099,
+      "duplicate_documents": 0,
+      "republications": 1,
+      "which_conversion_failed": "none",
+      "reason": "22 of 71 documents carry an independent vantage point (31.0%), at or above the 20% floor",
+      "belief_arm": "BLOCKED_EXTERNAL_CREDITS",
+      "belief_arm_reason": "9 of 10 compan(ies) produced no knowledge state for evidence to change, so learning conversion is downstream of the reasoning backend and is NOT a measurement of the evidence",
+      "first_starved_conversion": "independent evidence \u2192 learning: BLOCKED_EXTERNAL_CREDITS"
+    }
+  },
+  "results": [
+    {
+      "company_id": "cloudflare",
+      "canonical_name": "Cloudflare, Inc.",
+      "domain": "cloudflare.com",
+      "country": "USA",
+      "sector": "SOFTWARE_PLATFORM",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PUBLIC",
+      "entity_type": "OPERATING_COMPANY",
+      "coverage_expectation": "HIGH_COVERAGE",
+      "breaker_dimensions": [
+        "baseline_operating_company"
+      ],
+      "started_at": "2026-08-13T09:18:41.000772+00:00",
+      "runtime_sha": "e6347e9d6053378b18cd8e90cb1ff2df37000321",
+      "manifest_version": "1.0.0",
+      "analyst_configured": true,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": true,
+        "key_present": true,
+        "error": ""
+      },
+      "run_id": "01KZX6N9C0M9Q60NFT5CKY5NAQ",
+      "discovery_seconds": 4.0,
+      "candidates_discovered": 56,
+      "candidates_approved": 14,
+      "fetch_seconds": 10.55,
+      "compose_seconds": 8.18,
+      "identity": {
+        "requested_name": "Cloudflare, Inc.",
+        "requested_domain": "cloudflare.com",
+        "resolved_company_name": "Cloudflare, Inc.",
+        "resolved_domain": "cloudflare.com",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "NORMAL",
+        "parent_company_id": null,
+        "report_subject": "Cloudflare, Inc."
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 10,
+        "failed": 4,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "http_status": 2,
+          "too_large": 2
+        },
+        "http_status_counts": {
+          "HTTP 403": 2
+        },
+        "failure_messages": [
+          "HTTP 403",
+          "response exceeded 2000000 bytes"
+        ],
+        "retryable_failures": 0,
+        "families": [
+          "commercial",
+          "customers",
+          "identity",
+          "investor",
+          "product",
+          "strategy",
+          "talent"
+        ],
+        "family_counts": {
+          "identity": 1,
+          "investor": 2,
+          "customers": 1,
+          "strategy": 1,
+          "commercial": 1,
+          "talent": 1,
+          "product": 3
+        },
+        "missing_core": [],
+        "evidence_report_state": "EVIDENCE_REPORT_READY"
+      },
+      "evidence": {
+        "documents_retrieved": 10,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 10,
+        "evidence_independence_state": "MEASURED",
+        "independence": {
+          "contract": "evidence_independence.v1",
+          "state": "MEASURED",
+          "evidence_count": 10,
+          "independent_evidence_count": 1,
+          "source_family_count": 2,
+          "primary_source_count": 1,
+          "company_self_report_count": 1,
+          "independent_external_count": 0,
+          "unknown_lineage_count": 0,
+          "duplicate_document_count": 0,
+          "same_origin_count": 8,
+          "republication_count": 0,
+          "concentration_ratio": 0.8,
+          "distinct_observation_count": 2,
+          "corroboration_state": "PARTIALLY_INDEPENDENT",
+          "corroboration_reason": "exactly one outside vantage point; a second independent origin is what would corroborate it",
+          "plain_statement": "Ten document(s) support this view, representing one independent origin.",
+          "independent_origins": [
+            "sec.gov/filer/1477333"
+          ],
+          "source_families": [
+            "cloudflare.com",
+            "sec.gov/filer/1477333"
+          ],
+          "contradicting_evidence_ids": [],
+          "lineage_counts": {
+            "COMPANY_SELF_REPORT": 1,
+            "REGULATOR_OR_PRIMARY_FILING": 1,
+            "SAME_ORIGIN": 8
+          }
+        },
+        "independence_rows": [
+          {
+            "index": 0,
+            "source_id": "src-5e7c83cd0717",
+            "url": "https://www.cloudflare.com/",
+            "origin_family": "cloudflare.com",
+            "source_class": "company_owned",
+            "lineage": "COMPANY_SELF_REPORT",
+            "anchor_index": null,
+            "independence_bearing": false
+          },
+          {
+            "index": 1,
+            "source_id": "src-f747efbfe52c",
+            "url": "https://www.sec.gov/Archives/edgar/data/1477333/000147733326000016/cloud-20251231.htm",
+            "origin_family": "sec.gov/filer/1477333",
+            "source_class": "investor_material",
+            "lineage": "REGULATOR_OR_PRIMARY_FILING",
+            "anchor_index": null,
+            "independence_bearing": true
+          },
+          {
+            "index": 2,
+            "source_id": "src-cc6710ce5a9f",
+            "url": "https://www.cloudflare.com/partners/",
+            "origin_family": "cloudflare.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 3,
+            "source_id": "src-380b21268763",
+            "url": "https://blog.cloudflare.com/",
+            "origin_family": "cloudflare.com",
+            "source_class": "executive_statement",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 4,
+            "source_id": "src-7f07af9cc917",
+            "url": "https://www.cloudflare.com/plans/",
+            "origin_family": "cloudflare.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 5,
+            "source_id": "src-321bd9616618",
+            "url": "https://www.cloudflare.com/careers/",
+            "origin_family": "cloudflare.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 6,
+            "source_id": "src-c46a0a9bd3cd",
+            "url": "https://www.sec.gov/Archives/edgar/data/1477333/000147733326000054/cloud-20260630.htm",
+            "origin_family": "sec.gov/filer/1477333",
+            "source_class": "investor_material",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 1,
+            "independence_bearing": false
+          },
+          {
+            "index": 7,
+            "source_id": "src-7299df54786e",
+            "url": "https://www.cloudflare.com/products/api-shield/",
+            "origin_family": "cloudflare.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 8,
+            "source_id": "src-835e85be99c5",
+            "url": "https://www.cloudflare.com/products/",
+            "origin_family": "cloudflare.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 9,
+            "source_id": "src-4e3e26188ad1",
+            "url": "https://www.cloudflare.com/products/d1/",
+            "origin_family": "cloudflare.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          }
+        ]
+      },
+      "learning": {
+        "contract": "learning_attribution.v1",
+        "attribution_state": "BLOCKED_EXTERNAL_CREDITS",
+        "attribution_reason": "the run reached no usable strategic report, so no knowledge state existed for an evidence row to change",
+        "evidence_rows": 10,
+        "eligible_evidence_rows": "UNAVAILABLE",
+        "effect_producing_evidence_rows": "UNAVAILABLE",
+        "independent_effect_producing_evidence_rows": "UNAVAILABLE",
+        "zero_effect_evidence_rows": "UNAVAILABLE",
+        "learning_conversion": "UNAVAILABLE",
+        "independent_learning_conversion": "UNAVAILABLE",
+        "knowledge_effects": 0,
+        "effects_by_type": {},
+        "changes": []
+      },
+      "intelligence": {
+        "strategic_report": "PRESENT",
+        "result_state": "FAILED",
+        "result_state_detail": "The analysis did not complete. No conclusions should be drawn.",
+        "reasoning_provenance": "pattern_library",
+        "strategic_analysis": "ABSENT",
+        "hypotheses": 0,
+        "shifts": 3,
+        "critic_findings": 0,
+        "readiness": true
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "cloudflare:48e26cb942afec82",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "AVAILABLE",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-13",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_available": 1,
+        "founder_snapshots_read": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 1/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdzVsSsYgmojoe8BqfuqS'}",
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 2/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdzVsThAFxbDPwEffSzpW'}",
+        "ERROR intent_engine.strategic_intelligence.analyst.runner: analyst gave up after 2 attempt(s): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdzVsThAFxbDPwEffSzpW'}"
+      ],
+      "finished_at": "2026-08-13T09:19:03.758396+00:00",
+      "wall_seconds": 22.76
+    },
+    {
+      "company_id": "advanced-micro-devices",
+      "canonical_name": "Advanced Micro Devices, Inc.",
+      "domain": "amd.com",
+      "country": "USA",
+      "sector": "SEMICONDUCTOR",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PUBLIC",
+      "entity_type": "OPERATING_COMPANY",
+      "coverage_expectation": "HIGH_COVERAGE",
+      "breaker_dimensions": [
+        "competitive_response",
+        "demand_extraction",
+        "macro_transmission"
+      ],
+      "started_at": "2026-08-13T09:19:03.759318+00:00",
+      "runtime_sha": "e6347e9d6053378b18cd8e90cb1ff2df37000321",
+      "manifest_version": "1.0.0",
+      "analyst_configured": true,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": true,
+        "key_present": true,
+        "error": ""
+      },
+      "run_id": "01KZX6NZJJMD1JBTJKQVRM70CG",
+      "discovery_seconds": 26.3,
+      "candidates_discovered": 39,
+      "candidates_approved": 14,
+      "fetch_seconds": 18.51,
+      "compose_seconds": 5.16,
+      "identity": {
+        "requested_name": "Advanced Micro Devices, Inc.",
+        "requested_domain": "amd.com",
+        "resolved_company_name": "Advanced Micro Devices, Inc.",
+        "resolved_domain": "amd.com",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "NORMAL",
+        "parent_company_id": null,
+        "report_subject": "Advanced Micro Devices, Inc."
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 4,
+        "failed": 10,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "host_unreachable": 8,
+          "timeout": 2
+        },
+        "http_status_counts": {},
+        "failure_messages": [
+          "The read operation timed out",
+          "amd.com failed 2 times earlier in this run; not dialled again"
+        ],
+        "retryable_failures": 10,
+        "families": [
+          "independent",
+          "investor"
+        ],
+        "family_counts": {
+          "investor": 2,
+          "independent": 2
+        },
+        "missing_core": [
+          "identity",
+          "product",
+          "customers",
+          "strategy"
+        ],
+        "evidence_report_state": "EVIDENCE_PARTIAL"
+      },
+      "evidence": {
+        "documents_retrieved": 4,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 4,
+        "evidence_independence_state": "MEASURED",
+        "independence": {
+          "contract": "evidence_independence.v1",
+          "state": "MEASURED",
+          "evidence_count": 4,
+          "independent_evidence_count": 3,
+          "source_family_count": 3,
+          "primary_source_count": 1,
+          "company_self_report_count": 0,
+          "independent_external_count": 2,
+          "unknown_lineage_count": 0,
+          "duplicate_document_count": 0,
+          "same_origin_count": 1,
+          "republication_count": 0,
+          "concentration_ratio": 0.5,
+          "distinct_observation_count": 3,
+          "corroboration_state": "INDEPENDENTLY_CORROBORATED",
+          "corroboration_reason": "3 independent origins among 3 distinct observation(s)",
+          "plain_statement": "Four document(s) support this view, representing three independent origin(s).",
+          "independent_origins": [
+            "sec.gov/filer/2488",
+            "sec.gov/filer/4127",
+            "sec.gov/filer/897723"
+          ],
+          "source_families": [
+            "sec.gov/filer/2488",
+            "sec.gov/filer/4127",
+            "sec.gov/filer/897723"
+          ],
+          "contradicting_evidence_ids": [],
+          "lineage_counts": {
+            "INDEPENDENT_EXTERNAL_SOURCE": 2,
+            "REGULATOR_OR_PRIMARY_FILING": 1,
+            "SAME_ORIGIN": 1
+          }
+        },
+        "independence_rows": [
+          {
+            "index": 0,
+            "source_id": "src-ddcff05dd873",
+            "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm",
+            "origin_family": "sec.gov/filer/2488",
+            "source_class": "investor_material",
+            "lineage": "REGULATOR_OR_PRIMARY_FILING",
+            "anchor_index": null,
+            "independence_bearing": true
+          },
+          {
+            "index": 1,
+            "source_id": "src-d85c65bbdb86",
+            "url": "https://www.sec.gov/Archives/edgar/data/4127/000000412726000003/swks-20251003.htm",
+            "origin_family": "sec.gov/filer/4127",
+            "source_class": "competitor",
+            "lineage": "INDEPENDENT_EXTERNAL_SOURCE",
+            "anchor_index": null,
+            "independence_bearing": true
+          },
+          {
+            "index": 2,
+            "source_id": "src-640f25904488",
+            "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000123/amd-20260627.htm",
+            "origin_family": "sec.gov/filer/2488",
+            "source_class": "investor_material",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 3,
+            "source_id": "src-23189dd932a3",
+            "url": "https://www.sec.gov/Archives/edgar/data/897723/000089772325000042/sanm-20250927.htm",
+            "origin_family": "sec.gov/filer/897723",
+            "source_class": "competitor",
+            "lineage": "INDEPENDENT_EXTERNAL_SOURCE",
+            "anchor_index": null,
+            "independence_bearing": true
+          }
+        ]
+      },
+      "learning": {
+        "contract": "learning_attribution.v1",
+        "attribution_state": "NOT_ATTEMPTED",
+        "attribution_reason": "a knowledge state was produced and no attribution was recorded against it; the seam exists and was not exercised, which is not the same as evidence that changed nothing",
+        "evidence_rows": 4,
+        "eligible_evidence_rows": 4,
+        "effect_producing_evidence_rows": 0,
+        "independent_effect_producing_evidence_rows": 0,
+        "zero_effect_evidence_rows": 4,
+        "learning_conversion": 0.0,
+        "independent_learning_conversion": 0.0,
+        "knowledge_effects": 0,
+        "effects_by_type": {},
+        "changes": []
+      },
+      "intelligence": {
+        "strategic_report": "PRESENT",
+        "result_state": "EVIDENCE_LIMITED",
+        "result_state_detail": "Not enough could be retrieved to support a strategic reading. What was verified is shown below; nothing is inferred beyond it. What we did have: 4 source(s) retrieved and read; evidence covering investor material; 43 figure(s) we could quote directly. What was missing: anything written by someone other than the company \u2014 every source here is the company's own account. Independent reporting, a dated customer outcome, or published pricing would each strengthen this.",
+        "reasoning_provenance": "pattern_library",
+        "strategic_analysis": "ABSENT",
+        "hypotheses": 3,
+        "shifts": 1,
+        "critic_findings": 0,
+        "readiness": true
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "advanced-micro-devices:15c90011e1346bbd",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "AVAILABLE",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-13",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_available": 1,
+        "founder_snapshots_read": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [],
+      "finished_at": "2026-08-13T09:19:53.744358+00:00",
+      "wall_seconds": 49.99
+    },
+    {
+      "company_id": "boeing",
+      "canonical_name": "The Boeing Company",
+      "domain": "boeing.com",
+      "country": "USA",
+      "sector": "INDUSTRIAL",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PUBLIC",
+      "entity_type": "OPERATING_COMPANY",
+      "coverage_expectation": "HIGH_COVERAGE",
+      "breaker_dimensions": [
+        "capital_intensity",
+        "demand_extraction",
+        "macro_transmission",
+        "multi_segment_ambiguity",
+        "regulated_environment"
+      ],
+      "started_at": "2026-08-13T09:19:53.745622+00:00",
+      "runtime_sha": "e6347e9d6053378b18cd8e90cb1ff2df37000321",
+      "manifest_version": "1.0.0",
+      "analyst_configured": true,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": true,
+        "key_present": true,
+        "error": ""
+      },
+      "run_id": "01KZX6QGCNP72A8GPAK5X9AGSH",
+      "discovery_seconds": 3.49,
+      "candidates_discovered": 42,
+      "candidates_approved": 14,
+      "fetch_seconds": 10.5,
+      "compose_seconds": 8.35,
+      "identity": {
+        "requested_name": "The Boeing Company",
+        "requested_domain": "boeing.com",
+        "resolved_company_name": "The Boeing Company",
+        "resolved_domain": "boeing.com",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "NORMAL",
+        "parent_company_id": null,
+        "report_subject": "The Boeing Company"
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 7,
+        "failed": 7,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "http_status": 6,
+          "too_large": 1
+        },
+        "http_status_counts": {
+          "HTTP 404": 6
+        },
+        "failure_messages": [
+          "HTTP 404",
+          "response exceeded 2000000 bytes"
+        ],
+        "retryable_failures": 0,
+        "families": [
+          "identity",
+          "independent",
+          "investor",
+          "product",
+          "strategy"
+        ],
+        "family_counts": {
+          "identity": 1,
+          "investor": 2,
+          "product": 2,
+          "strategy": 1,
+          "independent": 1
+        },
+        "missing_core": [
+          "customers"
+        ],
+        "evidence_report_state": "EVIDENCE_REPORT_READY"
+      },
+      "evidence": {
+        "documents_retrieved": 7,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 7,
+        "evidence_independence_state": "MEASURED",
+        "independence": {
+          "contract": "evidence_independence.v1",
+          "state": "MEASURED",
+          "evidence_count": 7,
+          "independent_evidence_count": 2,
+          "source_family_count": 3,
+          "primary_source_count": 1,
+          "company_self_report_count": 1,
+          "independent_external_count": 1,
+          "unknown_lineage_count": 0,
+          "duplicate_document_count": 0,
+          "same_origin_count": 4,
+          "republication_count": 0,
+          "concentration_ratio": 0.5714,
+          "distinct_observation_count": 3,
+          "corroboration_state": "INDEPENDENTLY_CORROBORATED",
+          "corroboration_reason": "2 independent origins among 3 distinct observation(s)",
+          "plain_statement": "Seven document(s) support this view, representing two independent origin(s).",
+          "independent_origins": [
+            "sec.gov/filer/12927",
+            "sec.gov/filer/1362468"
+          ],
+          "source_families": [
+            "boeing.com",
+            "sec.gov/filer/12927",
+            "sec.gov/filer/1362468"
+          ],
+          "contradicting_evidence_ids": [],
+          "lineage_counts": {
+            "COMPANY_SELF_REPORT": 1,
+            "INDEPENDENT_EXTERNAL_SOURCE": 1,
+            "REGULATOR_OR_PRIMARY_FILING": 1,
+            "SAME_ORIGIN": 4
+          }
+        },
+        "independence_rows": [
+          {
+            "index": 0,
+            "source_id": "src-44bca23324d9",
+            "url": "https://investors.boeing.com/investors/overview/default.aspx",
+            "origin_family": "boeing.com",
+            "source_class": "company_owned",
+            "lineage": "COMPANY_SELF_REPORT",
+            "anchor_index": null,
+            "independence_bearing": false
+          },
+          {
+            "index": 1,
+            "source_id": "src-9ec529ae19bc",
+            "url": "https://www.sec.gov/Archives/edgar/data/12927/000162828026004357/ba-20251231.htm",
+            "origin_family": "sec.gov/filer/12927",
+            "source_class": "investor_material",
+            "lineage": "REGULATOR_OR_PRIMARY_FILING",
+            "anchor_index": null,
+            "independence_bearing": true
+          },
+          {
+            "index": 2,
+            "source_id": "src-1f9c68deb252",
+            "url": "https://www.boeing.com:443/commercial",
+            "origin_family": "boeing.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 3,
+            "source_id": "src-59424aa15a7d",
+            "url": "https://www.boeing.com:443/commercial/737max",
+            "origin_family": "boeing.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 4,
+            "source_id": "src-9ae1324c59d2",
+            "url": "https://www.sec.gov/Archives/edgar/data/1362468/000136246824000009/algt-20231231.htm",
+            "origin_family": "sec.gov/filer/1362468",
+            "source_class": "competitor",
+            "lineage": "INDEPENDENT_EXTERNAL_SOURCE",
+            "anchor_index": null,
+            "independence_bearing": true
+          },
+          {
+            "index": 5,
+            "source_id": "src-a16f8cb7c187",
+            "url": "https://www.sec.gov/Archives/edgar/data/12927/000162828026050038/ba-20260630.htm",
+            "origin_family": "sec.gov/filer/12927",
+            "source_class": "investor_material",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 1,
+            "independence_bearing": false
+          },
+          {
+            "index": 6,
+            "source_id": "src-14e77e70e8c7",
+            "url": "https://www.boeing.com:443/defense",
+            "origin_family": "boeing.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          }
+        ]
+      },
+      "learning": {
+        "contract": "learning_attribution.v1",
+        "attribution_state": "BLOCKED_EXTERNAL_CREDITS",
+        "attribution_reason": "the run reached no usable strategic report, so no knowledge state existed for an evidence row to change",
+        "evidence_rows": 7,
+        "eligible_evidence_rows": "UNAVAILABLE",
+        "effect_producing_evidence_rows": "UNAVAILABLE",
+        "independent_effect_producing_evidence_rows": "UNAVAILABLE",
+        "zero_effect_evidence_rows": "UNAVAILABLE",
+        "learning_conversion": "UNAVAILABLE",
+        "independent_learning_conversion": "UNAVAILABLE",
+        "knowledge_effects": 0,
+        "effects_by_type": {},
+        "changes": []
+      },
+      "intelligence": {
+        "strategic_report": "PRESENT",
+        "result_state": "FAILED",
+        "result_state_detail": "The analysis did not complete. No conclusions should be drawn.",
+        "reasoning_provenance": "pattern_library",
+        "strategic_analysis": "ABSENT",
+        "hypotheses": 3,
+        "shifts": 1,
+        "critic_findings": 0,
+        "readiness": true
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "boeing:7ace3557e245a78d",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "AVAILABLE",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-13",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_available": 1,
+        "founder_snapshots_read": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 1/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdzVxz7e7TT8QaKufa4eQ'}",
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 2/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdzVxzYBgaRDJfhVeowiZ'}",
+        "ERROR intent_engine.strategic_intelligence.analyst.runner: analyst gave up after 2 attempt(s): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdzVxzYBgaRDJfhVeowiZ'}"
+      ],
+      "finished_at": "2026-08-13T09:20:16.093231+00:00",
+      "wall_seconds": 22.35
+    },
+    {
+      "company_id": "bank-of-america",
+      "canonical_name": "Bank of America Corporation",
+      "domain": "bankofamerica.com",
+      "country": "USA",
+      "sector": "FINANCIAL_REGULATED",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PUBLIC",
+      "entity_type": "OPERATING_COMPANY",
+      "coverage_expectation": "HIGH_COVERAGE",
+      "breaker_dimensions": [
+        "regulated_environment"
+      ],
+      "started_at": "2026-08-13T09:20:16.094163+00:00",
+      "runtime_sha": "e6347e9d6053378b18cd8e90cb1ff2df37000321",
+      "manifest_version": "1.0.0",
+      "analyst_configured": true,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": true,
+        "key_present": true,
+        "error": ""
+      },
+      "run_id": "01KZX6R67109X4RC6ZCK2D68QN",
+      "discovery_seconds": 5.15,
+      "candidates_discovered": 42,
+      "candidates_approved": 14,
+      "fetch_seconds": 13.34,
+      "compose_seconds": 9.24,
+      "identity": {
+        "requested_name": "Bank of America Corporation",
+        "requested_domain": "bankofamerica.com",
+        "resolved_company_name": "Bank of America Corporation",
+        "resolved_domain": "bankofamerica.com",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "NORMAL",
+        "parent_company_id": null,
+        "report_subject": "Bank of America Corporation"
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 9,
+        "failed": 5,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "http_status": 5
+        },
+        "http_status_counts": {
+          "HTTP 404": 5
+        },
+        "failure_messages": [
+          "HTTP 404"
+        ],
+        "retryable_failures": 0,
+        "families": [
+          "customers",
+          "identity",
+          "independent",
+          "investor",
+          "product",
+          "strategy"
+        ],
+        "family_counts": {
+          "identity": 1,
+          "investor": 2,
+          "product": 3,
+          "strategy": 1,
+          "independent": 2,
+          "customers": 1
+        },
+        "missing_core": [],
+        "evidence_report_state": "EVIDENCE_REPORT_READY"
+      },
+      "evidence": {
+        "documents_retrieved": 10,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 10,
+        "evidence_independence_state": "MEASURED",
+        "independence": {
+          "contract": "evidence_independence.v1",
+          "state": "MEASURED",
+          "evidence_count": 10,
+          "independent_evidence_count": 3,
+          "source_family_count": 4,
+          "primary_source_count": 1,
+          "company_self_report_count": 1,
+          "independent_external_count": 2,
+          "unknown_lineage_count": 0,
+          "duplicate_document_count": 0,
+          "same_origin_count": 6,
+          "republication_count": 0,
+          "concentration_ratio": 0.6,
+          "distinct_observation_count": 4,
+          "corroboration_state": "INDEPENDENTLY_CORROBORATED",
+          "corroboration_reason": "3 independent origins among 4 distinct observation(s)",
+          "plain_statement": "Ten document(s) support this view, representing three independent origin(s).",
+          "independent_origins": [
+            "sec.gov/filer/1128250",
+            "sec.gov/filer/1689923",
+            "sec.gov/filer/70858"
+          ],
+          "source_families": [
+            "bankofamerica.com",
+            "sec.gov/filer/1128250",
+            "sec.gov/filer/1689923",
+            "sec.gov/filer/70858"
+          ],
+          "contradicting_evidence_ids": [],
+          "lineage_counts": {
+            "COMPANY_SELF_REPORT": 1,
+            "INDEPENDENT_EXTERNAL_SOURCE": 2,
+            "REGULATOR_OR_PRIMARY_FILING": 1,
+            "SAME_ORIGIN": 6
+          }
+        },
+        "independence_rows": [
+          {
+            "index": 0,
+            "source_id": "src-db8d79c1a2ab",
+            "url": "https://www.bankofamerica.com/",
+            "origin_family": "bankofamerica.com",
+            "source_class": "company_owned",
+            "lineage": "COMPANY_SELF_REPORT",
+            "anchor_index": null,
+            "independence_bearing": false
+          },
+          {
+            "index": 1,
+            "source_id": "src-bea43d3c03e1",
+            "url": "https://www.sec.gov/Archives/edgar/data/70858/000007085826000157/bac-20251231.htm",
+            "origin_family": "sec.gov/filer/70858",
+            "source_class": "investor_material",
+            "lineage": "REGULATOR_OR_PRIMARY_FILING",
+            "anchor_index": null,
+            "independence_bearing": true
+          },
+          {
+            "index": 2,
+            "source_id": "src-4b9f504e9223",
+            "url": "https://www.bankofamerica.com/auto-loans/",
+            "origin_family": "bankofamerica.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 3,
+            "source_id": "src-8bc5e3eda82e",
+            "url": "https://www.bankofamerica.com/deposits/checking/advantage-banking/",
+            "origin_family": "bankofamerica.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 4,
+            "source_id": "src-9ebe6af93a40",
+            "url": "https://www.sec.gov/Archives/edgar/data/1128250/000114036123013653/brhc10049912_10k.htm",
+            "origin_family": "sec.gov/filer/1128250",
+            "source_class": "competitor",
+            "lineage": "INDEPENDENT_EXTERNAL_SOURCE",
+            "anchor_index": null,
+            "independence_bearing": true
+          },
+          {
+            "index": 5,
+            "source_id": "src-c87c9a2ad4ca",
+            "url": "https://www.sec.gov/Archives/edgar/data/70858/000007085826000394/bac-20260630.htm",
+            "origin_family": "sec.gov/filer/70858",
+            "source_class": "investor_material",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 1,
+            "independence_bearing": false
+          },
+          {
+            "index": 6,
+            "source_id": "src-5df17b8203a3",
+            "url": "https://www.bankofamerica.com/credit-cards/",
+            "origin_family": "bankofamerica.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 7,
+            "source_id": "src-84fa2848402e",
+            "url": "https://www.bankofamerica.com/business/",
+            "origin_family": "bankofamerica.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 8,
+            "source_id": "src-7d5f79412ef1",
+            "url": "https://www.sec.gov/Archives/edgar/data/1689923/000168992324000025/ayx-20231231.htm",
+            "origin_family": "sec.gov/filer/1689923",
+            "source_class": "competitor",
+            "lineage": "INDEPENDENT_EXTERNAL_SOURCE",
+            "anchor_index": null,
+            "independence_bearing": true
+          },
+          {
+            "index": 9,
+            "source_id": "src-d2ec18134c94",
+            "url": "https://secure.bankofamerica.com/login/sign-in/signOnV2Screen.go",
+            "origin_family": "bankofamerica.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          }
+        ]
+      },
+      "learning": {
+        "contract": "learning_attribution.v1",
+        "attribution_state": "BLOCKED_EXTERNAL_CREDITS",
+        "attribution_reason": "the run reached no usable strategic report, so no knowledge state existed for an evidence row to change",
+        "evidence_rows": 10,
+        "eligible_evidence_rows": "UNAVAILABLE",
+        "effect_producing_evidence_rows": "UNAVAILABLE",
+        "independent_effect_producing_evidence_rows": "UNAVAILABLE",
+        "zero_effect_evidence_rows": "UNAVAILABLE",
+        "learning_conversion": "UNAVAILABLE",
+        "independent_learning_conversion": "UNAVAILABLE",
+        "knowledge_effects": 0,
+        "effects_by_type": {},
+        "changes": []
+      },
+      "intelligence": {
+        "strategic_report": "PRESENT",
+        "result_state": "FAILED",
+        "result_state_detail": "The analysis did not complete. No conclusions should be drawn.",
+        "reasoning_provenance": "pattern_library",
+        "strategic_analysis": "ABSENT",
+        "hypotheses": 0,
+        "shifts": 2,
+        "critic_findings": 0,
+        "readiness": true
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "bank-of-america:d31acfbc7dd81cc0",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "AVAILABLE",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-13",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_available": 1,
+        "founder_snapshots_read": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 1/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdzVzyKpSeyT2pKHw53ag'}",
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 2/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdzVzyto5TpYnjbRnYhvV'}",
+        "ERROR intent_engine.strategic_intelligence.analyst.runner: analyst gave up after 2 attempt(s): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdzVzyto5TpYnjbRnYhvV'}"
+      ],
+      "finished_at": "2026-08-13T09:20:43.838481+00:00",
+      "wall_seconds": 27.74
+    },
+    {
+      "company_id": "alimentation-couche-tard",
+      "canonical_name": "Alimentation Couche-Tard Inc.",
+      "domain": "couche-tard.com",
+      "country": "CANADA",
+      "sector": "CONSUMER",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PUBLIC",
+      "entity_type": "OPERATING_COMPANY",
+      "coverage_expectation": "HIGH_COVERAGE",
+      "breaker_dimensions": [
+        "identity",
+        "subject_attribution"
+      ],
+      "started_at": "2026-08-13T09:20:43.839419+00:00",
+      "runtime_sha": "e6347e9d6053378b18cd8e90cb1ff2df37000321",
+      "manifest_version": "1.0.0",
+      "analyst_configured": true,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": true,
+        "key_present": true,
+        "error": ""
+      },
+      "run_id": "01KZX6S1A2BM60T0MV4YG2WSK6",
+      "discovery_seconds": 1.91,
+      "candidates_discovered": 39,
+      "candidates_approved": 14,
+      "fetch_seconds": 3.88,
+      "compose_seconds": 2.86,
+      "identity": {
+        "requested_name": "Alimentation Couche-Tard Inc.",
+        "requested_domain": "couche-tard.com",
+        "resolved_company_name": "Alimentation Couche-Tard Inc.",
+        "resolved_domain": "couche-tard.com",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "IDENTITY_HARD",
+        "parent_company_id": null,
+        "report_subject": ""
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 8,
+        "failed": 6,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "http_status": 3,
+          "too_large": 3
+        },
+        "http_status_counts": {
+          "HTTP 404": 3
+        },
+        "failure_messages": [
+          "HTTP 404",
+          "response exceeded 2000000 bytes"
+        ],
+        "retryable_failures": 0,
+        "families": [
+          "identity",
+          "independent",
+          "product",
+          "strategy"
+        ],
+        "family_counts": {
+          "identity": 1,
+          "product": 5,
+          "strategy": 1,
+          "independent": 1
+        },
+        "missing_core": [
+          "customers",
+          "investor"
+        ],
+        "evidence_report_state": "EVIDENCE_REPORT_READY"
+      },
+      "evidence": {
+        "documents_retrieved": 8,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 8,
+        "evidence_independence_state": "MEASURED",
+        "independence": {
+          "contract": "evidence_independence.v1",
+          "state": "MEASURED",
+          "evidence_count": 8,
+          "independent_evidence_count": 1,
+          "source_family_count": 2,
+          "primary_source_count": 0,
+          "company_self_report_count": 1,
+          "independent_external_count": 1,
+          "unknown_lineage_count": 0,
+          "duplicate_document_count": 0,
+          "same_origin_count": 6,
+          "republication_count": 0,
+          "concentration_ratio": 0.875,
+          "distinct_observation_count": 2,
+          "corroboration_state": "PARTIALLY_INDEPENDENT",
+          "corroboration_reason": "exactly one outside vantage point; a second independent origin is what would corroborate it",
+          "plain_statement": "Eight document(s) support this view, representing one independent origin.",
+          "independent_origins": [
+            "sec.gov/filer/1378453"
+          ],
+          "source_families": [
+            "couche-tard.com",
+            "sec.gov/filer/1378453"
+          ],
+          "contradicting_evidence_ids": [],
+          "lineage_counts": {
+            "COMPANY_SELF_REPORT": 1,
+            "INDEPENDENT_EXTERNAL_SOURCE": 1,
+            "SAME_ORIGIN": 6
+          }
+        },
+        "independence_rows": [
+          {
+            "index": 0,
+            "source_id": "src-4bb07303ed7a",
+            "url": "https://corporate.couche-tard.com/?_gl=1*2qkw79*_gcl_au*MTkzMjQ0MjQ5Mi4xNzc0NjAxNjc1*_ga*MTYwNTA1MzczMC4xNzc0ODY3NTU5*_ga_GLDZDNH90T*czE3NzYwNjU4NzEkbzMwJGcxJHQxNzc2MDY3NTk1JGo2MCRsMCRoMTg0MzI1MTE1OQ..",
+            "origin_family": "couche-tard.com",
+            "source_class": "company_owned",
+            "lineage": "COMPANY_SELF_REPORT",
+            "anchor_index": null,
+            "independence_bearing": false
+          },
+          {
+            "index": 1,
+            "source_id": "src-5a46ddd9fcd3",
+            "url": "https://www.couche-tard.com:443/cafe-tout-simplement-bon",
+            "origin_family": "couche-tard.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 2,
+            "source_id": "src-635140b0e9ab",
+            "url": "https://www.couche-tard.com:443/%C3%A0-propos/postuler",
+            "origin_family": "couche-tard.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 3,
+            "source_id": "src-ac356c0abc24",
+            "url": "https://www.sec.gov/Archives/edgar/data/1378453/000110465923050410/tm2313468d1_10ka.htm",
+            "origin_family": "sec.gov/filer/1378453",
+            "source_class": "competitor",
+            "lineage": "INDEPENDENT_EXTERNAL_SOURCE",
+            "anchor_index": null,
+            "independence_bearing": true
+          },
+          {
+            "index": 4,
+            "source_id": "src-c83a50852fc0",
+            "url": "https://www.couche-tard.com:443/conditions-dutilisation-des-plateformes-en-ligne",
+            "origin_family": "couche-tard.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 5,
+            "source_id": "src-a0ff5481074c",
+            "url": "https://www.couche-tard.com:443/contact-us-new",
+            "origin_family": "couche-tard.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 6,
+            "source_id": "src-514d60150ce5",
+            "url": "https://www.couche-tard.com:443/couche-tard-app",
+            "origin_family": "couche-tard.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 7,
+            "source_id": "src-b126b9190efe",
+            "url": "https://www.couche-tard.com:443/engagement-social",
+            "origin_family": "couche-tard.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          }
+        ]
+      },
+      "learning": {
+        "contract": "learning_attribution.v1",
+        "attribution_state": "BLOCKED_EXTERNAL_CREDITS",
+        "attribution_reason": "the run reached no usable strategic report, so no knowledge state existed for an evidence row to change",
+        "evidence_rows": 8,
+        "eligible_evidence_rows": "UNAVAILABLE",
+        "effect_producing_evidence_rows": "UNAVAILABLE",
+        "independent_effect_producing_evidence_rows": "UNAVAILABLE",
+        "zero_effect_evidence_rows": "UNAVAILABLE",
+        "learning_conversion": "UNAVAILABLE",
+        "independent_learning_conversion": "UNAVAILABLE",
+        "knowledge_effects": 0,
+        "effects_by_type": {},
+        "changes": []
+      },
+      "intelligence": {
+        "strategic_report": "ABSENT",
+        "reason": "no strategic report was composed for this run"
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "alimentation-couche-tard:c055ce03744d883a",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "DEGRADED",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-13",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_read": 1,
+        "founder_snapshots_unavailable": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [],
+      "finished_at": "2026-08-13T09:20:52.501616+00:00",
+      "wall_seconds": 8.66
+    },
+    {
+      "company_id": "agnico-eagle-mines",
+      "canonical_name": "Agnico Eagle Mines Limited",
+      "domain": "agnicoeagle.com",
+      "country": "CANADA",
+      "sector": "MATERIALS_ENERGY",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PUBLIC",
+      "entity_type": "OPERATING_COMPANY",
+      "coverage_expectation": "HIGH_COVERAGE",
+      "breaker_dimensions": [
+        "capital_intensity",
+        "demand_extraction",
+        "macro_transmission"
+      ],
+      "started_at": "2026-08-13T09:20:52.503033+00:00",
+      "runtime_sha": "e6347e9d6053378b18cd8e90cb1ff2df37000321",
+      "manifest_version": "1.0.0",
+      "analyst_configured": true,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": true,
+        "key_present": true,
+        "error": ""
+      },
+      "run_id": "01KZX6S9RT9JJ5G059ZX657FPE",
+      "discovery_seconds": 1.71,
+      "candidates_discovered": 38,
+      "candidates_approved": 14,
+      "fetch_seconds": 2.22,
+      "compose_seconds": 1.8,
+      "identity": {
+        "requested_name": "Agnico Eagle Mines Limited",
+        "requested_domain": "agnicoeagle.com",
+        "resolved_company_name": "Agnico Eagle Mines Limited",
+        "resolved_domain": "agnicoeagle.com",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "NORMAL",
+        "parent_company_id": null,
+        "report_subject": ""
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 1,
+        "failed": 13,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "http_status": 10,
+          "too_large": 3
+        },
+        "http_status_counts": {
+          "HTTP 403": 10
+        },
+        "failure_messages": [
+          "HTTP 403",
+          "response exceeded 2000000 bytes"
+        ],
+        "retryable_failures": 0,
+        "families": [
+          "investor"
+        ],
+        "family_counts": {
+          "investor": 1
+        },
+        "missing_core": [
+          "identity",
+          "product",
+          "customers",
+          "strategy"
+        ],
+        "evidence_report_state": "EVIDENCE_PARTIAL"
+      },
+      "evidence": {
+        "documents_retrieved": 1,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 1,
+        "evidence_independence_state": "MEASURED",
+        "independence": {
+          "contract": "evidence_independence.v1",
+          "state": "MEASURED",
+          "evidence_count": 1,
+          "independent_evidence_count": 1,
+          "source_family_count": 1,
+          "primary_source_count": 1,
+          "company_self_report_count": 0,
+          "independent_external_count": 0,
+          "unknown_lineage_count": 0,
+          "duplicate_document_count": 0,
+          "same_origin_count": 0,
+          "republication_count": 0,
+          "concentration_ratio": 1.0,
+          "distinct_observation_count": 1,
+          "corroboration_state": "PARTIALLY_INDEPENDENT",
+          "corroboration_reason": "exactly one outside vantage point; a second independent origin is what would corroborate it",
+          "plain_statement": "One document(s) support this view, representing one independent origin.",
+          "independent_origins": [
+            "sec.gov/filer/2809"
+          ],
+          "source_families": [
+            "sec.gov/filer/2809"
+          ],
+          "contradicting_evidence_ids": [],
+          "lineage_counts": {
+            "REGULATOR_OR_PRIMARY_FILING": 1
+          }
+        },
+        "independence_rows": [
+          {
+            "index": 0,
+            "source_id": "src-e6af39ea8efb",
+            "url": "https://www.sec.gov/Archives/edgar/data/2809/000110465926094882/tm2622985d1_ex99-1.htm",
+            "origin_family": "sec.gov/filer/2809",
+            "source_class": "investor_material",
+            "lineage": "REGULATOR_OR_PRIMARY_FILING",
+            "anchor_index": null,
+            "independence_bearing": true
+          }
+        ]
+      },
+      "learning": {
+        "contract": "learning_attribution.v1",
+        "attribution_state": "BLOCKED_EXTERNAL_CREDITS",
+        "attribution_reason": "the run reached no usable strategic report, so no knowledge state existed for an evidence row to change",
+        "evidence_rows": 1,
+        "eligible_evidence_rows": "UNAVAILABLE",
+        "effect_producing_evidence_rows": "UNAVAILABLE",
+        "independent_effect_producing_evidence_rows": "UNAVAILABLE",
+        "zero_effect_evidence_rows": "UNAVAILABLE",
+        "learning_conversion": "UNAVAILABLE",
+        "independent_learning_conversion": "UNAVAILABLE",
+        "knowledge_effects": 0,
+        "effects_by_type": {},
+        "changes": []
+      },
+      "intelligence": {
+        "strategic_report": "ABSENT",
+        "reason": "no strategic report was composed for this run"
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "agnico-eagle-mines:7609589742b25e8c",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "DEGRADED",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-13",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_read": 1,
+        "founder_snapshots_unavailable": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [],
+      "finished_at": "2026-08-13T09:20:58.238940+00:00",
+      "wall_seconds": 5.74
+    },
+    {
+      "company_id": "bce",
+      "canonical_name": "BCE Inc.",
+      "domain": "bce.ca",
+      "country": "CANADA",
+      "sector": "INFRASTRUCTURE",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PUBLIC",
+      "entity_type": "OPERATING_COMPANY",
+      "coverage_expectation": "HIGH_COVERAGE",
+      "breaker_dimensions": [
+        "capital_intensity",
+        "identity",
+        "regulated_environment",
+        "subject_attribution"
+      ],
+      "started_at": "2026-08-13T09:20:58.240191+00:00",
+      "runtime_sha": "e6347e9d6053378b18cd8e90cb1ff2df37000321",
+      "manifest_version": "1.0.0",
+      "analyst_configured": true,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": true,
+        "key_present": true,
+        "error": ""
+      },
+      "run_id": "01KZX6SFC38K8ASVYHXV7GYGV5",
+      "discovery_seconds": 5.65,
+      "candidates_discovered": 42,
+      "candidates_approved": 14,
+      "fetch_seconds": 7.89,
+      "compose_seconds": 5.15,
+      "identity": {
+        "requested_name": "BCE Inc.",
+        "requested_domain": "bce.ca",
+        "resolved_company_name": "BCE Inc.",
+        "resolved_domain": "bce.ca",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "IDENTITY_HARD",
+        "parent_company_id": null,
+        "report_subject": "BCE Inc."
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 10,
+        "failed": 4,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "http_status": 4
+        },
+        "http_status_counts": {
+          "HTTP 404": 4
+        },
+        "failure_messages": [
+          "HTTP 404"
+        ],
+        "retryable_failures": 0,
+        "families": [
+          "commercial",
+          "customers",
+          "identity",
+          "independent",
+          "investor",
+          "product",
+          "strategy"
+        ],
+        "family_counts": {
+          "identity": 1,
+          "investor": 2,
+          "product": 3,
+          "strategy": 1,
+          "independent": 2,
+          "commercial": 1,
+          "customers": 1
+        },
+        "missing_core": [],
+        "evidence_report_state": "EVIDENCE_REPORT_READY"
+      },
+      "evidence": {
+        "documents_retrieved": 11,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 11,
+        "evidence_independence_state": "MEASURED",
+        "independence": {
+          "contract": "evidence_independence.v1",
+          "state": "MEASURED",
+          "evidence_count": 11,
+          "independent_evidence_count": 3,
+          "source_family_count": 4,
+          "primary_source_count": 1,
+          "company_self_report_count": 1,
+          "independent_external_count": 2,
+          "unknown_lineage_count": 0,
+          "duplicate_document_count": 0,
+          "same_origin_count": 7,
+          "republication_count": 0,
+          "concentration_ratio": 0.6364,
+          "distinct_observation_count": 4,
+          "corroboration_state": "INDEPENDENTLY_CORROBORATED",
+          "corroboration_reason": "3 independent origins among 4 distinct observation(s)",
+          "plain_statement": "11 document(s) support this view, representing three independent origin(s).",
+          "independent_origins": [
+            "sec.gov/filer/16875",
+            "sec.gov/filer/4127",
+            "sec.gov/filer/718940"
+          ],
+          "source_families": [
+            "bce.ca",
+            "sec.gov/filer/16875",
+            "sec.gov/filer/4127",
+            "sec.gov/filer/718940"
+          ],
+          "contradicting_evidence_ids": [],
+          "lineage_counts": {
+            "COMPANY_SELF_REPORT": 1,
+            "INDEPENDENT_EXTERNAL_SOURCE": 2,
+            "REGULATOR_OR_PRIMARY_FILING": 1,
+            "SAME_ORIGIN": 7
+          }
+        },
+        "independence_rows": [
+          {
+            "index": 0,
+            "source_id": "src-1d9f90f06240",
+            "url": "https://www.bce.ca",
+            "origin_family": "bce.ca",
+            "source_class": "company_owned",
+            "lineage": "COMPANY_SELF_REPORT",
+            "anchor_index": null,
+            "independence_bearing": false
+          },
+          {
+            "index": 1,
+            "source_id": "src-be5ec4df58ab",
+            "url": "https://www.sec.gov/Archives/edgar/data/718940/000119312526095004/d86374dex991.htm",
+            "origin_family": "sec.gov/filer/718940",
+            "source_class": "investor_material",
+            "lineage": "REGULATOR_OR_PRIMARY_FILING",
+            "anchor_index": null,
+            "independence_bearing": true
+          },
+          {
+            "index": 2,
+            "source_id": "src-0bf262366593",
+            "url": "https://www.bce.ca/accueil",
+            "origin_family": "bce.ca",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 3,
+            "source_id": "src-6a11a85850ba",
+            "url": "https://www.bce.ca/about-bce/bell-ventures/news",
+            "origin_family": "bce.ca",
+            "source_class": "executive_statement",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 4,
+            "source_id": "src-ac6d96abd7cd",
+            "url": "https://www.sec.gov/Archives/edgar/data/4127/000000412725000006/swks-20240927.htm",
+            "origin_family": "sec.gov/filer/4127",
+            "source_class": "competitor",
+            "lineage": "INDEPENDENT_EXTERNAL_SOURCE",
+            "anchor_index": null,
+            "independence_bearing": true
+          },
+          {
+            "index": 5,
+            "source_id": "src-684ec64bb23d",
+            "url": "https://www.bce.ca/plans",
+            "origin_family": "bce.ca",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 6,
+            "source_id": "src-5e5971444577",
+            "url": "https://www.sec.gov/Archives/edgar/data/718940/000071894026000011/bceform6-kxcodeofbusinessc.htm",
+            "origin_family": "sec.gov/filer/718940",
+            "source_class": "investor_material",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 1,
+            "independence_bearing": false
+          },
+          {
+            "index": 7,
+            "source_id": "src-d4983fd5edfc",
+            "url": "https://www.bce.ca/api",
+            "origin_family": "bce.ca",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 8,
+            "source_id": "src-17fa50b212fe",
+            "url": "https://www.bce.ca/business",
+            "origin_family": "bce.ca",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 9,
+            "source_id": "src-3e933d075390",
+            "url": "https://www.sec.gov/Archives/edgar/data/16875/000119312523078048/d390126d10ka.htm",
+            "origin_family": "sec.gov/filer/16875",
+            "source_class": "competitor",
+            "lineage": "INDEPENDENT_EXTERNAL_SOURCE",
+            "anchor_index": null,
+            "independence_bearing": true
+          },
+          {
+            "index": 10,
+            "source_id": "src-7cbc702326be",
+            "url": "https://www.bce.ca/partners",
+            "origin_family": "bce.ca",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          }
+        ]
+      },
+      "learning": {
+        "contract": "learning_attribution.v1",
+        "attribution_state": "BLOCKED_EXTERNAL_CREDITS",
+        "attribution_reason": "the run reached no usable strategic report, so no knowledge state existed for an evidence row to change",
+        "evidence_rows": 11,
+        "eligible_evidence_rows": "UNAVAILABLE",
+        "effect_producing_evidence_rows": "UNAVAILABLE",
+        "independent_effect_producing_evidence_rows": "UNAVAILABLE",
+        "zero_effect_evidence_rows": "UNAVAILABLE",
+        "learning_conversion": "UNAVAILABLE",
+        "independent_learning_conversion": "UNAVAILABLE",
+        "knowledge_effects": 0,
+        "effects_by_type": {},
+        "changes": []
+      },
+      "intelligence": {
+        "strategic_report": "PRESENT",
+        "result_state": "FAILED",
+        "result_state_detail": "The analysis did not complete. No conclusions should be drawn.",
+        "reasoning_provenance": "pattern_library",
+        "strategic_analysis": "ABSENT",
+        "hypotheses": 1,
+        "shifts": 1,
+        "critic_findings": 0,
+        "readiness": true
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "bce:7d100f3edc2e1147",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "AVAILABLE",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-13",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_available": 1,
+        "founder_snapshots_read": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 1/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdzW3X9o37ro7tv3cyVeE'}",
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 2/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdzW3XuSNwNXW64zTui7N'}",
+        "ERROR intent_engine.strategic_intelligence.analyst.runner: analyst gave up after 2 attempt(s): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdzW3XuSNwNXW64zTui7N'}"
+      ],
+      "finished_at": "2026-08-13T09:21:16.937482+00:00",
+      "wall_seconds": 18.7
+    },
+    {
+      "company_id": "stripe",
+      "canonical_name": "Stripe, Inc.",
+      "domain": "stripe.com",
+      "country": "USA",
+      "sector": "SOFTWARE_PLATFORM",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PRIVATE",
+      "entity_type": "OPERATING_COMPANY",
+      "coverage_expectation": "HIGH_COVERAGE",
+      "breaker_dimensions": [
+        "private_company_path"
+      ],
+      "started_at": "2026-08-13T09:21:16.938409+00:00",
+      "runtime_sha": "e6347e9d6053378b18cd8e90cb1ff2df37000321",
+      "manifest_version": "1.0.0",
+      "analyst_configured": true,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": true,
+        "key_present": true,
+        "error": ""
+      },
+      "run_id": "01KZX6T1MDCBXNXZ3KEB3T6PY5",
+      "discovery_seconds": 16.49,
+      "candidates_discovered": 39,
+      "candidates_approved": 14,
+      "fetch_seconds": 8.58,
+      "compose_seconds": 5.91,
+      "identity": {
+        "requested_name": "Stripe, Inc.",
+        "requested_domain": "stripe.com",
+        "resolved_company_name": "Stripe, Inc.",
+        "resolved_domain": "stripe.com",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "NORMAL",
+        "parent_company_id": null,
+        "report_subject": "Stripe, Inc."
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 12,
+        "failed": 2,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "http_status": 2
+        },
+        "http_status_counts": {
+          "HTTP 404": 2
+        },
+        "failure_messages": [
+          "HTTP 404"
+        ],
+        "retryable_failures": 0,
+        "families": [
+          "commercial",
+          "customers",
+          "identity",
+          "independent",
+          "product",
+          "strategy"
+        ],
+        "family_counts": {
+          "identity": 1,
+          "product": 3,
+          "customers": 2,
+          "strategy": 1,
+          "independent": 4,
+          "commercial": 1
+        },
+        "missing_core": [
+          "investor"
+        ],
+        "evidence_report_state": "EVIDENCE_REPORT_READY"
+      },
+      "evidence": {
+        "documents_retrieved": 12,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 12,
+        "evidence_independence_state": "MEASURED",
+        "independence": {
+          "contract": "evidence_independence.v1",
+          "state": "MEASURED",
+          "evidence_count": 12,
+          "independent_evidence_count": 4,
+          "source_family_count": 5,
+          "primary_source_count": 0,
+          "company_self_report_count": 1,
+          "independent_external_count": 4,
+          "unknown_lineage_count": 0,
+          "duplicate_document_count": 0,
+          "same_origin_count": 7,
+          "republication_count": 0,
+          "concentration_ratio": 0.6667,
+          "distinct_observation_count": 5,
+          "corroboration_state": "INDEPENDENTLY_CORROBORATED",
+          "corroboration_reason": "4 independent origins among 5 distinct observation(s)",
+          "plain_statement": "12 document(s) support this view, representing four independent origin(s).",
+          "independent_origins": [
+            "sec.gov/filer/1538716",
+            "sec.gov/filer/1898496",
+            "sec.gov/filer/1975940",
+            "sec.gov/filer/884650"
+          ],
+          "source_families": [
+            "sec.gov/filer/1538716",
+            "sec.gov/filer/1898496",
+            "sec.gov/filer/1975940",
+            "sec.gov/filer/884650",
+            "stripe.com"
+          ],
+          "contradicting_evidence_ids": [],
+          "lineage_counts": {
+            "COMPANY_SELF_REPORT": 1,
+            "INDEPENDENT_EXTERNAL_SOURCE": 4,
+            "SAME_ORIGIN": 7
+          }
+        },
+        "independence_rows": [
+          {
+            "index": 0,
+            "source_id": "src-9ababc9aff17",
+            "url": "https://stripe.com/en-ca",
+            "origin_family": "stripe.com",
+            "source_class": "company_owned",
+            "lineage": "COMPANY_SELF_REPORT",
+            "anchor_index": null,
+            "independence_bearing": false
+          },
+          {
+            "index": 1,
+            "source_id": "src-78dd248d401f",
+            "url": "https://dashboard.stripe.com/login",
+            "origin_family": "stripe.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 2,
+            "source_id": "src-5320b8c7aafc",
+            "url": "https://stripe.com/en-ca/customers/amazon",
+            "origin_family": "stripe.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 3,
+            "source_id": "src-7e8c9106ac9a",
+            "url": "https://dashboard.stripe.com/login",
+            "origin_family": "stripe.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 4,
+            "source_id": "src-b23d461b8c8f",
+            "url": "https://www.sec.gov/Archives/edgar/data/884650/000165495425012437/igi_10k.htm",
+            "origin_family": "sec.gov/filer/884650",
+            "source_class": "competitor",
+            "lineage": "INDEPENDENT_EXTERNAL_SOURCE",
+            "anchor_index": null,
+            "independence_bearing": true
+          },
+          {
+            "index": 5,
+            "source_id": "src-77c310fa7add",
+            "url": "https://stripe.com/en-ca/pricing",
+            "origin_family": "stripe.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 6,
+            "source_id": "src-93ebe1682488",
+            "url": "https://dashboard.stripe.com/register",
+            "origin_family": "stripe.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 7,
+            "source_id": "src-3d7897abfba6",
+            "url": "https://stripe.com/en-ca/customers/anthropic",
+            "origin_family": "stripe.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 8,
+            "source_id": "src-453f8fa54634",
+            "url": "https://docs.stripe.com/api",
+            "origin_family": "stripe.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          },
+          {
+            "index": 9,
+            "source_id": "src-84a54b5b7fa8",
+            "url": "https://www.sec.gov/Archives/edgar/data/1898496/000162828026027529/gety-20251231.htm",
+            "origin_family": "sec.gov/filer/1898496",
+            "source_class": "competitor",
+            "lineage": "INDEPENDENT_EXTERNAL_SOURCE",
+            "anchor_index": null,
+            "independence_bearing": true
+          },
+          {
+            "index": 10,
+            "source_id": "src-6495e209764c",
+            "url": "https://www.sec.gov/Archives/edgar/data/1975940/000121390026080973/ea0297484-10k_flye.htm",
+            "origin_family": "sec.gov/filer/1975940",
+            "source_class": "competitor",
+            "lineage": "INDEPENDENT_EXTERNAL_SOURCE",
+            "anchor_index": null,
+            "independence_bearing": true
+          },
+          {
+            "index": 11,
+            "source_id": "src-2037719175da",
+            "url": "https://www.sec.gov/Archives/edgar/data/1538716/000119312525107464/d933860d10ka.htm",
+            "origin_family": "sec.gov/filer/1538716",
+            "source_class": "competitor",
+            "lineage": "INDEPENDENT_EXTERNAL_SOURCE",
+            "anchor_index": null,
+            "independence_bearing": true
+          }
+        ]
+      },
+      "learning": {
+        "contract": "learning_attribution.v1",
+        "attribution_state": "BLOCKED_EXTERNAL_CREDITS",
+        "attribution_reason": "the run reached no usable strategic report, so no knowledge state existed for an evidence row to change",
+        "evidence_rows": 12,
+        "eligible_evidence_rows": "UNAVAILABLE",
+        "effect_producing_evidence_rows": "UNAVAILABLE",
+        "independent_effect_producing_evidence_rows": "UNAVAILABLE",
+        "zero_effect_evidence_rows": "UNAVAILABLE",
+        "learning_conversion": "UNAVAILABLE",
+        "independent_learning_conversion": "UNAVAILABLE",
+        "knowledge_effects": 0,
+        "effects_by_type": {},
+        "changes": []
+      },
+      "intelligence": {
+        "strategic_report": "PRESENT",
+        "result_state": "FAILED",
+        "result_state_detail": "The analysis did not complete. No conclusions should be drawn.",
+        "reasoning_provenance": "pattern_library",
+        "strategic_analysis": "ABSENT",
+        "hypotheses": 1,
+        "shifts": 3,
+        "critic_findings": 0,
+        "readiness": true
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "stripe:9e28e4d943178c07",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "AVAILABLE",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-13",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_available": 1,
+        "founder_snapshots_read": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 1/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdzW5r2Ab6WUNDHcnaPJ2'}",
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 2/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdzW5rf7WDxp3qwurQHFZ'}",
+        "ERROR intent_engine.strategic_intelligence.analyst.runner: analyst gave up after 2 attempt(s): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdzW5rf7WDxp3qwurQHFZ'}"
+      ],
+      "finished_at": "2026-08-13T09:21:47.923215+00:00",
+      "wall_seconds": 30.98
+    },
+    {
+      "company_id": "mckinsey",
+      "canonical_name": "McKinsey & Company",
+      "domain": "mckinsey.com",
+      "country": "USA",
+      "sector": "SERVICES",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PRIVATE",
+      "entity_type": "ADVISORY_ORGANIZATION",
+      "coverage_expectation": "PRIVATE_WITHHELD",
+      "breaker_dimensions": [
+        "bounded_or_withheld",
+        "non_operating_entity_contract",
+        "private_company_path",
+        "private_data_absence"
+      ],
+      "started_at": "2026-08-13T09:21:47.924047+00:00",
+      "runtime_sha": "e6347e9d6053378b18cd8e90cb1ff2df37000321",
+      "manifest_version": "1.0.0",
+      "analyst_configured": true,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": true,
+        "key_present": true,
+        "error": ""
+      },
+      "run_id": "01KZX6TZWQMH3270NVYCDR1G61",
+      "discovery_seconds": 25.68,
+      "candidates_discovered": 36,
+      "candidates_approved": 14,
+      "fetch_seconds": 18.3,
+      "compose_seconds": 2.79,
+      "identity": {
+        "requested_name": "McKinsey & Company",
+        "requested_domain": "mckinsey.com",
+        "resolved_company_name": "McKinsey & Company",
+        "resolved_domain": "mckinsey.com",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "NORMAL",
+        "parent_company_id": null,
+        "report_subject": ""
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 4,
+        "failed": 10,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "host_unreachable": 8,
+          "timeout": 2
+        },
+        "http_status_counts": {},
+        "failure_messages": [
+          "The read operation timed out",
+          "mckinsey.com failed 2 times earlier in this run; not dialled again"
+        ],
+        "retryable_failures": 10,
+        "families": [
+          "independent"
+        ],
+        "family_counts": {
+          "independent": 4
+        },
+        "missing_core": [
+          "identity",
+          "product",
+          "customers",
+          "investor",
+          "strategy"
+        ],
+        "evidence_report_state": "EVIDENCE_PARTIAL"
+      },
+      "evidence": {
+        "documents_retrieved": 4,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 4,
+        "evidence_independence_state": "MEASURED",
+        "independence": {
+          "contract": "evidence_independence.v1",
+          "state": "MEASURED",
+          "evidence_count": 4,
+          "independent_evidence_count": 3,
+          "source_family_count": 4,
+          "primary_source_count": 0,
+          "company_self_report_count": 0,
+          "independent_external_count": 3,
+          "unknown_lineage_count": 0,
+          "duplicate_document_count": 0,
+          "same_origin_count": 0,
+          "republication_count": 1,
+          "concentration_ratio": 0.25,
+          "distinct_observation_count": 3,
+          "corroboration_state": "INDEPENDENTLY_CORROBORATED",
+          "corroboration_reason": "3 independent origins among 3 distinct observation(s)",
+          "plain_statement": "Four document(s) support this view, representing three independent origin(s).",
+          "independent_origins": [
+            "sec.gov/filer/1417926",
+            "sec.gov/filer/1481028",
+            "sec.gov/filer/949858"
+          ],
+          "source_families": [
+            "sec.gov/filer/1417926",
+            "sec.gov/filer/1481028",
+            "sec.gov/filer/2006986",
+            "sec.gov/filer/949858"
+          ],
+          "contradicting_evidence_ids": [],
+          "lineage_counts": {
+            "DERIVED_REPUBLICATION": 1,
+            "INDEPENDENT_EXTERNAL_SOURCE": 3
+          }
+        },
+        "independence_rows": [
+          {
+            "index": 0,
+            "source_id": "src-09497f9b5673",
+            "url": "https://www.sec.gov/Archives/edgar/data/949858/000119312526197402/achv-20251231.htm",
+            "origin_family": "sec.gov/filer/949858",
+            "source_class": "competitor",
+            "lineage": "INDEPENDENT_EXTERNAL_SOURCE",
+            "anchor_index": null,
+            "independence_bearing": true
+          },
+          {
+            "index": 1,
+            "source_id": "src-9b71facd9b73",
+            "url": "https://www.sec.gov/Archives/edgar/data/1417926/000164117225011493/form10ka.htm",
+            "origin_family": "sec.gov/filer/1417926",
+            "source_class": "competitor",
+            "lineage": "INDEPENDENT_EXTERNAL_SOURCE",
+            "anchor_index": null,
+            "independence_bearing": true
+          },
+          {
+            "index": 2,
+            "source_id": "src-a2d43d979232",
+            "url": "https://www.sec.gov/Archives/edgar/data/1481028/000121390024083387/ea0215762-10k_sunhydro.htm",
+            "origin_family": "sec.gov/filer/1481028",
+            "source_class": "competitor",
+            "lineage": "INDEPENDENT_EXTERNAL_SOURCE",
+            "anchor_index": null,
+            "independence_bearing": true
+          },
+          {
+            "index": 3,
+            "source_id": "src-7e9350b79f1e",
+            "url": "https://www.sec.gov/Archives/edgar/data/2006986/000141057825001044/adgm-20241231x10ka.htm",
+            "origin_family": "sec.gov/filer/2006986",
+            "source_class": "competitor",
+            "lineage": "DERIVED_REPUBLICATION",
+            "anchor_index": 1,
+            "independence_bearing": false
+          }
+        ]
+      },
+      "learning": {
+        "contract": "learning_attribution.v1",
+        "attribution_state": "BLOCKED_EXTERNAL_CREDITS",
+        "attribution_reason": "the run reached no usable strategic report, so no knowledge state existed for an evidence row to change",
+        "evidence_rows": 4,
+        "eligible_evidence_rows": "UNAVAILABLE",
+        "effect_producing_evidence_rows": "UNAVAILABLE",
+        "independent_effect_producing_evidence_rows": "UNAVAILABLE",
+        "zero_effect_evidence_rows": "UNAVAILABLE",
+        "learning_conversion": "UNAVAILABLE",
+        "independent_learning_conversion": "UNAVAILABLE",
+        "knowledge_effects": 0,
+        "effects_by_type": {},
+        "changes": []
+      },
+      "intelligence": {
+        "strategic_report": "ABSENT",
+        "reason": "no strategic report was composed for this run"
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "mckinsey:4800ed0832daa9c6",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "DEGRADED",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-13",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_read": 1,
+        "founder_snapshots_unavailable": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [],
+      "finished_at": "2026-08-13T09:22:34.710194+00:00",
+      "wall_seconds": 46.79
+    },
+    {
+      "company_id": "johnson-and-johnson",
+      "canonical_name": "Johnson & Johnson",
+      "domain": "jnj.com",
+      "country": "USA",
+      "sector": "HEALTHCARE",
+      "cohort": "DEVELOPMENT",
+      "public_private": "PUBLIC",
+      "entity_type": "OPERATING_COMPANY",
+      "coverage_expectation": "HIGH_COVERAGE",
+      "breaker_dimensions": [
+        "identity",
+        "regulated_environment",
+        "subject_attribution"
+      ],
+      "started_at": "2026-08-13T09:22:34.711615+00:00",
+      "runtime_sha": "e6347e9d6053378b18cd8e90cb1ff2df37000321",
+      "manifest_version": "1.0.0",
+      "analyst_configured": true,
+      "outcome": "COMPLETED",
+      "analyst": {
+        "client_present": true,
+        "key_present": true,
+        "error": ""
+      },
+      "run_id": "01KZX6WDJT21FKJM1NJCF0NPJB",
+      "discovery_seconds": 6.96,
+      "candidates_discovered": 42,
+      "candidates_approved": 14,
+      "fetch_seconds": 8.32,
+      "compose_seconds": 8.11,
+      "identity": {
+        "requested_name": "Johnson & Johnson",
+        "requested_domain": "jnj.com",
+        "resolved_company_name": "Johnson & Johnson",
+        "resolved_domain": "jnj.com",
+        "domain_matches_manifest": true,
+        "manifest_identity_difficulty": "IDENTITY_HARD",
+        "parent_company_id": null,
+        "report_subject": "Johnson & Johnson"
+      },
+      "source_health": {
+        "attempted": 14,
+        "ok": 3,
+        "failed": 11,
+        "fetch_status": "PARTIAL",
+        "failure_types": {
+          "http_status": 9,
+          "too_large": 2
+        },
+        "http_status_counts": {
+          "HTTP 403": 1,
+          "HTTP 404": 8
+        },
+        "failure_messages": [
+          "HTTP 403",
+          "HTTP 404",
+          "response exceeded 2000000 bytes"
+        ],
+        "retryable_failures": 0,
+        "families": [
+          "customers",
+          "identity",
+          "investor"
+        ],
+        "family_counts": {
+          "identity": 1,
+          "investor": 2,
+          "customers": 1
+        },
+        "missing_core": [
+          "product",
+          "strategy"
+        ],
+        "evidence_report_state": "EVIDENCE_REPORT_READY"
+      },
+      "evidence": {
+        "documents_retrieved": 4,
+        "evidence_library_entries": 4,
+        "observations": 0,
+        "raw_document_count": 4,
+        "evidence_independence_state": "MEASURED",
+        "independence": {
+          "contract": "evidence_independence.v1",
+          "state": "MEASURED",
+          "evidence_count": 4,
+          "independent_evidence_count": 1,
+          "source_family_count": 2,
+          "primary_source_count": 1,
+          "company_self_report_count": 1,
+          "independent_external_count": 0,
+          "unknown_lineage_count": 0,
+          "duplicate_document_count": 0,
+          "same_origin_count": 2,
+          "republication_count": 0,
+          "concentration_ratio": 0.5,
+          "distinct_observation_count": 2,
+          "corroboration_state": "PARTIALLY_INDEPENDENT",
+          "corroboration_reason": "exactly one outside vantage point; a second independent origin is what would corroborate it",
+          "plain_statement": "Four document(s) support this view, representing one independent origin.",
+          "independent_origins": [
+            "sec.gov/filer/200406"
+          ],
+          "source_families": [
+            "jnj.com",
+            "sec.gov/filer/200406"
+          ],
+          "contradicting_evidence_ids": [],
+          "lineage_counts": {
+            "COMPANY_SELF_REPORT": 1,
+            "REGULATOR_OR_PRIMARY_FILING": 1,
+            "SAME_ORIGIN": 2
+          }
+        },
+        "independence_rows": [
+          {
+            "index": 0,
+            "source_id": "src-ca466768c6de",
+            "url": "https://www.jnj.com/",
+            "origin_family": "jnj.com",
+            "source_class": "company_owned",
+            "lineage": "COMPANY_SELF_REPORT",
+            "anchor_index": null,
+            "independence_bearing": false
+          },
+          {
+            "index": 1,
+            "source_id": "src-fd3343bfbdfc",
+            "url": "https://www.sec.gov/Archives/edgar/data/200406/000020040626000016/jnj-20251228.htm",
+            "origin_family": "sec.gov/filer/200406",
+            "source_class": "investor_material",
+            "lineage": "REGULATOR_OR_PRIMARY_FILING",
+            "anchor_index": null,
+            "independence_bearing": true
+          },
+          {
+            "index": 2,
+            "source_id": "src-583023fb0285",
+            "url": "https://www.sec.gov/Archives/edgar/data/200406/000020040626000153/jnj-20260628.htm",
+            "origin_family": "sec.gov/filer/200406",
+            "source_class": "investor_material",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 1,
+            "independence_bearing": false
+          },
+          {
+            "index": 3,
+            "source_id": "src-dec6cff963cb",
+            "url": "https://www.jnj.com/suppliers",
+            "origin_family": "jnj.com",
+            "source_class": "company_owned",
+            "lineage": "SAME_ORIGIN",
+            "anchor_index": 0,
+            "independence_bearing": false
+          }
+        ]
+      },
+      "learning": {
+        "contract": "learning_attribution.v1",
+        "attribution_state": "BLOCKED_EXTERNAL_CREDITS",
+        "attribution_reason": "the run reached no usable strategic report, so no knowledge state existed for an evidence row to change",
+        "evidence_rows": 4,
+        "eligible_evidence_rows": "UNAVAILABLE",
+        "effect_producing_evidence_rows": "UNAVAILABLE",
+        "independent_effect_producing_evidence_rows": "UNAVAILABLE",
+        "zero_effect_evidence_rows": "UNAVAILABLE",
+        "learning_conversion": "UNAVAILABLE",
+        "independent_learning_conversion": "UNAVAILABLE",
+        "knowledge_effects": 0,
+        "effects_by_type": {},
+        "changes": []
+      },
+      "intelligence": {
+        "strategic_report": "PRESENT",
+        "result_state": "FAILED",
+        "result_state_detail": "The analysis did not complete. No conclusions should be drawn.",
+        "reasoning_provenance": "pattern_library",
+        "strategic_analysis": "ABSENT",
+        "hypotheses": 1,
+        "shifts": 2,
+        "critic_findings": 0,
+        "readiness": true
+      },
+      "dossier": {
+        "built": true,
+        "dossier_id": "johnson-and-johnson:6a26d2a67a43dfec",
+        "dossier_version": 1,
+        "cohort": "DEVELOPMENT",
+        "manifest_version": "1.0.0",
+        "readiness": "INTELLIGENCE_PARTIAL",
+        "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+        "market_availability": "UNAVAILABLE",
+        "founder_availability": "AVAILABLE",
+        "temporal_compatibility": "WINDOW_UNKNOWN",
+        "population_compatibility": "POPULATION_UNKNOWN",
+        "decision_impact_state": "IMPACT_UNMEASURABLE_FIRST_OBSERVATION",
+        "coverage_class": "FIELD_UNAVAILABLE",
+        "effective_evidence_cutoff": "2026-08-13",
+        "quarantined": false,
+        "quarantine_reasons": [],
+        "market_block_states": {
+          "adversary": "UNAVAILABLE",
+          "beliefs": "UNAVAILABLE",
+          "causal_questions": "UNAVAILABLE",
+          "causal_results": "UNAVAILABLE",
+          "contradictions": "UNAVAILABLE",
+          "demand": "UNAVAILABLE",
+          "economic_state": "UNAVAILABLE",
+          "evidence": "UNAVAILABLE",
+          "expectations": "UNAVAILABLE",
+          "reconciliations": "UNAVAILABLE",
+          "replay": "UNAVAILABLE",
+          "theses": "UNAVAILABLE",
+          "thesis_history": "UNAVAILABLE"
+        },
+        "founder_block_states": {
+          "evidence": "NOT_ATTEMPTED",
+          "living_decisions": "UNAVAILABLE",
+          "minimum_data_requests": "UNAVAILABLE",
+          "minimum_viable_experiments": "UNAVAILABLE"
+        },
+        "absent_blocks": [
+          "adversary",
+          "beliefs",
+          "causal_questions",
+          "causal_results",
+          "contradictions",
+          "demand",
+          "economic_state",
+          "evidence",
+          "evidence",
+          "expectations",
+          "living_decisions",
+          "minimum_data_requests",
+          "minimum_viable_experiments",
+          "reconciliations",
+          "replay",
+          "theses",
+          "thesis_history"
+        ],
+        "visual_verification_state": "UNMEASURED"
+      },
+      "telemetry": {
+        "contract_mismatch": 1,
+        "crossing_FOUNDER_AVAILABLE_MARKET_UNAVAILABLE": 1,
+        "diff_FIRST_OBSERVATION": 1,
+        "dossiers_assembled": 1,
+        "dossiers_partial": 1,
+        "dossiers_persisted": 1,
+        "founder_snapshots_available": 1,
+        "founder_snapshots_read": 1,
+        "market_snapshots_read": 1,
+        "market_snapshots_unavailable": 1,
+        "market_unavailable": 1,
+        "population_mismatch": 1,
+        "readiness_INTELLIGENCE_PARTIAL": 1,
+        "temporal_mismatch": 1
+      },
+      "diagnostics": [
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 1/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdzWAwkbCn9hdZBgMVNAP'}",
+        "WARNING intent_engine.strategic_intelligence.analyst.runner: analyst call failed (attempt 2/2): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdzWAxVzBjXrza9eabYkp'}",
+        "ERROR intent_engine.strategic_intelligence.analyst.runner: analyst gave up after 2 attempt(s): BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CdzWAxVzBjXrza9eabYkp'}"
+      ],
+      "finished_at": "2026-08-13T09:22:58.114683+00:00",
+      "wall_seconds": 23.4
+    }
+  ]
+}

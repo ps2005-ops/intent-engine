@@ -1,0 +1,66 @@
+{
+  "blockers": [
+    "every CEO-facing intelligence block is UNAVAILABLE in the live dossier",
+    "the headline executive read is sourced from the Anthropic analyst, which section 1 forbids as a requirement",
+    "the market->founder bridge file is absent from the demo runtime root, so published beliefs never reach the founder surface"
+  ],
+  "contract": "pre100_demo_baseline.v1",
+  "founder_sha": "20291b5",
+  "frozen_at": "2026-08-14T05:20:56+00:00",
+  "manifest_version": "1.0.0",
+  "market_sha": "fbcbacc",
+  "market_snapshot_census": {
+    "empty": {
+      "adversary_refs": "0/26",
+      "causal_question_refs": "0/26",
+      "causal_result_refs": "0/26",
+      "contradiction_refs": "0/26",
+      "demand_state_refs": "0/26",
+      "economic_state_refs": "0/26",
+      "expectation_refs": "0/26",
+      "reconciliation_refs": "0/26",
+      "replay_refs": "0/26"
+    },
+    "populated": {
+      "belief_refs": "25/26",
+      "evidence_reference_ids": "26/26",
+      "thesis_refs": "4/26",
+      "thesis_revision_refs": "4/26"
+    },
+    "published_at": "2026-08-13",
+    "published_while_anthropic_exhausted": true,
+    "snapshots": 26
+  },
+  "pre100_demo_gate": "FAIL",
+  "production_sha": "cfd4c3b",
+  "root_cause": {
+    "classification": "BUILT_NOT_SURFACED (implemented, not instrumented)",
+    "producers_exist": [
+      "causal_question.py",
+      "causal.py",
+      "synthetic_control.py",
+      "adversary_case.py",
+      "demand_tension.py",
+      "replay.py",
+      "macro_state.py",
+      "competitor_voi.py"
+    ],
+    "producers_needing_anthropic": [],
+    "what": "the publish cycle passes None for every CEO-facing intelligence block; the code comment states the cycle does not compute them",
+    "where": "market/strategic_publish.py:293-300"
+  },
+  "runtime_sha": "fbcbacc",
+  "zero_anthropic_probe": {
+    "candidates_discovered": 52,
+    "company": "cloudflare",
+    "crossing_state": "FOUNDER_AVAILABLE_MARKET_UNAVAILABLE",
+    "documents_retrieved": 10,
+    "dossier_readiness": "INTELLIGENCE_PARTIAL",
+    "key_present": false,
+    "market_blocks_total": 13,
+    "market_blocks_unavailable": 13,
+    "outcome": "COMPLETED",
+    "result_state": "EVIDENCE_LIMITED",
+    "wall_seconds": 20.14
+  }
+}

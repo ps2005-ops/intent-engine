@@ -1,0 +1,82 @@
+[
+  {
+    "company": "Meta Platforms, Inc.",
+    "deployed_sha": "8397d67",
+    "status": "READY",
+    "run_id": "01M0H1E7T09BN34KZQC3TTF0MF",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/8397d67/meta_platforms_inc",
+    "process_before": {
+      "boot_id": "ea27804e556c4fcf",
+      "started_at": 1787278313.388944,
+      "uptime_seconds": 21.2
+    },
+    "seconds": 220,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H1E7T09BN34KZQC3TTF0MF/intro",
+    "routes": 11,
+    "errors": [],
+    "qa_capture_valid": true,
+    "answers": 10,
+    "rejected": []
+  },
+  {
+    "company": "Cloudflare, Inc.",
+    "deployed_sha": "8397d67",
+    "status": "READY",
+    "run_id": "01M0H1V4M6E85XX0KTHSBYW4BF",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/8397d67/cloudflare_inc",
+    "process_before": {
+      "boot_id": "ea27804e556c4fcf",
+      "started_at": 1787278313.388944,
+      "uptime_seconds": 444.2
+    },
+    "seconds": 20,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H1V4M6E85XX0KTHSBYW4BF",
+    "routes": 11,
+    "errors": [],
+    "qa_capture_valid": true,
+    "answers": 10,
+    "rejected": []
+  },
+  {
+    "company": "JPMorgan Chase & Co.",
+    "deployed_sha": "8397d67",
+    "status": "READY",
+    "run_id": "01M0H2649J92VKGD80RBFP1NMX",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/8397d67/jpmorgan_chase_co",
+    "process_before": {
+      "boot_id": "ea27804e556c4fcf",
+      "started_at": 1787278313.388944,
+      "uptime_seconds": 804.3
+    },
+    "seconds": 157,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2649J92VKGD80RBFP1NMX/intro",
+    "routes": 11,
+    "errors": [],
+    "qa_capture_valid": true,
+    "answers": 10,
+    "rejected": []
+  },
+  {
+    "company": "Caterpillar Inc.",
+    "deployed_sha": "8397d67",
+    "status": "READY",
+    "run_id": "01M0H2H3TBAMJF5A4B5JFQWF98",
+    "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/8397d67/caterpillar_inc",
+    "process_before": {
+      "boot_id": "ea27804e556c4fcf",
+      "started_at": 1787278313.388944,
+      "uptime_seconds": 1164.2
+    },
+    "seconds": 252,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2H3TBAMJF5A4B5JFQWF98/intro",
+    "routes": 11,
+    "errors": [],
+    "qa_capture_valid": true,
+    "answers": 10,
+    "rejected": []
+  }
+]

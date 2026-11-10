@@ -1,0 +1,66 @@
+{
+  "company": "The Goldman Sachs Group, Inc.",
+  "deployed_sha": "3b6ba34",
+  "run_id": "01M0KMHJ5Y6N4XBMYQD7Q0TBFY",
+  "analysis_seconds": 328,
+  "stage_transitions": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing The Goldman Sachs Group, Inc. GS \u00b7 goldmansachs.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current com",
+      "status": 200,
+      "html_bytes": 17030
+    },
+    {
+      "t": 6.4,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing The Goldman Sachs Group, Inc. GS \u00b7 goldmansachs.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current co",
+      "status": 200,
+      "html_bytes": 17026
+    },
+    {
+      "t": 65.6,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17026,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "cf-cache-status": "DYNAMIC",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KMHJ5Y6N4XBMYQD7Q0TBFY/progress",
+      "head": ""
+    },
+    {
+      "t": 327.6,
+      "text": "The Goldman Sachs Group, Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction The Goldman Sachs Group, Inc. GS \u00b7 USA \u00b7 goldmansachs.com \u00b7 SEC CIK 886982 The Goldman Sachs Group, Inc. is a financial regulated business that runs on prices to clients globally across tho",
+      "status": 200,
+      "html_bytes": 30883
+    }
+  ],
+  "route_seconds": {
+    "run": 16.76,
+    "intro": 13.9,
+    "slides": 14.11,
+    "full": 10.1,
+    "story": 7.28,
+    "history": 0.32,
+    "connect": 5.46
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "dae43c1445054526",
+    "started_at": 1787365432.1417418,
+    "uptime_seconds": 41.0
+  },
+  "process_after": {
+    "boot_id": "dae43c1445054526",
+    "started_at": 1787365432.1417418,
+    "uptime_seconds": 700.8
+  },
+  "errors": [
+    "GET /runs/01M0KMHJ5Y6N4XBMYQD7Q0TBFY/progress: timeout",
+    "GET /runs/01M0KMHJ5Y6N4XBMYQD7Q0TBFY/progress: timeout",
+    "GET /runs/01M0KMHJ5Y6N4XBMYQD7Q0TBFY/progress: timeout",
+    "GET /runs/01M0KMHJ5Y6N4XBMYQD7Q0TBFY/progress: timeout",
+    "GET /runs/01M0KMHJ5Y6N4XBMYQD7Q0TBFY/progress: timeout"
+  ]
+}

@@ -1,0 +1,168 @@
+{
+  "company": "Apple Inc.",
+  "run_id": "01M18388X62BBN58BN1KN73SZW",
+  "wall_s": 16.6,
+  "documents": 10,
+  "lifecycle": {
+    "created": "2026-08-30T01:06:29.414985+00:00",
+    "accepted": "2026-08-30T01:06:29.838974+00:00",
+    "core_ready": "2026-08-30T01:06:44.959515+00:00",
+    "deep_started": "2026-08-30T01:06:44.960114+00:00",
+    "deep_ready": "2026-08-30T01:06:46.431702+00:00"
+  },
+  "waterfall": {
+    "covered_wall_ms": 15119.4,
+    "phase": "core",
+    "spans": [
+      {
+        "cpu_ms": 105.1,
+        "deadline_remaining_end_s": 52.0,
+        "deadline_remaining_start_s": 60.0,
+        "depth": 0,
+        "item_count": 47,
+        "name": "discovery",
+        "offset_s": 0.0,
+        "status": "ok",
+        "wall_ms": 7999.8
+      },
+      {
+        "candidates": 47,
+        "cpu_ms": 1.3,
+        "deadline_remaining_end_s": 52.0,
+        "deadline_remaining_start_s": 52.0,
+        "depth": 0,
+        "item_count": 14,
+        "name": "source_selection",
+        "offset_s": 8.0,
+        "status": "ok",
+        "wall_ms": 1.3
+      },
+      {
+        "cpu_ms": 305.3,
+        "deadline_remaining_end_s": 49.09,
+        "deadline_remaining_start_s": 52.0,
+        "depth": 0,
+        "item_count": 10,
+        "name": "retrieval",
+        "offset_s": 8.001,
+        "status": "ok",
+        "wall_ms": 2903.5
+      },
+      {
+        "cpu_ms": 8.3,
+        "depth": 2,
+        "item_count": 10,
+        "name": "fi_run",
+        "offset_s": 10.973,
+        "status": "ok",
+        "wall_ms": 9.2
+      },
+      {
+        "cpu_ms": 0.1,
+        "depth": 2,
+        "name": "evidence_library",
+        "offset_s": 10.982,
+        "status": "ok",
+        "wall_ms": 0.1
+      },
+      {
+        "cpu_ms": 587.6,
+        "depth": 3,
+        "item_count": 6,
+        "name": "derive_observations",
+        "offset_s": 11.007,
+        "status": "ok",
+        "wall_ms": 589.7
+      },
+      {
+        "cpu_ms": 143.1,
+        "depth": 3,
+        "name": "classification",
+        "offset_s": 11.597,
+        "status": "ok",
+        "wall_ms": 306.1
+      },
+      {
+        "cpu_ms": 291.4,
+        "depth": 3,
+        "name": "build_report",
+        "offset_s": 11.903,
+        "status": "ok",
+        "wall_ms": 294.7
+      },
+      {
+        "cpu_ms": 1620.1,
+        "depth": 2,
+        "name": "strategic_report",
+        "offset_s": 11.007,
+        "status": "ok",
+        "wall_ms": 1790.7
+      },
+      {
+        "cpu_ms": 1725.7,
+        "deadline_remaining_end_s": 47.19,
+        "deadline_remaining_start_s": 49.09,
+        "depth": 1,
+        "name": "compose_proper",
+        "offset_s": 10.905,
+        "status": "ok",
+        "wall_ms": 1898.9
+      },
+      {
+        "cpu_ms": 0.2,
+        "depth": 1,
+        "name": "memory_snapshot",
+        "offset_s": 12.804,
+        "status": "ok",
+        "wall_ms": 0.2
+      },
+      {
+        "cpu_ms": 0.7,
+        "depth": 1,
+        "item_count": 14,
+        "name": "memory_publish",
+        "offset_s": 12.804,
+        "status": "ok",
+        "wall_ms": 0.7
+      },
+      {
+        "cpu_ms": 0.1,
+        "depth": 1,
+        "name": "critic",
+        "offset_s": 12.806,
+        "status": "ok",
+        "wall_ms": 0.1
+      },
+      {
+        "cpu_ms": 238.9,
+        "depth": 1,
+        "name": "external_context",
+        "offset_s": 12.806,
+        "status": "ok",
+        "wall_ms": 2180.6
+      },
+      {
+        "cpu_ms": 131.2,
+        "depth": 1,
+        "name": "demo_dossier",
+        "offset_s": 14.987,
+        "status": "ok",
+        "wall_ms": 132.7
+      },
+      {
+        "cpu_ms": 2097.9,
+        "deadline_remaining_end_s": 44.88,
+        "deadline_remaining_start_s": 49.09,
+        "depth": 0,
+        "item_count": 10,
+        "name": "core_composition",
+        "offset_s": 10.905,
+        "status": "ok",
+        "wall_ms": 4214.8
+      }
+    ],
+    "total_cpu_ms": 2509.6,
+    "total_wall_ms": 15119.6,
+    "unaccounted_wall_ms": 0.2
+  }
+}

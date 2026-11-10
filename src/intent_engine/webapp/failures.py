@@ -46,6 +46,31 @@ DEPLOYMENT_VERSION_MISMATCH = "DEPLOYMENT_VERSION_MISMATCH"
 AWAITING_SOURCE_APPROVAL = "AWAITING_SOURCE_APPROVAL"
 SHARE_LINK_UNAVAILABLE = "SHARE_LINK_UNAVAILABLE"
 NOT_FOUND = "NOT_FOUND"
+#: The run existed, this session started it, and the service no longer
+#: holds it. Distinct from NOT_FOUND, which cannot tell a restart from a
+#: typo from another person's run id and so had to say the same
+#: unhelpful thing to all three.
+RUN_RESTART_LOST = "RUN_RESTART_LOST"
+#: The reader left something out and can fix it themselves. Distinct from every
+#: other category here, all of which are faults on OUR side.
+INPUT_INCOMPLETE = "INPUT_INCOMPLETE"
+#: THE ANALYSIS NEVER STARTED. Admission was refused because every worker slot
+#: was taken, so no run was created, no company was resolved and no source was
+#: fetched.
+#:
+#: MEASURED LIVE on 25409f14 under deliberate admission pressure: this refusal
+#: classified as PROVIDER_CREDIT_EXHAUSTED, because the reassurance in its own
+#: message -- "NO ANALYSIS CREDIT WAS USED" -- contains the needle "credit".
+#: The reader was then told the company had been identified, its evidence
+#: retrieved, the reasoning step skipped, and that "what was retrieved remains
+#: available now". Four statements about work that never happened, which is
+#: precisely what this module exists to prevent.
+#:
+#: It is NOT an abstention. An abstention means the investigation ran and could
+#: not reach a defensible answer; this means the investigation never began, and
+#: conflating them would let infrastructure pressure be reported as analytical
+#: judgement.
+ADMISSION_REFUSED = "ADMISSION_REFUSED"
 INTERNAL_FAILURE = "INTERNAL_FAILURE"
 
 CATEGORIES = (
@@ -54,7 +79,9 @@ CATEGORIES = (
     ANALYSIS_INTERRUPTED, EVIDENCE_INSUFFICIENT, REASONING_WITHHELD,
     MALFORMED_REASONING, RENDERING_FAILED, PERSISTENCE_FAILED,
     DEPLOYMENT_VERSION_MISMATCH, AWAITING_SOURCE_APPROVAL,
-    SHARE_LINK_UNAVAILABLE, NOT_FOUND,
+    SHARE_LINK_UNAVAILABLE, NOT_FOUND, RUN_RESTART_LOST,
+    INPUT_INCOMPLETE,
+    ADMISSION_REFUSED,
     INTERNAL_FAILURE,
 )
 
@@ -62,6 +89,30 @@ CATEGORIES = (
 #: `what_worked` is supplied per-call, because it is the only part that depends
 #: on the particular run rather than on the kind of failure.
 _COPY = {
+    ADMISSION_REFUSED: (
+        "The analysis did not start",
+        "No analysis was started, so nothing was fetched and nothing was "
+        "read.",
+        "Every analysis slot on this preview is busy right now. This is a "
+        "limit on how much work runs at once, not a finding about the "
+        "company and not a fault in what you entered.",
+        "Try again in a few minutes — the same company will run normally "
+        "once a slot frees up.",
+        True,
+    ),
+    # MEASURED LIVE. Submitting the form without ticking consent produced
+    # "Something went wrong on our side ... This is a fault in the product,
+    # not in what you entered" -- which is the exact opposite of the truth,
+    # and leaves the reader with nothing to do but retry the same mistake.
+    # An unrecognised message defaults to INTERNAL_FAILURE, correctly; the
+    # repair is to recognise this one, not to soften the default.
+    INPUT_INCOMPLETE: (
+        "One thing is still needed",
+        "The analysis was not started.",
+        "Analysing a company reads its public sources on your behalf, so we "
+        "ask you to confirm that before anything is fetched.",
+        "Tick the confirmation under the company name and submit again.",
+        True),
     AWAITING_SOURCE_APPROVAL: (
         "This analysis is waiting for you",
         "The reading has not been built yet.",
@@ -173,6 +224,15 @@ _COPY = {
         "the analysis may have been cleared when the service restarted.",
         "Ask whoever shared it for a fresh link.",
         False),
+    RUN_RESTART_LOST: (
+        "This analysis was lost when the service restarted",
+        "The reading itself is gone; nothing about it was wrong.",
+        "This preview keeps completed analyses on the instance that produced "
+        "them, and that instance was replaced. Nothing you entered was "
+        "invented or mis-read \u2014 the work simply is not here any more.",
+        "Run the same company again. It takes about as long as the first "
+        "time and reads the same public sources.",
+        True),
     NOT_FOUND: (
         "That analysis is not available here",
         "Nothing could be opened.",
@@ -195,6 +255,7 @@ _COPY = {
 #: default is INTERNAL_FAILURE so an unmapped cause is never silently dressed
 #: up as an explained one.
 _SIGNATURES = (
+    ("consent is required", INPUT_INCOMPLETE),
     ("approve at least one source", AWAITING_SOURCE_APPROVAL),
     ("no approval recorded", AWAITING_SOURCE_APPROVAL),
     ("cannot fetch unknown candidates", INTERNAL_FAILURE),
@@ -204,6 +265,10 @@ _SIGNATURES = (
     ("unknown company", COMPANY_RESOLUTION_FAILED),
     ("no approved source could be retrieved", RETRIEVAL_INSUFFICIENT),
     ("run byte budget exhausted", RETRIEVAL_INSUFFICIENT),
+    # BEFORE "credit". The admission refusal says "NO ANALYSIS CREDIT WAS
+    # USED", and a bare substring test read that as the credit balance being
+    # exhausted -- our own reassurance classified as the opposite failure.
+    ("already running as many analyses", ADMISSION_REFUSED),
     ("rate limit", PROVIDER_RATE_LIMITED),
     ("credit", PROVIDER_CREDIT_EXHAUSTED),
     ("timed out", ANALYSIS_TIMEOUT),
@@ -224,9 +289,18 @@ def classify(message: str) -> str:
 #: had no company entered, so "the company you entered was recorded" is exactly
 #: the kind of statement-not-in-evidence this module exists to stop.
 _WHAT_WORKED = {
+    INPUT_INCOMPLETE: "Nothing was fetched and nothing was charged against "
+                      "your session.",
     NOT_FOUND: "Your session is active, and nothing you have already run was "
                "affected.",
     SHARE_LINK_UNAVAILABLE: "The link was received and checked.",
+    # The ONLY true thing here: the submission arrived. Every other line in
+    # this table would claim work that an unadmitted run never did.
+    ADMISSION_REFUSED: "Your request arrived and your session is intact. "
+                       "No analysis credit was used.",
+    RUN_RESTART_LOST: "Your session is intact and the company you "
+                      "entered is known, so the run can be started "
+                      "again without retyping anything.",
     PROVIDER_CREDIT_EXHAUSTED: "The company was identified and its public "
                                "evidence was retrieved.",
     PROVIDER_RATE_LIMITED: "The company was identified and retrieval had "

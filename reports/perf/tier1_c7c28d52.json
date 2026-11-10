@@ -1,0 +1,636 @@
+{
+  "base": "https://intent-engine-preview-bridge.onrender.com",
+  "cohort": "tier1",
+  "version": "{\"app_version\": \"1.5.0-executive-intelligence\", \"commit\": \"c7c28d526bbd35290afaa62c02c09cd30cbd4a0d\", \"process\": {\"boot_id\": \"c00ef1f1f1d14011\", \"started_at\": 1788085820.092313, \"uptime_seconds\": 10.9}}",
+  "summary": {
+    "attempted": 10,
+    "counted": 10,
+    "refused": 0,
+    "core_success": 10,
+    "deep_success": 4,
+    "no_result": 0,
+    "core_p50": 104.7,
+    "core_p90": 134.0,
+    "core_max": 141.1,
+    "deep_p50": 154.7,
+    "deep_p90": 224.7,
+    "deep_max": 224.7,
+    "core_over_60s": [
+      "Apple Inc.",
+      "Microsoft",
+      "NVIDIA",
+      "Amazon",
+      "Alphabet",
+      "Meta Platforms",
+      "Walmart",
+      "JPMorgan Chase",
+      "Visa",
+      "Caterpillar"
+    ]
+  },
+  "rows": [
+    {
+      "company": "Apple Inc.",
+      "domain": "apple.com",
+      "error": "",
+      "core_ready_seconds": 94.9,
+      "deep_ready_seconds": null,
+      "analyze_status": 200,
+      "run_id": "01M193H1W5TV0Y017YKNVQEJPY",
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 7.2
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 34.1
+        }
+      ],
+      "progress_unreachable_polls": 1,
+      "deep_detection": "NO_PENDING_ON_FIRST_POLL",
+      "core_open_seconds": 156.6,
+      "metric_source": {
+        "markers": "persisted_lifecycle_event:ci.lifecycle_marked",
+        "core_latency_s": "persisted_lifecycle_event",
+        "deep_latency_s": "persisted_lifecycle_event",
+        "evidence_count": "canonical_retrieved_documents",
+        "deep_status": "composed_report_object",
+        "result_state": "composed_report_object",
+        "run_state": "persisted_run_transitions",
+        "trace": "persisted_spans:ci.trace_recorded"
+      },
+      "canonical_evidence_count": 11,
+      "canonical_result_state": "FAILED",
+      "has_report": true,
+      "discovery_ms": 28979.1,
+      "retrieval_ms": 20001.3,
+      "composition_ms": 45697.3,
+      "documents": 11,
+      "text_chars": 457220,
+      "observations": 7,
+      "snapshot_mode": "COLD",
+      "pages": {
+        "": {
+          "status": 200,
+          "chars": 31553,
+          "seconds": 5.5,
+          "deep_pending": false,
+          "outcome": ""
+        },
+        "/brief": {
+          "status": 200,
+          "chars": 47730,
+          "seconds": 10.5,
+          "deep_pending": false,
+          "outcome": ""
+        }
+      },
+      "evidence_citations": 0,
+      "status": "CORE_READY_DEEP_PENDING",
+      "total_seconds": 212.2
+    },
+    {
+      "company": "Microsoft",
+      "domain": "microsoft.com",
+      "error": "",
+      "core_ready_seconds": 111.78,
+      "deep_ready_seconds": null,
+      "analyze_status": 200,
+      "run_id": "01M193QHTT4QE123JJVT2GZC0X",
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 1.1
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 32.8
+        }
+      ],
+      "progress_unreachable_polls": 1,
+      "deep_detection": "NO_PENDING_ON_FIRST_POLL",
+      "core_open_seconds": 137.0,
+      "metric_source": {
+        "markers": "persisted_lifecycle_event:ci.lifecycle_marked",
+        "core_latency_s": "persisted_lifecycle_event",
+        "deep_latency_s": "persisted_lifecycle_event",
+        "evidence_count": "canonical_retrieved_documents",
+        "deep_status": "composed_report_object",
+        "result_state": "composed_report_object",
+        "run_state": "persisted_run_transitions",
+        "trace": "persisted_spans:ci.trace_recorded"
+      },
+      "canonical_evidence_count": 9,
+      "canonical_result_state": "DEEP_PENDING",
+      "has_report": true,
+      "discovery_ms": 31233.6,
+      "retrieval_ms": 46752.6,
+      "composition_ms": 33704.1,
+      "documents": 9,
+      "text_chars": 440176,
+      "observations": 9,
+      "snapshot_mode": "COLD",
+      "pages": {
+        "": {
+          "status": 200,
+          "chars": 33829,
+          "seconds": 6.8,
+          "deep_pending": false,
+          "outcome": ""
+        },
+        "/brief": {
+          "status": 200,
+          "chars": 57747,
+          "seconds": 12.2,
+          "deep_pending": false,
+          "outcome": ""
+        }
+      },
+      "evidence_citations": 0,
+      "status": "CORE_READY_DEEP_PENDING",
+      "total_seconds": 190.0
+    },
+    {
+      "company": "NVIDIA",
+      "domain": "nvidia.com",
+      "error": "",
+      "core_ready_seconds": 126.52,
+      "deep_ready_seconds": null,
+      "analyze_status": 200,
+      "run_id": "01M193XBQMT4VV3ZJNJG9M8T7B",
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 0.7
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 32.5
+        }
+      ],
+      "progress_unreachable_polls": 1,
+      "deep_detection": "NO_PENDING_ON_FIRST_POLL",
+      "core_open_seconds": 147.6,
+      "metric_source": {
+        "markers": "persisted_lifecycle_event:ci.lifecycle_marked",
+        "core_latency_s": "persisted_lifecycle_event",
+        "deep_latency_s": "persisted_lifecycle_event",
+        "evidence_count": "canonical_retrieved_documents",
+        "deep_status": "composed_report_object",
+        "result_state": "composed_report_object",
+        "run_state": "persisted_run_transitions",
+        "trace": "persisted_spans:ci.trace_recorded"
+      },
+      "canonical_evidence_count": 15,
+      "canonical_result_state": "FAILED",
+      "has_report": true,
+      "discovery_ms": 29997.2,
+      "retrieval_ms": 30305.9,
+      "composition_ms": 65914.0,
+      "documents": 15,
+      "text_chars": 509645,
+      "observations": 7,
+      "snapshot_mode": "COLD",
+      "pages": {
+        "": {
+          "status": 200,
+          "chars": 32348,
+          "seconds": 20.1,
+          "deep_pending": false,
+          "outcome": ""
+        },
+        "/brief": {
+          "status": 200,
+          "chars": 56633,
+          "seconds": 28.6,
+          "deep_pending": false,
+          "outcome": ""
+        }
+      },
+      "evidence_citations": 0,
+      "status": "CORE_READY_DEEP_PENDING",
+      "total_seconds": 235.2
+    },
+    {
+      "company": "Amazon",
+      "domain": "amazon.com",
+      "error": "",
+      "core_ready_seconds": 141.11,
+      "deep_ready_seconds": null,
+      "analyze_status": 200,
+      "run_id": "01M1944HSXSGXSK2573FY7FWC4",
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 1.2
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 18.8
+        }
+      ],
+      "progress_unreachable_polls": 4,
+      "deep_detection": "MARKER_NEVER_SEEN",
+      "core_open_seconds": 337.1,
+      "metric_source": {
+        "markers": "persisted_lifecycle_event:ci.lifecycle_marked",
+        "core_latency_s": "persisted_lifecycle_event",
+        "deep_latency_s": "persisted_lifecycle_event",
+        "evidence_count": "canonical_retrieved_documents",
+        "deep_status": "composed_report_object",
+        "result_state": "composed_report_object",
+        "run_state": "persisted_run_transitions",
+        "trace": "persisted_spans:ci.trace_recorded"
+      },
+      "canonical_evidence_count": 11,
+      "canonical_result_state": "FAILED",
+      "has_report": true,
+      "discovery_ms": 16242.8,
+      "retrieval_ms": 22050.0,
+      "composition_ms": 102700.9,
+      "documents": 11,
+      "text_chars": 621415,
+      "observations": 8,
+      "snapshot_mode": "COLD",
+      "pages": {
+        "": {
+          "status": 200,
+          "chars": 31768,
+          "seconds": 8.2,
+          "deep_pending": false,
+          "outcome": ""
+        },
+        "/brief": {
+          "status": 200,
+          "chars": 52325,
+          "seconds": 12.8,
+          "deep_pending": false,
+          "outcome": ""
+        }
+      },
+      "evidence_citations": 0,
+      "status": "CORE_READY_DEEP_PENDING",
+      "total_seconds": 358.9
+    },
+    {
+      "company": "Alphabet",
+      "domain": "abc.xyz",
+      "error": "",
+      "core_ready_seconds": 109.91,
+      "deep_ready_seconds": 224.74,
+      "analyze_status": 200,
+      "run_id": "01M194FGZHCTRB1PY0J3W6JGG0",
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 1.0
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 32.4
+        }
+      ],
+      "progress_unreachable_polls": 2,
+      "deep_detection": "NO_PENDING_ON_FIRST_POLL",
+      "core_open_seconds": 209.1,
+      "metric_source": {
+        "markers": "persisted_lifecycle_event:ci.lifecycle_marked",
+        "core_latency_s": "persisted_lifecycle_event",
+        "deep_latency_s": "persisted_lifecycle_event",
+        "evidence_count": "canonical_retrieved_documents",
+        "deep_status": "composed_report_object",
+        "result_state": "composed_report_object",
+        "run_state": "persisted_run_transitions",
+        "trace": "persisted_spans:ci.trace_recorded"
+      },
+      "canonical_evidence_count": 7,
+      "canonical_result_state": "FAILED",
+      "has_report": true,
+      "discovery_ms": 28299.3,
+      "retrieval_ms": 23698.5,
+      "composition_ms": 57603.8,
+      "documents": 7,
+      "text_chars": 430377,
+      "observations": 6,
+      "snapshot_mode": "COLD",
+      "pages": {
+        "": {
+          "status": 200,
+          "chars": 31809,
+          "seconds": 4.8,
+          "deep_pending": false,
+          "outcome": ""
+        },
+        "/brief": {
+          "status": 200,
+          "chars": 51804,
+          "seconds": 9.5,
+          "deep_pending": false,
+          "outcome": ""
+        }
+      },
+      "evidence_citations": 0,
+      "status": "COMPLETE",
+      "total_seconds": 250.0
+    },
+    {
+      "company": "Meta Platforms",
+      "domain": "meta.com",
+      "error": "",
+      "core_ready_seconds": 104.68,
+      "deep_ready_seconds": null,
+      "analyze_status": 200,
+      "run_id": "01M194Q5HMDNJ62M80Z95M54RT",
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 1.3
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 32.6
+        }
+      ],
+      "progress_unreachable_polls": 1,
+      "deep_detection": "NO_PENDING_ON_FIRST_POLL",
+      "core_open_seconds": 138.6,
+      "metric_source": {
+        "markers": "persisted_lifecycle_event:ci.lifecycle_marked",
+        "core_latency_s": "persisted_lifecycle_event",
+        "deep_latency_s": "persisted_lifecycle_event",
+        "evidence_count": "canonical_retrieved_documents",
+        "deep_status": "composed_report_object",
+        "result_state": "composed_report_object",
+        "run_state": "persisted_run_transitions",
+        "trace": "persisted_spans:ci.trace_recorded"
+      },
+      "canonical_evidence_count": 8,
+      "canonical_result_state": "FAILED",
+      "has_report": true,
+      "discovery_ms": 30945.5,
+      "retrieval_ms": 24762.9,
+      "composition_ms": 48697.3,
+      "documents": 8,
+      "text_chars": 434444,
+      "observations": 4,
+      "snapshot_mode": "COLD",
+      "pages": {
+        "": {
+          "status": 200,
+          "chars": 31871,
+          "seconds": 5.1,
+          "deep_pending": false,
+          "outcome": ""
+        },
+        "/brief": {
+          "status": 200,
+          "chars": 47242,
+          "seconds": 10.9,
+          "deep_pending": false,
+          "outcome": ""
+        }
+      },
+      "evidence_citations": 0,
+      "status": "CORE_READY_DEEP_PENDING",
+      "total_seconds": 192.1
+    },
+    {
+      "company": "Walmart",
+      "domain": "walmart.com",
+      "error": "",
+      "core_ready_seconds": 84.35,
+      "deep_ready_seconds": 154.66,
+      "analyze_status": 200,
+      "run_id": "01M194X1F8GFZN7SKSBXHSF8VD",
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 1.3
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 37.6
+        }
+      ],
+      "progress_unreachable_polls": 1,
+      "deep_detection": "NO_PENDING_ON_FIRST_POLL",
+      "core_open_seconds": 142.0,
+      "metric_source": {
+        "markers": "persisted_lifecycle_event:ci.lifecycle_marked",
+        "core_latency_s": "persisted_lifecycle_event",
+        "deep_latency_s": "persisted_lifecycle_event",
+        "evidence_count": "canonical_retrieved_documents",
+        "deep_status": "composed_report_object",
+        "result_state": "composed_report_object",
+        "run_state": "persisted_run_transitions",
+        "trace": "persisted_spans:ci.trace_recorded"
+      },
+      "canonical_evidence_count": 7,
+      "canonical_result_state": "DEEP_PENDING",
+      "has_report": true,
+      "discovery_ms": 35156.6,
+      "retrieval_ms": 16143.9,
+      "composition_ms": 32905.0,
+      "documents": 7,
+      "text_chars": 302920,
+      "observations": 3,
+      "snapshot_mode": "COLD",
+      "pages": {
+        "": {
+          "status": 200,
+          "chars": 32650,
+          "seconds": 6.7,
+          "deep_pending": false,
+          "outcome": ""
+        },
+        "/brief": {
+          "status": 200,
+          "chars": 53121,
+          "seconds": 12.6,
+          "deep_pending": false,
+          "outcome": ""
+        }
+      },
+      "evidence_citations": 0,
+      "status": "COMPLETE",
+      "total_seconds": 182.5
+    },
+    {
+      "company": "JPMorgan Chase",
+      "domain": "jpmorganchase.com",
+      "error": "",
+      "core_ready_seconds": 82.03,
+      "deep_ready_seconds": 114.42,
+      "analyze_status": 200,
+      "run_id": "01M1952M3HCA6B1QSXW296H806",
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 0.9
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 18.2
+        }
+      ],
+      "progress_unreachable_polls": 1,
+      "deep_detection": "NO_PENDING_ON_FIRST_POLL",
+      "core_open_seconds": 115.2,
+      "metric_source": {
+        "markers": "persisted_lifecycle_event:ci.lifecycle_marked",
+        "core_latency_s": "persisted_lifecycle_event",
+        "deep_latency_s": "persisted_lifecycle_event",
+        "evidence_count": "canonical_retrieved_documents",
+        "deep_status": "composed_report_object",
+        "result_state": "composed_report_object",
+        "run_state": "persisted_run_transitions",
+        "trace": "persisted_spans:ci.trace_recorded"
+      },
+      "canonical_evidence_count": 15,
+      "canonical_result_state": "DEEP_PENDING",
+      "has_report": true,
+      "discovery_ms": 15027.9,
+      "retrieval_ms": 49687.1,
+      "composition_ms": 17011.1,
+      "documents": 15,
+      "text_chars": 187137,
+      "observations": 3,
+      "snapshot_mode": "COLD",
+      "pages": {
+        "": {
+          "status": 200,
+          "chars": 32229,
+          "seconds": 6.3,
+          "deep_pending": false,
+          "outcome": ""
+        },
+        "/brief": {
+          "status": 200,
+          "chars": 50028,
+          "seconds": 11.9,
+          "deep_pending": false,
+          "outcome": ""
+        }
+      },
+      "evidence_citations": 0,
+      "status": "COMPLETE",
+      "total_seconds": 146.8
+    },
+    {
+      "company": "Visa",
+      "domain": "visa.com",
+      "error": "",
+      "core_ready_seconds": 70.8,
+      "deep_ready_seconds": 136.9,
+      "analyze_status": 200,
+      "run_id": "01M19573W96Y36SH14HK92R3EY",
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 1.0
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 18.9
+        }
+      ],
+      "progress_unreachable_polls": 1,
+      "deep_detection": "NO_PENDING_ON_FIRST_POLL",
+      "core_open_seconds": 130.8,
+      "metric_source": {
+        "markers": "persisted_lifecycle_event:ci.lifecycle_marked",
+        "core_latency_s": "persisted_lifecycle_event",
+        "deep_latency_s": "persisted_lifecycle_event",
+        "evidence_count": "canonical_retrieved_documents",
+        "deep_status": "composed_report_object",
+        "result_state": "composed_report_object",
+        "run_state": "persisted_run_transitions",
+        "trace": "persisted_spans:ci.trace_recorded"
+      },
+      "canonical_evidence_count": 8,
+      "canonical_result_state": "DEEP_PENDING",
+      "has_report": true,
+      "discovery_ms": 16304.8,
+      "retrieval_ms": 18188.5,
+      "composition_ms": 36097.5,
+      "documents": 8,
+      "text_chars": 346825,
+      "observations": 4,
+      "snapshot_mode": "COLD",
+      "pages": {
+        "": {
+          "status": 200,
+          "chars": 33128,
+          "seconds": 7.6,
+          "deep_pending": false,
+          "outcome": ""
+        },
+        "/brief": {
+          "status": 200,
+          "chars": 51936,
+          "seconds": 11.9,
+          "deep_pending": false,
+          "outcome": ""
+        }
+      },
+      "evidence_citations": 0,
+      "status": "COMPLETE",
+      "total_seconds": 167.4
+    },
+    {
+      "company": "Caterpillar",
+      "domain": "caterpillar.com",
+      "error": "",
+      "core_ready_seconds": 134.0,
+      "deep_ready_seconds": null,
+      "analyze_status": 200,
+      "run_id": "01M195C7WZM0W2XNQ67BAY67W9",
+      "stages": [
+        {
+          "stage": "Reading current company evidence",
+          "at_s": 1.9
+        },
+        {
+          "stage": "Mapping competitors",
+          "at_s": 32.8
+        }
+      ],
+      "progress_unreachable_polls": 1,
+      "deep_detection": "NO_PENDING_ON_FIRST_POLL",
+      "core_open_seconds": 134.0,
+      "metric_source": {
+        "core_ready_seconds": "ui_redirect_fallback"
+      },
+      "canonical_evidence_count": 9,
+      "canonical_result_state": "FAILED",
+      "has_report": true,
+      "discovery_ms": null,
+      "retrieval_ms": null,
+      "composition_ms": null,
+      "documents": null,
+      "text_chars": null,
+      "observations": null,
+      "snapshot_mode": "COLD",
+      "pages": {
+        "": {
+          "status": 200,
+          "chars": 33533,
+          "seconds": 10.7,
+          "deep_pending": false,
+          "outcome": ""
+        },
+        "/brief": {
+          "status": 200,
+          "chars": 59853,
+          "seconds": 15.8,
+          "deep_pending": false,
+          "outcome": ""
+        }
+      },
+      "evidence_citations": 0,
+      "status": "CORE_READY_DEEP_PENDING",
+      "total_seconds": 189.3
+    }
+  ]
+}

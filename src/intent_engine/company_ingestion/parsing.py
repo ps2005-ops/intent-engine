@@ -46,7 +46,29 @@ MIN_MAIN_TEXT_CHARS = 40
 # the ordinary path is untouched.
 MIN_BODY_TEXT_CHARS = 600
 _BLOCK = {"p", "h1", "h2", "h3", "h4", "h5", "h6", "li", "td", "th",
-          "blockquote", "figcaption", "dt", "dd", "title"}
+          "blockquote", "figcaption", "dt", "dd", "title",
+          # MEASURED ADDITION, 2026-08-09. Text was captured ONLY inside the
+          # tags above, and `handle_data` dropped everything else on the
+          # floor. SEC filings — the single most economically load-bearing
+          # source this engine has — lay their prose out in <div> and <font>,
+          # not <p>. So on Caterpillar's Q2 exhibit the parser kept 13,462 of
+          # the document's 64,547 characters: the numeric table cells (<td>)
+          # survived and every sentence of narrative did not.
+          #
+          # What that cost, measured on that one filing: the sentence "Strong
+          # order rates and a growing backlog reflect broadening momentum
+          # across all three of our primary segments" was absent from the
+          # parsed text entirely, as were all nine occurrences of "Sales
+          # increased". 2,815 blocks averaging ELEVEN characters came out
+          # instead, which is why `fragment` is the largest single rejection
+          # reason in production at 3,200 a cycle.
+          #
+          # Downstream this is not a parsing detail. `demand_chain` reported
+          # ORDERS, BACKLOG, SHIPMENTS, END_DEMAND, CUSTOMER_INTENT and
+          # COMMITTED_DEMAND at ZERO companies across the whole corpus — not
+          # because companies do not state them, but because the sentences
+          # that state them were discarded three layers upstream.
+          "div", "section"}
 
 
 class _Extractor(HTMLParser):
@@ -94,10 +116,25 @@ class _Extractor(HTMLParser):
             self._skip_depth += 1
             return
         role = (attrs.get("role") or "").lower()
-        if tag in _CHROME or role in ("navigation", "banner", "contentinfo",
-                                      "complementary"):
+        is_chrome = tag in _CHROME or role in ("navigation", "banner",
+                                               "contentinfo", "complementary")
+        is_main = tag in _MAIN or role == "main"
+        # No flush here. Text buffered outside a block belongs to the region
+        # it was READ in, and the two sites that already flush — a region
+        # CLOSING, and a block OPENING — cover every case a break proof could
+        # construct against well-formed markup. A third flush on region open
+        # was written first and removed: it changed no outcome any test could
+        # detect, and an unguarded branch in a parser is how the next reader
+        # inherits a rule nobody can justify.
+        #
+        # Malformed markup that never closes <nav> is a separate, pre-existing
+        # weakness: the chrome region stays on the stack, main content is
+        # tagged chrome too, body_blocks empties and the whole-page fallback
+        # restores the navigation. That predates this change and is recorded
+        # in BACKLOG rather than fixed here.
+        if is_chrome:
             self._regions.append((tag, "chrome"))
-        elif tag in _MAIN or role == "main":
+        elif is_main:
             self._regions.append((tag, "main"))
         if tag == "meta":
             if (attrs.get("name") or "").lower() == "description":
@@ -115,6 +152,11 @@ class _Extractor(HTMLParser):
         if tag == "a" and attrs.get("href"):
             self.links.append(attrs["href"])
         if tag in _BLOCK:
+            # Emit what is already buffered instead of discarding it. In
+            # `<div>A<p>B</p></div>` the old reset threw "A" away, and with
+            # <div> now a block that is the shape every filing is written in:
+            # a paragraph of prose followed by a nested table or span.
+            self._emit(self._block_stack[-1] if self._block_stack else "")
             self._block_stack.append(tag)
             self._buffer = []
 
@@ -133,25 +175,37 @@ class _Extractor(HTMLParser):
         # never closes would swallow the rest of the document.
         for index in range(len(self._regions) - 1, -1, -1):
             if self._regions[index][0] == tag:
+                # Same rule as opening one: whatever is buffered was read
+                # inside this region and is emitted before the region goes.
+                self._emit("")
                 del self._regions[index:]
                 break
         if tag in _BLOCK and self._block_stack:
             self._block_stack.pop()
-            text = " ".join("".join(self._buffer).split())
-            self._buffer = []
-            if not text:
-                return
-            if tag == "title" and not self.title:
-                self.title = text
-                return
-            if tag.startswith("h") and len(tag) == 2:
-                self.headings.append((tag, text))
-            self.blocks.append(text)
-            kinds = {kind for _, kind in self._regions}
-            if "chrome" not in kinds:
-                self.body_blocks.append(text)
-                if "main" in kinds:
-                    self.main_blocks.append(text)
+            self._emit(tag)
+
+    def _emit(self, tag: str) -> None:
+        """Flush the buffer as one block, or do nothing if it is empty.
+
+        Split out of `handle_endtag` because a block STARTING now has to
+        flush too — see the note there. Emitting nothing for an empty buffer
+        is what makes the extra call harmless on the common path.
+        """
+        text = " ".join("".join(self._buffer).split())
+        self._buffer = []
+        if not text:
+            return
+        if tag == "title" and not self.title:
+            self.title = text
+            return
+        if tag.startswith("h") and len(tag) == 2:
+            self.headings.append((tag, text))
+        self.blocks.append(text)
+        kinds = {kind for _, kind in self._regions}
+        if "chrome" not in kinds:
+            self.body_blocks.append(text)
+            if "main" in kinds:
+                self.main_blocks.append(text)
 
     def handle_data(self, data):
         if self._in_jsonld:
@@ -160,7 +214,12 @@ class _Extractor(HTMLParser):
         if self._in_state:
             self._state_raw.append(data)
             return
-        if self._skip_depth == 0 and self._block_stack:
+        # No longer requires an open block tag. Text sitting directly in a
+        # <body> or a <font> run belongs to the document as much as text in a
+        # <p> does, and requiring a block was the other half of the filing
+        # loss: with <div> excluded, a filing's prose was neither inside a
+        # recognised block nor buffered without one.
+        if self._skip_depth == 0:
             self._buffer.append(data)
 
 
@@ -311,6 +370,68 @@ def _terminated(line: str) -> str:
     return line + "."
 
 
+#: Date keys schema.org uses, strongest first. `datePublished` is when the
+#: company said the thing; `dateModified` is when the page was last touched.
+#: Both are dates the PUBLISHER asserted, which is what makes them usable.
+_JSONLD_DATE_KEYS = ("datePublished", "dateCreated", "dateModified",
+                     "uploadDate")
+
+
+def _jsonld_date(blocks) -> str:
+    """A publication date from JSON-LD, when the meta tags carried none.
+
+    MEASURED 2026-09-11 across the ten demo companies: `<meta
+    article:modified_time>` and `<time datetime>` found a date on four of
+    them. Six published one in JSON-LD instead and the parser walked past it,
+    so those companies reached the history surface with no dated record at
+    all -- and the page told their reader the company had no history rather
+    than that we had not read the date it was published with.
+
+    Walks nested graphs because schema.org blocks are routinely wrapped in
+    `@graph`, and the date is usually on an inner node rather than the root.
+    """
+    import json
+
+    def walk(node, depth=0):
+        if depth > 6:
+            return ""
+        if isinstance(node, str):
+            # `_jsonld_raw` holds the RAW SCRIPT TEXT, not parsed objects --
+            # `handle_data` appends the characters as they stream in. A first
+            # version of this reader walked it as though it were already
+            # decoded, matched nothing on every real page, and returned the
+            # empty string exactly as often as having no reader at all. It
+            # passed its own unit test because that test handed it dicts.
+            try:
+                node = json.loads(node)
+            except Exception:                               # noqa: BLE001
+                return ""
+            return walk(node, depth + 1)
+        if isinstance(node, dict):
+            for key in _JSONLD_DATE_KEYS:
+                value = node.get(key)
+                if isinstance(value, str) and value.strip():
+                    return value.strip()
+            for value in node.values():
+                found = walk(value, depth + 1)
+                if found:
+                    return found
+        elif isinstance(node, (list, tuple)):
+            for value in node:
+                found = walk(value, depth + 1)
+                if found:
+                    return found
+        return ""
+    # Joined as well as walked singly: a long JSON-LD block reaches
+    # `handle_data` in several chunks, so no individual fragment parses.
+    for candidate in (list(blocks or ()) + ["".join(
+            str(b) for b in (blocks or ()))]):
+        found = walk(candidate)
+        if found:
+            return found
+    return ""
+
+
 def parse_html(html: str) -> dict:
     """Returns {title, meta_description, canonical_url, headings, text,
     links, content_hash, parser_version}. Deterministic."""
@@ -319,6 +440,11 @@ def parse_html(html: str) -> dict:
         extractor.feed(html or "")
     except Exception:                                      # noqa: BLE001
         pass                                # keep whatever was extracted
+    # Flush whatever the document ended without closing. Real pages leave
+    # tags unclosed and some put text straight in <body>, and either way the
+    # tail was silently dropped: nothing emits a buffer that no end tag ever
+    # arrives for. Harmless when the buffer is empty, which is the usual case.
+    extractor._emit("")
     # Prefer the page's own main region, then the page minus its chrome, then
     # everything. Each fallback only applies when the narrower choice does not
     # leave the page empty: stripping furniture must never cost a page that
@@ -393,7 +519,8 @@ def parse_html(html: str) -> dict:
         "title": extractor.title or og.get("og:title", ""),
         "meta_description": meta_description,
         "canonical_url": extractor.canonical_url,
-        "modified_date": extractor.modified_date,
+        "modified_date": (extractor.modified_date
+                          or _jsonld_date(extractor._jsonld_raw)),
         "headings": extractor.headings,
         "text": text,
         "links": extractor.links,

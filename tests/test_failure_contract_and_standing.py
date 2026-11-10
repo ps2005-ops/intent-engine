@@ -366,3 +366,32 @@ def test_a_run_without_a_filing_still_says_the_sources_are_the_companys_own():
     gaps = " ".join(report.evidence_gaps or ())
     assert "the company's filings carry this" not in gaps
     assert "published by the company itself" in gaps
+
+
+def test_an_independent_class_filing_is_read_for_the_subject_not_the_filer():
+    """Live on the prospect-100 pass: once `third_party_filings._emit` read the
+    class from the relationship, a SPAC's 10-K arrived as
+    `independent_reporting`, missed the `== "competitor"` branch, and its own
+    cover page and pricing prose became "Matillion publishes its prices"."""
+    spac_self = ("We are a blank check company incorporated as a Cayman "
+                 "Islands exempted company. Our pricing of units and the "
+                 "price per share in the offering were set by negotiation. ")
+    # Carries a filing proposition (supplier dependency), as `_ABOUT_SUBJECT`
+    # does, so the test exercises span selection rather than admission.
+    about = ("We depend on third-party providers including Matillion to load "
+             "subscription revenue data, and an interruption there would "
+             "delay collections materially. ")
+    doc = dict(_third_party_doc(_FILING_HEAD + spac_self + about,
+                                company="Matillion"),
+               title="Plum Acquisition Corp. I — 10-K",
+               source_class="independent_reporting")
+    observations = derive_observations([doc], company="Matillion")
+    assert observations, "the filing names the subject and should be usable"
+    excerpt = " ".join(o.excerpt for o in observations)
+    assert "providers including Matillion" in excerpt
+    assert "blank check" not in excerpt
+
+    # A filing in that class that never names the subject says nothing
+    # about it, and is not turned into an observation about it.
+    silent = dict(doc, text_content=_FILING_HEAD + spac_self)
+    assert derive_observations([silent], company="Matillion") == []

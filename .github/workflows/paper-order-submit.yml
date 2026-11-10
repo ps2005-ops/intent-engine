@@ -1,0 +1,28 @@
+# C. Paper order submit — shortly after the open. Deterministic client_order_id
+# makes a double-fire safe (Alpaca + the durable store both dedupe).
+name: paper-order-submit
+
+on:
+  schedule:
+    - cron: "47 14 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      as_of:
+        description: "Override trading date (YYYY-MM-DD); blank = today (NY)"
+        required: false
+
+concurrency:
+  group: paper-order-submit
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  call:
+    uses: ./.github/workflows/_hosted-job.yml
+    secrets: inherit
+    with:
+      job: paper-order-submit
+      as_of: ${{ github.event.inputs.as_of }}
+      timeout_minutes: 20

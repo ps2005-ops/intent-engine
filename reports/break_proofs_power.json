@@ -1,0 +1,101 @@
+{
+  "caught": 13,
+  "contract": "econ_break_proofs_power.v1",
+  "not_applied": 0,
+  "not_caught": 0,
+  "proofs": 13,
+  "results": [
+    {
+      "control": "PASS",
+      "description": "the block is built by a dict keyed on kind, so kinds with several live series keep only the last one",
+      "detail": "BlockDefect: 3 live instrument(s) are declared and did not reach the model: ['CORCACBS', 'DGORDER', 'DRCCLACBS']. A block that silently loses a series produces a delta about a different feature set from the one the report names.",
+      "proof": "01_drop_duplicate_instrument",
+      "verdict": "CAUGHT"
+    },
+    {
+      "control": "PASS",
+      "description": "a release date is shifted earlier than publication",
+      "detail": "AssertionError: July CPI reported available on 2024-07-31; the release was shifted to before publication and the wall let it through",
+      "proof": "02_future_release_before_origin",
+      "verdict": "CAUGHT"
+    },
+    {
+      "control": "PASS",
+      "description": "the frequency check is removed from the panel builder",
+      "detail": "AssertionError: a quarterly series carries non-quarter months and the panel builder no longer checks; twelve observations a year would ship as data",
+      "proof": "03_interpolate_quarterly_to_monthly",
+      "verdict": "CAUGHT"
+    },
+    {
+      "control": "PASS",
+      "description": "rows are shuffled before the blocks are cut",
+      "detail": "AssertionError: folds built from shuffled rows still passed every check; the fold builder is not reading the row order it was given",
+      "proof": "04_randomize_folds",
+      "verdict": "CAUGHT"
+    },
+    {
+      "control": "PASS",
+      "description": "the cluster key becomes the target id, so every row is its own independent observation",
+      "detail": "ClusteringDefect: bp: 60 paired forecasts resolved to 60 clusters. One cluster per row is the row bootstrap; either the forecasts genuinely come from that many distinct origins, or `Forecast.cluster` was not set and the interval is claiming precision the sample does not have.",
+      "proof": "05_bootstrap_rows_not_origins",
+      "verdict": "CAUGHT"
+    },
+    {
+      "control": "PASS",
+      "description": "consecutive origins inside one event are counted separately",
+      "detail": "AssertionError: twelve consecutive monthly origins inside one crisis were counted as 12 independent episodes",
+      "proof": "06_contiguous_crisis_as_many_episodes",
+      "verdict": "CAUGHT"
+    },
+    {
+      "control": "PASS",
+      "description": "the classifier reads the panel at today's vintage",
+      "detail": "AssertionError: the regime classifier reads panel.history(sid, as_of='2099-01-01', lookback=need + 6) -- a read that is not walled to the origin is a hindsight label",
+      "proof": "07_hindsight_regime_labels",
+      "verdict": "CAUGHT"
+    },
+    {
+      "control": "PASS",
+      "description": "the feature builder emits a level for every series, including the ones that grow monotonically",
+      "detail": "BlockDefect: ['CPIAUCSL_lvl'] are raw levels of trending series. A level that rises every period is the date wearing an economic name, and a model given the date will fit it.",
+      "proof": "08_raw_monotonic_levels",
+      "verdict": "CAUGHT"
+    },
+    {
+      "control": "PASS",
+      "description": "a delta smaller than the detectable effect is promoted",
+      "detail": "AssertionError: delta 0.001 inside an MDE of 0.05 was not reported as underpowered; a result the sample could not resolve is about to be promoted",
+      "proof": "09_promote_underpowered",
+      "verdict": "CAUGHT"
+    },
+    {
+      "control": "PASS",
+      "description": "the episode floor is lowered so two events count",
+      "detail": "AssertionError: a result resting on 2 independent episodes was reported robust",
+      "proof": "10_promote_on_two_episodes",
+      "verdict": "CAUGHT"
+    },
+    {
+      "control": "PASS",
+      "description": "a preregistered horizon is edited after the run",
+      "detail": "EconError: the preregistered declaration changed: expected 4ae395b62fb60f85, now 86885ed74328ca2f. Targets or horizons were edited after the experiment was designed, which is the easiest way to manufacture a result and leaves no other trace.",
+      "proof": "11_mutate_preregistration",
+      "verdict": "CAUGHT"
+    },
+    {
+      "control": "PASS",
+      "description": "the report stops checking its own wording against the calibration status",
+      "detail": "AssertionError: the final report no longer passes its own text through the calibration guard; a sentence claiming live accuracy would now ship from a system with zero resolved forward predictions",
+      "proof": "12_historical_reported_as_live",
+      "verdict": "CAUGHT"
+    },
+    {
+      "control": "PASS",
+      "description": "the promotion gate on the transmission registry is removed",
+      "detail": "AssertionError: the transmission registry no longer gates on PROMOTED; an untested construct can now reach a company recommendation",
+      "proof": "13_unvalidated_construct_reaches_founder",
+      "verdict": "CAUGHT"
+    }
+  ],
+  "unreliable": 0
+}

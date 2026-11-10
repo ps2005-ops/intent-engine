@@ -1,0 +1,170 @@
+{
+ "company": "Caterpillar Inc.",
+ "deployed_sha": "f8c183f",
+ "outcome": "",
+ "dimensions": [
+  {
+   "dimension": "intro",
+   "surface": "intro",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "business_model",
+   "surface": "intro",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "revenue_drivers",
+   "surface": "story",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "margin_drivers",
+   "surface": "story",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "capital_intensity",
+   "surface": "brief",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "macro",
+   "surface": "full",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "micro",
+   "surface": "full",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "market_belief",
+   "surface": "brief",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "belief_challenge",
+   "surface": "brief",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "competition",
+   "surface": "intro",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "adversary",
+   "surface": "full",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "impossible_hypothesis",
+   "surface": "full",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "economic_reasoning",
+   "surface": "full",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "recommendation",
+   "surface": "brief",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "falsifier",
+   "surface": "brief",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "mve",
+   "surface": "brief",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "presentation",
+   "surface": "slides",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "full_analysis",
+   "surface": "full",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "history",
+   "surface": "history",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "qa",
+   "surface": "qa",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  },
+  {
+   "dimension": "step6",
+   "surface": "connect",
+   "score": null,
+   "why": "surface did not render",
+   "passage": ""
+  }
+ ],
+ "core_mean": null,
+ "core_min": null,
+ "core_unmeasured": [
+  "business_model",
+  "economic_reasoning",
+  "market_belief",
+  "competition",
+  "adversary",
+  "impossible_hypothesis",
+  "recommendation",
+  "full_analysis",
+  "presentation",
+  "history",
+  "qa"
+ ],
+ "all_mean": null
+}

@@ -1,0 +1,27 @@
+{
+ "contract": "wave8_performance.v1",
+ "as_of": "2026-08-08",
+ "stages_ms": {
+  "event identity, group (249 rows)": 5.211,
+  "event index (155 events)": 0.013,
+  "corroboration, all 155 events": 4.669,
+  "action-object extraction (1 span)": 0.027,
+  "object query planning (1 action)": 0.024,
+  "object yields -> planning state (12 cells)": 0.027,
+  "research plan, ACTION_OBJECT": 0.006,
+  "economic chain, score_candidates": 0.096,
+  "economic chain, build (honda)": 0.228
+ },
+ "total_ms": 10.301,
+ "regressions": [
+  {
+   "stage": "event identity, group (249 rows)",
+   "wave7_ms": 4.76,
+   "wave8_ms": 5.211,
+   "delta_pct": 9.5,
+   "cause": "reading a row's fields without assuming its shape. Measured at +20.5% when each field re-dispatched; the row is now read ONCE into a namedtuple, which brings it under the 10% bar. What it buys is that a dict-fed ledger no longer folds 249 rows into one empty event",
+   "within_threshold": true
+  }
+ ],
+ "measurement_note": "corroboration is measured with each event's OWN accounts. Passing the whole 249-row ledger to every event costs 41 SECONDS \u2014 9.6M pairwise classifications \u2014 which is a benchmark error and not a code defect. Recorded so the next wave does not rediscover it as a regression"
+}

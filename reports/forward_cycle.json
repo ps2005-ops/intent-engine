@@ -1,0 +1,202 @@
+{
+  "note": "the rehearsal exists to exercise the resolver, the state machine, the tournament and the ladder through real transitions. Its scores are about the machinery and are never reported as evidence about any model.",
+  "real": {
+    "at": "2026-08-27",
+    "by_state": {
+      "OPEN": 12
+    },
+    "contracts_added": 12,
+    "expectations": 12,
+    "label": "REAL",
+    "ladder": {
+      "contract": "econ_forward_engine.v1",
+      "frozen_before_any_resolution": true,
+      "gap_to_next": {
+        "episodes": 1,
+        "families": 2,
+        "origins": 4,
+        "resolved": 10
+      },
+      "may_report": "nothing but the count of open and resolved expectations",
+      "next_stage": "EARLY_CALIBRATION",
+      "requirements": {
+        "CALIBRATED": {
+          "episodes": 3,
+          "families": 4,
+          "origins": 24,
+          "reports": "calibration curves and a BASE-versus-AUGMENTED verdict.",
+          "resolved": 60
+        },
+        "CALIBRATION_ESTABLISHING": {
+          "episodes": 2,
+          "families": 3,
+          "origins": 12,
+          "reports": "descriptive Brier and directional counts, always beside the five sample numbers, never as a headline percentage.",
+          "resolved": 30
+        },
+        "EARLY_CALIBRATION": {
+          "episodes": 1,
+          "families": 2,
+          "origins": 4,
+          "reports": "counts and per-prediction outcomes only. No aggregate score of any kind.",
+          "resolved": 10
+        }
+      },
+      "resolved": 0,
+      "sample": {
+        "headline": "0 predictions / 0 origins / 0 families / 0 episodes",
+        "independent_episodes": 0,
+        "overlapping_horizons": 0,
+        "raw_predictions": 0,
+        "regimes": 0,
+        "target_families": 0,
+        "unique_origins": 0
+      },
+      "stage": "PRE_CALIBRATION"
+    },
+    "resolved_this_cycle": 0,
+    "states": {
+      "ex-098665ff2223c4cc": "OPEN",
+      "ex-372940a2cdbf3da0": "OPEN",
+      "ex-5178fd7ec191013f": "OPEN",
+      "ex-5d74f3d6cb2bbc52": "OPEN",
+      "ex-68a2cbf30f3fa1ce": "OPEN",
+      "ex-840130b7513aa65e": "OPEN",
+      "ex-9185275b3bed99e4": "OPEN",
+      "ex-ca27724f35bb532d": "OPEN",
+      "ex-efc0e813eee0cca5": "OPEN",
+      "ex-f51b058f0d2b3a42": "OPEN",
+      "ex-fa792b7303de9d21": "OPEN",
+      "ex-fb104d744b1095d7": "OPEN"
+    },
+    "tournament": {
+      "pairs": 6,
+      "resolved_pairs": 0,
+      "unmatched": 0,
+      "verdict": "AWAITING_RESOLUTION",
+      "why": "6 matched pairs are open. A tournament with no resolved pair has no result, and reporting one would be reporting the historical backtest again under a new name."
+    }
+  },
+  "rehearsal": {
+    "at": "2026-08-27",
+    "by_state": {
+      "RESOLVED": 36
+    },
+    "contracts_added": 0,
+    "expectations": 36,
+    "label": "REHEARSAL",
+    "ladder": {
+      "contract": "econ_forward_engine.v1",
+      "frozen_before_any_resolution": true,
+      "gap_to_next": {
+        "episodes": 1,
+        "families": 0,
+        "origins": 6,
+        "resolved": 0
+      },
+      "may_report": "counts and per-prediction outcomes only. No aggregate score of any kind.",
+      "next_stage": "CALIBRATION_ESTABLISHING",
+      "requirements": {
+        "CALIBRATED": {
+          "episodes": 3,
+          "families": 4,
+          "origins": 24,
+          "reports": "calibration curves and a BASE-versus-AUGMENTED verdict.",
+          "resolved": 60
+        },
+        "CALIBRATION_ESTABLISHING": {
+          "episodes": 2,
+          "families": 3,
+          "origins": 12,
+          "reports": "descriptive Brier and directional counts, always beside the five sample numbers, never as a headline percentage.",
+          "resolved": 30
+        },
+        "EARLY_CALIBRATION": {
+          "episodes": 1,
+          "families": 2,
+          "origins": 4,
+          "reports": "counts and per-prediction outcomes only. No aggregate score of any kind.",
+          "resolved": 10
+        }
+      },
+      "resolved": 36,
+      "sample": {
+        "headline": "36 predictions / 6 origins / 3 families / 1 episodes",
+        "independent_episodes": 1,
+        "overlapping_horizons": 1,
+        "raw_predictions": 36,
+        "regimes": 1,
+        "target_families": 3,
+        "unique_origins": 6
+      },
+      "stage": "EARLY_CALIBRATION"
+    },
+    "resolved_this_cycle": 36,
+    "states": {
+      "rh-04a1755d35d170": "RESOLVED",
+      "rh-0a3ba351793de9": "RESOLVED",
+      "rh-1a555409e98644": "RESOLVED",
+      "rh-1b2fc7206b56c8": "RESOLVED",
+      "rh-2be84e4127ddec": "RESOLVED",
+      "rh-2cc7d7b8e312f4": "RESOLVED",
+      "rh-32c839ce78fa85": "RESOLVED",
+      "rh-422f6d2ae70eb6": "RESOLVED",
+      "rh-483e64801c540d": "RESOLVED",
+      "rh-49dd17d0ca81f1": "RESOLVED",
+      "rh-59668c34264cdc": "RESOLVED",
+      "rh-64c5d6b08502ee": "RESOLVED",
+      "rh-69eb85921a028b": "RESOLVED",
+      "rh-6ef2d3a382f8b1": "RESOLVED",
+      "rh-742522f12c9f4f": "RESOLVED",
+      "rh-74487da2049681": "RESOLVED",
+      "rh-74b8b5712655cd": "RESOLVED",
+      "rh-7f61e1b901f016": "RESOLVED",
+      "rh-8c4a5943b9f030": "RESOLVED",
+      "rh-a212ba97249456": "RESOLVED",
+      "rh-a77c66088b6111": "RESOLVED",
+      "rh-a7b287368a4ead": "RESOLVED",
+      "rh-a9922b144ae71a": "RESOLVED",
+      "rh-aabfa762a8b8e5": "RESOLVED",
+      "rh-ad612ba7fdde26": "RESOLVED",
+      "rh-d1da1af4480a1c": "RESOLVED",
+      "rh-d296948feee287": "RESOLVED",
+      "rh-d4a0b3645b998a": "RESOLVED",
+      "rh-d5f8c74d104c76": "RESOLVED",
+      "rh-dbd249f9d720b5": "RESOLVED",
+      "rh-e021c6284fd474": "RESOLVED",
+      "rh-e882626b49f8e4": "RESOLVED",
+      "rh-f023ed5dee046a": "RESOLVED",
+      "rh-f26ded8d5cf272": "RESOLVED",
+      "rh-f426bfd624e7ef": "RESOLVED",
+      "rh-ff31cc8dff59a6": "RESOLVED"
+    },
+    "tournament": {
+      "augmented": {
+        "absolute_error": 0.5,
+        "log_loss": 0.713558,
+        "squared_error": 0.26
+      },
+      "augmented_correct": 9,
+      "base": {
+        "absolute_error": 0.5,
+        "log_loss": 0.698173,
+        "squared_error": 0.2525
+      },
+      "base_correct": 9,
+      "calibration_stage": "EARLY_CALIBRATION",
+      "pairs": 18,
+      "resolved_pairs": 18,
+      "sample": {
+        "headline": "36 predictions / 6 origins / 3 families / 1 episodes",
+        "independent_episodes": 1,
+        "overlapping_horizons": 1,
+        "raw_predictions": 36,
+        "regimes": 1,
+        "target_families": 3,
+        "unique_origins": 6
+      },
+      "unmatched": 0,
+      "verdict": "DESCRIPTIVE_ONLY"
+    }
+  }
+}

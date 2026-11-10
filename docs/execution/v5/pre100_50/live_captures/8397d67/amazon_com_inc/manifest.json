@@ -1,0 +1,125 @@
+{
+  "company": "Amazon.com, Inc.",
+  "deployed_sha": "8397d67",
+  "captured_at": "2026-08-21T04:28:42Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H983N63Q3V1SWHVSJ6RP2Z/intro",
+      "chars": 5296,
+      "html_chars": 30836
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H983N63Q3V1SWHVSJ6RP2Z/intro",
+      "chars": 5296,
+      "html_chars": 30836
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H983N63Q3V1SWHVSJ6RP2Z/slides",
+      "chars": 7081,
+      "html_chars": 57027
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H983N63Q3V1SWHVSJ6RP2Z/full",
+      "chars": 26250,
+      "html_chars": 68935
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H983N63Q3V1SWHVSJ6RP2Z/story",
+      "chars": 5342,
+      "html_chars": 35138
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H983N63Q3V1SWHVSJ6RP2Z/history",
+      "chars": 29667,
+      "html_chars": 110094
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H983N63Q3V1SWHVSJ6RP2Z/connect",
+      "chars": 4089,
+      "html_chars": 28995
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H983N63Q3V1SWHVSJ6RP2Z/intro",
+      "chars": 5296,
+      "html_chars": 30836
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H983N63Q3V1SWHVSJ6RP2Z/evidence",
+      "chars": 6710,
+      "html_chars": 23988
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H983N63Q3V1SWHVSJ6RP2Z/report",
+      "chars": 307,
+      "html_chars": 14888
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H983N63Q3V1SWHVSJ6RP2Z/brief",
+      "chars": 19681,
+      "html_chars": 54979
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Amazon.com, Inc. AMZN \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connecti",
+      "status": 200,
+      "html_bytes": 16999
+    },
+    {
+      "t": 33.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Amazon.com, Inc. AMZN \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Connecting",
+      "status": 200,
+      "html_bytes": 16995
+    },
+    {
+      "t": 41.6,
+      "text": "",
+      "status": 303,
+      "html_bytes": 16995,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H983N63Q3V1SWHVSJ6RP2Z/progress",
+      "head": ""
+    },
+    {
+      "t": 296.7,
+      "text": "Amazon.com, Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Amazon.com, Inc. AMZN \u00b7 SEC CIK 0001018724 Amazon.com, Inc. is a retail business that runs on several distinct businesses under one owner, where the engine that carries the profit is not the one that ca",
+      "status": 200,
+      "html_bytes": 30903
+    }
+  ],
+  "process_before": {
+    "boot_id": "777e281ac5714ef8",
+    "started_at": 1787285577.8327832,
+    "uptime_seconds": 944.8
+  },
+  "run_id": "01M0H983N63Q3V1SWHVSJ6RP2Z",
+  "status": "READY",
+  "seconds": 297,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 6.14,
+    "intro": 5.94,
+    "slides": 9.68,
+    "full": 14.73,
+    "story": 7.62,
+    "history": 0.27,
+    "connect": 4.74
+  },
+  "errors": []
+}

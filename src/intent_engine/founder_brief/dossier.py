@@ -42,7 +42,11 @@ costs the reader.
 """
 from __future__ import annotations
 
+import html as html_lib
+import re
+
 from dataclasses import dataclass, field
+from dataclasses import replace as _replace
 from typing import List, Optional, Sequence
 
 from intent_engine.founder_brief.narrative import (
@@ -124,23 +128,47 @@ BOTH = "both"
 # what its ABSENCE costs, because "no competitor source" is only useful when a
 # reader is told what that stops the analysis doing.
 _FAMILIES = (
+    # EVERY SENTENCE HERE RENDERS WHEN THE FAMILY IS *ABSENT*, and this one
+    # described the opposite situation -- "everything here is the company
+    # describing itself" -- so it only became visible the first time a run had
+    # NO company pages at all. Measured live on Caterpillar, whose site
+    # answers 403 to automated requests: the brief asserted that everything
+    # present was company-authored while nothing was present.
     ("company_owned", "The company's own pages",
-     "Everything here is the company describing itself, so nothing has been "
-     "checked against an outside account of it."),
+     "We could not read anything the company publishes about itself, so its "
+     "own account of its strategy is missing from this reading."),
     ("executive_statement", "Executive statements",
      "Leadership commentary is a claim about intent, not evidence of result."),
+    # EACH CONSEQUENCE NAMES WHAT WOULD CLOSE IT (§16, §38).
+    #
+    # These sentences used to stop at the consequence: "No competitor's own
+    # account was read, so relative position rests on this company's framing
+    # of its market." True, and it leaves a reader holding a limitation with
+    # no way to act on it — which is the customer-facing dead end §14
+    # removes. The consequence is still first, because it is what the reader
+    # needs; the measurement follows it, because a gap a reader can close is
+    # a task and a gap they cannot is a complaint.
     ("investor_material", "Filings and investor material",
      "Without a filing there is no audited figure behind any economic "
-     "statement, so revenue mix, margin and concentration stay unverifiable."),
+     "statement, so revenue mix, margin and concentration stay unverifiable. "
+     "What would settle it: one annual report or investor deck, which turns "
+     "every bounded magnitude here into a measured one."),
     ("customer_voice", "Customer evidence",
      "Nothing here reports what buying and using this actually costs a "
-     "customer, so adoption and retention claims cannot be tested."),
+     "customer, so adoption and retention claims cannot be tested. What "
+     "would settle it: a handful of named customer accounts, reviews or "
+     "case studies — enough to see whether the value claimed is the value "
+     "bought."),
     ("competitor", "Another registrant's filing",
      "No competitor's own account was read, so relative position rests on "
-     "this company's framing of its market."),
+     "this company's framing of its market. What would settle it: one "
+     "rival's annual filing, where a competitor describes the same contest "
+     "in its own words and is under obligation to be accurate about it."),
     ("independent_reporting", "Independent reporting",
      "No outside party has reported on this, so nothing corrects for what the "
-     "company chooses to emphasise."),
+     "company chooses to emphasise. What would settle it: any source the "
+     "company does not control that discusses the same decision — trade "
+     "press, a regulator, or an analyst note."),
 )
 
 
@@ -266,20 +294,125 @@ def _readable_reason(text) -> str:
     return "" if len(out.split()) < 5 else out[:1].upper() + out[1:]
 
 
-def evidence_families(report: dict) -> tuple:
+def evidence_families(report: dict, documents=()) -> tuple:
     """What was read, what was not, and what each absence costs.
 
     Built from `source_class_coverage`, which the pipeline already computes, so
     the inventory and the evidence actually used cannot disagree.
     """
     coverage = report.get("source_class_coverage") or {}
+    # HOW HARD WE LOOKED, beside WHAT WE FOUND.
+    #
+    # THE DEFECT THIS CLOSES, found by driving the deployed product. This
+    # section rendered "Another registrant's filing — none": a bare zero, on
+    # the surface a chief executive actually reads. The measured coverage
+    # state existed and reached only the provenance drawer, so the one
+    # sentence that makes the zero readable was missing from the brief. This
+    # module's own renderer says it: a reader who cannot tell "no competitor
+    # said this" from "no competitor was asked" cannot judge the analysis.
+    discovery = report.get("discovery_coverage")
+    discovery = discovery if isinstance(discovery, dict) else {}
+    # WHY the families are empty, when the reason is that retrieval FAILED.
+    # Measured live: Caterpillar showed six empty families and no reason for
+    # any of them, while the run had recorded that caterpillar.com answers
+    # 403 to automated requests. Silence there reads as "this company has
+    # published nothing", which is a claim about the company rather than
+    # about our access to it -- the same error as a bare zero, one layer up.
+    failures = report.get("retrieval_failures")
+    failures = failures if isinstance(failures, dict) else {}
+    blocked = _blocked_sentence(failures)
+    # THE TYPED ACCOUNT, when the run produced one. `source_class_coverage`
+    # counts observations only, so a filing we read and could not extract from
+    # disappeared from this inventory while staying in the bibliography -- one
+    # page of one analysis contradicting itself.
+    typed = ((report.get("source_coverage") or {}).get("families")
+             if isinstance(report.get("source_coverage"), dict) else None)
+    typed = typed if isinstance(typed, dict) else {}
+    # THE BIBLIOGRAPHY IS RIGHT HERE. `build_dossier` already receives the
+    # retrieved documents to render the source list, and the whole defect was
+    # that this inventory counted something else. When the report did not
+    # carry the typed object -- an older run, or a path that rebuilt the
+    # payload -- derive it from the same documents the page is about to list,
+    # so the two sections cannot disagree.
+    if not typed and documents:
+        from intent_engine.company_ingestion import source_coverage as _SC
+        typed = _SC.assess(
+            documents=[d for d in documents if isinstance(d, dict)],
+            observations=[{"source_class": o.get("source_class")}
+                          for o in (report.get("observations") or ())
+                          if isinstance(o, dict)],
+            failures=failures)["families"]
     out = []
     for key, label, consequence in _FAMILIES:
         count = int(coverage.get(key) or 0)
-        out.append({"key": key, "label": label, "count": count,
-                    "present": count > 0,
-                    "consequence": "" if count else consequence})
+        row = typed.get(key) or {}
+        state = str(row.get("state") or "")
+        docs = int(row.get("documents") or 0)
+        # A family holding documents is never "none", whatever the
+        # observation count says.
+        present = bool(count) or bool(row.get("supports_analysis")) or docs > 0
+        entry = {"key": key, "label": label, "count": count or docs,
+                 "state": state, "documents": docs,
+                 "present": present,
+                 "consequence": "" if present else consequence}
+        if not present and row.get("reason"):
+            entry["consequence"] = f"{consequence} {row['reason']}"
+        if docs and not count:
+            entry["consequence"] = str(row.get("reason") or "")
+        if not present and key == "competitor":
+            entry["consequence"] = _search_sentence(discovery, consequence)
+        elif not present and blocked and key in _FIRST_PARTY_FAMILIES:
+            entry["consequence"] = f"{consequence} {blocked}"
+        out.append(entry)
     return tuple(out)
+
+
+#: Families that come from the COMPANY'S OWN publishing. A site that refuses
+#: automated access explains these and nothing else -- a competitor's filing
+#: is not missing because the subject's website said no.
+_FIRST_PARTY_FAMILIES = frozenset({"company_owned", "executive_statement"})
+
+#: Failure types that mean "the door was shut", as opposed to a slow or
+#: malformed page. Only these license the sentence.
+_ACCESS_DENIED = ("http_status", "blocked", "unsafe_redirect",
+                  "javascript_only")
+
+
+def _blocked_sentence(failures: dict) -> str:
+    """The access failure, in the reader's terms. Empty when none was recorded.
+
+    Deliberately does not quote a status code: a chief executive needs to know
+    the site refused us, not which number it refused us with, and the evidence
+    library already carries the per-source detail.
+    """
+    denied = sum(int(failures.get(k) or 0) for k in _ACCESS_DENIED)
+    if not denied:
+        return ""
+    if failures.get("javascript_only"):
+        return ("The company's site returns its content only to a full "
+                "browser, so an automated read retrieves nothing.")
+    return (f"This is not an absence of publishing: {denied} of the company's "
+            f"own addresses refused automated access, so the material may "
+            f"exist and be unreadable to us.")
+
+
+def _search_sentence(discovery: dict, consequence: str) -> str:
+    """The absence, plus whether we are entitled to call it a finding.
+
+    Only a search that read everything it considered may say the company has
+    no outside coverage. Everything else -- including no producer at all --
+    is a fact about our retrieval, and saying the stronger thing is the
+    flattering error this whole vocabulary exists to prevent.
+    """
+    from intent_engine.company_ingestion import relevance as _REL
+    reading = _REL.zero_reading(
+        independent_relevant=0,
+        coverage=str(discovery.get("coverage") or _REL.DISCOVERY_NOT_RUN))
+    considered = int(discovery.get("candidates_considered") or 0)
+    read = int(discovery.get("candidates_fetched") or 0)
+    effort = (f" We looked at {considered} filing(s) by other registrants and "
+              f"read {read} in full." if considered else "")
+    return f"{consequence} {reading['statement']}{effort}".strip()
 
 
 # --- passage builders ---------------------------------------------------------
@@ -392,8 +525,159 @@ def _customer_demand(company, report, index, said) -> Passage:
                    evidence_ids=tuple(i.evidence_id for i in items[:6]))
 
 
+def _capitalise_first(text: str) -> str:
+    text = (text or "").strip()
+    return text[:1].upper() + text[1:] if text else text
+
+
+def _structural_competition(read, company) -> list:
+    """What can be said about the competitive structure without a rival page.
+
+    Composed from the canonical read, which derives it from the business
+    model and from any rival THIS company named in its own filing. Empty when
+    the read has nothing -- an empty list is honest, a manufactured rival is
+    not.
+    """
+    rows = tuple(getattr(read, "level4_competition", ()) or ())
+    if not rows:
+        return []
+    out = []
+    for row in rows[:2]:
+        # THE FIELDS ARE ALREADY SENTENCES. Wrapping them in lead-ins
+        # produced "the counter available here is the available counter-move
+        # is pricing of assets and liabilities" on the deployed page — a
+        # stutter caused by two layers each supplying the same framing.
+        # Rendered as sentences, with the label carried by the field itself.
+        out.append(end_sentence(
+            f"{row.name}: {row.why_a_rival} {row.likely_response} "
+            f"Response likelihood: {row.response_likelihood.lower().rstrip('.')}. "
+            f"{_capitalise_first(row.counter_move)} "
+            f"The signal that would show it first is "
+            f"{lower_first(row.signal_to_watch)}"))
+    return out
+
+
+def _other_relationships(read) -> list:
+    """§6. What the filing named that is NOT a rival, under its own heading.
+
+    An index, a payer programme and a captive lender's competitors were all
+    published as companies contesting the subject's market. Removing them
+    made the read correct and made the analysis poorer — Medicare Part D
+    genuinely moves Walmart's pharmacy economics and a leasing market
+    genuinely decides whether Caterpillar's customer can buy at all.
+
+    So they are routed rather than dropped. Rendering them here is what makes
+    the routing real: a classification with no reader is a capability with no
+    caller, which this codebase has shipped before and called done.
+    """
+    ground = getattr(read, "competitive_ground", None)
+    rows = tuple(getattr(ground, "other_relationships", ()) or ())
+    if not rows:
+        return []
+    by_section: dict = {}
+    for section, name, reason in rows:
+        by_section.setdefault(section, []).append((name, reason))
+    out = []
+    for section, entries in list(by_section.items())[:3]:
+        names = ", ".join(n for n, _ in entries[:3])
+        out.append(end_sentence(
+            f"{section}: {names}. Named in the filing alongside the "
+            f"competitive discussion and kept out of it — "
+            f"{lower_first(entries[0][1])}"))
+    return out
+
+
+def _adversary(company, read, said) -> Passage:
+    """L0/L1/L2 against the nearest established rival. §6.
+
+    THE SURFACE THIS WAS MISSING. The engine has been complete for a long
+    time and scored 0.0 on all 44 measured companies, because its output sat
+    on the analysis selection and no reader-facing object carried it. It now
+    reaches the canonical read; this is the projection that puts it in front
+    of a reader, on the deepest surface, where an adversarial reading belongs.
+
+    Wired HERE and not only into `deep.py`: `/demo-dossiers/<id>/full` is an
+    operator route, and the customer's Full Analysis is this document. A
+    repair rendered on the wrong one of the two is the inert repair this
+    programme has now shipped three times.
+    """
+    rows = tuple(getattr(read, "adversary", ()) or ())
+    if not rows:
+        return Passage("adversary", "If we move, what do they do", depth=FULL)
+    paras = [
+        "One rival, three ways it could behave. The levels are not scenarios "
+        "about the market; they are assumptions about how much of our move "
+        "the competitor sees and when.",
+    ]
+    items = []
+    for row in rows[:3]:
+        if not isinstance(row, dict):
+            continue
+        line = end_sentence(
+            f"{row.get('level', '')} — {row.get('actor', '')} "
+            f"{row.get('action', '')}. {_capitalise_first(row.get('rationale', ''))} "
+            f"What follows: {lower_first(row.get('impact', ''))} "
+            f"Watch for {lower_first(row.get('observable_signal', ''))} "
+            f"Our counter: {lower_first(row.get('countermeasure', ''))}")
+        line = said.fresh(line)
+        if line:
+            items.append(line)
+    if not items:
+        return Passage("adversary", "If we move, what do they do", depth=FULL)
+    paras.extend(items)
+    paras.append(
+        "No probability is put on these branches. The inputs a game-theoretic "
+        "weighting would need are not in the published record, and a number "
+        "invented for the look of it would be the least trustworthy thing in "
+        "this document.")
+    return Passage("adversary", "If we move, what do they do",
+                   depth=FULL, paragraphs=tuple(paras))
+
+
+def _impossible(company, read, said) -> Passage:
+    """Propositions the current framing rules out. §5.
+
+    Each carries the economic mechanism that would make it true, what argues
+    for and against it, and the smallest experiment that would settle it --
+    because a heresy without a mechanism is a guess and a heresy without an
+    experiment cannot be acted on at a board table. None of it is asserted.
+    """
+    rows = tuple(getattr(read, "impossible_hypotheses", ()) or ())
+    if not rows:
+        return Passage("impossible",
+                       "What could be true that we are not considering",
+                       depth=FULL)
+    paras = [
+        "These are propositions this company's current framing rules out by "
+        "construction. None of them is a claim, and none is a forecast: each "
+        "is stated with the mechanism that would make it true and the "
+        "cheapest test that would settle it.",
+    ]
+    for row in rows[:4]:
+        if not isinstance(row, dict):
+            continue
+        line = end_sentence(
+            f"{row.get('hypothesis', '')} {_capitalise_first(row.get('mechanism', ''))} "
+            f"Why this is usually missed: {lower_first(row.get('why_missed', ''))} "
+            f"For it: {lower_first(row.get('evidence_for', ''))} "
+            f"Against it: {lower_first(row.get('evidence_against', ''))} "
+            f"It is falsified by {lower_first(row.get('falsifier', ''))} "
+            f"Smallest test: {lower_first(row.get('smallest_experiment', ''))} "
+            f"Standing: {row.get('plausibility', '')}")
+        line = said.fresh(line)
+        if line:
+            paras.append(line)
+    if len(paras) == 1:
+        return Passage("impossible",
+                       "What could be true that we are not considering",
+                       depth=FULL)
+    return Passage("impossible",
+                   "What could be true that we are not considering",
+                   depth=FULL, paragraphs=tuple(paras))
+
+
 def _competitive(company, report, decision, hypotheses, families,
-                 said, external=None) -> Passage:
+                 said, external=None, read=None) -> Passage:
     """Relative position, or a stated reason there is nothing to say.
 
     A generic competitor list is worse than none: it is the same paragraph for
@@ -464,47 +748,153 @@ def _competitive(company, report, decision, hypotheses, families,
     # `paras`, so keying off it suppressed the notice for a company that had a
     # vulnerability and no competitor, which is exactly when it is needed.
     if not items and not named_alternatives:
+        # THE FAMILY FLAG DESCRIBES RETRIEVAL; THIS SECTION DESCRIBES THE
+        # MARKET, AND THEY ARE NOT THE SAME QUESTION.
+        #
+        # Measured on the deployed preview at 2fb958d: Bank of America's Full
+        # analysis carried NO competitive section at all. The run had
+        # retrieved three documents classed `competitor` -- third-party 10-Ks
+        # that mention the subject in passing -- so the coverage family read
+        # PRESENT, `absent` was None, and nothing was rendered. Meanwhile
+        # `items` was empty because none of those documents says anything
+        # about this company, and the ladder was carrying "banks", "thrifts"
+        # and "credit unions" out of Bank of America's own filing.
+        #
+        # So the whole competitive read, quoted from the subject and scoring
+        # 10.0 in the rubric because the rubric reads the OBJECT, was
+        # invisible to the reader. A repair that ships inert.
+        #
+        # The structural read is now rendered whenever there is nothing
+        # better, which is what the section is for. The family flag still
+        # decides the LIMITATION wording below, because that genuinely is a
+        # statement about what was retrieved.
         absent = next((f for f in families
                        if f["key"] == "competitor" and not f["present"]), None)
-        if absent:
+        if True:
+            # §13. A COMPETITIVE READ IS A STATEMENT ABOUT MARKET STRUCTURE.
+            #
+            # This used to open "No competitor's own account was retrieved for
+            # this run" -- a fact about retrieval, in the section a reader
+            # opens to find out who they are competing with. Structure is
+            # established by what kind of business this is, not by whether a
+            # rival's page happened to be in the fetch set; what retrieval
+            # decides is the STANDING, which is still said, second.
+            supported = _structural_competition(read, company)
+            if supported:
+                paras.extend(supported)
+            paras.extend(_other_relationships(read))
+            # §13 FORBIDS THE RETRIEVAL REPORT ON A PRIMARY SURFACE, and it
+            # is right to: "No competitor's own account was retrieved for
+            # this run" answers a question about the fetcher in the section a
+            # reader opened to learn about their market. The LIMITATION is
+            # real and stays; what changes is that it is stated as what is
+            # missing from the read rather than as what the run failed to do.
             paras.append(
-                "No competitor's own account was retrieved for this run, so "
-                "nothing here corrects for how this company frames its own "
-                "market. Treat the positioning below as self-described, and "
-                "read the decision knowing that a competitor moving first is "
-                "the risk the evidence cannot price.")
+                "Confidence in the above is bounded: it rests on this "
+                "company's own account of its market and on how businesses "
+                "of this kind compete, with no rival's own account to check "
+                "it against. What would improve it is a competitor's "
+                "published positioning or pricing on the same buyer — until "
+                "then, treat a competitor moving first as the risk this "
+                "evidence cannot price.")
+    else:
+        # A company WITH named rivals still has an index, a payer or a lender
+        # in its filing, and the reader needs those in the right place rather
+        # than only when the competitive read was otherwise empty.
+        paras.extend(_other_relationships(read))
     return Passage("competitive", "Where this sits against the alternatives",
                    depth=BOTH, kind="evidence", paragraphs=tuple(paras),
                    items=tuple(items[:4]),
                    evidence_ids=tuple(i.evidence_id for i in items[:4]))
 
 
-def _market(company, market, said, external=None) -> Passage:
-    """Market expectations in business language, or a stated limitation.
+def _the_bridge(company, read, said) -> Passage:
+    """The decision bridge, on the deepest surface. §44.
+
+    THE DEFECT. The Full Analysis is the flagship document and, measured
+    across the golden six, it did not reliably contain the recommendation.
+    Caterpillar's carried no mechanism, no confidence, no guardrail and no
+    falsifier — all four existed in the canonical read, and all four appeared
+    on the introduction and on the deck, which are the SHALLOWER surfaces.
+    A reader who went deeper got less.
+
+    That is the architecture's own contract failing at one site rather than a
+    missing feature: one decision object, projected by every surface. This
+    passage is that projection, and it leads the document because a board
+    memo that reaches its recommendation on page four has buried it.
+    """
+    action = getattr(read, "level6_action", None) if read is not None else None
+    if action is None or not getattr(action, "action_now", ""):
+        return Passage("bridge", "The recommendation", depth=BOTH)
+    paras = [end_sentence(f"What to do now: {action.action_now}")]
+    for label, value in (
+            ("Why it matters", getattr(action, "why_it_matters", "")),
+            ("The mechanism this rests on",
+             getattr(action, "what_is_known", "")),
+            ("Confidence", getattr(action, "causal_confidence", "")),
+            ("Guardrail", getattr(action, "guardrail", "")),
+            ("Stopping rule", getattr(action, "kill_switch", "")),
+            ("How to test it",
+             getattr(action, "minimum_viable_experiment", "")),
+            ("What would change this view", getattr(action, "falsifier", "")),
+            ("What remains open",
+             getattr(action, "what_remains_unknown", ""))):
+        if value and not said.has(value):
+            said.remember(value)
+            paras.append(end_sentence(f"{label}: {value}"))
+    return Passage("bridge", "The recommendation", depth=BOTH,
+                   paragraphs=tuple(paras))
+
+
+def _market(company, market, said, external=None, modeled=None) -> Passage:
+    """Market expectations in business language, or the next rung of the ladder.
 
     Never a strategy name, a win rate, a Sharpe ratio or a recommendation --
     those are the trading system talking about itself. And never a zero: an
     absent series is an absent series.
+
+    WHAT CHANGED, AND WHAT DID NOT. A missing price feed used to end this
+    passage: "there is no read on what investors currently expect". A reader
+    asked what the market expects and was told which of our integrations is
+    switched off. `modeled` is the next rung -- an expectation built from the
+    company's OWN filed results, which exist for every registrant whether or
+    not a price series was retrieved.
+
+    What did not change is the epistemic accounting. A modelled expectation is
+    labelled MODELLED in its own sentence, it is never called a consensus, and
+    when there is no filed series either the passage still says so. The rule
+    is exhaust the ladder, not fill the space.
     """
     ctx = market if isinstance(market, dict) else (
         market.as_dict() if market is not None else None)
-    if not ctx:
+    if not ctx or not ctx.get("available"):
+        why = (end_sentence(
+            f"Not established — {as_clause(ctx.get('reason', ''), company)}")
+            if ctx else
+            f"No published price or estimate series was retrieved for "
+            f"{company} in this run.")
+        if modeled is not None:
+            return Passage(
+                "market", "What the market appears to expect", depth=BOTH,
+                paragraphs=(
+                    f"MODELLED MARKET EXPECTATION. {modeled.statement}",
+                    f"Built from {modeled.derivation}. {why} What is above "
+                    f"stands in its place and is a weaker claim than a "
+                    f"retrieved series would have been: it says what the "
+                    f"published record implies, not what any investor has "
+                    f"said."),
+                note=_flat((ctx or {}).get("disclaimer")))
         return Passage(
             "market", "What the market appears to expect", depth=BOTH,
-            paragraphs=("No market snapshot has been published for this "
-                        "company, so there is no read on what investors "
-                        "currently expect. That is a gap in this analysis, not "
-                        "a finding: it means the decision below is argued from "
-                        "the business alone, with no check on whether the "
-                        "market already believes it.",))
-    if not ctx.get("available"):
-        return Passage(
-            "market", "What the market appears to expect", depth=BOTH,
-            paragraphs=(end_sentence(
-                f"Not established — {as_clause(ctx.get('reason', ''), company)}"),
-                "Nothing is inferred from the absence. A missing price series "
-                "is not a flat one."),
-            note=_flat(ctx.get("disclaimer")))
+            paragraphs=(
+                why,
+                "Nothing is inferred from the absence. A missing price "
+                "series is not a flat one. Nothing is modelled in its "
+                "place either, because this company has no multi-year filed "
+                "result series to model from. What would resolve it: three "
+                "or more years of reported results, or a market identifier "
+                "that resolves to a published price history.",),
+            note=_flat((ctx or {}).get("disclaimer")))
     # WHAT CHANGED HERE. The old version printed each module's fact and its
     # "why this matters" and stopped, so a reader learned what the shares did
     # and never which choice it bore on. Every block now carries its decision
@@ -638,6 +1028,147 @@ _MACRO_FACTORS = (
     ("foreign exchange", "Currency exposure"),
     ("currency", "Currency exposure"),
 )
+
+
+def _economic_impact(company, econ, said) -> Passage:
+    """§11: ECONOMIC IMPACT, as a CEO decision surface.
+
+    Six things, in the order a decision-maker needs them: what changed, how it
+    reaches this company, what it changes about the recommendation, how sure we
+    are, what would change the view, and what to learn next.
+
+    RENDERED FROM THE CANONICAL CONTEXT AND NOTHING ELSE. Every sentence below
+    comes off `FounderEconomicContext`, which is built once per run, so the
+    brief and the full analysis cannot word this verdict differently or reach
+    opposite ones -- §21 is a property of there being one object rather than of
+    two renderers agreeing.
+
+    ABSTENTION IS RENDERED, NOT SKIPPED. §7: when the state was read and does
+    not bear on the decision, the section says exactly that in one line and
+    stops. It does not become a heading with nothing under it, and it does not
+    grow an economic paragraph to justify its own existence -- a section that
+    always speaks teaches its reader to stop reading it.
+    """
+    if econ is None:
+        return Passage("economic", "Economic impact", depth=FULL)
+    headline = econ.headline()
+    if not econ.available:
+        # §18. The analysis stands on the company's own evidence; the section
+        # states what is missing rather than disappearing, because a missing
+        # section and an unread economy look identical to a reader.
+        return Passage(
+            "economic", "Economic impact", depth=FULL,
+            paragraphs=(headline, econ.reason) if econ.reason else (headline,))
+    if econ.abstains:
+        text = [headline]
+        if econ.abstention_reason:
+            text.append(econ.abstention_reason)
+        return Passage("economic", "Economic impact", depth=BOTH,
+                       paragraphs=tuple(t for t in text if t),
+                       evidence_ids=tuple(p.observation
+                                          for p in econ.provenance)[:4],
+                       note=_econ_note(econ))
+    items = [{"label": "What changed", "text": end_sentence(headline)}]
+    if econ.economic_state_summary:
+        items.append({"label": "The reading",
+                      "text": end_sentence(econ.economic_state_summary)})
+    # THE EXPOSURE THE CHANGE RESTS ON, not the first one measured. Live,
+    # NVIDIA's section explained the change through the capacity-commitment
+    # mechanism while the trigger beneath it named a different condition.
+    live = [e for e in econ.company_exposures if e.measured and e.mechanism]
+    lead = econ.lead_exposure if (econ.lead_exposure
+                                  and econ.lead_exposure.mechanism) else None
+    if lead or live:
+        e = lead or live[0]
+        items.append({
+            "label": "How it reaches this company",
+            "text": end_sentence(
+                f"{e.mechanism.rstrip('.')}. The variable it moves here is "
+                f"{lower_first(e.business_variable or e.channel.lower())}")})
+    for change in econ.material_decision_delta[:3]:
+        items.append({
+            "label": f"Changes {change.field.replace('_', ' ')}",
+            "text": end_sentence(
+                f"{_before_after(change)} because {lower_first(change.trigger)}")})
+    if econ.falsifiers:
+        items.append({"label": "What would change our view",
+                      "text": end_sentence(econ.falsifiers[0])})
+    if econ.information_priorities:
+        items.append({"label": "What to learn next",
+                      "text": end_sentence(econ.information_priorities[0])})
+    for item in items:
+        said.remember(item["text"])
+    return Passage(
+        "economic", "Economic impact", depth=BOTH, kind="labelled",
+        items=tuple(items[:6]),
+        evidence_ids=tuple(p.observation for p in econ.provenance)[:4],
+        note=_econ_note(econ))
+
+
+def _before_after(change) -> str:
+    """A structured field move, in words a reader can check.
+
+    The values are enums and identifiers, not prose, so this states them as
+    they are rather than paraphrasing -- a paraphrase is where "PREPARE" turns
+    into a recommendation nobody's structured field actually carries.
+    """
+    def one(value):
+        if isinstance(value, (list, tuple)):
+            return ", ".join(_readable_id(str(v)) for v in value) or "nothing"
+        if isinstance(value, dict):
+            return "; ".join(f"{_readable_id(k)} {v}"
+                             for k, v in sorted(value.items()))
+        return str(value) if str(value).strip() else "nothing"
+    return f"{one(change.before)} becomes {one(change.after)}"
+
+
+def _readable_id(value: str) -> str:
+    """A risk identifier, said out loud.
+
+    `top_risks` carries risk IDS, and they reached a customer surface
+    verbatim: "Changes top risks company:blind:0 becomes
+    econ:financial_conditions, company:0". They are internal handles, and
+    §41 keeps those on operator surfaces.
+    """
+    text = str(value)
+    if text.startswith("econ:"):
+        return f"the economic risk to {text[5:].replace('_', ' ')}"
+    if text.startswith("company:blind:"):
+        return "a company risk from an observed tension"
+    if text.startswith("company:"):
+        return "a company risk from its own evidence"
+    return text
+
+
+def _econ_note(econ) -> str:
+    """Freshness, standing and calibration, in one line and never overstated.
+
+    §13/§41. The calibration state is translated: PRE_CALIBRATION is an enum
+    and "no prediction has come due yet, so there is no accuracy record to
+    quote" is what it means. §14's guarantee -- that no rehearsal result is in
+    that number -- is what makes the sentence safe to print.
+    """
+    from intent_engine.econ import founder_contract as FC
+    age = {FC.CURRENT: "current", FC.DELAYED: "delayed",
+           FC.STALE: "stale", FC.BLOCKED: "unavailable"}.get(
+               econ.freshness, econ.freshness.lower())
+    days = ("today" if econ.age_days == 0 else
+            "1 day old" if econ.age_days == 1 else
+            f"{econ.age_days} days old")
+    bits = [f"Economic reading as of {econ.as_of} ({age}"
+            + (f", {days})" if econ.age_days >= 0 else ")")]
+    if econ.candidate_relations:
+        bits.append(f"{len(econ.candidate_relations)} further relation(s) are "
+                    f"being tracked and are not yet supported, so none of them "
+                    f"is stated here as a finding")
+    if econ.calibration_status == FC.PRE_CALIBRATION:
+        n = len(econ.forward_expectations)
+        bits.append(
+            f"{n} forward prediction(s) are open and none has come due, so "
+            "there is no accuracy record to quote yet" if n else
+            "no forward prediction has come due, so there is no accuracy "
+            "record to quote yet")
+    return ". ".join(bits) + "."
 
 
 def _analogs(company, report, decision, hypotheses, said) -> Passage:
@@ -868,8 +1399,15 @@ def _artefacts(company, decision, report, said) -> Passage:
                 f"written so the trade-off has to be made explicitly rather "
                 f"than by default")})
     else:
+        # NOT A THIRD COPY OF THE UNKNOWNS. Live on the prospect-100 pass the
+        # same near-miss sentence ("We found signs of this shape for X, but
+        # did not verify that ...") printed under "What is still unknown",
+        # then again in the evidence request, then again in the diligence
+        # checklist -- three times on one page. A request names what is
+        # missing; it does not re-read the paragraph above it.
         wanted = "; ".join(_flat(e).rstrip(".")
-                           for e in decision.evidence_required[:3])
+                           for e in decision.evidence_required[:3]
+                           if not said.has(e))
         if wanted:
             rows.append({"label": "Evidence request",
                          "text": end_sentence(
@@ -887,7 +1425,9 @@ def _artefacts(company, decision, report, said) -> Passage:
         rows.append({"label": "Board discussion questions",
                      "text": end_sentence("; ".join(
                          q.rstrip("?") for q in questions))})
-    gaps = [_flat(g) for g in (report.get("evidence_gaps") or ())][:2]
+    asked = SaidOnce(seed=decision.evidence_required[:3])
+    gaps = [_flat(g) for g in (report.get("evidence_gaps") or ())
+            if _flat(g) and not said.has(g) and not asked.has(g)][:2]
     if gaps:
         rows.append({"label": "Diligence checklist",
                      "text": end_sentence("; ".join(
@@ -937,7 +1477,8 @@ def _evidence_appendix(report, index) -> Passage:
 
 def build_dossier(*, company: str, report: Optional[dict] = None,
                   decision=None, market=None, narrative=None,
-                  documents=(), external=None) -> Dossier:
+                  documents=(), external=None, read=None,
+                  modeled_market=None, econ=None) -> Dossier:
     """The canonical deep material, assembled once for both deep surfaces.
 
     `narrative` is the already-built primary screen. It is passed in so the
@@ -955,7 +1496,7 @@ def build_dossier(*, company: str, report: Optional[dict] = None,
                   for h in (report.get("hypotheses") or ())]
     hypotheses = [h for h in hypotheses if isinstance(h, dict)]
     index = _evidence_index(_observation_dicts(report))
-    families = evidence_families(report)
+    families = evidence_families(report, documents or ())
 
     # SEEDED WITH WHAT THE PRIMARY SCREEN ALREADY SAID.
     #
@@ -976,13 +1517,22 @@ def build_dossier(*, company: str, report: Optional[dict] = None,
                     said.remember(item.text)
 
     built = [
+        _the_bridge(company, read, said),
         _operating_model(company, report, said),
         _what_was_read(company, documents, _observation_dicts(report), said),
         _what_changed(company, report, said),
         _customer_demand(company, report, index, said),
         _competitive(company, report, decision, hypotheses, families, said,
-                     external),
-        _market(company, market, said, external),
+                     external, read=read),
+        _adversary(company, read, said),
+        _impossible(company, read, said),
+        _market(company, market, said, external, modeled_market),
+        # BEFORE `_macro`, DELIBERATELY. `said` is seeded forward, so whichever
+        # section composes first owns the material. The economic impact section
+        # is the decision-relevant one and the keyword-spotted macro section is
+        # the fallback; composing the fallback first would let it claim a
+        # sentence the decision section then has to skip.
+        _economic_impact(company, econ, said),
         _macro(company, report, decision, said, external),
         _analogs(company, report, decision, hypotheses, said),
         _opportunity(company, report, said),
@@ -1055,6 +1605,202 @@ def render_families(families) -> str:
             f'</h2><ul class="fam">{chips}</ul>{gaps}</section>')
 
 
+def _words(text: str) -> str:
+    # Words only, NO label stripping: `sentence_identity` strips up to the
+    # first colon, which turns "What to do now: The gap ...: X" and "The gap
+    # ...: X" into two different identities.
+    return " ".join(re.findall(r"[a-z0-9]+", str(text or "").lower()))
+
+
+def _lead_sentences(lead_html: str) -> tuple:
+    """The lead's sentences, as identities, long enough to mean something."""
+    if not lead_html:
+        return ()
+    text = re.sub(r"(?is)<(style|script)[^>]*>.*?</\1>", " ", lead_html)
+    text = html_lib.unescape(re.sub(r"<[^>]+>", " ", text))
+    out = []
+    for sentence in re.split(r"(?<=[.!?])\s+", " ".join(text.split())):
+        key = _words(sentence)
+        if len(key) >= 50:
+            out.append(key)
+    return tuple(out)
+
+
+def _sentence_keys(text: str) -> list:
+    """Identities of a text's sentences long enough to mean something."""
+    out = []
+    for sentence in re.split(r"(?<=[.!?])\s+", " ".join(str(text or "").split())):
+        key = _words(sentence)
+        if len(key) >= 50:
+            out.append(key)
+    return out
+
+
+_BACK_REFERENCE = re.compile(
+    r"^(this|that|these|those|it|its|they|their|such|so|which|then)\b", re.I)
+
+
+def _said(key: str, restated) -> bool:
+    return any(key == s or key in s for s in restated)
+
+
+def _all_said(text: str, restated) -> bool:
+    """Every substantial sentence of `text` is already on the page."""
+    keys = _sentence_keys(text)
+    if not keys:
+        return _restates(text, restated)
+    return all(_said(k, restated) for k in keys)
+
+
+def _without_said(text: str, restated: list) -> str:
+    """`text` minus the substantial sentences the page already said.
+
+    A sentence is only removed when the one after it does not lean on it:
+    "This ..." / "That ..." / "It ..." refer back, and cutting what they refer
+    to would trade a repetition for a sentence that means nothing.
+    """
+    sentences = re.split(r"(?<=[.!?])\s+", " ".join(str(text or "").split()))
+    kept = []
+    for i, sentence in enumerate(sentences):
+        key = _words(sentence)
+        nxt = sentences[i + 1] if i + 1 < len(sentences) else ""
+        if len(key) >= 50 and _said(key, restated) \
+                and not _BACK_REFERENCE.match(nxt):
+            continue
+        kept.append(sentence)
+    out = " ".join(kept).strip()
+    restated.extend(_sentence_keys(out))
+    return out
+
+
+def _fresh_paragraphs(paragraphs, restated: list) -> list:
+    """The paragraphs, with what the page already said taken out.
+
+    Whole paragraphs that restate the page are dropped; a paragraph that
+    adds something keeps its new sentences (see `_without_said`).
+    """
+    kept = []
+    for paragraph in paragraphs or ():
+        if _restates(paragraph, restated) or _all_said(paragraph, restated):
+            continue
+        rest = _without_said(paragraph, restated)
+        if rest:
+            kept.append(rest)
+    return kept
+
+
+def _chart_without_restated_heading(chart_html: str, restated: list) -> str:
+    """Drop a chart's painted text when the page has already said it.
+
+    The heading, the caption and the source stamp are the three pieces of a
+    chart a reader sees outside the drawing; each restated what the passage
+    above had just said (measured: every macro sentence twice on Workday's
+    /full). The SVG keeps its own <title> and <desc>, so the chart stays named
+    for a screen reader; only the painted duplicates go.
+    """
+    html = chart_html or ""
+    for pattern in (r'<p class="xc-hd">(.*?)</p>',
+                    r'<figcaption>(.*?)</figcaption>',
+                    r'<p class="xc-src">(.*?)</p>'):
+        m = re.search(pattern, html, re.S)
+        if not m:
+            continue
+        text = html_lib.unescape(re.sub(r"<[^>]+>", "", m.group(1))).strip()
+        if not text:
+            continue
+        stamp = pattern.startswith('<p class="xc-src"')
+        key = _words(text)
+        if (_all_said(text, restated)
+                or (stamp and key and any(key == r for r in restated))):
+            html = html[:m.start()] + html[m.end():]
+        else:
+            restated.extend(_sentence_keys(text) or ([key] if stamp else []))
+    return html
+
+
+def dedupe_page_paragraphs(page_html: str) -> str:
+    """Remove a <p> whose every substantial sentence the page already said.
+
+    For surfaces assembled from several builders that share no ledger (the
+    introduction: "Why this analysis is different" and "The lens this
+    analysis is using" both printed the lens rationale). A paragraph with
+    one new sentence is kept whole.
+    """
+    seen: list = []
+
+    def keep(m):
+        text = html_lib.unescape(re.sub(r"<[^>]+>", " ", m.group(2)))
+        keys = _sentence_keys(text)
+        # Every sentence of four words or more must already be on the page;
+        # a short new sentence is still new.
+        sentences = [x for x in re.split(r"(?<=[.!?])\s+",
+                                         " ".join(text.split()))
+                     if len(x.split()) >= 4]
+        if keys and all(_said(_words(x), seen) for x in sentences):
+            return ""
+        seen.extend(keys)
+        return m.group(0)
+
+    return re.sub(r"<p(\s[^>]*)?>(.*?)</p>", keep, page_html or "",
+                  flags=re.S)
+
+
+def _drop_said_rows(block_html: str, seen: list) -> str:
+    """Remove <dt>/<dd> rows whose text the page has already said."""
+    if not block_html or not seen:
+        return block_html
+
+    def keep(m):
+        text = html_lib.unescape(re.sub(r"<[^>]+>", " ", m.group(2)))
+        return "" if _all_said(text, seen) else m.group(0)
+
+    return re.sub(r"<dt>(.*?)</dt><dd>(.*?)</dd>", keep, block_html,
+                  flags=re.S)
+
+
+def _render_appendix(passage, run_id, labels, restated: list) -> str:
+    """Every source, once -- and an excerpt already quoted is not re-quoted."""
+    from html import escape
+
+    from intent_engine.founder_brief.narrative import _evidence_link, _para
+    out = [_para(x) for x in _fresh_paragraphs(passage.paragraphs, restated)]
+    if passage.items:
+        out.append('<ul class="ev">')
+        for item in passage.items:
+            text = getattr(item, "text", "") or ""
+            out.append("<li>")
+            if text and _all_said(text, restated):
+                body = '<span class="muted">quoted above</span>'
+            elif text:
+                body = f"<q>{escape(text)}</q>"
+                restated.extend(_sentence_keys(text))
+            else:
+                body = ('<span class="muted">read in full; no single passage '
+                        'is quoted here</span>')
+            out.append(f'<span class="prov">{escape(item.provenance)}</span>'
+                       + body)
+            out.append(f'<span class="src">'
+                       f"{_evidence_link(item, run_id, labels)}</span>")
+            out.append("</li>")
+        out.append("</ul>")
+    return "".join(out)
+
+
+def _restates(paragraph: str, seeds) -> bool:
+    """True when the paragraph says nothing a lead sentence did not.
+
+    Equal, contained in a lead sentence, or containing one with little else
+    -- a paragraph that adds a clause of its own is kept.
+    """
+    if not seeds:
+        return False
+    key = _words(paragraph)
+    if not key:
+        return False
+    return any(key == s or key in s or (s in key and len(key) <= len(s) * 1.3)
+               for s in seeds)
+
+
 def render_dossier(dossier, *, depth: str, run_id: str = "",
                    citation_labels=None, lead: str = "",
                    wrap: bool = True, charts=None) -> str:
@@ -1082,6 +1828,26 @@ def render_dossier(dossier, *, depth: str, run_id: str = "",
            f'<p class="kicker">{escape(kicker)}</p>']
     if lead:
         out.append(lead)
+    # THE LEAD AND THE DOSSIER ARE TWO COMPOSERS WITH TWO LEDGERS.
+    #
+    # The lead (`render_decision_lead`) and the passages below it each keep
+    # their own record of what they have said, so neither knows what the
+    # other printed: live on the prospect-100 pass, "The gap that has to
+    # close first is this: ..." reached /full three times -- "What to do
+    # next", then "What to do now:" under "The recommendation". A passage
+    # paragraph that restates a sentence the lead already gave is dropped
+    # here, at the one place both meet. Only sentences of real length seed
+    # this, so a short line in the lead can never silence a paragraph that
+    # merely contains its words.
+    restated = list(_lead_sentences(lead))
+    # ...AND THE SAME RULE ACROSS THE PASSAGES THEMSELVES. Measured on the
+    # prospect-100 round-2 server, Workday's /full still said 20 sentences
+    # twice: "What the evidence actually says" quoted an excerpt that "Every
+    # source this rests on" quoted again; a chart's visible heading repeated
+    # the sentence directly above it; two rival cards carried the identical
+    # response template. Each passage built its text correctly on its own --
+    # the repetition only exists on the assembled page, so it is removed
+    # where the page is assembled. `restated` grows as the page is written.
 
     charts = charts or {}
     #: Which chart belongs under which passage. Only these three passages
@@ -1095,16 +1861,34 @@ def render_dossier(dossier, *, depth: str, run_id: str = "",
     for passage in dossier.at(depth):
         out.append(f'<section id="{escape(passage.key)}">')
         out.append(f"<h2>{escape(passage.title)}</h2>")
-        if passage.kind == "evidence":
-            out.append(_render_evidence(passage, run_id, citation_labels))
+        if passage.kind == "evidence" and passage.key == "evidence_appendix":
+            out.append(_render_appendix(passage, run_id, citation_labels,
+                                        restated))
+        elif passage.kind == "evidence":
+            fresh = _fresh_paragraphs(passage.paragraphs, restated)
+            out.append(_render_evidence(
+                _replace(passage, paragraphs=tuple(fresh)), run_id,
+                citation_labels))
+            for item in passage.items:
+                restated.extend(_sentence_keys(getattr(item, "text", "")))
         elif passage.kind == "options":
             out.append(_render_options(passage.options))
+            for option in passage.options:
+                for value in vars(option).values():
+                    if isinstance(value, str):
+                        restated.extend(_sentence_keys(value))
         elif passage.kind == "labelled":
             out.append('<dl class="dl">')
             for item in passage.items:
+                text = _without_said(str(item.get("text", "")), restated)
+                # The label is often the fact itself (a macro row's label IS
+                # the reading), so it counts as said too.
+                restated.extend(_sentence_keys(str(item.get("label", ""))))
+                if not text:
+                    continue
                 out.append(f'<div class="row"><dt class="k">'
                            f'{escape(str(item.get("label", "")))}</dt>'
-                           f'<dd>{escape(str(item.get("text", "")))}</dd>'
+                           f'<dd>{escape(text)}</dd>'
                            f'</div>')
             out.append("</dl>")
         elif passage.kind == "dated":
@@ -1120,17 +1904,32 @@ def render_dossier(dossier, *, depth: str, run_id: str = "",
                 out.append('<div class="an">')
                 out.append(_p(item["text"]))
                 if item.get("breaks"):
+                    # THE LIMIT OF AN ANALOGY IS A TEST, NOT A DISCLAIMER.
+                    #
+                    # This printed the pattern's `when_it_does_not_apply`
+                    # clause verbatim — "Only one buyer group is ever
+                    # described, or the second is an aspiration with no
+                    # evidence" — which reads to a customer as a complaint
+                    # and leaves them nothing to do. It is in fact the exact
+                    # condition that would break the comparison, so it is
+                    # framed as the thing to check.
                     out.append(f'<p class="brk">Where the comparison stops: '
-                               f'{escape(item["breaks"])}</p>')
+                               f'{escape(item["breaks"])} '
+                               f'Check that against the company before '
+                               f'relying on the analogy — it is the one '
+                               f'condition that would make it the wrong '
+                               f'comparison.</p>')
                 if item.get("cases"):
                     out.append(f'<p class="cases">Seen at: '
                                f'{escape(item["cases"])}</p>')
                 out.append("</div>")
         else:
-            out.extend(_p(x) for x in passage.paragraphs)
+            out.extend(_p(x) for x in
+                       _fresh_paragraphs(passage.paragraphs, restated))
         for key in _CHART_FOR.get(passage.key, ()):
             if charts.get(key):
-                out.append(charts[key])
+                out.append(_chart_without_restated_heading(charts[key],
+                                                           restated))
         if passage.note:
             out.append(f'<p class="gap">{escape(passage.note)}</p>')
         out.append("</section>")
@@ -1138,13 +1937,15 @@ def render_dossier(dossier, *, depth: str, run_id: str = "",
     out.append(render_families(dossier.families))
     if run_id:
         from intent_engine.founder_brief.render import _deeper
-        out.append(_deeper(run_id))
+        # The FULL depth is step 3 of the story and gets the sequential nav.
+        # The BRIEF depth is a secondary surface and gets the way back.
+        out.append(_deeper(run_id, step="full" if depth == FULL else ""))
     out.append(f"</{tag}>")
     return "".join(out)
 
 
 def render_decision_lead(decision, company: str = "", *, depth: str = BRIEF,
-                         run_id: str = "") -> str:
+                         run_id: str = "", contract=None, read=None) -> str:
     """The decision, rendered identically at both depths.
 
     The ANSWER is the same object the 60-second screen renders, so a reader
@@ -1158,12 +1959,91 @@ def render_decision_lead(decision, company: str = "", *, depth: str = BRIEF,
     said = SaidOnce()
     out = ['<section id="executive_answer" class="lead"><h2>The answer</h2>']
     if decision.readiness == WITHHELD:
-        out.append(_p(f"No strategic reading of {company} cleared the "
-                      f"evidence bar, so none is asserted here."))
-        if decision.unsafe_because:
-            out.append(_p(end_sentence(
-                f"That absence is itself the finding: "
-                f"{as_clause(decision.unsafe_because, company)}")))
+        # D17. "THIS RUN FOUND NOTHING" IS NOT "THERE IS NOTHING".
+        #
+        # This asserted the second because it could only see the first. On a
+        # company the market engine has a published reading for, the X-Ray
+        # said "Supported in direction, not in size · Pricing decision" while
+        # this line said no reading had cleared the bar -- one product, two
+        # opposite answers, two clicks apart.
+        #
+        # The refusal is still rendered when it is TRUE. What changed is that
+        # whether a reading exists is no longer decided here; it is read from
+        # the one contract every executive surface consults. The reasoning
+        # prose below is untouched, because the brief's job is still to
+        # explain what THIS run could and could not establish.
+        if contract is not None and getattr(contract,
+                                            "supported_reading_exists", False):
+            out.append(_p(
+                f"A supported reading of {company} exists and is set out on "
+                f"the Executive X-Ray."))
+            out.append(_p(getattr(contract, "run_contribution", "") or
+                          "This run did not add enough independent evidence "
+                          "to strengthen it."))
+            if decision.unsafe_because:
+                out.append(_p(end_sentence(
+                    f"What this run could not establish on its own: "
+                    f"{as_clause(decision.unsafe_because, company)}")))
+        elif read is not None and getattr(read, "puts_a_strategy_forward",
+                                          False):
+            # THE BOUNDED READ, WHERE THE REFUSAL USED TO BE (§4, §7).
+            #
+            # "This run's reasoning matched no pattern" and "there is no
+            # strategy here" are different facts, and the product asserted
+            # the second because it could only see the first. With the
+            # pattern library correctly gated by business model, a software
+            # company stops being handed an industrial mechanism -- and the
+            # honest consequence is that some runs match nothing at all. That
+            # must not reopen the dead end by another door.
+            #
+            # `strategic_read` is composed from the established
+            # classification of the business, the published record and this
+            # run's evidence. It is BOUNDED, says so, and carries the action,
+            # the experiment and the falsifier. Rendering it here is not
+            # lowering the bar: nothing below asserts a magnitude, and the
+            # standing on every line says what kind of claim it is.
+            # `_p` escapes. Escaping here as well printed "period&#x27;s" on
+            # 39 companies' /brief and /full once bounded reads reached
+            # this branch (prospect-100 pass 3).
+            out.append(_p((read.level5_decision.text)))
+            action = read.level6_action
+            if action is not None:
+                out.append(_p((
+                    f"Causal confidence: {action.causal_confidence}.")))
+                out.append(_p((
+                    f"What is known: {action.what_is_known}")))
+                out.append(_p((
+                    f"What remains unknown: {action.what_remains_unknown}")))
+                out.append(_p((
+                    f"Why that matters: {action.why_it_matters}")))
+                out.append(_p((
+                    f"What management should do now: {action.action_now}")))
+                out.append(_p((
+                    f"Minimum viable experiment: "
+                    f"{action.minimum_viable_experiment}")))
+                out.append(_p((f"Kill switch: {action.kill_switch}")))
+                out.append(_p((
+                    f"What would change our mind: {action.falsifier}")))
+            if decision.unsafe_because:
+                out.append(_p(end_sentence(
+                    f"What this run could not establish on its own: "
+                    f"{as_clause(decision.unsafe_because, company)}")))
+        elif getattr(contract, "merge_state", "") == "BOUNDED_READ_ONLY":
+            # The contract holds a bounded read this lead was not handed. It
+            # may not be denied (HAS_READING) and may not be called supported
+            # -- the narrative screen's wording, so the two surfaces agree.
+            out.append(_p(f"No curated transition pattern matched {company}, "
+                          f"so what follows is read from the public record "
+                          f"directly rather than from a known pattern."))
+            out.append(_p("It is bounded for that reason, and every claim "
+                          "below names the evidence it rests on."))
+        else:
+            out.append(_p(f"No strategic reading of {company} cleared the "
+                          f"evidence bar, so none is asserted here."))
+            if decision.unsafe_because:
+                out.append(_p(end_sentence(
+                    f"That absence is itself the finding: "
+                    f"{as_clause(decision.unsafe_because, company)}")))
     else:
         if decision.mechanism:
             out.append(_p(end_sentence(
@@ -1232,4 +2112,23 @@ def render_decision_lead(decision, company: str = "", *, depth: str = BRIEF,
                    f'wrong</h2>'
                    f'{_p(end_sentence(lead_in + as_clause(falsifier, company)))}'
                    "</section>")
+    # §17. THE BELIEF LAYER, IMMEDIATELY AFTER THE ANSWER.
+    #
+    # Placed here rather than at the foot of the dossier because the question
+    # it answers -- "what if the reading I have just been given is wrong?" --
+    # is the one a chief executive has WHILE reading the answer, not after
+    # thirty more paragraphs. It renders nothing at all when the run formed
+    # no belief, which is the correct output and not a gap to be filled.
+    if read is not None:
+        try:
+            from intent_engine.founder_brief import challenge_block
+            # The challenge block re-states the falsifier that "What to do
+            # next" printed a few lines above (measured on Moody's and
+            # Workday: "One check separates them: ..." twice). Its other rows
+            # are new and stay; a row the lead already said is dropped.
+            out.append(_drop_said_rows(
+                challenge_block.render(read, company=company),
+                list(_lead_sentences("".join(out)))))
+        except Exception:                                   # noqa: BLE001
+            pass
     return "".join(out)

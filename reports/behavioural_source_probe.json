@@ -1,0 +1,122 @@
+[
+  {
+    "id": "FRB_G19_REVOLVING",
+    "construct": "financial_anxiety",
+    "publisher": "Federal Reserve G.19",
+    "url": "https://www.federalreserve.gov/datadownload/Output.aspx?rel=G19&series=d63e0f39cd1e0e2d0e0f1e9e0f4e0f5c&lastobs=24&from=&to=&filetype=csv&label=include&layout=seriescolumn",
+    "status": "BLOCKED",
+    "why": "answered with only 0 bytes",
+    "http": 200,
+    "bytes": 0
+  },
+  {
+    "id": "FRB_G19_INDEX",
+    "construct": "financial_anxiety",
+    "publisher": "Federal Reserve G.19 landing",
+    "url": "https://www.federalreserve.gov/releases/g19/current/default.htm",
+    "status": "LIVE",
+    "why": "HTTP 200, 60000b, text/html",
+    "http": 200,
+    "bytes": 60000
+  },
+  {
+    "id": "FRB_H8_INDEX",
+    "construct": "financial_anxiety",
+    "publisher": "Federal Reserve H.8 landing",
+    "url": "https://www.federalreserve.gov/releases/h8/current/default.htm",
+    "status": "LIVE",
+    "why": "HTTP 200, 60000b, text/html",
+    "http": 200,
+    "bytes": 60000
+  },
+  {
+    "id": "FRB_CHARGEOFF",
+    "construct": "financial_anxiety",
+    "publisher": "Federal Reserve charge-off/delinq",
+    "url": "https://www.federalreserve.gov/releases/chargeoff/delallsa.htm",
+    "status": "LIVE",
+    "why": "HTTP 200, 60000b, text/html",
+    "http": 200,
+    "bytes": 60000
+  },
+  {
+    "id": "NYFED_SCE_PAGE",
+    "construct": "household_expectation",
+    "publisher": "NY Fed Survey of Consumer Expectations",
+    "url": "https://www.newyorkfed.org/microeconomics/sce",
+    "status": "LIVE",
+    "why": "HTTP 200, 60000b, text/html; charset=utf-8",
+    "http": 200,
+    "bytes": 60000
+  },
+  {
+    "id": "NYFED_HHDC_PAGE",
+    "construct": "financial_anxiety",
+    "publisher": "NY Fed Household Debt & Credit",
+    "url": "https://www.newyorkfed.org/microeconomics/hhdc",
+    "status": "LIVE",
+    "why": "HTTP 200, 60000b, text/html; charset=utf-8",
+    "http": 200,
+    "bytes": 60000
+  },
+  {
+    "id": "BLS_JOLTS_QUITS",
+    "construct": "perceived_control",
+    "publisher": "BLS JOLTS",
+    "url": "https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000QUR",
+    "status": "QUOTA_BLOCKED",
+    "why": "keyless but currently rate-limited",
+    "http": 200,
+    "bytes": 224
+  },
+  {
+    "id": "TREASURY_FISCALDATA",
+    "construct": "n/a",
+    "publisher": "US Treasury FiscalData",
+    "url": "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v2/accounting/od/avg_interest_rates?page[size]=1",
+    "status": "LIVE",
+    "why": "HTTP 200, 1742b, application/json",
+    "http": 200,
+    "bytes": 1742
+  },
+  {
+    "id": "UMICH_SCA_TABLE",
+    "construct": "survey_confidence",
+    "publisher": "U. Michigan Surveys of Consumers",
+    "url": "http://www.sca.isr.umich.edu/files/tbmics.csv",
+    "status": "LIVE",
+    "why": "HTTP 200, 12207b, application/octet-stream",
+    "http": 200,
+    "bytes": 12207
+  },
+  {
+    "id": "CENSUS_BFS",
+    "construct": "perceived_control",
+    "publisher": "Census Business Formation Statistics",
+    "url": "https://api.census.gov/data/timeseries/eits/bfs?get=cell_value&for=us:*&time=2025-06",
+    "status": "KEY_REQUIRED",
+    "why": "the endpoint answered by asking for a key",
+    "http": 200,
+    "bytes": 8531
+  },
+  {
+    "id": "FRED_CSV",
+    "construct": "financial_anxiety",
+    "publisher": "FRED keyless CSV",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=PSAVERT",
+    "status": "LIVE",
+    "why": "HTTP 200, 12499b, application/csv",
+    "http": 200,
+    "bytes": 12499
+  },
+  {
+    "id": "BEA_API",
+    "construct": "saving_rate",
+    "publisher": "Bureau of Economic Analysis",
+    "url": "https://apps.bea.gov/api/data?&method=GetDataSetList&ResultFormat=JSON",
+    "status": "BLOCKED",
+    "why": "URLError: <urlopen error [Errno 8] nodename nor servname provided, or not known>",
+    "http": 0,
+    "bytes": 0
+  }
+]

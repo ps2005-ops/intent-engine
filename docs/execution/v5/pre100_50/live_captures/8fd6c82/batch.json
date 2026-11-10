@@ -1,0 +1,79 @@
+[
+  {
+    "company": "Advanced Micro Devices, Inc.",
+    "deployed_sha": "8fd6c82",
+    "status": "FAILED",
+    "run_id": "01M0K0YKSGGV2JN1AW6MAFFCZQ",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/8fd6c82/advanced_micro_devices_inc",
+    "process_before": {
+      "boot_id": "9faee695704b434b",
+      "started_at": 1787344896.8719635,
+      "uptime_seconds": 31.9
+    },
+    "entry_domain": "amd.com",
+    "seconds": 380,
+    "first_useful": null,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K0YKSGGV2JN1AW6MAFFCZQ/progress"
+  },
+  {
+    "company": "NVIDIA Corporation",
+    "deployed_sha": "8fd6c82",
+    "status": "READY",
+    "run_id": "01M0K1AW6FVAC40YMH3ZG3BGYA",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/8fd6c82/nvidia_corporation",
+    "process_before": {
+      "boot_id": "9faee695704b434b",
+      "started_at": 1787344896.8719635,
+      "uptime_seconds": 419.5
+    },
+    "entry_domain": "nvidia.com",
+    "seconds": 162,
+    "first_useful": 162,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K1AW6FVAC40YMH3ZG3BGYA",
+    "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "outcome_by_route": {
+      "run": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "intro": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "slides": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "full": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "story": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "history": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "connect": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "Meta Platforms, Inc.",
+    "deployed_sha": "8fd6c82",
+    "status": "READY",
+    "run_id": "01M0K1P9A6E5EWX22AFFQYG515",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/8fd6c82/meta_platforms_inc",
+    "process_before": {
+      "boot_id": "9faee695704b434b",
+      "started_at": 1787344896.8719635,
+      "uptime_seconds": 808.8
+    },
+    "entry_domain": "",
+    "seconds": 47,
+    "first_useful": 47,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K1P9A6E5EWX22AFFQYG515",
+    "outcome": "TRUE_EVIDENCE_SCARCITY",
+    "outcome_by_route": {
+      "run": "TRUE_EVIDENCE_SCARCITY",
+      "intro": "TRUE_EVIDENCE_SCARCITY",
+      "slides": "TRUE_EVIDENCE_SCARCITY",
+      "full": "TRUE_EVIDENCE_SCARCITY",
+      "story": "TRUE_EVIDENCE_SCARCITY",
+      "history": "TRUE_EVIDENCE_SCARCITY",
+      "connect": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  }
+]

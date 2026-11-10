@@ -183,8 +183,33 @@ form.analyze button[type=submit]{background:var(--l-accent);
   margin-top:2.4rem}
 .assurance p{color:var(--l-muted);line-height:1.6}
 .assurance .more{font-size:.92rem}
+/* The two decisions on the first screen: the primary action is the dominant
+   mark, the secondary one obviously available and obviously lesser. Both are
+   >=52px tall so a thumb hits them on a 360px phone, which is where the first
+   external tester failed.
+   NOTE: no customer-facing wording in this sheet. A stylesheet ships to every
+   visitor, so a comment quoting button copy is indistinguishable from the
+   button itself to anything reading the page — including the guard that
+   checks a feature-flagged CTA is truly absent. */
+main.landing{max-width:38rem}
+.cta-row{display:flex;gap:1rem;align-items:stretch;flex-wrap:wrap;
+  margin:2.4rem 0 .9rem}
+.cta-row form{margin:0}
+button.primary{background:var(--l-accent);color:var(--l-accent-ink);border:0;
+  border-radius:10px;padding:.95rem 2.1rem;font-size:1.06rem;font-weight:600;
+  cursor:pointer;min-height:52px;width:100%}
+.cta-primary{flex:0 1 auto}
+.cta-secondary{display:inline-flex;align-items:center;justify-content:center;
+  min-height:52px;padding:.95rem 1.5rem;color:var(--l-link);font-size:1.02rem;
+  text-decoration:none;border:1px solid var(--l-field-line);border-radius:10px}
+.cta-note{font-size:.9rem;color:var(--l-faint);margin-top:0}
 @media (max-width:640px){h1{font-size:1.75rem}.field-row{display:block}
-  .field-row .field{margin-bottom:.9rem}}
+  .field-row .field{margin-bottom:.9rem}
+  .cta-row{display:block}
+  .cta-row .cta-primary{display:block}
+  .cta-secondary{display:flex;width:100%;margin-top:.8rem;
+    box-sizing:border-box}
+  form.analyze button[type=submit]{width:100%;min-height:52px}}
 @media (prefers-color-scheme:dark){
 :root{--l-ink:#f3f4f6;--l-muted:#c3cad6;--l-lede:#c3cad6;--l-label:#c3cad6;
   --l-faint:#c3cad6;--l-head:#c3cad6;--l-line:#3a4454;--l-field-bg:#1b2230;
@@ -249,6 +274,16 @@ button:disabled{background:#b9b9d4;cursor:not-allowed}
 border-radius:8px;padding:.7rem .9rem;margin:1rem 0}
 [role=status]{background:#f0f6ff;border:1px solid #cfe0f5;border-radius:8px;
 padding:.7rem .9rem;margin:1rem 0}
+/* AN ANNOUNCEMENT WITH NOTHING TO ANNOUNCE DRAWS NOTHING.
+   The autocomplete's live region is a [role=status] and inherits this panel,
+   so on the company-entry screen an empty 38px tinted box sat directly under
+   the only input on the page — reading as a second, broken field. Measured
+   locally at 390px.
+   It stays in the DOM rather than being display:none'd, because a live region
+   removed from the box tree is one assistive technology may stop watching;
+   this only stops it PAINTING until it has something to say. */
+[role=status]:empty,[role=alert]:empty{background:none;border:0;padding:0;
+margin:0}
 .coverage{background:#fffaf0;border:1px solid #f0e0c0;border-radius:8px;
 padding:.7rem .9rem;margin:1rem 0}
 details{border:1px solid #e6e6ef;border-radius:10px;padding:.6rem .9rem;
@@ -283,6 +318,12 @@ padding:.15rem .75rem;font-size:.85rem;font-weight:600;color:#2d2d70}
 @media (prefers-color-scheme:dark){
 [role=alert]{background:#2a1717;border-color:#5b2b2b;color:#ffb4b4}
 [role=status]{background:#161c26;border-color:#3a4454;color:#f3f4f6}
+/* Restated inside the dark block: these two rules have the same specificity
+   as the :empty reset above and land after it, so without this the empty
+   announcement box comes back in dark only — exactly the asymmetry this
+   file's own dark audit was written to stop. */
+[role=status]:empty,[role=alert]:empty{background:none;border:0;padding:0;
+margin:0}
 .coverage{background:#1f1b12;border-color:#4a3f28;color:#f3f4f6}
 details{background:#161c26;border-color:#3a4454}
 ul.source-list li label{background:#1b2230;border-color:#3a4454;color:#f3f4f6}
@@ -324,42 +365,112 @@ def render_result_html(run_result: dict) -> str:
             f'<body>{"".join(body)}</body></html>')
 
 
-def render_landing_html() -> str:
+def render_landing_html(*, demo_mode: bool = True) -> str:
+    """The first screen. Two decisions on it, and nothing else.
+
+    WHY THE FORM LEFT THIS PAGE. The landing page WAS the analysis form, with
+    the methodology, an example quote, a trust note and a source policy under
+    it. That asks a first-time visitor to start work before they have been
+    told what the work is, and it gave a page with one job four of them.
+
+    The landing page sells; the demo page collects. A visitor who wants to
+    start is one click from the same form, on a screen where the company name
+    is the only thing being asked for.
+
+    WHAT THE PRODUCT IS, IN ITS OWN TERMS. The old promise — "we read its
+    public evidence" — describes retrieval, which is the least of it and the
+    part a reader assumes anyway. What the product actually produces is a
+    strategic read: the bet, the economics that make it rational, what the
+    market believes about it, and what would prove it wrong.
+    """
     return (
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
-        '<title>Founder Intelligence — read a company from the outside</title>'
+        '<title>Founder Intelligence — see what a company is betting on'
+        '</title>'
+        f'<style>{_BASE_CSS}{_LANDING_CSS}</style></head><body><main '
+        'class="landing">'
+        '<h1>See what a company is really betting on.</h1>'
+        # Seven lines of lede on a 390px phone pushed the buttons to the edge
+        # of the fold. The promise has to land before the thumb has to move.
+        '<p class="lede">Name a company. We read its filings, its market and '
+        'its competitors, then come back with the bet management is making, '
+        'the economics behind it, and what would prove it wrong.</p>'
+        '<div class="cta-row">'
+        # The demo entry point is feature-flagged and must vanish ENTIRELY
+        # when it is off — an inviting button that leads to a login wall is
+        # worse than no button.
+        + ('<form action="/demo" method="post" class="cta-primary" '
+           'aria-label="Try the demo without logging in">'
+           '<button type="submit" class="primary">Try the demo</button>'
+           '</form>' if demo_mode else '')
+        + '<a class="cta-secondary" href="/login">Log in</a>'
+        '</div>'
+        + ('<p class="cta-note">No login needed for the demo. Public sources '
+           'only.</p>' if demo_mode
+           else '<p class="cta-note">Log in to run an analysis.</p>')
+        + '</main></body></html>')
+
+
+def render_company_entry_html() -> str:
+    """The demo's first working screen: one field, and the reason for it."""
+    return (
+        '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+        '<meta name="viewport" content="width=device-width,initial-scale=1">'
+        '<title>Which company?</title>'
         f'<style>{_BASE_CSS}{_LANDING_CSS}</style></head><body><main>'
-        # 1. The promise, in terms of what you get rather than what it is.
-        '<h1>Read a company the way its competitors wish they could.</h1>'
-        '<p class="lede">Give us a company. We read its public evidence — its '
-        'own pages, its filings and results where they exist, and what others '
-        'report about it — and explain what management appears to be doing, '
-        'what the business model says about why, and what the market may be '
-        'missing.</p>'
+        '<h1>Which company should we read?</h1>'
+        '<p class="lede">Start typing and pick the company you mean. We '
+        'confirm the legal entity before anything is read, so the analysis '
+        'is about the company you had in mind.</p>'
         # 2. The input. One job on this screen.
+        # THE NAME IS THE ONLY REQUIRED FIELD.
+        #
+        # Website used to be `required`, and asking for it is asking the user
+        # to do the identity resolution this product already does: the entity
+        # registry resolves a typed name to a legal name, domain and ticker,
+        # and says AMBIGUOUS with a chooser when a name genuinely names two
+        # companies. Demanding the URL up front converted that capability
+        # into homework, and a form the user can fail.
+        #
+        # It survives as a RECOVERY input under the optional section, where
+        # it is worth something: a domain is the strongest signal a user can
+        # give, because they had to have the specific entity in mind to type
+        # it.
         '<form action="/analyze" method="post" aria-label="Analyze a company" '
         'class="analyze">'
         '<div class="field-row">'
-        '<span class="field"><label for="company_name">Company</label>'
+        '<span class="field grow"><label for="company_name">Company name'
+        '</label>'
         '<input id="company_name" name="company_name" '
-        'placeholder="Cloudflare" required></span>'
-        '<span class="field"><label for="website">Website</label>'
-        '<input id="website" name="website" type="url" '
-        'placeholder="https://www.cloudflare.com" required></span>'
+        'placeholder="Cloudflare" autofocus required></span>'
         '</div>'
-        '<details class="opt"><summary>Add context (optional)</summary>'
-        '<p><label for="role">Your role</label>'
+        '<details class="opt"><summary>Optional — website, your role, what '
+        'you want to work out</summary>'
+        '<p><label for="website">Website</label> '
+        '<input id="website" name="website" type="url" '
+        'placeholder="https://www.cloudflare.com"> '
+        '<span class="hint">Only needed if the name is ambiguous or we '
+        'cannot find the company.</span></p>'
+        '<p><label for="role">Your role</label> '
         '<input id="role" name="requester_role" '
-        'placeholder="founder, investor, product lead"></label></p>'
-        '<p><label for="q">What are you trying to work out?</label>'
+        'placeholder="founder, investor, product lead"></p>'
+        '<p><label for="q">What are you trying to work out?</label> '
         '<input id="q" name="business_question" '
         'placeholder="are they moving upmarket?"></p></details>'
+        # The consent stays -- it is a real statement about what runs -- but
+        # it is a sentence, not a gate the user can trip over.
         '<p class="consent"><label><input type="checkbox" name="consent" '
-        'required> Analyse this company from public and official sources.'
+        'checked> Analyse this company from public and official sources.'
         '</label></p>'
-        '<button type="submit">Read this company</button></form>'
+        '<button type="submit">Analyse company</button></form>'
         # 3. What the result actually looks like. Concrete, not adjectives.
+        #
+        # KEPT SHORT, DELIBERATELY. This screen exists to take one company
+        # name. The example below is the only thing on it that is not the
+        # form, and it is here rather than on the landing page because a
+        # visitor who has already clicked "Try the demo" has decided to look
+        # — what they need now is confidence about what they will get.
         '<section class="sample" aria-label="What you get back">'
         '<h2>What comes back</h2>'
         # The quote sat here unlabelled, so it read as something the product

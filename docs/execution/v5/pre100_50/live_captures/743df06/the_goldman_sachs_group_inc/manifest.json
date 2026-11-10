@@ -1,0 +1,138 @@
+{
+  "company": "The Goldman Sachs Group, Inc.",
+  "deployed_sha": "743df06",
+  "captured_at": "2026-08-21T15:37:45Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JFH666JK7F54T1949DBAC1",
+      "chars": 2056,
+      "html_chars": 17795,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JFH666JK7F54T1949DBAC1/intro",
+      "chars": 4540,
+      "html_chars": 29797,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JFH666JK7F54T1949DBAC1",
+      "chars": 2056,
+      "html_chars": 17795,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JFH666JK7F54T1949DBAC1/full",
+      "chars": 2056,
+      "html_chars": 17795,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JFH666JK7F54T1949DBAC1/story",
+      "chars": 5194,
+      "html_chars": 34852,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JFH666JK7F54T1949DBAC1/history",
+      "chars": 27687,
+      "html_chars": 102358,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JFH666JK7F54T1949DBAC1/connect",
+      "chars": 3998,
+      "html_chars": 28904,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JFH666JK7F54T1949DBAC1",
+      "chars": 2056,
+      "html_chars": 17795,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JFH666JK7F54T1949DBAC1/evidence",
+      "chars": 3206,
+      "html_chars": 18955,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JFH666JK7F54T1949DBAC1/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JFH666JK7F54T1949DBAC1/brief",
+      "chars": 16166,
+      "html_chars": 48620,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing The Goldman Sachs Group, Inc. GS \u00b7 goldmansachs.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current com",
+      "status": 200,
+      "html_bytes": 17030
+    },
+    {
+      "t": 6.4,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing The Goldman Sachs Group, Inc. GS \u00b7 goldmansachs.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current co",
+      "status": 200,
+      "html_bytes": 17026
+    },
+    {
+      "t": 53.6,
+      "text": "Limited analysis of The Goldman Sachs Group, Inc. Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of The Goldman Sachs Group, Inc. There is not enough public evidence to build a briefing on this company. Rather than show a briefing that looks complete and is not, here is exactl",
+      "status": 200,
+      "html_bytes": 17831
+    }
+  ],
+  "process_before": {
+    "boot_id": "d7df6481c13e43c7",
+    "started_at": 1787326618.1855707,
+    "uptime_seconds": 47.9
+  },
+  "run_id": "01M0JFH666JK7F54T1949DBAC1",
+  "status": "READY",
+  "seconds": 54,
+  "first_useful": 54,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 2.98,
+    "intro": 12.52,
+    "slides": 3.19,
+    "full": 3.35,
+    "story": 6.6,
+    "history": 0.31,
+    "connect": 4.24
+  },
+  "evidence_gate": "compose=3 usable=3 families=investor stored=3 attempt=3 failed=26/24 dropped=0/0/0/0",
+  "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+  "outcome_by_route": {
+    "run": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "intro": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "slides": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "full": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "story": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "history": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "connect": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": []
+}

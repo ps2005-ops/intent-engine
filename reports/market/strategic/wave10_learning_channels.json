@@ -1,0 +1,107 @@
+{
+ "contract": "learning_channels.v1",
+ "by_channel": {
+  "ECONOMIC_KNOWLEDGE_GAIN": {
+   "movements": [
+    {
+     "channel": "ECONOMIC_KNOWLEDGE_GAIN",
+     "kind": "established_object",
+     "count": 0,
+     "detail": "no new established competitive object; still the single 'Shopify Shipping expands to Italy and Spain'"
+    }
+   ],
+   "total": 0
+  },
+  "SYSTEM_CAPABILITY_GAIN": {
+   "movements": [
+    {
+     "channel": "SYSTEM_CAPABILITY_GAIN",
+     "kind": "duplicate_removed",
+     "count": 1,
+     "detail": "content-identical documents at different URLs (/releases and /products/innovation/releases) now retrieved once"
+    },
+    {
+     "channel": "SYSTEM_CAPABILITY_GAIN",
+     "kind": "precision_improved",
+     "count": 3,
+     "detail": "three index-page context leaks refused: 'checkout' borrowed from a neighbouring entry, and the buyer 'Sidekick app extensionsApp store' built from two nav labels"
+    },
+    {
+     "channel": "SYSTEM_CAPABILITY_GAIN",
+     "kind": "routing_improved",
+     "count": 1,
+     "detail": "source maturity now requires actor diversity, so one vendor's changelog can no longer promote a whole family"
+    },
+    {
+     "channel": "SYSTEM_CAPABILITY_GAIN",
+     "kind": "counting_defect_fixed",
+     "count": 1,
+     "detail": "release_notes yield corrected from 0.333 on 3 documents to 0.091 on 11 after expansion"
+    }
+   ],
+   "total": 6
+  },
+  "CALIBRATION_GAIN": {
+   "movements": [],
+   "total": 0
+  },
+  "FOUNDER_UTILITY_GAIN": {
+   "movements": [],
+   "total": 0
+  }
+ },
+ "calibration": [
+  {
+   "track": "RELATIONSHIP_ACCURACY",
+   "tested": 0,
+   "correct": 0,
+   "accuracy": null,
+   "standing": "UNMEASURABLE",
+   "note": ""
+  },
+  {
+   "track": "ACTION_CLASSIFICATION_ACCURACY",
+   "tested": 0,
+   "correct": 0,
+   "accuracy": null,
+   "standing": "UNMEASURABLE",
+   "note": ""
+  },
+  {
+   "track": "OBJECT_ESTABLISHMENT_ACCURACY",
+   "tested": 0,
+   "correct": 0,
+   "accuracy": null,
+   "standing": "UNMEASURABLE",
+   "note": "no live prediction was tested this wave"
+  },
+  {
+   "track": "RELEVANCE_ACCURACY",
+   "tested": 0,
+   "correct": 0,
+   "accuracy": null,
+   "standing": "UNMEASURABLE",
+   "note": ""
+  },
+  {
+   "track": "RESPONSE_PREDICTION_ACCURACY",
+   "tested": 0,
+   "correct": 0,
+   "accuracy": null,
+   "standing": "UNMEASURABLE",
+   "note": ""
+  },
+  {
+   "track": "OBJECTIVE_INFERENCE_ACCURACY",
+   "tested": 0,
+   "correct": 0,
+   "accuracy": null,
+   "standing": "UNMEASURABLE",
+   "note": ""
+  }
+ ],
+ "calibration_unmeasurable": 6,
+ "note": "the four totals are never summed. A wave can have high system capability gain and zero economic knowledge gain, and that is a description rather than a disappointment.",
+ "wave": 10,
+ "headline": "SYSTEM_CAPABILITY 6 movements, ECONOMIC_KNOWLEDGE 0, CALIBRATION 0, FOUNDER_UTILITY 0. Three waves running, the engine has improved its instrument and learned nothing new about the market \u2014 which is the correct reading and the reason this split exists."
+}

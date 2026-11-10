@@ -1,0 +1,179 @@
+{
+  "measured_at": "2026-08-20",
+  "method": "resolved through the real EDGAR path \u2014 registrant SIC from the live submissions index, then the subject's own filing text \u2014 exactly as a run resolves it. Zero demo analyses spent, so this is a prediction the rendered pages are scored against, not a reading of them.",
+  "code_sha": "0420fb0",
+  "companies": [
+    {
+      "company": "Meta Platforms, Inc.",
+      "cik": "1326801",
+      "sic": "7370",
+      "sic_desc": "Services-Computer Programming, Data Pr",
+      "candidates": 3,
+      "model_class": "ADVERTISING_PLATFORM",
+      "profile_state": "PROFILE_PARTIAL",
+      "n_patterns": 8,
+      "patterns": [
+        "differentiator_commoditization",
+        "ecosystem_control_vs_openness",
+        "human_to_agent_workflow",
+        "portfolio_run_as_one",
+        "product_to_platform",
+        "single_product_to_ecosystem",
+        "single_to_multi_segment",
+        "smb_wedge_to_enterprise"
+      ],
+      "capacity_ahead_of_demand_offered": false
+    },
+    {
+      "company": "Amazon.com, Inc.",
+      "cik": "1018724",
+      "sic": "5961",
+      "sic_desc": "Retail-Catalog & Mail-Order Houses",
+      "candidates": 3,
+      "model_class": "MULTI_ENGINE_PLATFORM",
+      "profile_state": "PROFILE_PARTIAL",
+      "n_patterns": 8,
+      "patterns": [
+        "differentiator_commoditization",
+        "ecosystem_control_vs_openness",
+        "human_to_agent_workflow",
+        "portfolio_run_as_one",
+        "product_to_platform",
+        "single_product_to_ecosystem",
+        "single_to_multi_segment",
+        "smb_wedge_to_enterprise"
+      ],
+      "capacity_ahead_of_demand_offered": false
+    },
+    {
+      "company": "NVIDIA Corporation",
+      "cik": "1045810",
+      "sic": "3674",
+      "sic_desc": "Semiconductors & Related Devices",
+      "candidates": 3,
+      "model_class": "DESIGN_AND_MANUFACTURE",
+      "profile_state": "PROFILE_AVAILABLE",
+      "n_patterns": 10,
+      "patterns": [
+        "buyer_concentration_exposure",
+        "capacity_ahead_of_demand",
+        "differentiator_commoditization",
+        "ecosystem_control_vs_openness",
+        "portfolio_run_as_one",
+        "product_to_platform",
+        "services_to_product",
+        "single_product_to_ecosystem",
+        "single_to_multi_segment",
+        "smb_wedge_to_enterprise"
+      ],
+      "capacity_ahead_of_demand_offered": true
+    },
+    {
+      "company": "JPMorgan Chase & Co.",
+      "cik": "19617",
+      "sic": "6021",
+      "sic_desc": "National Commercial Banks",
+      "candidates": 3,
+      "model_class": "BALANCE_SHEET_OR_NETWORK",
+      "profile_state": "PROFILE_AVAILABLE",
+      "n_patterns": 11,
+      "patterns": [
+        "buyer_concentration_exposure",
+        "differentiator_commoditization",
+        "ecosystem_control_vs_openness",
+        "human_to_agent_workflow",
+        "portfolio_run_as_one",
+        "product_to_platform",
+        "services_to_product",
+        "single_product_to_ecosystem",
+        "single_to_multi_segment",
+        "smb_wedge_to_enterprise",
+        "tool_to_system_of_record"
+      ],
+      "capacity_ahead_of_demand_offered": false
+    },
+    {
+      "company": "Walmart Inc.",
+      "cik": "104169",
+      "sic": "5331",
+      "sic_desc": "Retail-Variety Stores",
+      "candidates": 3,
+      "model_class": "SCALE_RETAIL",
+      "profile_state": "PROFILE_AVAILABLE",
+      "n_patterns": 7,
+      "patterns": [
+        "differentiator_commoditization",
+        "ecosystem_control_vs_openness",
+        "human_to_agent_workflow",
+        "portfolio_run_as_one",
+        "product_to_platform",
+        "single_product_to_ecosystem",
+        "single_to_multi_segment"
+      ],
+      "capacity_ahead_of_demand_offered": false
+    },
+    {
+      "company": "Eli Lilly and Company",
+      "cik": "59478",
+      "sic": "2834",
+      "sic_desc": "Pharmaceutical Preparations",
+      "candidates": 3,
+      "model_class": "REGULATED_PRODUCT_OR_PROVIDER",
+      "profile_state": "PROFILE_AVAILABLE",
+      "n_patterns": 9,
+      "patterns": [
+        "buyer_concentration_exposure",
+        "differentiator_commoditization",
+        "human_to_agent_workflow",
+        "portfolio_run_as_one",
+        "product_to_platform",
+        "services_to_product",
+        "single_product_to_ecosystem",
+        "single_to_multi_segment",
+        "tool_to_system_of_record"
+      ],
+      "capacity_ahead_of_demand_offered": false
+    },
+    {
+      "company": "Caterpillar Inc.",
+      "cik": "18230",
+      "sic": "3531",
+      "sic_desc": "Construction Machinery & Equip",
+      "candidates": 3,
+      "model_class": "MANUFACTURE_AND_AFTERMARKET",
+      "profile_state": "PROFILE_AVAILABLE",
+      "n_patterns": 10,
+      "patterns": [
+        "buyer_concentration_exposure",
+        "capacity_ahead_of_demand",
+        "differentiator_commoditization",
+        "ecosystem_control_vs_openness",
+        "portfolio_run_as_one",
+        "product_to_platform",
+        "services_to_product",
+        "single_product_to_ecosystem",
+        "single_to_multi_segment",
+        "smb_wedge_to_enterprise"
+      ],
+      "capacity_ahead_of_demand_offered": true
+    },
+    {
+      "company": "Exxon Mobil Corporation",
+      "cik": "34088",
+      "sic": "2911",
+      "sic_desc": "Petroleum Refining",
+      "candidates": 3,
+      "model_class": "COMMODITY_PRODUCER",
+      "profile_state": "PROFILE_AVAILABLE",
+      "n_patterns": 5,
+      "patterns": [
+        "buyer_concentration_exposure",
+        "capacity_ahead_of_demand",
+        "differentiator_commoditization",
+        "portfolio_run_as_one",
+        "single_to_multi_segment"
+      ],
+      "capacity_ahead_of_demand_offered": true
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+[
+  {
+    "company": "Meta Platforms, Inc.",
+    "sic": "7370",
+    "sic_description": "Services-Computer Programming, Data Processing, Etc.",
+    "filing_chars": 549561,
+    "assigned_class": "ADVERTISING_PLATFORM",
+    "sector": "SOFTWARE_PLATFORM",
+    "known": true,
+    "profile_state": "PROFILE_PARTIAL",
+    "revenue_hint": "ADVERTISING_PLATFORM",
+    "expected_class": "ADVERTISING_PLATFORM",
+    "class_describes_business": true,
+    "asserted_business_model": "attention resold to advertisers: revenue is an auction price per impression, so nothing is contracted forward and each period's revenue has to be re-earned by engagement",
+    "asserted_revenue_drivers": [
+      "users and their engagement",
+      "impressions or ad load per user",
+      "price per impression",
+      "advertiser count and budget share",
+      "measurable return per advertiser"
+    ],
+    "asserted_macro": [
+      "CONSUMER_DEMAND",
+      "MARKET_RATE",
+      "CURRENCY"
+    ]
+  },
+  {
+    "company": "Amazon.com, Inc.",
+    "sic": "5961",
+    "sic_description": "Retail-Catalog & Mail-Order Houses",
+    "filing_chars": 326607,
+    "assigned_class": "MULTI_ENGINE_PLATFORM",
+    "sector": "RETAIL",
+    "known": true,
+    "profile_state": "PROFILE_PARTIAL",
+    "revenue_hint": null,
+    "expected_class": "MULTI_ENGINE_PLATFORM",
+    "class_describes_business": true,
+    "asserted_business_model": "several distinct businesses under one owner, where the engine that carries the profit is not the one that carries the revenue \u2014 so a consolidated margin describes none of them",
+    "asserted_revenue_drivers": [
+      "segment mix",
+      "take rate or attach per engine",
+      "volume through the largest engine",
+      "cross-engine reinforcement"
+    ],
+    "asserted_macro": [
+      "CONSUMER_DEMAND",
+      "MARKET_RATE",
+      "LABOR"
+    ]
+  },
+  {
+    "company": "NVIDIA Corporation",
+    "sic": "3674",
+    "sic_description": "Semiconductors & Related Devices",
+    "filing_chars": 373322,
+    "assigned_class": "DESIGN_AND_MANUFACTURE",
+    "sector": "SEMICONDUCTOR",
+    "known": true,
+    "profile_state": "PROFILE_AVAILABLE",
+    "revenue_hint": null,
+    "expected_class": "SEMICONDUCTOR_PLATFORM",
+    "class_describes_business": false,
+    "asserted_business_model": "design and manufacture of a physical product sold into a capacity-constrained supply chain",
+    "asserted_revenue_drivers": [
+      "unit volume",
+      "product and node mix",
+      "average selling price",
+      "design wins",
+      "customer concentration"
+    ],
+    "asserted_macro": [
+      "INDUSTRIAL_DEMAND",
+      "MARKET_RATE",
+      "CURRENCY"
+    ]
+  },
+  {
+    "company": "JPMorgan Chase & Co.",
+    "sic": "",
+    "sic_description": "",
+    "filing_chars": 0,
+    "assigned_class": "BALANCE_SHEET_OR_NETWORK",
+    "sector": "FINANCIAL_REGULATED",
+    "known": true,
+    "profile_state": "PROFILE_AVAILABLE",
+    "revenue_hint": null,
+    "expected_class": "BANK",
+    "class_describes_business": false,
+    "asserted_business_model": "earnings from a balance sheet or from a transaction network \u2014 spread and fees on volume the firm intermediates",
+    "asserted_revenue_drivers": [
+      "spread on assets and liabilities",
+      "transaction and fee volume",
+      "balance or asset growth",
+      "take rate"
+    ],
+    "asserted_macro": [
+      "MARKET_RATE",
+      "UNEMPLOYMENT",
+      "INFLATION",
+      "INDUSTRIAL_DEMAND"
+    ]
+  },
+  {
+    "company": "Walmart Inc.",
+    "sic": "5331",
+    "sic_description": "Retail-Variety Stores",
+    "filing_chars": 396094,
+    "assigned_class": "SCALE_RETAIL",
+    "sector": "RETAIL",
+    "known": true,
+    "profile_state": "PROFILE_AVAILABLE",
+    "revenue_hint": null,
+    "expected_class": "SCALE_RETAIL",
+    "class_describes_business": true,
+    "asserted_business_model": "sale of other people's products at deliberately thin margin, where the return comes from scale in buying and from how fast inventory turns rather than from price premium",
+    "asserted_revenue_drivers": [
+      "store and site traffic",
+      "average ticket",
+      "comparable sales",
+      "unit volume",
+      "selling space and channel mix"
+    ],
+    "asserted_macro": [
+      "CONSUMER_DEMAND",
+      "LABOR",
+      "MARKET_RATE"
+    ]
+  },
+  {
+    "company": "Eli Lilly and Company",
+    "sic": "2834",
+    "sic_description": "Pharmaceutical Preparations",
+    "filing_chars": 430423,
+    "assigned_class": "REGULATED_PRODUCT_OR_PROVIDER",
+    "sector": "HEALTHCARE",
+    "known": true,
+    "profile_state": "PROFILE_AVAILABLE",
+    "revenue_hint": null,
+    "expected_class": "PHARMA",
+    "class_describes_business": false,
+    "asserted_business_model": "a product or service that may only be sold once a regulator permits it and a payer agrees to pay for it",
+    "asserted_revenue_drivers": [
+      "approved products and indications",
+      "volume and prescriptions or procedures",
+      "net price after rebates",
+      "exclusivity runway",
+      "geographic and product mix"
+    ],
+    "asserted_macro": [
+      "INFLATION",
+      "CURRENCY",
+      "LABOR"
+    ]
+  },
+  {
+    "company": "Caterpillar Inc.",
+    "sic": "3531",
+    "sic_description": "Construction Machinery & Equip",
+    "filing_chars": 607121,
+    "assigned_class": "MANUFACTURE_AND_AFTERMARKET",
+    "sector": "INDUSTRIAL",
+    "known": true,
+    "profile_state": "PROFILE_AVAILABLE",
+    "revenue_hint": null,
+    "expected_class": "INDUSTRIAL_EQUIPMENT",
+    "class_describes_business": false,
+    "asserted_business_model": "sale of a long-lived manufactured product followed by a higher-margin service and parts stream over its life",
+    "asserted_revenue_drivers": [
+      "orders and backlog",
+      "delivery or production rate",
+      "aftermarket and services on the installed base",
+      "product mix"
+    ],
+    "asserted_macro": [
+      "INDUSTRIAL_DEMAND",
+      "MARKET_RATE",
+      "LABOR",
+      "CURRENCY"
+    ]
+  },
+  {
+    "company": "Exxon Mobil Corporation",
+    "sic": "2911",
+    "sic_description": "Petroleum Refining",
+    "filing_chars": 538557,
+    "assigned_class": "COMMODITY_PRODUCER",
+    "sector": "MATERIALS_ENERGY",
+    "known": true,
+    "profile_state": "PROFILE_AVAILABLE",
+    "revenue_hint": null,
+    "expected_class": "INTEGRATED_ENERGY",
+    "class_describes_business": false,
+    "asserted_business_model": "production of an undifferentiated output sold at a price the producer does not set",
+    "asserted_revenue_drivers": [
+      "produced volume",
+      "realised commodity price",
+      "grade or quality of output",
+      "sales mix"
+    ],
+    "asserted_macro": [
+      "COMMODITY",
+      "CURRENCY",
+      "MARKET_RATE",
+      "INDUSTRIAL_DEMAND"
+    ]
+  }
+]

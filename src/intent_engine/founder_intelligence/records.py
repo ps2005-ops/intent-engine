@@ -227,6 +227,28 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
+def speakable(cards) -> tuple:
+    """The cards whose own validation passes. Never raises.
+
+    A card's headline is often a claim's text, and a claim is often someone
+    else's words -- the company's copy, or a third party's ("you must",
+    "is broken"). The product-language rule is right that the PRODUCT does
+    not command or condemn, so such a card is left out. What it must not do
+    is take the whole run down: measured on the prospect-100 passes, one
+    such sentence made Wood Mackenzie's composition raise (every page 500)
+    and, once independent reporting arrived, a competitor card did the same
+    to the conversation endpoint.
+    """
+    out = []
+    for card in cards or ():
+        try:
+            card.validate()
+        except FounderIntelligenceError:
+            continue
+        out.append(card)
+    return tuple(out)
+
+
 def assert_product_language(text: str, *, where: str = "text") -> None:
     hits = scan_banned_language(text, BANNED_PRODUCT_LANGUAGE)
     if hits:
@@ -318,7 +340,22 @@ class CompanyInput:
     def validate(self) -> None:
         if not str(self.company_name or "").strip():
             raise FounderIntelligenceError("a company name is required")
-        validate_public_url(self.website)          # SSRF wall
+        # A WEBSITE IS NOT THE ONLY WAY TO IDENTIFY A COMPANY.
+        #
+        # MEASURED: a live "Meta" run retrieved five sources including its own
+        # 10-K and 10-Q, and then composition raised
+        #   UnsafeURLRejected: a company website URL is required
+        # because the run carries no domain. `create_run` deliberately opens a
+        # run on a CIK alone -- the regulator records no web domain, and
+        # substituting one would make the REGULATOR the company's website --
+        # so every company entered by name that resolves only to a filer hit
+        # this. Meta, Toyota and Vale all failed here, not in retrieval.
+        #
+        # The SSRF wall is not weakened: it guards URLs we FETCH, and it still
+        # runs on every one of them. A company we hold no website for is a
+        # company whose website we will not be dialling.
+        if str(self.website or "").strip():
+            validate_public_url(self.website)      # SSRF wall
         for text in (self.company_name, self.requester_role or "",
                      self.business_question or ""):
             assert_no_secret(text, where="company input")

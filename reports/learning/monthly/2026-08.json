@@ -1,0 +1,170 @@
+{
+  "contract": "market_learning_report.v1",
+  "report_version": 1,
+  "period": "month",
+  "start": "2026-08-01",
+  "end": "2026-08-31",
+  "partial_period": true,
+  "partial_month": true,
+  "generated_at": "2026-08-12T23:03:03.885364+00:00",
+  "system_of_record": "market_intelligence_learning_engine",
+  "data_root": "/Users/prathamsharma/intent-engine-market/reports/market/learning_ledger.jsonl",
+  "runtime_sha": "",
+  "rows": {
+    "in_period": 4744,
+    "ledger_all_time": 4960,
+    "undatable_all_time": 25,
+    "undatable_by_kind": {
+      "causal_estimate": 25
+    },
+    "date_field_used": {
+      "as_of": 357,
+      "at": 15,
+      "available_at": 373,
+      "changed_at": 23,
+      "chosen_at": 40,
+      "completed_at": 40,
+      "created_at": 669,
+      "detected_at": 114,
+      "evaluated_at": 15,
+      "last_updated": 73,
+      "measured_as_of": 207,
+      "preregistered_at": 73,
+      "retrieved_at": 2446,
+      "seen_at": 299
+    }
+  },
+  "channels": {
+    "evidence": {
+      "evidence_rows": 373,
+      "re_observations": 299,
+      "arrivals_total": 672,
+      "new_information_share": 0.5551,
+      "knowledge_effects": 652,
+      "evidence_that_changed_something": 36,
+      "zero_effect_evidence": 337,
+      "effects_by_type": {
+        "CONTRADICTED": 16,
+        "CREATED": 44,
+        "NO_CHANGE": 496,
+        "RESOLVED": 56,
+        "SUPPORTED": 40
+      },
+      "changing_effect_share": 0.2393,
+      "independent_evidence_rows": "UNAVAILABLE",
+      "independent_evidence_note": "evidence independence is produced on the founder branch (company_ingestion.independence); the market ledger carries no independence column"
+    },
+    "beliefs": {
+      "beliefs_declared": 73,
+      "beliefs_updated": 15,
+      "distinct_beliefs_touched": 73,
+      "transitions": {
+        "UNSPECIFIED": 15
+      }
+    },
+    "expectations": {
+      "preregistered": 73,
+      "reconciled": 15,
+      "outcomes": {
+        "CONFIRMED": 11,
+        "CONTRADICTED": 4
+      },
+      "open_after_period": 58
+    },
+    "thesis": {
+      "snapshots": 66,
+      "revisions": 23,
+      "distinct_theses_revised": 23,
+      "transitions": {
+        "CREATED": 23
+      }
+    },
+    "research": {
+      "decisions": 40,
+      "outcomes": 40,
+      "by_status": {
+        "FAILED": 1,
+        "NO_RESULT": 1,
+        "SUCCESS": 38
+      },
+      "zero_result_captured": true
+    },
+    "method": {
+      "performance_rows": 207,
+      "beat_baseline": 40,
+      "beat_baseline_share": 0.1932,
+      "assumption_checks": 276,
+      "assumptions_held": 0,
+      "assumptions_held_share": 0.0
+    },
+    "sources": {
+      "observations": 114,
+      "families_tracked": 6,
+      "by_state": {
+        "DEGRADED": 4,
+        "HEALTHY": 90,
+        "UNAVAILABLE": 3,
+        "UNCLASSIFIED": 17
+      },
+      "degraded_families": [
+        "bureau_of_labor_statistics"
+      ],
+      "fallbacks_active": [],
+      "longest_failure_streak": 1,
+      "affected_intelligence": [],
+      "note": "a degraded source reduces observability; it is never evidence that a company did nothing"
+    },
+    "macro": {
+      "observations": 2446,
+      "distinct_conditions": 12,
+      "by_condition": {
+        "COMMODITY_PRICE": 24,
+        "CURRENCY": 522,
+        "EMPLOYMENT": 54,
+        "ENERGY_PRICE": 24,
+        "FISCAL": 24,
+        "GROWTH": 24,
+        "HOUSING": 24,
+        "INDUSTRIAL_PRODUCTION": 24,
+        "INFLATION": 54,
+        "MARKET_RATE": 1094,
+        "POLICY_RATE": 523,
+        "WAGES": 55
+      }
+    }
+  },
+  "bottleneck": {
+    "bottleneck": "NONE_MEASURED",
+    "severity": null,
+    "reason": "every measured conversion is above its floor for this period"
+  },
+  "next_research_priority": {
+    "bottleneck": "NONE_MEASURED",
+    "missing_fact": "no conversion is below its floor",
+    "suggested_action": "continue the standing research queue",
+    "why_now": "every measured conversion is above its floor for this period",
+    "forbidden_shape": "a query that names its desired conclusion is refused; the action must be able to fail"
+  },
+  "executive_summary": {
+    "top_learnings": [
+      "36 evidence row(s) changed the model",
+      "16 contradicted effect(s)",
+      "44 created effect(s)",
+      "56 resolved effect(s)",
+      "40 supported effect(s)"
+    ],
+    "top_contradictions": [
+      "16 contradicting effect(s)"
+    ],
+    "top_revalidations": [
+      "496 observation(s) confirmed existing knowledge"
+    ],
+    "top_degradations": [
+      "bureau_of_labor_statistics"
+    ],
+    "top_information_gaps": [
+      "every measured conversion is above its floor for this period"
+    ],
+    "material_change": true
+  }
+}

@@ -47,11 +47,25 @@ def test_ineligible_rules(tmp_path, over, rule):
 
 
 def test_stale_prediction_rejected(tmp_path):
+    """A prediction older than the freshness window is refused.
+
+    THE `as_of` IS RELATIVE TO THE PREDICTION, NOT TO THE CALENDAR.
+    `record_prediction` stamps `created_at` with the real current date, so a
+    hardcoded "late" date only sits the required number of days after it
+    while the wall clock is near the date this test was written. It drifted
+    past it and the test began asserting that a prediction zero days old is
+    stale -- a test that passes or fails depending on what day it is run,
+    which is the failure this file now cannot have. Reproduced on the frozen
+    baseline db6946fa, so it predates and is unrelated to the V2 layer.
+    """
     p = _pred(tmp_path)
-    late = (date(2026, 7, 24) + timedelta(days=60)).isoformat()
-    r = evaluate_prediction(p, config=EligibilityConfig(), as_of=late,
-                            reasoning="m")
-    assert not r.eligible and r.rule == "stale_data"
+    config = EligibilityConfig()
+    created = date.fromisoformat(str(p.created_at)[:10])
+    late = (created + timedelta(days=config.max_data_age_days + 1)).isoformat()
+    r = evaluate_prediction(p, config=config, as_of=late, reasoning="m")
+    assert not r.eligible and r.rule == "stale_data", (
+        f"a prediction {config.max_data_age_days + 1}d old was accepted: "
+        f"{r.rule!r}")
 
 
 def test_duplicate_exposure_rejected(tmp_path):

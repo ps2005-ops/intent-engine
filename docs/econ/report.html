@@ -1,0 +1,552 @@
+<title>One Economic World Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;450;600&display=swap">
+
+<style>
+  :root {
+    --ground:      #F5F7F6;
+    --surface:     #FFFFFF;
+    --surface-alt: #EDF1EF;
+    --ink:         #131917;
+    --ink-soft:    #3B4744;
+    --muted:       #64716D;
+    --rule:        #DCE3E0;
+    --rule-strong: #C2CDC8;
+    --accent:      #1F6F5C;
+    --accent-soft: #E2EFEA;
+    --alert:       #A9502B;
+    --alert-soft:  #F6E9E1;
+    --shadow:      0 1px 2px rgba(19, 25, 23, .05);
+
+    --measure: 68ch;
+    --step--1: clamp(.79rem, .77rem + .1vw, .84rem);
+    --step-0:  clamp(1rem, .97rem + .15vw, 1.07rem);
+    --step-1:  clamp(1.2rem, 1.14rem + .3vw, 1.4rem);
+    --step-2:  clamp(1.5rem, 1.38rem + .6vw, 1.9rem);
+    --step-3:  clamp(2rem, 1.7rem + 1.5vw, 3rem);
+    --step-4:  clamp(2.6rem, 2rem + 3vw, 4.4rem);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0E1211;
+      --surface:     #151B19;
+      --surface-alt: #1B2321;
+      --ink:         #E7ECE9;
+      --ink-soft:    #C0CBC6;
+      --muted:       #8E9C97;
+      --rule:        #26302C;
+      --rule-strong: #35423D;
+      --accent:      #6FC3A8;
+      --accent-soft: #16302A;
+      --alert:       #DE8E62;
+      --alert-soft:  #332016;
+      --shadow:      0 1px 2px rgba(0, 0, 0, .4);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:      #0E1211;
+    --surface:     #151B19;
+    --surface-alt: #1B2321;
+    --ink:         #E7ECE9;
+    --ink-soft:    #C0CBC6;
+    --muted:       #8E9C97;
+    --rule:        #26302C;
+    --rule-strong: #35423D;
+    --accent:      #6FC3A8;
+    --accent-soft: #16302A;
+    --alert:       #DE8E62;
+    --alert-soft:  #332016;
+    --shadow:      0 1px 2px rgba(0, 0, 0, .4);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--step-0);
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 78rem; margin: 0 auto; padding: 0 clamp(1.1rem, 4vw, 3.5rem) 6rem; }
+
+  /* ---------- masthead ---------- */
+  .masthead { padding: clamp(3rem, 9vw, 7rem) 0 clamp(2rem, 5vw, 3.5rem); border-bottom: 1px solid var(--rule-strong); }
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: var(--step--1); letter-spacing: .13em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 1.4rem;
+  }
+  h1 {
+    font-family: Newsreader, ui-serif, Georgia, serif;
+    font-weight: 600; font-size: var(--step-4); line-height: 1.02;
+    letter-spacing: -.022em; margin: 0; text-wrap: balance; max-width: 20ch;
+  }
+  .thesis {
+    font-family: Newsreader, ui-serif, Georgia, serif;
+    font-size: var(--step-1); line-height: 1.5; color: var(--ink-soft);
+    max-width: 54ch; margin: 1.6rem 0 0;
+  }
+  .thesis em { font-style: italic; color: var(--ink); }
+
+  .runstrip {
+    display: flex; flex-wrap: wrap; gap: 0 2.4rem;
+    margin-top: 2.6rem; padding-top: 1.5rem; border-top: 1px solid var(--rule);
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: var(--step--1);
+  }
+  .runstrip div { display: flex; flex-direction: column; gap: .15rem; padding: .4rem 0; }
+  .runstrip dt, .runstrip .k { color: var(--muted); letter-spacing: .07em; text-transform: uppercase; font-size: .78em; }
+  .runstrip .v { color: var(--ink); font-weight: 500; }
+
+  /* ---------- sections ---------- */
+  section { padding-top: clamp(2.8rem, 6vw, 4.5rem); }
+  .sec-head { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1.6rem; }
+  .sec-mark {
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: var(--step--1);
+    color: var(--muted); letter-spacing: .1em; white-space: nowrap; padding-top: .35em;
+  }
+  h2 {
+    font-family: Newsreader, ui-serif, Georgia, serif; font-weight: 600;
+    font-size: var(--step-3); line-height: 1.1; letter-spacing: -.018em;
+    margin: 0; text-wrap: balance;
+  }
+  h3 {
+    font-family: "IBM Plex Sans", sans-serif; font-weight: 600;
+    font-size: var(--step-1); line-height: 1.25; margin: 2.4rem 0 .7rem;
+    letter-spacing: -.008em; text-wrap: balance;
+  }
+  p { max-width: var(--measure); margin: 0 0 1.05rem; }
+  p.lede { font-size: var(--step-1); font-family: Newsreader, ui-serif, serif; line-height: 1.5; color: var(--ink-soft); }
+  strong { font-weight: 600; }
+  code, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: .9em; }
+  code { background: var(--surface-alt); padding: .1em .35em; border-radius: 2px; }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- topology diagram ---------- */
+  .topo { margin: 2rem 0 2.4rem; }
+  .topo svg { width: 100%; height: auto; max-width: 56rem; display: block; }
+  .topo figcaption {
+    font-size: var(--step--1); color: var(--muted); max-width: var(--measure);
+    margin-top: .9rem; font-family: "IBM Plex Mono", monospace; line-height: 1.55;
+  }
+
+  /* ---------- findings ---------- */
+  .finding {
+    border-top: 1px solid var(--rule); padding-top: 1.5rem; margin-top: 2.6rem;
+  }
+  .finding-tag {
+    display: inline-block; font-family: "IBM Plex Mono", monospace;
+    font-size: .74rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--alert); background: var(--alert-soft);
+    padding: .22em .6em; border-radius: 2px; margin-bottom: .8rem;
+  }
+  .finding-tag.ok { color: var(--accent); background: var(--accent-soft); }
+  .finding h3 { margin-top: 0; }
+
+  /* ---------- tables ---------- */
+  .tablewrap { overflow-x: auto; margin: 1.4rem 0 1.6rem; max-width: 56rem; }
+  table { border-collapse: collapse; width: 100%; font-size: var(--step--1); }
+  caption {
+    text-align: left; font-family: "IBM Plex Mono", monospace; font-size: .78rem;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+    padding-bottom: .7rem;
+  }
+  th, td { text-align: left; padding: .55rem .9rem .55rem 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  thead th {
+    font-family: "IBM Plex Mono", monospace; font-size: .76rem; font-weight: 500;
+    letter-spacing: .07em; text-transform: uppercase; color: var(--muted);
+    border-bottom: 1px solid var(--rule-strong);
+  }
+  td.num, th.num { text-align: right; font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; padding-right: 1.4rem; }
+  tbody tr:last-child td { border-bottom: none; }
+  .was { color: var(--muted); text-decoration: line-through; text-decoration-thickness: 1px; }
+  .now { color: var(--accent); font-weight: 600; }
+  .bad { color: var(--alert); font-weight: 600; }
+
+  /* ---------- module grid ---------- */
+  .modules { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin: 1.6rem 0 1rem; }
+  .modules div { background: var(--surface); padding: .85rem 1rem; }
+  .modules .m { font-family: "IBM Plex Mono", monospace; font-size: .82rem; color: var(--accent); font-weight: 500; }
+  .modules .d { font-size: .84rem; color: var(--ink-soft); line-height: 1.45; margin-top: .2rem; }
+
+  /* ---------- refusals ---------- */
+  .refusals { list-style: none; padding: 0; margin: 1.4rem 0 0; max-width: 56rem; display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .refusals li { background: var(--surface); padding: .95rem 1.1rem; }
+  .refusals b { display: block; font-size: .95rem; margin-bottom: .2rem; }
+  .refusals span { font-size: .87rem; color: var(--ink-soft); }
+
+  .callout {
+    border-left: 2px solid var(--accent); padding: .1rem 0 .1rem 1.2rem;
+    margin: 1.6rem 0; max-width: var(--measure);
+  }
+  .callout p:last-child { margin-bottom: 0; }
+
+  footer { margin-top: 5rem; padding-top: 1.5rem; border-top: 1px solid var(--rule-strong); font-family: "IBM Plex Mono", monospace; font-size: var(--step--1); color: var(--muted); }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Architecture run · branch v6/unified</p>
+    <h1>One economic world model, two decision surfaces</h1>
+    <p class="thesis">
+      The market engine and the founder engine did not lack a connection. They lacked a
+      <em>substrate</em> — and the canonical object already existed, imprisoned in a package
+      the other side may not import.
+    </p>
+    <div class="runstrip">
+      <div><span class="k">Stage</span><span class="v">Paper only</span></div>
+      <div><span class="k">Core</span><span class="v">24 modules · 5,931 lines</span></div>
+      <div><span class="k">Tests</span><span class="v">196 new · 10,084 total</span></div>
+      <div><span class="k">Live cycles</span><span class="v">3 · real ledger</span></div>
+      <div><span class="k">Companies</span><span class="v">6 · live retrieval</span></div>
+      <div><span class="k">Calibration</span><span class="v">PRE_CALIBRATION (n=0)</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head"><span class="sec-mark">01</span><h2>The defect</h2></div>
+    <p class="lede">
+      Two intelligence products had diverged for 202 and 371 commits from a common ancestor.
+      One asks what is happening around a company; the other asks which economic mechanisms
+      are changing. They shared a repository and shared nothing else.
+    </p>
+    <p>
+      <code>market.macro_state</code> already held a dated, revision-aware, three-times-per-fact
+      reading of the economy. <code>market.transmission</code> already conditioned it on a
+      specific company. <code>market.company_exposure</code> already refused to infer an exposure
+      from a sector. All of it was correct — and all of it sat inside
+      <code>intent_engine.market</code>, which founder code may not import and
+      <em>must</em> not, because “trading internals cannot reach a founder’s screen” is a
+      property of the import graph rather than a promise about what people remember.
+    </p>
+    <p>
+      So the better economic picture was <strong>structurally unreachable</strong> from the
+      surface that needed it, and every company analysis re-derived a worse one from whatever
+      documents that company happened to publish.
+    </p>
+
+    <figure class="topo">
+      <svg viewBox="0 0 720 250" role="img" aria-label="Before, the founder engine could not import the market engine and had no shared substrate. After, a neutral econ core sits between them: the market publishes into it and the founder reads from it, while the direct import remains forbidden.">
+        <defs>
+          <marker id="ar" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+            <path d="M0,1 L8,4.5 L0,8 z" fill="currentColor"/>
+          </marker>
+        </defs>
+        <g font-family="IBM Plex Mono, monospace" font-size="11">
+          <!-- BEFORE -->
+          <text x="0" y="14" fill="var(--muted)" letter-spacing="1.4">BEFORE</text>
+          <rect x="0" y="30" width="150" height="46" fill="var(--surface)" stroke="var(--rule-strong)"/>
+          <text x="12" y="52" fill="var(--ink)">market</text>
+          <text x="12" y="67" fill="var(--muted)" font-size="9.5">macro_state · beliefs</text>
+
+          <rect x="230" y="30" width="150" height="46" fill="var(--surface)" stroke="var(--rule-strong)"/>
+          <text x="242" y="52" fill="var(--ink)">founder</text>
+          <text x="242" y="67" fill="var(--muted)" font-size="9.5">re-derives its own</text>
+
+          <g color="var(--alert)">
+            <line x1="158" y1="53" x2="222" y2="53" stroke="currentColor" stroke-width="1.4" stroke-dasharray="4 4"/>
+            <line x1="182" y1="43" x2="198" y2="63" stroke="currentColor" stroke-width="1.6"/>
+            <line x1="198" y1="43" x2="182" y2="63" stroke="currentColor" stroke-width="1.6"/>
+          </g>
+          <text x="150" y="93" fill="var(--alert)" font-size="9.5">import forbidden — and nothing else crossed</text>
+
+          <!-- AFTER -->
+          <text x="0" y="146" fill="var(--muted)" letter-spacing="1.4">AFTER</text>
+          <rect x="0" y="162" width="150" height="46" fill="var(--surface)" stroke="var(--rule-strong)"/>
+          <text x="12" y="184" fill="var(--ink)">market</text>
+          <text x="12" y="199" fill="var(--muted)" font-size="9.5">publishes state</text>
+
+          <rect x="250" y="150" width="200" height="70" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.4"/>
+          <text x="264" y="176" fill="var(--accent)" font-weight="600">intent_engine.econ</text>
+          <text x="264" y="192" fill="var(--ink-soft)" font-size="9.5">neutral — imports neither</text>
+          <text x="264" y="206" fill="var(--ink-soft)" font-size="9.5">evidence · causal · belief</text>
+
+          <rect x="550" y="162" width="160" height="46" fill="var(--surface)" stroke="var(--rule-strong)"/>
+          <text x="562" y="184" fill="var(--ink)">founder</text>
+          <text x="562" y="199" fill="var(--muted)" font-size="9.5">reads state, publishes evidence</text>
+
+          <g color="var(--accent)">
+            <line x1="152" y1="185" x2="242" y2="185" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)"/>
+            <line x1="458" y1="178" x2="542" y2="178" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)"/>
+            <line x1="542" y1="196" x2="458" y2="196" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)"/>
+          </g>
+          <g color="var(--alert)">
+            <path d="M75,155 C75,110 630,110 630,155" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 4"/>
+            <line x1="345" y1="112" x2="361" y2="132" stroke="currentColor" stroke-width="1.6"/>
+            <line x1="361" y1="112" x2="345" y2="132" stroke="currentColor" stroke-width="1.6"/>
+          </g>
+          <text x="378" y="126" fill="var(--alert)" font-size="9.5">still forbidden, still tested</text>
+        </g>
+      </svg>
+      <figcaption>
+        The wall did not move. A third package was added that neither side’s internals can
+        reach — and both may cross into.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-mark">02</span><h2>What was built</h2></div>
+    <p>
+      <code>intent_engine.econ</code> — 24 modules, neutral by construction. A test parses every
+      module in it and fails on an import edge into either product, in exactly the shape that
+      already guards the neutral dossier package.
+    </p>
+    <div class="modules">
+      <div><div class="m">evidence · lineage</div><div class="d">One dated, sourced fact — and the wall that stops a derived index corroborating its own inputs.</div></div>
+      <div><div class="m">causal · seed · shock</div><div class="d">Directed mechanisms on an L0–L5 evidence ladder; propagation with compounding confidence.</div></div>
+      <div><div class="m">belief</div><div class="d">Beliefs and preregistered expectations, append-only. Five outcomes, including VOID.</div></div>
+      <div><div class="m">attacks</div><div class="d">Five attack kinds × ten impossible-hypothesis categories. Six required fields or refusal.</div></div>
+      <div><div class="m">levelk · reflexivity</div><div class="d">Ten participant classes by public mandate; belief → positioning → price → forced flow.</div></div>
+      <div><div class="m">execution</div><div class="d">Almgren–Chriss impact, spread, fees. Paper and shadow adapters; the live one raises.</div></div>
+      <div><div class="m">calibration</div><div class="d">PRE_CALIBRATION until 30 resolved forward predictions. Brier before accuracy, always.</div></div>
+      <div><div class="m">zero_trade</div><div class="d">Learning from what was declined, and from what was never seen at all.</div></div>
+      <div><div class="m">voi · replay</div><div class="d">Bounded value of information; vintage-correct replay with a four-way verdict.</div></div>
+      <div><div class="m">promotion</div><div class="d">Candidate → knowledge, gated on six overfitting defences and distinct regimes.</div></div>
+      <div><div class="m">acceleration</div><div class="d">Is it learning faster — and is it learning as well? Velocity paired with quality.</div></div>
+      <div><div class="m">exposure</div><div class="d">What a company’s own words say it depends on. Never its sector.</div></div>
+      <div><div class="m">state · company</div><div class="d">EconomicState and CompanyEconomicState — the two objects both products read.</div></div>
+      <div><div class="m">series · store</div><div class="d">40 cross-asset series with availability stated; append-only durable form.</div></div>
+    </div>
+    <div class="callout">
+      <p>
+        A module nothing calls is inert, and this repository has shipped inert repairs before.
+        Two steps were added to <strong>both</strong> the day and night market cycles, the founder
+        analysis path reads and writes the core in the same pass, and <code>/learning</code>
+        answers eleven questions from it.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-mark">03</span><h2>Three live cycles</h2></div>
+    <p class="lede">
+      Each cycle ran against the real accumulated ledger, and each one was inspected before the
+      next was run. The defects below were found this way, not by reading the code.
+    </p>
+    <div class="tablewrap">
+      <table>
+        <caption>Run, inspect, repair, run again</caption>
+        <thead><tr><th class="num">#</th><th>Cycle</th><th>What it proved</th></tr></thead>
+        <tbody>
+          <tr><td class="num">1</td><td>day · 2026-08-24</td><td>The bridge read fields production does not write — <strong>0 of 151</strong> beliefs crossed. Two steps ran green and invisible.</td></tr>
+          <tr><td class="num">2</td><td>night · 2026-08-27</td><td><strong>52 of 155</strong> beliefs crossed with real mechanisms and falsifiers. <strong>71 company nodes → 3 sufficient indices.</strong> Six shocks with participant views; 28 zero-trade records.</td></tr>
+          <tr><td class="num">3</td><td>day · 2026-08-27</td><td>The acceleration producer wrote real counts: <strong>554 nodes ingested, 3 new</strong>, novelty 0.0054. A naive counter would have reported 554 units of learning for a cycle that learned three things. Marked <span class="mono">SKIPPED_NO_NEW_MARKET_SESSION</span> — the duplicate-bar guard refusing to count one close twice.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Cycle 2’s <span class="mono">SHARED ECONOMIC CORE</span> section, verbatim:</p>
+    <div class="tablewrap">
+      <table>
+        <tbody>
+          <tr><td>conditions measured</td><td class="num">5 of 35</td><td>0.143 coverage</td></tr>
+          <tr><td>evidence nodes published</td><td class="num">160</td><td>market → core</td></tr>
+          <tr><td>beliefs published</td><td class="num now">52 of 155</td><td>103 refused, by named family</td></tr>
+          <tr><td>structural shocks evaluated</td><td class="num">6</td><td>0 substantially forced flow</td></tr>
+          <tr><td>zero-trade records written</td><td class="num">28</td><td>precision <span class="mono">UNMEASURABLE</span> — nothing scored yet</td></tr>
+          <tr><td>company evidence nodes read</td><td class="num now">71</td><td>across 5 companies</td></tr>
+          <tr><td>indices sufficient</td><td class="num now">3 of 8</td><td>tradable: <strong>0</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      The zero-trade gates are real — <code>no_market_evidence</code> ×23,
+      <code>view_withheld</code> ×4, <code>not_tradable</code> ×1. Decline precision reports
+      <span class="mono">UNMEASURABLE</span> rather than 100%, because a rate over unscored
+      rejections is how a gate proves itself right by being recent.
+    </p>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-mark">04</span><h2>What the live runs found</h2></div>
+    <p class="lede">
+      Five defects, each found by running the thing rather than reading it. Two were in the new
+      code, three had been in production the whole time.
+    </p>
+
+    <div class="finding">
+      <span class="finding-tag">Found by cycle 1</span>
+      <h3>The bridge read fields production does not write</h3>
+      <p>
+        The first live cycle announced <em>“151 beliefs refused — they state no observable.”</em>
+        They state one. A belief’s falsifier and expected observation live on the
+        <strong>expectation</strong> record, joined on <code>hypothesis_id</code>, and that
+        expectation’s <code>metric</code> names the causal family that states the mechanism.
+      </p>
+      <div class="tablewrap">
+        <table>
+          <caption>151 beliefs in the live ledger</caption>
+          <thead><tr><th>Outcome</th><th class="num">Before</th><th class="num">After</th><th>Reason</th></tr></thead>
+          <tbody>
+            <tr><td>Crossed into the shared ledger</td><td class="num was">0</td><td class="num now">51</td><td>joined 151 of 151 on <code>hypothesis_id</code></td></tr>
+            <tr><td>Refused — no expectation</td><td class="num">151</td><td class="num">0</td><td>the join existed all along</td></tr>
+            <tr><td>Refused — no recorded mechanism</td><td class="num">—</td><td class="num bad">100</td><td>12 named causal families, a work list</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="finding">
+      <span class="finding-tag">Found by the cross-domain proof</span>
+      <h3>The exposure layer was starved, not broken</h3>
+      <p>
+        <code>company_exposure</code> rates four exposures across 28 companies and 562 evidence
+        rows. Its corpus is news headlines with a median length of 95 characters; its patterns
+        need a sentence in which the company is the <em>subject</em> of a dependency — a
+        construction headlines never contain. The founder engine had the filings all along.
+      </p>
+      <div class="tablewrap">
+        <table>
+          <caption>Same patterns, same six companies</caption>
+          <thead><tr><th>Corpus</th><th class="num">Documents</th><th class="num">Characters</th><th class="num">Exposures found</th></tr></thead>
+          <tbody>
+            <tr><td>Market ledger — headlines</td><td class="num">131 rows</td><td class="num">19,415</td><td class="num bad">1</td></tr>
+            <tr><td>Founder path — filings</td><td class="num">46</td><td class="num">3,564,390</td><td class="num now">39</td></tr>
+            <tr><td><strong>Ratio</strong></td><td class="num">—</td><td class="num"><strong>184×</strong></td><td class="num"><strong>39×</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="finding">
+      <span class="finding-tag">Found while moving the capability</span>
+      <h3>Two branches inside those patterns were dead</h3>
+      <p>
+        <code>\b(\d+\s*%|percent|majority)\b</code> could never match a percentage: the
+        alternative ends on <code>%</code>, a non-word character, and the trailing boundary then
+        demands a word character — <code>" of revenue"</code> is not one. Only the spelled-out
+        forms ever rated, and the numeric form is what filings use. Separately,
+        <code>capital expenditure</code> never matched the plural every filing writes.
+      </p>
+      <p>Both fixed in both copies, with a test that fails if the copies ever drift apart.</p>
+    </div>
+
+    <div class="finding">
+      <span class="finding-tag">Found by reading the first published state</span>
+      <h3>Direction was the sign of a level</h3>
+      <p>
+        All five measured conditions read <code>UP</code> — including a consumer price index of
+        333.918, a number greater than zero in every month that has ever existed. Uniformity
+        across every condition is the instrument tell: a real economy does not move one way in
+        five out of five. The change was computable the whole time, from 23–46 dated
+        observations per condition already sitting in the graph.
+      </p>
+      <div class="tablewrap">
+        <table>
+          <caption>The same five conditions, before and after</caption>
+          <thead><tr><th>Condition</th><th class="num">Latest</th><th class="num">Prior</th><th>Before</th><th>After</th></tr></thead>
+          <tbody>
+            <tr><td>fiscal</td><td class="num">41.951</td><td class="num">42.938</td><td class="was">UP</td><td class="now">DOWN</td></tr>
+            <tr><td>inflation</td><td class="num">333.918</td><td class="num">333.952</td><td class="was">UP</td><td class="now">DOWN</td></tr>
+            <tr><td>labour</td><td class="num">4.1</td><td class="num">4.2</td><td class="was">UP</td><td class="now">DOWN</td></tr>
+            <tr><td>treasury 10y</td><td class="num">3.283</td><td class="num">3.248</td><td>UP</td><td>UP</td></tr>
+            <tr><td>wages</td><td class="num">37.62</td><td class="num">37.60</td><td>UP</td><td>UP</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        <code>NO_PRIOR</code> is now a distinct value from <code>FLAT</code>, two prints of one
+        period are treated as a revision rather than a movement, and a reading that claims a
+        direction must carry the prior it was computed from or construction raises.
+      </p>
+    </div>
+
+    <div class="finding">
+      <span class="finding-tag ok">The flywheel, and the wall</span>
+      <h3>Company evidence became candidate indicators — and could not corroborate itself</h3>
+      <p>
+        Six companies retrieved live produced 71 economic nodes across five of them, and three
+        sufficient candidate indicators. All three are refused as corroboration of their own
+        inputs. None is tradable, and no code path makes one so.
+      </p>
+      <div class="tablewrap">
+        <table>
+          <caption>Candidate macro indicators from public corporate evidence</caption>
+          <thead><tr><th>Index</th><th>Direction</th><th class="num">Score</th><th class="num">Panel</th><th class="num">Largest contributor</th><th>Independent of its inputs?</th></tr></thead>
+          <tbody>
+            <tr><td><code>capex_intention_index</code></td><td>UP</td><td class="num">0.60</td><td class="num">5</td><td class="num">0.20</td><td class="bad">No — refused</td></tr>
+            <tr><td><code>financing_conditions_index</code></td><td>DOWN</td><td class="num">−0.20</td><td class="num">5</td><td class="num">0.20</td><td class="bad">No — refused</td></tr>
+            <tr><td><code>pricing_pressure_index</code></td><td>UP</td><td class="num">0.20</td><td class="num">5</td><td class="num">0.20</td><td class="bad">No — refused</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="finding">
+      <span class="finding-tag">Found by auditing importers</span>
+      <h3><code>acceleration</code> had no producer</h3>
+      <p>
+        The module was complete, tested, and <strong>imported by nothing</strong>. Rolling
+        windows over a history nobody writes are windows over an empty list: every one would
+        have reported <code>INSUFFICIENT_HISTORY</code> forever, and nobody could have told that
+        from a genuinely young engine. Its own suite passed against fixtures the whole time.
+      </p>
+      <p>
+        The publish step now records real counts each cycle — <code>evidence_new</code> is
+        content this core had not seen before rather than rows appended, and
+        <code>belief_movement</code> is the <em>size</em> of the probability changes rather than
+        the count of them, so a velocity measure cannot be gamed by running more often.
+      </p>
+      <p>
+        Cycle 3, verbatim: <code>INSUFFICIENT_HISTORY · 1 cycle(s) of history</code> —
+        <code>3 new of 554 evidence nodes (novelty 0.0054)</code>. Both halves matter: the
+        counter refused to call 551 re-reads new, and the window refused to call one cycle a
+        trend.
+      </p>
+    </div>
+
+    <div class="finding">
+      <span class="finding-tag">Found by cycle 1, in the report itself</span>
+      <h3>Two steps ran green and invisible</h3>
+      <p>
+        <code>econ_publish</code> and <code>econ_aggregate</code> completed successfully for a
+        full cycle and appeared in neither the markdown nor the JSON, because the cycle report
+        reads named keys and nobody had added them. A step whose result is not in the record has
+        no history, and “it ran” is the only thing anyone can ever say about it.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-mark">05</span><h2>What is deliberately refused</h2></div>
+    <ul class="refusals">
+      <li><b>Demo search queries as a trading signal.</b><span>No function in the bridge takes a query, a session, a visitor, or a count of any of them — asserted structurally, by parameter name. It would be a signal about who linked to the product this week, and a manipulation surface for anyone who can type into a public box.</span></li>
+      <li><b>Live capital.</b><span><code>LiveBrokerAdapter.__init__</code> raises. Enabling it needs an authorisation object that does not exist anywhere in this repository, so the change is a visible addition rather than a flag flip.</span></li>
+      <li><b>Causal language below evidence level 3.</b><span>A different sentence is constructed. There is no argument, flag or override that produces “causes” from a level-2 edge — including through a chain, where the weakest link decides.</span></li>
+      <li><b>Any accuracy figure before 30 resolved forward predictions.</b><span>Status reads PRE_CALIBRATION and the headline names the shortfall. Prose that implies performance is refused by the same check.</span></li>
+      <li><b>Tenant-private evidence in a public aggregate.</b><span>A refusal, never a filter — an aggregate quietly built from private material and reported as smaller is a breach that also lies about its own sample.</span></li>
+      <li><b>An exposure inferred from a sector.</b><span>It produces the same claim for every company in the sector, so the most specific-sounding output carries the least information. The function raises in both copies.</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-mark">06</span><h2>What is honestly incomplete</h2></div>
+    <p>
+      The market engine’s own cycle path still reads headlines through its ledger-shaped
+      exposure reader; the shared capability is used by the founder path, not yet by that one.
+      Twelve causal families carry no recorded mechanism, so 100 of 151 beliefs cannot cross.
+      No forward expectation has been written to the shared core, so calibration sits at n=0 and
+      will stay there until the belief→expectation producer writes into <code>econ</code> rather
+      than only into the market ledger. Six series are keyed and six are unavailable — OIS,
+      cross-currency basis, the VIX complex, dealer gamma — each carrying its reason, none
+      synthesised.
+    </p>
+    <p>
+      Dealer gamma is the one worth naming twice: its sign is unknown to this deployment, and an
+      unknown sign leaves the short-gamma loop <em>not armed</em> rather than assumed. It is the
+      loop a guess would matter most in.
+    </p>
+  </section>
+
+  <footer>
+    Paper only · no live capital · no private data in any public aggregate · no accuracy figure before the declared sample
+  </footer>
+</div>

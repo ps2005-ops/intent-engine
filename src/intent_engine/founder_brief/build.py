@@ -78,6 +78,11 @@ _WITHHELD_STATES = frozenset({
     "LIMITED", "REFUSED",
 })
 
+#: The provenance composition stamps on a report whose hypotheses came from
+#: the pattern library rather than from a verified analyst reading. This, and
+#: not the state name, is what separates a reading from a scaffold.
+_SCAFFOLD_PROVENANCE = "pattern_library"
+
 NEVER_INVENT = ("leadership discussions", "strategic pivots",
                 "customer adoption", "unit economics", "defensibility",
                 "market share", "revenue", "margins", "retention")
@@ -169,12 +174,42 @@ class FounderBrief:
         }
 
 
+#: Marketing formulas that describe an ASPIRATION rather than a business.
+#: These are the sentences a company puts at the top of its own site, and
+#: they are the ones this product may not put at the top of its page (§22).
+_ASPIRATION = re.compile(
+    r"\bmission is to\b|\bour vision\b|\bwe believe that\b"
+    r"|\bwe are on a mission\b|\bhelp build a better\b"
+    r"|\bthe world'?s leading\b|\bpowering the next generation\b"
+    r"|\bwelcome to\b", re.I)
+
+
 def _sentence(text: str, limit: int = 220) -> str:
+    """A COMPLETE sentence, or a shorter complete one, but never a fragment.
+
+    THE ELLIPSIS WAS THE DEFECT. Cutting at a character budget and appending
+    "…" put this on the first line of the product, under the company name:
+
+        "Cloudflare's mission is to help build a better Internet. We have
+         built a global network that delivers a broad range of services to
+         businesses of all sizes and in all…"
+
+    Prose that trails off because a buffer ran out is indistinguishable, to a
+    reader, from a product that stopped working. So the cut is made at a
+    SENTENCE boundary. If not even one sentence fits, the value is dropped
+    rather than clipped -- an absent line degrades the page, a broken one
+    discredits it.
+    """
     text = " ".join(str(text or "").split())
     if len(text) <= limit:
         return text
-    cut = text[:limit]
-    return cut[:cut.rfind(" ")] + "…" if " " in cut else cut
+    kept = ""
+    for match in re.finditer(r"[^.!?]*[.!?]", text):
+        candidate = text[:match.end()].strip()
+        if len(candidate) > limit:
+            break
+        kept = candidate
+    return kept
 
 
 def build(*, company: str, mode: str, report: Optional[dict] = None,
@@ -611,10 +646,22 @@ def _what_it_does(report: dict, observations: Sequence[dict],
                 candidates.append(excerpt)
         if not candidates:
             return ""
-        # Stable: ties keep retrieval order, so this only ever demotes copy
-        # that is positively identifiable as metadata or promotion.
-        best = sorted(candidates, key=lambda e: -_excerpt_substance(e))[0]
-        return _sentence(best, 180)
+        # A MISSION STATEMENT IS NOT A DESCRIPTION OF A BUSINESS (§22).
+        #
+        # "Cloudflare's mission is to help build a better Internet" is the
+        # company's own words, is correctly attributed, and tells a reader
+        # nothing they can act on -- and it was the first sentence of the
+        # product. Aspiration copy is demoted below anything else the
+        # company said about itself, and used only when there is nothing
+        # else at all.
+        ranked = sorted(candidates,
+                        key=lambda e: (bool(_ASPIRATION.search(e)),
+                                       -_excerpt_substance(e)))
+        for candidate in ranked:
+            trimmed = _sentence(candidate, 180)
+            if trimmed:
+                return trimmed
+        return ""
 
     return (_pick(("product_surface",)) or _pick(("messaging",))
             or _pick(()) or _fallback_label(observations))
@@ -726,6 +773,21 @@ def _insight_candidates(report: dict,
     # serious thing this product could do. The strategic brief already honours
     # this state; the founder brief now honours the same one.
     if str(report.get("result_state") or "").upper() in _WITHHELD_STATES:
+        return []
+    # AND THE SAME QUESTION ASKED STRUCTURALLY, because the line above is a
+    # denylist and a denylist cannot exclude a class invented after it. The
+    # CORE/DEEP split added DEEP_PENDING, the pre-model payload began carrying
+    # it instead of EVIDENCE_LIMITED, and the scaffolds walked straight
+    # through onto the primary screen: `key_insight` became `thesis.view` and
+    # the next three became `hypotheses[:3]` -- generic by construction,
+    # carrying real observation ids so `safe_insights` passes them, shown on
+    # the page a chief executive opens first and now opens in seconds.
+    #
+    # DEEP_PENDING is deliberately NOT added to the set above as well. It
+    # would be a second guard over the same case, and a redundant guard masks
+    # the proof of the one doing the work -- removing either would leave the
+    # test green and the wall would only look defended.
+    if str(report.get("reasoning_provenance") or "") == _SCAFFOLD_PROVENANCE:
         return []
 
     view = thesis.get("view") or ""
