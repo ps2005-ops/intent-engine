@@ -1,0 +1,491 @@
+{
+ "data_vintage": {
+  "history_resolved_through": "2026-10-19",
+  "history_rows": 20422,
+  "macro": {
+   "forward_snapshot": "reports/paper_validation/forward_macro/2026-11-09.jsonl",
+   "forward_snapshot_sha256": "466deb1c3d0584b6",
+   "panel": "reports/panel/historical_panel.jsonl",
+   "panel_sha256": "61cc092792d3f808"
+  },
+  "prices": {
+   "ADBE": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "cdf03c13296d90a1",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "AMAT": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "5da007f7b54d7bb1",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "AMD": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "e9f15a819f8690d9",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "AMT": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "fb03a03f100bc74e",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "AVGO": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "0643611a1c0b2c92",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "BA": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "cc3b2b52b9cfb21b",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "BAC": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "c0556babc04eb42a",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "BX": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "2c94f406a068ae7b",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "CAT": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "3ae26bf532a129b9",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "COST": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "9c5a9881bd855b8f",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "CRM": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "d907bd6a97af42b7",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "CTAS": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "ee7b7ddced783145",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "CVX": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "db6efb8f20ad3142",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "DBC": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "5eb27acc3dae9680",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "DDOG": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "dc868e775dd2a3fb",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "DE": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "dd27dfd887f8afa7",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "DIA": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "a57d50dc698434db",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "DUK": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "6c3ccf9a0e4e6e49",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "EEM": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "c89833c438db874a",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "EFA": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "8185e8655239da34",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "EQIX": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "ba1637adc165ca67",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "FCX": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "9ea4cec9e318b257",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "GE": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "9a81013e997d5f4c",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "GLD": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "ae1ec7b4e1020d79",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "GS": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "dfb8e81550595055",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "HCA": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "17fd58aa456a12c0",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "HON": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "aafab1b249566581",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "HYG": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "3d261b844e59876f",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "IEF": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "45cbf9b865e42ae9",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "INTC": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "34c378201b123a85",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "ISRG": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "1782bbd54ce6f36e",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "IWM": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "05fe1e89c6d63f71",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "JNJ": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "1c5b7bdf2eb66827",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "JPM": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "2bfcca953d4891b9",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "KO": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "da61180882c95067",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "LLY": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "61c2aa5a4dca7361",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "LQD": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "04a490ea03ac2ee9",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "LRCX": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "e87c91dc447c99f0",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "MA": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "21d942a194379df2",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "MCD": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "acf33a8bbc2b53f9",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "MDB": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "14bbe18ef6268de3",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "MSFT": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "60bcbedf34ef6983",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "MU": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "361f8643a99a81d2",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "NEE": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "f151efc4093d354b",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "NET": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "f0229c33be502544",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "NKE": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "e54d2dcd46d2f6b2",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "NOW": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "0edafac21b4b9fbb",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "NVDA": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "92b6356c1f69a852",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "ORCL": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "d162316199887d1b",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "PFE": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "12c7e0ee7966c90a",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "PG": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "d8103f928796736a",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "PGR": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "40de68cec5ceb257",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "PLTR": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "f8594009b8ce2c0d",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "QQQ": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "8bba9e5188f02e83",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "SCHW": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "9fe71da1a6b1ab0e",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "SHY": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "07eeb2c9033d227d",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "SLV": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "3201704239676eee",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "SNOW": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "32056792ce0af6a1",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "SPY": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "80a9b053683c511c",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "TIP": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "e1127c3935b682e3",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "TLT": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "84bacedd380c2807",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "TXN": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "d1f1e04972166a11",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "UNH": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "44f79b9c514ecb76",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "UNP": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "fe0b1d310b510260",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "USO": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "e0e7ee461b7d8cff",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "V": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "1c09e31c27c8a14b",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "WDAY": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "53ae8a59f426c3f6",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "WM": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "6a582feef32bb621",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "WMT": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "408a1c899154a410",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "XLB": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "48f480bdde212289",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "XLE": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "ba4a85c11468c989",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "XLF": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "c845552222aba912",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "XLI": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "0a0af7c246734e4a",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "XLK": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "dae555b55084103b",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "XLP": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "4c4f10f2827d1cdd",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "XLU": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "65c2ea8d292dce09",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "XLV": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "19f5a03c5aeff8f0",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "XLY": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "f89992b5249a78a6",
+    "source": "yahoo_chart.v1+adjclose"
+   },
+   "XOM": {
+    "last_bar": "2026-11-06",
+    "retrieved_at": "2026-11-10T01:54:22+00:00",
+    "sha256": "56d58c0b8bf9e973",
+    "source": "yahoo_chart.v1+adjclose"
+   }
+  }
+ },
+ "decision_date": "2026-11-09",
+ "decision_ts": "2026-11-10T01:54:22+00:00",
+ "registered": 977
+}
