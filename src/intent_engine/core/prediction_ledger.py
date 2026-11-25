@@ -156,6 +156,19 @@ def _persist(prediction: Prediction, path: Union[str, Path]) -> None:
     conn = get_connection(path)
     try:
         _ensure_schema(conn)
+        reg = conn.execute(
+            "SELECT data FROM predictions WHERE id = ? ORDER BY rowid LIMIT 1",
+            (prediction.id,)).fetchone()
+        if reg is not None:
+            registered = _immutable(Prediction.model_validate_json(reg[0]))
+            proposed = _immutable(prediction)
+            changed = sorted(k for k in IMMUTABLE_FIELDS
+                             if registered.get(k) != proposed.get(k))
+            if changed:
+                raise LedgerIntegrityError(
+                    f"prediction {prediction.id!r} is registered; a later row "
+                    f"may record its outcome but may not change {changed} "
+                    f"(registered resolve_by={registered.get('resolve_by')!r})")
         conn.execute(
             "INSERT INTO predictions (id, created_at, source, entity_id, resolved_at, outcome, data) "
             "VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -180,11 +193,66 @@ def _read_all(path: Union[str, Path]) -> List[Prediction]:
     return [Prediction.model_validate_json(row[0]) for row in rows]
 
 
+#: The forecast itself: what was claimed, when, at what probability, by what
+#: rule and by what date. Fixed by the FIRST row written for an id (the
+#: registration). The creation time doubles as the information cutoff.
+IMMUTABLE_FIELDS = (
+    "created_at", "source", "entity_id", "claim_text", "probability",
+    "resolve_by", "instrument", "direction", "horizon_days",
+    "resolution_rule", "resolution_source",
+)
+#: What a later row is allowed to contribute: the outcome, and nothing else.
+RESOLUTION_FIELDS = ("resolved_at", "outcome", "brier_component",
+                     "resolution_note")
+
+
+class LedgerIntegrityError(RuntimeError):
+    """A row tried to change a forecast that was already registered."""
+
+
+def _immutable(p: Prediction) -> dict:
+    return {k: v for k, v in p.model_dump(mode="json").items()
+            if k in IMMUTABLE_FIELDS}
+
+
 def _read_latest(path: Union[str, Path]) -> List[Prediction]:
+    """One Prediction per id: the forecast terms from the REGISTRATION row,
+    the outcome from the latest row.
+
+    Folding to the latest row whole would let any later row -- a bad
+    migration, a regenerated store, a buggy writer -- move `resolve_by` or
+    rewrite the probability, and every reader would silently follow. Only
+    resolution fields are taken from later rows.
+    """
+    first: Dict[str, Prediction] = {}
     latest: Dict[str, Prediction] = {}
     for p in _read_all(path):
+        first.setdefault(p.id, p)
         latest[p.id] = p
-    return list(latest.values())
+    out = []
+    for pid, reg in first.items():
+        last = latest[pid]
+        out.append(reg.model_copy(update={k: getattr(last, k)
+                                          for k in RESOLUTION_FIELDS}))
+    return out
+
+
+def immutable_drift(path: Union[str, Path] = DEFAULT_LEDGER_PATH) -> List[dict]:
+    """Rows whose forecast terms differ from their registration row. The read
+    path already ignores them; this names them so an audit can see them."""
+    first: Dict[str, Prediction] = {}
+    drift = []
+    for i, p in enumerate(_read_all(path), 1):
+        if p.id not in first:
+            first[p.id] = p
+            continue
+        a, b = _immutable(first[p.id]), _immutable(p)
+        changed = sorted(k for k in IMMUTABLE_FIELDS if a.get(k) != b.get(k))
+        if changed:
+            drift.append({"prediction_id": p.id, "row": i, "fields": changed,
+                          "registered": {k: a.get(k) for k in changed},
+                          "later_row": {k: b.get(k) for k in changed}})
+    return drift
 
 
 def record_prediction(
@@ -336,3 +404,90 @@ def brier_summary(
     }
 
     return BrierSummary(count=len(resolved), mean_brier=mean_brier, calibration_buckets=calibration_buckets)
+
+
+# --- resolution attempts --------------------------------------------------------
+#
+# A prediction has ONE due date, `resolve_by`, fixed at registration. Every
+# time the resolver looks at it -- and finds the outcome, or finds the data not
+# yet published, or finds a source down -- that is an ATTEMPT, recorded here,
+# in its own table. Retry dates live on attempts and never on the prediction,
+# so a resolver that runs late, restarts or retries cannot move the due date,
+# and an audit can always see when a forecast was due versus when it was
+# processed.
+
+ATTEMPT_STATUSES = ("RESOLVED", "PENDING", "GAVE_UP")
+
+
+def _ensure_attempts_schema(conn) -> None:
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS resolution_attempts (
+            prediction_id TEXT NOT NULL,
+            attempted_at TEXT NOT NULL,
+            as_of TEXT NOT NULL,
+            original_resolve_by TEXT NOT NULL,
+            status TEXT NOT NULL,
+            reason TEXT NOT NULL,
+            next_attempt_on TEXT
+        )
+        """
+    )
+    conn.commit()
+
+
+def record_resolution_attempt(
+    prediction_id: str,
+    as_of: str,
+    status: str,
+    reason: str,
+    next_attempt_on: Optional[str] = None,
+    path: Union[str, Path] = DEFAULT_LEDGER_PATH,
+) -> dict:
+    if status not in ATTEMPT_STATUSES:
+        raise ValueError(f"unknown attempt status {status!r}")
+    reg = next((p for p in _read_latest(path) if p.id == prediction_id), None)
+    if reg is None:
+        raise ValueError(f"No prediction {prediction_id!r} found.")
+    row = {"prediction_id": prediction_id, "attempted_at": _current_timestamp(),
+           "as_of": as_of, "original_resolve_by": reg.resolve_by,
+           "status": status, "reason": reason,
+           "next_attempt_on": next_attempt_on}
+    conn = get_connection(path)
+    try:
+        _ensure_attempts_schema(conn)
+        conn.execute(
+            "INSERT INTO resolution_attempts (prediction_id, attempted_at, "
+            "as_of, original_resolve_by, status, reason, next_attempt_on) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            tuple(row[k] for k in ("prediction_id", "attempted_at", "as_of",
+                                   "original_resolve_by", "status", "reason",
+                                   "next_attempt_on")))
+        conn.commit()
+    finally:
+        conn.close()
+    return row
+
+
+def list_resolution_attempts(
+    prediction_id: Optional[str] = None,
+    path: Union[str, Path] = DEFAULT_LEDGER_PATH,
+) -> List[dict]:
+    path = Path(path)
+    if not path.exists():
+        return []
+    conn = get_connection(path)
+    try:
+        _ensure_attempts_schema(conn)
+        q = ("SELECT prediction_id, attempted_at, as_of, original_resolve_by, "
+             "status, reason, next_attempt_on FROM resolution_attempts")
+        args: tuple = ()
+        if prediction_id is not None:
+            q += " WHERE prediction_id = ?"
+            args = (prediction_id,)
+        rows = conn.execute(q + " ORDER BY rowid", args).fetchall()
+    finally:
+        conn.close()
+    keys = ("prediction_id", "attempted_at", "as_of", "original_resolve_by",
+            "status", "reason", "next_attempt_on")
+    return [dict(zip(keys, r)) for r in rows]

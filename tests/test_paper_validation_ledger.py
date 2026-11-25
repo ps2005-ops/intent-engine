@@ -5,6 +5,7 @@ import json
 import pytest
 
 from intent_engine.paper_validation import ledger as LG
+from intent_engine.paper_validation import schedule as SCH
 
 T0 = dt.datetime(2026, 11, 10, 1, 0, tzinfo=dt.timezone.utc)   # 20:00 NY 11-09
 
@@ -16,7 +17,12 @@ def rec(fid="pv1-fwd:p:SPY:2026-11-09", kind=LG.FORWARD_SHADOW,
               "decision_ts": decision_ts, "decision_date": "2026-11-09",
               "information_cutoff": "2026-11-09", "direction": "LONG",
               "probability": 0.55, "evidence_ids": [],
-              "competing_hypotheses": [], "abstention_reason": ""})
+              "competing_hypotheses": [], "abstention_reason": "",
+              # a real schedule: 21 NYSE sessions from the 2026-11-10 entry
+              "horizon_sessions": 21,
+              "scheduled_entry_session": "2026-11-10",
+              "scheduled_exit_session": "2026-12-10",
+              "schedule_calendar": SCH.NYSE.calendar_id})
     r.update(kw)
     return r
 

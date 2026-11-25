@@ -56,6 +56,18 @@ _RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 _TIINGO_FORWARD_SEARCH_DAYS = 10
 _FRED_FORWARD_SEARCH_DAYS = 40
 
+# A rule's outcome can be unobservable on its due date for a reason that says
+# nothing about the forecast: the value is published later (a daily FRED close
+# appears the next morning; a monthly series a month after the period), or a
+# source is down. Until FINAL date the result is PENDING -- never persisted,
+# retried on every run -- and only after it is "unresolvable" terminal.
+# Final = due date + the rule's own forward-search window + publication grace.
+# On 2026-09-04..10-16 all six FRED rules in the ledger were closed
+# "unresolvable" at 06:00 on their due date, before the value existed.
+PENDING = "pending"
+_TIINGO_PUBLICATION_GRACE_DAYS = 5
+_FRED_PUBLICATION_GRACE_DAYS = 45
+
 
 class TiingoSeries(BaseModel):
     symbol: str
@@ -134,16 +146,22 @@ def get_prices(
         raise RuntimeError("TIINGO_API_KEY is not set. Add it to a .env file or pass api_key= explicitly.")
 
     raw = _fetch_tiingo_with_retry(symbol, start_str, end_str, resolved_key, max_retries, timeout)
+    # Parse BEFORE caching: an empty or malformed response raises here and is
+    # never written, so a retry tomorrow asks the network again instead of
+    # re-reading today's empty answer forever.
+    series = _parse_tiingo_response(raw, symbol)
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     cache_path.write_text(json.dumps(raw))
-    return _parse_tiingo_response(raw, symbol)
+    return series
 
 
 # --- grading -----------------------------------------------------------------
 
 
 class ResolutionResult(NamedTuple):
-    outcome: str  # "happened" | "did_not_happen" | "unresolvable" -- matches PredictionOutcome
+    # "happened" | "did_not_happen" | "unresolvable" -- matches PredictionOutcome
+    # -- or PENDING, which is NOT an outcome and must never be persisted.
+    outcome: str
     note: str  # always populated: what data/comparison produced this outcome, for audit
 
 
@@ -175,18 +193,39 @@ def _evaluate_op(actual: float, op: str, threshold: float) -> bool:
     raise ValueError(f"Unknown comparison op {op!r}")  # unreachable: ComparisonOp is a closed Literal
 
 
+def final_resolution_date(due: str, forward_search_days: int, grace_days: int) -> str:
+    """The last day on which a missing observation still means "not yet"."""
+    return (date.fromisoformat(due) + timedelta(days=forward_search_days + grace_days)).isoformat()
+
+
+def _not_yet_or_unresolvable(reason: str, due: str, final: str, as_of: Optional[str]) -> ResolutionResult:
+    as_of = as_of or date.today().isoformat()
+    if as_of <= final:
+        return ResolutionResult(
+            PENDING, f"{reason} -- not yet resolvable (due {due}); retried daily until {final}.")
+    return ResolutionResult(
+        "unresolvable", f"{reason} -- still unobservable on {as_of}, past the final date {final} for a "
+        f"prediction due {due}.")
+
+
 def resolve_pct_change_rule(
     rule: PctChangeRule, created_at_date: str, resolve_by: str, price_fetcher=get_prices,
+    as_of: Optional[str] = None,
 ) -> ResolutionResult:
+    final = final_resolution_date(
+        max((date.fromisoformat(created_at_date) + timedelta(days=rule.window_days)).isoformat(), resolve_by),
+        _TIINGO_FORWARD_SEARCH_DAYS, _TIINGO_PUBLICATION_GRACE_DAYS)
     try:
         theoretical_end = (date.fromisoformat(created_at_date) + timedelta(days=rule.window_days)).isoformat()
         fetch_end = max(theoretical_end, resolve_by)
         series = price_fetcher(rule.symbol, created_at_date, fetch_end)
     except (ValueError, RuntimeError) as exc:
-        return ResolutionResult("unresolvable", f"Could not fetch Tiingo prices for {rule.symbol!r}: {exc}")
+        return _not_yet_or_unresolvable(
+            f"Could not fetch Tiingo prices for {rule.symbol!r}: {exc}", resolve_by, final, as_of)
 
     if not series.observations:
-        return ResolutionResult("unresolvable", f"No Tiingo price data available for {rule.symbol!r} in the resolution window.")
+        return _not_yet_or_unresolvable(
+            f"No Tiingo price data available for {rule.symbol!r} in the resolution window", resolve_by, final, as_of)
 
     baseline = _forward_search(series.observations, created_at_date, _TIINGO_FORWARD_SEARCH_DAYS)
     if baseline is None:
@@ -220,11 +259,9 @@ def resolve_pct_change_rule(
             )
 
     if effective_end < resolve_by and not effective_end_point:
-        return ResolutionResult(
-            "unresolvable",
+        return _not_yet_or_unresolvable(
             f"Resolution window for {rule.symbol!r} [{baseline_date}, {theoretical_end}] has no data through "
-            f"its end and resolve_by ({resolve_by}) has passed.",
-        )
+            f"its end", resolve_by, final, as_of)
 
     return ResolutionResult(
         "did_not_happen",
@@ -233,17 +270,19 @@ def resolve_pct_change_rule(
     )
 
 
-def resolve_level_rule(rule: LevelRule, fred_fetcher=get_fred_series) -> ResolutionResult:
+def resolve_level_rule(rule: LevelRule, fred_fetcher=get_fred_series, as_of: Optional[str] = None) -> ResolutionResult:
     fetch_start = rule.by
     fetch_end = (date.fromisoformat(rule.by) + timedelta(days=_FRED_FORWARD_SEARCH_DAYS)).isoformat()
+    final = final_resolution_date(rule.by, _FRED_FORWARD_SEARCH_DAYS, _FRED_PUBLICATION_GRACE_DAYS)
     try:
         series = fred_fetcher(rule.series, fetch_start, fetch_end)
     except (ValueError, RuntimeError) as exc:
-        return ResolutionResult("unresolvable", f"Could not fetch FRED series {rule.series!r}: {exc}")
+        return _not_yet_or_unresolvable(f"Could not fetch FRED series {rule.series!r}: {exc}", rule.by, final, as_of)
 
     point = _forward_search(series.observations, rule.by, _FRED_FORWARD_SEARCH_DAYS)
     if point is None:
-        return ResolutionResult("unresolvable", f"No FRED observation found for {rule.series!r} at or after {rule.by}.")
+        return _not_yet_or_unresolvable(
+            f"No FRED observation found for {rule.series!r} at or after {rule.by}", rule.by, final, as_of)
 
     obs_date, value = point
     happened = _evaluate_op(value, rule.op, rule.value)
@@ -256,6 +295,7 @@ def resolve_level_rule(rule: LevelRule, fred_fetcher=get_fred_series) -> Resolut
 
 def resolve_market_prediction(
     prediction: Prediction, price_fetcher=get_prices, fred_fetcher=get_fred_series,
+    as_of: Optional[str] = None,
 ) -> ResolutionResult:
     """Evaluates prediction.resolution_rule against real data. Does NOT
     persist anything -- the caller (scripts/resolve_market_predictions.py)
@@ -266,7 +306,7 @@ def resolve_market_prediction(
 
     created_at_date = prediction.created_at[:10]
     if isinstance(rule, PctChangeRule):
-        return resolve_pct_change_rule(rule, created_at_date, prediction.resolve_by, price_fetcher)
+        return resolve_pct_change_rule(rule, created_at_date, prediction.resolve_by, price_fetcher, as_of=as_of)
     if isinstance(rule, LevelRule):
-        return resolve_level_rule(rule, fred_fetcher)
+        return resolve_level_rule(rule, fred_fetcher, as_of=as_of)
     return ResolutionResult("unresolvable", f"Unknown resolution_rule type: {type(rule).__name__}")  # unreachable

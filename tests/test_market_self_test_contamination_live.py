@@ -48,3 +48,53 @@ def test_the_real_ledgers_dominant_class_is_the_sweep_re_read():
         f"some other way is the defect this catches: {counts}")
     assert "no longer hashes the sweep date" in \
         got["producers"][OB.SAME_SOURCE_REPACKAGING]
+
+
+# Moved 2026-11-25 from test_market_self_test_contamination.py: it reads the
+# live ledger and its ratio moved with the nightly cycle (2 < 5/4 failed on the
+# untouched base 66e70ddd). Assertion unchanged.
+def test_occurrence_identity_removes_the_duplicates_and_loses_no_binding():
+    """The measurement that justifies the change, pinned.
+
+    Optimising self-tests to zero by refusing more would be easy and would
+    destroy recall. This asserts the opposite: the same expectations bind,
+    from fewer rows.
+    """
+    if not REAL_LEDGER.exists():                       # pragma: no cover
+        return
+    store = LS.LearningStore(REAL_LEDGER)
+    evidence = list(store.evidence())
+    expectations = store.open_expectations(as_of="2026-08-07")
+
+    seen, deduped = set(), []
+    for row in evidence:
+        key = ME.occurrence_key(subject_company=row.subject_company,
+                                evidence_type=row.evidence_type,
+                                fact=row.fact, source=row.source)
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(row)
+
+    # The count MOVES with the ledger in both directions; the property is
+    # that occurrence identity removes duplicates and never invents rows.
+    assert len(deduped) < len(evidence), (
+        "occurrence identity removed nothing; either the ledger has no "
+        "duplicates or the key has started including a per-read field again")
+    assert set(deduped).issubset(set(evidence))
+
+    before, before_refused = OB.bind(expectations, evidence,
+                                     as_of="2026-08-07")
+    after, after_refused = OB.bind(expectations, deduped, as_of="2026-08-07")
+
+    key = "restates_the_evidence_that_opened_it"
+    assert before_refused[key] > 0, (
+        "no self-test refusal to collapse; the fixture no longer exercises "
+        "the contamination this repair addresses")
+    # The property is the COLLAPSE, not the residue: occurrence identity
+    # takes self-test refusals from many to a handful.
+    assert after_refused.get(key, 0) < before_refused[key] / 4
+    # Recall is exactly preserved: not one expectation resolved before and
+    # stopped resolving after.
+    assert set(before) == set(after)
+    assert before == after
