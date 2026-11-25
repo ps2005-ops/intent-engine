@@ -11,11 +11,11 @@ Every figure below is read from a measurement file by `scripts/prospect100/write
 - **Incomplete analysis: 1** (Datarails — the harness's strict autocomplete gate; see search).
 - **Unresolved visual defects: 0** (773 pages × 10 widths × 2 themes, final code).
 - **Performance failures: 0** (core analysis ≤ 120 s and every timing gate).
-- **Verified on the live preview: 62** (57 analyses + 5 status pages, on d5672e71 — the repairs in this report are NOT deployed). **Verified only locally: 38.** All 100 were verified locally.
+- **Verified on the live preview: 100** (95 analyses + 5 status pages, on d5672e71 — the repairs in this report are NOT deployed). **Verified only locally: 0.** All 100 were verified locally.
 
 ## The live run (Pass 2)
 
-Detached process on the preview, rate-limited at 10 analyses/hour, still running when this was written: **57 of 95** classified — DEFENSIBLE_ABSTENTION 29, INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY 17, DECISION_GRADE_READING 8, RETRIEVAL_LIMITATION_HANDLED_CORRECTLY 2, PRODUCT_DEFECT 1. Results are checkpointed per company in `reports/prospect100_pass2/state.json` and survive interruption; the harness skips any company already done on the same SHA, so no paid analysis is repeated. The preview runs its own reasoning key, so each live analysis may spend provider credit; the local passes below ran with no key (deterministic path, no spend).
+Detached process on the preview, rate-limited at 10 analyses/hour, still running when this was written: **95 of 95** classified — DEFENSIBLE_ABSTENTION 46, INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY 28, DECISION_GRADE_READING 10, RETRIEVAL_LIMITATION_HANDLED_CORRECTLY 7, PRODUCT_DEFECT 4. Results are checkpointed per company in `reports/prospect100_pass2/state.json` and survive interruption; the harness skips any company already done on the same SHA, so no paid analysis is repeated. The preview runs its own reasoning key, so each live analysis may spend provider credit; the local passes below ran with no key (deterministic path, no spend).
 
 ## 100-company qualification table (A)
 
@@ -179,4 +179,33 @@ Known residuals: 1–5 repeated sentences remain on 50 companies, mostly in intr
 ## Scorer audit
 
 The ten-dimension rubric (`next40_ten_dimensions`) scores truthful *handling*: a correct abstention is a PASS there. That is the right question for safety and the wrong one for depth, so this table grades depth separately — independence, coverage, where the decision came from, and repetition — and a BOUNDED grade is never counted as a PASS. The rubric's own UI dimension reads NOT_MEASURED by design and is replaced here by the browser matrix. Grading errors of my own found while building the table and corrected: dated documents used as coverage, the autocomplete gate counted as performance, the shard-time render status used instead of the final render, and Datarails' shared prefix graded PASS.
+
+## Deployed to the preview and verified live
+
+After the live pass finished (95/95), the repairs were pushed to `feat/founder-market-integration` as a fast-forward (d5672e71 → e3762f22) with the user's approval; the preview served `e3762f22` about 100 s later. Verified against the deployed preview:
+
+- Status pages: 5 of 5 absorbed or closed companies show their status page and open no run.
+- Search: 100 of 100 put the right company first on every typed prefix (14 prefixes bounded: exact tickers and the shared "Data" prefix); round trip p50 198 ms, p95 317 ms including the network.
+- One fresh live analysis, Matillion: DEFENSIBLE_ABSTENTION (the pre-repair deploy read it as DECISION_GRADE on a blank-check company's 10-K); its pages carry no SPAC text, no consumer-spend mechanism and no X-Ray pointer. Core 23.1 s.
+- NOT deployed: the independent-reporting channel (49edf9d3) and the two crash fixes after it — local only, pending approval.
+
+## Pass 4 — the independent-reporting channel (local)
+
+Commit 49edf9d3 adds verified trade-press articles as independent evidence (publisher feeds admitted by a robots + feed probe; Wikipedia references identity-checked through Wikidata; GDELT off — refused from this host). Discovery alone, measured over the 85 companies that had no independent origin: **53 gain at least one verified independent article, 20 from two or more publishers** (247 articles).
+
+| Dimension | Pass 3 | Pass 4 |
+|---|---|---|
+| independence | BOUNDED 10 · FAIL 85 | BOUNDED 43 · FAIL 45 · PASS 7 |
+| strategy | BOUNDED 84 · FAIL 1 · PASS 10 | BOUNDED 45 · FAIL 1 · PASS 49 |
+| economics | BOUNDED 78 · PASS 17 | BOUNDED 81 · PASS 14 |
+| presentation | BOUNDED 50 · PASS 45 | BOUNDED 62 · FAIL 8 · PASS 25 |
+| history | BOUNDED 74 · FAIL 9 · PASS 12 | BOUNDED 79 · FAIL 5 · PASS 11 |
+| visual | PASS 95 | FAIL 1 · PASS 94 |
+| performance | PASS 95 | PASS 95 |
+
+**Decision-grade readings: 10 → 49.** 39 companies moved to decision-grade: Hammerspace, WEKA, Reltio, Ataccama, Matillion, Securiti, Immuta, Privacera, Soda, Acceldata, Anomalo, TigerGraph, Neo4j, Interos, Morningstar, Rystad Energy, Wood Mackenzie, Assent, Vena, Aleph, Pigment, Anaplan, Workday, Ramp, Brex, BlackLine, Acumatica, Epicor, Kaseya, N-able, Barracuda, eSentire, Blackpoint Cyber, Tanium, Lansweeper, Softchoice, Trace3, Rackspace Technology, Pellera Technologies.
+
+Spot-check of ten pass-4 decision-grade readings: eight rest on an article genuinely about the company (Help Net Security, SiliconANGLE, StorageReview, BetaKit) or a rival's filing naming it; one rests on a summit round-up that discusses the company; one (Trace3) on a Channel Insider video about another company that mentions it — marginal corroboration. One independent origin is the common case: it moves a reading from abstention to decision-grade under the product's existing bar, which is a single relevant independent source; it is not two-source corroboration, and the table grades it BOUNDED, not PASS.
+
+Defects pass 4 surfaced and fixed (commit after 49edf9d3): `/slides` answered 500 on 8 of 95 (belief slides passed bare strings) and the conversation endpoint answered 500 when a competitor claim quoted "is broken". Pass 4 ran on code before the Wikipedia dated-article rule, which affects only the few companies matched through Wikidata.
 

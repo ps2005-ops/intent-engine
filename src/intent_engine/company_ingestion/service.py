@@ -1088,7 +1088,11 @@ class CompanyIngestionService:
         # candidate is stored with — and therefore which sources the
         # recommendation picks — is byte-for-byte what it was.
         from concurrent.futures import ThreadPoolExecutor
-        _pool = ThreadPoolExecutor(max_workers=2,
+        # One worker per optional branch (filings, independent reporting,
+        # sitemap). With two, the reporting branch queued the sitemap crawl
+        # past its cap and a run lost its own company pages (measured on
+        # Hammerspace: 12 dated documents -> 0).
+        _pool = ThreadPoolExecutor(max_workers=3,
                                    thread_name_prefix="discover")
         try:
             # §18. Both are HIGH_VALUE_OPTIONAL: they widen the evidence and
@@ -1134,6 +1138,11 @@ class CompanyIngestionService:
             third_party = (_pool.submit(self._third_party_filing_candidates,
                                         meta, run_id=run_id)
                            if optional_ok else None)
+            # INDEPENDENT REPORTING, its own branch with its own cap: a slow
+            # publisher must not make the filing search miss its join.
+            reporting = (_pool.submit(self._independent_reporting_candidates,
+                                      meta, run_id=run_id)
+                         if optional_ok else None)
             sitemap = (_pool.submit(self._sitemap_candidates, meta["website"])
                        if meta.get("website") and optional_ok else None)
             if meta.get("website"):
@@ -1229,6 +1238,13 @@ class CompanyIngestionService:
             # public is EDGAR full-text search, where a COMPETITOR'S OWN 10-K names
             # this company. Different author, regulatory venue, exact date,
             # permanent citation.
+            if reporting is not None:
+                _ir = _bounded_result(
+                    reporting, deadline, "discovery",
+                    "independent reporting search did not return within its "
+                    "share of the interactive budget",
+                    cap_s=self._INDEPENDENT_REPORTING_CAP_S)
+                candidates = candidates + (_ir or [])
             if third_party is not None:
                 _tp = _bounded_result(
                     third_party, deadline, "discovery",
@@ -1800,6 +1816,16 @@ class CompanyIngestionService:
     #: same search cost 5.3s on a cold Apple run, so this keeps the branch
     #: that usually succeeds and drops the tail that does not.
     _OPTIONAL_DISCOVERY_CAP_S = 8.0
+    #: Independent reporting reads feeds AND fetches each article it keeps,
+    #: so it gets its own, larger share. Measured 2026-11-09 on six private
+    #: companies: 5.2-9.9 s for the whole channel, run beside (not after)
+    #: the filing search.
+    _INDEPENDENT_REPORTING_CAP_S = 15.0
+    #: Live publishers are reached only when this is True. The suite turns
+    #: it off for every test (tests/conftest.py): several suites build a
+    #: service with no transport and stub only the filing search, and the
+    #: first version of this channel went to the live web from inside them.
+    INDEPENDENT_REPORTING_LIVE = True
 
     _FETCH_CONCURRENCY = 6
     #: NOT RAISED, AND THE ATTEMPT IS RECORDED HERE SO IT IS NOT REPEATED.
@@ -3288,8 +3314,50 @@ class CompanyIngestionService:
 
         Empty when discovery never ran, which every consumer must read as
         DISCOVERY_NOT_RUN. An empty dict is not a measured zero.
+
+        The filing search and the independent-reporting search run on two
+        threads and keep two accounts; they are combined here, at the one
+        place every consumer (the drawer, the snapshot) reads from, so
+        neither thread can overwrite the other.
         """
-        return dict(getattr(self, "_discovery_reports", {}).get(run_id) or {})
+        base = dict(getattr(self, "_discovery_reports", {}).get(run_id) or {})
+        news = getattr(self, "_reporting_reports", {}).get(run_id)
+        if not news:
+            return base
+        return _merge_reporting(base, news)
+
+    def _independent_reporting_candidates(self, meta, run_id: str = "") -> list:
+        """Articles by other publishers about this company. Never raises.
+
+        Same guard as the filing search: an injected transport is a test or a
+        replay, and live publishers are not part of it.
+        """
+        if self.transport is not None or not self.INDEPENDENT_REPORTING_LIVE:
+            return []
+        from datetime import date as _date
+
+        from intent_engine.company_ingestion import independent_reporting as IR
+        from intent_engine.company_ingestion.suggest import _common
+        legal = str(meta.get("company_name") or "").strip()
+        name = _common(legal) or legal
+        try:
+            fetch, fetch_json = IR.live_fetchers()
+            report = IR.discover(
+                company=name, domain=str(meta.get("domain") or ""),
+                aliases=tuple(a for a in (legal,) if a and a != name),
+                fetch=fetch, fetch_json=fetch_json,
+                today=_date.today().isoformat(),
+                deadline=time.monotonic() +
+                self._INDEPENDENT_REPORTING_CAP_S - 1.5)
+        except Exception as exc:                          # noqa: BLE001
+            _LOG.warning("independent_reporting_raised company=%r %s: %s",
+                         name, type(exc).__name__, exc)
+            return []
+        if run_id:
+            if not hasattr(self, "_reporting_reports"):
+                self._reporting_reports = {}
+            self._reporting_reports[run_id] = report
+        return report.get("candidates") or []
 
     def _record_abandoned_discovery(self, run_id: str, company: str) -> None:
         """Say that a dispatched search was abandoned, and why.
@@ -3430,3 +3498,54 @@ class CompanyIngestionService:
                  "message": failure["safe_message"],
                  "retryable": failure["retryable"]})
         return groups
+
+
+def _merge_reporting(base: dict, news: dict) -> dict:
+    """The filing search's account plus the independent-reporting account.
+
+    Counts add; channels list both; rejections keep their channel prefix so
+    a reader can tell "no filing named it" from "no publisher covered it".
+    The filing channel's coverage grade is kept when it ran -- coverage is a
+    statement about how thoroughly a channel was searched, and one channel's
+    grade cannot be lent to another.
+    """
+    from intent_engine.company_ingestion import relevance as _R
+    out = dict(base) if base else {
+        "contract": "third_party_discovery.v1", "query": news.get("query", ""),
+        "candidates": [], "coverage": (_R.DISCOVERY_PARTIAL
+                                       if news.get("budget_exhausted")
+                                       else _R.DISCOVERY_EXHAUSTED),
+        "channels_attempted": [], "channels_successful": [],
+        "hits_total": 0, "candidates_considered": 0, "candidates_fetched": 0,
+        "rejected": [], "rejection_reasons": {},
+        "independent_relevant_origins": 0, "budget_exhausted": False}
+    out["channels_attempted"] = list(dict.fromkeys(
+        list(out.get("channels_attempted") or [])
+        + list(news.get("channels_attempted") or [])))
+    out["channels_successful"] = list(dict.fromkeys(
+        list(out.get("channels_successful") or [])
+        + list(news.get("channels_successful") or [])))
+    out["hits_total"] = int(out.get("hits_total") or 0) + int(
+        news.get("pointers_found") or 0)
+    out["candidates_considered"] = int(out.get("candidates_considered") or 0) \
+        + int(news.get("candidates_considered") or 0)
+    out["candidates_fetched"] = int(out.get("candidates_fetched") or 0) + int(
+        news.get("candidates_fetched") or 0)
+    reasons = dict(out.get("rejection_reasons") or {})
+    for key, value in (news.get("rejection_reasons") or {}).items():
+        reasons[f"reporting:{key}"] = reasons.get(f"reporting:{key}", 0) + value
+    out["rejection_reasons"] = reasons
+    out["independent_relevant_origins"] = int(
+        out.get("independent_relevant_origins") or 0) + int(
+        news.get("independent_relevant_origins") or 0)
+    out["independent_reporting"] = {
+        "contract": news.get("contract"),
+        "publishers": sorted({c.get("publisher", "") for c in
+                              news.get("candidates") or []
+                              if c.get("source_class") ==
+                              "independent_reporting"}),
+        "articles_kept": len(news.get("candidates") or []),
+        "budget_exhausted": bool(news.get("budget_exhausted")),
+    }
+    return out
+

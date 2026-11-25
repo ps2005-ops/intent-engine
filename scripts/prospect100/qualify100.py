@@ -36,7 +36,9 @@ import yaml  # noqa: E402
 
 DOCS = ROOT / "docs/engineering/prospect100"
 P2 = ROOT / "reports/prospect100_pass2"
-P3 = ROOT / "reports/prospect100_pass3"
+import os
+#: Which local pass to qualify (default pass 3); pass 4 = the news channel.
+P3 = ROOT / "reports" / os.environ.get("QUALIFY_PASS", "prospect100_pass3")
 
 PASS, BOUNDED, FAIL, NM = "PASS", "BOUNDED", "FAIL", "NOT_MEASURED"
 VALUE = {PASS: 1.0, BOUNDED: 0.5, FAIL: 0.0, NM: 0.0}
@@ -249,13 +251,24 @@ def main() -> int:
     # Shards first, then targeted re-runs, which supersede (later wins):
     # Barracuda was re-run after the gzip repair invalidated its documents.
     local = _rows(*sorted(P3.glob("s*/state.json")), P3 / "rerun/state.json")
+    if not (P3 / "captures_final").exists():
+        # A pass without a re-render: its own captures, merged.
+        merged = P3 / "captures_final"
+        merged.mkdir(exist_ok=True)
+        for cap in P3.glob("s*/reports/next40_ui/*.html"):
+            target = merged / cap.name
+            if not target.exists():
+                target.symlink_to(cap.resolve())
     live = _rows(P2 / "state.json")
-    ui = ((_load(DOCS / "ui_matrix_pass3.json", {}) or {}).get("summary") or {}) \
-        .get("per_company")
+    ui = ((_load(DOCS / os.environ.get("QUALIFY_UI", "ui_matrix_pass3.json"),
+                 {}) or {}).get("summary") or {}).get("per_company")
     caps = P3 / "captures_final"
     repeats = prose_repeats(caps) if caps.exists() else {}
     documents = _documents_read()
-    rendered_final = _load(caps / "index.json", {}) or {}
+    rendered_final = _load(caps / "index.json", {}) or {
+        r["company"]: {k: {"status": v} for k, v in
+                       (r.get("surface_status") or {}).items()}
+        for r in local.values()}
     table = [grade(r, local, live, search, ui, repeats, documents=documents,
                    rendered_final=rendered_final) for r in
              sorted(reg, key=lambda r: r["prospect_id"])]
@@ -275,7 +288,7 @@ def main() -> int:
         "performance_fail": sum(1 for t in table
                                 if t["grades"].get("performance") == FAIL),
     }
-    (DOCS / "qualification_100.json").write_text(json.dumps(
+    (DOCS / os.environ.get("QUALIFY_OUT", "qualification_100.json")).write_text(json.dumps(
         {"summary": summary, "companies": table}, indent=1, default=str))
     print(json.dumps(summary, indent=1))
     return 0

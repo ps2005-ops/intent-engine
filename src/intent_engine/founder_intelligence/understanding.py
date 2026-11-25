@@ -53,10 +53,9 @@ def _speakable(card) -> bool:
 
 def assemble_understanding(claims: list) -> IntelligenceSection:
     """Proof of Understanding — supported fields only, each cited."""
-    cards = tuple(card for card in (_card(c, SECTION_UNDERSTANDING)
-                                    for c in claims
-                                    if c.availability != AVAIL_UNAVAILABLE)
-                  if _speakable(card))
+    from intent_engine.founder_intelligence.records import speakable
+    cards = speakable(_card(c, SECTION_UNDERSTANDING) for c in claims
+                      if c.availability != AVAIL_UNAVAILABLE)
     section = IntelligenceSection(
         kind=SECTION_UNDERSTANDING, title="What we understood",
         cards=cards, availability=AVAIL_SUPPORTED if cards else AVAIL_UNAVAILABLE,

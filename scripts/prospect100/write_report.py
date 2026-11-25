@@ -262,6 +262,84 @@ def main() -> int:
       "as coverage, the autocomplete gate counted as performance, the "
       "shard-time render status used instead of the final render, and "
       "Datarails' shared prefix graded PASS.\n")
+    # ---------------------------------------------------------- deployed
+    dep = DOCS / "live_search_deployed.json"
+    if dep.exists():
+        ds = _j(dep)["summary"]
+        status = ROOT / "reports/prospect100_deployed/status_pages.json"
+        st = _j(status) if status.exists() else {}
+        ok = sum(1 for v in st.values() if v.get("says_no_longer_independent")
+                 and not v.get("opened_run"))
+        w("## Deployed to the preview and verified live\n")
+        w(f"After the live pass finished (95/95), the repairs were pushed to "
+          f"`feat/founder-market-integration` as a fast-forward "
+          f"(d5672e71 → e3762f22) with the user's approval; the preview "
+          f"served `{str(ds['served'])[:8]}` about 100 s later. Verified "
+          f"against the deployed preview:\n")
+        w(f"- Status pages: {ok} of {len(st)} absorbed or closed companies "
+          f"show their status page and open no run.")
+        w(f"- Search: {ds['pass']} of {ds['prospects']} put the right company "
+          f"first on every typed prefix ({len(ds['bounded'])} prefixes "
+          f"bounded: exact tickers and the shared \"Data\" prefix); round "
+          f"trip p50 {ds['round_trip_p50_ms']} ms, p95 "
+          f"{ds['round_trip_p95_ms']} ms including the network.")
+        w("- One fresh live analysis, Matillion: DEFENSIBLE_ABSTENTION (the "
+          "pre-repair deploy read it as DECISION_GRADE on a blank-check "
+          "company's 10-K); its pages carry no SPAC text, no consumer-spend "
+          "mechanism and no X-Ray pointer. Core 23.1 s.")
+        w("- NOT deployed: the independent-reporting channel (49edf9d3) and "
+          "the two crash fixes after it — local only, pending approval.\n")
+
+    # ---------------------------------------------------------- pass 4
+    q4p = DOCS / "qualification_100_pass4.json"
+    cov = DOCS / "independent_coverage.json"
+    if q4p.exists() and cov.exists():
+        q4 = _j(q4p)
+        cv = _j(cov)["summary"]
+        w("## Pass 4 — the independent-reporting channel (local)\n")
+        w(f"Commit 49edf9d3 adds verified trade-press articles as independent "
+          f"evidence (publisher feeds admitted by a robots + feed probe; "
+          f"Wikipedia references identity-checked through Wikidata; GDELT "
+          f"off — refused from this host). Discovery alone, measured over "
+          f"the {cv['companies_without_independent_evidence_before']} "
+          f"companies that had no independent origin: "
+          f"**{cv['now_with_at_least_one_independent_origin']} gain at least "
+          f"one verified independent article, "
+          f"{cv['now_with_two_or_more']} from two or more publishers** "
+          f"({cv['independent_articles_total']} articles).\n")
+        d3, d4 = s["dimensions"], q4["summary"]["dimensions"]
+        w("| Dimension | Pass 3 | Pass 4 |")
+        w("|---|---|---|")
+        for dim in ("independence", "strategy", "economics", "presentation",
+                    "history", "visual", "performance"):
+            fmt = lambda d: " · ".join(f"{k} {v}" for k, v in sorted(
+                d.items()) if k != "N/A")
+            w(f"| {dim} | {fmt(d3.get(dim, {}))} | {fmt(d4.get(dim, {}))} |")
+        before = {t["entity_id"]: t for t in rows}
+        moved = [t for t in q4["companies"]
+                 if t.get("class") == "DECISION_GRADE_READING"
+                 and before.get(t["entity_id"], {}).get("class")
+                 != "DECISION_GRADE_READING"]
+        w(f"\n**Decision-grade readings: {d3.get('strategy', {}).get('PASS', 0)}"
+          f" → {d4.get('strategy', {}).get('PASS', 0)}.** "
+          f"{len(moved)} companies moved to decision-grade: "
+          + ", ".join(t["company"] for t in moved) + ".\n")
+        w("Spot-check of ten pass-4 decision-grade readings: eight rest on "
+          "an article genuinely about the company (Help Net Security, "
+          "SiliconANGLE, StorageReview, BetaKit) or a rival's filing naming "
+          "it; one rests on a summit round-up that discusses the company; "
+          "one (Trace3) on a Channel Insider video about another company "
+          "that mentions it — marginal corroboration. One independent "
+          "origin is the common case: it moves a reading from abstention to "
+          "decision-grade under the product's existing bar, which is a "
+          "single relevant independent source; it is not two-source "
+          "corroboration, and the table grades it BOUNDED, not PASS.\n")
+        w("Defects pass 4 surfaced and fixed (commit after 49edf9d3): "
+          "`/slides` answered 500 on 8 of 95 (belief slides passed bare "
+          "strings) and the conversation endpoint answered 500 when a "
+          "competitor claim quoted \"is broken\". Pass 4 ran on code "
+          "before the Wikipedia dated-article rule, which affects only the "
+          "few companies matched through Wikidata.\n")
     (DOCS / "QUALIFICATION_100.md").write_text("\n".join(L) + "\n")
     print("wrote", DOCS / "QUALIFICATION_100.md", len(L), "lines")
     return 0

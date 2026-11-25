@@ -16,7 +16,7 @@ from intent_engine.founder_intelligence.records import (
     OPP_HYPOTHESIS, OPP_OBSERVED, SECTION_ASSUMPTIONS, SECTION_ATTENTION,
     SECTION_BLIND_SPOTS, SECTION_COMPETITORS, SECTION_CONFIDENCE,
     SECTION_DONT_BELIEVE, SECTION_MARKET_VIEW, SECTION_OPPORTUNITIES,
-    SECTION_STOOD_OUT,
+    SECTION_STOOD_OUT, speakable,
 )
 
 PERSPECTIVE_VERSION = "fi_perspective.v1"
@@ -217,6 +217,7 @@ def assemble_competitors(supported=False, claims=()) -> IntelligenceSection:
         insight_id=f"{SECTION_COMPETITORS}.{c.claim_id}",
         kind=SECTION_COMPETITORS, headline=c.text, availability=c.availability,
         claims=(c,)) for c in claims if c.availability == AVAIL_SUPPORTED)
+    cards = speakable(cards)
     section = IntelligenceSection(kind=SECTION_COMPETITORS,
                                   title="Companies worth comparing", cards=cards)
     section.validate()
@@ -241,6 +242,7 @@ def assemble_opportunities(claims) -> IntelligenceSection:
                            "this is not a recommendation",
             what_would_change_the_view="completing the validation step stated "
                                        "in the opportunity"))
+    cards = speakable(cards)
     section = IntelligenceSection(
         kind=SECTION_OPPORTUNITIES, title="Opportunities worth investigating",
         cards=tuple(cards),

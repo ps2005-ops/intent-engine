@@ -1,0 +1,2798 @@
+{
+ "summary": {
+  "served": "e3762f22ba484ca8044a0ac28fd22ef1ab0c65db",
+  "prospects": 100,
+  "pass": 100,
+  "fail": [],
+  "bounded": [
+   [
+    4,
+    "Atac",
+    "BOUNDED_EXACT_TICKER",
+    "Albatross Acquisition Corp"
+   ],
+   [
+    22,
+    "Neo",
+    "BOUNDED_EXACT_TICKER",
+    "Neogenomics Inc"
+   ],
+   [
+    29,
+    "Alt",
+    "BOUNDED_EXACT_TICKER",
+    "Altimmune, Inc."
+   ],
+   [
+    31,
+    "Say",
+    "BOUNDED_EXACT_TICKER",
+    "Saratoga Investment Corp."
+   ],
+   [
+    35,
+    "MSC",
+    "BOUNDED_EXACT_TICKER",
+    "STUDIO CITY INTERNATIONAL HOLDINGS Ltd"
+   ],
+   [
+    36,
+    "Fac",
+    "BOUNDED_EXACT_TICKER",
+    "Factorial Energy Inc."
+   ],
+   [
+    47,
+    "Cor",
+    "BOUNDED_EXACT_TICKER",
+    "Cencora, Inc."
+   ],
+   [
+    53,
+    "Cub",
+    "BOUNDED_EXACT_TICKER",
+    "Lionheart Holdings"
+   ],
+   [
+    58,
+    "Wor",
+    "BOUNDED_EXACT_TICKER",
+    "Worthington Enterprises, Inc."
+   ],
+   [
+    60,
+    "Pay",
+    "BOUNDED_EXACT_TICKER",
+    "Paymentus Holdings, Inc."
+   ],
+   [
+    67,
+    "Flo",
+    "BOUNDED_EXACT_TICKER",
+    "Flowers Foods Inc"
+   ],
+   [
+    69,
+    "Data",
+    "BOUNDED_SHARED_PREFIX",
+    "Dataiku, Inc."
+   ],
+   [
+    90,
+    "Swim",
+    "BOUNDED_EXACT_TICKER",
+    "Latham Group, Inc."
+   ],
+   [
+    91,
+    "Pax",
+    "BOUNDED_EXACT_TICKER",
+    "Patria Investments Ltd"
+   ]
+  ],
+  "round_trip_p50_ms": 198,
+  "round_trip_p95_ms": 317
+ },
+ "rows": [
+  {
+   "prospect_id": 1,
+   "typed": "Hammerspace",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Hamme",
+     "verdict": "PASS",
+     "top": "Hammerspace"
+    },
+    {
+     "typed": "hammerspace",
+     "verdict": "PASS",
+     "top": "Hammerspace"
+    },
+    {
+     "typed": "HAMMERSPACE",
+     "verdict": "PASS",
+     "top": "Hammerspace"
+    },
+    {
+     "typed": "Hammerspace",
+     "verdict": "PASS",
+     "top": "Hammerspace"
+    }
+   ]
+  },
+  {
+   "prospect_id": 2,
+   "typed": "WEKA",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "WEK",
+     "verdict": "PASS",
+     "top": "WekaIO, Inc."
+    },
+    {
+     "typed": "weka",
+     "verdict": "PASS",
+     "top": "WekaIO, Inc."
+    },
+    {
+     "typed": "WEKA",
+     "verdict": "PASS",
+     "top": "WekaIO, Inc."
+    },
+    {
+     "typed": "WEKA",
+     "verdict": "PASS",
+     "top": "WekaIO, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 3,
+   "typed": "Reltio",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Rel",
+     "verdict": "PASS",
+     "top": "Reltio, Inc."
+    },
+    {
+     "typed": "reltio",
+     "verdict": "PASS",
+     "top": "Reltio, Inc."
+    },
+    {
+     "typed": "RELTIO",
+     "verdict": "PASS",
+     "top": "Reltio, Inc."
+    },
+    {
+     "typed": "Reltio",
+     "verdict": "PASS",
+     "top": "Reltio, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 4,
+   "typed": "Ataccama",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Atac",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Albatross Acquisition Corp"
+    },
+    {
+     "typed": "ataccama",
+     "verdict": "PASS",
+     "top": "Ataccama"
+    },
+    {
+     "typed": "ATACCAMA",
+     "verdict": "PASS",
+     "top": "Ataccama"
+    },
+    {
+     "typed": "Ataccama",
+     "verdict": "PASS",
+     "top": "Ataccama"
+    }
+   ]
+  },
+  {
+   "prospect_id": 5,
+   "typed": "Informatica",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Infor",
+     "verdict": "PASS",
+     "top": "Informatica Inc."
+    },
+    {
+     "typed": "informatica",
+     "verdict": "PASS",
+     "top": "Informatica Inc."
+    },
+    {
+     "typed": "INFORMATICA",
+     "verdict": "PASS",
+     "top": "Informatica Inc."
+    },
+    {
+     "typed": "Informatica",
+     "verdict": "PASS",
+     "top": "Informatica Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 6,
+   "typed": "Qlik",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Qli",
+     "verdict": "PASS",
+     "top": "Qlik"
+    },
+    {
+     "typed": "qlik",
+     "verdict": "PASS",
+     "top": "Qlik"
+    },
+    {
+     "typed": "QLIK",
+     "verdict": "PASS",
+     "top": "Qlik"
+    },
+    {
+     "typed": "Qlik",
+     "verdict": "PASS",
+     "top": "Qlik"
+    }
+   ]
+  },
+  {
+   "prospect_id": 7,
+   "typed": "Matillion",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Mati",
+     "verdict": "PASS",
+     "top": "Matillion"
+    },
+    {
+     "typed": "matillion",
+     "verdict": "PASS",
+     "top": "Matillion"
+    },
+    {
+     "typed": "MATILLION",
+     "verdict": "PASS",
+     "top": "Matillion"
+    },
+    {
+     "typed": "Matillion",
+     "verdict": "PASS",
+     "top": "Matillion"
+    }
+   ]
+  },
+  {
+   "prospect_id": 8,
+   "typed": "Keboola",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Keb",
+     "verdict": "PASS",
+     "top": "Keboola"
+    },
+    {
+     "typed": "keboola",
+     "verdict": "PASS",
+     "top": "Keboola"
+    },
+    {
+     "typed": "KEBOOLA",
+     "verdict": "PASS",
+     "top": "Keboola"
+    },
+    {
+     "typed": "Keboola",
+     "verdict": "PASS",
+     "top": "Keboola"
+    }
+   ]
+  },
+  {
+   "prospect_id": 9,
+   "typed": "CData",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "CDa",
+     "verdict": "PASS",
+     "top": "CData Software, Inc."
+    },
+    {
+     "typed": "cdata",
+     "verdict": "PASS",
+     "top": "CData Software, Inc."
+    },
+    {
+     "typed": "CDATA",
+     "verdict": "PASS",
+     "top": "CData Software, Inc."
+    },
+    {
+     "typed": "CData",
+     "verdict": "PASS",
+     "top": "CData Software, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 10,
+   "typed": "Precisely",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Prec",
+     "verdict": "PASS",
+     "top": "Precisely"
+    },
+    {
+     "typed": "precisely",
+     "verdict": "PASS",
+     "top": "Precisely"
+    },
+    {
+     "typed": "PRECISELY",
+     "verdict": "PASS",
+     "top": "Precisely"
+    },
+    {
+     "typed": "Precisely",
+     "verdict": "PASS",
+     "top": "Precisely"
+    }
+   ]
+  },
+  {
+   "prospect_id": 11,
+   "typed": "Securiti",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Secu",
+     "verdict": "PASS",
+     "top": "Securiti"
+    },
+    {
+     "typed": "securiti",
+     "verdict": "PASS",
+     "top": "Securiti"
+    },
+    {
+     "typed": "SECURITI",
+     "verdict": "PASS",
+     "top": "Securiti"
+    },
+    {
+     "typed": "Securiti",
+     "verdict": "PASS",
+     "top": "Securiti"
+    }
+   ]
+  },
+  {
+   "prospect_id": 12,
+   "typed": "Immuta",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Imm",
+     "verdict": "PASS",
+     "top": "Immuta, Inc."
+    },
+    {
+     "typed": "immuta",
+     "verdict": "PASS",
+     "top": "Immuta, Inc."
+    },
+    {
+     "typed": "IMMUTA",
+     "verdict": "PASS",
+     "top": "Immuta, Inc."
+    },
+    {
+     "typed": "Immuta",
+     "verdict": "PASS",
+     "top": "Immuta, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 13,
+   "typed": "Privacera",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Priv",
+     "verdict": "PASS",
+     "top": "Privacera, Inc."
+    },
+    {
+     "typed": "privacera",
+     "verdict": "PASS",
+     "top": "Privacera, Inc."
+    },
+    {
+     "typed": "PRIVACERA",
+     "verdict": "PASS",
+     "top": "Privacera, Inc."
+    },
+    {
+     "typed": "Privacera",
+     "verdict": "PASS",
+     "top": "Privacera, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 14,
+   "typed": "Soda",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Sod",
+     "verdict": "PASS",
+     "top": "Soda"
+    },
+    {
+     "typed": "soda",
+     "verdict": "PASS",
+     "top": "Soda"
+    },
+    {
+     "typed": "SODA",
+     "verdict": "PASS",
+     "top": "Soda"
+    },
+    {
+     "typed": "Soda",
+     "verdict": "PASS",
+     "top": "Soda"
+    }
+   ]
+  },
+  {
+   "prospect_id": 15,
+   "typed": "Acceldata",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Acce",
+     "verdict": "PASS",
+     "top": "Acceldata"
+    },
+    {
+     "typed": "acceldata",
+     "verdict": "PASS",
+     "top": "Acceldata"
+    },
+    {
+     "typed": "ACCELDATA",
+     "verdict": "PASS",
+     "top": "Acceldata"
+    },
+    {
+     "typed": "Acceldata",
+     "verdict": "PASS",
+     "top": "Acceldata"
+    }
+   ]
+  },
+  {
+   "prospect_id": 16,
+   "typed": "Anomalo",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Ano",
+     "verdict": "PASS",
+     "top": "Anomalo"
+    },
+    {
+     "typed": "anomalo",
+     "verdict": "PASS",
+     "top": "Anomalo"
+    },
+    {
+     "typed": "ANOMALO",
+     "verdict": "PASS",
+     "top": "Anomalo"
+    },
+    {
+     "typed": "Anomalo",
+     "verdict": "PASS",
+     "top": "Anomalo"
+    }
+   ]
+  },
+  {
+   "prospect_id": 17,
+   "typed": "Observe",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Obs",
+     "verdict": "PASS",
+     "top": "Observe, Inc."
+    },
+    {
+     "typed": "observe",
+     "verdict": "PASS",
+     "top": "Observe, Inc."
+    },
+    {
+     "typed": "OBSERVE",
+     "verdict": "PASS",
+     "top": "Observe, Inc."
+    },
+    {
+     "typed": "Observe",
+     "verdict": "PASS",
+     "top": "Observe, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 18,
+   "typed": "Chronosphere",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Chrono",
+     "verdict": "PASS",
+     "top": "Chronosphere, Inc."
+    },
+    {
+     "typed": "chronosphere",
+     "verdict": "PASS",
+     "top": "Chronosphere, Inc."
+    },
+    {
+     "typed": "CHRONOSPHERE",
+     "verdict": "PASS",
+     "top": "Chronosphere, Inc."
+    },
+    {
+     "typed": "Chronosphere",
+     "verdict": "PASS",
+     "top": "Chronosphere, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 19,
+   "typed": "CrateDB",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Cra",
+     "verdict": "PASS",
+     "top": "Crate.io"
+    },
+    {
+     "typed": "cratedb",
+     "verdict": "PASS",
+     "top": "Crate.io"
+    },
+    {
+     "typed": "CRATEDB",
+     "verdict": "PASS",
+     "top": "Crate.io"
+    },
+    {
+     "typed": "CrateDB",
+     "verdict": "PASS",
+     "top": "Crate.io"
+    }
+   ]
+  },
+  {
+   "prospect_id": 20,
+   "typed": "SingleStore",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Singl",
+     "verdict": "PASS",
+     "top": "SingleStore, Inc."
+    },
+    {
+     "typed": "singlestore",
+     "verdict": "PASS",
+     "top": "SingleStore, Inc."
+    },
+    {
+     "typed": "SINGLESTORE",
+     "verdict": "PASS",
+     "top": "SingleStore, Inc."
+    },
+    {
+     "typed": "SingleStore",
+     "verdict": "PASS",
+     "top": "SingleStore, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 21,
+   "typed": "TigerGraph",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Tiger",
+     "verdict": "PASS",
+     "top": "TigerGraph, Inc."
+    },
+    {
+     "typed": "tigergraph",
+     "verdict": "PASS",
+     "top": "TigerGraph, Inc."
+    },
+    {
+     "typed": "TIGERGRAPH",
+     "verdict": "PASS",
+     "top": "TigerGraph, Inc."
+    },
+    {
+     "typed": "TigerGraph",
+     "verdict": "PASS",
+     "top": "TigerGraph, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 22,
+   "typed": "Neo4j",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Neo",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Neogenomics Inc"
+    },
+    {
+     "typed": "neo4j",
+     "verdict": "PASS",
+     "top": "Neo4j, Inc."
+    },
+    {
+     "typed": "NEO4J",
+     "verdict": "PASS",
+     "top": "Neo4j, Inc."
+    },
+    {
+     "typed": "Neo4j",
+     "verdict": "PASS",
+     "top": "Neo4j, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 23,
+   "typed": "Arango",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Ara",
+     "verdict": "PASS",
+     "top": "ArangoDB Inc."
+    },
+    {
+     "typed": "arango",
+     "verdict": "PASS",
+     "top": "ArangoDB Inc."
+    },
+    {
+     "typed": "ARANGO",
+     "verdict": "PASS",
+     "top": "ArangoDB Inc."
+    },
+    {
+     "typed": "Arango",
+     "verdict": "PASS",
+     "top": "ArangoDB Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 24,
+   "typed": "KX",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "KX",
+     "verdict": "PASS",
+     "top": "KX"
+    },
+    {
+     "typed": "kx",
+     "verdict": "PASS",
+     "top": "KX"
+    },
+    {
+     "typed": "KX",
+     "verdict": "PASS",
+     "top": "KX"
+    },
+    {
+     "typed": "KX",
+     "verdict": "PASS",
+     "top": "KX"
+    }
+   ]
+  },
+  {
+   "prospect_id": 25,
+   "typed": "Tecton",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Tec",
+     "verdict": "PASS",
+     "top": "Tecton"
+    },
+    {
+     "typed": "tecton",
+     "verdict": "PASS",
+     "top": "Tecton"
+    },
+    {
+     "typed": "TECTON",
+     "verdict": "PASS",
+     "top": "Tecton"
+    },
+    {
+     "typed": "Tecton",
+     "verdict": "PASS",
+     "top": "Tecton"
+    }
+   ]
+  },
+  {
+   "prospect_id": 26,
+   "typed": "Interos",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Int",
+     "verdict": "PASS",
+     "top": "Interos"
+    },
+    {
+     "typed": "interos",
+     "verdict": "PASS",
+     "top": "Interos"
+    },
+    {
+     "typed": "INTEROS",
+     "verdict": "PASS",
+     "top": "Interos"
+    },
+    {
+     "typed": "Interos",
+     "verdict": "PASS",
+     "top": "Interos"
+    }
+   ]
+  },
+  {
+   "prospect_id": 27,
+   "typed": "Everstream Analytics",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Everstream",
+     "verdict": "PASS",
+     "top": "Everstream Analytics"
+    },
+    {
+     "typed": "everstream analytics",
+     "verdict": "PASS",
+     "top": "Everstream Analytics"
+    },
+    {
+     "typed": "EVERSTREAM ANALYTICS",
+     "verdict": "PASS",
+     "top": "Everstream Analytics"
+    },
+    {
+     "typed": "Everstream Analytics",
+     "verdict": "PASS",
+     "top": "Everstream Analytics"
+    }
+   ]
+  },
+  {
+   "prospect_id": 28,
+   "typed": "Resilinc",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Resi",
+     "verdict": "PASS",
+     "top": "Resilinc"
+    },
+    {
+     "typed": "resilinc",
+     "verdict": "PASS",
+     "top": "Resilinc"
+    },
+    {
+     "typed": "RESILINC",
+     "verdict": "PASS",
+     "top": "Resilinc"
+    },
+    {
+     "typed": "Resilinc",
+     "verdict": "PASS",
+     "top": "Resilinc"
+    }
+   ]
+  },
+  {
+   "prospect_id": 29,
+   "typed": "Altana",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Alt",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Altimmune, Inc."
+    },
+    {
+     "typed": "altana",
+     "verdict": "PASS",
+     "top": "Altana"
+    },
+    {
+     "typed": "ALTANA",
+     "verdict": "PASS",
+     "top": "Altana"
+    },
+    {
+     "typed": "Altana",
+     "verdict": "PASS",
+     "top": "Altana"
+    }
+   ]
+  },
+  {
+   "prospect_id": 30,
+   "typed": "Exiger",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Exi",
+     "verdict": "PASS",
+     "top": "Exiger"
+    },
+    {
+     "typed": "exiger",
+     "verdict": "PASS",
+     "top": "Exiger"
+    },
+    {
+     "typed": "EXIGER",
+     "verdict": "PASS",
+     "top": "Exiger"
+    },
+    {
+     "typed": "Exiger",
+     "verdict": "PASS",
+     "top": "Exiger"
+    }
+   ]
+  },
+  {
+   "prospect_id": 31,
+   "typed": "Sayari",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Say",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Saratoga Investment Corp."
+    },
+    {
+     "typed": "sayari",
+     "verdict": "PASS",
+     "top": "Sayari"
+    },
+    {
+     "typed": "SAYARI",
+     "verdict": "PASS",
+     "top": "Sayari"
+    },
+    {
+     "typed": "Sayari",
+     "verdict": "PASS",
+     "top": "Sayari"
+    }
+   ]
+  },
+  {
+   "prospect_id": 32,
+   "typed": "Kharon",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Kha",
+     "verdict": "PASS",
+     "top": "Kharon"
+    },
+    {
+     "typed": "kharon",
+     "verdict": "PASS",
+     "top": "Kharon"
+    },
+    {
+     "typed": "KHARON",
+     "verdict": "PASS",
+     "top": "Kharon"
+    },
+    {
+     "typed": "Kharon",
+     "verdict": "PASS",
+     "top": "Kharon"
+    }
+   ]
+  },
+  {
+   "prospect_id": 33,
+   "typed": "Moody's",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Moo",
+     "verdict": "PASS",
+     "top": "Moody's Corporation"
+    },
+    {
+     "typed": "moody's",
+     "verdict": "PASS",
+     "top": "Moody's Corporation"
+    },
+    {
+     "typed": "MOODY'S",
+     "verdict": "PASS",
+     "top": "Moody's Corporation"
+    },
+    {
+     "typed": "Moody's",
+     "verdict": "PASS",
+     "top": "Moody's Corporation"
+    }
+   ]
+  },
+  {
+   "prospect_id": 34,
+   "typed": "S&P Global",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "S&P G",
+     "verdict": "PASS",
+     "top": "S&P Global Inc."
+    },
+    {
+     "typed": "s&p global",
+     "verdict": "PASS",
+     "top": "S&P Global Inc."
+    },
+    {
+     "typed": "S&P GLOBAL",
+     "verdict": "PASS",
+     "top": "S&P Global Inc."
+    },
+    {
+     "typed": "S&P Global",
+     "verdict": "PASS",
+     "top": "S&P Global Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 35,
+   "typed": "MSCI",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "MSC",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "STUDIO CITY INTERNATIONAL HOLDINGS Ltd"
+    },
+    {
+     "typed": "msci",
+     "verdict": "PASS",
+     "top": "MSCI Inc."
+    },
+    {
+     "typed": "MSCI",
+     "verdict": "PASS",
+     "top": "MSCI Inc."
+    },
+    {
+     "typed": "MSCI",
+     "verdict": "PASS",
+     "top": "MSCI Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 36,
+   "typed": "FactSet",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Fac",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Factorial Energy Inc."
+    },
+    {
+     "typed": "factset",
+     "verdict": "PASS",
+     "top": "FactSet Research Systems Inc."
+    },
+    {
+     "typed": "FACTSET",
+     "verdict": "PASS",
+     "top": "FactSet Research Systems Inc."
+    },
+    {
+     "typed": "FactSet",
+     "verdict": "PASS",
+     "top": "FactSet Research Systems Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 37,
+   "typed": "Morningstar",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Morni",
+     "verdict": "PASS",
+     "top": "Morningstar, Inc."
+    },
+    {
+     "typed": "morningstar",
+     "verdict": "PASS",
+     "top": "Morningstar, Inc."
+    },
+    {
+     "typed": "MORNINGSTAR",
+     "verdict": "PASS",
+     "top": "Morningstar, Inc."
+    },
+    {
+     "typed": "Morningstar",
+     "verdict": "PASS",
+     "top": "Morningstar, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 38,
+   "typed": "Enverus",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Env",
+     "verdict": "PASS",
+     "top": "Enverus"
+    },
+    {
+     "typed": "enverus",
+     "verdict": "PASS",
+     "top": "Enverus"
+    },
+    {
+     "typed": "ENVERUS",
+     "verdict": "PASS",
+     "top": "Enverus"
+    },
+    {
+     "typed": "Enverus",
+     "verdict": "PASS",
+     "top": "Enverus"
+    }
+   ]
+  },
+  {
+   "prospect_id": 39,
+   "typed": "Rystad Energy",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Rystad",
+     "verdict": "PASS",
+     "top": "Rystad Energy"
+    },
+    {
+     "typed": "rystad energy",
+     "verdict": "PASS",
+     "top": "Rystad Energy"
+    },
+    {
+     "typed": "RYSTAD ENERGY",
+     "verdict": "PASS",
+     "top": "Rystad Energy"
+    },
+    {
+     "typed": "Rystad Energy",
+     "verdict": "PASS",
+     "top": "Rystad Energy"
+    }
+   ]
+  },
+  {
+   "prospect_id": 40,
+   "typed": "Wood Mackenzie",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Wood Ma",
+     "verdict": "PASS",
+     "top": "Wood Mackenzie"
+    },
+    {
+     "typed": "wood mackenzie",
+     "verdict": "PASS",
+     "top": "Wood Mackenzie"
+    },
+    {
+     "typed": "WOOD MACKENZIE",
+     "verdict": "PASS",
+     "top": "Wood Mackenzie"
+    },
+    {
+     "typed": "Wood Mackenzie",
+     "verdict": "PASS",
+     "top": "Wood Mackenzie"
+    }
+   ]
+  },
+  {
+   "prospect_id": 41,
+   "typed": "Verisk",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Ver",
+     "verdict": "PASS",
+     "top": "Verisk Analytics, Inc."
+    },
+    {
+     "typed": "verisk",
+     "verdict": "PASS",
+     "top": "Verisk Analytics, Inc."
+    },
+    {
+     "typed": "VERISK",
+     "verdict": "PASS",
+     "top": "Verisk Analytics, Inc."
+    },
+    {
+     "typed": "Verisk",
+     "verdict": "PASS",
+     "top": "Verisk Analytics, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 42,
+   "typed": "Jupiter Intelligence",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Jupiter In",
+     "verdict": "PASS",
+     "top": "Jupiter Intelligence"
+    },
+    {
+     "typed": "jupiter intelligence",
+     "verdict": "PASS",
+     "top": "Jupiter Intelligence"
+    },
+    {
+     "typed": "JUPITER INTELLIGENCE",
+     "verdict": "PASS",
+     "top": "Jupiter Intelligence"
+    },
+    {
+     "typed": "Jupiter Intelligence",
+     "verdict": "PASS",
+     "top": "Jupiter Intelligence"
+    }
+   ]
+  },
+  {
+   "prospect_id": 43,
+   "typed": "Cervest",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Cer",
+     "verdict": "PASS",
+     "top": "Cervest"
+    },
+    {
+     "typed": "cervest",
+     "verdict": "PASS",
+     "top": "Cervest"
+    },
+    {
+     "typed": "CERVEST",
+     "verdict": "PASS",
+     "top": "Cervest"
+    },
+    {
+     "typed": "Cervest",
+     "verdict": "PASS",
+     "top": "Cervest"
+    }
+   ]
+  },
+  {
+   "prospect_id": 44,
+   "typed": "Watershed",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Wate",
+     "verdict": "PASS",
+     "top": "Watershed"
+    },
+    {
+     "typed": "watershed",
+     "verdict": "PASS",
+     "top": "Watershed"
+    },
+    {
+     "typed": "WATERSHED",
+     "verdict": "PASS",
+     "top": "Watershed"
+    },
+    {
+     "typed": "Watershed",
+     "verdict": "PASS",
+     "top": "Watershed"
+    }
+   ]
+  },
+  {
+   "prospect_id": 45,
+   "typed": "Persefoni",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Pers",
+     "verdict": "PASS",
+     "top": "Persefoni"
+    },
+    {
+     "typed": "persefoni",
+     "verdict": "PASS",
+     "top": "Persefoni"
+    },
+    {
+     "typed": "PERSEFONI",
+     "verdict": "PASS",
+     "top": "Persefoni"
+    },
+    {
+     "typed": "Persefoni",
+     "verdict": "PASS",
+     "top": "Persefoni"
+    }
+   ]
+  },
+  {
+   "prospect_id": 46,
+   "typed": "Benchmark Gensuite",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Benchmark",
+     "verdict": "PASS",
+     "top": "Benchmark Gensuite"
+    },
+    {
+     "typed": "benchmark gensuite",
+     "verdict": "PASS",
+     "top": "Benchmark Gensuite"
+    },
+    {
+     "typed": "BENCHMARK GENSUITE",
+     "verdict": "PASS",
+     "top": "Benchmark Gensuite"
+    },
+    {
+     "typed": "Benchmark Gensuite",
+     "verdict": "PASS",
+     "top": "Benchmark Gensuite"
+    }
+   ]
+  },
+  {
+   "prospect_id": 47,
+   "typed": "Cority",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Cor",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Cencora, Inc."
+    },
+    {
+     "typed": "cority",
+     "verdict": "PASS",
+     "top": "Cority Software Inc."
+    },
+    {
+     "typed": "CORITY",
+     "verdict": "PASS",
+     "top": "Cority Software Inc."
+    },
+    {
+     "typed": "Cority",
+     "verdict": "PASS",
+     "top": "Cority Software Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 48,
+   "typed": "Assent",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Ass",
+     "verdict": "PASS",
+     "top": "Assent Inc."
+    },
+    {
+     "typed": "assent",
+     "verdict": "PASS",
+     "top": "Assent Inc."
+    },
+    {
+     "typed": "ASSENT",
+     "verdict": "PASS",
+     "top": "Assent Inc."
+    },
+    {
+     "typed": "Assent",
+     "verdict": "PASS",
+     "top": "Assent Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 49,
+   "typed": "EcoVadis",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "EcoV",
+     "verdict": "PASS",
+     "top": "EcoVadis"
+    },
+    {
+     "typed": "ecovadis",
+     "verdict": "PASS",
+     "top": "EcoVadis"
+    },
+    {
+     "typed": "ECOVADIS",
+     "verdict": "PASS",
+     "top": "EcoVadis"
+    },
+    {
+     "typed": "EcoVadis",
+     "verdict": "PASS",
+     "top": "EcoVadis"
+    }
+   ]
+  },
+  {
+   "prospect_id": 50,
+   "typed": "Dun & Bradstreet",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Dun & Br",
+     "verdict": "PASS",
+     "top": "Dun & Bradstreet Holdings, Inc."
+    },
+    {
+     "typed": "dun & bradstreet",
+     "verdict": "PASS",
+     "top": "Dun & Bradstreet Holdings, Inc."
+    },
+    {
+     "typed": "DUN & BRADSTREET",
+     "verdict": "PASS",
+     "top": "Dun & Bradstreet Holdings, Inc."
+    },
+    {
+     "typed": "Dun & Bradstreet",
+     "verdict": "PASS",
+     "top": "Dun & Bradstreet Holdings, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 51,
+   "typed": "Planful",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Pla",
+     "verdict": "PASS",
+     "top": "Planful, Inc."
+    },
+    {
+     "typed": "planful",
+     "verdict": "PASS",
+     "top": "Planful, Inc."
+    },
+    {
+     "typed": "PLANFUL",
+     "verdict": "PASS",
+     "top": "Planful, Inc."
+    },
+    {
+     "typed": "Planful",
+     "verdict": "PASS",
+     "top": "Planful, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 52,
+   "typed": "Vena",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Ven",
+     "verdict": "PASS",
+     "top": "Vena Solutions Inc."
+    },
+    {
+     "typed": "vena",
+     "verdict": "PASS",
+     "top": "Vena Solutions Inc."
+    },
+    {
+     "typed": "VENA",
+     "verdict": "PASS",
+     "top": "Vena Solutions Inc."
+    },
+    {
+     "typed": "Vena",
+     "verdict": "PASS",
+     "top": "Vena Solutions Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 53,
+   "typed": "Cube",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Cub",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Lionheart Holdings"
+    },
+    {
+     "typed": "cube",
+     "verdict": "PASS",
+     "top": "Cube Planning, Inc."
+    },
+    {
+     "typed": "CUBE",
+     "verdict": "PASS",
+     "top": "Cube Planning, Inc."
+    },
+    {
+     "typed": "Cube",
+     "verdict": "PASS",
+     "top": "Cube Planning, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 54,
+   "typed": "Mosaic",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Mos",
+     "verdict": "PASS",
+     "top": "Mosaic Co"
+    },
+    {
+     "typed": "mosaic",
+     "verdict": "PASS",
+     "top": "Mosaic"
+    },
+    {
+     "typed": "MOSAIC",
+     "verdict": "PASS",
+     "top": "Mosaic"
+    },
+    {
+     "typed": "Mosaic",
+     "verdict": "PASS",
+     "top": "Mosaic"
+    }
+   ]
+  },
+  {
+   "prospect_id": 55,
+   "typed": "Aleph",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Ale",
+     "verdict": "PASS",
+     "top": "Aleph"
+    },
+    {
+     "typed": "aleph",
+     "verdict": "PASS",
+     "top": "Aleph"
+    },
+    {
+     "typed": "ALEPH",
+     "verdict": "PASS",
+     "top": "Aleph"
+    },
+    {
+     "typed": "Aleph",
+     "verdict": "PASS",
+     "top": "Aleph"
+    }
+   ]
+  },
+  {
+   "prospect_id": 56,
+   "typed": "Pigment",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Pig",
+     "verdict": "PASS",
+     "top": "Pigment"
+    },
+    {
+     "typed": "pigment",
+     "verdict": "PASS",
+     "top": "Pigment"
+    },
+    {
+     "typed": "PIGMENT",
+     "verdict": "PASS",
+     "top": "Pigment"
+    },
+    {
+     "typed": "Pigment",
+     "verdict": "PASS",
+     "top": "Pigment"
+    }
+   ]
+  },
+  {
+   "prospect_id": 57,
+   "typed": "Anaplan",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Ana",
+     "verdict": "PASS",
+     "top": "Anaplan, Inc."
+    },
+    {
+     "typed": "anaplan",
+     "verdict": "PASS",
+     "top": "Anaplan, Inc."
+    },
+    {
+     "typed": "ANAPLAN",
+     "verdict": "PASS",
+     "top": "Anaplan, Inc."
+    },
+    {
+     "typed": "Anaplan",
+     "verdict": "PASS",
+     "top": "Anaplan, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 58,
+   "typed": "Workday",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Wor",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Worthington Enterprises, Inc."
+    },
+    {
+     "typed": "workday",
+     "verdict": "PASS",
+     "top": "Workday, Inc."
+    },
+    {
+     "typed": "WORKDAY",
+     "verdict": "PASS",
+     "top": "Workday, Inc."
+    },
+    {
+     "typed": "Workday",
+     "verdict": "PASS",
+     "top": "Workday, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 59,
+   "typed": "Dayforce",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Dayf",
+     "verdict": "PASS",
+     "top": "Dayforce, Inc."
+    },
+    {
+     "typed": "dayforce",
+     "verdict": "PASS",
+     "top": "Dayforce, Inc."
+    },
+    {
+     "typed": "DAYFORCE",
+     "verdict": "PASS",
+     "top": "Dayforce, Inc."
+    },
+    {
+     "typed": "Dayforce",
+     "verdict": "PASS",
+     "top": "Dayforce, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 60,
+   "typed": "Paycor",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Pay",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Paymentus Holdings, Inc."
+    },
+    {
+     "typed": "paycor",
+     "verdict": "PASS",
+     "top": "Paycor HCM, Inc."
+    },
+    {
+     "typed": "PAYCOR",
+     "verdict": "PASS",
+     "top": "Paycor HCM, Inc."
+    },
+    {
+     "typed": "Paycor",
+     "verdict": "PASS",
+     "top": "Paycor HCM, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 61,
+   "typed": "Rippling",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Ripp",
+     "verdict": "PASS",
+     "top": "People Center, Inc."
+    },
+    {
+     "typed": "rippling",
+     "verdict": "PASS",
+     "top": "People Center, Inc."
+    },
+    {
+     "typed": "RIPPLING",
+     "verdict": "PASS",
+     "top": "People Center, Inc."
+    },
+    {
+     "typed": "Rippling",
+     "verdict": "PASS",
+     "top": "People Center, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 62,
+   "typed": "Deel",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Dee",
+     "verdict": "PASS",
+     "top": "Deel, Inc."
+    },
+    {
+     "typed": "deel",
+     "verdict": "PASS",
+     "top": "Deel, Inc."
+    },
+    {
+     "typed": "DEEL",
+     "verdict": "PASS",
+     "top": "Deel, Inc."
+    },
+    {
+     "typed": "Deel",
+     "verdict": "PASS",
+     "top": "Deel, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 63,
+   "typed": "Gusto",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Gus",
+     "verdict": "PASS",
+     "top": "Gusto, Inc."
+    },
+    {
+     "typed": "gusto",
+     "verdict": "PASS",
+     "top": "Gusto, Inc."
+    },
+    {
+     "typed": "GUSTO",
+     "verdict": "PASS",
+     "top": "Gusto, Inc."
+    },
+    {
+     "typed": "Gusto",
+     "verdict": "PASS",
+     "top": "Gusto, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 64,
+   "typed": "Ramp",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Ram",
+     "verdict": "PASS",
+     "top": "Ramp Business Corporation"
+    },
+    {
+     "typed": "ramp",
+     "verdict": "PASS",
+     "top": "Ramp Business Corporation"
+    },
+    {
+     "typed": "RAMP",
+     "verdict": "PASS",
+     "top": "Ramp Business Corporation"
+    },
+    {
+     "typed": "Ramp",
+     "verdict": "PASS",
+     "top": "Ramp Business Corporation"
+    }
+   ]
+  },
+  {
+   "prospect_id": 65,
+   "typed": "Brex",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Bre",
+     "verdict": "PASS",
+     "top": "Brex Inc."
+    },
+    {
+     "typed": "brex",
+     "verdict": "PASS",
+     "top": "Brex Inc."
+    },
+    {
+     "typed": "BREX",
+     "verdict": "PASS",
+     "top": "Brex Inc."
+    },
+    {
+     "typed": "Brex",
+     "verdict": "PASS",
+     "top": "Brex Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 66,
+   "typed": "BILL",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "BIL",
+     "verdict": "PASS",
+     "top": "BILL Holdings, Inc."
+    },
+    {
+     "typed": "bill",
+     "verdict": "PASS",
+     "top": "BILL Holdings, Inc."
+    },
+    {
+     "typed": "BILL",
+     "verdict": "PASS",
+     "top": "BILL Holdings, Inc."
+    },
+    {
+     "typed": "BILL",
+     "verdict": "PASS",
+     "top": "BILL Holdings, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 67,
+   "typed": "FloQast",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Flo",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Flowers Foods Inc"
+    },
+    {
+     "typed": "floqast",
+     "verdict": "PASS",
+     "top": "FloQast, Inc."
+    },
+    {
+     "typed": "FLOQAST",
+     "verdict": "PASS",
+     "top": "FloQast, Inc."
+    },
+    {
+     "typed": "FloQast",
+     "verdict": "PASS",
+     "top": "FloQast, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 68,
+   "typed": "BlackLine",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Blac",
+     "verdict": "PASS",
+     "top": "BlackLine, Inc."
+    },
+    {
+     "typed": "blackline",
+     "verdict": "PASS",
+     "top": "BlackLine, Inc."
+    },
+    {
+     "typed": "BLACKLINE",
+     "verdict": "PASS",
+     "top": "BlackLine, Inc."
+    },
+    {
+     "typed": "BlackLine",
+     "verdict": "PASS",
+     "top": "BlackLine, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 69,
+   "typed": "Datarails",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Data",
+     "verdict": "BOUNDED_SHARED_PREFIX",
+     "top": "Dataiku, Inc."
+    },
+    {
+     "typed": "datarails",
+     "verdict": "PASS",
+     "top": "Datarails"
+    },
+    {
+     "typed": "DATARAILS",
+     "verdict": "PASS",
+     "top": "Datarails"
+    },
+    {
+     "typed": "Datarails",
+     "verdict": "PASS",
+     "top": "Datarails"
+    }
+   ]
+  },
+  {
+   "prospect_id": 70,
+   "typed": "Centage",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Cen",
+     "verdict": "PASS",
+     "top": "Centage"
+    },
+    {
+     "typed": "centage",
+     "verdict": "PASS",
+     "top": "Centage"
+    },
+    {
+     "typed": "CENTAGE",
+     "verdict": "PASS",
+     "top": "Centage"
+    },
+    {
+     "typed": "Centage",
+     "verdict": "PASS",
+     "top": "Centage"
+    }
+   ]
+  },
+  {
+   "prospect_id": 71,
+   "typed": "Acumatica",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Acum",
+     "verdict": "PASS",
+     "top": "Acumatica, Inc."
+    },
+    {
+     "typed": "acumatica",
+     "verdict": "PASS",
+     "top": "Acumatica, Inc."
+    },
+    {
+     "typed": "ACUMATICA",
+     "verdict": "PASS",
+     "top": "Acumatica, Inc."
+    },
+    {
+     "typed": "Acumatica",
+     "verdict": "PASS",
+     "top": "Acumatica, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 72,
+   "typed": "Epicor",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Epi",
+     "verdict": "PASS",
+     "top": "Epicor Software Corporation"
+    },
+    {
+     "typed": "epicor",
+     "verdict": "PASS",
+     "top": "Epicor Software Corporation"
+    },
+    {
+     "typed": "EPICOR",
+     "verdict": "PASS",
+     "top": "Epicor Software Corporation"
+    },
+    {
+     "typed": "Epicor",
+     "verdict": "PASS",
+     "top": "Epicor Software Corporation"
+    }
+   ]
+  },
+  {
+   "prospect_id": 73,
+   "typed": "Plex",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Ple",
+     "verdict": "PASS",
+     "top": "Plex Systems, Inc."
+    },
+    {
+     "typed": "plex",
+     "verdict": "PASS",
+     "top": "Plex Systems, Inc."
+    },
+    {
+     "typed": "PLEX",
+     "verdict": "PASS",
+     "top": "Plex Systems, Inc."
+    },
+    {
+     "typed": "Plex",
+     "verdict": "PASS",
+     "top": "Plex Systems, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 74,
+   "typed": "IFS",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "IFS",
+     "verdict": "PASS",
+     "top": "IFS"
+    },
+    {
+     "typed": "ifs",
+     "verdict": "PASS",
+     "top": "IFS"
+    },
+    {
+     "typed": "IFS",
+     "verdict": "PASS",
+     "top": "IFS"
+    },
+    {
+     "typed": "IFS",
+     "verdict": "PASS",
+     "top": "IFS"
+    }
+   ]
+  },
+  {
+   "prospect_id": 75,
+   "typed": "QAD",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "QAD",
+     "verdict": "PASS",
+     "top": "QAD Inc."
+    },
+    {
+     "typed": "qad",
+     "verdict": "PASS",
+     "top": "QAD Inc."
+    },
+    {
+     "typed": "QAD",
+     "verdict": "PASS",
+     "top": "QAD Inc."
+    },
+    {
+     "typed": "QAD",
+     "verdict": "PASS",
+     "top": "QAD Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 76,
+   "typed": "Auvik",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Auv",
+     "verdict": "PASS",
+     "top": "Auvik Networks Inc."
+    },
+    {
+     "typed": "auvik",
+     "verdict": "PASS",
+     "top": "Auvik Networks Inc."
+    },
+    {
+     "typed": "AUVIK",
+     "verdict": "PASS",
+     "top": "Auvik Networks Inc."
+    },
+    {
+     "typed": "Auvik",
+     "verdict": "PASS",
+     "top": "Auvik Networks Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 77,
+   "typed": "Kaseya",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Kas",
+     "verdict": "PASS",
+     "top": "Kaseya"
+    },
+    {
+     "typed": "kaseya",
+     "verdict": "PASS",
+     "top": "Kaseya"
+    },
+    {
+     "typed": "KASEYA",
+     "verdict": "PASS",
+     "top": "Kaseya"
+    },
+    {
+     "typed": "Kaseya",
+     "verdict": "PASS",
+     "top": "Kaseya"
+    }
+   ]
+  },
+  {
+   "prospect_id": 78,
+   "typed": "ConnectWise",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Conne",
+     "verdict": "PASS",
+     "top": "ConnectWise, LLC"
+    },
+    {
+     "typed": "connectwise",
+     "verdict": "PASS",
+     "top": "ConnectWise, LLC"
+    },
+    {
+     "typed": "CONNECTWISE",
+     "verdict": "PASS",
+     "top": "ConnectWise, LLC"
+    },
+    {
+     "typed": "ConnectWise",
+     "verdict": "PASS",
+     "top": "ConnectWise, LLC"
+    }
+   ]
+  },
+  {
+   "prospect_id": 79,
+   "typed": "N-able",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "N-a",
+     "verdict": "PASS",
+     "top": "N-able, Inc."
+    },
+    {
+     "typed": "n-able",
+     "verdict": "PASS",
+     "top": "N-able, Inc."
+    },
+    {
+     "typed": "N-ABLE",
+     "verdict": "PASS",
+     "top": "N-able, Inc."
+    },
+    {
+     "typed": "N-able",
+     "verdict": "PASS",
+     "top": "N-able, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 80,
+   "typed": "Datto",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Dat",
+     "verdict": "PASS",
+     "top": "Datto, Inc."
+    },
+    {
+     "typed": "datto",
+     "verdict": "PASS",
+     "top": "Datto, Inc."
+    },
+    {
+     "typed": "DATTO",
+     "verdict": "PASS",
+     "top": "Datto, Inc."
+    },
+    {
+     "typed": "Datto",
+     "verdict": "PASS",
+     "top": "Datto, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 81,
+   "typed": "Barracuda",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Barr",
+     "verdict": "PASS",
+     "top": "Barracuda Networks, Inc."
+    },
+    {
+     "typed": "barracuda",
+     "verdict": "PASS",
+     "top": "Barracuda Networks, Inc."
+    },
+    {
+     "typed": "BARRACUDA",
+     "verdict": "PASS",
+     "top": "Barracuda Networks, Inc."
+    },
+    {
+     "typed": "Barracuda",
+     "verdict": "PASS",
+     "top": "Barracuda Networks, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 82,
+   "typed": "eSentire",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "eSen",
+     "verdict": "PASS",
+     "top": "eSentire, Inc."
+    },
+    {
+     "typed": "esentire",
+     "verdict": "PASS",
+     "top": "eSentire, Inc."
+    },
+    {
+     "typed": "ESENTIRE",
+     "verdict": "PASS",
+     "top": "eSentire, Inc."
+    },
+    {
+     "typed": "eSentire",
+     "verdict": "PASS",
+     "top": "eSentire, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 83,
+   "typed": "Blackpoint Cyber",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Blackpoi",
+     "verdict": "PASS",
+     "top": "Blackpoint Cyber"
+    },
+    {
+     "typed": "blackpoint cyber",
+     "verdict": "PASS",
+     "top": "Blackpoint Cyber"
+    },
+    {
+     "typed": "BLACKPOINT CYBER",
+     "verdict": "PASS",
+     "top": "Blackpoint Cyber"
+    },
+    {
+     "typed": "Blackpoint Cyber",
+     "verdict": "PASS",
+     "top": "Blackpoint Cyber"
+    }
+   ]
+  },
+  {
+   "prospect_id": 84,
+   "typed": "Red Canary",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Red C",
+     "verdict": "PASS",
+     "top": "Red Canary, Inc."
+    },
+    {
+     "typed": "red canary",
+     "verdict": "PASS",
+     "top": "Red Canary, Inc."
+    },
+    {
+     "typed": "RED CANARY",
+     "verdict": "PASS",
+     "top": "Red Canary, Inc."
+    },
+    {
+     "typed": "Red Canary",
+     "verdict": "PASS",
+     "top": "Red Canary, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 85,
+   "typed": "ReliaQuest",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Relia",
+     "verdict": "PASS",
+     "top": "ReliaQuest, LLC"
+    },
+    {
+     "typed": "reliaquest",
+     "verdict": "PASS",
+     "top": "ReliaQuest, LLC"
+    },
+    {
+     "typed": "RELIAQUEST",
+     "verdict": "PASS",
+     "top": "ReliaQuest, LLC"
+    },
+    {
+     "typed": "ReliaQuest",
+     "verdict": "PASS",
+     "top": "ReliaQuest, LLC"
+    }
+   ]
+  },
+  {
+   "prospect_id": 86,
+   "typed": "Tanium",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Tan",
+     "verdict": "PASS",
+     "top": "Tanium Inc."
+    },
+    {
+     "typed": "tanium",
+     "verdict": "PASS",
+     "top": "Tanium Inc."
+    },
+    {
+     "typed": "TANIUM",
+     "verdict": "PASS",
+     "top": "Tanium Inc."
+    },
+    {
+     "typed": "Tanium",
+     "verdict": "PASS",
+     "top": "Tanium Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 87,
+   "typed": "Lansweeper",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Lansw",
+     "verdict": "PASS",
+     "top": "Lansweeper"
+    },
+    {
+     "typed": "lansweeper",
+     "verdict": "PASS",
+     "top": "Lansweeper"
+    },
+    {
+     "typed": "LANSWEEPER",
+     "verdict": "PASS",
+     "top": "Lansweeper"
+    },
+    {
+     "typed": "Lansweeper",
+     "verdict": "PASS",
+     "top": "Lansweeper"
+    }
+   ]
+  },
+  {
+   "prospect_id": 88,
+   "typed": "Torq",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Tor",
+     "verdict": "PASS",
+     "top": "Torq"
+    },
+    {
+     "typed": "torq",
+     "verdict": "PASS",
+     "top": "Torq"
+    },
+    {
+     "typed": "TORQ",
+     "verdict": "PASS",
+     "top": "Torq"
+    },
+    {
+     "typed": "Torq",
+     "verdict": "PASS",
+     "top": "Torq"
+    }
+   ]
+  },
+  {
+   "prospect_id": 89,
+   "typed": "Tines",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Tin",
+     "verdict": "PASS",
+     "top": "Tines"
+    },
+    {
+     "typed": "tines",
+     "verdict": "PASS",
+     "top": "Tines"
+    },
+    {
+     "typed": "TINES",
+     "verdict": "PASS",
+     "top": "Tines"
+    },
+    {
+     "typed": "Tines",
+     "verdict": "PASS",
+     "top": "Tines"
+    }
+   ]
+  },
+  {
+   "prospect_id": 90,
+   "typed": "Swimlane",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Swim",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Latham Group, Inc."
+    },
+    {
+     "typed": "swimlane",
+     "verdict": "PASS",
+     "top": "Swimlane"
+    },
+    {
+     "typed": "SWIMLANE",
+     "verdict": "PASS",
+     "top": "Swimlane"
+    },
+    {
+     "typed": "Swimlane",
+     "verdict": "PASS",
+     "top": "Swimlane"
+    }
+   ]
+  },
+  {
+   "prospect_id": 91,
+   "typed": "Pax8",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Pax",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Patria Investments Ltd"
+    },
+    {
+     "typed": "pax8",
+     "verdict": "PASS",
+     "top": "Pax8, Inc."
+    },
+    {
+     "typed": "PAX8",
+     "verdict": "PASS",
+     "top": "Pax8, Inc."
+    },
+    {
+     "typed": "Pax8",
+     "verdict": "PASS",
+     "top": "Pax8, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 92,
+   "typed": "Sherweb",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "She",
+     "verdict": "PASS",
+     "top": "Sherweb Inc."
+    },
+    {
+     "typed": "sherweb",
+     "verdict": "PASS",
+     "top": "Sherweb Inc."
+    },
+    {
+     "typed": "SHERWEB",
+     "verdict": "PASS",
+     "top": "Sherweb Inc."
+    },
+    {
+     "typed": "Sherweb",
+     "verdict": "PASS",
+     "top": "Sherweb Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 93,
+   "typed": "Softchoice",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Softc",
+     "verdict": "PASS",
+     "top": "Softchoice Corporation"
+    },
+    {
+     "typed": "softchoice",
+     "verdict": "PASS",
+     "top": "Softchoice Corporation"
+    },
+    {
+     "typed": "SOFTCHOICE",
+     "verdict": "PASS",
+     "top": "Softchoice Corporation"
+    },
+    {
+     "typed": "Softchoice",
+     "verdict": "PASS",
+     "top": "Softchoice Corporation"
+    }
+   ]
+  },
+  {
+   "prospect_id": 94,
+   "typed": "CDW",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "CDW",
+     "verdict": "PASS",
+     "top": "CDW Corporation"
+    },
+    {
+     "typed": "cdw",
+     "verdict": "PASS",
+     "top": "CDW Corporation"
+    },
+    {
+     "typed": "CDW",
+     "verdict": "PASS",
+     "top": "CDW Corporation"
+    },
+    {
+     "typed": "CDW",
+     "verdict": "PASS",
+     "top": "CDW Corporation"
+    }
+   ]
+  },
+  {
+   "prospect_id": 95,
+   "typed": "Presidio",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Pres",
+     "verdict": "PASS",
+     "top": "Presidio, Inc."
+    },
+    {
+     "typed": "presidio",
+     "verdict": "PASS",
+     "top": "Presidio, Inc."
+    },
+    {
+     "typed": "PRESIDIO",
+     "verdict": "PASS",
+     "top": "Presidio, Inc."
+    },
+    {
+     "typed": "Presidio",
+     "verdict": "PASS",
+     "top": "Presidio, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 96,
+   "typed": "Trace3",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Tra",
+     "verdict": "PASS",
+     "top": "Trace3, LLC"
+    },
+    {
+     "typed": "trace3",
+     "verdict": "PASS",
+     "top": "Trace3, LLC"
+    },
+    {
+     "typed": "TRACE3",
+     "verdict": "PASS",
+     "top": "Trace3, LLC"
+    },
+    {
+     "typed": "Trace3",
+     "verdict": "PASS",
+     "top": "Trace3, LLC"
+    }
+   ]
+  },
+  {
+   "prospect_id": 97,
+   "typed": "World Wide Technology",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "World Wide",
+     "verdict": "PASS",
+     "top": "World Wide Technology Holding Co., LLC"
+    },
+    {
+     "typed": "world wide technology",
+     "verdict": "PASS",
+     "top": "World Wide Technology Holding Co., LLC"
+    },
+    {
+     "typed": "WORLD WIDE TECHNOLOGY",
+     "verdict": "PASS",
+     "top": "World Wide Technology Holding Co., LLC"
+    },
+    {
+     "typed": "World Wide Technology",
+     "verdict": "PASS",
+     "top": "World Wide Technology Holding Co., LLC"
+    }
+   ]
+  },
+  {
+   "prospect_id": 98,
+   "typed": "AHEAD",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "AHE",
+     "verdict": "PASS",
+     "top": "AHEAD"
+    },
+    {
+     "typed": "ahead",
+     "verdict": "PASS",
+     "top": "AHEAD"
+    },
+    {
+     "typed": "AHEAD",
+     "verdict": "PASS",
+     "top": "AHEAD"
+    },
+    {
+     "typed": "AHEAD",
+     "verdict": "PASS",
+     "top": "AHEAD"
+    }
+   ]
+  },
+  {
+   "prospect_id": 99,
+   "typed": "Rackspace Technology",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Rackspace ",
+     "verdict": "PASS",
+     "top": "Rackspace Technology, Inc."
+    },
+    {
+     "typed": "rackspace technology",
+     "verdict": "PASS",
+     "top": "Rackspace Technology, Inc."
+    },
+    {
+     "typed": "RACKSPACE TECHNOLOGY",
+     "verdict": "PASS",
+     "top": "Rackspace Technology, Inc."
+    },
+    {
+     "typed": "Rackspace Technology",
+     "verdict": "PASS",
+     "top": "Rackspace Technology, Inc."
+    }
+   ]
+  },
+  {
+   "prospect_id": 100,
+   "typed": "Pellera Technologies",
+   "status": "PASS",
+   "queries": [
+    {
+     "typed": "Pellera Te",
+     "verdict": "PASS",
+     "top": "Pellera Technologies"
+    },
+    {
+     "typed": "pellera technologies",
+     "verdict": "PASS",
+     "top": "Pellera Technologies"
+    },
+    {
+     "typed": "PELLERA TECHNOLOGIES",
+     "verdict": "PASS",
+     "top": "Pellera Technologies"
+    },
+    {
+     "typed": "Pellera Technologies",
+     "verdict": "PASS",
+     "top": "Pellera Technologies"
+    }
+   ]
+  }
+ ]
+}

@@ -227,6 +227,28 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
+def speakable(cards) -> tuple:
+    """The cards whose own validation passes. Never raises.
+
+    A card's headline is often a claim's text, and a claim is often someone
+    else's words -- the company's copy, or a third party's ("you must",
+    "is broken"). The product-language rule is right that the PRODUCT does
+    not command or condemn, so such a card is left out. What it must not do
+    is take the whole run down: measured on the prospect-100 passes, one
+    such sentence made Wood Mackenzie's composition raise (every page 500)
+    and, once independent reporting arrived, a competitor card did the same
+    to the conversation endpoint.
+    """
+    out = []
+    for card in cards or ():
+        try:
+            card.validate()
+        except FounderIntelligenceError:
+            continue
+        out.append(card)
+    return tuple(out)
+
+
 def assert_product_language(text: str, *, where: str = "text") -> None:
     hits = scan_banned_language(text, BANNED_PRODUCT_LANGUAGE)
     if hits:
