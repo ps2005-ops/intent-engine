@@ -1,0 +1,20 @@
+America Movil              conf 0.506 v2=positive_surprise    | America Movil ADR earnings missed by Mex$0.03, revenue topped estimates - Investing.com In
+BHP Group Limited          conf 0.586 v2=ABSTAIN              | BHP Group's Copper Output Falls in Q1 on Grade Declines, Weather, Maintenance - marketscre
+Check Point Software       conf 0.506 v2=demand_weakening     | Cybersecurity firm Check Point Software first-quarter profit beats estimates, cuts 2026 re
+Cloudflare, Inc.           conf 0.498 v2=demand_strengthening | Cloudflare Q2 2026 Earnings: Revenue Rises 36% as Restructuring Widens GAAP Loss - trading
+Duolingo, Inc.             conf 0.506 v2=ABSTAIN              | Duolingo (DUOL) Stock Falls on Q2 2026 Earnings - Quiver Quantitative.
+Etsy, Inc.                 conf 0.498 v2=ABSTAIN              | Weekly Recap: Etsy (ETSY) Q3 GMS and margin guidance and 12% staff cuts - TradingView.
+Grifols S.A.               conf 0.506 v2=demand_weakening     | Profit rises 27.9% at Grifols (GRFS), but one revenue stream declines. - Stock Titan.
+HDFC Bank Limited          conf 0.506 v2=ABSTAIN              | HDFC Bank (HDB) Fell as Deposit Fell Short of Expectations - Yahoo Finance.
+Honda Motor Co., Ltd.      conf 0.506 v2=demand_strengthening | Honda Motor (HMC) Releases Q2 2027 Earnings: Revenue Up, Profitability Falls - Quiver Quan
+Infosys Limited            conf 0.506 v2=ABSTAIN              | Infosys (NSEI:INFY) Stock Fair Value Falls After Analysts Cut Targets On Weaker Outlook - 
+Johnson & Johnson          conf 0.646 v2=ABSTAIN              | J&J lowers 2026 profit forecast on deal costs, sees further hit in 2027 - Reuters.
+JPMorgan Chase & Co.       conf 0.504 v2=ABSTAIN              | 2017 – Net Income Excluding TCJA¹: Adjusted net income was $26.9 billion, excluding $2.4 b
+Linde plc                  conf 0.506 v2=ABSTAIN              | Linde PLC Reports Q3 Revenue of $9.4 Billion, Misses EPS Estimat - GuruFocus.
+MercadoLibre, Inc.         conf 0.590 v2=ABSTAIN              | MercadoLibre Declines 11.9% Since Q3 Earnings: How to Play MELI Stock - Zacks Investment R
+NextEra Energy, Inc.       conf 0.506 v2=negative_surprise    | Earnings call transcript: NextEra Energy beats Q2 2026 EPS, misses on revenue - Investing.
+Olo Inc.                   conf 0.586 v2=ABSTAIN              | Olo (OLO) Declined in Q2 on Investors’ Concerns over Multiple Factors - Yahoo Finance.
+Sasol Limited              conf 0.586 v2=demand_strengthening | Sasol lifts fuel sales outlook but cuts gas output forecast for 2026 - Stock Titan.
+Shopify Inc.               conf 0.506 v2=negative_surprise    | Shopify Inc Reports Q3 2026 Earnings: EPS Matches Estimates at $0.38, Revenue Falls Short 
+Vale S.A.                  conf 0.646 v2=ABSTAIN              | Vale posts profit fall, lifts base metals outlook and unveils buyback - Mining.com.
+19 dossier demand-weakening beliefs; v2 readings: {'positive_surprise': 1, 'ABSTAIN': 11, 'demand_weakening': 2, 'demand_strengthening': 3, 'negative_surprise': 2}
