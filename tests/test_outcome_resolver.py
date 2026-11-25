@@ -41,6 +41,24 @@ def test_an_unelapsed_horizon_is_not_mature_and_never_graded():
     assert "realized_return" not in ev
 
 
+def test_on_the_horizon_end_day_itself_the_record_is_not_yet_mature(tmp_path):
+    """Found in the production dry run on 2026-11-25: three records whose
+    horizon ended that day were graded on the live intraday quote, and a
+    04:47 run the same day graded them on the PRIOR close. Either one would
+    have been written as terminal. The end-day close is final only once that
+    day has passed."""
+    end = SO.horizon_end("2026-08-03")                       # 2026-08-24
+    closes = _weekdays("2026-07-01", end)                    # includes 'today'
+    ev = OR.grade(_row(), closes, today=end)
+    assert ev["state"] == OR.NOT_MATURE
+    r = OR.resolve([_row()], root=tmp_path, today=end,
+                   series_fn=lambda s: closes, write=True)
+    assert r["counts"][OR.NOT_MATURE] == 1 and r["appended"] == 0
+    nxt = (date.fromisoformat(end) + timedelta(days=1)).isoformat()
+    ev2 = OR.grade(_row(), closes, today=nxt)
+    assert ev2["state"] == OR.RESOLVED and ev2["exit_date"] == end
+
+
 def test_a_mature_record_is_graded_by_the_preregistered_rule():
     closes = _weekdays("2026-07-01", "2026-09-30")
     ev = OR.grade(_row(), closes, today="2026-09-30")

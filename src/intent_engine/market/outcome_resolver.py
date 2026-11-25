@@ -102,7 +102,7 @@ def grade(row: dict, closes: Optional[Dict[str, float]], *, today: str,
             "fired": bool(row.get("fired")), "processed_on": today[:10],
             "price_basis": PRICE_BASIS}
 
-    if end > today[:10]:
+    if end >= today[:10]:   # the horizon-end close is final only once that day has passed
         return {**base, "state": NOT_MATURE, "reason": "horizon not elapsed"}
 
     def open_or_final(reason: str) -> dict:
@@ -197,7 +197,7 @@ def resolve(audit_rows: List[dict], *, root, today: str,
             continue
         end = SO.horizon_end(row["as_of"], int(
             (row.get("opportunity") or {}).get("horizon_days", SO.HORIZON_DAYS)))
-        if end > today[:10]:
+        if end >= today[:10]:   # the horizon-end close is final only once that day has passed
             counts[NOT_MATURE] += 1
             continue
         sym = row.get("instrument")
