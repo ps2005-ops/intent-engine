@@ -485,3 +485,66 @@ class TestMarketExpectationWindowsAreFixed:
                          for e in store.open_expectations(as_of="2026-11-10"))
         assert windows == [("2026-08-05", "2026-12-03"),
                            ("2026-08-08", "2026-12-06")]
+
+
+class TestSupersedingAWronglyClosedPrediction:
+    """The six July FRED forecasts were closed 'unresolvable' before their data
+    existed. The repair appends an outcome; it never edits or re-scores."""
+
+    def _closed(self, path, p=0.62):
+        pred = PLG.record_prediction("market", "macro-watch", "spread < 0.30",
+                                     p, "2026-09-18", path=path)
+        PLG.resolve_prediction(pred.id, "unresolvable",
+                               "FRED returned no observations", path=path)
+        return pred
+
+    def test_an_unresolvable_is_superseded_by_an_appended_row(self, tmp_path):
+        path = tmp_path / "l.db"
+        pred = self._closed(path)
+        new = PLG.supersede_unresolvable(
+            pred.id, "happened", evidence_note="T10Y2Y 0.25 on 09-18",
+            data_first_published="2026-09-19", path=path)
+        assert new.brier_component == pytest.approx((0.62 - 1) ** 2)
+        assert new.resolve_by == "2026-09-18" and new.probability == 0.62
+        assert PLG.SUPERSEDE_MARKER in new.resolution_note
+        assert "FRED returned no observations" in new.resolution_note
+        import sqlite3
+        rows = sqlite3.connect(path).execute(
+            "SELECT outcome FROM predictions WHERE id=? ORDER BY rowid",
+            (pred.id,)).fetchall()
+        assert [r[0] for r in rows] == [None, "unresolvable", "happened"]
+
+    def test_it_counts_once_in_the_brier_summary(self, tmp_path):
+        path = tmp_path / "l.db"
+        pred = self._closed(path)
+        PLG.supersede_unresolvable(pred.id, "happened", evidence_note="x",
+                                   data_first_published="d", path=path)
+        s = PLG.brier_summary(path=path)
+        assert s.count == 1
+
+    def test_a_scored_prediction_can_never_be_superseded(self, tmp_path):
+        path = tmp_path / "l.db"
+        pred = PLG.record_prediction("market", "m", "c", 0.6, "2026-09-18",
+                                     path=path)
+        PLG.resolve_prediction(pred.id, "did_not_happen", path=path)
+        with pytest.raises(ValueError, match="only an 'unresolvable'"):
+            PLG.supersede_unresolvable(pred.id, "happened", evidence_note="x",
+                                       data_first_published="d", path=path)
+
+    def test_a_second_supersession_is_refused(self, tmp_path):
+        path = tmp_path / "l.db"
+        pred = self._closed(path)
+        PLG.supersede_unresolvable(pred.id, "happened", evidence_note="x",
+                                   data_first_published="d", path=path)
+        with pytest.raises(ValueError):
+            PLG.supersede_unresolvable(pred.id, "did_not_happen",
+                                       evidence_note="x",
+                                       data_first_published="d", path=path)
+
+    def test_unresolvable_cannot_supersede_unresolvable(self, tmp_path):
+        path = tmp_path / "l.db"
+        pred = self._closed(path)
+        with pytest.raises(ValueError, match="must be happened"):
+            PLG.supersede_unresolvable(pred.id, "unresolvable",
+                                       evidence_note="x",
+                                       data_first_published="d", path=path)

@@ -528,6 +528,15 @@ def add_commands(sub, load_inputs) -> None:
     p.set_defaults(fn=cmd_resolve)
     p = sub.add_parser("rehearse")
     p.set_defaults(fn=cmd_rehearse)
+
+    def cmd_daily(args):
+        from intent_engine.paper_validation import daily as D
+        row = D.run(now=_now())
+        print(json.dumps(row, indent=1, default=str))
+        return 1 if row.get("status") == "FAILED" else 0
+    p = sub.add_parser("daily", help="resolve what is due, alert on overdue "
+                       "and missed runs; never registers")
+    p.set_defaults(fn=cmd_daily)
     p = sub.add_parser("status")
     p.set_defaults(fn=cmd_status)
     p = sub.add_parser("learn")

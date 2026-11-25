@@ -319,6 +319,56 @@ def resolve_prediction(
     return updated
 
 
+SUPERSEDE_MARKER = "SUPERSEDES-UNRESOLVABLE"
+
+
+def supersede_unresolvable(
+    prediction_id: str,
+    outcome: PredictionOutcome,
+    *,
+    evidence_note: str,
+    data_first_published: str,
+    path: Union[str, Path] = DEFAULT_LEDGER_PATH,
+) -> Prediction:
+    """Record the real outcome of a prediction that was closed "unresolvable"
+    only because its data had not been published yet.
+
+    The one exception to "one outcome per prediction", and deliberately
+    narrow:
+
+    * only a prediction whose CURRENT outcome is "unresolvable" qualifies. A
+      scored prediction can never be re-scored.
+    * the new outcome must be "happened" or "did_not_happen".
+    * the forecast terms are unchanged (`_persist` refuses otherwise). The
+      original unresolvable row stays in the table and is named in the note.
+    * reads take the latest row per id, so the prediction is counted once in
+      `brier_summary`, never twice.
+    """
+    if outcome not in ("happened", "did_not_happen"):
+        raise ValueError("a superseding outcome must be happened or did_not_happen")
+    predictions = _read_latest(path)
+    current = next((p for p in predictions if p.id == prediction_id), None)
+    if current is None:
+        raise ValueError(f"No prediction {prediction_id!r} found.")
+    if current.outcome != "unresolvable":
+        raise ValueError(
+            f"Prediction {prediction_id!r} has outcome {current.outcome!r}; only "
+            "an 'unresolvable' outcome may be superseded.")
+    brier = (current.probability - (1.0 if outcome == "happened" else 0.0)) ** 2
+    note = (f"{SUPERSEDE_MARKER}: prior row resolved_at={current.resolved_at} "
+            f"note={current.resolution_note!r}. Original resolve_by="
+            f"{current.resolve_by}; data first published {data_first_published}. "
+            f"{evidence_note}")
+    updated = current.model_copy(update={
+        "resolved_at": _current_timestamp(),
+        "outcome": outcome,
+        "brier_component": brier,
+        "resolution_note": note,
+    })
+    _persist(updated, path)
+    return updated
+
+
 def list_predictions(
     source: Optional[PredictionSource] = None,
     unresolved_only: bool = False,

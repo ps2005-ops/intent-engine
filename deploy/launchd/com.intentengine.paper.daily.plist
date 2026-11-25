@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- PROPOSED, NOT INSTALLED. Daily resolver for the forward shadow ledger.
+     Runs 19:15 America/Toronto, after the close and before the market night
+     cycle (20:30). A missed run (host asleep) is caught up by the next one:
+     `daily` resolves every forecast whose scheduled exit has passed.
+     WorkingDirectory must be the ONE worktree that owns
+     reports/paper_validation/forward_shadow_ledger.jsonl (single writer). -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.intentengine.paper.daily</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/prathamsharma/intent-engine/.venv/bin/python</string>
+    <string>-m</string><string>intent_engine.paper_validation</string>
+    <string>daily</string>
+  </array>
+  <key>WorkingDirectory</key><string>__OWNER_WORKTREE__</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PYTHONPATH</key><string>__OWNER_WORKTREE__/src</string>
+    <key>TZ</key><string>America/Toronto</string>
+    <key>TRADING_MODE</key><string>PAPER</string>
+  </dict>
+  <key>StartCalendarInterval</key><dict><key>Hour</key><integer>19</integer><key>Minute</key><integer>15</integer></dict>
+  <key>RunAtLoad</key><false/>
+  <key>StandardOutPath</key><string>/Users/prathamsharma/Library/Logs/intent-engine/paper_daily.out.log</string>
+  <key>StandardErrorPath</key><string>/Users/prathamsharma/Library/Logs/intent-engine/paper_daily.err.log</string>
+</dict>
+</plist>
