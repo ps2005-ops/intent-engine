@@ -301,12 +301,26 @@ def _walk_allowlist(node: Any, spec: Any, path: str) -> None:
     raise ExportLeak(f"{path}: malformed allowlist spec")  # pragma: no cover
 
 
+#: Banned terms that are ordinary words inside real company names. Matched on
+#: WORD BOUNDARIES rather than as bare substrings, because "alpha" as a bare
+#: substring refuses `Alphabet Inc.` — a top-five public company whose export
+#: therefore failed closed with a message about trading internals. The term is
+#: still caught where it is actually a trading claim ("our alpha was 3%").
+_WORD_BOUNDED = frozenset({"alpha", "expectancy", "sharpe"})
+_BOUNDED_PATTERNS = {
+    term: __import__("re").compile(r"\b" + term + r"\b")
+    for term in _WORD_BOUNDED
+}
+
+
 def _scan_text(node: Any, path: str = "") -> None:
     """Catch internals leaking inside otherwise-permitted free text."""
     if isinstance(node, str):
         low = node.lower()
         for banned in _BANNED_SUBSTRINGS:
-            if banned in low:
+            pattern = _BOUNDED_PATTERNS.get(banned)
+            hit = pattern.search(low) if pattern else (banned in low)
+            if hit:
                 raise ExportLeak(
                     f"{path}: text contains {banned!r}, which is a trading "
                     f"internal and may not reach a founder surface")

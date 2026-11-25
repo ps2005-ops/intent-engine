@@ -120,7 +120,7 @@ def test_a_partial_run_does_not_block_a_retry(tmp_path):
         return {}
 
     retry = run(tmp_path, steps=[("work", counted)])
-    assert retry.status != C.SKIPPED_DUPLICATE
+    assert retry.status not in C.SKIPPED_WITHOUT_RUNNING
     assert ran["n"] == 1              # the retry actually executed
 
 
@@ -142,7 +142,7 @@ def test_a_held_lock_makes_the_second_cycle_skip(tmp_path):
     from intent_engine.runtime.locks import JobLock
     with JobLock(C.LOCK_NAME, root=tmp_path):
         result = run(tmp_path)
-    assert result.status == C.SKIPPED_DUPLICATE
+    assert result.status == C.SKIPPED_LOCK_CONTENTION
     assert "lock" in result.reason
 
 
@@ -151,7 +151,8 @@ def test_day_and_night_share_one_lock_so_they_cannot_overlap(tmp_path):
     would corrupt both."""
     from intent_engine.runtime.locks import JobLock
     with JobLock(C.LOCK_NAME, root=tmp_path):
-        assert run(tmp_path, cycle=C.NIGHT).status == C.SKIPPED_DUPLICATE
+        assert (run(tmp_path, cycle=C.NIGHT).status
+                == C.SKIPPED_LOCK_CONTENTION)
 
 
 def test_lock_state_distinguishes_a_leftover_file_from_a_held_lock(tmp_path):
@@ -176,7 +177,7 @@ def test_a_crashed_run_does_not_wedge_the_next_one(tmp_path):
     assert acquired.wait(timeout=30), "child never acquired the lock"
 
     blocked = run(tmp_path)
-    assert blocked.status == C.SKIPPED_DUPLICATE
+    assert blocked.status == C.SKIPPED_LOCK_CONTENTION
 
     release.set()
     proc.join(timeout=30)
@@ -295,7 +296,7 @@ def test_an_early_fire_is_skipped_without_taking_the_lock(tmp_path):
     before the lock, so it costs nothing and cannot block a correct fire."""
     result = run(tmp_path, enforce_window=True,
                  now=datetime(2026, 7, 31, 3, 0, tzinfo=ZoneInfo(S.TIMEZONE)))
-    assert result.status == C.SKIPPED_DUPLICATE
+    assert result.status == C.SKIPPED_OUTSIDE_WINDOW
     assert "outside the" in result.reason
     # Checked on the path directly: `lock_state` probes by acquiring, which
     # would create the very file this asserts was never created.

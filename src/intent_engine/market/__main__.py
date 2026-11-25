@@ -26,6 +26,7 @@ after the fact, and this project's measurements are the only thing it has.
 from __future__ import annotations
 
 import argparse
+import datetime as _dt
 import json
 import os
 import pathlib
@@ -33,6 +34,9 @@ import sys
 
 from intent_engine.market import cycle as C
 from intent_engine.market import health as H
+from intent_engine.market import learning_status as LS
+from intent_engine.market import learning_report as LR
+from intent_engine.market import learning_watchdog as LW
 from intent_engine.market import session as S
 from intent_engine.market import steps as STEPS
 
@@ -114,6 +118,79 @@ def cmd_cycle(name: str, args) -> int:
     return result.exit_code
 
 
+def cmd_catch_up(args) -> int:
+    """Replay scheduled cycles that did no work and nothing retried.
+
+    Never enforces the window: a catch-up is BY DEFINITION out of its window,
+    and that is what makes it a catch-up rather than a duplicate.
+    """
+    from intent_engine.market import schedule_audit as SA
+    # `resolve_root`, NEVER `_root`: the latter redirects to <root>/dryrun
+    # whenever a `--dry-run` flag is set, which is right for rehearsing a
+    # cycle and catastrophic here -- the audit would read an almost-empty
+    # sandbox tree and report every real cycle as MISSED_NEVER_INVOKED, then
+    # offer to replay 15 cycles that had in fact completed. Measured.
+    # The flag is `--plan-only` for the same reason: "dry run" already means
+    # "write into the sandbox" in this CLI, and it cannot also mean "read the
+    # real tree and change nothing".
+    root = resolve_root(args.root)
+    root.mkdir(parents=True, exist_ok=True)
+
+    before = SA.audit(root=root)
+    print("\n".join(SA.render(before)))
+    plan = SA.catch_up_plan(before)
+    if not plan:
+        print("\nnothing to replay")
+        return 0
+    if args.plan_only:
+        print(f"\nwould replay {len(plan)} slot(s), oldest first:")
+        for slot in sorted(plan, key=lambda s: (s["as_of"], s["cycle"])):
+            print(f"  --as-of {slot['as_of']} {slot['cycle']}")
+        return 0
+
+    def runner(cycle: str, as_of: str):
+        print(f"\nreplaying {as_of} {cycle} ...")
+        result = C.run_cycle(
+            cycle, root=root, steps=STEPS.STEPS[cycle](),
+            as_of=as_of, catch_up=True,
+            # No window enforcement, and no bar probe: the probe answers
+            # "what is the newest bar NOW", which for a historical replay is
+            # future information. Leaving it None makes the session report
+            # BAR_UNAVAILABLE honestly rather than dating today's bar to a
+            # past operating day.
+            enforce_window=False, latest_bar=None)
+        print(f"  {result.run_id}  {result.status}")
+        if result.reason:
+            print(f"    {result.reason}")
+        return result
+
+    outcome = SA.catch_up(root=root, runner=runner, limit=args.limit)
+    print(f"\nreplayed {len(outcome['replayed'])}, "
+          f"refused {len(outcome['refused'])}")
+    if outcome.get("yielded_to_schedule"):
+        held = outcome["yielded_to_schedule"]
+        print(f"stopped: a scheduled cycle is due in "
+              f"{held['minutes_to_next_slot']:.0f} min — the live slot "
+              f"outranks a historical one")
+    rel, cov = outcome["reliability_after"], outcome["coverage_after"]
+    # Scoped to the recoverable window, NOT the whole history printed above.
+    print(f"\nover the recoverable window "
+          f"{outcome['window_start']} .. {outcome['window_end']}:")
+    print(f"  cycles still lost      : {outcome['slots_lost_after']}")
+    print(f"  still recoverable      : {outcome['still_recoverable']}")
+    print(f"  unrecoverable (too old): {outcome['unrecoverable']}")
+    if rel is not None:
+        print(f"  schedule reliability   : {rel:.1%}  (on-time only)")
+        print(f"  coverage               : {cov:.1%}  (including replays)")
+    whole = SA.audit(root=root)
+    if whole.get("reliability") is not None:
+        print(f"\nwhole history {whole['start']} .. {whole['end']}: "
+              f"reliability {whole['reliability']:.1%}, "
+              f"coverage {whole['coverage']:.1%}, "
+              f"{whole['slots_lost']} lost")
+    return 0
+
+
 def cmd_status(args) -> int:
     root = resolve_root(args.root)
     health = H.check(root)
@@ -142,6 +219,63 @@ def cmd_runs(args) -> int:
         print(f"{row.get('run_id', ''):<44}{row.get('status', ''):<32}"
               f"{ok}/{len(steps):>4}")
     return 0
+
+
+def cmd_learning_status(args) -> int:
+    """What the SYSTEM OF RECORD has learned.
+
+    Resolves every path through the declaration, so this command cannot read
+    a legacy store even by accident — which is the whole reason it exists.
+    """
+    root = _root(args)
+    status = LS.collect(root=root, window=args.window)
+    if args.json:
+        print(json.dumps(status, indent=2, sort_keys=False))
+    else:
+        print(LS.render(status))
+    # Nonzero when the canonical ledger is absent: an operator asking what the
+    # system learned and getting a clean empty screen would read it as "it
+    # learned nothing", which is the exact failure this replaces.
+    return 0 if status["system_of_record"]["ledger_exists"] else 1
+
+
+def cmd_learning_report(args) -> int:
+    """Generate and persist a canonical learning report.
+
+    The JSON artifact is authoritative; the printed view is a projection of
+    it, so an operator and a later weekly synthesis read the same numbers.
+    """
+    root = _root(args)
+    report = LR.build(args.period, root=root)
+    path = LR.persist(report, root=root)
+    if args.json:
+        print(json.dumps(report, indent=2, sort_keys=False))
+    else:
+        print(LR.render(report))
+        print(f"\nwrote {path}")
+    return 0
+
+
+def cmd_watchdog(args) -> int:
+    """Is the system still LEARNING — not merely still running.
+
+    Exit status is the alerting channel, as everywhere else in this CLI: 2 on
+    CRITICAL, 1 on WARNING, 0 on OK, so launchd records a watchdog finding
+    without any external monitoring service.
+    """
+    root = _root(args)
+    founder = root / "reports" / "market" / "dossier_revisions.jsonl"
+    last_write = ""
+    if founder.exists():
+        last_write = _dt.datetime.fromtimestamp(
+            founder.stat().st_mtime, _dt.timezone.utc).isoformat()
+    report = LW.evaluate(root=root, window=args.window,
+                         founder_last_write=last_write)
+    if args.json:
+        print(json.dumps(report, indent=2, sort_keys=False))
+    else:
+        print(LW.render(report))
+    return {LW.CRITICAL: 2, LW.WARNING: 1}.get(report["status"], 0)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -175,6 +309,17 @@ def build_parser() -> argparse.ArgumentParser:
                        help="refuse to run outside the scheduled local-time "
                             "window (used by launchd; guards DST)")
 
+    p = sub.add_parser("catch-up",
+                       help="replay scheduled cycles that did no work")
+    p.add_argument("--root", default=None,
+                   help=f"runtime tree (default: ${ROOT_ENV}, else "
+                        f"./{FALLBACK_ROOT})")
+    p.add_argument("--plan-only", action="store_true",
+                   help="list what would be replayed and exit; reads the "
+                        "real tree and changes nothing")
+    p.add_argument("--limit", type=int, default=0,
+                   help="replay at most N slots (0 = all recoverable)")
+
     p = sub.add_parser("status", help="operational health, one screen")
     p.add_argument("--root", default=None,
                    help=f"runtime tree (default: ${ROOT_ENV}, else "
@@ -186,6 +331,30 @@ def build_parser() -> argparse.ArgumentParser:
                    help=f"runtime tree (default: ${ROOT_ENV}, else "
                         f"./{FALLBACK_ROOT})")
     p.add_argument("--limit", type=int, default=20)
+
+    # The answer to "what has this system learned?", so that question never
+    # again has to be answered by whichever store an explorer finds first.
+    p = sub.add_parser("learning-report",
+                       help="daily/weekly/monthly canonical learning report")
+    p.add_argument("--root", default=None)
+    p.add_argument("--period", default="day", choices=list(LR.PERIODS))
+    p.add_argument("--json", action="store_true")
+
+    p = sub.add_parser("watchdog",
+                       help="is the system still learning (typed alerts)")
+    p.add_argument("--root", default=None)
+    p.add_argument("--window", default="7d", choices=sorted(LS.WINDOWS))
+    p.add_argument("--json", action="store_true")
+
+    p = sub.add_parser("learning-status",
+                       help="what the system of record has learned")
+    p.add_argument("--root", default=None,
+                   help=f"runtime tree (default: ${ROOT_ENV}, else "
+                        f"./{FALLBACK_ROOT})")
+    p.add_argument("--window", default="7d",
+                   choices=sorted(LS.WINDOWS),
+                   help="rolling window over the canonical ledger")
+    p.add_argument("--json", action="store_true")
     return parser
 
 
@@ -193,10 +362,18 @@ def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
     if args.command in C.CYCLES:
         return cmd_cycle(args.command, args)
+    if args.command == "catch-up":
+        return cmd_catch_up(args)
     if args.command == "status":
         return cmd_status(args)
     if args.command == "runs":
         return cmd_runs(args)
+    if args.command == "learning-status":
+        return cmd_learning_status(args)
+    if args.command == "watchdog":
+        return cmd_watchdog(args)
+    if args.command == "learning-report":
+        return cmd_learning_report(args)
     return 2  # pragma: no cover - argparse rejects unknown commands
 
 

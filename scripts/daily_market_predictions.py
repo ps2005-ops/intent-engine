@@ -316,7 +316,23 @@ def run_daily(
     return summary
 
 
+# LEGACY CONTAINMENT (2026-08-12). This pipeline was once mistaken for the
+# market intelligence system of record: an exploration read its ledger, found
+# it twenty-three days stale, and reported that the learning system had learned
+# nothing. The banner is printed by main() so the mistake cannot be repeated
+# by anyone — human or agent — who runs this file and reads its output.
+def _legacy_banner() -> None:
+    import os
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+    from intent_engine.market import system_of_record as SOR
+    banner = SOR.legacy_banner("daily_market_predictions")
+    if banner:
+        print(banner)
+
+
 def main(argv=None):
+    _legacy_banner()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--entity-id", default="macro-watch")
     parser.add_argument("--path", default=str(DEFAULT_LEDGER_PATH))

@@ -19,12 +19,16 @@ def _pred(tmp_path, **over):
     return pl.record_prediction(**kw)
 
 
-AS_OF = "2026-07-24"
+def _same_day(p):
+    """The prediction's own date. A hardcoded date became a FUTURE date as the
+    wall clock passed it, and the future_dated guard then refused every case
+    in this file for a reason none of them was testing."""
+    return p.created_at[:10]
 
 
 def test_eligible_prediction_becomes_intent(tmp_path):
     p = _pred(tmp_path)
-    r = evaluate_prediction(p, config=EligibilityConfig(), as_of=AS_OF,
+    r = evaluate_prediction(p, config=EligibilityConfig(), as_of=_same_day(p),
                             reasoning="mechanism")
     assert r.eligible and isinstance(r.intent, PaperIntent)
     assert r.intent.direction == "long" and r.intent.instrument == "SPY"
@@ -41,7 +45,7 @@ def test_eligible_prediction_becomes_intent(tmp_path):
 ])
 def test_ineligible_rules(tmp_path, over, rule):
     p = _pred(tmp_path, **over)
-    r = evaluate_prediction(p, config=EligibilityConfig(), as_of=AS_OF,
+    r = evaluate_prediction(p, config=EligibilityConfig(), as_of=_same_day(p),
                             reasoning="m")
     assert not r.eligible and r.rule == rule and r.reason
 
@@ -71,22 +75,22 @@ def test_stale_prediction_rejected(tmp_path):
 def test_duplicate_exposure_rejected(tmp_path):
     p = _pred(tmp_path)
     r = evaluate_prediction(p, config=EligibilityConfig(),
-                            open_prediction_ids={p.id}, as_of=AS_OF, reasoning="m")
+                            open_prediction_ids={p.id}, as_of=_same_day(p), reasoning="m")
     assert not r.eligible and r.rule == "duplicate_exposure"
 
 
 def test_risk_limit_rejected(tmp_path):
     p = _pred(tmp_path)
     r = evaluate_prediction(p, config=EligibilityConfig(max_open_positions=3),
-                            open_position_count=3, as_of=AS_OF, reasoning="m")
+                            open_position_count=3, as_of=_same_day(p), reasoning="m")
     assert not r.eligible and r.rule == "risk_limit"
 
 
 def test_rejections_persist_idempotently(tmp_path):
     p = _pred(tmp_path, probability=0.55)
-    r = evaluate_prediction(p, config=EligibilityConfig(), as_of=AS_OF, reasoning="m")
+    r = evaluate_prediction(p, config=EligibilityConfig(), as_of=_same_day(p), reasoning="m")
     store = RejectionStore(tmp_path / "rej.jsonl")
-    assert store.record(r, as_of=AS_OF) is True
-    assert store.record(r, as_of=AS_OF) is False        # idempotent per day
+    assert store.record(r, as_of=_same_day(p)) is True
+    assert store.record(r, as_of=_same_day(p)) is False        # idempotent per day
     rows = store.read_all()
     assert len(rows) == 1 and rows[0]["rule"] == "low_confidence"

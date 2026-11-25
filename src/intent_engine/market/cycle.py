@@ -71,12 +71,41 @@ STARTED = "STARTED"
 COMPLETED = "COMPLETED"
 PARTIAL = "PARTIAL"
 FAILED = "FAILED"
+#: The run id had already completed. A genuine duplicate: the work exists.
 SKIPPED_DUPLICATE = "SKIPPED_DUPLICATE"
+#: Fired outside its scheduled local-time window. NOT a duplicate -- the work
+#: does NOT exist and, because nothing retries, it never will.
+#:
+#: This is what launchd does after the machine has been asleep: it coalesces
+#: the missed `StartCalendarInterval` firings and runs them at wake time, so
+#: both the 06:30 and the 20:30 job can fire together at (measured)
+#: 06:09. `--enforce-window` correctly refuses them -- and reporting that
+#: refusal as SKIPPED_DUPLICATE made three permanently lost cycles
+#: indistinguishable from three cycles whose work was already done.
+#: 2026-10-09 night, 2026-10-10 day and 2026-10-10 night were all lost this
+#: way, with every monitoring surface reporting success.
+SKIPPED_OUTSIDE_WINDOW = "SKIPPED_OUTSIDE_WINDOW"
+#: Another cycle held the shared lock. Also not a duplicate: this run did no
+#: work, though the holder presumably did.
+SKIPPED_LOCK_CONTENTION = "SKIPPED_LOCK_CONTENTION"
 SKIPPED_STALE_DATA = "SKIPPED_STALE_DATA"
 SKIPPED_NO_NEW_MARKET_SESSION = "SKIPPED_NO_NEW_MARKET_SESSION"
 
 STATUSES = (STARTED, COMPLETED, PARTIAL, FAILED, SKIPPED_DUPLICATE,
+            SKIPPED_OUTSIDE_WINDOW, SKIPPED_LOCK_CONTENTION,
             SKIPPED_STALE_DATA, SKIPPED_NO_NEW_MARKET_SESSION)
+
+#: Statuses where the process returned BEFORE running any step. The useful
+#: group for "did this run do the work", and deliberately excluding
+#: SKIPPED_NO_NEW_MARKET_SESSION, which ran every step and found no new market
+#: observation -- that is a completed cycle reporting an honest absence, not a
+#: skipped one, and grouping it here made a successful run look like a no-op.
+SKIPPED_WITHOUT_RUNNING = (SKIPPED_DUPLICATE, SKIPPED_OUTSIDE_WINDOW,
+                           SKIPPED_LOCK_CONTENTION, SKIPPED_STALE_DATA)
+
+#: Every non-failure status that is not a plain COMPLETED. Exists so adding a
+#: skip kind cannot silently fall out of the exit-code mapping below.
+SKIPPED = SKIPPED_WITHOUT_RUNNING + (SKIPPED_NO_NEW_MARKET_SESSION,)
 
 # The lock is shared by BOTH cycles. A night run must not start while a slow
 # day run is still going: they write the same funnel history and the same
@@ -131,6 +160,12 @@ class CycleResult:
     finished_at: str = ""
     trading_mode: str = ""
     dry_run: bool = False
+    #: True when this run replayed a slot that had already been missed. The
+    #: ledger MUST be able to tell a replay from an on-time run: a cycle
+    #: replayed on Sunday for Friday is a Sunday execution of Friday's window,
+    #: and reporting it as Friday's cycle would turn schedule reliability into
+    #: a number about replays. Execution timestamps are never backdated.
+    catch_up: bool = False
     report_paths: dict = field(default_factory=dict)
 
     @property
@@ -141,13 +176,17 @@ class CycleResult:
     def exit_code(self) -> int:
         """Nonzero on anything that is not a clean completion or a deliberate
         skip. launchd surfaces this, and a human's `status` reads it."""
-        return 0 if self.status in (COMPLETED, SKIPPED_DUPLICATE,
-                                    SKIPPED_NO_NEW_MARKET_SESSION) else 1
+        # Every skip kind exits 0: launchd must not thrash or back off over a
+        # deliberate refusal. The MISSED-cycle signal belongs on the health
+        # report, which can tell SKIPPED_OUTSIDE_WINDOW from a duplicate --
+        # exit status cannot, and conflating them is what hid the loss.
+        return 0 if self.status in (COMPLETED,) + SKIPPED else 1
 
     def as_dict(self) -> dict:
         return {"run_id": self.run_id, "cycle": self.cycle,
                 "as_of": self.as_of, "timezone": self.timezone,
                 "status": self.status, "reason": self.reason,
+                "catch_up": self.catch_up,
                 "session": self.session,
                 "steps": [s.as_dict() for s in self.steps],
                 "started_at": self.started_at, "finished_at": self.finished_at,
@@ -318,6 +357,7 @@ def run_cycle(cycle: str, *, root, steps: Sequence[Tuple[str, StepFn]],
               dry_run: bool = False,
               env: Optional[dict] = None,
               enforce_window: bool = False,
+              catch_up: bool = False,
               sleep: Callable[[float], None] = time.sleep) -> CycleResult:
     """Run one complete cycle. The order of the guards below is the design.
 
@@ -346,7 +386,7 @@ def run_cycle(cycle: str, *, root, steps: Sequence[Tuple[str, StepFn]],
             status=status, reason=reason,
             session=(session.as_dict() if session else {}),
             steps=tuple(steps_run), started_at=started, finished_at=_now_utc(),
-            trading_mode=mode, dry_run=dry_run,
+            trading_mode=mode, dry_run=dry_run, catch_up=catch_up,
             report_paths=reports or {})
         store.append(result)
         return result
@@ -363,7 +403,7 @@ def run_cycle(cycle: str, *, root, steps: Sequence[Tuple[str, StepFn]],
         hour, minute = SCHEDULE[cycle]
         if not S.within_window(now, hour, minute):
             return finish(
-                SKIPPED_DUPLICATE,
+                SKIPPED_OUTSIDE_WINDOW,
                 f"fired at {now.strftime('%H:%M %Z')}, outside the "
                 f"{hour:02d}:{minute:02d} {S.TIMEZONE} window — not running",
                 mode=mode)
@@ -420,7 +460,7 @@ def run_cycle(cycle: str, *, root, steps: Sequence[Tuple[str, StepFn]],
             return finish(COMPLETED, session.reason, session, ran, mode,
                           reports)
     except JobLockedError:
-        return finish(SKIPPED_DUPLICATE,
+        return finish(SKIPPED_LOCK_CONTENTION,
                       "another cycle holds the lock", mode=mode)
     except Exception as exc:  # noqa: BLE001 - never lose a failure
         return finish(FAILED, f"{F.classify(exc)}: {type(exc).__name__}: {exc}",

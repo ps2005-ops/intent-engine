@@ -60,7 +60,12 @@ import statistics
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Tuple
 
-CONTRACT = "market_learning_health.v1"
+# v2 renamed the former `expectation_calibration` / `belief_calibration` to
+# `hit_rate`, which is what they always computed, and added a real
+# `probabilistic_calibration` block beside it. The version is bumped rather
+# than the fields quietly redefined because 60 v1 snapshots are on record and
+# a reader must be able to tell which question a given row answered.
+CONTRACT = "market_learning_health.v2"
 
 # The sentinel. A metric is UNMEASURABLE when the data required to compute it
 # does not exist yet -- distinct from a measured zero, which is a finding.
@@ -135,6 +140,16 @@ KNOWLEDGE_REVERSAL_RATE_RISING = "KNOWLEDGE_REVERSAL_RATE_RISING"
 WATCHLIST_COVERAGE_DROPPING = "PRIORITY_WATCHLIST_COVERAGE_DROPPING"
 FOUNDER_UTILITY_DROPPING = "FOUNDER_UTILITY_DROPPING"
 PIPELINE_STAGE_REGRESSION = "PIPELINE_STAGE_REGRESSION"
+#: A scheduled cycle did no work and nothing will retry it. Fires on the
+#: SCHEDULE, not on the cycle reports, because a cycle that never ran wrote no
+#: report -- which is precisely why 20 of 145 due slots were lost in silence
+#: while every surface here reported healthy.
+CYCLES_MISSED = "CYCLES_MISSED"
+SCHEDULE_RELIABILITY_LOW = "SCHEDULE_RELIABILITY_LOW"
+
+#: Below this fraction of due slots actually doing work, the schedule is the
+#: engine's binding problem and no learning metric below it means much.
+MIN_SCHEDULE_RELIABILITY = 0.95
 
 ALERT_CLASSES = frozenset({
     LEARNING_STALLED, BELIEF_TESTING_STALLED, EXPECTATION_BACKLOG_GROWING,
@@ -788,11 +803,13 @@ class LearningHealth:
     status: Dict[str, object] = field(default_factory=dict)
     alerts: List[dict] = field(default_factory=list)
     coverage: Dict[str, object] = field(default_factory=dict)
+    schedule: Dict[str, object] = field(default_factory=dict)
 
     def as_dict(self) -> dict:
         return {
             "contract": CONTRACT, "as_of": self.as_of,
             "runtime_sha": self.runtime_sha,
+            "schedule_health": self.schedule,
             "observation_health": self.observation,
             "belief_health": self.belief,
             "expectation_health": self.expectation,
@@ -825,11 +842,34 @@ def alerts(observations: Sequence[CycleObservation],
     """
     usable = [o for o in observations if not o.backlog_drain]
     out: List[dict] = []
-    if len(usable) < MIN_CYCLES_FOR_ALERT:
-        return out
 
     def fire(name: str, detail: str, severity: str = "WARN") -> None:
         out.append({"alert": name, "severity": severity, "detail": detail})
+
+    # --- schedule first, and ABOVE the observation gate -------------------
+    # Every alert below needs MIN_CYCLES_FOR_ALERT observations, and an
+    # observation only exists for a cycle that RAN. So the fewer cycles run,
+    # the fewer alerts could fire -- the engine went quietest exactly when it
+    # was most broken. A missed cycle is read from the schedule, which exists
+    # whether or not anything ran, so it must be checked before that gate.
+    schedule = health.schedule or {}
+    lost = int(schedule.get("slots_lost", 0) or 0)
+    if lost:
+        recoverable = len(schedule.get("recoverable", ()) or ())
+        fire(CYCLES_MISSED,
+             f"{lost} scheduled cycle(s) did no work and nothing retried "
+             f"them; {recoverable} are still recoverable "
+             f"(`market catch-up` replays them)",
+             "CRITICAL" if recoverable else "WARN")
+    reliability = schedule.get("reliability")
+    if _is_number(reliability) and reliability < MIN_SCHEDULE_RELIABILITY:
+        fire(SCHEDULE_RELIABILITY_LOW,
+             f"{reliability:.1%} of due cycles did work "
+             f"(floor {MIN_SCHEDULE_RELIABILITY:.0%}); the schedule is the "
+             f"binding problem, not the learning rate", "CRITICAL")
+
+    if len(usable) < MIN_CYCLES_FOR_ALERT:
+        return out
 
     recent = usable[-MIN_CYCLES_FOR_ALERT:]
 
@@ -977,6 +1017,10 @@ def assess(*, root: pathlib.Path, as_of: str, store=None,
     belief_rows = [r for r in rows if r.get("record") == "belief"]
     expectation_rows = [r for r in rows if r.get("record") == "expectation"]
     reconciliations = [r for r in rows if r.get("record") == "reconciliation"]
+    # Carries the forecast probability AND the realised direction in one row,
+    # which is why calibration is scored from here rather than from a join --
+    # see `probabilistic_calibration` on why the join scores the wrong prior.
+    belief_updates = [r for r in rows if r.get("record") == "belief_update"]
 
     observations = load_cycle_observations(root)
     health = LearningHealth(as_of=as_of[:10], runtime_sha=runtime_sha)
@@ -1101,14 +1145,20 @@ def assess(*, root: pathlib.Path, as_of: str, store=None,
                 + outcomes.get("CONTRADICTED", 0))
     # Below the minimum sample every one of these is a number that would be
     # read as a measurement and is not one.
+    # Two different questions, two different fields. `hit_rate` is how often
+    # the engine was right; `probabilistic_calibration` is whether its stated
+    # probabilities mean anything. They can disagree, and on this ledger they
+    # do -- a 0.72 hit rate sitting on negative Brier skill. Reporting the
+    # first under the name of the second is the defect this replaces.
+    from . import probabilistic_calibration as PC
+    proper_score = PC.score(PC.pairs_from_updates(belief_updates))
     if resolved < MIN_RESOLVED_FOR_CALIBRATION:
         health.calibration = {
             "effective_sample_size": resolved,
-            "belief_calibration": UNMEASURABLE,
-            "expectation_calibration": UNMEASURABLE,
+            "hit_rate": UNMEASURABLE,
             "false_positive_rate": UNMEASURABLE,
             "false_negative_rate": UNMEASURABLE,
-            "brier_or_equivalent": UNMEASURABLE,
+            "probabilistic_calibration": proper_score,
             "because": f"{resolved} informative resolutions on record; "
                        f"{MIN_RESOLVED_FOR_CALIBRATION} is the minimum at "
                        f"which any of these stops being noise",
@@ -1118,11 +1168,10 @@ def assess(*, root: pathlib.Path, as_of: str, store=None,
             "PARTIALLY_CONFIRMED", 0)
         health.calibration = {
             "effective_sample_size": resolved,
-            "expectation_calibration": confirmed / resolved,
+            "hit_rate": confirmed / resolved,
             "false_positive_rate": outcomes.get("CONTRADICTED", 0) / resolved,
             "false_negative_rate": UNMEASURABLE,
-            "belief_calibration": confirmed / resolved,
-            "brier_or_equivalent": UNMEASURABLE,
+            "probabilistic_calibration": proper_score,
         }
     health.counterfactual = {
         "near_misses": 0,
@@ -1194,7 +1243,34 @@ def assess(*, root: pathlib.Path, as_of: str, store=None,
     # a transmission hypothesis that has been wrong every time it was checked
     # keeps proposing beliefs at full strength forever.
     from . import mechanism_calibration as MC
-    health.mechanisms = MC.summarise(MC.calibrate(rows))
+    # The mechanism grade is capped by its CAUSAL standing before it is
+    # published. `calibration_consistency` could always compute that ceiling
+    # and nothing applied it -- no module under src/ imported it -- so a
+    # mechanism graded ESTABLISHED off a hit rate was published as ESTABLISHED
+    # under a CONTESTED causal family. A high confirmation rate measures
+    # prediction, not identification, and must not be read as the second.
+    from . import calibration_consistency as CK
+    from . import causal_calibration as CC
+    from . import belief_maturity as BM
+    _mechanisms = MC.calibrate(rows)
+    try:
+        from intent_engine.universe.companies import default_universe
+        _industry = {c.company_id: (getattr(c, "industry", "") or "")
+                     for c in default_universe().prediction_companies()}
+    except Exception:  # noqa: BLE001 - a cap must not depend on the universe
+        _industry = {}
+    # No try/except around `check`: it is pure comparison over data already
+    # in hand, and swallowing a failure here would silently restore exactly
+    # the uncapped publication this exists to stop -- the cap would look
+    # applied and not be. If it can raise, that is a defect to see, not hide.
+    _incoherences = CK.check(
+        maturities=BM.classify(rows, as_of=as_of),
+        mechanisms=_mechanisms,
+        causal_families=CC.calibrate(rows, industry_of=_industry),
+        family_of={r.get("hypothesis_id"): r.get("metric")
+                   for r in expectation_rows})
+    health.mechanisms = CK.cap_mechanism_summary(
+        MC.summarise(_mechanisms), _incoherences)
 
     health.funnel = funnel(observations, ledger_totals={
         "expectations_resolved": resolved,
@@ -1222,6 +1298,11 @@ def assess(*, root: pathlib.Path, as_of: str, store=None,
 
     health.status = classify(observations, as_of=as_of,
                              bottleneck=health.funnel.get("bottleneck"))
+    # The schedule is read from the durable run ledger, not from the cycle
+    # reports -- a cycle that never ran wrote no report, so the reports can
+    # never reveal its absence. Must precede `alerts`, which consumes it.
+    from . import schedule_audit as SCHED
+    health.schedule = SCHED.audit(root=root, end=as_of[:10])
     health.alerts = alerts(observations, health)
     return health
 
@@ -1373,13 +1454,22 @@ def render(health: LearningHealth) -> str:
         f"{expectation['expectations_confirmed']} / "
         f"{expectation['expectations_contradicted']}",
         f"- Validated knowledge: {knowledge['net_new_knowledge']}",
-        f"- Expectation calibration: "
-        f"{_fmt(calibration['expectation_calibration'])} "
+        f"- Hit rate (how often it was right): "
+        f"{_fmt(calibration['hit_rate'])} "
         f"(n={calibration['effective_sample_size']})",
         "",
     ]
     if calibration.get("because"):
         lines += [f"_{calibration['because']}_", ""]
+
+    # Deliberately its own section. Folded in beside the hit rate it reads as
+    # a second opinion on the same quantity, and it is not one.
+    proper_score = calibration.get("probabilistic_calibration") or {}
+    if proper_score:
+        from . import probabilistic_calibration as PC
+        lines += ["## Do its probabilities mean anything?", ""]
+        lines += PC.render(proper_score)
+        lines += [""]
 
     lines += [
         "## Is learning speeding up?",
@@ -1459,6 +1549,13 @@ def render(health: LearningHealth) -> str:
         f"{cov.get('off_watchlist_companies_observed')}",
         "",
     ]
+
+    schedule = d.get("schedule_health") or {}
+    if schedule:
+        from . import schedule_audit as SCHED
+        lines += ["## Did every scheduled cycle actually run?", ""]
+        lines += SCHED.render(schedule)
+        lines += [""]
 
     if d["alerts"]:
         lines += ["## Alerts", ""]

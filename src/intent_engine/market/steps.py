@@ -650,6 +650,16 @@ def learning_step(ctx: C.CycleContext) -> dict:
             # answers to "what changed your mind".
             economic_theses=store.thesis_snapshots(),
             thesis_revisions=store.thesis_revisions(),
+            # THE EXPECTATION LEG. The snapshot was handed
+            # `information_priorities` -- a different thing, empty in 26/26
+            # exports -- while the ledger held real preregistered
+            # expectations. Zero expectations was a wiring artefact, not a
+            # finding about the companies.
+            expectations=store.expectations(),
+            # THE CAUSAL TRUTH LEG: 25 real resolutions, every one a refusal
+            # naming its missing prerequisite. Withholding them published
+            # "did not run", which is false.
+            causal_resolutions=store.causal_estimates(),
             history_available=True)
     except Exception as exc:  # noqa: BLE001 - see above
         payload["strategic_export"] = {"error": str(exc), "published": []}
@@ -853,7 +863,8 @@ def source_acquisition_step(ctx: C.CycleContext) -> dict:
             status=_acquisition_status(report, integrated=integrated),
             started_at=started,
             completed_at=_dt.datetime.now(_dt.timezone.utc).isoformat(),
-            documents_attempted=report.documents_attempted,
+            subjects_attempted=report.subjects_attempted,
+            documents_attempted=report.document_attempts,
             documents_retrieved=report.documents_retrieved,
             accepted_evidence=(report.relationships_accepted if integrated
                                else 0),
@@ -963,6 +974,7 @@ def _rehydrate_outcome(row: dict):
             status=str(row.get("status") or ""),
             started_at=str(row.get("started_at") or ""),
             completed_at=str(row.get("completed_at") or ""),
+            subjects_attempted=int(row.get("subjects_attempted") or 0),
             documents_attempted=int(row.get("documents_attempted") or 0),
             documents_retrieved=int(row.get("documents_retrieved") or 0),
             accepted_evidence=int(row.get("accepted_evidence") or 0),

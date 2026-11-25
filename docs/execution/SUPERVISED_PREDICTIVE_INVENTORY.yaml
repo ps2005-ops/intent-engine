@@ -1,0 +1,125 @@
+# Every predictive/supervised-like component in the Market engine.
+#
+# WHY THIS EXISTS AS DATA
+# ------------------------
+# "Supervised learning" was reported NOT_BUILT because nobody had enumerated
+# what already predicts. The answer is that a prospective forecast→reconcile→
+# score chain has been running all along; what was missing was the honest
+# classification of WHICH components actually update parameters.
+#
+# THE CLASSIFICATION RULE, STATED SO IT CANNOT DRIFT
+# ---------------------------------------------------
+# A component is LEARNING only if fitted parameters change in response to
+# resolved observations. Running every cycle is not learning. Being evaluated
+# every cycle is not learning. `_persistence` runs daily forever and will
+# never learn anything, by design — it is the bar the others must clear.
+
+contract: supervised_predictive_inventory.v1
+as_of: "2026-08-13"
+
+classes: [LIVE_ONLINE_LEARNING, LIVE_PERIODIC_RETRAINING,
+          LIVE_FIXED_MODEL_WITH_EVALUATION, EVALUATION_ONLY,
+          ARCHITECTURE_ONLY, BLOCKED_DATA, DEPRECATED, LEGACY_AUXILIARY]
+
+components:
+  - component_id: macro_ar1_forecast
+    module: intent_engine.market.macro_expectation
+    entrypoint: "forecast() -> Expectation"
+    target: "next value of a macro series"
+    method: "first-order autoregression, coefficients fitted per call"
+    fitted_parameters: true
+    fit_site: "_ar1_fit(values) -> (alpha, beta)"
+    training_data: "the series history available at prediction time"
+    prediction_persisted: true
+    outcome_resolver: "reconcile() -> Surprise"
+    evaluation: "backtest() -> MethodScore"
+    baseline: "persistence and drift, in economic_method"
+    temporal_wall: "forecast reads only observations at or before as_of"
+    production_caller: "market cycle, macro/expectation step"
+    ledger_rows: "method_performance (207), method_assumption_check (276)"
+    # Coefficients are re-fitted from the current window on every call, so
+    # parameters DO move with new resolved data — but there is no persisted
+    # trained artifact that carries across runs. That is periodic refitting,
+    # not online learning, and the distinction matters: nothing accumulates.
+    capability: LIVE_PERIODIC_RETRAINING
+    empirical: MEASURED
+
+  - component_id: macro_persistence_baseline
+    module: intent_engine.market.economic_method
+    entrypoint: "_persistence(history)"
+    target: "next value of a macro series"
+    method: "last observation carried forward"
+    fitted_parameters: false
+    # Deliberately incapable of learning. It exists to make a claim of
+    # improvement falsifiable.
+    capability: LIVE_FIXED_MODEL_WITH_EVALUATION
+    empirical: MEASURED
+
+  - component_id: macro_drift_baseline
+    module: intent_engine.market.economic_method
+    entrypoint: "_drift(history)"
+    method: "mean first difference extrapolated"
+    fitted_parameters: false
+    capability: LIVE_FIXED_MODEL_WITH_EVALUATION
+    empirical: MEASURED
+
+  - component_id: synthetic_control_estimator
+    module: intent_engine.market.economic_method
+    entrypoint: "_synthetic_control_estimator(treated, donors, ...)"
+    target: "counterfactual path of a treated unit"
+    method: "donor weighting"
+    fitted_parameters: true
+    fit_site: "donor weights solved per estimation"
+    capability: LIVE_PERIODIC_RETRAINING
+    empirical: BLOCKED_DATA
+    blocked_reason: >
+      needs a donor panel with enough pre-period history; the live causal
+      channel reports PANEL_UNAVAILABLE on every current question
+    sample_required: "a donor panel per question"
+    sample_available: "0 questions currently have one"
+
+  - component_id: causal_calibration
+    module: intent_engine.market.causal_calibration
+    target: "whether a causal family's estimates are borne out"
+    method: "outcome scoring by family, no fitted parameters"
+    fitted_parameters: false
+    capability: EVALUATION_ONLY
+    empirical: MEASURED
+
+  - component_id: mechanism_calibration
+    module: intent_engine.market.mechanism_calibration
+    target: "whether a named mechanism's predictions hold"
+    fitted_parameters: false
+    capability: EVALUATION_ONLY
+    empirical: MEASURED
+
+  - component_id: calibration_consistency
+    module: intent_engine.market.calibration_consistency
+    target: "internal consistency of stated confidences"
+    fitted_parameters: false
+    capability: EVALUATION_ONLY
+    empirical: MEASURED
+
+  - component_id: research_policy
+    module: intent_engine.market.research_policy
+    target: "which research action to take next"
+    method: "value-of-information scoring over candidate actions"
+    fitted_parameters: false
+    prediction_persisted: true
+    outcome_resolver: "research_outcome rows"
+    capability: EVALUATION_ONLY
+    empirical: BLOCKED_DATA
+    blocked_reason: >
+      prospective decision/outcome pairs are accumulating (40 decisions,
+      40 outcomes incl. 1 FAILED and 1 NO_RESULT) but the sample cannot yet
+      support off-policy evaluation
+    sample_required: "not yet justified statistically; see RL_POLICY_MATURITY"
+    sample_available: "40 prospective pairs"
+
+  - component_id: legacy_daily_market_predictions
+    module: scripts/daily_market_predictions.py
+    capability: LEGACY_AUXILIARY
+    empirical: NOT_APPLICABLE
+    note: >
+      retained for its July 2026 prospective predictions; NOT the system of
+      record and not scheduled

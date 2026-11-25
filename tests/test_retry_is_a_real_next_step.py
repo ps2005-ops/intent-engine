@@ -111,10 +111,15 @@ def failed_run():
     # Landing there instead of on the detail page is what made the first
     # version of this file pass three times and fail the fourth. Poll until
     # the reader would actually be on the page under test.
+    # Poll for the page UNDER TEST, not for the absence of one other page. A
+    # retryable run also has a progress variant ("This analysis stopped
+    # early") with no "See the failure details" link; breaking on that link's
+    # absence landed there whenever the web store lagged, which happened under
+    # a loaded full suite (15 errors on 2026-11-25, 15/15 green alone).
     body = ""
     for _ in range(200):
         body = get(f"/runs/{run}")
-        if "See the failure details" not in body:
+        if "What happened to each source" in body:
             break
         time.sleep(0.05)
     else:                                       # pragma: no cover

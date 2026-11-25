@@ -44,9 +44,28 @@ import pathlib
 import re
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
+from . import demo_snapshot_export as DSE
 from . import strategic_export as SE
 
 EXPORT_DIR = "reports/market/strategic"
+
+
+def _runtime_sha() -> str:
+    """The market runtime's provenance, for the neutral read model.
+
+    A dossier assembled from two sides must record which code produced each,
+    or a change of behaviour between versions looks like a change in the
+    company.
+    """
+    try:
+        from .runtime_provenance import provenance
+        # `runtime_git_sha` is the field name `runtime_provenance` actually
+        # emits. Getting it wrong is invisible: the snapshot publishes an
+        # empty sha, the dossier records "no market runtime", and nothing
+        # anywhere raises. A test pins the two together.
+        return str((provenance() or {}).get("runtime_git_sha") or "")
+    except Exception:  # noqa: BLE001 - provenance must never fail a publish
+        return ""
 
 
 def company_key(subject: str) -> str:
@@ -127,6 +146,52 @@ def bundles(result, *, market_structures: Sequence[Any] = (),
     return out
 
 
+def _causal_for(resolutions: Sequence[Any], subject_id: str) -> list:
+    """This subject's causal resolutions, refusals included."""
+    out = []
+    for r in resolutions or ():
+        question = (r.get("question") if isinstance(r, dict)
+                    else getattr(r, "question", None)) or {}
+        company = (question.get("company_id") if isinstance(question, dict)
+                   else getattr(question, "company_id", ""))
+        if str(company or "") == str(subject_id):
+            out.append(r)
+    return out
+
+
+def _causal_questions_for(resolutions: Sequence[Any], subject_id: str) -> list:
+    """The questions behind this subject's resolutions.
+
+    Read off the resolutions rather than collected separately: a question
+    published without its resolution would say the engine asked and leave the
+    answer -- including the refusal -- invisible.
+    """
+    out = []
+    for r in _causal_for(resolutions, subject_id):
+        question = (r.get("question") if isinstance(r, dict)
+                    else getattr(r, "question", None))
+        if question:
+            out.append(question)
+    return out
+
+
+def _expectations_for(expectations: Sequence[Any], subject_id: str) -> list:
+    """This subject's expectations only.
+
+    An expectation belongs to whoever it is about. Publishing the whole
+    ledger under one company would attribute another company's preregistered
+    test to this one, which is the cross-subject contamination the export
+    wall exists to prevent.
+    """
+    out = []
+    for e in expectations or ():
+        subject = (e.get("subject") if isinstance(e, dict)
+                   else getattr(e, "subject", ""))
+        if str(subject or "") == str(subject_id):
+            out.append(e)
+    return out
+
+
 def _belongs(thesis: Any, subject_id: str) -> bool:
     """Whether this thesis is about this subject, by id and never by text."""
     if isinstance(thesis, dict):
@@ -168,6 +233,21 @@ def publish(result, *, root=".", market_structures: Sequence[Any] = (),
             evidence_rows: Sequence[Any] = (),
             economic_theses: Sequence[Any] = (),
             thesis_revisions: Sequence[Any] = (),
+            #: Real preregistered expectations. None (the default) keeps the
+            #: previous behaviour exactly, so a caller that does not pass them
+            #: is unchanged rather than silently publishing an empty block.
+            expectations: Optional[Sequence[Any]] = None,
+            #: Causal resolutions, refusals included. None keeps the old
+            #: behaviour; passing them is what stops a refusal being
+            #: published as "this subsystem did not run".
+            causal_resolutions: Optional[Sequence[Any]] = None,
+            #: Measured economic conditions, and the RAW ledger rows the
+            #: exposure reader needs. Both or neither: an economy with no
+            #: exposure profile is a story that applies to every company
+            #: equally, which is the one thing `company_exposure` exists to
+            #: refuse. None keeps the previous behaviour exactly.
+            economic_states: Optional[Sequence[Any]] = None,
+            exposure_rows: Optional[Sequence[Any]] = None,
             history_available: bool = True,
             limitations: Sequence[str] = ()) -> dict:
     """Write one sanitized export per company with something to say.
@@ -198,10 +278,51 @@ def publish(result, *, root=".", market_structures: Sequence[Any] = (),
     grouped = bundles(result, market_structures=market_structures,
                       pricing_actions=pricing_actions,
                       causal_pathways=causal_pathways)
+    # WHICH ECONOMY REACHES WHICH COMPANY.
+    #
+    # Publishing the measured economy to every company would put the same
+    # sixteen conditions on twenty-six dossiers -- a macro dashboard, which is
+    # exactly what §4 asks this NOT to be. A condition crosses only where this
+    # company's own evidence establishes an exposure that transmits it, which
+    # is `company_exposure.conditions_transmission`, unchanged.
+    #
+    # 266 of 270 dimensions are UNKNOWN in the live corpus and that is the
+    # honest reading: an exposure model with every dimension populated is one
+    # that has been guessing from a sector table.
+    _economy = list(economic_states or ())
+    _profiles: Dict[str, Any] = {}
+    if economic_states is not None and exposure_rows:
+        from . import company_exposure as _CX
+        for _subject in sorted({str(r.get("subject_company") or "")
+                                for r in exposure_rows
+                                if isinstance(r, dict)
+                                and r.get("record") == "evidence"
+                                and r.get("subject_company")}):
+            _profiles[_subject] = _CX.profile(exposure_rows,
+                                              company_id=_subject)
+
+    def _economy_for(subject_id: str):
+        """The conditions that reach THIS company, or a stated absence.
+
+        Returns None when no economy was supplied at all -- which must stay
+        distinguishable from "the economy is measured and none of it reaches
+        this company", the answer for 23 of 27 live companies.
+        """
+        if economic_states is None:
+            return None
+        from . import company_exposure as _CX
+        profile = _profiles.get(subject_id) or {}
+        if not profile:
+            return []
+        return [s for s in _economy
+                if any(_CX.conditions_transmission(profile.get(d), s)
+                       for d in _CX.DIMENSIONS)]
     identities = identities or {}
     published: List[str] = []
     refused: List[dict] = []
     unnamed: List[str] = []
+    snapshots: List[str] = []
+    snapshot_refused: List[dict] = []
     for key, bundle in grouped.items():
         subject_id = bundle["subject"]
         display, aliases = _identity_for(subject_id, identities)
@@ -250,6 +371,64 @@ def publish(result, *, root=".", market_structures: Sequence[Any] = (),
             refused.append({"company_id": file_key, "reason": str(exc)})
             continue
         published.append(file_key)
+        # The neutral read model's market leg, emitted from the SAME bundle
+        # rather than from a demo-only path (§12). It carries ids and states
+        # only; blocks this cycle did not compute are passed as None and
+        # serialize as UNAVAILABLE, never as an empty list.
+        try:
+            DSE.write_snapshot(DSE.build_snapshot(
+                company_id=file_key, as_of=result.as_of,
+                canonical_name=display or file_key, subject_names=aliases,
+                market_run_id=str(getattr(result, "run_id", "") or ""),
+                runtime_sha=_runtime_sha(),
+                beliefs=bundle["beliefs"],
+                # ALREADY IN THE BUNDLE, and already shipped to the strategic
+                # export for 22 of 26 companies. The demo contract simply had
+                # no field for it, so the product showed nothing.
+                hidden_states=bundle["hidden_states"],
+                theses=[t for t in economic_theses
+                        if _belongs(t, subject_id)],
+                thesis_revisions=_revisions_for(
+                    thesis_revisions,
+                    [t for t in economic_theses if _belongs(t, subject_id)]),
+                reconciliations=bundle["reconciliations"],
+                # `information_priorities` was passed here as the expectation
+                # block. It is a DIFFERENT thing, and it is empty in 26/26
+                # exports, while the ledger holds real preregistered
+                # expectations with falsifiers and evaluation windows. The
+                # snapshot was reading the wrong field, so "no expectations"
+                # was a wiring artefact and not a finding.
+                expectations=(_expectations_for(expectations, subject_id)
+                              if expectations is not None
+                              else bundle["information_priorities"]),
+                evidence_rows=evidence_rows,
+                # Deliberately NOT passed: this cycle does not compute them,
+                # and `None` is the honest statement of that. Passing `()`
+                # here would publish "we looked and found no causal result",
+                # which is a finding nobody made.
+                # THE CAUSAL TRUTH LEG. The router asked real questions and
+                # refused them for a named missing prerequisite. Publishing
+                # None said "did not run", which is a different claim and a
+                # false one -- and it is the claim that made the product look
+                # like it has no causal capability at all.
+                causal_questions=(_causal_questions_for(causal_resolutions,
+                                                        subject_id)
+                                  if causal_resolutions is not None else None),
+                causal_results=(_causal_for(causal_resolutions, subject_id)
+                                if causal_resolutions is not None else None),
+                replay_episodes=None, adversary_cases=None,
+                demand_states=None, contradictions=None,
+                # THE ECONOMY THIS COMPANY IS ACTUALLY EXPOSED TO. `None` was
+                # passed here unconditionally, so `ECONOMIC_STATE_NOT_RUN` was
+                # a wiring artefact: the macro layer holds 2,466 observations
+                # and 16 anchored conditions, and the cycle already computes
+                # both the states and the exposure profiles.
+                economic_states=_economy_for(subject_id),
+            ), root=root)
+            snapshots.append(file_key)
+        except DSE.SnapshotLeak as exc:
+            snapshot_refused.append({"company_id": file_key,
+                                     "reason": str(exc)})
     return {
         "contract": SE.EXPORT_VERSION,
         "as_of": result.as_of,
@@ -257,6 +436,8 @@ def publish(result, *, root=".", market_structures: Sequence[Any] = (),
         "published": sorted(published),
         "refused": refused,
         "unnamed": sorted(unnamed),
+        "demo_snapshots": sorted(snapshots),
+        "demo_snapshots_refused": snapshot_refused,
         "directory": str(pathlib.Path(root) / EXPORT_DIR),
         "note": ("a company with no belief, posture move, mismatch or "
                  "information priority is not given an empty dossier"),

@@ -20,6 +20,8 @@ editing history, which is precisely what an append-only log exists to prevent.
 """
 from __future__ import annotations
 
+import datetime as _dt
+
 import json
 import pathlib
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
@@ -274,6 +276,15 @@ class LearningStore:
             raise ValueError("a causal estimate row needs a resolution_id")
         if rid in self.causal_estimate_ids():
             return False
+        # WHEN this estimate was made. Every causal row written before
+        # 2026-08-12 carried no timestamp of any kind — only a state such as
+        # PANEL_UNAVAILABLE — so the whole causal channel was invisible to
+        # every reporting window. That was a producer gap, not a reader gap:
+        # no priority of field names can date a row that was never stamped.
+        # Historical rows stay unstamped and report LEGACY_UNDATABLE; they are
+        # not back-filled, because inventing a date for a past estimate is
+        # exactly the kind of fabrication this ledger refuses.
+        payload.setdefault("estimated_at", _dt.date.today().isoformat())
         self._append(CAUSAL_ESTIMATE, payload)
         return True
 
@@ -1093,6 +1104,27 @@ class LearningStore:
     def reconciliations(self) -> Tuple[dict, ...]:
         return tuple(r for r in self._rows()
                      if r.get("record") == RECONCILIATION)
+
+    def causal_estimates(self) -> Tuple[dict, ...]:
+        """Every causal resolution, including the refusals.
+
+        A refusal is the commonest outcome and the most important one to
+        publish: it says the engine ASKED and could not identify, which is
+        different in kind from never having asked.
+        """
+        return tuple(r for r in self._rows()
+                     if r.get("record") == CAUSAL_ESTIMATE)
+
+    def expectations(self) -> Tuple[dict, ...]:
+        """Every preregistered expectation, for the publisher to filter.
+
+        `expectation_ids` existed and this did not, so a caller wanting the
+        expectations themselves had nothing to call -- which is why the demo
+        snapshot was handed `information_priorities` instead and published
+        zero expectations for every company while 76 sat in the ledger.
+        """
+        return tuple(r for r in self._rows()
+                     if r.get("record") == EXPECTATION)
 
     def health(self) -> dict:
         rows = self._rows()

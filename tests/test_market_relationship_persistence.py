@@ -211,7 +211,8 @@ def test_the_acquisition_step_persists_what_it_accepts(tmp_path, monkeypatch):
         """
 
         family = "government_award"
-        documents_attempted = 1
+        subjects_attempted = 1
+        document_attempts = 1
         documents_retrieved = 1
         relationships_accepted = 1
         relationships_refused = 0

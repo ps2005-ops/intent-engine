@@ -1,0 +1,195 @@
+# THE COMPLETION MATRIX — one machine-readable source.
+#
+# A previous hand-written matrix said "PARTIAL (10)" above a table containing
+# twelve PARTIAL rows. A completion matrix that cannot count itself is not
+# authoritative, so counts are never typed here: `scripts/market_matrix.py`
+# derives them, and a test asserts the derivation equals the rows.
+#
+# TWO AXES, DELIBERATELY.
+#   capability        — is the seam built, called, persisted, reloaded,
+#                       consumed, reported, and proven?
+#   empirical         — has enough real data arrived for the numbers to mean
+#                       something?
+# A conservative channel with a complete seam and no movement today is
+# capability=PASS, empirical=RAN_NO_CHANGE. Collapsing those into PARTIAL is
+# what kept twelve finished subsystems looking unfinished.
+
+contract: market_learning_os_matrix.v1
+as_of: "2026-08-12"
+market_sha: "ec9d630"
+
+capability_states: [PASS, PARTIAL, NOT_BUILT, BLOCKED_DATA, BLOCKED_EXTERNAL,
+                    NOT_APPLICABLE, UNMEASURED]
+empirical_states: [MEASURED, RAN_NO_CHANGE, SPARSE, BLOCKED_DATA,
+                   BLOCKED_EXTERNAL, LEGACY_UNDATABLE, NOT_APPLICABLE,
+                   UNMEASURED, RAN_NO_ELIGIBLE_ITEM, NOT_CONSUMED]
+
+axes:
+  - id: SYSTEM_OF_RECORD
+    capability: PASS
+    empirical: MEASURED
+    evidence: "declared + code-consumed; 17 break proofs"
+  - id: COMPANY_ACQUISITION
+    capability: PASS
+    empirical: MEASURED
+    evidence: "live cycle: 6 evidence, 80 re-observations"
+  - id: MACRO
+    capability: PASS
+    empirical: MEASURED
+    evidence: "2,446 observations, retrieved_at today"
+  - id: EVIDENCE
+    capability: PASS
+    empirical: MEASURED
+    evidence: "763 rows; 646 datable in 7d"
+  - id: EVIDENCE_INDEPENDENCE
+    capability: PASS
+    empirical: MEASURED
+    evidence: "market/evidence_independence.py adds the ORIGIN axis over the
+      existing per-role vantage weight; live week: 41 rows, 3 origins, 1
+      independent group, PARTIALLY_INDEPENDENT. 19 tests incl. the ten-
+      syndicated-copies metamorphic case"
+  - id: ECONOMIC_STATE
+    capability: PASS
+    empirical: MEASURED
+  - id: DEMAND
+    capability: PASS
+    empirical: SPARSE
+    evidence: "producer/persistence/consumer all live; real coverage thin"
+  - id: BELIEFS
+    capability: PASS
+    empirical: MEASURED
+    evidence: "88 rows incl. 15 updates, all datable"
+  - id: EXPECTATIONS
+    capability: PASS
+    empirical: MEASURED
+    evidence: "73 preregistered; datable via preregistered_at"
+  - id: RECONCILIATION
+    capability: PASS
+    empirical: MEASURED
+    evidence: "15 reconciliations; datable via evaluated_at"
+  - id: HIDDEN_STATE
+    capability: PASS
+    empirical: RAN_NO_CHANGE
+  - id: WORLD_MODEL
+    capability: PASS
+    empirical: MEASURED
+    evidence: "28 relationship rows"
+  - id: CAUSAL
+    capability: PASS
+    empirical: LEGACY_UNDATABLE
+    evidence: "25 estimates; producer now stamps estimated_at, historical rows
+      deliberately not back-filled"
+  - id: SUPERVISED_PREDICTIVE
+    capability: PASS
+    empirical: MEASURED
+    evidence: "SUPERVISED_PREDICTIVE_INVENTORY.yaml: 9 components classified.
+      2 fit parameters (macro AR1, synthetic control), 2 are deliberately
+      unlearnable baselines, 4 evaluation-only, 1 legacy. The prospective
+      chain forecast()->reconcile()->backtest() was running all along; what
+      was missing was the honest classification"
+  - id: UNSUPERVISED
+    capability: PASS
+    empirical: SPARSE
+    evidence: "UNSUPERVISED_UTILITY_GAIN EARLY_WARNING 1/3 INSUFFICIENT_SAMPLE"
+  - id: ACTIVE_LEARNING
+    capability: PASS
+    empirical: MEASURED
+    evidence: "40 decisions / 40 outcomes"
+  - id: RL_PROSPECTIVE_DATA
+    capability: PASS
+    empirical: MEASURED
+    evidence: "SUCCESS 38 / FAILED 1 / NO_RESULT 1; zero-result captured"
+  - id: RL_POLICY_MATURITY
+    capability: PASS
+    empirical: BLOCKED_DATA
+    evidence: "correctly gated; collection running"
+  - id: THESIS
+    capability: PASS
+    empirical: MEASURED
+    evidence: "89 snapshots, 23 revisions, datable via changed_at"
+  - id: PROOF
+    capability: PASS
+    empirical: RAN_NO_CHANGE
+  - id: ADVERSARY
+    capability: PASS
+    empirical: RAN_NO_CHANGE
+  - id: TRADING_CONSUMER
+    capability: PASS
+    empirical: NOT_APPLICABLE
+    evidence: "declared a consumer; learning proven with zero trades"
+  - id: FOUNDER_CONSUMPTION
+    capability: PASS
+    empirical: NOT_CONSUMED
+    evidence: "market/founder_freshness.py: a semantic-digest state machine
+      that mechanically separates CURRENT from merely-untouched. 31 tests,
+      both arms, 6 break proofs. LIVE: 0 of 60 companies current - 35
+      NOT_CONSUMED, 25 whose revisions predate digest recording and therefore
+      cannot be PROVEN current. The capability closed; the empirical state is
+      bad and is now visible instead of silent. No Founder consumer runs
+      against this data root and transport is TRANSPORT_NOT_CONFIGURED."
+  - id: COMPANY_DEMO_DOSSIER
+    capability: PASS
+    empirical: RAN_NO_CHANGE
+  - id: DAILY_REPORT
+    capability: PASS
+    empirical: MEASURED
+    evidence: "reports/learning/daily/2026-08-12.json"
+  - id: WEEKLY_REPORT
+    capability: PASS
+    empirical: MEASURED
+    evidence: "reports/learning/weekly/2026-W33.json, partial period marked"
+  - id: MONTHLY_REPORT
+    capability: PASS
+    empirical: MEASURED
+    evidence: "reports/learning/monthly/2026-08.json, PARTIAL_MONTH true"
+  - id: LEARNING_ACCELERATION
+    capability: PASS
+    empirical: MEASURED
+  - id: STAGNATION
+    capability: PASS
+    empirical: MEASURED
+  - id: WATCHDOG
+    capability: PASS
+    empirical: MEASURED
+    evidence: "live OK; 5 break proofs; 7 negative controls"
+  - id: SOURCE_DEGRADATION
+    capability: PASS
+    empirical: MEASURED
+    evidence: "6 families tracked; bureau_of_labor_statistics UNCLASSIFIED"
+  - id: KNOWLEDGE_DECAY
+    capability: PASS
+    empirical: RAN_NO_ELIGIBLE_ITEM
+    evidence: "the previous matrix was WRONG: knowledge_decay.summarise emits
+      next_decay_window=2026-12-03 and three distinct cadences (120/180/365d)
+      are in use, so the review window exists and is per-belief. 73 beliefs
+      assessed, 0 eligible because the oldest is 8 days old; 58 WINDOW_OPEN,
+      15 TESTED. It separates STALE (time passing) from WEAKENING (evidence
+      arguing against), so age alone never means false"
+  - id: BOTTLENECK_TO_RESEARCH
+    capability: PASS
+    empirical: MEASURED
+    evidence: "daily report computes bottleneck and next_research_priority;
+      not yet consumed by the next cycle's decision step"
+  - id: SECURITY_CANARIES
+    capability: PASS
+    empirical: MEASURED
+    evidence: "7 injection canaries + the two-sided requirement (attack authority removed AND benign content preserved). Found and fixed a SEV: 'alpha' matched as a bare substring refused 'Alphabet Inc.' entirely"
+  - id: CROSS_TENANT_ISOLATION
+    capability: PASS
+    empirical: MEASURED
+    evidence: "driven through real InternalFact/tenant_scope, symmetric both directions, and each tenant still reads its own canary so the test cannot pass by filtering everything"
+  - id: ANTITRUST_AIR_GAP
+    capability: PASS
+    empirical: MEASURED
+    evidence: "InternalFact IS the private partition - there is no public provenance for one, which is the architectural reason the gap holds; the metamorphic half proves the boundary is the record class, not the words"
+  - id: SCHEDULER
+    capability: PASS
+    empirical: MEASURED
+    evidence: "three launchd jobs on the canonical entrypoint"
+  - id: PERSISTENCE_RELOAD
+    capability: PASS
+    empirical: MEASURED
+    evidence: "two cycles; second SKIPPED_DUPLICATE, ledger unchanged"
+  - id: RUNTIME_PIN
+    capability: PASS
+    empirical: MEASURED

@@ -7,13 +7,21 @@ from intent_engine.core.market_resolution import ResolutionResult
 from intent_engine.events import CompanyEventBus
 from intent_engine.runtime.market import MarketRuntime
 
-AS_OF = "2026-07-24"
-FUTURE = "2027-01-01"
+# `pl.record_prediction` stamps the REAL current date and accepts no override,
+# so a hard-coded AS_OF drifts: once real time passes it, every call here
+# evaluates a prediction dated in the FUTURE relative to `as_of`. That is a
+# different code path from the one these tests mean to exercise, and it was
+# silently accepted until `eligibility` gained its `future_dated` guard --
+# which is how 7 tests in this file turned red without their subject changing.
+# Anchor both dates to the same clock the ledger writes with.
+TODAY = date.today()
+AS_OF = TODAY.isoformat()
+FUTURE = (TODAY + timedelta(days=365)).isoformat()
 
 
 def _seed(tmp_path, **over):
     kw = dict(source="market", entity_id="e", claim_text="SPY up 2%",
-              probability=0.8, resolve_by=(date(2026, 7, 24) + timedelta(days=30)).isoformat(),
+              probability=0.8, resolve_by=(TODAY + timedelta(days=30)).isoformat(),
               path=tmp_path / "prediction_ledger.db", instrument="SPY",
               direction="up", horizon_days=30,
               resolution_rule={"type": "pct_change", "symbol": "SPY",
