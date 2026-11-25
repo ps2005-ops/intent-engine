@@ -1,0 +1,417 @@
+### daily
+{
+ "ny_date": "2026-11-25",
+ "ran_at": "2026-11-25T15:52:30+00:00",
+ "previous_run": null,
+ "missed_runs": null,
+ "resolved": 0,
+ "voided": 0,
+ "fetched": false,
+ "still_open": 977,
+ "overdue": 0,
+ "overdue_ids": [],
+ "due_schedule": {
+  "2026-11-09": {
+   "forecasts": 977,
+   "open": 977,
+   "resolved": 0,
+   "voided": 0,
+   "scheduled_entry_session": "2026-11-10",
+   "scheduled_exit_session": "2026-12-10",
+   "resolvable_from": "2026-12-11",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  }
+ },
+ "alerts": [],
+ "status": "OK"
+}
+rc=0
+### learn
+{
+ "ledger": "reports/paper_validation/forward_shadow_ledger.jsonl",
+ "kind": "FORWARD_SHADOW",
+ "chain_entries": 977,
+ "resolved": 0,
+ "attribution": {},
+ "calibration_drift": {},
+ "promotion": {},
+ "beliefs": {
+  "events": 0,
+  "path": "reports/paper_validation/shadow_beliefs_forward.jsonl"
+ },
+ "candidates_proposed": [],
+ "promotion_authority": "human only (LearningLedger.promote)"
+}
+rc=0
+### register --if-due
+{"registered": 0, "due": false, "sessions_since_last": 11}
+rc=0
+### register (forced, scratch only: proves generation)
+forward macro AAA10Y: 306 cells
+forward macro BAA: 14 cells
+forward macro BAA10Y: 306 cells
+forward macro BABATOTALSAUS: 14 cells
+forward macro BAMLH0A0HYM2: 324 cells
+forward macro BOGZ1FL153064486Q: 3 cells
+forward macro CIVPART: 13 cells
+forward macro CORCACBS: 3 cells
+forward macro CPIAUCSL: 13 cells
+forward macro DFF: 449 cells
+forward macro DGORDER: 14 cells
+forward macro DGS10: 307 cells
+forward macro DGS2: 307 cells
+forward macro DRCCLACBS: 3 cells
+forward macro DRSFRMACBS: 3 cells
+forward macro EMRATIO: 13 cells
+forward macro GDPC1: 4 cells
+forward macro HOUST: 14 cells
+forward macro HSN1F: 14 cells
+forward macro INDPRO: 14 cells
+forward macro JTSQUR: 13 cells
+forward macro MICH: 14 cells
+forward macro MORTGAGE30US: 64 cells
+forward macro PCEC96: 14 cells
+forward macro PERMIT: 14 cells
+forward macro PSAVERT: 14 cells
+forward macro REVOLSL: 13 cells
+forward macro T10Y3M: 308 cells
+forward macro TDSP: 3 cells
+forward macro U6RATE: 13 cells
+forward macro UEMP15OV: 13 cells
+forward macro UMCSENT: 14 cells
+forward macro UNRATE: 13 cells
+forward macro USACSCICP02STSAM: 14 cells
+  observations: date 1/285 2003-01-02 rows=55
+  observations: date 26/285 2005-02-02 rows=1512
+  observations: date 51/285 2007-03-07 rows=3072
+  observations: date 76/285 2009-04-06 rows=4760
+  observations: date 101/285 2011-05-05 rows=6519
+  observations: date 126/285 2013-06-07 rows=8308
+  observations: date 151/285 2015-07-09 rows=10152
+  observations: date 176/285 2017-08-08 rows=12002
+  observations: date 201/285 2019-09-10 rows=13862
+  observations: date 226/285 2021-10-08 rows=15761
+  observations: date 251/285 2023-11-09 rows=17736
+  observations: date 276/285 2025-12-15 rows=19711
+  observations: date 1/1 2026-11-24 rows=79
+{
+ "registered": 977,
+ "skipped_existing": 0,
+ "information_cutoff": "2026-11-24",
+ "decision_date": "2026-11-25",
+ "voided_rows": [],
+ "ledger": "reports/paper_validation/forward_shadow_ledger.jsonl",
+ "price_failures": {}
+}
+rc=0
+### status
+{
+ "path": "reports/paper_validation/forward_shadow_ledger.jsonl",
+ "kind": "FORWARD_SHADOW",
+ "entries": 1954,
+ "forecasts": 1954,
+ "by_status": {
+  "OPEN": 1954
+ },
+ "due": {
+  "2026-11-09": {
+   "forecasts": 977,
+   "open": 977,
+   "resolved": 0,
+   "voided": 0,
+   "scheduled_entry_session": "2026-11-10",
+   "scheduled_exit_session": "2026-12-10",
+   "resolvable_from": "2026-12-11",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2026-11-25": {
+   "forecasts": 977,
+   "open": 977,
+   "resolved": 0,
+   "voided": 0,
+   "scheduled_entry_session": "2026-11-27",
+   "scheduled_exit_session": "2026-12-29",
+   "resolvable_from": "2026-12-30",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": true
+  }
+ }
+}
+{
+ "path": "reports/paper_validation/rehearsal_ledger.jsonl",
+ "kind": "REHEARSAL",
+ "entries": 1200,
+ "forecasts": 600,
+ "by_status": {
+  "RESOLVED": 600
+ },
+ "due": {
+  "2024-01-02": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2024-01-03",
+   "scheduled_exit_session": "2024-02-02",
+   "resolvable_from": "2024-02-03",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2024-02-01": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2024-02-02",
+   "scheduled_exit_session": "2024-03-05",
+   "resolvable_from": "2024-03-06",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2024-03-04": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2024-03-05",
+   "scheduled_exit_session": "2024-04-04",
+   "resolvable_from": "2024-04-05",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2024-04-03": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2024-04-04",
+   "scheduled_exit_session": "2024-05-03",
+   "resolvable_from": "2024-05-04",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2024-05-02": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2024-05-03",
+   "scheduled_exit_session": "2024-06-04",
+   "resolvable_from": "2024-06-05",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2024-06-03": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2024-06-04",
+   "scheduled_exit_session": "2024-07-05",
+   "resolvable_from": "2024-07-06",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2024-07-03": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2024-07-05",
+   "scheduled_exit_session": "2024-08-05",
+   "resolvable_from": "2024-08-06",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2024-08-02": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2024-08-05",
+   "scheduled_exit_session": "2024-09-04",
+   "resolvable_from": "2024-09-05",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2024-09-03": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2024-09-04",
+   "scheduled_exit_session": "2024-10-03",
+   "resolvable_from": "2024-10-04",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2024-10-02": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2024-10-03",
+   "scheduled_exit_session": "2024-11-01",
+   "resolvable_from": "2024-11-02",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2024-10-31": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2024-11-01",
+   "scheduled_exit_session": "2024-12-03",
+   "resolvable_from": "2024-12-04",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2024-12-02": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2024-12-03",
+   "scheduled_exit_session": "2025-01-03",
+   "resolvable_from": "2025-01-04",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2025-01-02": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2025-01-03",
+   "scheduled_exit_session": "2025-02-05",
+   "resolvable_from": "2025-02-06",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2025-02-04": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2025-02-05",
+   "scheduled_exit_session": "2025-03-07",
+   "resolvable_from": "2025-03-08",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2025-03-06": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2025-03-07",
+   "scheduled_exit_session": "2025-04-07",
+   "resolvable_from": "2025-04-08",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2025-04-04": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2025-04-07",
+   "scheduled_exit_session": "2025-05-07",
+   "resolvable_from": "2025-05-08",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2025-05-06": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2025-05-07",
+   "scheduled_exit_session": "2025-06-06",
+   "resolvable_from": "2025-06-07",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2025-06-05": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2025-06-06",
+   "scheduled_exit_session": "2025-07-09",
+   "resolvable_from": "2025-07-10",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2025-07-08": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2025-07-09",
+   "scheduled_exit_session": "2025-08-07",
+   "resolvable_from": "2025-08-08",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2025-08-06": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2025-08-07",
+   "scheduled_exit_session": "2025-09-08",
+   "resolvable_from": "2025-09-09",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2025-09-05": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2025-09-08",
+   "scheduled_exit_session": "2025-10-07",
+   "resolvable_from": "2025-10-08",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2025-10-06": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2025-10-07",
+   "scheduled_exit_session": "2025-11-05",
+   "resolvable_from": "2025-11-06",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2025-11-04": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2025-11-05",
+   "scheduled_exit_session": "2025-12-05",
+   "resolvable_from": "2025-12-06",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  },
+  "2025-12-04": {
+   "forecasts": 25,
+   "open": 0,
+   "resolved": 25,
+   "voided": 0,
+   "scheduled_entry_session": "2025-12-05",
+   "scheduled_exit_session": "2026-01-07",
+   "resolvable_from": "2026-01-08",
+   "schedule_calendar": "nyse_rules.v1+special:8a0b22daaa08",
+   "schedule_stored": false
+  }
+ }
+}
+rc=0

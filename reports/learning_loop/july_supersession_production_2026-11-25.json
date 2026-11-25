@@ -1,0 +1,83 @@
+{
+ "mode": "IN_PLACE",
+ "target": "/Users/prathamsharma/intent-engine/data/prediction_ledger.db",
+ "source_sha256_before": "b89550463b9bfd92",
+ "source_unchanged": true,
+ "appended": [
+  {
+   "id": "4bae2749",
+   "resolve_by": "2026-10-16",
+   "probability": 0.72,
+   "outcome": "happened",
+   "brier": 0.0784,
+   "flags": 1,
+   "row_written_at": "2026-11-25T15:46:40.298285+00:00"
+  },
+  {
+   "id": "2d44806f",
+   "resolve_by": "2026-10-01",
+   "probability": 0.65,
+   "outcome": "happened",
+   "brier": 0.1225,
+   "flags": 1,
+   "row_written_at": "2026-11-25T15:46:40.303788+00:00"
+  },
+  {
+   "id": "0f742abb",
+   "resolve_by": "2026-09-30",
+   "probability": 0.72,
+   "outcome": "happened",
+   "brier": 0.0784,
+   "flags": 1,
+   "row_written_at": "2026-11-25T15:46:40.306053+00:00"
+  },
+  {
+   "id": "73b2bf49",
+   "resolve_by": "2026-09-18",
+   "probability": 0.62,
+   "outcome": "happened",
+   "brier": 0.1444,
+   "flags": 0,
+   "row_written_at": "2026-11-25T15:46:40.307749+00:00"
+  },
+  {
+   "id": "e0408859",
+   "resolve_by": "2026-08-31",
+   "probability": 0.58,
+   "outcome": "happened",
+   "brier": 0.1764,
+   "flags": 1,
+   "row_written_at": "2026-11-25T15:46:40.310055+00:00"
+  },
+  {
+   "id": "59bcc2e3",
+   "resolve_by": "2026-09-03",
+   "probability": 0.54,
+   "outcome": "did_not_happen",
+   "brier": 0.2916,
+   "flags": 1,
+   "row_written_at": "2026-11-25T15:46:40.312096+00:00"
+  }
+ ],
+ "rows_after": 37,
+ "brier_before": {
+  "market": {
+   "n": 4,
+   "mean_brier": 0.125
+  },
+  "baseline": {
+   "n": 4,
+   "mean_brier": 0.0797
+  }
+ },
+ "brier_after": {
+  "market": {
+   "n": 10,
+   "mean_brier": 0.1391
+  },
+  "baseline": {
+   "n": 4,
+   "mean_brier": 0.0797
+  }
+ }
+}

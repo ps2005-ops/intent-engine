@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- The zero-Anthropic daily learning cycle (deploy/launchd/learning_daily.sh).
+     19:15 America/Toronto. launchd runs a missed StartCalendarInterval once on
+     wake; every step is idempotent and catches up, so sleep loses nothing.
+     __CODE__ is a detached worktree pinned by SHA. Replaces the draft
+     com.intentengine.paper.daily, which is NOT installed alongside it. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.intentengine.learning.daily</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/zsh</string>
+    <string>__CODE__/deploy/launchd/learning_daily.sh</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>LEARNING_CODE</key><string>__CODE__</string>
+  </dict>
+  <key>WorkingDirectory</key><string>/Users/prathamsharma/ie-paper-validation</string>
+  <key>StartCalendarInterval</key><dict><key>Hour</key><integer>19</integer><key>Minute</key><integer>15</integer></dict>
+  <key>RunAtLoad</key><false/>
+  <key>StandardOutPath</key><string>/Users/prathamsharma/Library/Logs/intent-engine/learning_daily.out.log</string>
+  <key>StandardErrorPath</key><string>/Users/prathamsharma/Library/Logs/intent-engine/learning_daily.err.log</string>
+</dict>
+</plist>

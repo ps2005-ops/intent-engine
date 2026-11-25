@@ -141,6 +141,11 @@ def grade(row: dict, closes: Optional[Dict[str, float]], *, today: str,
                0, (_d(today) - _d(end)).days)}
     if row.get("opportunity_state") == SO.MISSED_OPPORTUNITY_CANDIDATE:
         out["confirmed_miss"] = abs(ret) >= MIN_ABS_RETURN
+    sh = row.get("shadow_signal") or {}
+    if sh.get("fired") and sh.get("direction") in ("long", "short"):
+        # FORWARD shadow grade: the direction was recorded at decision time.
+        out["shadow_direction"] = sh["direction"]
+        out["shadow_correct"] = (ret > 0) == (sh["direction"] == "long")
     return out
 
 

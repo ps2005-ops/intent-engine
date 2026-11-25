@@ -204,6 +204,11 @@ class AuditRecord:
     resolved_at: str = ""
     data_unavailable: bool = False
     calibration_eligible: bool = False
+    #: What `baseline_momentum.v1` actually says on these closes. Recorded in
+    #: SHADOW beside `fired`, which stays False: the audit stage never trades.
+    #: Before 2026-11-26 the step never computed the signal at all and wrote a
+    #: fixed reason that was false for 211 of 231 decisions.
+    shadow_signal: Optional[dict] = None
 
     def as_dict(self) -> dict:
         return {"as_of": self.as_of, "cycle_id": self.cycle_id,
@@ -220,7 +225,9 @@ class AuditRecord:
                 "realized_return": self.realized_return,
                 "resolved_at": self.resolved_at,
                 "data_unavailable": self.data_unavailable,
-                "calibration_eligible": self.calibration_eligible}
+                "calibration_eligible": self.calibration_eligible,
+                **({"shadow_signal": dict(self.shadow_signal)}
+                   if self.shadow_signal is not None else {})}
 
 
 def horizon_end(as_of: str, horizon_days: int = HORIZON_DAYS) -> str:

@@ -1,0 +1,330 @@
+[
+ {
+  "id": "99e07e94",
+  "source": "market",
+  "created": "2026-07-17",
+  "resolve_by": "2026-08-31",
+  "p": 0.65,
+  "claim": "SPY consolidates near recent highs; probability of recovery to within 0.5% of 2026-07-16 peak by end of August",
+  "outcome": "happened",
+  "brier": 0.1225,
+  "rows": 2,
+  "history": [
+   [
+    "happened",
+    "2026-09-04"
+   ]
+  ]
+ },
+ {
+  "id": "93384e1d",
+  "source": "market",
+  "created": "2026-07-17",
+  "resolve_by": "2026-09-15",
+  "p": 0.72,
+  "claim": "SPY downside risk below -2.5% from 2026-07-16 levels over next 60 days remains subdued; probability of holding",
+  "outcome": "happened",
+  "brier": 0.0784,
+  "rows": 2,
+  "history": [
+   [
+    "happened",
+    "2026-09-15"
+   ]
+  ]
+ },
+ {
+  "id": "4bae2749",
+  "source": "market",
+  "created": "2026-07-17",
+  "resolve_by": "2026-10-16",
+  "p": 0.72,
+  "claim": "10-Year minus 2-Year Treasury yield spread remains above +0.30 percentage points (consistent with a non-invert",
+  "outcome": "happened",
+  "brier": 0.0784,
+  "rows": 3,
+  "history": [
+   [
+    "unresolvable",
+    "2026-10-16"
+   ],
+   [
+    "happened",
+    "2026-11-25"
+   ]
+  ],
+  "vintage_check": {
+   "series": "T10Y2Y",
+   "obs_date": "2026-10-16",
+   "latest_now": "0.35",
+   "first_published_now": null,
+   "original_failure": "Could not fetch FRED series 'T10Y2Y': FRED series 'T10Y2Y' returned no observations for the requested range (missing/short series) -- never silently treated as ",
+   "failed_at": "2026-10-16"
+  },
+  "persistence_p": 0.9,
+  "persistence_brier": 0.01,
+  "uninformative_brier": 0.25
+ },
+ {
+  "id": "03c7cd9d",
+  "source": "market",
+  "created": "2026-07-17",
+  "resolve_by": "2026-09-15",
+  "p": 0.58,
+  "claim": "SPY rebounds to within +1.0% of its recent running high within the next 60 days (mild mean reversion from curr",
+  "outcome": "happened",
+  "brier": 0.1764,
+  "rows": 2,
+  "history": [
+   [
+    "happened",
+    "2026-09-15"
+   ]
+  ]
+ },
+ {
+  "id": "2d44806f",
+  "source": "market",
+  "created": "2026-07-17",
+  "resolve_by": "2026-10-01",
+  "p": 0.65,
+  "claim": "US unemployment rate remains below 5.0% through end of Q3 2026 (persistent tightness in labor market).",
+  "outcome": "happened",
+  "brier": 0.1225,
+  "rows": 3,
+  "history": [
+   [
+    "unresolvable",
+    "2026-10-09"
+   ],
+   [
+    "happened",
+    "2026-11-25"
+   ]
+  ],
+  "vintage_check": {
+   "series": "UNRATE",
+   "obs_date": "2026-10-01",
+   "latest_now": "4.1",
+   "first_published_now": "2026-11-06",
+   "original_failure": "Could not fetch FRED series 'UNRATE': FRED series 'UNRATE' returned no observations for the requested range (missing/short series) -- never silently treated as ",
+   "failed_at": "2026-10-09"
+  },
+  "persistence_p": 0.9,
+  "persistence_brier": 0.01,
+  "uninformative_brier": 0.25
+ },
+ {
+  "id": "62dc866c",
+  "source": "baseline",
+  "created": "2026-07-17",
+  "resolve_by": "2026-09-15",
+  "p": 0.65,
+  "claim": "SPY rises at least 2% within 60 days (momentum baseline)",
+  "outcome": "happened",
+  "brier": 0.1225,
+  "rows": 2,
+  "history": [
+   [
+    "happened",
+    "2026-09-15"
+   ]
+  ]
+ },
+ {
+  "id": "865d2188",
+  "source": "baseline",
+  "created": "2026-07-17",
+  "resolve_by": "2026-09-15",
+  "p": 0.8079,
+  "claim": "SPY rises at least 2% within 60 days (base-rate baseline)",
+  "outcome": "happened",
+  "brier": 0.0369,
+  "rows": 2,
+  "history": [
+   [
+    "happened",
+    "2026-09-15"
+   ]
+  ]
+ },
+ {
+  "id": "0f742abb",
+  "source": "market",
+  "created": "2026-07-18",
+  "resolve_by": "2026-09-30",
+  "p": 0.72,
+  "claim": "10-Year minus 2-Year Treasury yield spread remains above +0.25 percentage points through late September 2026, ",
+  "outcome": "happened",
+  "brier": 0.0784,
+  "rows": 3,
+  "history": [
+   [
+    "unresolvable",
+    "2026-09-30"
+   ],
+   [
+    "happened",
+    "2026-11-25"
+   ]
+  ],
+  "vintage_check": {
+   "series": "T10Y2Y",
+   "obs_date": "2026-09-30",
+   "latest_now": "0.41",
+   "first_published_now": null,
+   "original_failure": "Could not fetch FRED series 'T10Y2Y': FRED series 'T10Y2Y' returned no observations for the requested range (missing/short series) -- never silently treated as ",
+   "failed_at": "2026-09-30"
+  },
+  "persistence_p": 0.9,
+  "persistence_brier": 0.01,
+  "uninformative_brier": 0.25
+ },
+ {
+  "id": "f30cf99e",
+  "source": "market",
+  "created": "2026-07-18",
+  "resolve_by": "2026-09-18",
+  "p": 0.65,
+  "claim": "SPY trades within 3.5% of its 2026-07-17 level over the next 60 trading days, suggesting consolidation after r",
+  "outcome": "happened",
+  "brier": 0.1225,
+  "rows": 2,
+  "history": [
+   [
+    "happened",
+    "2026-09-18"
+   ]
+  ]
+ },
+ {
+  "id": "73b2bf49",
+  "source": "market",
+  "created": "2026-07-20",
+  "resolve_by": "2026-09-18",
+  "p": 0.62,
+  "claim": "10Y-2Y Treasury spread narrows below +0.30 percentage points within 60 days, consistent with policy-tightening",
+  "outcome": "happened",
+  "brier": 0.1444,
+  "rows": 3,
+  "history": [
+   [
+    "unresolvable",
+    "2026-09-18"
+   ],
+   [
+    "happened",
+    "2026-11-25"
+   ]
+  ],
+  "vintage_check": {
+   "series": "T10Y2Y",
+   "obs_date": "2026-09-18",
+   "latest_now": "0.25",
+   "first_published_now": null,
+   "original_failure": "Could not fetch FRED series 'T10Y2Y': FRED series 'T10Y2Y' returned no observations for the requested range (missing/short series) -- never silently treated as ",
+   "failed_at": "2026-09-18"
+  },
+  "persistence_p": 0.1,
+  "persistence_brier": 0.81,
+  "uninformative_brier": 0.25
+ },
+ {
+  "id": "e0408859",
+  "source": "market",
+  "created": "2026-07-20",
+  "resolve_by": "2026-08-31",
+  "p": 0.58,
+  "claim": "Unemployment rate rises to at least 3.40% by end of August, consistent with labor softening accompanying input",
+  "outcome": "happened",
+  "brier": 0.1764,
+  "rows": 3,
+  "history": [
+   [
+    "unresolvable",
+    "2026-09-04"
+   ],
+   [
+    "happened",
+    "2026-11-25"
+   ]
+  ],
+  "vintage_check": {
+   "series": "UNRATE",
+   "obs_date": "2026-09-01",
+   "latest_now": "4.2",
+   "first_published_now": "2026-10-02",
+   "original_failure": "Could not fetch FRED series 'UNRATE': FRED series 'UNRATE' returned no observations for the requested range (missing/short series) -- never silently treated as ",
+   "failed_at": "2026-09-04"
+  },
+  "persistence_p": 0.9,
+  "persistence_brier": 0.01,
+  "uninformative_brier": 0.25
+ },
+ {
+  "id": "59bcc2e3",
+  "source": "market",
+  "created": "2026-07-20",
+  "resolve_by": "2026-09-03",
+  "p": 0.54,
+  "claim": "High-yield credit spreads (BAMLH0A0HYM2) widen to at least the 20th percentile of trailing 10-year window with",
+  "outcome": "did_not_happen",
+  "brier": 0.2916,
+  "rows": 3,
+  "history": [
+   [
+    "unresolvable",
+    "2026-09-04"
+   ],
+   [
+    "did_not_happen",
+    "2026-11-25"
+   ]
+  ],
+  "vintage_check": {
+   "series": "BAMLH0A0HYM2",
+   "obs_date": "2026-09-03",
+   "latest_now": "2.65",
+   "first_published_now": "2026-09-03",
+   "original_failure": "Could not fetch FRED series 'BAMLH0A0HYM2': FRED series 'BAMLH0A0HYM2' returned no observations for the requested range (missing/short series) -- never silently",
+   "failed_at": "2026-09-04"
+  },
+  "persistence_p": 0.1,
+  "persistence_brier": 0.01,
+  "uninformative_brier": 0.25
+ },
+ {
+  "id": "9052dbbf",
+  "source": "baseline",
+  "created": "2026-07-20",
+  "resolve_by": "2026-09-18",
+  "p": 0.65,
+  "claim": "SPY rises at least 2% within 60 days (momentum baseline)",
+  "outcome": "happened",
+  "brier": 0.1225,
+  "rows": 2,
+  "history": [
+   [
+    "happened",
+    "2026-09-18"
+   ]
+  ]
+ },
+ {
+  "id": "9e2f2609",
+  "source": "baseline",
+  "created": "2026-07-20",
+  "resolve_by": "2026-09-18",
+  "p": 0.8079,
+  "claim": "SPY rises at least 2% within 60 days (base-rate baseline)",
+  "outcome": "happened",
+  "brier": 0.0369,
+  "rows": 2,
+  "history": [
+   [
+    "happened",
+    "2026-09-18"
+   ]
+  ]
+ }
+]

@@ -306,7 +306,24 @@ def opportunity_step(series_fn: Optional[Callable] = None) -> Callable:
                     f"bars but only "
                     f"{len([d for d in closes if d <= ctx.as_of[:10]])} "
                     f"exist on or before {ctx.as_of}")
-            fired = False          # the baseline has never fired; recorded, not assumed
+            # The audit stage never trades, so `fired` stays False. What the
+            # signal WOULD say is computed, not assumed, and recorded in shadow
+            # so it can be graded forward. The previous text here claimed the
+            # trailing move was inside the noise floor without computing it.
+            from intent_engine.market import strategy_library as LIB
+            shadow = (LIB.baseline_momentum(
+                {d: v for d, v in closes.items() if d[:10] <= ctx.as_of[:10]},
+                security=symbol, as_of=ctx.as_of[:10]).as_dict()
+                if closes else None)
+            fired = False
+            if shadow is None:
+                reason = "not traded: no price data"
+            elif shadow["fired"]:
+                reason = ("not traded: audit stage only; shadow "
+                          f"baseline_momentum.v1 says {shadow['direction']} "
+                          f"(trailing {shadow['value']:+.2%})")
+            else:
+                reason = f"not traded: shadow signal flat ({shadow['reason']})"
             records.append(SO.AuditRecord(
                 as_of=ctx.as_of, cycle_id=ctx.run_id,
                 company_id=row.get("company", ""), instrument=symbol,
@@ -317,8 +334,7 @@ def opportunity_step(series_fn: Optional[Callable] = None) -> Callable:
                         "volatility": observable.volatility},
                 threshold=observable.threshold,
                 raw_value=observable.expected_move, fired=fired,
-                fire_reason=("no direction: |trailing return| below the "
-                             "noise floor"),
+                fire_reason=reason, shadow_signal=shadow,
                 opportunity_state=SO.label(observable, fired=fired),
                 opportunity=observable.as_dict(),
                 data_unavailable=not closes))

@@ -1,0 +1,13 @@
+ALL (overlapping)            decisions=231 fired=211 hits= 67 hit_rate=0.318  up_base_rate=0.494
+NON-OVERLAPPING              decisions= 20 fired= 17 hits=  7 hit_rate=0.412  up_base_rate=0.550
+  CHKP                       decisions=  7 fired=  7 hits=  1 hit_rate=0.143  up_base_rate=0.571
+  MELI                       decisions= 29 fired= 22 hits=  2 hit_rate=0.091  up_base_rate=0.345
+  NEE                        decisions= 30 fired= 28 hits=  9 hit_rate=0.321  up_base_rate=0.700
+  NET                        decisions= 74 fired= 72 hits= 31 hit_rate=0.431  up_base_rate=0.432
+  PG                         decisions=  6 fired=  4 hits=  4 hit_rate=1.000  up_base_rate=1.000
+  SHOP                       decisions= 85 fired= 78 hits= 20 hit_rate=0.256  up_base_rate=0.482
+  regime SPY_up63            decisions=221 fired=201 hits= 61 hit_rate=0.303  up_base_rate=0.502
+  regime SPY_down63          decisions= 10 fired= 10 hits=  6 hit_rate=0.600  up_base_rate=0.300
+  direction long             decisions=128 fired=128 hits= 40 hit_rate=0.312  up_base_rate=0.312
+  direction short            decisions= 83 fired= 83 hits= 27 hit_rate=0.325  up_base_rate=0.675
+block-bootstrap 95% CI on hit rate (19 instrument-month blocks): 0.220-0.418

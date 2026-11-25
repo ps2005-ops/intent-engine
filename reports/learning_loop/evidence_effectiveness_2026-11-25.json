@@ -1,0 +1,1096 @@
+[
+ {
+  "subject": "duolingo",
+  "metric": "demand_weakening",
+  "dir": "DOWN",
+  "ok": false,
+  "outcome": "CONTRADICTED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "honda",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.38,
+  "basis_roles": [
+   "independent_reporting",
+   "regulatory_filing"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT",
+   "GUIDANCE_REVISION"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 2,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "shopify",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.36,
+  "basis_roles": [
+   "company_owned",
+   "independent_reporting",
+   "regulatory_filing"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT",
+   "EARNINGS_SURPRISE"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 6,
+  "self_authored_basis": true,
+  "same_doc": false
+ },
+ {
+  "subject": "cloudflare",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.3991,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT",
+   "GUIDANCE_REVISION"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 2,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "cloudflare",
+  "metric": "demand_weakening",
+  "dir": "DOWN",
+  "ok": false,
+  "outcome": "CONTRADICTED",
+  "uncertainty": 0.422,
+  "basis_roles": [
+   "analyst_coverage"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "asml",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "analyst_coverage"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "toyota",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.346,
+  "basis_roles": [
+   "independent_reporting",
+   "regulatory_filing"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT",
+   "GUIDANCE_REVISION"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 5,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "etsy",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.3991,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_SURPRISE"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 2,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "jpmorgan",
+  "metric": "market_share_seeking",
+  "dir": "UP",
+  "ok": false,
+  "outcome": "CONTRADICTED",
+  "uncertainty": 0.3991,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "PRICING_SIGNAL"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 2,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "caterpillar",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "duolingo",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.3711,
+  "basis_roles": [
+   "analyst_coverage",
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT",
+   "EARNINGS_SURPRISE",
+   "GUIDANCE_REVISION"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 3,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "nextera",
+  "metric": "demand_weakening",
+  "dir": "DOWN",
+  "ok": false,
+  "outcome": "CONTRADICTED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "regulatory_filing"
+  ],
+  "recon_hosts": [
+   "?"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "mercadolibre",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "regulatory_filing"
+  ],
+  "recon_hosts": [
+   "?"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "stripe",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.406,
+  "basis_roles": [
+   "company_owned",
+   "regulatory_filing"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "company_owned"
+  ],
+  "recon_hosts": [
+   "?"
+  ],
+  "n_basis": 2,
+  "self_authored_basis": true,
+  "same_doc": false
+ },
+ {
+  "subject": "sea_limited",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.422,
+  "basis_roles": [
+   "analyst_coverage"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "jpmorgan",
+  "metric": "pricing_power",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "PRICING_SIGNAL"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "linde",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "bhp",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "etsy",
+  "metric": "demand_weakening",
+  "dir": "DOWN",
+  "ok": false,
+  "outcome": "CONTRADICTED",
+  "uncertainty": 0.422,
+  "basis_roles": [
+   "analyst_coverage"
+  ],
+  "basis_types": [
+   "GUIDANCE_REVISION"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "america_movil",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "procter_gamble",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_SURPRISE"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "canadian_national",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.378,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT",
+   "GUIDANCE_REVISION"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 4,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "jpmorgan",
+  "metric": "demand_weakening",
+  "dir": "DOWN",
+  "ok": false,
+  "outcome": "CONTRADICTED",
+  "uncertainty": 0.416,
+  "basis_roles": [
+   "regulatory_filing"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "jpmorgan",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "checkpoint",
+  "metric": "demand_weakening",
+  "dir": "DOWN",
+  "ok": false,
+  "outcome": "CONTRADICTED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "GUIDANCE_REVISION"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "checkpoint",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_SURPRISE"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "olo",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.4359,
+  "basis_roles": [
+   "company_owned"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "company_owned"
+  ],
+  "recon_hosts": [
+   "?"
+  ],
+  "n_basis": 2,
+  "self_authored_basis": true,
+  "same_doc": false
+ },
+ {
+  "subject": "etsy",
+  "metric": "pricing_power",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "PRICING_SIGNAL"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "linde",
+  "metric": "pricing_power",
+  "dir": "UP",
+  "ok": false,
+  "outcome": "CONTRADICTED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "PRICING_SIGNAL"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "linde",
+  "metric": "market_share_seeking",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "PRICING_SIGNAL"
+  ],
+  "recon_roles": [
+   "regulatory_filing"
+  ],
+  "recon_hosts": [
+   "?"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "johnson_johnson",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": false,
+  "outcome": "CONTRADICTED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "GUIDANCE_REVISION"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "johnson_johnson",
+  "metric": "demand_weakening",
+  "dir": "DOWN",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "GUIDANCE_REVISION"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "hdfc_bank",
+  "metric": "demand_weakening",
+  "dir": "DOWN",
+  "ok": false,
+  "outcome": "CONTRADICTED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_SURPRISE"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "hdfc_bank",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "infosys",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.422,
+  "basis_roles": [
+   "analyst_coverage"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "infosys",
+  "metric": "demand_weakening",
+  "dir": "DOWN",
+  "ok": false,
+  "outcome": "CONTRADICTED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "GUIDANCE_REVISION"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "nextera",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.3911,
+  "basis_roles": [
+   "regulatory_filing"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "regulatory_filing"
+  ],
+  "recon_hosts": [
+   "?"
+  ],
+  "n_basis": 3,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "america_movil",
+  "metric": "demand_weakening",
+  "dir": "DOWN",
+  "ok": false,
+  "outcome": "CONTRADICTED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_SURPRISE"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "vale",
+  "metric": "demand_weakening",
+  "dir": "DOWN",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "GUIDANCE_REVISION"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "vale",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": false,
+  "outcome": "CONTRADICTED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "linde",
+  "metric": "demand_weakening",
+  "dir": "DOWN",
+  "ok": false,
+  "outcome": "CONTRADICTED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "analyst_coverage"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "grifols",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": false,
+  "outcome": "CONTRADICTED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "grifols",
+  "metric": "demand_weakening",
+  "dir": "DOWN",
+  "ok": false,
+  "outcome": "CONTRADICTED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "independent_reporting"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "vale",
+  "metric": "pricing_power",
+  "dir": "UP",
+  "ok": false,
+  "outcome": "CONTRADICTED",
+  "uncertainty": 0.422,
+  "basis_roles": [
+   "analyst_coverage"
+  ],
+  "basis_types": [
+   "PRICING_SIGNAL"
+  ],
+  "recon_roles": [
+   "analyst_coverage"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "shopify",
+  "metric": "demand_weakening",
+  "dir": "DOWN",
+  "ok": false,
+  "outcome": "CONTRADICTED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "analyst_coverage"
+  ],
+  "recon_hosts": [
+   "news.google.com"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "exxon_mobil",
+  "metric": "demand_strengthening",
+  "dir": "UP",
+  "ok": true,
+  "outcome": "CONFIRMED",
+  "uncertainty": 0.422,
+  "basis_roles": [
+   "analyst_coverage"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "regulatory_filing"
+  ],
+  "recon_hosts": [
+   "?"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ },
+ {
+  "subject": "honda",
+  "metric": "demand_weakening",
+  "dir": "DOWN",
+  "ok": false,
+  "outcome": "CONTRADICTED",
+  "uncertainty": 0.414,
+  "basis_roles": [
+   "independent_reporting"
+  ],
+  "basis_types": [
+   "EARNINGS_RESULT"
+  ],
+  "recon_roles": [
+   "regulatory_filing"
+  ],
+  "recon_hosts": [
+   "?"
+  ],
+  "n_basis": 1,
+  "self_authored_basis": false,
+  "same_doc": false
+ }
+]

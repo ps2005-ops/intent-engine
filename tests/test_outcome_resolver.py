@@ -239,3 +239,50 @@ def test_the_stub_is_gone():
     src = inspect.getsource(ST.resolve_outcomes_step)
     assert "0 if ctx.dry_run else 0" not in src
     assert "OR.resolve(" in src
+
+
+# --- shadow momentum (S1, preregistered 2026-11-25) -------------------------
+def _audit_ctx(root, as_of):
+    rows = [{"gate": "no_market_evidence", "instrument": "SHOP",
+             "company": "shopify", "thesis": "x"}]
+    return types.SimpleNamespace(root=pathlib.Path(root), as_of=as_of,
+                                 dry_run=True, run_id=f"{as_of}:night:x",
+                                 results={"research": {"rows": rows}})
+
+
+def test_the_audit_step_computes_the_signal_instead_of_asserting_silence(tmp_path):
+    """Until 2026-11-25 the step wrote `fired=False` and "|trailing return|
+    below the noise floor" without computing anything. A 20% trailing rise
+    must be recorded as a shadow LONG, and the reason must not claim a flat
+    market."""
+    rising = _weekdays("2026-01-01", "2026-08-03", px=lambda i: 100.0 * 1.01 ** i)
+    out = ST.opportunity_step(series_fn=lambda s: rising)(
+        _audit_ctx(tmp_path, "2026-08-03"))
+    rec = out["records"][0]
+    assert rec["fired"] is False                       # still never trades
+    assert rec["shadow_signal"]["fired"] is True
+    assert rec["shadow_signal"]["direction"] == "long"
+    assert "noise floor" not in rec["fire_reason"]
+    assert "long" in rec["fire_reason"]
+
+
+def test_the_shadow_signal_never_reads_a_close_after_as_of(tmp_path):
+    flat_then_spike = _weekdays("2026-01-01", "2026-08-03")
+    flat_then_spike = {d: 100.0 for d in flat_then_spike}
+    flat_then_spike["2026-08-10"] = 500.0              # the future
+    out = ST.opportunity_step(series_fn=lambda s: flat_then_spike)(
+        _audit_ctx(tmp_path, "2026-08-03"))
+    sh = out["records"][0]["shadow_signal"]
+    assert sh["fired"] is False and sh["value"] == 0.0
+
+
+def test_a_shadow_direction_is_graded_forward():
+    closes = _weekdays("2026-07-01", "2026-09-30")     # rising
+    long_ = OR.grade(_row(shadow_signal={"fired": True, "direction": "long"}),
+                     closes, today="2026-09-30")
+    short = OR.grade(_row(shadow_signal={"fired": True, "direction": "short"}),
+                     closes, today="2026-09-30")
+    flat = OR.grade(_row(shadow_signal={"fired": False, "direction": ""}),
+                    closes, today="2026-09-30")
+    assert long_["shadow_correct"] is True and short["shadow_correct"] is False
+    assert "shadow_correct" not in flat

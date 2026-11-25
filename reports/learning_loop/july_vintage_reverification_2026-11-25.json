@@ -1,0 +1,122 @@
+[
+ {
+  "id": "4bae2749",
+  "series": "T10Y2Y",
+  "obs_date": "2026-10-16",
+  "rule": ">= 0.3 by 2026-10-16",
+  "p": 0.72,
+  "created": "2026-07-17",
+  "latest_now": "0.35",
+  "audit_latest": 0.35,
+  "first_release_now": "{\"error_code\":400,\"error_message\":\"Bad Request.  There are 3168 vintage dates in the specified real-time period: 1776-07-04 to 9999-12-31.  This exceeds the maximum number of vintage dates allowed for",
+  "first_published_now": null,
+  "audit_first_published": "not in ALFRED (daily market series, not revised)",
+  "n_vintages": 1,
+  "vintage_values": [
+   "{\"error_code\":400,\"error_message\":\"Bad Request.  There are 3169 vintage dates in the specified real-time period: 1776-07-04 to 9999-12-31.  This exceeds the maximum number of vintage dates allowed for"
+  ],
+  "original_failure": "Could not fetch FRED series 'T10Y2Y': FRED series 'T10Y2Y' returned no observations for the requested range (missing/short series) -- never silently treated as ",
+  "failed_at": "2026-10-16",
+  "audit_outcome": "happened"
+ },
+ {
+  "id": "2d44806f",
+  "series": "UNRATE",
+  "obs_date": "2026-10-01",
+  "rule": "< 5.0 by 2026-10-01",
+  "p": 0.65,
+  "created": "2026-07-17",
+  "latest_now": "4.1",
+  "audit_latest": 4.1,
+  "first_release_now": "4.1",
+  "first_published_now": "2026-11-06",
+  "audit_first_published": "2026-11-06",
+  "n_vintages": 1,
+  "vintage_values": [
+   "4.1"
+  ],
+  "original_failure": "Could not fetch FRED series 'UNRATE': FRED series 'UNRATE' returned no observations for the requested range (missing/short series) -- never silently treated as ",
+  "failed_at": "2026-10-09",
+  "audit_outcome": "happened"
+ },
+ {
+  "id": "0f742abb",
+  "series": "T10Y2Y",
+  "obs_date": "2026-09-30",
+  "rule": ">= 0.25 by 2026-09-30",
+  "p": 0.72,
+  "created": "2026-07-18",
+  "latest_now": "0.41",
+  "audit_latest": 0.41,
+  "first_release_now": "{\"error_code\":400,\"error_message\":\"Bad Request.  There are 3168 vintage dates in the specified real-time period: 1776-07-04 to 9999-12-31.  This exceeds the maximum number of vintage dates allowed for",
+  "first_published_now": null,
+  "audit_first_published": "not in ALFRED (daily market series, not revised)",
+  "n_vintages": 1,
+  "vintage_values": [
+   "{\"error_code\":400,\"error_message\":\"Bad Request.  There are 3169 vintage dates in the specified real-time period: 1776-07-04 to 9999-12-31.  This exceeds the maximum number of vintage dates allowed for"
+  ],
+  "original_failure": "Could not fetch FRED series 'T10Y2Y': FRED series 'T10Y2Y' returned no observations for the requested range (missing/short series) -- never silently treated as ",
+  "failed_at": "2026-09-30",
+  "audit_outcome": "happened"
+ },
+ {
+  "id": "73b2bf49",
+  "series": "T10Y2Y",
+  "obs_date": "2026-09-18",
+  "rule": "< 0.3 by 2026-09-18",
+  "p": 0.62,
+  "created": "2026-07-20",
+  "latest_now": "0.25",
+  "audit_latest": 0.25,
+  "first_release_now": "{\"error_code\":400,\"error_message\":\"Bad Request.  There are 3168 vintage dates in the specified real-time period: 1776-07-04 to 9999-12-31.  This exceeds the maximum number of vintage dates allowed for",
+  "first_published_now": null,
+  "audit_first_published": "not in ALFRED (daily market series, not revised)",
+  "n_vintages": 1,
+  "vintage_values": [
+   "{\"error_code\":400,\"error_message\":\"Bad Request.  There are 3169 vintage dates in the specified real-time period: 1776-07-04 to 9999-12-31.  This exceeds the maximum number of vintage dates allowed for"
+  ],
+  "original_failure": "Could not fetch FRED series 'T10Y2Y': FRED series 'T10Y2Y' returned no observations for the requested range (missing/short series) -- never silently treated as ",
+  "failed_at": "2026-09-18",
+  "audit_outcome": "happened"
+ },
+ {
+  "id": "e0408859",
+  "series": "UNRATE",
+  "obs_date": "2026-09-01",
+  "rule": ">= 3.4 by 2026-08-31",
+  "p": 0.58,
+  "created": "2026-07-20",
+  "latest_now": "4.2",
+  "audit_latest": 4.2,
+  "first_release_now": "4.2",
+  "first_published_now": "2026-10-02",
+  "audit_first_published": "2026-10-02",
+  "n_vintages": 1,
+  "vintage_values": [
+   "4.2"
+  ],
+  "original_failure": "Could not fetch FRED series 'UNRATE': FRED series 'UNRATE' returned no observations for the requested range (missing/short series) -- never silently treated as ",
+  "failed_at": "2026-09-04",
+  "audit_outcome": "happened"
+ },
+ {
+  "id": "59bcc2e3",
+  "series": "BAMLH0A0HYM2",
+  "obs_date": "2026-09-03",
+  "rule": ">= 310.0 by 2026-09-03",
+  "p": 0.54,
+  "created": "2026-07-20",
+  "latest_now": "2.65",
+  "audit_latest": 2.65,
+  "first_release_now": "2.65",
+  "first_published_now": "2026-09-03",
+  "audit_first_published": "2026-09-03",
+  "n_vintages": 1,
+  "vintage_values": [
+   "2.65"
+  ],
+  "original_failure": "Could not fetch FRED series 'BAMLH0A0HYM2': FRED series 'BAMLH0A0HYM2' returned no observations for the requested range (missing/short series) -- never silently",
+  "failed_at": "2026-09-04",
+  "audit_outcome": "did_not_happen"
+ }
+]
