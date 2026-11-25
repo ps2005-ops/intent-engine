@@ -1,0 +1,11 @@
+behavioural nodes: 48 {'quits': 24, 'labour_participation': 24} failures: {}
+venues: ['api.stlouisfed.org (FRED mirror CIVPART of BLS LNS11300000)', 'api.stlouisfed.org (FRED mirror JTSQUR of BLS JTS000000000000000QUR)']
+bayes functions executed: {'__init__': 25, '__post_init__': 25, 'update': 1, '<listcomp>': 2, '<genexpr>': 78, 'precision': 48, '_classify': 1, 'apply': 1, 'informative': 2, 'summarise': 1, '<dictcomp>': 1, 'delta': 2, '<setcomp>': 1}
+updates: {"updates": 1, "informative": 1, "arrived_without_informing": 0, "by_effect": {"CONFIRMATION": 0, "STRENGTHENING": 1, "WEAKENING": 0, "CONTRADICTION": 0, "NO_INFORMATION": 0, "DUPLICATE_EVIDENCE": 0}, "mean_absolute_move": 0.0, "duplicate_nodes": []}
+Traceback (most recent call last):
+  File "<stdin>", line 18, in <module>
+AttributeError: 'str' object has no attribute 'posterior_mean'
+readings by dimension: {'perceived_control': 24} kinds: {'perceived_control': ['quits']}
+update: {'dimension': 'perceived_control', 'prior_mean': None, 'posterior_mean': 0.3917, 'effect': 'STRENGTHENING'}
+estimate: {'dimension': 'perceived_control', 'posterior_mean': 0.3917, 'uncertainty': 0.0204, 'confidence': 0.959, 'promotion_state': 'CANDIDATE'}
+AFTER FIX: perceived_control posterior 0.45 uncertainty 0.1 confidence 0.8 | not counted: 23

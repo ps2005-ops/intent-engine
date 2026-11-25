@@ -68,6 +68,25 @@ LAGS: Dict[str, LagModel] = {
 }
 
 
+def _latest_per_series(readings):
+    """One reading per (series, publisher, dimension): the latest period.
+
+    WHY (traced 2026-11-25, the first live run in which `bayes.update`
+    executed): 24 monthly quits readings were precision-combined as 24
+    independent measurements of TODAY's state, giving uncertainty 0.020 and
+    confidence 0.959 from one slowly moving series. Consecutive months of one
+    series are not independent evidence about the present; the history
+    reaches the posterior through the prior carried from earlier cycles.
+    """
+    best = {}
+    for r in readings:
+        k = (r.kind, r.publisher, r.dimension)
+        if k not in best or (r.as_of or "") > (best[k].as_of or ""):
+            best[k] = r
+    kept = list(best.values())
+    return kept, len(readings) - len(kept)
+
+
 def estimate(*, population: Population, as_of: str, nodes: Iterable,
              register: Sequence[Construct] = (),
              prior: Optional[CollectiveStateEstimate] = None,
@@ -83,7 +102,7 @@ def estimate(*, population: Population, as_of: str, nodes: Iterable,
     by_dim = {c.dimension: c for c in register}
     retired = {d for d, c in by_dim.items() if c.state == RETIRED}
 
-    readings = proxies.read_nodes(nodes)
+    readings, serially_dependent = _latest_per_series(proxies.read_nodes(nodes))
     grouped = proxies.group_by_dimension(readings)
 
     dimensions: List[DimensionEstimate] = []
@@ -134,6 +153,7 @@ def estimate(*, population: Population, as_of: str, nodes: Iterable,
         "readings": proxies.summarise(readings),
         "updates": bayes.summarise(updates),
         "skipped_retired": skipped_retired,
+        "serially_dependent_readings_not_counted": serially_dependent,
         "dimensions_estimated": len([d for d in dimensions
                                      if d.posterior_mean is not None]),
         "dimensions_no_proxy": proxies.uncovered_dimensions(),

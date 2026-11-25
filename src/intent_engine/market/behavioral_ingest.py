@@ -123,9 +123,90 @@ def bureau_of_labor_statistics(*, retrieved_at: str, periods: int = 24,
     return out
 
 
+#: BLS series -> its exact FRED mirror. Used ONLY when BLS refuses.
+#:
+#: WHY: from the production runtime BLS answers "the daily threshold for ...
+#: registration key '' has been reached" -- the adapter calls without a key,
+#: the anonymous quota is shared with the macro adapter, and the collective
+#: layer received ZERO behavioural nodes, so `econ.bayes.update` never ran
+#: (traced 2026-11-25). FRED republishes the same BLS series under a key the
+#: runtime already has, and ALFRED supplies the REAL first-publication date,
+#: which replaces the assumed lag rather than adding a second copy.
+FRED_MIRRORS: Dict[str, str] = {"JTS000000000000000QUR": "JTSQUR",
+                                "LNS11300000": "CIVPART"}
+
+
+def _fred_get(series_id: str, start: str, end: str):  # pragma: no cover - live
+    import json, os, urllib.parse, urllib.request
+    key = os.environ.get("FRED_API_KEY")
+    if not key:
+        from dotenv import load_dotenv
+        load_dotenv()
+        key = os.environ.get("FRED_API_KEY")
+    if not key:
+        raise RuntimeError("FRED_API_KEY is not set")
+    q = {"series_id": series_id, "api_key": key, "file_type": "json",
+         "observation_start": start, "realtime_start": "1776-07-04",
+         "realtime_end": end, "output_type": "4"}   # 4 = first release only
+    with urllib.request.urlopen("https://api.stlouisfed.org/fred/series/"
+                                "observations?" + urllib.parse.urlencode(q),
+                                timeout=30) as r:
+        return json.load(r)["observations"]
+
+
+def fred_mirror_of_bls(*, retrieved_at: str, periods: int = 24,
+                       fetcher: Optional[Callable] = None
+                       ) -> List[EV.EconomicNode]:
+    """The BLS behavioural series as first released, via FRED/ALFRED."""
+    import datetime as _dt
+    get = fetcher or _fred_get
+    start = (_dt.date.fromisoformat(retrieved_at[:10])
+             - _dt.timedelta(days=31 * (periods + 1))).isoformat()
+    out: List[EV.EconomicNode] = []
+    for bls_id, fred_id in sorted(FRED_MIRRORS.items()):
+        kind, label, unit, _lag = BLS_BEHAVIOURAL[bls_id]
+        for o in get(fred_id, start, retrieved_at[:10]):
+            value = _as_float(o.get("value"))
+            if value is None:
+                continue
+            published = str(o.get("realtime_start") or "")
+            if not published or published > retrieved_at[:10]:
+                continue                      # not knowable yet
+            out.append(EV.node(
+                node_class=V.BEHAVIORAL, kind=kind, subject="US_households",
+                standing=V.OBSERVED, occurred_at=o["date"],
+                available_at=published, value=value, unit=unit,
+                statement=f"{label}: {value}{unit} for {o['date']} "
+                          f"(first release {published})",
+                publisher="US Bureau of Labor Statistics",
+                venue=f"api.stlouisfed.org (FRED mirror {fred_id} of BLS {bls_id})",
+                document_id=bls_id, producer=CONTRACT, confidence=0.85,
+                retrieved_at=retrieved_at))
+    return out
+
+
+def bls_with_fred_fallback(*, retrieved_at: str, periods: int = 24,
+                           fetcher: Optional[Callable] = None,
+                           fred_fetcher: Optional[Callable] = None
+                           ) -> List[EV.EconomicNode]:
+    """BLS first; the FRED mirror only if BLS refuses. Never both, so one
+    observation can never arrive twice under two venues."""
+    try:
+        return bureau_of_labor_statistics(retrieved_at=retrieved_at,
+                                          periods=periods, fetcher=fetcher)
+    except RuntimeError as exc:
+        # An injected BLS double with no FRED double is a test of the BLS
+        # path: never reach a live network from it.
+        if "refused" not in str(exc) or (fetcher is not None
+                                         and fred_fetcher is None):
+            raise
+        return fred_mirror_of_bls(retrieved_at=retrieved_at, periods=periods,
+                                  fetcher=fred_fetcher)
+
+
 #: key -> builder. A new keyless behavioural publisher is one entry here.
 SOURCES: Dict[str, Callable] = {
-    "bureau_of_labor_statistics": bureau_of_labor_statistics,
+    "bureau_of_labor_statistics": bls_with_fred_fallback,
 }
 
 #: Which adapters speak POST. Same trap as `macro_ingest.POST_SERIES`: an
