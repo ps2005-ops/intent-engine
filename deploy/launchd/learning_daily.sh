@@ -47,11 +47,17 @@ step paper_register $PAPER $PY -m intent_engine.paper_validation register --if-d
 step econ_resolve   $ECON  $PY -m intent_engine.econ.resolve_job \
      --ledger reports/real_forward_expectations.jsonl \
      --log reports/econ_resolution_runs.jsonl
+# 5. FX4 (preregistered 2026-11-25): intent vs behaviour. Reads the market
+#    evidence ledger read-only; appends only to its own ledger.
+step fx4            $PAPER $PY -m intent_engine.market.intent_behaviour_job \
+     --evidence /Users/prathamsharma/intent-engine-market/reports/market/learning_ledger.jsonl \
+     --audit /Users/prathamsharma/intent-engine-market/reports/market/signal_audit.jsonl \
+     --ledger reports/experiments/fx4_intent_behaviour.jsonl
 
 FAILED=()
 for k v in ${(kv)RC}; do [[ $v != 0 ]] && FAILED+=$k; done
 SHA=$(git -C $CODE rev-parse --short HEAD)
-print -r -- "{\"ran_at\": \"$(date -u +%FT%TZ)\", \"code\": \"$SHA\", \"failed\": \"${FAILED[*]}\", \"paper_daily\": ${RC[paper_daily]}, \"paper_learn\": ${RC[paper_learn]}, \"paper_register\": ${RC[paper_register]}, \"econ_resolve\": ${RC[econ_resolve]}}" >> $STATUS
+print -r -- "{\"ran_at\": \"$(date -u +%FT%TZ)\", \"code\": \"$SHA\", \"failed\": \"${FAILED[*]}\", \"paper_daily\": ${RC[paper_daily]}, \"paper_learn\": ${RC[paper_learn]}, \"paper_register\": ${RC[paper_register]}, \"econ_resolve\": ${RC[econ_resolve]}, \"fx4\": ${RC[fx4]}}" >> $STATUS
 ALERTS=()
 tail -1 $PAPER/reports/paper_validation/daily_runs.jsonl 2>/dev/null | grep -q '"status": "ALERT"' && ALERTS+=paper_daily
 tail -1 $ECON/reports/econ_resolution_runs.jsonl 2>/dev/null | grep -q '"status": "ALERT"' && ALERTS+=econ_resolve

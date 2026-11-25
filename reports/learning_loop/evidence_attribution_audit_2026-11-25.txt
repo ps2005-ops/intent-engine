@@ -1,0 +1,6 @@
+evidence records: 1460
+  price_or_valuation_only              83  e.g. Linde plc (NASDAQ:LIN) Shares Fall 6% After Capex Boost Surpasses EPS Gain - TechStock²
+  analyst_action_on_other_company      25  e.g. JPMorgan Chase & Co. Has Lowered Expectations for Monte Rosa Therapeutics (NASDAQ:GLUE) Stock Price - MarketBe
+  customer_case_study                  11  e.g. Dutch fashion brand MR MARVIS achieved 10+ years of double-digit revenue growth and expanded from 0 to 25 reta
+  stale_historical_table                8  e.g. 2017 – Net Income Excluding TCJA¹: Adjusted net income was $26.9 billion, excluding $2.4 billion related to th
+  different_company_same_word           2  e.g. All-Link Air & Sea Limited Provides Earnings Guidance for the Year 2026 - marketscreener.com.

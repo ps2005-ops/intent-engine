@@ -1,0 +1,52 @@
+GUIDANCE_REVISION evidence: 109 | trigger under v2.1: 26
+  trigger honda 2026-08-05 UP | Honda Motor Earnings, Revenue Rise; Raises Annual Guidance - marketscreener.com.
+  trigger canadian_national 2026-08-03 UP | Canadian National Railway raises its 2026 volume outlook on firmer freight demand - MarketScale.
+  trigger canadian_national 2026-07-24 UP | Canadian National Railway Raises 2026 Volume Outlook - wsj.com.
+  trigger canadian_national 2026-08-01 UP | Canadian National Railway raises its 2026 volume outlook as freight demand firms - MarketScale.
+  trigger canadian_national 2026-07-24 UP | Canadian National Railway Raises 2026 Volume Outlook - WSJ.
+  trigger honda 2026-08-05 UP | Honda Motor Earnings, Revenue Rise; Raises Annual Guidance - Yahoo Finance.
+  trigger caterpillar 2026-08-04 UP | Caterpillar Raises Sales Outlook on Data Center Boom - Yahoo Finance.
+  trigger canadian_national 2026-08-03 UP | Canadian National Railway raises its 2026 volume outlook on firmer freight demand - marketscale.com.
+  trigger canadian_national 2026-08-01 UP | Canadian National Railway raises its 2026 volume outlook as freight demand firms - marketscale.com.
+  trigger canadian_national 2026-08-01 UP | Canadian National Railway raises its 2026 volume outlook as freight demand firms - MarketScale.
+  trigger cloudflare 2026-08-09 UP | Cloudflare (NET) Is Up 7.6% After Raising 2026 Revenue Outlook And Expanding Its AI-Agent Platform -
+  trigger cloudflare 2026-08-09 UP | Cloudflare (NET) Is Up 7.6% After Raising 2026 Revenue Outlook And Expanding Its AI-Agent Platform -
+  trigger sasol 2026-01-21 UP | Sasol lifts fuel sales outlook but cuts gas output forecast for 2026 - Stock Titan.
+  trigger canadian_national 2026-08-01 UP | Canadian National Railway raises its 2026 volume outlook as freight demand firms - marketscale.com.
+  trigger checkpoint 2026-04-30 DOWN | Cybersecurity firm Check Point Software first-quarter profit beats estimates, cuts 2026 revenue outl
+  trigger sasol 2026-04-22 UP | Sasol lifts fuel sales outlook but cuts gas forecast after floods - Stock Titan.
+  trigger asml 2026-08-21 UP | ASML stock holds in the mid-$1,700s as raised 2026 sales guidance lifts outlook - Ad-hoc-news.de.
+  trigger checkpoint 2026-04-30 DOWN | Cybersecurity firm Check Point Software first-quarter profit beats estimates, cuts 2026 revenue outl
+  trigger asml 2026-10-14 UP | ASML Raises Full-Year Sales Outlook as AI Boom Drives Demand - Yahoo Finance.
+  trigger johnson_johnson 2026-10-13 UP | Johnson & Johnson Beats Third-Quarter Earnings Estimates and Raises 2026 Revenue and Profit Outlook 
+  trigger johnson_johnson 2026-10-17 UP | Johnson & Johnson Just Raised Its Sales Outlook Again.
+  trigger infosys 2026-10-23 DOWN | Infosys Cuts Sales Forecast After Companies Curb IT Spending - Bloomberg.com.
+  trigger linde 2026-10-29 UP | Linde Q3 Adjusted Earnings, Revenue Rise; Q4, 2026 Adjusted EPS Outlook Updated - Yahoo Finance.
+  trigger cloudflare 2026-11-06 UP | Cloudflare Shares Surge Over 14% as Third-Quarter Revenue Jumps 39% and Company Raises 2026 Outlook 
+  trigger cloudflare 2026-11-05 UP | Cloudflare catapults as Q3 revenue surges 39%; raises full-year guidance (NET:NYSE) - Seeking Alpha.
+  trigger procter_gamble 2026-11-19 UP | PG Raises Sales Outlook as Thorne Acquisition Adds Growth Potential - TradingView.
+would register: 3
+   fx4:NET:2026-06-30 UP | persistence baseline UP | cutoff 2026-08-09
+   fx4:NET:2026-09-30 UP | persistence baseline UP | cutoff 2026-11-06
+   fx4:PG:2026-09-30 UP | persistence baseline DOWN | cutoff 2026-11-19
+
+AFTER TIGHTENING: triggers 19 | on/after 2026-11-25 : 0
+   canadian_national 2026-08-03 UP | Canadian National Railway raises its 2026 volume outlook on firmer freight demand - Market
+   canadian_national 2026-07-24 UP | Canadian National Railway Raises 2026 Volume Outlook - wsj.com.
+   canadian_national 2026-08-01 UP | Canadian National Railway raises its 2026 volume outlook as freight demand firms - MarketS
+   canadian_national 2026-07-24 UP | Canadian National Railway Raises 2026 Volume Outlook - WSJ.
+   caterpillar 2026-08-04 UP | Caterpillar Raises Sales Outlook on Data Center Boom - Yahoo Finance.
+   canadian_national 2026-08-03 UP | Canadian National Railway raises its 2026 volume outlook on firmer freight demand - market
+   canadian_national 2026-08-01 UP | Canadian National Railway raises its 2026 volume outlook as freight demand firms - markets
+   canadian_national 2026-08-01 UP | Canadian National Railway raises its 2026 volume outlook as freight demand firms - MarketS
+   cloudflare 2026-08-09 UP | Cloudflare (NET) Is Up 7.6% After Raising 2026 Revenue Outlook And Expanding Its AI-Agent 
+   cloudflare 2026-08-09 UP | Cloudflare (NET) Is Up 7.6% After Raising 2026 Revenue Outlook And Expanding Its AI-Agent 
+   sasol 2026-01-21 UP | Sasol lifts fuel sales outlook but cuts gas output forecast for 2026 - Stock Titan.
+   canadian_national 2026-08-01 UP | Canadian National Railway raises its 2026 volume outlook as freight demand firms - markets
+   checkpoint 2026-04-30 DOWN | Cybersecurity firm Check Point Software first-quarter profit beats estimates, cuts 2026 re
+   sasol 2026-04-22 UP | Sasol lifts fuel sales outlook but cuts gas forecast after floods - Stock Titan.
+   asml 2026-08-21 UP | ASML stock holds in the mid-$1,700s as raised 2026 sales guidance lifts outlook - Ad-hoc-n
+   checkpoint 2026-04-30 DOWN | Cybersecurity firm Check Point Software first-quarter profit beats estimates, cuts 2026 re
+   asml 2026-10-14 UP | ASML Raises Full-Year Sales Outlook as AI Boom Drives Demand - Yahoo Finance.
+   johnson_johnson 2026-10-17 UP | Johnson & Johnson Just Raised Its Sales Outlook Again.
+   infosys 2026-10-23 DOWN | Infosys Cuts Sales Forecast After Companies Curb IT Spending - Bloomberg.com.

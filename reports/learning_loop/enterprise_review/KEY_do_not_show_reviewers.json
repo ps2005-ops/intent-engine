@@ -1,0 +1,22 @@
+{
+ "america-movil": {
+  "A": "after",
+  "B": "before"
+ },
+ "johnson-johnson": {
+  "A": "after",
+  "B": "before"
+ },
+ "mercadolibre-inc": {
+  "A": "before",
+  "B": "after"
+ },
+ "sasol-limited": {
+  "A": "after",
+  "B": "before"
+ },
+ "vale-s-a": {
+  "A": "after",
+  "B": "before"
+ }
+}
