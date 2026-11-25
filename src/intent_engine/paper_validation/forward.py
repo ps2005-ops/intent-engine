@@ -42,6 +42,7 @@ from intent_engine.paper_validation import leakage as LK
 from intent_engine.paper_validation import macro as M
 from intent_engine.paper_validation import observations as OB
 from intent_engine.paper_validation import policies as PL
+from intent_engine.paper_validation import schedule as SCH
 from intent_engine.paper_validation import universe as U
 from intent_engine.paper_validation.protocol import (BORROW_BPS_YEAR,
                                                      HORIZON, PROTOCOL,
@@ -85,7 +86,9 @@ def build_record(*, kind: str, policy: PL.Policy, obs: OB.Obs,
                  decision: PL.Decision, decision_ts: str, decision_date: str,
                  n_in_universe: int, data_vintage: dict,
                  cash_rate: Optional[float],
-                 info_as_of: str = "") -> dict:
+                 info_as_of: str = "", calendar=None) -> dict:
+    cal = calendar or SCH.DEFAULT
+    entry, exit_ = SCH.scheduled_window(decision_date, HORIZON, cal)
     # Each record carries ITS OWN inputs' vintage (its instrument and SPY);
     # the full batch vintage is written once, beside the ledger.
     dv = dict(data_vintage)
@@ -115,6 +118,9 @@ def build_record(*, kind: str, policy: PL.Policy, obs: OB.Obs,
         "probability": (None if decision.probability is None
                         else round(float(decision.probability), 6)),
         "horizon_sessions": HORIZON,
+        "scheduled_entry_session": entry,
+        "scheduled_exit_session": exit_,
+        "schedule_calendar": cal.calendar_id,
         "entry_rule": ENTRY_RULE,
         "exit_rule": EXIT_RULE,
         "risk_budget": {"fraction_of_book": round(1.0 / n_in_universe, 6),
@@ -148,7 +154,8 @@ def build_record(*, kind: str, policy: PL.Policy, obs: OB.Obs,
 def decide_records(*, kind: str, policies: Sequence[PL.Policy],
                    rows: Sequence[OB.Obs], history, bars, decision_ts: str,
                    decision_date: str, data_vintage: dict,
-                   cash_rate: Optional[float]) -> List[dict]:
+                   cash_rate: Optional[float],
+                   calendar=None) -> List[dict]:
     out = []
     for uni in (U.ETF, U.COMPANY):
         urows = [o for o in rows if o.universe == uni]
@@ -167,43 +174,80 @@ def decide_records(*, kind: str, policies: Sequence[PL.Policy],
                     kind=kind, policy=p, obs=o, decision=dec,
                     decision_ts=decision_ts, decision_date=decision_date,
                     n_in_universe=len(urows), data_vintage=data_vintage,
-                    cash_rate=cash_rate, info_as_of=decision_date))
+                    cash_rate=cash_rate, info_as_of=decision_date,
+                    calendar=calendar))
     return out
 
 
 # --- resolution ------------------------------------------------------------------
 
+#: How long a delisted or halted instrument is waited for, after its scheduled
+#: exit, before the forecast is voided. A benchmark that has not caught up is
+#: waited for indefinitely: that is a fetch that has not happened yet, and a
+#: fetch failure must never close a forecast.
+DATA_GRACE_DAYS = 7
+
+
+def _bar_problem(b, day: str, spy, today: str) -> Optional[str]:
+    """None if `b` has a bar on `day`; "WAIT" if the data may still arrive;
+    otherwise the reason the session will never have a bar."""
+    if b is None:
+        return "WAIT"
+    if b.index_of(day) is not None:
+        return None
+    if b.dates and b.dates[-1] > day:
+        return f"no {b.symbol} bar on scheduled session {day}"
+    # The series ends before the scheduled session. If the benchmark has
+    # moved past it, this instrument stopped trading; otherwise the fetch is
+    # simply behind.
+    bench_past = spy is not None and spy.dates and spy.dates[-1] > day
+    late = (_dt.date.fromisoformat(today)
+            > _dt.date.fromisoformat(day) + _dt.timedelta(days=DATA_GRACE_DAYS))
+    if bench_past and late and b is not spy:
+        return (f"{b.symbol} has no bars after {b.dates[-1] if b.dates else 'ever'}"
+                f" (halted or delisted); scheduled session {day}")
+    return "WAIT"
+
+
 def resolve_open(ledger: LG.Ledger, bars: Dict[str, BR.Bars], *,
                  now: _dt.datetime) -> dict:
-    """Resolve what has happened; leave the rest OPEN. Returns counts."""
+    """Resolve what has happened; leave the rest OPEN. Returns counts.
+
+    Entry and exit are the SCHEDULED sessions (`schedule.schedule_of`), never
+    "the 21st bar in today's feed". A bar that is missing makes the forecast
+    wait or, once the gap is certain, void with the reason. It is never
+    scored on a different session, so nothing here can postpone a forecast.
+    """
     today = LG.ny_date(now)
     spy = bars.get(U.BENCHMARK)
     resolutions, voids = [], []
     waiting = 0
     for st in ledger.open_forecasts():
         reg = st.registration
-        b = bars.get(reg["instrument"])
-        if b is None or spy is None:
-            waiting += 1
-            continue
-        si = spy.first_index_after(reg["decision_date"])
-        if si is None or si + HORIZON >= len(spy):
-            waiting += 1
-            continue
-        entry, exit_ = spy.dates[si], spy.dates[si + HORIZON]
+        entry, exit_, cal = SCH.schedule_of(reg)
         if exit_ >= today:
             waiting += 1
             continue
-        ie, ix = b.index_of(entry), b.index_of(exit_)
-        if ie is None or ix is None:
+        b = bars.get(reg["instrument"])
+        problems = [_bar_problem(x, day, spy, today)
+                    for x in (spy, b) for day in (entry, exit_)]
+        if "WAIT" in problems:
+            waiting += 1
+            continue
+        reasons = [p for p in problems if p]
+        if reasons:
             voids.append({"forecast_id": st.forecast_id,
-                          "reason": f"no {reg['instrument']} bar on "
-                                    f"{entry if ie is None else exit_}",
+                          "reason": "; ".join(dict.fromkeys(reasons)) +
+                                    ". The due date is never moved.",
+                          "scheduled_entry_session": entry,
+                          "scheduled_exit_session": exit_,
                           "resolved_at": now.isoformat(timespec="seconds")})
             continue
+        si, sx = spy.index_of(entry), spy.index_of(exit_)
+        ie, ix = b.index_of(entry), b.index_of(exit_)
         ret = b.open_adj[ix] / b.open_adj[ie] - 1.0
         if reg["universe"] == U.COMPANY:
-            bench = spy.open_adj[si + HORIZON] / spy.open_adj[si] - 1.0
+            bench = spy.open_adj[sx] / spy.open_adj[si] - 1.0
             excess = ret - bench
         else:
             days = (_dt.date.fromisoformat(exit_)
@@ -215,7 +259,9 @@ def resolve_open(ledger: LG.Ledger, bars: Dict[str, BR.Bars], *,
         pos = {"LONG": 1, "SHORT": -1}.get(reg["direction"], 0)
         resolutions.append({
             "forecast_id": st.forecast_id, "entry_date": entry,
-            "exit_date": exit_, "entry_open_adj": round(b.open_adj[ie], 6),
+            "exit_date": exit_, "schedule_calendar": cal,
+            "benchmark_sessions_elapsed": sx - si,
+            "entry_open_adj": round(b.open_adj[ie], 6),
             "exit_open_adj": round(b.open_adj[ix], 6),
             "instrument_return": round(ret, 6),
             "benchmark_return": round(bench, 6),
@@ -482,6 +528,15 @@ def add_commands(sub, load_inputs) -> None:
     p.set_defaults(fn=cmd_resolve)
     p = sub.add_parser("rehearse")
     p.set_defaults(fn=cmd_rehearse)
+
+    def cmd_daily(args):
+        from intent_engine.paper_validation import daily as D
+        row = D.run(now=_now())
+        print(json.dumps(row, indent=1, default=str))
+        return 1 if row.get("status") == "FAILED" else 0
+    p = sub.add_parser("daily", help="resolve what is due, alert on overdue "
+                       "and missed runs; never registers")
+    p.set_defaults(fn=cmd_daily)
     p = sub.add_parser("status")
     p.set_defaults(fn=cmd_status)
     p = sub.add_parser("learn")

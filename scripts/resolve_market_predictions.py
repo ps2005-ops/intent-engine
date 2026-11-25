@@ -19,16 +19,17 @@ Usage: python scripts/resolve_market_predictions.py [--as-of YYYY-MM-DD] [--path
 
 import argparse
 import sys
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from intent_engine.core.market_resolution import resolve_market_prediction  # noqa: E402
+from intent_engine.core.market_resolution import PENDING, resolve_market_prediction  # noqa: E402
 from intent_engine.core.prediction_ledger import (  # noqa: E402
     DEFAULT_LEDGER_PATH,
     list_predictions,
+    record_resolution_attempt,
     resolve_prediction,
 )
 
@@ -42,13 +43,28 @@ def resolve_due_predictions(as_of: str, path=DEFAULT_LEDGER_PATH) -> dict:
 
     counts = {"happened": 0, "did_not_happen": 0, "unresolvable": 0}
     details = []
+    pending = []
     for prediction in due:
-        result = resolve_market_prediction(prediction)
+        result = resolve_market_prediction(prediction, as_of=as_of)
+        if result.outcome == PENDING:
+            # Not an outcome. Nothing is written to the prediction; the
+            # attempt is logged with tomorrow as its retry date, and the
+            # prediction's own resolve_by is untouched.
+            next_day = (date.fromisoformat(as_of) + timedelta(days=1)).isoformat()
+            record_resolution_attempt(prediction.id, as_of, "PENDING", result.note,
+                                      next_attempt_on=next_day, path=path)
+            pending.append((prediction.id, prediction.claim_text, result.note))
+            continue
         resolve_prediction(prediction.id, result.outcome, resolution_note=result.note, path=path)
+        record_resolution_attempt(
+            prediction.id, as_of,
+            "GAVE_UP" if result.outcome == "unresolvable" else "RESOLVED",
+            result.note, path=path)
         counts[result.outcome] += 1
         details.append((prediction.id, prediction.claim_text, result.outcome, result.note))
 
-    return {"total": len(due), "counts": counts, "details": details}
+    return {"total": len(details), "counts": counts, "details": details,
+            "pending": len(pending), "pending_details": pending}
 
 
 # LEGACY CONTAINMENT (2026-08-12). This pipeline was once mistaken for the
@@ -79,8 +95,11 @@ def main(argv=None):
     print(f"  happened:       {summary['counts']['happened']}")
     print(f"  did_not_happen: {summary['counts']['did_not_happen']}")
     print(f"  unresolvable:   {summary['counts']['unresolvable']}")
+    print(f"  pending:        {summary['pending']}  (not yet observable; left open, retried tomorrow)")
     for pred_id, claim_text, outcome, note in summary["details"]:
         print(f"\n  [{outcome}] {pred_id}: {claim_text}\n    {note}")
+    for pred_id, claim_text, note in summary["pending_details"]:
+        print(f"\n  [pending] {pred_id}: {claim_text}\n    {note}")
 
     return 0
 

@@ -218,6 +218,11 @@ def get_series(
         )
 
     raw = _fetch_with_retry(series_id, start_str, end_str, resolved_key, max_retries, timeout)
+    # Parse BEFORE caching. An empty answer ("no observations yet") used to be
+    # written first and then raise, so every later run re-read the same empty
+    # file and never asked FRED again: the six cached resolver fetches of
+    # 2026-09-04..10-16 all hold zero observations.
+    series = _parse_response(raw, series_id)
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     cache_path.write_text(json.dumps(raw))
-    return _parse_response(raw, series_id)
+    return series

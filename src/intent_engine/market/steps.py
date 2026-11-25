@@ -433,21 +433,23 @@ def resolve_outcomes_step(series_fn: Optional[Callable] = None) -> Callable:
     fully elapsed. This is the ONLY place a future return enters the system,
     and it enters as evaluation of a settled past decision."""
     def step(ctx: C.CycleContext) -> dict:
+        from intent_engine.market import outcome_resolver as OR
         fetch = series_fn or _live_series
-        pending = [r for r in read_audit(ctx.root)
-                   if r.get("outcome_state") == SO.UNRESOLVED]
-        resolved = 0
-        for row in pending:
-            end = SO.horizon_end(row["as_of"],
-                                 row.get("opportunity", {}).get(
-                                     "horizon_days", SO.HORIZON_DAYS))
-            if end > ctx.as_of[:10]:
-                continue           # horizon not elapsed — never graded early
-            resolved += 1
-        return {"pending": len(pending), "eligible_to_resolve": resolved,
-                "resolved": 0 if ctx.dry_run else 0,
-                "note": ("outcome attachment runs once a horizon elapses; "
-                         f"{len(pending)} audit record(s) pending")}
+        rows = read_audit(ctx.root)
+        result = OR.resolve(rows, root=ctx.root, today=ctx.as_of[:10],
+                            series_fn=fetch, write=not ctx.dry_run)
+        summary = OR.summarise(OR.read_outcomes(ctx.root)
+                               + ([] if not ctx.dry_run else result["events"]))
+        c = result["counts"]
+        return {"inspected": c["inspected"],
+                "resolved": c[OR.RESOLVED], "pending": c[OR.PENDING],
+                "unresolvable": c[OR.UNRESOLVABLE],
+                "not_mature": c[OR.NOT_MATURE],
+                "already_terminal": c["already_terminal"],
+                "duplicate_rows": c["duplicate_rows"],
+                "appended": result["appended"],
+                "would_append": result["would_append"],
+                "dry_run": bool(ctx.dry_run), "summary": summary}
     return step
 
 

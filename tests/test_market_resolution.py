@@ -140,10 +140,21 @@ def test_level_rule_miss_case():
 
 
 def test_level_rule_unresolvable_when_no_observation_within_forward_cap():
+    """Nothing at or after "by": PENDING while the value may still be
+    published, terminal only after the final date (by + 40 + 45 days).
+
+    This test used to assert "unresolvable" with no clock at all -- for a
+    rule due 2026-12-31, written in July 2026. That was the production
+    defect itself: on its due date the value does not exist yet, and six
+    FRED predictions were closed for good at 06:00 on the day they fell due."""
     observations = [("2026-06-01", 4.0)]  # far before "by", nothing forward of it
     rule = LevelRule(type="level", series="UNRATE", op=">=", value=4.5, by="2026-12-31")
-    result = resolve_level_rule(rule, fred_fetcher=_fake_fred_fetcher(observations))
+    fetch = _fake_fred_fetcher(observations)
+    assert resolve_level_rule(rule, fred_fetcher=fetch, as_of="2026-12-31").outcome == "pending"
+    assert resolve_level_rule(rule, fred_fetcher=fetch, as_of="2027-03-26").outcome == "pending"
+    result = resolve_level_rule(rule, fred_fetcher=fetch, as_of="2027-03-27")
     assert result.outcome == "unresolvable"
+    assert "2026-12-31" in result.note and "2027-03-26" in result.note
 
 
 # --- unresolvable is excluded from Brier, end to end --------------------------
@@ -156,7 +167,10 @@ def test_unresolvable_outcome_excluded_from_brier_summary(tmp_path):
         resolution_rule={"type": "pct_change", "symbol": "NOSUCHTICKER", "op": ">=", "value": 0.02, "window_days": 60},
         resolution_source="tiingo",
     )
-    result = resolve_market_prediction(p, price_fetcher=_fake_price_fetcher([]))
+    # record_prediction stamps created_at = now, so the 60-day window ends
+    # ~60 days from today; ask after the final date (window end + 10 + 5),
+    # when "no price data" is terminal rather than "not yet".
+    result = resolve_market_prediction(p, price_fetcher=_fake_price_fetcher([]), as_of="2099-01-01")
     assert result.outcome == "unresolvable"
     resolve_prediction(p.id, result.outcome, resolution_note=result.note, path=path)
 
@@ -207,7 +221,7 @@ def test_resolve_due_predictions_is_idempotent(tmp_path, monkeypatch):
     import resolve_market_predictions as script_module
     monkeypatch.setattr(
         script_module, "resolve_market_prediction",
-        lambda prediction: ResolutionResult("happened", "test stub"),
+        lambda prediction, **_kw: ResolutionResult("happened", "test stub"),
     )
 
     first_run = resolve_due_predictions("2024-03-01", path=path)

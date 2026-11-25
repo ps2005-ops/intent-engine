@@ -40,6 +40,7 @@ import pathlib
 from dataclasses import dataclass
 from typing import Callable, Dict, Iterable, List, Optional, Sequence
 
+from intent_engine.paper_validation import schedule as SCH
 from intent_engine.paper_validation.protocol import canonical
 
 CONTRACT = "paper_validation_ledger.v1"
@@ -68,6 +69,10 @@ REQUIRED = (
     "competing_hypotheses", "policy_id", "policy_version", "provenance",
     "feature_set", "model_version", "data_vintage", "protocol_hash",
     "regime_at_decision",
+    # The due date, decided once from the exchange calendar and sealed into
+    # the chain. Records registered before 2026-11-10 lack these; their
+    # schedule is recomputed by `schedule.schedule_of` from the same rules.
+    "scheduled_entry_session", "scheduled_exit_session", "schedule_calendar",
 )
 DIRECTIONS = ("LONG", "SHORT", "ABSTAIN")
 
@@ -142,6 +147,26 @@ def validate_registration(rec: dict, *, kind: str) -> None:
         raise LedgerViolation("evidence_ids must be a list")
     if not isinstance(rec["competing_hypotheses"], list):
         raise LedgerViolation("competing_hypotheses must be a list")
+    _validate_schedule(rec)
+
+
+def _validate_schedule(rec: dict) -> None:
+    """A stored due date must be the one the calendar gives. Otherwise a
+    registration could be written with its exit already postponed."""
+    cal = SCH.CALENDARS.get(rec["schedule_calendar"])
+    if cal is None:
+        raise LedgerViolation(
+            f"unknown schedule calendar {rec['schedule_calendar']!r}")
+    if not isinstance(rec["horizon_sessions"], int):
+        raise LedgerViolation("horizon_sessions must be an int")
+    want = SCH.scheduled_window(rec["decision_date"], rec["horizon_sessions"],
+                                cal)
+    got = (rec["scheduled_entry_session"], rec["scheduled_exit_session"])
+    if got != want:
+        raise LedgerViolation(
+            f"{rec['forecast_id']}: scheduled {got} but the {cal.calendar_id} "
+            f"calendar gives {want} for a {rec['horizon_sessions']}-session "
+            f"horizon from {rec['decision_date']}")
 
 
 class Ledger:
@@ -279,15 +304,22 @@ class Ledger:
         if RESOLVE in history or VOID in history:
             raise LedgerViolation(
                 f"{fid} is already closed; an outcome is recorded once")
+        reg = regs[fid]
+        _entry, due_exit, _cal = SCH.schedule_of(reg)
+        today_ny = _ny_date(now)
         if event == VOID:
             if not str(payload.get("reason", "")).strip():
                 raise LedgerViolation("a VOID must give its reason")
+            if due_exit >= today_ny:
+                raise LedgerViolation(
+                    f"{fid}: scheduled to exit {due_exit} (clock {today_ny}). "
+                    "A forecast is not voided before its window has closed; "
+                    "a bar that is missing today may still arrive.")
             return
         # RESOLVE: the outcome must have happened.
         for f in ("entry_date", "exit_date", "excess_return", "outcome"):
             if f not in payload:
                 raise LedgerViolation(f"resolution missing {f}")
-        today_ny = _ny_date(now)
         if str(payload["exit_date"]) >= today_ny:
             raise LedgerViolation(
                 f"{fid}: exit session {payload['exit_date']} has not "
@@ -295,7 +327,6 @@ class Ledger:
                 "happened cannot be recorded.")
         if payload["outcome"] not in (0, 1):
             raise LedgerViolation("outcome must be 0 or 1")
-        reg = regs[fid]
         if str(payload["entry_date"]) <= str(reg["decision_date"]):
             raise LedgerViolation(
                 f"{fid}: entry {payload['entry_date']} is not after the "
@@ -303,6 +334,13 @@ class Ledger:
                 "be scored on a session it already saw")
         if str(payload["exit_date"]) <= str(payload["entry_date"]):
             raise LedgerViolation(f"{fid}: exit is not after entry")
+        sched = (_entry, due_exit)
+        got = (str(payload["entry_date"]), str(payload["exit_date"]))
+        if got != sched:
+            raise LedgerViolation(
+                f"{fid}: scheduled entry/exit {sched}, resolution says {got}. "
+                "A resolution may not move a forecast's due date; if the "
+                "scheduled session has no bar, the forecast is voided.")
 
     def register(self, records: Sequence[dict]) -> int:
         return self._append([(REGISTER, r["forecast_id"], r) for r in records])
@@ -328,6 +366,32 @@ def ny_date(t: _dt.datetime) -> str:
     return _ny_date(t)
 
 
+def due_schedule(ledger: Ledger) -> Dict[str, dict]:
+    """Per decision date: how many forecasts, when they are due, and how many
+    are still open. Read from the registrations, so every caller that reports
+    a due date reports the same one."""
+    out: Dict[str, dict] = {}
+    for s in ledger.states().values():
+        reg = s.registration
+        entry, exit_, cal = SCH.schedule_of(reg)
+        row = out.setdefault(reg["decision_date"], {
+            "forecasts": 0, "open": 0, "resolved": 0, "voided": 0,
+            "scheduled_entry_session": entry,
+            "scheduled_exit_session": exit_,
+            "resolvable_from": SCH.resolvable_from(exit_),
+            "schedule_calendar": cal,
+            "schedule_stored": bool(reg.get("scheduled_exit_session"))})
+        if (row["scheduled_entry_session"], row["scheduled_exit_session"]) \
+                != (entry, exit_):
+            raise LedgerViolation(
+                f"decision date {reg['decision_date']} has forecasts with two "
+                "different schedules")
+        row["forecasts"] += 1
+        row[{OPEN: "open", RESOLVED: "resolved", VOIDED: "voided"}[
+            s.status]] += 1
+    return dict(sorted(out.items()))
+
+
 def summary(ledger: Ledger) -> dict:
     st = ledger.states()
     by = {}
@@ -335,4 +399,4 @@ def summary(ledger: Ledger) -> dict:
         by[s.status] = by.get(s.status, 0) + 1
     return {"path": str(ledger.path), "kind": ledger.kind,
             "entries": ledger.verify(), "forecasts": len(st),
-            "by_status": by}
+            "by_status": by, "due": due_schedule(ledger)}

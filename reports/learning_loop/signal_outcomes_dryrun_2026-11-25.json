@@ -1,0 +1,142 @@
+{
+ "today": "2026-11-25",
+ "live_audit_sha256": "16074b0b8ac8cf6e",
+ "copy_identical": true,
+ "counts": {
+  "inspected": 669,
+  "RESOLVED": 362,
+  "PENDING": 19,
+  "UNRESOLVABLE": 104,
+  "NOT_MATURE": 113,
+  "already_terminal": 0,
+  "unchanged_pending": 0,
+  "duplicate_rows": 71
+ },
+ "summary": {
+  "contract": "signal_outcome_resolution.v1",
+  "records_by_state": {
+   "RESOLVED": 362,
+   "UNRESOLVABLE": 104,
+   "PENDING": 19
+  },
+  "distinct_decisions_resolved": 234,
+  "duplicate_records_collapsed": 128,
+  "fired_decisions": 0,
+  "missed_candidates_resolved": 228,
+  "confirmed_misses": 207,
+  "confirmed_miss_rate": 0.908,
+  "median_abs_21d_move": 0.089052,
+  "by_instrument": {
+   "SHOP": {
+    "candidates": 83,
+    "confirmed": 73
+   },
+   "CHKP": {
+    "candidates": 7,
+    "confirmed": 7
+   },
+   "NET": {
+    "candidates": 74,
+    "confirmed": 70
+   },
+   "MELI": {
+    "candidates": 30,
+    "confirmed": 25
+   },
+   "NEE": {
+    "candidates": 28,
+    "confirmed": 26
+   },
+   "PG": {
+    "candidates": 6,
+    "confirmed": 6
+   }
+  },
+  "brier": null,
+  "brier_note": "undefined: no record carries a probability",
+  "trade_return": null,
+  "trade_return_note": "undefined: no record fired, so no position or direction exists to score"
+ },
+ "fetched": {
+  "SHOP": [
+   "2024-11-25",
+   "2026-11-24",
+   501
+  ],
+  "CHKP": [
+   "2024-11-25",
+   "2026-11-24",
+   501
+  ],
+  "NET": [
+   "2024-11-25",
+   "2026-11-24",
+   501
+  ],
+  "MELI": [
+   "2024-11-25",
+   "2026-11-24",
+   501
+  ],
+  "NEE": [
+   "2024-11-25",
+   "2026-11-24",
+   501
+  ],
+  "PG": [
+   "2024-11-25",
+   "2026-11-24",
+   501
+  ]
+ },
+ "non_resolved_reasons": {
+  "UNRESOLVABLE | no price data: PriceUnavailable: OLO: HTTPError": 104,
+  "PENDING | no price data: PriceUnavailable: OLO: HTTPError": 19
+ },
+ "states_by_instrument": {
+  "SHOP": {
+   "RESOLVED": 140
+  },
+  "OLO": {
+   "UNRESOLVABLE": 104,
+   "PENDING": 19
+  },
+  "CHKP": {
+   "RESOLVED": 7
+  },
+  "NET": {
+   "RESOLVED": 116
+  },
+  "MELI": {
+   "RESOLVED": 51
+  },
+  "NEE": {
+   "RESOLVED": 42
+  },
+  "PG": {
+   "RESOLVED": 6
+  }
+ },
+ "candidates_by_month": {
+  "2026-07": {
+   "n": 1,
+   "confirmed": 1
+  },
+  "2026-08": {
+   "n": 79,
+   "confirmed": 69
+  },
+  "2026-09": {
+   "n": 73,
+   "confirmed": 66
+  },
+  "2026-10": {
+   "n": 65,
+   "confirmed": 61
+  },
+  "2026-11": {
+   "n": 10,
+   "confirmed": 10
+  }
+ }
+}
