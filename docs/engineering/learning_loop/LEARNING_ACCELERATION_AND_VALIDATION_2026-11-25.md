@@ -207,3 +207,18 @@ The production ledger was hash-verified unchanged afterwards.
   `signal_outcomes.jsonl` grows only when the resolver is run by hand.
 * The evidence ablation (logit_C) cannot be run historically: no
   point-in-time news archive exists. It can only accumulate forward.
+
+## 9. Operational state at the end of 2026-11-25
+
+| Item | State |
+|---|---|
+| B signal outcomes | Written (481), rerun appended 0. Grows only when run by hand until item A is approved: `PYTHONPATH=src python scripts/learning_loop/prod_resolve.py ~/intent-engine-market write` |
+| C July ledger | 6 supersessions appended; originals kept |
+| D scheduler | `com.intentengine.learning.daily` loaded, 19:15 local, code pinned at `~/ie-learning-runtime` (detached 02cd6e71). Single writer: no other job writes the forward or econ ledger; the draft `com.intentengine.paper.daily` is not installed |
+| D test | The same wrapper ran under launchd twice as a temporary `.TEST` job on copies: all four steps rc=0, the second run idempotent, the job removed. The installed code then dry-ran against the production ledgers: 977 open (exit 12-10, resolvable 12-11), 13 econ open, both hashes unchanged |
+| E July generator | 18:30 cron line commented out with its original text; crontab before and after in `~/intent-engine-safety-backups/`; 43 historical logs untouched. Replacement: `register --if-due` inside the daily cycle (next cohort due about 2026-12-09) |
+| Dec 11 | Resolves on the first 19:15 run on or after 12-11. A run missed through sleep is run on wake. Forecasts still open 7 days after exit raise an ALERT notification |
+| Dec 25 | `econ.resolve_job` runs nightly. On 2026-11-25 ALFRED already serves PERMIT 2026-10 (the horizon period), so the PERMIT expectation is ELIGIBLE on 12-25 |
+| F premortem 32bbf0c5 | Unresolved. Entity `t006-live` is the T006 wiring fixture ("We're hiring a 4-person outbound sales team…"); no CRM, pipeline or opportunity record exists (local stores and the connected Snov.io CRM: 1 default funnel, 0 deals). The claim's "remains below 5 … by 2026-11-20" is also ambiguous between throughout and at the deadline, and it has no machine rule |
+
+To remove the scheduler: `launchctl bootout gui/$(id -u)/com.intentengine.learning.daily && rm ~/Library/LaunchAgents/com.intentengine.learning.daily.plist`.
