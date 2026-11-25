@@ -1,0 +1,562 @@
+[
+{
+"i": 0,
+"evidence_id": "ev_7d48e185ed27ae31",
+"type": "EARNINGS_RESULT",
+"subject": "asml",
+"observed_at": "2026-08-05",
+"fact": "July 15, 2026 ASML reports \u20ac9.3 billion total net sales and \u20ac2.9 billion net income in Q2 2026."
+},
+{
+"i": 1,
+"evidence_id": "ev_75625201a75e79d8",
+"type": "EARNINGS_RESULT",
+"subject": "jpmorgan",
+"observed_at": "2026-11-12",
+"fact": "JP Morgan Chase & (JPM): JPMorgan reports $1.84 trillion in 13F holdings for Q3 2026 - Quantisnow."
+},
+{
+"i": 2,
+"evidence_id": "ev_0544385b5ee5e9c5",
+"type": "EARNINGS_RESULT",
+"subject": "jpmorgan",
+"observed_at": "2026-10-13",
+"fact": "JPMorgan Chase & Co. (JPM) Reports Q3 Earnings: What Key Metrics Have to Say - Yahoo Finance."
+},
+{
+"i": 3,
+"evidence_id": "ev_b40c30c008547737",
+"type": "EARNINGS_RESULT",
+"subject": "america_movil",
+"observed_at": "2026-10-31",
+"fact": "America Movil stock faces mixed analyst signals after Q3 growth - ad-hoc-news.de."
+},
+{
+"i": 4,
+"evidence_id": "ev_c22e7e6c8faf68fc",
+"type": "GUIDANCE_REVISION",
+"subject": "procter_gamble",
+"observed_at": "2026-11-19",
+"fact": "PG Raises Sales Outlook as Thorne Acquisition Adds Growth Potential - TradingView."
+},
+{
+"i": 5,
+"evidence_id": "ev_12b91fadce14979d",
+"type": "GUIDANCE_REVISION",
+"subject": "honda",
+"observed_at": "2026-08-06",
+"fact": "Revisions to the forecast of consolidated financial results most recently announced: Yes. *Explanatory notes."
+},
+{
+"i": 6,
+"evidence_id": "ev_46bbd7c24647cd61",
+"type": "EARNINGS_RESULT",
+"subject": "honda",
+"observed_at": "2026-11-12",
+"fact": "Sales revenue from external customers increased by 9.9%, to \u00a57,541.8 billion from the same period last year, due mainly to increased consolidated unit sales as well as positive foreign currency translation effects."
+},
+{
+"i": 7,
+"evidence_id": "ev_51df13576069fdd2",
+"type": "EARNINGS_SURPRISE",
+"subject": "shopify",
+"observed_at": "2026-11-04",
+"fact": "Shopify\u2019s 32% Revenue Growth Missed Expectations; Analysts Say It's Poised For Agentic AI Benefits - Benzinga."
+},
+{
+"i": 8,
+"evidence_id": "ev_b78a8e092a3b16f8",
+"type": "EARNINGS_RESULT",
+"subject": "mercadolibre",
+"observed_at": "2026-11-09",
+"fact": "In Fintech, our platform is digital from the ground up, so our users can do much more with us for the same cost: the cost to serve an active user is around $1 per month, a figure that has been broadly flat since Q1'25 while transactions, products and revenue per user have all grown strongly."
+},
+{
+"i": 9,
+"evidence_id": "ev_36bb6d2fac20e027",
+"type": "EARNINGS_RESULT",
+"subject": "linde",
+"observed_at": "2026-08-24",
+"fact": "Linde (LIN) Results Versus Estimates: Reported EPS Misses Expectations at the Close; After Earnings: The Market Price Moves 1.30% Higher in Latest Trading - Consensus Forecast Report - vinanet.vn."
+},
+{
+"i": 10,
+"evidence_id": "ev_b7223055364dcff3",
+"type": "EARNINGS_RESULT",
+"subject": "nextera",
+"observed_at": "2026-10-21",
+"fact": "On an adjusted basis, NextEra Energy's 2026 third-quarter earnings were $2.592 billion, or $1.24 per share, compared to $2.348 billion, or $1.13 per share, in the third quarter of 2025."
+},
+{
+"i": 11,
+"evidence_id": "ev_b4273daf712f14ed",
+"type": "EARNINGS_RESULT",
+"subject": "procter_gamble",
+"observed_at": "2026-10-25",
+"fact": "The Procter & Gamble Company Just Recorded A 6.0% EPS Beat: Here's What Analysts Are Forecasting Next - Moomoo."
+},
+{
+"i": 12,
+"evidence_id": "ev_4731b03e2af9b9fb",
+"type": "EARNINGS_SURPRISE",
+"subject": "nextera",
+"observed_at": "2026-10-23",
+"fact": "NextEra Energy, Inc. Beat Analyst Estimates: See What The Consensus Is Forecasting For Next Year - Moomoo."
+},
+{
+"i": 13,
+"evidence_id": "ev_1a605168aafe2d37",
+"type": "GUIDANCE_REVISION",
+"subject": "cloudflare",
+"observed_at": "2026-11-05",
+"fact": "Cloudflare, Inc. Provides Earnings Guidance for the Fourth Quarter and Full Fiscal Year 2026 - www.marketscreener.com."
+},
+{
+"i": 14,
+"evidence_id": "ev_6a6e46ab91b2457a",
+"type": "GUIDANCE_REVISION",
+"subject": "sea_limited",
+"observed_at": "2026-09-11",
+"fact": "All-Link Air & Sea Limited Provides Earnings Guidance for the Year 2026 - marketscreener.com."
+},
+{
+"i": 15,
+"evidence_id": "ev_5708dbd18ced8817",
+"type": "EARNINGS_RESULT",
+"subject": "toyota",
+"observed_at": "2026-08-07",
+"fact": "Vehicle unit sales in Japan increased by 43 thousand units, or 8.9%, to 524 thousand units in FY2027 first quarter compared with FY2026 first quarter."
+},
+{
+"i": 16,
+"evidence_id": "ev_3c8ea95c4b2b023f",
+"type": "EARNINGS_SURPRISE",
+"subject": "sea_limited",
+"observed_at": "2026-11-10",
+"fact": "Sea (NYSE:SE) exceeds Q3 2026 expectations but stock drops - Yahoo Finance."
+},
+{
+"i": 17,
+"evidence_id": "ev_97eb9a13ed0bf045",
+"type": "EARNINGS_RESULT",
+"subject": "linde",
+"observed_at": "2026-10-05",
+"fact": "Excluding Linde AG purchase accounting impacts, adjusted net income was $2,089 million, up 8% versus prior year."
+},
+{
+"i": 18,
+"evidence_id": "ev_ef818101626cb4f0",
+"type": "GUIDANCE_REVISION",
+"subject": "cloudflare",
+"observed_at": "2026-11-05",
+"fact": "Cloudflare catapults as Q3 revenue surges 39%; raises full-year guidance (NET:NYSE) - Seeking Alpha."
+},
+{
+"i": 19,
+"evidence_id": "ev_1ed8ae60655be1f0",
+"type": "EARNINGS_SURPRISE",
+"subject": "etsy",
+"observed_at": "2026-10-28",
+"fact": "Etsy Inc earnings beat by $0.24, revenue topped estimates - Investing.com Nigeria."
+},
+{
+"i": 20,
+"evidence_id": "ev_93b41c97e1532fe8",
+"type": "EARNINGS_RESULT",
+"subject": "cloudflare",
+"observed_at": "2026-08-11",
+"fact": "Cloudflare says 1 Tbps DDoS attacks grew sixfold in the second quarter - siliconangle.com."
+},
+{
+"i": 21,
+"evidence_id": "ev_bf301027299cdb47",
+"type": "EARNINGS_RESULT",
+"subject": "johnson_johnson",
+"observed_at": "2026-10-14",
+"fact": "Johnson & Johnson Reports Q3 2026 Results, Raises Full-Year Guidance - VisionMonday.com."
+},
+{
+"i": 22,
+"evidence_id": "ev_a0b8885a44829e20",
+"type": "EARNINGS_RESULT",
+"subject": "nextera",
+"observed_at": "2026-08-09",
+"fact": "On an adjusted basis, NextEra Energy's 2026 second-quarter earnings were $2.407 billion, or $1.15 per share, compared to $2.164 billion, or $1.05 per share, in the second quarter of 2025."
+},
+{
+"i": 23,
+"evidence_id": "ev_6a6876e244ddcbb3",
+"type": "EARNINGS_RESULT",
+"subject": "etsy",
+"observed_at": "2026-10-28",
+"fact": "Etsy Q3: Platform Growth Has Inflected (NYSE:ETSY) - Seeking Alpha."
+},
+{
+"i": 24,
+"evidence_id": "ev_673a0169d8f1d0fb",
+"type": "EARNINGS_SURPRISE",
+"subject": "duolingo",
+"observed_at": "2026-11-09",
+"fact": "DUOL Q3 Earnings Miss Estimates, Revenues Beat, Shares Rise 25.3% - TradingView."
+},
+{
+"i": 25,
+"evidence_id": "ev_c6fac0606bd7706b",
+"type": "GUIDANCE_REVISION",
+"subject": "infosys",
+"observed_at": "2026-10-23",
+"fact": "Earnings call transcript: Infosys Q2 2026 beats revenue, cuts outlook By Investing.com - Investing.com India."
+},
+{
+"i": 26,
+"evidence_id": "ev_5ea4cfae8cd8bb3f",
+"type": "EARNINGS_RESULT",
+"subject": "sasol",
+"observed_at": "2026-09-18",
+"fact": "Sasol Limited (SASOF) Q4 2025 Earnings Report - Results, Call & Slides - TipRanks."
+},
+{
+"i": 27,
+"evidence_id": "ev_5fc5bf3e79836877",
+"type": "EARNINGS_RESULT",
+"subject": "etsy",
+"observed_at": "2026-08-06",
+"fact": "Etsy Inc (ETSY) (Q2 2026) Earnings Call Highlights: GMS Growth Accelerates to 7. ... - Yahoo Finance."
+},
+{
+"i": 28,
+"evidence_id": "ev_32397cdc00940c93",
+"type": "GUIDANCE_REVISION",
+"subject": "asml",
+"observed_at": "2026-08-21",
+"fact": "ASML stock holds in the mid-$1,700s as raised 2026 sales guidance lifts outlook - Ad-hoc-news.de."
+},
+{
+"i": 29,
+"evidence_id": "ev_838b8add4ea9074d",
+"type": "EARNINGS_RESULT",
+"subject": "mercadolibre",
+"observed_at": "2026-08-09",
+"fact": "MONTEVIDEO, Uruguay; August 5, 2026 -- MercadoLibre, Inc. (Nasdaq: MELI) (http://www.mercadolibre.com), Latin America\u2019s leading e-commerce and fintech company, today reported financial results for the second quarter ended June 30, 2026."
+},
+{
+"i": 30,
+"evidence_id": "ev_11cb219a71e0dbb7",
+"type": "EARNINGS_RESULT",
+"subject": "checkpoint",
+"observed_at": "2026-11-23",
+"fact": "Check Point Software Technologies Sees Product Revenue Returning to Growth in Q2 2027 - Yahoo Finance."
+},
+{
+"i": 31,
+"evidence_id": "ev_a15e91d64aa5715a",
+"type": "EARNINGS_RESULT",
+"subject": "cloudflare",
+"observed_at": "2026-11-02",
+"fact": "Cloudflare Stock: Earnings Preview, Great Growth, Terrible Valuation (NYSE:NET) - Seeking Alpha."
+},
+{
+"i": 32,
+"evidence_id": "ev_d85736e88cb1969a",
+"type": "EARNINGS_RESULT",
+"subject": "procter_gamble",
+"observed_at": "2026-10-22",
+"fact": "The Procter & Gamble Company reports results for the quarter ended September 30 - Earnings Summary - TradingView."
+},
+{
+"i": 33,
+"evidence_id": "ev_38947aaa8f918d17",
+"type": "EARNINGS_RESULT",
+"subject": "shopify",
+"observed_at": "2026-08-07",
+"fact": "Dutch fashion brand MR MARVIS achieved 10+ years of double-digit revenue growth and expanded from 0 to 25 retail locations by consolidating its operations on Shopify."
+},
+{
+"i": 34,
+"evidence_id": "ev_d233528355946110",
+"type": "PRICING_SIGNAL",
+"subject": "shopify",
+"observed_at": "2026-10-16",
+"fact": "Shopify Price Hikes Signal Pricing Power as JPMorgan Keeps $200 Bullish Target - Benzinga."
+},
+{
+"i": 35,
+"evidence_id": "ev_e846de7a25420fe0",
+"type": "GUIDANCE_REVISION",
+"subject": "infosys",
+"observed_at": "2026-10-23",
+"fact": "Infosys Limited Revises Earnings Guidance for the Fiscal Year 2027 - www.marketscreener.com."
+},
+{
+"i": 36,
+"evidence_id": "ev_f3d3846009ebb201",
+"type": "EARNINGS_RESULT",
+"subject": "johnson_johnson",
+"observed_at": "2026-10-13",
+"fact": "Update: Johnson & Johnson Fiscal Q3 Adjusted Earnings Fall, Sales Increase; Fiscal 2026 Guidance Lifted - Yahoo Finance."
+},
+{
+"i": 37,
+"evidence_id": "ev_1b4806501cc9bc3c",
+"type": "GUIDANCE_REVISION",
+"subject": "cloudflare",
+"observed_at": "2026-08-07",
+"fact": "Cloudflare shares jump after forecast raise on higher AI-driven spending - finance.yahoo.com."
+},
+{
+"i": 38,
+"evidence_id": "ev_59aaaba65f044deb",
+"type": "GUIDANCE_REVISION",
+"subject": "sasol",
+"observed_at": "2026-04-22",
+"fact": "Sasol lifts fuel sales outlook but cuts gas forecast after floods - Stock Titan."
+},
+{
+"i": 39,
+"evidence_id": "ev_a966c46101b46513",
+"type": "EARNINGS_RESULT",
+"subject": "procter_gamble",
+"observed_at": "2026-08-31",
+"fact": "P&G Fiscal 2027 Outlook Brings an 8% Core EPS Headwind Into Focus - Eastern Progress."
+},
+{
+"i": 40,
+"evidence_id": "ev_6878593a814423d5",
+"type": "EARNINGS_SURPRISE",
+"subject": "etsy",
+"observed_at": "2026-10-29",
+"fact": "ETSY Q3 Earnings Beat Estimates on GMS & Ads Growth, Revenues Rise Y/Y - TradingView."
+},
+{
+"i": 41,
+"evidence_id": "ev_3e12de5e8b440382",
+"type": "EARNINGS_RESULT",
+"subject": "stripe",
+"observed_at": "2026-08-07",
+"fact": "Additionally, card account updater and network tokenization will help 1Password protect its revenue, increase authorization rates, and reduce the churn caused by changes in customers\u2019 credit cards."
+},
+{
+"i": 42,
+"evidence_id": "ev_8ff5133f234f0585",
+"type": "EARNINGS_RESULT",
+"subject": "cloudflare",
+"observed_at": "2026-11-04",
+"fact": "Cloudflare (NET) Shares Outperform Following Accelerating Revenue Growth and Raised Outlook - Yahoo Finance."
+},
+{
+"i": 43,
+"evidence_id": "ev_5e5d3b227ef267a0",
+"type": "EARNINGS_RESULT",
+"subject": "sea_limited",
+"observed_at": "2026-10-16",
+"fact": "Sea (NYSE:SE) Limited Earnings Growth and Nasdaq Composite Trends - Kalkine Media."
+},
+{
+"i": 44,
+"evidence_id": "ev_40ccf87ca4b3e62f",
+"type": "EARNINGS_RESULT",
+"subject": "mercadolibre",
+"observed_at": "2026-08-05",
+"fact": "MercadoLibre (NASDAQ:MELI) Surprises With Strong Q2 CY2026, Increases Its Unique Active Buyers - finance.yahoo.com."
+},
+{
+"i": 45,
+"evidence_id": "ev_06bae101001741d4",
+"type": "EARNINGS_RESULT",
+"subject": "toyota",
+"observed_at": "2026-10-01",
+"fact": "Toyota Motor North America Reports September, Third Quarter 2026 U.S. Sales Results \u2013 Company Announcement - Financial Times."
+},
+{
+"i": 46,
+"evidence_id": "ev_6d6b363f8d8631ec",
+"type": "EARNINGS_RESULT",
+"subject": "shopify",
+"observed_at": "2026-08-07",
+"fact": "How a global industrial manufacturer unified a fragmented catalog on Shopify, unlocked digital B2B, and grew revenue 15% YoY."
+},
+{
+"i": 47,
+"evidence_id": "ev_488c84f5fa846bdf",
+"type": "GUIDANCE_REVISION",
+"subject": "checkpoint",
+"observed_at": "2026-04-30",
+"fact": "Cybersecurity firm Check Point Software first-quarter profit beats estimates, cuts 2026 revenue outlook - finance.yahoo.com."
+},
+{
+"i": 48,
+"evidence_id": "ev_045fba3654e068d9",
+"type": "GUIDANCE_REVISION",
+"subject": "johnson_johnson",
+"observed_at": "2026-11-04",
+"fact": "Smith+Nephew cuts outlook after failed orthopaedics deal talks with J&J - Reuters."
+},
+{
+"i": 49,
+"evidence_id": "ev_2ab930680c66e64e",
+"type": "EARNINGS_RESULT",
+"subject": "procter_gamble",
+"observed_at": "2026-10-26",
+"fact": "P&G reports 4% sales growth in first quarter of fiscal 2027 - Tissue Online North America."
+},
+{
+"i": 50,
+"evidence_id": "ev_78874abcf1d6ed50",
+"type": "EARNINGS_RESULT",
+"subject": "infosys",
+"observed_at": "2026-10-26",
+"fact": "India's Infosys falls after revenue growth view cut flags AI, competitive pressures - marketscreener.com."
+},
+{
+"i": 51,
+"evidence_id": "ev_544dd3df10c0a0dc",
+"type": "EARNINGS_SURPRISE",
+"subject": "sea_limited",
+"observed_at": "2026-08-13",
+"fact": "SE Q2 Earnings Miss Estimates as Costs Rise, Revenues Beat & Grew Y/Y - TradingView."
+},
+{
+"i": 52,
+"evidence_id": "ev_2baa697d17f35b10",
+"type": "EARNINGS_RESULT",
+"subject": "mercadolibre",
+"observed_at": "2026-08-05",
+"fact": "MercadoLibre reports Q2 2026 revenue $10.17bn, operating income $683m, net income $466m - TradingView."
+},
+{
+"i": 53,
+"evidence_id": "ev_21245c4ab9d0611e",
+"type": "GUIDANCE_REVISION",
+"subject": "cloudflare",
+"observed_at": "2026-11-06",
+"fact": "Cloudflare Shares Surge Over 14% as Third-Quarter Revenue Jumps 39% and Company Raises 2026 Outlook - Yahoo Finance."
+},
+{
+"i": 54,
+"evidence_id": "ev_21ac5fdeacdcbcb9",
+"type": "EARNINGS_RESULT",
+"subject": "jpmorgan",
+"observed_at": "2026-08-06",
+"fact": "2017 \u2013 Net Income Excluding TCJA\u00b9: Adjusted net income was $26.9 billion, excluding $2.4 billion related to the Tax Cuts and Jobs Act (TCJA)."
+},
+{
+"i": 55,
+"evidence_id": "ev_34a4b28fcfbe1088",
+"type": "EARNINGS_SURPRISE",
+"subject": "shopify",
+"observed_at": "2026-08-05",
+"fact": "Shopify Q2 2026 earnings beat revenue estimates, stock surges - Yahoo Finance."
+},
+{
+"i": 56,
+"evidence_id": "ev_b3c1aa063bd2cf69",
+"type": "EARNINGS_RESULT",
+"subject": "linde",
+"observed_at": "2026-08-31",
+"fact": "Linde stock holds firm after Q2 2026 earnings beat and stays below its 52-week high - AD HOC NEWS."
+},
+{
+"i": 57,
+"evidence_id": "ev_55e3a682a4672975",
+"type": "EARNINGS_RESULT",
+"subject": "mercadolibre",
+"observed_at": "2026-10-20",
+"fact": "Items delivered LTM as of Q2'26."
+},
+{
+"i": 58,
+"evidence_id": "ev_ec525708c43820b4",
+"type": "EARNINGS_RESULT",
+"subject": "mercadolibre",
+"observed_at": "2026-11-03",
+"fact": "MercadoLibre Q3 2026 Earnings Preview (MELI:NASDAQ) - Seeking Alpha."
+},
+{
+"i": 59,
+"evidence_id": "ev_7a7c055b9b7e1794",
+"type": "EARNINGS_RESULT",
+"subject": "grifols",
+"observed_at": "2026-11-03",
+"fact": "Grifols SA (GRFS) Q3 2026 Earnings Call Highlights: Biopharma Growth Accelerates as Margin ... - Yahoo Finance."
+},
+{
+"i": 60,
+"evidence_id": "ev_b33669da932fc8de",
+"type": "GUIDANCE_REVISION",
+"subject": "toyota",
+"observed_at": "2026-11-05",
+"fact": "First-half net income rises 26.1% as Toyota (TM) raises its full-year profit forecast. - Stock Titan."
+},
+{
+"i": 61,
+"evidence_id": "ev_69829b8e6e27bce1",
+"type": "EARNINGS_RESULT",
+"subject": "nextera",
+"observed_at": "2026-10-21",
+"fact": "\"NextEra Energy delivered strong third-quarter results, with adjusted earnings per share increasing 9.7% year-over-year, reflecting continued strong financial and operational performance at both FPL and NextEra Energy Resources,\" said John Ketchum, chairman, president and chief executive officer."
+},
+{
+"i": 62,
+"evidence_id": "ev_a9c618ed85d1917e",
+"type": "EARNINGS_RESULT",
+"subject": "linde",
+"observed_at": "2026-10-29",
+"fact": "Linde (LIN) Projects Q4 2026 Adjusted EPS Growth of 5%-7% - GuruFocus."
+},
+{
+"i": 63,
+"evidence_id": "ev_e1fca88ccac6601f",
+"type": "EARNINGS_RESULT",
+"subject": "shopify",
+"observed_at": "2026-11-02",
+"fact": "Shopify Q3 earnings preview: EPS, revenue growth, and AI commerce push in focus (SHOP:NASDAQ) - Seeking Alpha."
+},
+{
+"i": 64,
+"evidence_id": "ev_ed101fea6b71590d",
+"type": "EARNINGS_SURPRISE",
+"subject": "canadian_national",
+"observed_at": "2026-10-30",
+"fact": "Canadian National Railway earnings beat by C$0.08, revenue topped estimates - Investing.com."
+},
+{
+"i": 65,
+"evidence_id": "ev_775dc4177c4e0fa7",
+"type": "EARNINGS_SURPRISE",
+"subject": "duolingo",
+"observed_at": "2026-07-20",
+"fact": "Will Duolingo (DUOL) Beat Estimates Again in Its Next Earnings Report? - Yahoo Finance"
+},
+{
+"i": 66,
+"evidence_id": "ev_718b2edf731902f4",
+"type": "PRICING_SIGNAL",
+"subject": "etsy",
+"observed_at": "2022-04-15",
+"fact": "Why Etsy's latest fee increase has inspired thousands of sellers, including its most marginalized, to strike - PBS."
+},
+{
+"i": 67,
+"evidence_id": "ev_15aafbfb9ab35fe0",
+"type": "EARNINGS_RESULT",
+"subject": "stripe",
+"observed_at": "2026-08-06",
+"fact": "Postmates boosts authorisation rates with Stripe, adding $70+ million in revenue."
+},
+{
+"i": 68,
+"evidence_id": "ev_73026984e3a36a72",
+"type": "PRICING_SIGNAL",
+"subject": "shopify",
+"observed_at": "2026-10-03",
+"fact": "For instance, while online customer service reps may specialize in specific queries, such as sales or refunds, employees at brick-and-mortar stores should be all-around knowledgeable and empowered\u2014such as returning online sales in store, conducting price adjustments, and answering questions about special promos."
+},
+{
+"i": 69,
+"evidence_id": "ev_d1de204e3c147e9e",
+"type": "EARNINGS_RESULT",
+"subject": "canadian_national",
+"observed_at": "2026-10-30",
+"fact": "Earnings Flash (CNR.TO) Canadian National Railway Reports Q3 Revenue CA$4.77B, vs. FactSet Est of CA$4.66B - marketscreener.com."
+}
+]

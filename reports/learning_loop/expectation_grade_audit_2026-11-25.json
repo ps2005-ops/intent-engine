@@ -1,0 +1,1594 @@
+[
+ {
+  "expectation_id": "exp_d5c8cb6f415ba22f",
+  "subject": "duolingo",
+  "metric": "demand_weakening",
+  "expected": "DOWN",
+  "original_grade": "CONTRADICTED",
+  "basis": {
+   "date": "2026-08-05",
+   "period": "Q2 2026",
+   "fact": "Duolingo (DUOL) Stock Falls on Q2 2026 Earnings - Quiver Quantitative.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-08-06",
+   "period": null,
+   "fact": "Duolingo Beats, Raises Outlook\u2014But Stock Drops as Investors Want More - Benzinga."
+  },
+  "gap_days": 1,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-11-02",
+    "fact": "Duolingo (DUOL) Reports Q3 Earnings Amid Significant Undervaluat - GuruFocus."
+   },
+   {
+    "date": "2026-11-03",
+    "fact": "Duolingo, Inc. Reports Earnings Results for the Third Quarter Ended September 30, 2026 - www.marketscreener.co"
+   },
+   {
+    "date": "2026-11-04",
+    "fact": "Duolingo's Q3 2026 sales beat estimates, stock jumps - Yahoo Finance."
+   }
+  ],
+  "window_ends": "2026-12-03",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_97e10ee8710a25e1",
+  "subject": "honda",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-08-05",
+   "period": null,
+   "fact": "Honda\u2019s consolidated sales revenue for the three months ended June 30, 2026 increased by 13.5%, to JPY 6,061.5 billion from the same period ",
+   "v2_reading": "demand_strengthening"
+  },
+  "grading": {
+   "date": "2026-08-05",
+   "period": null,
+   "fact": "Honda Motor Earnings, Revenue Rise; Raises Annual Guidance - Yahoo Finance."
+  },
+  "gap_days": 0,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-11-10",
+    "fact": "HONDA MOTOR CO., LTD. reports results for the quarter ended September 30 - Earnings Summary - TradingView."
+   },
+   {
+    "date": "2026-11-10",
+    "fact": "Honda Raises Outlook Even as EV Fallout Hangs Over Carmaker - Bloomberg.com."
+   },
+   {
+    "date": "2026-11-10",
+    "fact": "Honda Raises Annual Profit Forecast 20% on Hybrid Demand and Weaker Yen - News and Statistics - IndexBox."
+   }
+  ],
+  "window_ends": "2026-12-03",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_16d16ef20bbc6a6f",
+  "subject": "shopify",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-08-05",
+   "period": null,
+   "fact": "Shopify Delivers Big: 30%+ Growth Across GMV, Revenue, Gross Profit, and Free Cash Flow.",
+   "v2_reading": "demand_strengthening"
+  },
+  "grading": {
+   "date": "2026-08-05",
+   "period": "Q2",
+   "fact": "Stock Market Today, Aug. 5: Shopify Soars 17% After Beating Q2 Estimates, Raises Q3 Outlook - Yahoo Finance."
+  },
+  "gap_days": 0,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-09-24",
+    "fact": "FOOTDISTRICT grew revenue by 14%, returning customers by 28%, and average order value by 5% after moving from "
+   },
+   {
+    "date": "2026-09-25",
+    "fact": "Shopify achieved 34% revenue growth (33% in constant currency) and 18% free cash flow margins."
+   },
+   {
+    "date": "2026-09-25",
+    "fact": "\u201cThis was a monster quarter: more than 30% growth in GMV AND revenue AND gross profit AND free cash flow,\u201d sai"
+   }
+  ],
+  "window_ends": "2026-12-03",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_d017ff1b66bde613",
+  "subject": "cloudflare",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-08-06",
+   "period": null,
+   "fact": "Cloudflare shares jump 18% on revenue beat and raised full-year outlook - SiliconANGLE.",
+   "v2_reading": "positive_surprise"
+  },
+  "grading": {
+   "date": "2026-08-06",
+   "period": "Q2 2026",
+   "fact": "Cloudflare (NYSE: NET) grows Q2 2026 revenue while restructuring and cutting 20% of staff - Stock Titan."
+  },
+  "gap_days": 0,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-09-24",
+    "fact": "Cloudflare stock reports 36 percent revenue growth - AD HOC NEWS."
+   },
+   {
+    "date": "2026-10-13",
+    "fact": "Cloudflare Announces Date of Third Quarter 2026 Financial Results - Yahoo Finance."
+   },
+   {
+    "date": "2026-11-02",
+    "fact": "Cloudflare Earnings Preview: Great Growth, Terrible Valuation - Seeking Alpha."
+   }
+  ],
+  "window_ends": "2026-12-04",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_cd2d2ce77b8e8bc7",
+  "subject": "cloudflare",
+  "metric": "demand_weakening",
+  "expected": "DOWN",
+  "original_grade": "CONTRADICTED",
+  "basis": {
+   "date": "2026-08-06",
+   "period": "Q2 2026",
+   "fact": "Cloudflare Q2 2026 Earnings: Revenue Rises 36% as Restructuring Widens GAAP Loss - tradingkey.com.",
+   "v2_reading": "demand_strengthening"
+  },
+  "grading": {
+   "date": "2026-08-06",
+   "period": "Q2 2026",
+   "fact": "Cloudflare (NYSE: NET) grows Q2 2026 revenue while restructuring and cutting 20% of staff - Stock Titan."
+  },
+  "gap_days": 0,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-09-24",
+    "fact": "Cloudflare stock reports 36 percent revenue growth - AD HOC NEWS."
+   },
+   {
+    "date": "2026-10-13",
+    "fact": "Cloudflare Announces Date of Third Quarter 2026 Financial Results - Yahoo Finance."
+   },
+   {
+    "date": "2026-11-02",
+    "fact": "Cloudflare Earnings Preview: Great Growth, Terrible Valuation - Seeking Alpha."
+   }
+  ],
+  "window_ends": "2026-12-04",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_9679b177120b5ca7",
+  "subject": "asml",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-06-23",
+   "period": "Q1",
+   "fact": "(ASML) Reported Strong Returns in Q1 - Yahoo Finance.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-08-07",
+   "period": null,
+   "fact": "ASML Holding NV (ASML) Earnings Forecast: Future EPS & Revenue Growth Estimates - TradingKey."
+  },
+  "gap_days": 45,
+  "same_event": false,
+  "later_period_candidates": [
+   {
+    "date": "2026-08-07",
+    "fact": "July 15, 2026 ASML reports \u20ac9.3 billion total net sales and \u20ac2.9 billion net income in Q2 2026."
+   },
+   {
+    "date": "2026-08-07",
+    "fact": "ASML Holding NV (ASML) Earnings Forecast: Future EPS & Revenue Growth Estimates - TradingKey."
+   },
+   {
+    "date": "2026-08-08",
+    "fact": "July 15, 2026 ASML reports \u20ac9.3 billion total net sales and \u20ac2.9 billion net income in Q2 2026."
+   }
+  ],
+  "window_ends": "2026-12-03",
+  "verdict": "VALID_LATER_PERIOD"
+ },
+ {
+  "expectation_id": "exp_24abd1ae49b65e98",
+  "subject": "toyota",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-08-05",
+   "period": "FY2027",
+   "fact": "Vehicle unit sales in Japan increased by 43 thousand units, or 8.9%, to 524 thousand units in FY2027 first quarter compared with FY2026 firs",
+   "v2_reading": "demand_strengthening"
+  },
+  "grading": {
+   "date": "2026-08-07",
+   "period": null,
+   "fact": "Toyota Motor Corporation Just Beat Analyst Forecasts, And Analysts Have Been Updating Their Predictions - simplywall.st."
+  },
+  "gap_days": 2,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-10-01",
+    "fact": "Toyota Motor North America Reports September, Third Quarter 2026 U.S. Sales Results \u2013 Company Announcement - F"
+   },
+   {
+    "date": "2026-10-01",
+    "fact": "Toyota Motor US Reports Higher Q3 Vehicle Sales - marketscreener.com."
+   },
+   {
+    "date": "2026-10-05",
+    "fact": "Toyota Motor Q3 US Sales Rise 1% Y/Y on Strong EV Deliveries - Yahoo Finance."
+   }
+  ],
+  "window_ends": "2026-12-03",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_6f068ed46a12fcbe",
+  "subject": "etsy",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-08-05",
+   "period": null,
+   "fact": "Etsy Inc earnings beat by $0.25, revenue topped estimates - Investing.com.",
+   "v2_reading": "positive_surprise"
+  },
+  "grading": {
+   "date": "2026-08-07",
+   "period": "Q2",
+   "fact": "Etsy Analysts Increase Their Forecasts Following Better-Than-Expected Q2 Earnings - Benzinga."
+  },
+  "gap_days": 2,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-09-29",
+    "fact": "Etsy stock reports 6.20 percent revenue growth in Q2 - AD HOC NEWS."
+   },
+   {
+    "date": "2026-10-04",
+    "fact": "Etsy stock reports Q2 growth as analysts weigh valuation - AD HOC NEWS."
+   },
+   {
+    "date": "2026-10-23",
+    "fact": "Etsy (ETSY) Q3 2026 Preview: EPS Est. $0.74, Reports October 28 - AlphaStreet."
+   }
+  ],
+  "window_ends": "2026-12-04",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_fb67413eb9e24617",
+  "subject": "jpmorgan",
+  "metric": "market_share_seeking",
+  "expected": "UP",
+  "original_grade": "CONTRADICTED",
+  "basis": {
+   "date": "2026-08-07",
+   "period": null,
+   "fact": "JPMorgan Chase & Co. Has Lowered Expectations for Monte Rosa Therapeutics (NASDAQ:GLUE) Stock Price - MarketBeat.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-08-07",
+   "period": null,
+   "fact": "JPMorgan Chase & Co. Has Lowered Expectations for Cipher Mining (NASDAQ:CIFR) Stock Price - marketbeat.com."
+  },
+  "gap_days": 0,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-10-06",
+    "fact": "JPMorgan Chase & Co. (JPM) Reports Next Week: Wall Street Expects Earnings Growth - Yahoo Finance Australia."
+   },
+   {
+    "date": "2026-10-06",
+    "fact": "JPMorgan Chase & Co. (JPM) Reports Next Week: Wall Street Expects Earnings Growth - Yahoo Finance."
+   },
+   {
+    "date": "2026-10-13",
+    "fact": "JPMorganChase Reports Third-Quarter 2026 Financial Results - The National Law Review."
+   }
+  ],
+  "window_ends": "2027-02-03",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_276fb9fd56ceae5a",
+  "subject": "caterpillar",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-08-04",
+   "period": "Q2",
+   "fact": "Data center boom drives Q2 earnings growth for Caterpillar - Transport Topics.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-08-08",
+   "period": null,
+   "fact": "Caterpillar Inc. Just Beat Earnings Expectations: Here's What Analysts Think Will Happen Next - simplywall.st."
+  },
+  "gap_days": 4,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-10-22",
+    "fact": "Caterpillar (CAT) Reports Next Week: Wall Street Expects Earnings Growth - Yahoo Finance."
+   },
+   {
+    "date": "2026-10-29",
+    "fact": "Caterpillar Inc reports results for the quarter ended September 30 - Earnings Summary - TradingView."
+   },
+   {
+    "date": "2026-10-29",
+    "fact": "Earnings Flash (CAT) Caterpillar Inc. Reports Q3 Revenue $20.68B, vs. FactSet Est of $20.76B - marketscreener."
+   }
+  ],
+  "window_ends": "2026-12-03",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_bd98c22a5053105c",
+  "subject": "duolingo",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-08-06",
+   "period": null,
+   "fact": "Duolingo Beats, Raises Outlook\u2014But Stock Drops as Investors Want More - Benzinga.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-08-06",
+   "period": null,
+   "fact": "Duolingo Beats, Raises Outlook\u2014But Stock Drops as Investors Want More - benzinga.com."
+  },
+  "gap_days": 0,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-11-02",
+    "fact": "Duolingo (DUOL) Reports Q3 Earnings Amid Significant Undervaluat - GuruFocus."
+   },
+   {
+    "date": "2026-11-03",
+    "fact": "Duolingo, Inc. Reports Earnings Results for the Third Quarter Ended September 30, 2026 - www.marketscreener.co"
+   },
+   {
+    "date": "2026-11-04",
+    "fact": "Duolingo's Q3 2026 sales beat estimates, stock jumps - Yahoo Finance."
+   }
+  ],
+  "window_ends": "2026-12-04",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_9e3934ba95f4a309",
+  "subject": "nextera",
+  "metric": "demand_weakening",
+  "expected": "DOWN",
+  "original_grade": "CONTRADICTED",
+  "basis": {
+   "date": "2026-07-24",
+   "period": "Q2 2026",
+   "fact": "Earnings call transcript: NextEra Energy beats Q2 2026 EPS, misses on revenue - Investing.com.",
+   "v2_reading": "negative_surprise"
+  },
+  "grading": {
+   "date": "2026-08-09",
+   "period": null,
+   "fact": "We continue to expect to grow adjusted earnings per share at a compound annual growth rate of 8%+ through 2032 and are targeting the same fr"
+  },
+  "gap_days": 16,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-10-07",
+    "fact": "NextEra Energy announces date for release of third-quarter 2026 financial results - Morningstar."
+   },
+   {
+    "date": "2026-10-07",
+    "fact": "NextEra Energy announces date for release of third-quarter 2026 financial results - StreetInsider."
+   },
+   {
+    "date": "2026-10-07",
+    "fact": "NextEra Energy announces date for release of third-quarter 2026 financial results - Yahoo Finance Australia."
+   }
+  ],
+  "window_ends": "2026-12-03",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_b7c409702135991f",
+  "subject": "mercadolibre",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-08-05",
+   "period": "Q2 2026",
+   "fact": "MercadoLibre (NASDAQ:MELI) Surprises With Strong Q2 CY2026, Increases Its Unique Active Buyers - Yahoo Finance.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-08-09",
+   "period": "Q2",
+   "fact": "Unique buyers in Commerce grew 26% YoY in Q2'26 and Fintech MAUs grew 30% YoY."
+  },
+  "gap_days": 4,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-10-20",
+    "fact": "Items delivered LTM as of Q2'26."
+   },
+   {
+    "date": "2026-11-03",
+    "fact": "MercadoLibre Q3 2026 Earnings Preview (MELI:NASDAQ) - Seeking Alpha."
+   },
+   {
+    "date": "2026-11-04",
+    "fact": "MercadoLibre, Inc. Reports Third Quarter 2026 Financial Results - Yahoo Finance."
+   }
+  ],
+  "window_ends": "2026-12-04",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_69b221f54baad733",
+  "subject": "stripe",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-08-05",
+   "period": null,
+   "fact": "1Password has expanded its business-to-business customer base and it now accounts for over two-thirds of the company\u2019s total revenue.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-08-11",
+   "period": null,
+   "fact": "At our annual user conference, we shared how we are helping businesses increase revenue with our global payments suite, how we are allowing "
+  },
+  "gap_days": 6,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-10-23",
+    "fact": "Increase revenue by 3.8% on average and reduce costs by up to 3.3% with AI-powered optimisations trained on bi"
+   }
+  ],
+  "window_ends": "2026-12-03",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_e29856610c359052",
+  "subject": "sea_limited",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-07-21",
+   "period": null,
+   "fact": "Sea Limited: Why I'm Not Fading This Revenue Growth Story (NYSE:SE) - Seeking Alpha.",
+   "v2_reading": "demand_strengthening"
+  },
+  "grading": {
+   "date": "2026-08-11",
+   "period": null,
+   "fact": "Sea Limited stock surges 9% on strong revenue growth - Investing.com."
+  },
+  "gap_days": 21,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-09-11",
+    "fact": "All-Link Air & Sea Limited Provides Earnings Guidance for the Year 2026 - marketscreener.com."
+   },
+   {
+    "date": "2026-09-22",
+    "fact": "Sea Limited stock holds above USD 102 after revenue growth - AD HOC NEWS."
+   },
+   {
+    "date": "2026-10-16",
+    "fact": "Sea (NYSE:SE) Limited Earnings Growth and Nasdaq Composite Trends - Kalkine Media."
+   }
+  ],
+  "window_ends": "2026-12-07",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_c6b5fe78350c4f61",
+  "subject": "jpmorgan",
+  "metric": "pricing_power",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-08-12",
+   "period": null,
+   "fact": "Canadian Natural Resources (TSE:CNQ) Stock Price Expected to Rise, JPMorgan Chase & Co. Analyst Says - marketbeat.com.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-08-13",
+   "period": null,
+   "fact": "Aramark (NYSE:ARMK) Stock Price Expected to Rise, JPMorgan Chase & Co. Analyst Says - MarketBeat."
+  },
+  "gap_days": 1,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-10-06",
+    "fact": "JPMorgan Chase & Co. (JPM) Reports Next Week: Wall Street Expects Earnings Growth - Yahoo Finance Australia."
+   },
+   {
+    "date": "2026-10-06",
+    "fact": "JPMorgan Chase & Co. (JPM) Reports Next Week: Wall Street Expects Earnings Growth - Yahoo Finance."
+   },
+   {
+    "date": "2026-10-13",
+    "fact": "JPMorganChase Reports Third-Quarter 2026 Financial Results - The National Law Review."
+   }
+  ],
+  "window_ends": "2027-02-08",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_2ca39b608d70ac58",
+  "subject": "linde",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-08-17",
+   "period": "Q2 2026",
+   "fact": "Linde stock holds strong after Q2 2026 earnings beat and guidance raise - ad-hoc-news.de.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-08-19",
+   "period": "Q2 2026",
+   "fact": "Linde stock holds firm after Q2 2026 earnings beat - AD HOC NEWS."
+  },
+  "gap_days": 2,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-10-05",
+    "fact": "Full-year 2026 adjusted EPS guidance of $17.70 - $17.90 representing 8% to 9% growth."
+   },
+   {
+    "date": "2026-10-05",
+    "fact": "Excluding Linde AG purchase accounting impacts, adjusted net income was $2,089 million, up 8% versus prior yea"
+   },
+   {
+    "date": "2026-10-05",
+    "fact": "Adjusted diluted earnings per share was $4.50, 10% above prior year."
+   }
+  ],
+  "window_ends": "2026-12-15",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_56728f0a9b43085e",
+  "subject": "bhp",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-08-18",
+   "period": null,
+   "fact": "BHP Group Fiscal 2026 Underlying Earnings, Revenue Up; Shares Up 3% - marketscreener.com.",
+   "v2_reading": "demand_strengthening"
+  },
+  "grading": {
+   "date": "2026-08-19",
+   "period": null,
+   "fact": "Berenberg Updates Estimates for BHP Group Post-FY26 Earnings Beat - marketscreener.com."
+  },
+  "gap_days": 1,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-10-20",
+    "fact": "BHP Group's Copper Output Falls in Q1 on Grade Declines, Weather, Maintenance - marketscreener.com."
+   },
+   {
+    "date": "2026-10-20",
+    "fact": "BHP Group Limited Reaffirms Group Production Guidance for the Fiscal Year 2027 - www.marketscreener.com."
+   },
+   {
+    "date": "2026-10-20",
+    "fact": "BHP Group Limited Reports Group Production Results for the First Quarter Ended September 30, 2026 - www.market"
+   }
+  ],
+  "window_ends": "2026-12-16",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_b65351098443f624",
+  "subject": "etsy",
+  "metric": "demand_weakening",
+  "expected": "DOWN",
+  "original_grade": "CONTRADICTED",
+  "basis": {
+   "date": "2026-08-10",
+   "period": "Q3",
+   "fact": "Weekly Recap: Etsy (ETSY) Q3 GMS and margin guidance and 12% staff cuts - TradingView.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-08-21",
+   "period": "Q2 2026",
+   "fact": "Resilient Etsy stock edges higher as Bank of America upgrade and Q2 2026 beat support durable growth - Ad-hoc-news.de."
+  },
+  "gap_days": 11,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-09-29",
+    "fact": "Etsy stock reports 6.20 percent revenue growth in Q2 - AD HOC NEWS."
+   },
+   {
+    "date": "2026-10-04",
+    "fact": "Etsy stock reports Q2 growth as analysts weigh valuation - AD HOC NEWS."
+   },
+   {
+    "date": "2026-10-23",
+    "fact": "Etsy (ETSY) Q3 2026 Preview: EPS Est. $0.74, Reports October 28 - AlphaStreet."
+   }
+  ],
+  "window_ends": "2026-12-10",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_1ada5e5681ca6b68",
+  "subject": "america_movil",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-07-22",
+   "period": "Q2 2026",
+   "fact": "Earnings call transcript: Am\u00e9rica M\u00f3vil posts Q2 2026 revenue beat, EPS miss - Investing.com.",
+   "v2_reading": "positive_surprise"
+  },
+  "grading": {
+   "date": "2026-09-01",
+   "period": "Q2 2026",
+   "fact": "Am\u00e9rica M\u00f3vil's Q2 2026 Growth Strengthens Greater Reach and Reliability for Claro's Enterprise Customers Across the Americas \u2013 Company Anno"
+  },
+  "gap_days": 41,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-09-24",
+    "fact": "America Movil stock reports 3.1 percent Q2 revenue growth - AD HOC NEWS."
+   },
+   {
+    "date": "2026-10-02",
+    "fact": "America Movil grows revenue 3.10 percent: what it means for America Movil stock - AD HOC NEWS."
+   },
+   {
+    "date": "2026-10-02",
+    "fact": "America Movil grows revenue 3.10 percent: what it means for America Movil stock - ad-hoc-news.de."
+   }
+  ],
+  "window_ends": "2026-12-08",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_832e89f100908c7e",
+  "subject": "procter_gamble",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-07-29",
+   "period": "Q4",
+   "fact": "Procter & Gamble Q4 Earnings Beat on Productivity, Sales Miss Estimates - Yahoo Finance.",
+   "v2_reading": "negative_surprise"
+  },
+  "grading": {
+   "date": "2026-09-02",
+   "period": null,
+   "fact": "Procter & Gamble outlook raised to positive by Moody\u2019s on cash flow - Investing.com Canada."
+  },
+  "gap_days": 35,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-09-23",
+    "fact": "P&G Announces Results for the Third Quarter of Fiscal Year 2026."
+   },
+   {
+    "date": "2026-09-23",
+    "fact": "P&G reported results for the third quarter of fiscal 2026."
+   },
+   {
+    "date": "2026-10-21",
+    "fact": "P&G Q1 earnings on deck: Eyes on sales growth (PG:NYSE) - Seeking Alpha."
+   }
+  ],
+  "window_ends": "2026-12-05",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_4ed96cf1236cf4e7",
+  "subject": "canadian_national",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-08-03",
+   "period": null,
+   "fact": "Canadian National Railway raises its 2026 volume outlook on firmer freight demand - MarketScale.",
+   "v2_reading": "demand_strengthening"
+  },
+  "grading": {
+   "date": "2026-09-03",
+   "period": "Q2 2026",
+   "fact": "CNI stock gains as Canadian National Railway lifts outlook on Q2 2026 growth - AD HOC NEWS."
+  },
+  "gap_days": 31,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-10-23",
+    "fact": "Canadian National Railway (CNI) Expected to Announce Earnings on Friday - MarketBeat."
+   },
+   {
+    "date": "2026-10-30",
+    "fact": "Canadian National Railway Company Reports Earnings Results for the Third Quarter and Nine Months Ended Septemb"
+   },
+   {
+    "date": "2026-10-30",
+    "fact": "Canadian National Railway earnings beat by C$0.08, revenue topped estimates - Investing.com."
+   }
+  ],
+  "window_ends": "2026-12-03",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_69d434e18e6a1966",
+  "subject": "jpmorgan",
+  "metric": "demand_weakening",
+  "expected": "DOWN",
+  "original_grade": "CONTRADICTED",
+  "basis": {
+   "date": "2026-08-05",
+   "period": null,
+   "fact": "2017 \u2013 Net Income Excluding TCJA\u00b9: Adjusted net income was $26.9 billion, excluding $2.4 billion related to the Tax Cuts and Jobs Act (TCJA)",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-09-15",
+   "period": "Q3",
+   "fact": "JPMorgan Chase Sees Mid-Teens Growth in Q3 Banking Fees and Markets Revenue - Yahoo Finance."
+  },
+  "gap_days": 41,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-10-06",
+    "fact": "JPMorgan Chase & Co. (JPM) Reports Next Week: Wall Street Expects Earnings Growth - Yahoo Finance Australia."
+   },
+   {
+    "date": "2026-10-06",
+    "fact": "JPMorgan Chase & Co. (JPM) Reports Next Week: Wall Street Expects Earnings Growth - Yahoo Finance."
+   },
+   {
+    "date": "2026-10-13",
+    "fact": "JPMorganChase Reports Third-Quarter 2026 Financial Results - The National Law Review."
+   }
+  ],
+  "window_ends": "2026-12-03",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_0f99817e0c3d1007",
+  "subject": "jpmorgan",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-09-15",
+   "period": "Q3",
+   "fact": "JPMorgan Chase Sees Mid-Teens Growth in Q3 Banking Fees and Markets Revenue - Yahoo Finance.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-09-15",
+   "period": "Q3",
+   "fact": "JPMorgan Chase Sees Mid-Teens Growth in Q3 Banking Fees and Markets Revenue - finance.yahoo.com."
+  },
+  "gap_days": 0,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-11-10",
+    "fact": "JPMorgan Chase & Co. (NYSE:JPM) Reports Higher Loans and Deposits Alongside Quarterly Earnings - Kalkine."
+   },
+   {
+    "date": "2026-11-12",
+    "fact": "JP Morgan Chase & (JPM): JPMorgan reports $1.84 trillion in 13F holdings for Q3 2026 - Quantisnow."
+   }
+  ],
+  "window_ends": "2027-01-13",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_490d93b911e12cd1",
+  "subject": "checkpoint",
+  "metric": "demand_weakening",
+  "expected": "DOWN",
+  "original_grade": "CONTRADICTED",
+  "basis": {
+   "date": "2026-04-30",
+   "period": "Q1",
+   "fact": "Cybersecurity firm Check Point Software first-quarter profit beats estimates, cuts 2026 revenue outlook - Yahoo Finance.",
+   "v2_reading": "demand_weakening"
+  },
+  "grading": {
+   "date": "2026-09-18",
+   "period": null,
+   "fact": "Check Point's 2026 Outlook: Infinity Platform Strategy Drives Subscription Revenue Growth - fool.com."
+  },
+  "gap_days": 141,
+  "same_event": false,
+  "later_period_candidates": [
+   {
+    "date": "2026-07-30",
+    "fact": "Check Point Software Reports 2026 Second Quarter Financial Results - Yahoo Finance."
+   },
+   {
+    "date": "2026-07-31",
+    "fact": "Check Point Q2 Earnings Beat Estimates, Revenues Increase Y/Y - Yahoo Finance."
+   },
+   {
+    "date": "2026-09-18",
+    "fact": "Check Point's 2026 Outlook: Infinity Platform Strategy Drives Subscription Revenue Growth - Currently.com."
+   }
+  ],
+  "window_ends": "2026-12-11",
+  "verdict": "VALID_LATER_PERIOD"
+ },
+ {
+  "expectation_id": "exp_e362e6fd12604117",
+  "subject": "checkpoint",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-07-31",
+   "period": "Q2",
+   "fact": "Check Point Q2 Earnings Beat Estimates, Revenues Increase Y/Y - Yahoo Finance.",
+   "v2_reading": "demand_strengthening"
+  },
+  "grading": {
+   "date": "2026-09-18",
+   "period": null,
+   "fact": "Check Point's 2026 Outlook: Infinity Platform Strategy Drives Subscription Revenue Growth - fool.com."
+  },
+  "gap_days": 49,
+  "same_event": false,
+  "later_period_candidates": [
+   {
+    "date": "2026-09-18",
+    "fact": "Check Point's 2026 Outlook: Infinity Platform Strategy Drives Subscription Revenue Growth - Currently.com."
+   },
+   {
+    "date": "2026-09-18",
+    "fact": "Check Point's 2026 Outlook: Infinity Platform Strategy Drives Subscription Revenue Growth - fool.com."
+   },
+   {
+    "date": "2026-09-18",
+    "fact": "Check Point's 2026 Outlook: Infinity Platform Strategy Drives Subscription Revenue Growth - The Motley Fool."
+   }
+  ],
+  "window_ends": "2026-12-18",
+  "verdict": "VALID_LATER_PERIOD"
+ },
+ {
+  "expectation_id": "exp_ac2f7f856adac125",
+  "subject": "olo",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-08-05",
+   "period": null,
+   "fact": "Personalized recommendations for online orders increase repeat guests\u2014and revenue \u2014 for the 24/7 diner.",
+   "v2_reading": "demand_strengthening"
+  },
+  "grading": {
+   "date": "2026-09-23",
+   "period": null,
+   "fact": "GDP, our restaurant-focused Customer Data Platform (CDP), helps accelerate revenue growth by enabling guest-data-driven decisions in every l"
+  },
+  "gap_days": 49,
+  "same_event": false,
+  "later_period_candidates": [
+   {
+    "date": "2026-09-23",
+    "fact": "GDP, our restaurant-focused Customer Data Platform (CDP), helps accelerate revenue growth by enabling guest-da"
+   },
+   {
+    "date": "2026-10-27",
+    "fact": "Increase Revenue with Automated Menu Management."
+   },
+   {
+    "date": "2026-10-27",
+    "fact": "Put up to five items side by side and see which one wins on guest count, revenue, and repeat orders, instead o"
+   }
+  ],
+  "window_ends": "2026-12-03",
+  "verdict": "VALID_LATER_PERIOD"
+ },
+ {
+  "expectation_id": "exp_7c6f0bb034cbeb7f",
+  "subject": "etsy",
+  "metric": "pricing_power",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-09-22",
+   "period": null,
+   "fact": "Etsy Inc. stock gains as analysts raise consensus price targets - AD HOC NEWS.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-09-22",
+   "period": null,
+   "fact": "Etsy Inc. stock gains as analysts raise consensus price targets - ad-hoc-news.de."
+  },
+  "gap_days": 0,
+  "same_event": true,
+  "later_period_candidates": [],
+  "window_ends": "2027-03-21",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "OPEN_AWAITING_NEXT_REPORT (window to 2027-03-21)"
+ },
+ {
+  "expectation_id": "exp_5e8d86f2b7dd9b9e",
+  "subject": "linde",
+  "metric": "pricing_power",
+  "expected": "UP",
+  "original_grade": "CONTRADICTED",
+  "basis": {
+   "date": "2026-06-01",
+   "period": null,
+   "fact": "BofA and BMO Raise Price Targets on Linde (LIN) Amid Hydrogen and Industrial Gas Growth Prospects - Yahoo Finance.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-09-28",
+   "period": null,
+   "fact": "Argus Has Lowered Expectations for Linde (NASDAQ:LIN) Stock Price - MarketBeat."
+  },
+  "gap_days": 119,
+  "same_event": false,
+  "later_period_candidates": [
+   {
+    "date": "2026-07-31",
+    "fact": "GUIDANCE: (LIN) Linde Plc Expects Q3 Adjusted EPS Range $4.45 - $4.55 - Moomoo."
+   },
+   {
+    "date": "2026-07-31",
+    "fact": "Linde PLC reports results for the quarter ended June 30 - Earnings Summary - TradingView."
+   },
+   {
+    "date": "2026-07-31",
+    "fact": "Earnings Flash (LIN) Linde plc Posts Q2 Adjusted EPS $4.50 per Share - marketscreener.com."
+   }
+  ],
+  "window_ends": "2027-02-21",
+  "verdict": "VALID_LATER_PERIOD"
+ },
+ {
+  "expectation_id": "exp_f9cd282ce8cbe503",
+  "subject": "linde",
+  "metric": "market_share_seeking",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-09-28",
+   "period": null,
+   "fact": "Argus Has Lowered Expectations for Linde (NASDAQ:LIN) Stock Price - MarketBeat.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-10-05",
+   "period": null,
+   "fact": "Compared to prior year, underlying sales increased 4% from 2% price attainment and 2% volumes, primarily in the electronics, manufacturing a"
+  },
+  "gap_days": 7,
+  "same_event": true,
+  "later_period_candidates": [],
+  "window_ends": "2027-03-27",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "OPEN_AWAITING_NEXT_REPORT (window to 2027-03-27)"
+ },
+ {
+  "expectation_id": "exp_454d4121134b6c67",
+  "subject": "johnson_johnson",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONTRADICTED",
+  "basis": {
+   "date": "2026-07-27",
+   "period": null,
+   "fact": "Johnson & Johnson (JNJ) Raised Its Outlook.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-10-05",
+   "period": null,
+   "fact": "Johnson & Johnson Stock Fell Nearly 6% in 4 Days Before Its October 13 Earnings."
+  },
+  "gap_days": 70,
+  "same_event": false,
+  "later_period_candidates": [
+   {
+    "date": "2026-10-05",
+    "fact": "Johnson & Johnson Stock Fell Nearly 6% in 4 Days Before Its October 13 Earnings."
+   },
+   {
+    "date": "2026-10-13",
+    "fact": "Johnson & Johnson reports Q3 2026 results, raises 2026 guidance."
+   },
+   {
+    "date": "2026-10-13",
+    "fact": "\u20222026 Third-Quarter reported sales growth of 5.9% to $25.4 Billion with operational growth of 6.0%* and adjust"
+   }
+  ],
+  "window_ends": "2026-12-04",
+  "verdict": "VALID_LATER_PERIOD"
+ },
+ {
+  "expectation_id": "exp_9f477096d158e618",
+  "subject": "johnson_johnson",
+  "metric": "demand_weakening",
+  "expected": "DOWN",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-07-29",
+   "period": null,
+   "fact": "J&J lowers 2026 profit forecast on deal costs, sees further hit in 2027 - Reuters.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-10-05",
+   "period": null,
+   "fact": "Johnson & Johnson Stock Fell Nearly 6% in 4 Days Before Its October 13 Earnings."
+  },
+  "gap_days": 68,
+  "same_event": false,
+  "later_period_candidates": [
+   {
+    "date": "2026-10-05",
+    "fact": "Johnson & Johnson Stock Fell Nearly 6% in 4 Days Before Its October 13 Earnings."
+   },
+   {
+    "date": "2026-10-13",
+    "fact": "Johnson & Johnson reports Q3 2026 results, raises 2026 guidance."
+   },
+   {
+    "date": "2026-10-13",
+    "fact": "\u20222026 Third-Quarter reported sales growth of 5.9% to $25.4 Billion with operational growth of 6.0%* and adjust"
+   }
+  ],
+  "window_ends": "2026-12-04",
+  "verdict": "VALID_LATER_PERIOD"
+ },
+ {
+  "expectation_id": "exp_235c1e4a565de110",
+  "subject": "hdfc_bank",
+  "metric": "demand_weakening",
+  "expected": "DOWN",
+  "original_grade": "CONTRADICTED",
+  "basis": {
+   "date": "2026-06-17",
+   "period": null,
+   "fact": "HDFC Bank (HDB) Fell as Deposit Fell Short of Expectations - Yahoo Finance.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-10-17",
+   "period": "Q2 2026",
+   "fact": "Earnings call transcript: HDFC Bank Q2 2026 margin pressure eases as growth stays firm - Investing.com."
+  },
+  "gap_days": 122,
+  "same_event": false,
+  "later_period_candidates": [
+   {
+    "date": "2026-08-07",
+    "fact": "Jefferies sees brighter India outlook as credit, capital flows ramp up; removes HDFC Bank in portfolio revamp "
+   },
+   {
+    "date": "2026-10-17",
+    "fact": "Earnings call transcript: HDFC Bank Q2 2026 margin pressure eases as growth stays firm - Investing.com."
+   },
+   {
+    "date": "2026-10-22",
+    "fact": "HDFC Bank reports Q2 profit growth as leadership change nears for HDFC Bank stock - AD HOC NEWS."
+   }
+  ],
+  "window_ends": "2026-12-05",
+  "verdict": "VALID_LATER_PERIOD"
+ },
+ {
+  "expectation_id": "exp_8b3e468c7ec30f8e",
+  "subject": "hdfc_bank",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-07-18",
+   "period": "Q1 2026",
+   "fact": "Earnings call transcript: HDFC Bank posts modest Q1 2026 growth as margins narrow - Investing.com.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-10-17",
+   "period": "Q2 2026",
+   "fact": "Earnings call transcript: HDFC Bank Q2 2026 margin pressure eases as growth stays firm - Investing.com."
+  },
+  "gap_days": 91,
+  "same_event": false,
+  "later_period_candidates": [
+   {
+    "date": "2026-10-17",
+    "fact": "Earnings call transcript: HDFC Bank Q2 2026 margin pressure eases as growth stays firm - Investing.com."
+   },
+   {
+    "date": "2026-10-22",
+    "fact": "HDFC Bank reports Q2 profit growth as leadership change nears for HDFC Bank stock - AD HOC NEWS."
+   }
+  ],
+  "window_ends": "2026-12-06",
+  "verdict": "VALID_LATER_PERIOD"
+ },
+ {
+  "expectation_id": "exp_4b91d8ee2f52dd46",
+  "subject": "infosys",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-08-03",
+   "period": "Q1",
+   "fact": "Weekly Recap: Q1 FY27 revenue rise and Ashiss Kumar Dash named CEO - TradingView.",
+   "v2_reading": "demand_strengthening"
+  },
+  "grading": {
+   "date": "2026-10-20",
+   "period": "Q1",
+   "fact": "Infosys stock: Q1 revenue grew 14.00 percent at Infosys stock - ad-hoc-news.de."
+  },
+  "gap_days": 78,
+  "same_event": true,
+  "later_period_candidates": [
+   {
+    "date": "2026-09-23",
+    "fact": "Infosys narrows FY27 guidance to 1.5%-3%, appoints Dash as CEO - scanx.trade."
+   },
+   {
+    "date": "2026-10-21",
+    "fact": "Infosys Limited Reports Earnings Results for the Second Quarter and Six Months Ended September 30, 2026 - www."
+   },
+   {
+    "date": "2026-10-23",
+    "fact": "Infosys Limited (INFY) Reports In-Line Q3 EPS - StreetInsider."
+   }
+  ],
+  "window_ends": "2026-12-03",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "REGRADE_CANDIDATE_NEEDS_REVIEW"
+ },
+ {
+  "expectation_id": "exp_7744e231b0a8f11d",
+  "subject": "infosys",
+  "metric": "demand_weakening",
+  "expected": "DOWN",
+  "original_grade": "CONTRADICTED",
+  "basis": {
+   "date": "2026-07-31",
+   "period": null,
+   "fact": "Infosys (NSEI:INFY) Stock Fair Value Falls After Analysts Cut Targets On Weaker Outlook - Yahoo Finance.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-10-20",
+   "period": "Q1",
+   "fact": "Infosys stock: Q1 revenue grew 14.00 percent at Infosys stock - ad-hoc-news.de."
+  },
+  "gap_days": 81,
+  "same_event": false,
+  "later_period_candidates": [
+   {
+    "date": "2026-09-23",
+    "fact": "Infosys narrows FY27 guidance to 1.5%-3%, appoints Dash as CEO - scanx.trade."
+   },
+   {
+    "date": "2026-10-20",
+    "fact": "Infosys stock: Q1 revenue grew 14.00 percent at Infosys stock - ad-hoc-news.de."
+   },
+   {
+    "date": "2026-10-20",
+    "fact": "Infosys stock: Q1 revenue grew 14.00 percent at Infosys stock - AD HOC NEWS."
+   }
+  ],
+  "window_ends": "2027-01-24",
+  "verdict": "VALID_LATER_PERIOD"
+ },
+ {
+  "expectation_id": "exp_3818d4f1b5d89224",
+  "subject": "nextera",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-08-09",
+   "period": "Q2",
+   "fact": "\u2022NextEra Energy delivers strong second-quarter results.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-10-21",
+   "period": "Q3 2026",
+   "fact": "FPL's growth in the third quarter of 2026 was driven primarily by continued disciplined capital investments."
+  },
+  "gap_days": 73,
+  "same_event": false,
+  "later_period_candidates": [
+   {
+    "date": "2026-10-07",
+    "fact": "NextEra Energy announces date for release of third-quarter 2026 financial results - Morningstar."
+   },
+   {
+    "date": "2026-10-07",
+    "fact": "NextEra Energy announces date for release of third-quarter 2026 financial results - StreetInsider."
+   },
+   {
+    "date": "2026-10-07",
+    "fact": "NextEra Energy announces date for release of third-quarter 2026 financial results - Yahoo Finance Australia."
+   }
+  ],
+  "window_ends": "2026-12-07",
+  "verdict": "VALID_LATER_PERIOD"
+ },
+ {
+  "expectation_id": "exp_5acc7ca62978539c",
+  "subject": "america_movil",
+  "metric": "demand_weakening",
+  "expected": "DOWN",
+  "original_grade": "CONTRADICTED",
+  "basis": {
+   "date": "2026-10-21",
+   "period": null,
+   "fact": "America Movil ADR earnings missed by Mex$0.03, revenue topped estimates - Investing.com India.",
+   "v2_reading": "positive_surprise"
+  },
+  "grading": {
+   "date": "2026-10-21",
+   "period": "Q3",
+   "fact": "Claro Brasil posts BRL 13.8 bln revenue in Q3, up 6% year-on-year - Telecompaper."
+  },
+  "gap_days": 0,
+  "same_event": true,
+  "later_period_candidates": [],
+  "window_ends": "2027-02-18",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "OPEN_AWAITING_NEXT_REPORT (window to 2027-02-18)"
+ },
+ {
+  "expectation_id": "exp_62e8802167ced80a",
+  "subject": "vale",
+  "metric": "demand_weakening",
+  "expected": "DOWN",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-07-31",
+   "period": null,
+   "fact": "Vale posts profit fall, lifts base metals outlook and unveils buyback - Mining.com.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-10-29",
+   "period": "Q3 2026",
+   "fact": "(VALE) Releases Q3 2026 Earnings: Revenue Up Slightly but Profit Falls - Quiver Quantitative."
+  },
+  "gap_days": 90,
+  "same_event": false,
+  "later_period_candidates": [
+   {
+    "date": "2026-10-29",
+    "fact": "(VALE) Releases Q3 2026 Earnings: Revenue Up Slightly but Profit Falls - Quiver Quantitative."
+   },
+   {
+    "date": "2026-10-30",
+    "fact": "Vale: Strong cash generation and hedges cushioned weaker iron ore earnings as growth projects advanced - Tradi"
+   },
+   {
+    "date": "2026-10-30",
+    "fact": "Vale rises after reporting mixed Q3 results, maintaining production guidance (VALE:NYSE) - Seeking Alpha."
+   }
+  ],
+  "window_ends": "2026-12-03",
+  "verdict": "VALID_LATER_PERIOD"
+ },
+ {
+  "expectation_id": "exp_db85d61aa754f7c3",
+  "subject": "vale",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONTRADICTED",
+  "basis": {
+   "date": "2026-04-28",
+   "period": "Q1",
+   "fact": "Miner Vale posts 36% rise in Q1 profit on more sales, higher prices - Reuters.",
+   "v2_reading": "demand_strengthening"
+  },
+  "grading": {
+   "date": "2026-10-29",
+   "period": "Q3 2026",
+   "fact": "(VALE) Releases Q3 2026 Earnings: Revenue Up Slightly but Profit Falls - Quiver Quantitative."
+  },
+  "gap_days": 184,
+  "same_event": false,
+  "later_period_candidates": [
+   {
+    "date": "2026-07-31",
+    "fact": "Vale posts profit fall, lifts base metals outlook and unveils buyback - Mining.com."
+   },
+   {
+    "date": "2026-08-01",
+    "fact": "Vale SA reports results for the quarter ended June 30 - Earnings Summary - TradingView."
+   },
+   {
+    "date": "2026-10-29",
+    "fact": "(VALE) Releases Q3 2026 Earnings: Revenue Up Slightly but Profit Falls - Quiver Quantitative."
+   }
+  ],
+  "window_ends": "2026-12-07",
+  "verdict": "VALID_LATER_PERIOD"
+ },
+ {
+  "expectation_id": "exp_ca642e2a287f8ad1",
+  "subject": "linde",
+  "metric": "demand_weakening",
+  "expected": "DOWN",
+  "original_grade": "CONTRADICTED",
+  "basis": {
+   "date": "2026-10-29",
+   "period": "Q3",
+   "fact": "Linde PLC Reports Q3 Revenue of $9.4 Billion, Misses EPS Estimat - GuruFocus.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-10-30",
+   "period": "Q3",
+   "fact": "LIN Q3 Earnings Call Highlights Restructuring and Growth Outlook - TradingView."
+  },
+  "gap_days": 1,
+  "same_event": true,
+  "later_period_candidates": [],
+  "window_ends": "2027-02-27",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "OPEN_AWAITING_NEXT_REPORT (window to 2027-02-27)"
+ },
+ {
+  "expectation_id": "exp_481be6cfcf1a0e09",
+  "subject": "grifols",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONTRADICTED",
+  "basis": {
+   "date": "2026-02-26",
+   "period": "Q4 2025",
+   "fact": "(GRFS) Releases Q4 2025 Earnings: Revenue Up Strongly but EPS and Cash Flow Slump - Quiver Quantitative.",
+   "v2_reading": "demand_strengthening"
+  },
+  "grading": {
+   "date": "2026-11-02",
+   "period": null,
+   "fact": "Profit rises 27.9% at Grifols (GRFS), but one revenue stream declines. - Stock Titan."
+  },
+  "gap_days": 249,
+  "same_event": false,
+  "later_period_candidates": [
+   {
+    "date": "2026-07-28",
+    "fact": "(GRFS) Stock Rises on Q2 2026 Earnings - Quiver Quantitative."
+   },
+   {
+    "date": "2026-07-28",
+    "fact": "(GRFS) Stock Rises on Q2 2026 Earnings - quiverquant.com."
+   },
+   {
+    "date": "2026-07-28",
+    "fact": "(GRFS) Stock Rises on Q2 2026 Earnings - Quiver Quantitative."
+   }
+  ],
+  "window_ends": "2026-12-03",
+  "verdict": "VALID_LATER_PERIOD"
+ },
+ {
+  "expectation_id": "exp_0726f3e34090971c",
+  "subject": "grifols",
+  "metric": "demand_weakening",
+  "expected": "DOWN",
+  "original_grade": "CONTRADICTED",
+  "basis": {
+   "date": "2026-11-02",
+   "period": null,
+   "fact": "Profit rises 27.9% at Grifols (GRFS), but one revenue stream declines. - Stock Titan.",
+   "v2_reading": "demand_weakening"
+  },
+  "grading": {
+   "date": "2026-11-02",
+   "period": "Q3",
+   "fact": "Grifols S A : increases revenue by 8.4% to EUR 2,040 million and grows net profit by 28% to EUR 162m in Q3\u201926 - www.marketscreener.com."
+  },
+  "gap_days": 0,
+  "same_event": true,
+  "later_period_candidates": [],
+  "window_ends": "2027-03-02",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "OPEN_AWAITING_NEXT_REPORT (window to 2027-03-02)"
+ },
+ {
+  "expectation_id": "exp_1345adea81546044",
+  "subject": "vale",
+  "metric": "pricing_power",
+  "expected": "UP",
+  "original_grade": "CONTRADICTED",
+  "basis": {
+   "date": "2026-10-19",
+   "period": null,
+   "fact": "Vale raised at Scotiabank after stock price correction; Southern Copper looks expensive (VALE:NYSE) - Seeking Alpha.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-11-03",
+   "period": null,
+   "fact": "Key facts: Vale price targets lowered; analysts split on ratings - TradingView."
+  },
+  "gap_days": 15,
+  "same_event": true,
+  "later_period_candidates": [],
+  "window_ends": "2027-04-17",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "OPEN_AWAITING_NEXT_REPORT (window to 2027-04-17)"
+ },
+ {
+  "expectation_id": "exp_bdf4cccc2b24fbdd",
+  "subject": "shopify",
+  "metric": "demand_weakening",
+  "expected": "DOWN",
+  "original_grade": "CONTRADICTED",
+  "basis": {
+   "date": "2026-11-03",
+   "period": "Q3 2026",
+   "fact": "Shopify Inc Reports Q3 2026 Earnings: EPS Matches Estimates at $0.38, Revenue Falls Short at $3,742 Million - GuruFocus.",
+   "v2_reading": "negative_surprise"
+  },
+  "grading": {
+   "date": "2026-11-04",
+   "period": "Q3",
+   "fact": "SHOP Q3 Earnings Beat Estimates, Revenues Rise on Strong GMV - TradingView."
+  },
+  "gap_days": 1,
+  "same_event": true,
+  "later_period_candidates": [],
+  "window_ends": "2027-03-04",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "OPEN_AWAITING_NEXT_REPORT (window to 2027-03-04)"
+ },
+ {
+  "expectation_id": "exp_156ad523a77b804f",
+  "subject": "exxon_mobil",
+  "metric": "demand_strengthening",
+  "expected": "UP",
+  "original_grade": "CONFIRMED",
+  "basis": {
+   "date": "2026-10-30",
+   "period": "Q3",
+   "fact": "Exxon rises after posting Q3 earnings topper on record refining haul (XOM:NYSE) - Seeking Alpha.",
+   "v2_reading": "ABSTAIN"
+  },
+  "grading": {
+   "date": "2026-11-12",
+   "period": null,
+   "fact": "Our earnings growth is driven by improvements in both volume and mix and continuing to drive structural cost savings."
+  },
+  "gap_days": 13,
+  "same_event": true,
+  "later_period_candidates": [],
+  "window_ends": "2027-02-27",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "OPEN_AWAITING_NEXT_REPORT (window to 2027-02-27)"
+ },
+ {
+  "expectation_id": "exp_6a3993df5be7ae20",
+  "subject": "honda",
+  "metric": "demand_weakening",
+  "expected": "DOWN",
+  "original_grade": "CONTRADICTED",
+  "basis": {
+   "date": "2026-11-10",
+   "period": "Q2 2027",
+   "fact": "Honda Motor (HMC) Releases Q2 2027 Earnings: Revenue Up, Profitability Falls - Quiver Quantitative.",
+   "v2_reading": "demand_strengthening"
+  },
+  "grading": {
+   "date": "2026-11-12",
+   "period": null,
+   "fact": "Sales revenue from external customers increased by 18.3%, to \u00a52,272.5 billion from the same period last year, due mainly to increased consol"
+  },
+  "gap_days": 2,
+  "same_event": true,
+  "later_period_candidates": [],
+  "window_ends": "2027-03-10",
+  "verdict": "INVALID_SAME_EVENT",
+  "status_after_invalidation": "OPEN_AWAITING_NEXT_REPORT (window to 2027-03-10)"
+ }
+]

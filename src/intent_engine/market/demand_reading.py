@@ -41,15 +41,19 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Optional
 
-CONTRACT = "demand_reading.v2"
+CONTRACT = "demand_reading.v2.1"
 
 WEAKENING, STRENGTHENING = "demand_weakening", "demand_strengthening"
 SURPRISE_NEG, SURPRISE_POS = "negative_surprise", "positive_surprise"
 ABSTAIN = "ABSTAIN"
 
+# v2.1 (2026-11-25, from failures on held-out sample 1): user and buyer
+# activity measures were missing.
 _QTY = (r"revenue|revenues|sales|orders|order book|bookings|backlog|volume|"
-        r"volumes|shipments|deliveries|gmv|gross merchandise|deposits|"
-        r"subscribers|subscriptions|users|traffic|units|demand|loan growth")
+        r"volumes|shipments|deliveries|gmv|gross merchandise|deposits?|"
+        r"subscribers|subscriptions|users|dau|mau|daily active users|"
+        r"paying customers|buyers|items per buyer|traffic|units|demand|"
+        r"loan growth")
 _Q = re.compile(rf"\b({_QTY})\b", re.I)
 _UP = re.compile(r"\b(ris\w*|rose|grow\w*|grew|increas\w*|up|jump\w*|surg\w*|"
                  r"climb\w*|gain\w*|higher|expand\w*|accelerat\w*|record|"
@@ -57,11 +61,14 @@ _UP = re.compile(r"\b(ris\w*|rose|grow\w*|grew|increas\w*|up|jump\w*|surg\w*|"
 _DN = re.compile(r"\b(fall\w*|fell|declin\w*|drop\w*|decreas\w*|lower\w*|"
                  r"down|shrank|shrink\w*|contract\w*|slump\w*|slow\w*|"
                  r"weak\w*|cut\w*|reduc\w*)\b", re.I)
+# v2.1: bare "top" matched "on top of last year" and "Top ... Pick"; a top
+# is a surprise only when it tops estimates/expectations/consensus.
 _VS_EST = re.compile(r"\b(estimate\w*|expectation\w*|consensus|forecasts? of "
                      r"analysts|analysts?|street|short of|falls? short|fell short|"
-                     r"beat\w*|miss\w*|"
-                     r"top\w* estimates|tops?|shy of)\b", re.I)
-_BEAT = re.compile(r"\b(beat\w*|top\w*|exceed\w*|above)\b", re.I)
+                     r"beat\w*|miss\w*|tops? (?:estimates|expectations|consensus|"
+                     r"forecasts?)|topped (?:estimates|expectations|consensus)|"
+                     r"shy of)\b", re.I)
+_BEAT = re.compile(r"\b(beat\w*|tops?|topped|exceed\w*|above)\b", re.I)
 _MISS = re.compile(r"\b(miss\w*|short|shy|below|under)\b", re.I)
 _NOT_DEMAND = re.compile(r"\b(stock|shares?|price target|fair value|profit\w*|"
                          r"margin\w*|eps|earnings per share|net income|loss\w*|"

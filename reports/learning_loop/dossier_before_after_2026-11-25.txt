@@ -1,0 +1,21 @@
+===== cloudflare-inc [BEFORE] beliefs shown=6
+  FACTS: 
+===== cloudflare-inc [AFTER] beliefs shown=5
+  FACTS: 
+  NOTE: Withdrawn after audit (contradicted by source): "Cloudflare, Inc. is seeing demand weaken rather than pause" — the basis reports revenue +36%; the down words were restructuring and GAAP loss
+===== shopify-inc [BEFORE] beliefs shown=6
+  FACTS: 
+===== shopify-inc [AFTER] beliefs shown=5
+  FACTS: 
+  NOTE: Withdrawn after audit (contradicted by source): "Shopify Inc. is seeing demand weaken rather than pause" — 'revenue falls short' means short of estimates; revenue grew about 32% year on year
+===== check-point-software [BEFORE] beliefs shown=7
+  FACTS: 
+===== check-point-software [AFTER] beliefs shown=7
+  FACTS: 
+  QUALIFIED: Check Point Software is seeing demand weaken rather than pause -> Management cut its 2026 revenue outlook in April 2026; subsequent reporting shows subscription growth. Demand weakening is a guidance signal, not an observed decline.
+--- cloudflare-inc BEFORE (1 block(s))
+  fact: Reading strategic evidence about Cloudflare, Inc., the market-learning engine holds that Cloudflare, Inc. is seeing demand strengthen rather than plateau — the current evidence makes this moderately plausible. It is revised since it was opened, as later evidence arrived. It also holds: Cloudflare, Inc. is protecting margin by taking cost out rather than growing into it; Cloudflare, Inc. is converting delivered work into repeatable product. It rests on 2 piece(s) of public evidence.
+  limitation: These are readings held at a stated confidence, not observations, and they describe strategic posture rather than this company's operating results. Stated by the engine: one period's result is a data point, not a trend.
+--- cloudflare-inc AFTER (1 block(s))
+  fact: Reading strategic evidence about Cloudflare, Inc., the market-learning engine holds that Cloudflare, Inc. is seeing demand strengthen rather than plateau — the current evidence makes this moderately plausible. It is revised since it was opened, as later evidence arrived. It also holds: Cloudflare, Inc. is protecting margin by taking cost out rather than growing into it; Cloudflare, Inc. is converting delivered work into repeatable product. It rests on 2 piece(s) of public evidence.
+  limitation: These are readings held at a stated confidence, not observations, and they describe strategic posture rather than this company's operating results. Stated by the engine: one period's result is a data point, not a trend.

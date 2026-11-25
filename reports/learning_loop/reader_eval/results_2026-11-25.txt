@@ -1,0 +1,29 @@
+v1 production (direction_of): clear items 90, ambiguous 10
+   exact accuracy 71/90 = 0.79
+   demand claims made 27: precision 15/27 = 0.56; FALSE demand claims 12
+   demand recall 15/17 = 0.88
+   surprises identified 4/10
+   correct abstention 56/67
+   on ambiguous items it asserted: {'S': 7, 'N': 3}
+     FALSE W (gold ['N']): JPMorgan Chase & Co. (NYSE:JPM) Posts Earnings Results, Misses Expectations By $0.19 EPS - MarketBea
+     FALSE S (gold ['N']): •NextEra Energy delivers strong third-quarter results.
+     FALSE S (gold ['N']): NextEra Energy (NEE) Q3 Earnings Beat Estimates - Yahoo Finance.
+     FALSE S (gold ['N']): Present prices in local currencies to your customers, tailoring customer experience and increasing r
+     FALSE S (gold ['PS']): Cloudflare (NYSE:NET) Q3 Beat and Above-Consensus Guidance Fuel Rebound - ChartMill.
+     FALSE S (gold ['N']): Infosys (INFY) Reports Q4 EPS Beat - Yahoo Finance.
+     FALSE S (gold ['N']): (GRFS) Q4 2025 Earnings: EPS Beats Estimates by 10.4%, Shares Edge Higher - Guidance Revision Trend 
+     FALSE S (gold ['N']): CN says wildfires, tariff threats no barrier to growth as railway ups earnings target - BNN Bloomber
+
+v2 demand_reading (shadow): clear items 90, ambiguous 10
+   exact accuracy 76/90 = 0.84
+   demand claims made 13: precision 10/13 = 0.77; FALSE demand claims 3
+   demand recall 11/17 = 0.65
+   surprises identified 3/10
+   correct abstention 64/67
+   on ambiguous items it asserted: {'N': 10}
+     FALSE S (gold ['N']): Present prices in local currencies to your customers, tailoring customer experience and increasing r
+     FALSE S (gold ['N']): Bloomreach partners with Shopify to deliver AI-powered personalization, helping enterprises increase
+     FALSE S (gold ['N']): Digital revenue at Scalpers grew from €4 million to €40 million after the Spanish fashion brand move
+
+HUMAN REVIEW (ambiguous): [6, 19, 26, 27, 28, 30, 37, 43, 62, 77]
+v2 misses on clear demand items: [(35, ['S'], 'N'), (39, ['S'], 'N'), (63, ['S'], 'PS'), (64, ['S'], 'PS'), (67, ['PS', 'S'], 'N'), (92, ['PS', 'S'], 'N')]

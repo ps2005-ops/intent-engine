@@ -1,0 +1,30 @@
+half-month runs attempt retriev accept refuse new_ev acc/run  subjects  statuses
+2026-08a     43    1308    1957    451    397    454    10.5    1  {'SUCCESS': 40, 'FAILED': 1, 'NO_RESULT': 2}
+2026-08b     21     987     987    164    514    164     7.8    1  {'FAILED': 3, 'SUCCESS': 17, 'NO_RESULT': 1}
+2026-09a     20    1046    1046    169    938    169     8.4    1  {'SUCCESS': 18, 'FAILED': 1, 'NO_RESULT': 1}
+2026-09b     22     983     983    176    837    176     8.0    1  {'SUCCESS': 18, 'FAILED': 3, 'NO_RESULT': 1}
+2026-10a     17     938     938    174    572    174    10.2    1  {'SUCCESS': 16, 'NO_RESULT': 1}
+2026-10b     16     949     949    171    683    171    10.7    1  {'SUCCESS': 16}
+2026-11a     10     575     575    127    199    127    12.7    1  {'SUCCESS': 10}
+2026-11b     15     696     696    153    536    153    10.2    1  {'SUCCESS': 12, 'FAILED': 2, 'NO_RESULT': 1}
+
+source health since Nov 1: {('bank_of_canada', 'HEALTHY'): 25, ('bureau_of_labor_statistics', 'HEALTHY'): 23, ('statistics_canada', 'HEALTHY'): 22, ('treasury_bill_rate', 'HEALTHY'): 27, ('treasury_interest_expense', 'HEALTHY'): 27, ('treasury_note_rate', 'HEALTHY'): 27, ('bank_of_canada', 'DEGRADED'): 2, ('statistics_canada', 'DEGRADED'): 1, ('bureau_of_labor_statistics', 'UNCLASSIFIED'): 7, ('statistics_canada', 'UNCLASSIFIED'): 5, ('bank_of_canada', 'UNCLASSIFIED'): 3, ('treasury_bill_rate', 'UNCLASSIFIED'): 3, ('treasury_interest_expense', 'UNCLASSIFIED'): 3, ('treasury_note_rate', 'UNCLASSIFIED'): 3, ('statistics_canada', 'AUTH_EXPIRED'): 1, ('statistics_canada', 'PARSER_BROKEN'): 1}
+sightings per half-month (new / all): {'2026-04b': '0/3', '2026-07b': '0/1', '2026-08a': '0/526', '2026-08b': '0/1033', '2026-09a': '0/568', '2026-09b': '0/741', '2026-10a': '0/537', '2026-10b': '0/561', '2026-11a': '0/705', '2026-11b': '0/449'}
+cycles per half-month: {'2026-08a': 21, '2026-08b': 29, '2026-09a': 23, '2026-09b': 27, '2026-10a': 19, '2026-10b': 16, '2026-11a': 17, '2026-11b': 13}
+
+untested expectations: {'window still open': 129}
+   ('procurement_momentum', 'open') 17
+   ('leadership_transition', 'open') 17
+   ('margin_protection', 'open') 16
+   ('capital_return_posture', 'open') 16
+   ('consolidation_posture', 'open') 14
+   ('regulatory_pressure', 'open') 12
+   ('partner_led_distribution', 'open') 9
+   ('capacity_expansion', 'open') 6
+   ('pricing_power', 'open') 4
+   ('demand_weakening', 'open') 4
+   ('capacity_hiring', 'open') 3
+   ('productization', 'open') 3
+   ('market_share_seeking', 'open') 3
+   ('supply_constraint', 'open') 2
+window ends: first 2026-12-08 median 2027-05-10 last 2027-11-18

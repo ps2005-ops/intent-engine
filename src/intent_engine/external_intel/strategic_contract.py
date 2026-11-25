@@ -567,8 +567,50 @@ def _economic_theses(payload: dict) -> Tuple[dict, ...]:
     return tuple(out)
 
 
+#: Audit verdicts that withdraw a belief from every founder surface. The
+#: dossier is never edited; the correction is an appended line beside it.
+WITHDRAW_VERDICTS = ("CONTRADICTED_BY_SOURCE", "UNSUPPORTED", "STALE",
+                     "INCORRECTLY_ATTRIBUTED")
+QUALIFY_VERDICTS = ("SUPPORTED_WITH_QUALIFICATION", "INFERRED_WITH_UNCERTAINTY")
+
+
+CORRECTIONS_FILE = "belief_corrections.jsonl"
+
+
+def read_corrections(path) -> Dict[tuple, dict]:
+    """(company_id, proposition) -> the LATEST audit correction for it."""
+    import json
+    import pathlib
+    out: Dict[tuple, dict] = {}
+    p = pathlib.Path(path)
+    if not p.exists():
+        return out
+    for line in p.read_text(encoding="utf-8").splitlines():
+        try:
+            c = json.loads(line)
+        except ValueError:
+            continue
+        out[(c.get("company_id"), c.get("proposition"))] = c
+    return out
+
+
+def _apply_corrections(beliefs, company, corrections):
+    kept, withdrawn = [], []
+    for b in beliefs:
+        c = corrections.get((company, b.get("proposition")))
+        if c and c.get("verdict") in WITHDRAW_VERDICTS:
+            withdrawn.append(c)
+            continue
+        if c and c.get("verdict") in QUALIFY_VERDICTS:
+            b = {**b, "audit_verdict": c["verdict"],
+                 "qualification": c.get("corrected_statement", "")}
+        kept.append(b)
+    return tuple(kept), withdrawn
+
+
 def consume(payload: dict, *, expected_company: str = "",
-            today: str = "") -> StrategicIntel:
+            today: str = "", corrections: Optional[Dict[tuple, dict]] = None
+            ) -> StrategicIntel:
     """Read one dossier, refusing anything this side cannot vouch for."""
     if not isinstance(payload, dict):
         return unavailable("The strategic dossier was not a readable object.")
@@ -609,6 +651,12 @@ def consume(payload: dict, *, expected_company: str = "",
         return tuple(r for r in (payload.get(key) or ())
                      if isinstance(r, dict))
 
+    beliefs, withdrawn = _apply_corrections(_rows("strategic_beliefs"),
+                                            company, corrections or {})
+    audit_notes = tuple(
+        f"Withdrawn after audit ({c['verdict'].replace('_', ' ').lower()}): "
+        f"\"{c['proposition']}\" — {c.get('reason', '')}" for c in withdrawn)
+
     return StrategicIntel(
         available=True, company_id=company,
         display_name=str(payload.get("company_display_name") or ""),
@@ -616,7 +664,7 @@ def consume(payload: dict, *, expected_company: str = "",
                             (payload.get("subject_names") or ())),
         as_of=as_of, age_days=age,
         stale=False,
-        beliefs=_rows("strategic_beliefs"),
+        beliefs=beliefs,
         postures=_rows("hidden_states"),
         interactions=_rows("interactions"),
         mismatches=_rows("expectation_mismatches"),
@@ -632,7 +680,8 @@ def consume(payload: dict, *, expected_company: str = "",
         economic_theses=_economic_theses(payload),
         thesis_revisions=tuple(payload.get("thesis_revisions") or ()),
         thesis_history=payload.get("thesis_history"),
-        limitations=tuple(str(x) for x in (payload.get("limitations") or ())),
+        limitations=tuple(str(x) for x in (payload.get("limitations") or ()))
+        + audit_notes,
         evidence_trust=(payload.get("evidence_trust")
                         if isinstance(payload.get("evidence_trust"), dict)
                         else None),
@@ -787,4 +836,6 @@ def load(path, *, expected_company: str = "",
         return unavailable(
             f"The strategic dossier could not be read ({kind}). It was not "
             f"rendered.", company_id=expected_company)
-    return consume(payload, expected_company=expected_company, today=today)
+    corrections = read_corrections(p.parent / CORRECTIONS_FILE)
+    return consume(payload, expected_company=expected_company, today=today,
+                   corrections=corrections)

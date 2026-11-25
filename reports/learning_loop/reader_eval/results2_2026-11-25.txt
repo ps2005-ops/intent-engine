@@ -1,0 +1,30 @@
+v1 production (direction_of): clear items 61, ambiguous 9
+   exact accuracy 35/61 = 0.57
+   demand claims made 34: precision 12/34 = 0.35; FALSE demand claims 22
+   demand recall 12/15 = 0.80
+   surprises identified 3/9
+   correct abstention 23/41
+   on ambiguous items it asserted: {'S': 7, 'W': 2}
+     FALSE S (gold ['N']): In Fintech, our platform is digital from the ground up, so our users can do much more with us for th
+     FALSE S (gold ['N']): The Procter & Gamble Company Just Recorded A 6.0% EPS Beat: Here's What Analysts Are Forecasting Nex
+     FALSE S (gold ['N']): NextEra Energy, Inc. Beat Analyst Estimates: See What The Consensus Is Forecasting For Next Year - M
+     FALSE S (gold ['N', 'PS']): Sea (NYSE:SE) exceeds Q3 2026 expectations but stock drops - Yahoo Finance.
+     FALSE S (gold ['N']): Excluding Linde AG purchase accounting impacts, adjusted net income was $2,089 million, up 8% versus
+     FALSE S (gold ['PS']): Etsy Inc earnings beat by $0.24, revenue topped estimates - Investing.com Nigeria.
+     FALSE S (gold ['N']): Cloudflare says 1 Tbps DDoS attacks grew sixfold in the second quarter - siliconangle.com.
+     FALSE S (gold ['PS']): DUOL Q3 Earnings Miss Estimates, Revenues Beat, Shares Rise 25.3% - TradingView.
+
+v2.1 demand_reading (shadow, frozen): clear items 61, ambiguous 9
+   exact accuracy 54/61 = 0.89
+   demand claims made 15: precision 11/15 = 0.73; FALSE demand claims 4
+   demand recall 13/15 = 0.87
+   surprises identified 8/9
+   correct abstention 37/41
+   on ambiguous items it asserted: {'N': 5, 'S': 3, 'PS': 1}
+     FALSE S (gold ['N']): In Fintech, our platform is digital from the ground up, so our users can do much more with us for th
+     FALSE S (gold ['N']): Dutch fashion brand MR MARVIS achieved 10+ years of double-digit revenue growth and expanded from 0 
+     FALSE S (gold ['N']): How a global industrial manufacturer unified a fragmented catalog on Shopify, unlocked digital B2B, 
+     FALSE S (gold ['N']): Shopify Q3 earnings preview: EPS, revenue growth, and AI commerce push in focus (SHOP:NASDAQ) - Seek
+
+HUMAN REVIEW (ambiguous): [3, 4, 21, 23, 25, 30, 37, 38, 59]
+v2 misses on clear demand items: [(27, ['S'], 'N'), (50, ['W'], 'N')]

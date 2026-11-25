@@ -444,7 +444,8 @@ def reconcile_step(ctx: C.CycleContext) -> dict:
             "voided": 0}
 
 
-def resolve_outcomes_step(series_fn: Optional[Callable] = None) -> Callable:
+def resolve_outcomes_step(series_fn: Optional[Callable] = None,
+                          registry=None) -> Callable:
     """Night only. Attach realised outcomes to audit records whose horizon has
     fully elapsed. This is the ONLY place a future return enters the system,
     and it enters as evaluation of a settled past decision."""
@@ -452,8 +453,14 @@ def resolve_outcomes_step(series_fn: Optional[Callable] = None) -> Callable:
         from intent_engine.market import outcome_resolver as OR
         fetch = series_fn or _live_series
         rows = read_audit(ctx.root)
+        reg = registry
+        if reg is None and series_fn is None:   # production: SEC-backed, cached
+            from intent_engine.market import instrument_registry as IR
+            reg = IR.sec_registry(pathlib.Path(ctx.root) / "data" / "cache"
+                                  / "instrument_registry.json")
         result = OR.resolve(rows, root=ctx.root, today=ctx.as_of[:10],
-                            series_fn=fetch, write=not ctx.dry_run)
+                            series_fn=fetch, write=not ctx.dry_run,
+                            registry=reg)
         summary = OR.summarise(OR.read_outcomes(ctx.root)
                                + ([] if not ctx.dry_run else result["events"]))
         c = result["counts"]

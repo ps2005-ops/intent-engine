@@ -63,7 +63,11 @@ RESOLVED = "RESOLVED"
 PENDING = "PENDING"
 UNRESOLVABLE = "UNRESOLVABLE"
 NOT_MATURE = "NOT_MATURE"
-TERMINAL = (RESOLVED, UNRESOLVABLE)
+#: Not tradable at the decision (delisted or deregistered before it). Terminal,
+#: and distinct from UNRESOLVABLE: nothing failed to be measured, there was
+#: nothing to decide. See market/instrument_registry.py.
+INELIGIBLE = "INELIGIBLE"
+TERMINAL = (RESOLVED, UNRESOLVABLE, INELIGIBLE)
 
 IDENTITY_FIELDS = ("cycle_id", "company_id", "instrument", "signal",
                    "signal_version", "as_of")
@@ -85,7 +89,7 @@ def _d(s: str) -> date:
 
 
 def grade(row: dict, closes: Optional[Dict[str, float]], *, today: str,
-          provider_error: str = "") -> dict:
+          provider_error: str = "", eligibility=None) -> dict:
     """Grade one audit row. Pure: no I/O, no clock. Returns an outcome event."""
     horizon = int((row.get("opportunity") or {}).get(
         "horizon_days", SO.HORIZON_DAYS))
@@ -102,8 +106,15 @@ def grade(row: dict, closes: Optional[Dict[str, float]], *, today: str,
             "fired": bool(row.get("fired")), "processed_on": today[:10],
             "price_basis": PRICE_BASIS}
 
+    if eligibility is not None and eligibility.state == "INELIGIBLE":
+        return {**base, "state": INELIGIBLE, "reason": eligibility.reason,
+                "eligibility": eligibility.as_dict()}
     if end >= today[:10]:   # the horizon-end close is final only once that day has passed
         return {**base, "state": NOT_MATURE, "reason": "horizon not elapsed"}
+    delisted = (eligibility.delisted_on if eligibility is not None
+                and eligibility.delisted_on and row["as_of"][:10]
+                < eligibility.delisted_on <= end and closes
+                and max(d[:10] for d in closes) < end else "")
 
     def open_or_final(reason: str) -> dict:
         if today[:10] > final:
@@ -121,9 +132,12 @@ def grade(row: dict, closes: Optional[Dict[str, float]], *, today: str,
         return {**base, "state": UNRESOLVABLE,
                 "reason": "no decision-time entry bar within "
                           f"{MAX_ENTRY_STALENESS_DAYS} days of as_of"}
-    exit_ = [(d, v) for d, v in bars if as_of < d <= end]
+    exit_ = [(d, v) for d, v in bars if as_of < d <= (delisted or end)]
     last_bar = bars[-1][0]
-    if not exit_ or (_d(end) - _d(exit_[-1][0])).days > MAX_EXIT_STALENESS_DAYS:
+    if delisted and exit_ and exit_[-1][0] == last_bar:
+        pass    # delisted inside the window and the series ends: its last
+                # tradable close is the exit (Form 25 precedes Form 15)
+    elif not exit_ or (_d(end) - _d(exit_[-1][0])).days > MAX_EXIT_STALENESS_DAYS:
         if last_bar < end:
             # The series stops before the horizon end: lag, or delisting.
             return open_or_final(f"series ends {last_bar}, before horizon end {end}")
@@ -135,6 +149,8 @@ def grade(row: dict, closes: Optional[Dict[str, float]], *, today: str,
     x_date, x_px = exit_[-1]
     ret = round((x_px - e_px) / e_px, 6)
     out = {**base, "state": RESOLVED, "entry_date": e_date,
+           "exit_basis": ("last close on or before delisting " + delisted
+                          if delisted else "last close on or before horizon end"),
            "entry_close": e_px, "exit_date": x_date, "exit_close": x_px,
            "realized_return": ret,
            "late": today[:10] > final, "days_late": max(
@@ -163,21 +179,40 @@ def read_outcomes(root) -> List[dict]:
     return out
 
 
+CORRECTION = "signal_outcome_correction.v1"
+
+
+def correction_for(prior: dict, new_state: str, *, reason: str, evidence,
+                   processed_on: str) -> dict:
+    """An APPENDED correction of a terminal event. The original line stays;
+    this one names it, says why, and carries the evidence."""
+    return {**{k: v for k, v in prior.items()
+               if k not in ("state", "reason", "processed_on")},
+            "contract": CORRECTION, "state": new_state, "reason": reason,
+            "corrects_state": prior.get("state"),
+            "corrects_processed_on": prior.get("processed_on"),
+            "evidence": evidence, "processed_on": processed_on}
+
+
 def latest_by_key(events: Iterable[dict]) -> Dict[str, dict]:
-    """Terminal events win and are never superseded by a later event."""
+    """Terminal events win and are never superseded by a later GRADING event.
+    Only an explicit correction (contract CORRECTION, naming the state it
+    corrects) may replace a terminal event."""
     latest: Dict[str, dict] = {}
     for ev in events:
         k = ev.get("record_key")
         prev = latest.get(k)
         if prev and prev.get("state") in TERMINAL:
-            continue
+            if not (ev.get("contract") == CORRECTION
+                    and ev.get("corrects_state") == prev.get("state")):
+                continue
         latest[k] = ev
     return latest
 
 
 def resolve(audit_rows: List[dict], *, root, today: str,
             series_fn: Callable[[str], Dict[str, float]],
-            write: bool = True) -> dict:
+            write: bool = True, registry=None) -> dict:
     """Grade every audit row that is mature and not yet terminal.
 
     One fetch per instrument per call, so the entry and exit of every record
@@ -187,7 +222,8 @@ def resolve(audit_rows: List[dict], *, root, today: str,
     cache: Dict[str, tuple] = {}
     new_events: List[dict] = []
     counts = {"inspected": len(audit_rows), RESOLVED: 0, PENDING: 0,
-              UNRESOLVABLE: 0, NOT_MATURE: 0, "already_terminal": 0,
+              UNRESOLVABLE: 0, NOT_MATURE: 0, INELIGIBLE: 0,
+              "already_terminal": 0,
               "unchanged_pending": 0}
     seen_this_run = set()
     counts["duplicate_rows"] = 0
@@ -202,6 +238,23 @@ def resolve(audit_rows: List[dict], *, root, today: str,
             continue
         end = SO.horizon_end(row["as_of"], int(
             (row.get("opportunity") or {}).get("horizon_days", SO.HORIZON_DAYS)))
+        elig = None
+        if registry is not None:
+            sym = row.get("instrument")
+            if sym not in cache:
+                try:
+                    cache[sym] = (series_fn(sym) or {}, "")
+                except Exception as exc:
+                    cache[sym] = ({}, f"{type(exc).__name__}: {exc}"[:160])
+            a = row["as_of"][:10]
+            near = [d for d in cache[sym][0] if d[:10] <= a
+                    and (_d(a) - _d(d[:10])).days <= MAX_ENTRY_STALENESS_DAYS]
+            elig = registry.status(sym or "", a, price_absent=not near)
+        if elig is not None and elig.state == "INELIGIBLE":
+            ev = grade(row, None, today=today, eligibility=elig)
+            counts[INELIGIBLE] += 1
+            new_events.append(ev)
+            continue
         if end >= today[:10]:   # the horizon-end close is final only once that day has passed
             counts[NOT_MATURE] += 1
             continue
@@ -212,7 +265,8 @@ def resolve(audit_rows: List[dict], *, root, today: str,
             except Exception as exc:  # provider failure is a state, not a crash
                 cache[sym] = ({}, f"{type(exc).__name__}: {exc}"[:160])
         closes, err = cache[sym]
-        ev = grade(row, closes, today=today, provider_error=err)
+        ev = grade(row, closes, today=today, provider_error=err,
+                   eligibility=elig)
         counts[ev["state"]] += 1
         p = prior.get(key)
         if (ev["state"] == PENDING and p and p.get("state") == PENDING
