@@ -1,0 +1,177 @@
+{
+ "company/company": {
+  "n_train_rows": 6317,
+  "n_train_dates": 143,
+  "n_test_rows": 7263,
+  "n_test_dates": 141,
+  "instruments": 49,
+  "macro_dates_per_param": 15.9,
+  "macro_condition_number": 6.5,
+  "brier_A": 0.24974,
+  "brier_B": 0.25062,
+  "B_minus_A_gain": [
+   -0.00085,
+   -0.00182,
+   3e-05
+  ],
+  "placebo_B_gain_mean_10seeds": -0.00022,
+  "placebo_B_gain_range": [
+   -0.0009,
+   0.0001
+  ],
+  "univariate_gain_vs_base_rate": {
+   "slope_10y3m": -3e-05,
+   "d_slope_10y3m_91d": -3e-05,
+   "baa_spread": 7e-05,
+   "d_baa_spread_91d": 0.0,
+   "d_dgs10_91d": -0.0,
+   "d_dff_365d": -6e-05,
+   "d_unrate_365d": -4e-05,
+   "cpi_yoy": 1e-05,
+   "indpro_yoy": 2e-05
+  },
+  "base_rate_brier": 0.24968,
+  "stale_macro_B_gain": -0.00084,
+  "exposure_macroXbeta_gain": [
+   -0.00055,
+   -0.00146,
+   0.00038
+  ]
+ },
+ "etf/bond": {
+  "n_train_rows": 736,
+  "n_train_dates": 135,
+  "n_test_rows": 846,
+  "n_test_dates": 141,
+  "instruments": 6,
+  "macro_dates_per_param": 15.0,
+  "macro_condition_number": 6.8,
+  "brier_A": 0.24979,
+  "brier_B": 0.2596,
+  "B_minus_A_gain": [
+   -0.00982,
+   -0.02432,
+   0.00474
+  ],
+  "placebo_B_gain_mean_10seeds": -0.00607,
+  "placebo_B_gain_range": [
+   -0.02067,
+   0.00277
+  ],
+  "univariate_gain_vs_base_rate": {
+   "slope_10y3m": -0.00374,
+   "d_slope_10y3m_91d": 0.00146,
+   "baa_spread": 0.00047,
+   "d_baa_spread_91d": -0.00033,
+   "d_dgs10_91d": -0.00067,
+   "d_dff_365d": 0.00246,
+   "d_unrate_365d": 0.00116,
+   "cpi_yoy": 0.0038,
+   "indpro_yoy": 0.0
+  },
+  "base_rate_brier": 0.25005,
+  "stale_macro_B_gain": -0.00604
+ },
+ "etf/commodity": {
+  "n_train_rows": 379,
+  "n_train_dates": 107,
+  "n_test_rows": 564,
+  "n_test_dates": 141,
+  "instruments": 4,
+  "macro_dates_per_param": 11.9,
+  "macro_condition_number": 6.6,
+  "brier_A": 0.25042,
+  "brier_B": 0.27531,
+  "B_minus_A_gain": [
+   -0.02489,
+   -0.04996,
+   -0.00046
+  ],
+  "placebo_B_gain_mean_10seeds": -0.01347,
+  "placebo_B_gain_range": [
+   -0.02773,
+   0.00319
+  ],
+  "univariate_gain_vs_base_rate": {
+   "slope_10y3m": 0.00029,
+   "d_slope_10y3m_91d": -0.00144,
+   "baa_spread": -0.00304,
+   "d_baa_spread_91d": 0.00016,
+   "d_dgs10_91d": -0.00263,
+   "d_dff_365d": 0.00039,
+   "d_unrate_365d": -0.00207,
+   "cpi_yoy": -0.00994,
+   "indpro_yoy": 0.00219
+  },
+  "base_rate_brier": 0.2495,
+  "stale_macro_B_gain": -0.02968
+ },
+ "etf/equity_broad": {
+  "n_train_rows": 841,
+  "n_train_dates": 143,
+  "n_test_rows": 846,
+  "n_test_dates": 141,
+  "instruments": 6,
+  "macro_dates_per_param": 15.9,
+  "macro_condition_number": 6.5,
+  "brier_A": 0.24275,
+  "brier_B": 0.25206,
+  "B_minus_A_gain": [
+   -0.00931,
+   -0.02984,
+   0.01125
+  ],
+  "placebo_B_gain_mean_10seeds": -0.01017,
+  "placebo_B_gain_range": [
+   -0.01878,
+   -0.00052
+  ],
+  "univariate_gain_vs_base_rate": {
+   "slope_10y3m": -0.00096,
+   "d_slope_10y3m_91d": -0.00152,
+   "baa_spread": -0.00164,
+   "d_baa_spread_91d": -0.0019,
+   "d_dgs10_91d": 0.00029,
+   "d_dff_365d": -0.01426,
+   "d_unrate_365d": -0.00637,
+   "cpi_yoy": -0.00026,
+   "indpro_yoy": 0.00058
+  },
+  "base_rate_brier": 0.23792,
+  "stale_macro_B_gain": -0.00897
+ },
+ "etf/sector": {
+  "n_train_rows": 1287,
+  "n_train_dates": 143,
+  "n_test_rows": 1269,
+  "n_test_dates": 141,
+  "instruments": 9,
+  "macro_dates_per_param": 15.9,
+  "macro_condition_number": 6.5,
+  "brier_A": 0.24469,
+  "brier_B": 0.26158,
+  "B_minus_A_gain": [
+   -0.01689,
+   -0.03498,
+   0.00011
+  ],
+  "placebo_B_gain_mean_10seeds": -0.00668,
+  "placebo_B_gain_range": [
+   -0.01445,
+   -0.00214
+  ],
+  "univariate_gain_vs_base_rate": {
+   "slope_10y3m": 0.0001,
+   "d_slope_10y3m_91d": -0.00169,
+   "baa_spread": -0.00012,
+   "d_baa_spread_91d": -0.00125,
+   "d_dgs10_91d": 0.00036,
+   "d_dff_365d": -0.00649,
+   "d_unrate_365d": -0.00567,
+   "cpi_yoy": -0.00385,
+   "indpro_yoy": -0.00036
+  },
+  "base_rate_brier": 0.24084,
+  "stale_macro_B_gain": -0.01457
+ }
+}

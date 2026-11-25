@@ -1,0 +1,262 @@
+{
+ "july_prediction_ledger": {
+  "forecasts": 17,
+  "admit": 0,
+  "quarantine": 13,
+  "reject": 4,
+  "finding_codes": {
+   "NOT_A_REAL_FORECAST": 3,
+   "MISSING_TARGET": 3,
+   "MISSING_RESOLUTION_RULE": 3,
+   "MISSING_OUTCOME_SOURCE": 3,
+   "MISSING_MECHANISM": 17,
+   "MISSING_BASELINE": 17,
+   "MISSING_MODEL_VERSION": 17,
+   "MISSING_EVIDENCE_PROVENANCE": 17,
+   "MISSING_INVALIDATION": 17,
+   "IMPOSSIBLE_OR_UNIT_MISMATCH": 1,
+   "CLAIM_RULE_MISMATCH": 3,
+   "ALREADY_TRUE_AT_CREATION": 4
+  },
+  "warnings_on_admitted": {},
+  "detail": [
+   {
+    "id": "32bbf0c5-9bfc-4a98-9ca4-",
+    "verdict": "REJECT",
+    "findings": [
+     "NOT_A_REAL_FORECAST: classified TEST_FIXTURE; excluded from real-world performance statistics",
+     "MISSING_TARGET: no target",
+     "MISSING_RESOLUTION_RULE: no resolution rule",
+     "MISSING_OUTCOME_SOURCE: no outcome source",
+     "MISSING_MECHANISM: no mechanism",
+     "MISSING_BASELINE: no baseline",
+     "MISSING_MODEL_VERSION: no model version",
+     "MISSING_EVIDENCE_PROVENANCE: no evidence provenance",
+     "MISSING_INVALIDATION: no invalidation"
+    ]
+   },
+   {
+    "id": "a4446e76-9bb6-4330-8a64-",
+    "verdict": "REJECT",
+    "findings": [
+     "NOT_A_REAL_FORECAST: classified TEST_FIXTURE; excluded from real-world performance statistics",
+     "MISSING_TARGET: no target",
+     "MISSING_RESOLUTION_RULE: no resolution rule",
+     "MISSING_OUTCOME_SOURCE: no outcome source",
+     "MISSING_MECHANISM: no mechanism",
+     "MISSING_BASELINE: no baseline",
+     "MISSING_MODEL_VERSION: no model version",
+     "MISSING_EVIDENCE_PROVENANCE: no evidence provenance",
+     "MISSING_INVALIDATION: no invalidation"
+    ]
+   },
+   {
+    "id": "a5bca63d-2240-4091-9f75-",
+    "verdict": "REJECT",
+    "findings": [
+     "NOT_A_REAL_FORECAST: classified TEST_FIXTURE; excluded from real-world performance statistics",
+     "MISSING_TARGET: no target",
+     "MISSING_RESOLUTION_RULE: no resolution rule",
+     "MISSING_OUTCOME_SOURCE: no outcome source",
+     "MISSING_MECHANISM: no mechanism",
+     "MISSING_BASELINE: no baseline",
+     "MISSING_MODEL_VERSION: no model version",
+     "MISSING_EVIDENCE_PROVENANCE: no evidence provenance",
+     "MISSING_INVALIDATION: no invalidation"
+    ]
+   },
+   {
+    "id": "59bcc2e3-ab5c-485f-af28-",
+    "verdict": "REJECT",
+    "findings": [
+     "MISSING_MECHANISM: no mechanism",
+     "MISSING_BASELINE: no baseline",
+     "MISSING_MODEL_VERSION: no model version",
+     "MISSING_EVIDENCE_PROVENANCE: no evidence provenance",
+     "MISSING_INVALIDATION: no invalidation",
+     "IMPOSSIBLE_OR_UNIT_MISMATCH: threshold 310.0 is more than 20 ranges outside the series' observed 2.59..4.61; check units (percent vs basis points)"
+    ]
+   },
+   {
+    "id": "99e07e94-8fa1-4dee-9a76-",
+    "verdict": "QUARANTINE",
+    "findings": [
+     "MISSING_MECHANISM: no mechanism",
+     "MISSING_BASELINE: no baseline",
+     "MISSING_MODEL_VERSION: no model version",
+     "MISSING_EVIDENCE_PROVENANCE: no evidence provenance",
+     "MISSING_INVALIDATION: no invalidation"
+    ]
+   },
+   {
+    "id": "93384e1d-bdda-4bdc-aeeb-",
+    "verdict": "QUARANTINE",
+    "findings": [
+     "MISSING_MECHANISM: no mechanism",
+     "MISSING_BASELINE: no baseline",
+     "MISSING_MODEL_VERSION: no model version",
+     "MISSING_EVIDENCE_PROVENANCE: no evidence provenance",
+     "MISSING_INVALIDATION: no invalidation"
+    ]
+   },
+   {
+    "id": "4bae2749-784f-44f6-a695-",
+    "verdict": "QUARANTINE",
+    "findings": [
+     "MISSING_MECHANISM: no mechanism",
+     "MISSING_BASELINE: no baseline",
+     "MISSING_MODEL_VERSION: no model version",
+     "MISSING_EVIDENCE_PROVENANCE: no evidence provenance",
+     "MISSING_INVALIDATION: no invalidation",
+     "CLAIM_RULE_MISMATCH: the claim asserts persistence ('remains') but the rule reads a single observation",
+     "ALREADY_TRUE_AT_CREATION: last known T10Y2Y=0.37 already satisfies >= 0.3; the forecast is persistence"
+    ]
+   },
+   {
+    "id": "03c7cd9d-ea8f-41d4-b15c-",
+    "verdict": "QUARANTINE",
+    "findings": [
+     "MISSING_MECHANISM: no mechanism",
+     "MISSING_BASELINE: no baseline",
+     "MISSING_MODEL_VERSION: no model version",
+     "MISSING_EVIDENCE_PROVENANCE: no evidence provenance",
+     "MISSING_INVALIDATION: no invalidation"
+    ]
+   },
+   {
+    "id": "2d44806f-9e9a-49b5-8038-",
+    "verdict": "QUARANTINE",
+    "findings": [
+     "MISSING_MECHANISM: no mechanism",
+     "MISSING_BASELINE: no baseline",
+     "MISSING_MODEL_VERSION: no model version",
+     "MISSING_EVIDENCE_PROVENANCE: no evidence provenance",
+     "MISSING_INVALIDATION: no invalidation",
+     "CLAIM_RULE_MISMATCH: the claim asserts persistence ('remains') but the rule reads a single observation",
+     "ALREADY_TRUE_AT_CREATION: last known UNRATE=4.2 already satisfies < 5.0; the forecast is persistence"
+    ]
+   },
+   {
+    "id": "62dc866c-05d0-4405-b089-",
+    "verdict": "QUARANTINE",
+    "findings": [
+     "MISSING_MECHANISM: no mechanism",
+     "MISSING_BASELINE: no baseline",
+     "MISSING_MODEL_VERSION: no model version",
+     "MISSING_EVIDENCE_PROVENANCE: no evidence provenance",
+     "MISSING_INVALIDATION: no invalidation"
+    ]
+   },
+   {
+    "id": "865d2188-98bb-4062-a89d-",
+    "verdict": "QUARANTINE",
+    "findings": [
+     "MISSING_MECHANISM: no mechanism",
+     "MISSING_BASELINE: no baseline",
+     "MISSING_MODEL_VERSION: no model version",
+     "MISSING_EVIDENCE_PROVENANCE: no evidence provenance",
+     "MISSING_INVALIDATION: no invalidation"
+    ]
+   },
+   {
+    "id": "0f742abb-e3a6-48eb-a89d-",
+    "verdict": "QUARANTINE",
+    "findings": [
+     "MISSING_MECHANISM: no mechanism",
+     "MISSING_BASELINE: no baseline",
+     "MISSING_MODEL_VERSION: no model version",
+     "MISSING_EVIDENCE_PROVENANCE: no evidence provenance",
+     "MISSING_INVALIDATION: no invalidation",
+     "CLAIM_RULE_MISMATCH: the claim asserts persistence ('remains') but the rule reads a single observation",
+     "ALREADY_TRUE_AT_CREATION: last known T10Y2Y=0.37 already satisfies >= 0.25; the forecast is persistence"
+    ]
+   },
+   {
+    "id": "f30cf99e-2f58-4d76-a81c-",
+    "verdict": "QUARANTINE",
+    "findings": [
+     "MISSING_MECHANISM: no mechanism",
+     "MISSING_BASELINE: no baseline",
+     "MISSING_MODEL_VERSION: no model version",
+     "MISSING_EVIDENCE_PROVENANCE: no evidence provenance",
+     "MISSING_INVALIDATION: no invalidation"
+    ]
+   },
+   {
+    "id": "73b2bf49-46a4-4c43-9082-",
+    "verdict": "QUARANTINE",
+    "findings": [
+     "MISSING_MECHANISM: no mechanism",
+     "MISSING_BASELINE: no baseline",
+     "MISSING_MODEL_VERSION: no model version",
+     "MISSING_EVIDENCE_PROVENANCE: no evidence provenance",
+     "MISSING_INVALIDATION: no invalidation"
+    ]
+   },
+   {
+    "id": "e0408859-4367-41e2-85fb-",
+    "verdict": "QUARANTINE",
+    "findings": [
+     "MISSING_MECHANISM: no mechanism",
+     "MISSING_BASELINE: no baseline",
+     "MISSING_MODEL_VERSION: no model version",
+     "MISSING_EVIDENCE_PROVENANCE: no evidence provenance",
+     "MISSING_INVALIDATION: no invalidation",
+     "ALREADY_TRUE_AT_CREATION: last known UNRATE=4.2 already satisfies >= 3.4; the forecast is persistence"
+    ]
+   },
+   {
+    "id": "9052dbbf-9457-406e-a371-",
+    "verdict": "QUARANTINE",
+    "findings": [
+     "MISSING_MECHANISM: no mechanism",
+     "MISSING_BASELINE: no baseline",
+     "MISSING_MODEL_VERSION: no model version",
+     "MISSING_EVIDENCE_PROVENANCE: no evidence provenance",
+     "MISSING_INVALIDATION: no invalidation"
+    ]
+   },
+   {
+    "id": "9e2f2609-480e-430b-a199-",
+    "verdict": "QUARANTINE",
+    "findings": [
+     "MISSING_MECHANISM: no mechanism",
+     "MISSING_BASELINE: no baseline",
+     "MISSING_MODEL_VERSION: no model version",
+     "MISSING_EVIDENCE_PROVENANCE: no evidence provenance",
+     "MISSING_INVALIDATION: no invalidation"
+    ]
+   }
+  ]
+ },
+ "paper_forward_977": {
+  "forecasts": 977,
+  "admit": 977,
+  "quarantine": 0,
+  "reject": 0,
+  "finding_codes": {},
+  "warnings_on_admitted": {},
+  "detail": []
+ },
+ "econ_forward": {
+  "forecasts": 13,
+  "admit": 12,
+  "quarantine": 1,
+  "reject": 0,
+  "finding_codes": {
+   "MISSING_EVIDENCE_PROVENANCE": 1
+  },
+  "warnings_on_admitted": {
+   "CONTRACT_DERIVED_FROM_PROSE": 12
+  },
+  "detail": [
+   {
+    "id": "rl-b669edc0cdcd5c",
+    "verdict": "QUARANTINE",
+    "findings": [
+     "MISSING_EVIDENCE_PROVENANCE: no evidence provenance"
+    ]
+   }
+  ]
+ }
+}

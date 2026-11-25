@@ -345,6 +345,26 @@ def register(inp: dict, *, now: _dt.datetime, fresh_bars: Dict[str, BR.Bars],
     led = LG.Ledger(ledger_path, LG.FORWARD_SHADOW)
     known = set(led.states())
     new = [r for r in recs if r["forecast_id"] not in known]
+    # The forecast-quality gate decides admission BEFORE anything is written.
+    # A refused or quarantined forecast goes to a side file with its findings;
+    # it never enters the evaluation ledger and is never silently dropped.
+    from intent_engine.core import forecast_quality as FQ
+    existing = {FQ.from_paper(s.registration).identity
+                for s in led.states().values()}
+    gated = FQ.admit_batch([FQ.from_paper(r) for r in new], existing=existing)
+    held = {c.forecast_id: fs for k in (FQ.REJECT, FQ.QUARANTINE)
+            for c, fs in gated[k]}
+    if held:
+        qpath = pathlib.Path(ledger_path).parent / "forward_quarantine.jsonl"
+        with open(qpath, "a", encoding="utf-8") as fh:
+            for r in new:
+                if r["forecast_id"] in held:
+                    fh.write(json.dumps({
+                        "gate": FQ.CONTRACT, "held_at": now.isoformat(
+                            timespec="seconds"), "forecast": r,
+                        "findings": [f.__dict__ for f in held[r["forecast_id"]]]},
+                        sort_keys=True, default=str) + "\n")
+        new = [r for r in new if r["forecast_id"] not in held]
     n = led.register(new) if new else 0
     batch = pathlib.Path(ledger_path).parent / "forward_batches" / \
         f"{decision_date}.json"
@@ -356,7 +376,8 @@ def register(inp: dict, *, now: _dt.datetime, fresh_bars: Dict[str, BR.Bars],
                                      "registered": n, "data_vintage": vint},
                                     indent=1, sort_keys=True),
                          encoding="utf-8")
-    return {"registered": n, "skipped_existing": len(recs) - len(new),
+    return {"registered": n, "quality_held": len(held),
+            "skipped_existing": len(recs) - len(new) - len(held),
             "information_cutoff": cutoff, "decision_date": decision_date,
             "voided_rows": voids, "ledger": str(ledger_path)}
 

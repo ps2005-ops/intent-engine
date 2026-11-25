@@ -1,0 +1,13 @@
+company rows 13629, with point-in-time fundamentals 9059 (53 companies, first 2009-12-03)
+VALIDATION 2015-2020 (fit on <2015): train 2087 rows/60 dates, test 3296 rows/72 dates
+   Brier base 0.24837  A 0.24878  A+fundamentals 0.24833
+   gain (A - E), + = fundamentals help: +0.00044  95% CI [-0.00020, +0.00109]
+   placebo (shuffled across companies) gain mean -0.00061 range [-0.00136, +0.00045]
+   standardized weights: {'rev_yoy': -0.0, 'rev_accel': 0.06, 'capex_yoy': -0.036, 'capex_known': 0.04, 'fresh': -0.045, 'fresh_x_accel': -0.035}
+
+--- HOLDOUT, run once; fit on everything that exited before 2021 ---
+HOLDOUT 2021-2026: train 5377 rows/132 dates, test 3631 rows/69 dates
+   Brier base 0.25200  A 0.25198  A+fundamentals 0.25299
+   gain (A - E), + = fundamentals help: -0.00101  95% CI [-0.00190, -0.00013]
+   placebo (shuffled across companies) gain mean -0.00028 range [-0.00127, +0.00019]
+   standardized weights: {'rev_yoy': 0.012, 'rev_accel': 0.085, 'capex_yoy': -0.025, 'capex_known': 0.051, 'fresh': -0.025, 'fresh_x_accel': -0.043}

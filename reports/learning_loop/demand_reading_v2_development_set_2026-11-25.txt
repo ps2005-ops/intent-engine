@@ -1,0 +1,34 @@
+duolingo         CONTRADICTED v2=ABSTAIN              grade_admissible=False | names 'Stock' but no demand quantity moving against the company's own past; price, profit,
+cloudflare       CONTRADICTED v2=demand_strengthening grade_admissible=False | 'Revenue Rises 36%'
+nextera          CONTRADICTED v2=negative_surprise    grade_admissible=False | 'misses on revenue' is a miss against estimates, not a decline
+etsy             CONTRADICTED v2=ABSTAIN              grade_admissible=False | names 'margin' but no demand quantity moving against the company's own past; price, profit
+jpmorgan         CONTRADICTED v2=ABSTAIN              grade_admissible=False | names 'Net Income' but no demand quantity moving against the company's own past; price, pr
+checkpoint       CONTRADICTED v2=demand_weakening     grade_admissible=True | 'cuts 2026 revenue outlook'
+johnson_johnson  CONFIRMED    v2=ABSTAIN              grade_admissible=True | names 'profit' but no demand quantity moving against the company's own past; price, profit
+hdfc_bank        CONTRADICTED v2=ABSTAIN              grade_admissible=True | no demand quantity with a direction
+infosys          CONTRADICTED v2=ABSTAIN              grade_admissible=True | names 'Stock' but no demand quantity moving against the company's own past; price, profit,
+america_movil    CONTRADICTED v2=positive_surprise    grade_admissible=False | 'revenue topped estimates' is a beat against estimates, not growth
+vale             CONFIRMED    v2=ABSTAIN              grade_admissible=True | names 'profit' but no demand quantity moving against the company's own past; price, profit
+linde            CONTRADICTED v2=ABSTAIN              grade_admissible=False | names 'EPS' but no demand quantity moving against the company's own past; price, profit, m
+grifols          CONTRADICTED v2=demand_weakening     grade_admissible=False | 'one revenue stream declines.'
+shopify          CONTRADICTED v2=demand_weakening     grade_admissible=False | 'Revenue Falls Short at $3'
+honda            CONTRADICTED v2=demand_strengthening grade_admissible=False | 'Revenue Up'
+
+v1 family / v2 reading / outcome ('demand_strengthening', 'ABSTAIN', 'CONFIRMED') 10
+v1 family / v2 reading / outcome ('demand_strengthening', 'ABSTAIN', 'CONTRADICTED') 1
+v1 family / v2 reading / outcome ('demand_strengthening', 'demand_strengthening', 'CONFIRMED') 9
+v1 family / v2 reading / outcome ('demand_strengthening', 'demand_strengthening', 'CONTRADICTED') 2
+v1 family / v2 reading / outcome ('demand_strengthening', 'negative_surprise', 'CONFIRMED') 1
+v1 family / v2 reading / outcome ('demand_strengthening', 'positive_surprise', 'CONFIRMED') 3
+v1 family / v2 reading / outcome ('demand_weakening', 'ABSTAIN', 'CONFIRMED') 2
+v1 family / v2 reading / outcome ('demand_weakening', 'ABSTAIN', 'CONTRADICTED') 6
+v1 family / v2 reading / outcome ('demand_weakening', 'demand_strengthening', 'CONTRADICTED') 2
+v1 family / v2 reading / outcome ('demand_weakening', 'demand_weakening', 'CONTRADICTED') 3
+v1 family / v2 reading / outcome ('demand_weakening', 'negative_surprise', 'CONTRADICTED') 1
+v1 family / v2 reading / outcome ('demand_weakening', 'positive_surprise', 'CONTRADICTED') 1
+family / grade admissible / outcome ('demand_strengthening', False, 'CONFIRMED') 17
+family / grade admissible / outcome ('demand_strengthening', True, 'CONFIRMED') 6
+family / grade admissible / outcome ('demand_strengthening', True, 'CONTRADICTED') 3
+family / grade admissible / outcome ('demand_weakening', False, 'CONTRADICTED') 10
+family / grade admissible / outcome ('demand_weakening', True, 'CONFIRMED') 2
+family / grade admissible / outcome ('demand_weakening', True, 'CONTRADICTED') 3

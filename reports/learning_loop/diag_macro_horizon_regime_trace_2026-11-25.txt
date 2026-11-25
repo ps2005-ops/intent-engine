@@ -1,0 +1,18 @@
+E6 horizon 63 sessions (purged: train exits63 < split)
+  company/company: base 0.2492 A 0.2494 B 0.2525 gain B-A -0.0031
+  etf/bond: base 0.2658 A 0.2673 B 0.2799 gain B-A -0.0126
+  etf/commodity: base 0.2450 A 0.2532 B 0.2807 gain B-A -0.0276
+  etf/equity_broad: base 0.2211 A 0.2307 B 0.2433 gain B-A -0.0126
+  etf/sector: base 0.2300 A 0.2403 B 0.2594 gain B-A -0.0191
+
+E7 univariate coefficient (standardised) before 2015 vs from 2015
+  etf/equity_broad: 5 of 9 flip sign: d_slope_10y3m_91d(-0.16->+0.03), baa_spread(-0.09->+0.25), d_baa_spread_91d(-0.14->+0.16), d_dff_365d(+0.30->-0.27), d_unrate_365d(-0.07->+0.45)
+  etf/sector: 6 of 9 flip sign: d_slope_10y3m_91d(-0.13->+0.06), baa_spread(-0.01->+0.20), d_baa_spread_91d(-0.11->+0.14), d_dff_365d(+0.21->-0.15), d_unrate_365d(-0.10->+0.19), indpro_yoy(+0.02->-0.23)
+  etf/bond: 2 of 9 flip sign: d_baa_spread_91d(-0.06->+0.06), d_dgs10_91d(+0.05->-0.07)
+  etf/commodity: 3 of 9 flip sign: d_slope_10y3m_91d(-0.08->+0.14), baa_spread(+0.13->-0.06), d_dgs10_91d(-0.20->+0.01)
+
+E8 trace SPY 2022-03-10 entry 2022-03-11 exit 2022-04-11
+  macro evidence ids: ['panel:BAA10Y:2021-12-08@2021-12-09', 'panel:BAA10Y:2022-03-09@2022-03-10', 'panel:CPIAUCSL:2021-01-01@2021-02-20', 'panel:CPIAUCSL:2022-01-01@2022-02-20', 'panel:DFF:2021-03-09@2021-03-10', 'panel:DFF:2022-03-09@2022-03-10'] ...
+  macro features: {'slope_10y3m': 1.56, 'd_slope_10y3m_91d': 0.11, 'baa_spread': 2.32, 'd_baa_spread_91d': 0.53, 'd_dgs10_91d': 0.42, 'd_dff_365d': 0.01, 'd_unrate_365d': -2.4, 'cpi_yoy': 0.0756, 'indpro_yoy': 0.0367}
+  trained on 1345 rows; p(A)=0.594 p(B)=0.363; realised excess +0.0405 y=1
+  B macro weights: {'slope_10y3m': -0.167, 'd_slope_10y3m_91d': 0.039, 'baa_spread': 0.119, 'd_baa_spread_91d': -0.043, 'd_dgs10_91d': -0.189, 'd_dff_365d': 0.236, 'd_unrate_365d': 0.078, 'cpi_yoy': -0.168, 'indpro_yoy': -0.212}

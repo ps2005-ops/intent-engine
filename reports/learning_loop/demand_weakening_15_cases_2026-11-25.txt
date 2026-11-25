@@ -1,0 +1,90 @@
+=== 1. duolingo  CONTRADICTED  prereg 2026-08-05 graded 2026-08-07  window_end 2026-12-03  unc 0.414
+  expected: DOWN | the next reported revenue or guidance figure | falsifier: the next reported revenue or guidance figure is flat or higher
+  belief: {"proposition": "duolingo is seeing demand weaken rather than pause"}
+  BASIS  EARNINGS_RESULT independent_reporting 2026-08-05 | Duolingo (DUOL) Stock Falls on Q2 2026 Earnings - Quiver Quantitative.
+  GRADED GUIDANCE_REVISION independent_reporting 2026-08-06 | Duolingo Beats, Raises Outlook—But Stock Drops as Investors Want More - Benzinga.
+  rationale: expected DOWN, observed UP; the mismatch is the finding | observed: UP
+=== 2. cloudflare  CONTRADICTED  prereg 2026-08-06 graded 2026-08-07  window_end 2026-12-04  unc 0.422
+  expected: DOWN | the next reported revenue or guidance figure | falsifier: the next reported revenue or guidance figure is flat or higher
+  belief: {"proposition": "cloudflare is seeing demand weaken rather than pause"}
+  BASIS  EARNINGS_RESULT analyst_coverage 2026-08-06 | Cloudflare Q2 2026 Earnings: Revenue Rises 36% as Restructuring Widens GAAP Loss - tradingkey.com.
+  GRADED EARNINGS_RESULT independent_reporting 2026-08-06 | Cloudflare (NYSE: NET) grows Q2 2026 revenue while restructuring and cutting 20% of staff - Stock Titan.
+  rationale: expected DOWN, observed UP; the mismatch is the finding | observed: UP
+=== 3. nextera  CONTRADICTED  prereg 2026-08-05 graded 2026-08-09  window_end 2026-12-03  unc 0.414
+  expected: DOWN | the next reported revenue or guidance figure | falsifier: the next reported revenue or guidance figure is flat or higher
+  belief: {"proposition": "nextera is seeing demand weaken rather than pause"}
+  BASIS  EARNINGS_RESULT independent_reporting 2026-07-24 | Earnings call transcript: NextEra Energy beats Q2 2026 EPS, misses on revenue - Investing.com.
+  GRADED EARNINGS_RESULT regulatory_filing 2026-08-09 | We continue to expect to grow adjusted earnings per share at a compound annual growth rate of 8%+ through 2032 and are targeting the same from 2032 th
+  rationale: expected DOWN, observed UP; the mismatch is the finding | observed: UP
+=== 4. etsy  CONTRADICTED  prereg 2026-08-12 graded 2026-08-22  window_end 2026-12-10  unc 0.422
+  expected: DOWN | the next reported revenue or guidance figure | falsifier: the next reported revenue or guidance figure is flat or higher
+  belief: {"proposition": "etsy is seeing demand weaken rather than pause"}
+  BASIS  GUIDANCE_REVISION analyst_coverage 2026-08-10 | Weekly Recap: Etsy (ETSY) Q3 GMS and margin guidance and 12% staff cuts - TradingView.
+  GRADED EARNINGS_RESULT independent_reporting 2026-08-21 | Resilient Etsy stock edges higher as Bank of America upgrade and Q2 2026 beat support durable growth - Ad-hoc-news.de.
+  rationale: expected DOWN, observed UP; the mismatch is the finding | observed: UP
+=== 5. jpmorgan  CONTRADICTED  prereg 2026-08-05 graded 2026-09-16  window_end 2026-12-03  unc 0.416
+  expected: DOWN | the next reported revenue or guidance figure | falsifier: the next reported revenue or guidance figure is flat or higher
+  belief: {"proposition": "jpmorgan is seeing demand weaken rather than pause"}
+  BASIS  EARNINGS_RESULT regulatory_filing 2026-08-05 | 2017 – Net Income Excluding TCJA¹: Adjusted net income was $26.9 billion, excluding $2.4 billion related to the Tax Cuts and Jobs Act (TCJA).
+  GRADED EARNINGS_RESULT independent_reporting 2026-09-15 | JPMorgan Chase Sees Mid-Teens Growth in Q3 Banking Fees and Markets Revenue - Yahoo Finance.
+  rationale: expected DOWN, observed UP; the mismatch is the finding | observed: UP
+=== 6. checkpoint  CONTRADICTED  prereg 2026-08-13 graded 2026-09-20  window_end 2026-12-11  unc 0.414
+  expected: DOWN | the next reported revenue or guidance figure | falsifier: the next reported revenue or guidance figure is flat or higher
+  belief: {"proposition": "checkpoint is seeing demand weaken rather than pause"}
+  BASIS  GUIDANCE_REVISION independent_reporting 2026-04-30 | Cybersecurity firm Check Point Software first-quarter profit beats estimates, cuts 2026 revenue outlook - Yahoo Finance.
+  GRADED EARNINGS_RESULT independent_reporting 2026-09-18 | Check Point's 2026 Outlook: Infinity Platform Strategy Drives Subscription Revenue Growth - fool.com.
+  rationale: expected DOWN, observed UP; the mismatch is the finding | observed: UP
+=== 7. johnson_johnson  CONFIRMED  prereg 2026-08-06 graded 2026-10-07  window_end 2026-12-04  unc 0.414
+  expected: DOWN | the next reported revenue or guidance figure | falsifier: the next reported revenue or guidance figure is flat or higher
+  belief: {"proposition": "johnson_johnson is seeing demand weaken rather than pause"}
+  BASIS  GUIDANCE_REVISION independent_reporting 2026-07-29 | J&J lowers 2026 profit forecast on deal costs, sees further hit in 2027 - Reuters.
+  GRADED EARNINGS_RESULT independent_reporting 2026-10-05 | Johnson & Johnson Stock Fell Nearly 6% in 4 Days Before Its October 13 Earnings.
+  rationale: observed direction matches the preregistered expectation | observed: DOWN
+=== 8. hdfc_bank  CONTRADICTED  prereg 2026-08-07 graded 2026-10-20  window_end 2026-12-05  unc 0.414
+  expected: DOWN | the next reported revenue or guidance figure | falsifier: the next reported revenue or guidance figure is flat or higher
+  belief: {"proposition": "hdfc_bank is seeing demand weaken rather than pause"}
+  BASIS  EARNINGS_SURPRISE independent_reporting 2026-06-17 | HDFC Bank (HDB) Fell as Deposit Fell Short of Expectations - Yahoo Finance.
+  GRADED EARNINGS_RESULT independent_reporting 2026-10-17 | Earnings call transcript: HDFC Bank Q2 2026 margin pressure eases as growth stays firm - Investing.com.
+  rationale: expected DOWN, observed UP; the mismatch is the finding | observed: UP
+=== 9. infosys  CONTRADICTED  prereg 2026-09-26 graded 2026-10-21  window_end 2027-01-24  unc 0.414
+  expected: DOWN | the next reported revenue or guidance figure | falsifier: the next reported revenue or guidance figure is flat or higher
+  belief: {"proposition": "infosys is seeing demand weaken rather than pause"}
+  BASIS  GUIDANCE_REVISION independent_reporting 2026-07-31 | Infosys (NSEI:INFY) Stock Fair Value Falls After Analysts Cut Targets On Weaker Outlook - Yahoo Finance.
+  GRADED EARNINGS_RESULT independent_reporting 2026-10-20 | Infosys stock: Q1 revenue grew 14.00 percent at Infosys stock - ad-hoc-news.de.
+  rationale: expected DOWN, observed UP; the mismatch is the finding | observed: UP
+=== 10. america_movil  CONTRADICTED  prereg 2026-10-21 graded 2026-10-23  window_end 2027-02-18  unc 0.414
+  expected: DOWN | the next reported revenue or guidance figure | falsifier: the next reported revenue or guidance figure is flat or higher
+  belief: {"proposition": "america_movil is seeing demand weaken rather than pause"}
+  BASIS  EARNINGS_SURPRISE independent_reporting 2026-10-21 | America Movil ADR earnings missed by Mex$0.03, revenue topped estimates - Investing.com India.
+  GRADED EARNINGS_RESULT independent_reporting 2026-10-21 | Claro Brasil posts BRL 13.8 bln revenue in Q3, up 6% year-on-year - Telecompaper.
+  rationale: expected DOWN, observed UP; the mismatch is the finding | observed: UP
+=== 11. vale  CONFIRMED  prereg 2026-08-05 graded 2026-10-31  window_end 2026-12-03  unc 0.414
+  expected: DOWN | the next reported revenue or guidance figure | falsifier: the next reported revenue or guidance figure is flat or higher
+  belief: {"proposition": "vale is seeing demand weaken rather than pause"}
+  BASIS  GUIDANCE_REVISION independent_reporting 2026-07-31 | Vale posts profit fall, lifts base metals outlook and unveils buyback - Mining.com.
+  GRADED EARNINGS_RESULT independent_reporting 2026-10-29 | (VALE) Releases Q3 2026 Earnings: Revenue Up Slightly but Profit Falls - Quiver Quantitative.
+  rationale: observed direction matches the preregistered expectation | observed: DOWN
+=== 12. linde  CONTRADICTED  prereg 2026-10-30 graded 2026-10-31  window_end 2027-02-27  unc 0.414
+  expected: DOWN | the next reported revenue or guidance figure | falsifier: the next reported revenue or guidance figure is flat or higher
+  belief: {"proposition": "linde is seeing demand weaken rather than pause"}
+  BASIS  EARNINGS_RESULT independent_reporting 2026-10-29 | Linde PLC Reports Q3 Revenue of $9.4 Billion, Misses EPS Estimat - GuruFocus.
+  GRADED EARNINGS_RESULT analyst_coverage 2026-10-30 | LIN Q3 Earnings Call Highlights Restructuring and Growth Outlook - TradingView.
+  rationale: expected DOWN, observed UP; the mismatch is the finding | observed: UP
+=== 13. grifols  CONTRADICTED  prereg 2026-11-02 graded 2026-11-03  window_end 2027-03-02  unc 0.414
+  expected: DOWN | the next reported revenue or guidance figure | falsifier: the next reported revenue or guidance figure is flat or higher
+  belief: {"proposition": "grifols is seeing demand weaken rather than pause"}
+  BASIS  EARNINGS_RESULT independent_reporting 2026-11-02 | Profit rises 27.9% at Grifols (GRFS), but one revenue stream declines. - Stock Titan.
+  GRADED EARNINGS_RESULT independent_reporting 2026-11-02 | Grifols S A : increases revenue by 8.4% to EUR 2,040 million and grows net profit by 28% to EUR 162m in Q3’26 - www.marketscreener.com.
+  rationale: expected DOWN, observed UP; the mismatch is the finding | observed: UP
+=== 14. shopify  CONTRADICTED  prereg 2026-11-04 graded 2026-11-06  window_end 2027-03-04  unc 0.414
+  expected: DOWN | the next reported revenue or guidance figure | falsifier: the next reported revenue or guidance figure is flat or higher
+  belief: {"proposition": "shopify is seeing demand weaken rather than pause"}
+  BASIS  EARNINGS_RESULT independent_reporting 2026-11-03 | Shopify Inc Reports Q3 2026 Earnings: EPS Matches Estimates at $0.38, Revenue Falls Short at $3,742 Million - GuruFocus.
+  GRADED EARNINGS_SURPRISE analyst_coverage 2026-11-04 | SHOP Q3 Earnings Beat Estimates, Revenues Rise on Strong GMV - TradingView.
+  rationale: expected DOWN, observed UP; the mismatch is the finding | observed: UP
+=== 15. honda  CONTRADICTED  prereg 2026-11-10 graded 2026-11-13  window_end 2027-03-10  unc 0.414
+  expected: DOWN | the next reported revenue or guidance figure | falsifier: the next reported revenue or guidance figure is flat or higher
+  belief: {"proposition": "honda is seeing demand weaken rather than pause"}
+  BASIS  EARNINGS_RESULT independent_reporting 2026-11-10 | Honda Motor (HMC) Releases Q2 2027 Earnings: Revenue Up, Profitability Falls - Quiver Quantitative.
+  GRADED EARNINGS_RESULT regulatory_filing 2026-11-12 | Sales revenue from external customers increased by 18.3%, to ¥2,272.5 billion from the same period last year, due mainly to increased consolidated uni
+  rationale: expected DOWN, observed UP; the mismatch is the finding | observed: UP
