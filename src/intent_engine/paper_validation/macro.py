@@ -144,7 +144,10 @@ def macro_features(panel: PN.Panel, as_of: str
 
 
 def regime(panel: PN.Panel, as_of: str) -> RG.RegimeReading:
-    return RG.classify(panel, as_of)
+    """Classified under the protocol version in force at `as_of` (amendment
+    A1 is prospective: earlier decisions keep econ_regime.v1)."""
+    from intent_engine.paper_validation.protocol import regime_version_for
+    return RG.classify(panel, as_of, version=regime_version_for(as_of))
 
 
 def regime_features(reading: RG.RegimeReading) -> Dict[str, float]:

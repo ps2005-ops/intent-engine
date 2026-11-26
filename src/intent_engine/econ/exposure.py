@@ -117,8 +117,26 @@ _PATTERNS: Tuple[Tuple[str, str], ...] = (
     # the form nearly every filing uses -- the trailing \b fails against the
     # plural "s". Measured on six annual reports: the singular appears twice
     # and the plural forty-one times.
-    (CAPITAL_INTENSITY, r"\b(capital expenditures?|capex|capital intensity|"
-                        r"capital[- ]intensive)\b"),
+    #
+    # OWNERSHIP, like every other pattern here (2026-11-25): without it, a
+    # 10-K sentence of ECONOMY-WIDE statistics ("the 1,000 largest U.S. public
+    # companies represent 70% of the $2.2 trillion in total capital
+    # expenditures") became JPMorgan's own CAPITAL_INTENSITY exposure the
+    # night the plural fix landed, and moved five theses to CONTESTED on old
+    # information. The company has to be the owner of the spending.
+    (CAPITAL_INTENSITY, r"(\b(our|its|we)\b[^.]{0,60}\b(capital expenditures?|"
+                        r"capex|capital intensity|capital[- ]intensive)\b"
+                        r"|\b(capital expenditures?|capex)\b[^.]{0,30}\b(was|were|"
+                        r"of|totall?ed|increased|decreased|rose|fell)\b[^.]{0,30}"
+                        r"\b(our|its|we)\b|\b(we|the company)\s+(spent|invested|"
+                        r"plan\w* to (spend|invest))\b[^.]{0,60}\b(capital|capex)\b"
+                        # a named actor's own programme, in a headline's third
+                        # person: "Linde ... Capex Boost", "raises capex"
+                        r"|\b(capex|capital expenditures?|capital spending)\s+"
+                        r"(boost|plan|budget|guidance|program\w*|increase|cut|"
+                        r"target|outlook)\b|\b(rais\w+|boost\w*|cut\w*|lift\w*|"
+                        r"increas\w+|reduc\w+)\s+(its\s+|their\s+)?(capex|capital "
+                        r"expenditures?|capital spending)\b)"),
     (REGULATORY, r"\b(regulat\w+|tariff|sanction)\w*\b[^.]{0,60}"
                  r"\b(our|its)\b[^.]{0,40}\b(business|operations|results)\b"),
 )

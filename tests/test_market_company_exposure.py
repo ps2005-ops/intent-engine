@@ -193,3 +193,16 @@ def test_the_real_corpus_is_mostly_unknown_and_says_so():
             if exposure.conditions:
                 assert exposure.basis.strip()
                 assert exposure.evidence_ids
+
+
+def test_economy_wide_statistics_in_a_filing_are_not_the_companys_exposure():
+    """2026-11-25: JPMorgan's 10-K quoted national R&D and capex totals; the
+    plural fix made it JPMorgan's own CAPITAL_INTENSITY and moved five theses."""
+    got = CX.read_exposures(
+        [row("Despite their smaller count, large businesses dominate in "
+             "investment: they account for 80% of the $0.8 trillion in total "
+             "business R&D spending, and the 1,000 largest U.S. public "
+             "companies represent 70% of the $2.2 trillion in total capital "
+             "expenditures.", company="jpmorgan", role="regulatory_filing")],
+        company_id="jpmorgan")
+    assert not [e for e in got if e.dimension == CX.CAPITAL_INTENSITY]

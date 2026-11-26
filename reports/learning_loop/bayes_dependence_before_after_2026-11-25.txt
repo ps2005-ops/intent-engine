@@ -1,0 +1,22 @@
+evidence: 24 monthly quits readings (FRED JTSQUR first releases), proxy noise 0.1
+ORIGINAL (24 independent):      sd 0.0204  (the 0.020 recorded live)
+INTERIM (latest reading only):  sd 0.1000
+CORRECTED (local level + shared construct error): posterior 0.4136 sd 0.1033 confidence 0.793
+dependence diagnostics: [
+{
+"series": "quits|US Bureau of Labor Statistics|perceived_control",
+"readings": 24,
+"already_folded": 0,
+"r_shared": 0.01,
+"var_dy": 0.003261,
+"filtered_idio_sd": 0.0259,
+"posterior_sd": 0.1033,
+"effective_n": 0.937,
+"naive_independent_sd": 0.0204,
+"sensitivity_posterior_sd": {
+"split_0.25": 0.1033,
+"split_0.75": 0.1018
+}
+}
+]
+update: STRENGTHENING | first evidence for this construct; the posterior is the observation, and there was no prior to contradict
