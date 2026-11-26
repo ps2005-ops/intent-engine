@@ -3,7 +3,7 @@
  "worktree_branch": "qual/prospect100-resume",
  "base_commit": "3536cf41 (integration/unified-2026-11-25)",
  "current_wave": 0,
- "current_round": 12,
+ "current_round": 13,
  "completed_company_ids": [],
  "pending_company_ids": [
   1,
@@ -108,8 +108,8 @@
   100
  ],
  "scorecard": "docs/engineering/prospect100/resume/scorecard_live.json",
- "last_baseline_build": "2026-11-26T11:36:20+00:00",
- "last_verified_commit": "c48dfac0",
+ "last_baseline_build": "2026-11-26T12:59:44+00:00",
+ "last_verified_commit": "deb6a2d5",
  "resume_command": ".venv/bin/python scripts/prospect100/resume/build_baseline.py",
  "operations_log": "docs/engineering/prospect100/resume/OPERATIONS.json",
  "last_completed_operation": "V.1 Shared frontend fix: session nav wrapped as text at 375/390 px leaving a bare separator at the start of line 2; now flex items with decorative separators hidden on phones. Unstyled links in light mode used browser #0000EE; now the product accent at zero specificity. Full suite: 0 new failures",
@@ -131,7 +131,8 @@
   "8": "35a09899",
   "9": "f8aac885",
   "10": "c48dfac0",
-  "11": "d6c3186e"
+  "11": "d6c3186e",
+  "12": "deb6a2d5"
  },
  "status": "round 9 running on the round-9 candidate tree (committed through the guard in parallel)",
  "active_processes": "none recorded here; check `ps` for live_pass/runserver before assuming",

@@ -1,0 +1,17 @@
+{
+ "round": 12,
+ "analysis_commit": "deb6a2d5",
+ "journeys": "95/95 PASS; CORE p50 28.7-32.2s, max 64.9s",
+ "analysis_tree": "deb6a2d5",
+ "ui_widths": [
+  375,
+  390,
+  768,
+  1024,
+  1440
+ ],
+ "themes": [
+  "light",
+  "dark"
+ ]
+}

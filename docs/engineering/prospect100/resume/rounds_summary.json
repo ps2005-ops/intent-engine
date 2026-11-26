@@ -344,5 +344,67 @@
    "PASS": 28,
    "FAIL": 31
   }
+ },
+ {
+  "round": 12,
+  "commit": "deb6a2d5",
+  "analytical": 95,
+  "mean": 7.742,
+  "median": 8.0,
+  "ten_of_ten_original": 0,
+  "pass_original": {
+   "search": 94,
+   "identity": 95,
+   "coverage": 78,
+   "independence": 7,
+   "economics": 7,
+   "strategy": 55,
+   "presentation": 32,
+   "history": 12,
+   "visual": 95,
+   "performance": 95
+  },
+  "pass_strengthened": {
+   "search": 94,
+   "identity": 95,
+   "coverage": 78,
+   "independence": 4,
+   "economics": 46,
+   "strategy": 52,
+   "presentation": 32,
+   "history": 12,
+   "visual": 95,
+   "performance": 95
+  },
+  "pass_commercial": {
+   "surfaces": 95,
+   "deck_or_limited_page": 89,
+   "browser_matrix": 95,
+   "performance": 95,
+   "identity": 95
+  },
+  "fully_qualified": {
+   "A": 0,
+   "B": 0,
+   "C": 89
+  },
+  "false_decision_grade": [
+   "Epicor",
+   "IFS",
+   "Softchoice"
+  ],
+  "decks_missing": [
+   "CData",
+   "Enverus",
+   "Epicor",
+   "IFS",
+   "Plex",
+   "Softchoice"
+  ],
+  "history_expanded": {
+   "BOUNDED": 31,
+   "PASS": 29,
+   "FAIL": 35
+  }
  }
 ]
