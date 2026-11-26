@@ -41,6 +41,30 @@ def _git(*args):
                           text=True).stdout.strip()
 
 
+def _current_summary(rows, rounds) -> dict:
+    """The latest scored round, against round 4. Never invents a score."""
+    if not rounds:
+        return {"evaluated": 0, "fully_qualified_analytical": 0,
+                "fully_qualified_status_pages": 0, "remaining": 100,
+                "note": "No company has been re-evaluated on the candidate yet."}
+    n, _table, commit = rounds[-1]
+    a = [r for r in rows if r["kind"] == "ANALYTICAL"
+         and r.get(f"round{n}_score") is not None]
+    s = sorted(r[f"round{n}_score"] for r in a)
+    up = sum(1 for r in a if r[f"round{n}_score"] > (r["round4_score"] or 0))
+    down = sum(1 for r in a if r[f"round{n}_score"] < (r["round4_score"] or 0))
+    return {"round": n, "analysis_commit": commit, "evaluated": len(a),
+            "ten_of_ten": sum(1 for x in s if x == 10.0),
+            "fully_qualified_analytical": sum(1 for x in s if x == 10.0),
+            "mean": round(sum(s) / len(s), 3),
+            "median": (s[len(s) // 2] if len(s) % 2 else
+                       (s[len(s) // 2 - 1] + s[len(s) // 2]) / 2),
+            "lowest": s[0], "highest": s[-1],
+            "up": up, "down": down, "same": len(a) - up - down,
+            "pass_count_by_metric": {d: sum(1 for r in a if (r.get(
+                f"round{n}_grades") or {}).get(d) == "PASS") for d in DIMS}}
+
+
 def main() -> int:
     head = _git("rev-parse", "--short=8", "HEAD")
     p4 = json.load(open(P100 / "qualification_100_pass4.json"))["companies"]
@@ -146,6 +170,43 @@ def main() -> int:
                 "current outside source (network blocked).")
             r["next_action"] = "Re-verify corporate status from a primary source"
 
+    # --- Later rounds, each scored by the ORIGINAL qualify100 on ONE commit --
+    #: (round number, qualification file, commit the analyses ran on)
+    rounds = []
+    for f in sorted(OUT.glob("qualification_r*.json")):
+        n = int("".join(ch for ch in f.stem.split("_r")[-1] if ch.isdigit()))
+        meta = OUT / f"round{n}_meta.json"
+        commit = (json.loads(meta.read_text()).get("analysis_commit")
+                  if meta.exists() else "")
+        rounds.append((n, json.loads(f.read_text())["companies"], commit))
+    rounds.sort()
+    for n, table, commit in rounds:
+        by = {c["prospect_id"]: c for c in table}
+        for r in rows:
+            c = by.get(r["prospect_id"])
+            if not c:
+                continue
+            r[f"round{n}_score"] = c.get("score")
+            r[f"round{n}_grades"] = c.get("grades")
+            r[f"round{n}_blocker"] = c.get("blocker")
+    if rounds:
+        n, table, commit = rounds[-1]
+        by = {c["prospect_id"]: c for c in table}
+        for r in rows:
+            c = by.get(r["prospect_id"])
+            if not c or r["kind"] != "ANALYTICAL":
+                continue
+            r["current_original_rubric_score"] = c.get("score")
+            r["current_grades"] = c.get("grades")
+            r["evaluated_commit"] = commit
+            r["qualification_status"] = (
+                "QUALIFIED_10_OF_10" if c.get("score") == 10.0 else
+                f"ROUND_{n}_SCORED")
+            r["why_not_re_evaluated"] = None
+            r["failed_metrics_current"] = [d for d in DIMS if
+                                           (c.get("grades") or {}).get(d) != "PASS"]
+            r["next_action"] = (c.get("blocker") or "")[:160]
+
     OUT.mkdir(parents=True, exist_ok=True)
     scores = sorted(r["round4_score"] for r in rows if r["round4_score"] is not None)
     dist = {}
@@ -169,9 +230,7 @@ def main() -> int:
             "distribution": dict(sorted(dist.items(), key=lambda kv: -float(kv[0]))),
             "pass_count_by_metric_of_95": pass_rate,
         },
-        "current": {"evaluated": 0, "fully_qualified_analytical": 0,
-                    "fully_qualified_status_pages": 0, "remaining": 100,
-                    "note": "No company has been re-evaluated on the candidate yet."},
+        "current": _current_summary(rows, rounds),
         "presentation_crash_companies": [
             {"prospect_id": p, "company": next(r["company"] for r in rows
                                                if r["prospect_id"] == p)}
@@ -180,26 +239,40 @@ def main() -> int:
     (OUT / "scorecard_live.json").write_text(json.dumps(
         {"summary": agg, "companies": rows}, indent=1) + "\n")
 
+    cur = agg["current"]
+    latest = rounds[-1][0] if rounds else None
     md = ["# Prospect-100 live scorecard", "",
           f"Generated {agg['generated_at']} on `{head}`. Round 4 was evaluated on "
-          f"`{ROUND4_BASE}`. **No company has been re-evaluated yet**; the "
-          "current columns stay empty until a re-run on one candidate commit.", "",
+          f"`{ROUND4_BASE}`."
+          + (f" Current = round {latest}, scored by the original "
+             f"`qualify100.py` on analyses run at `{cur.get('analysis_commit')}`."
+             if latest else " No later round has been scored yet."), "",
           f"Round 4: 10/10 = {agg['round4']['ten_of_ten']}; mean "
           f"{agg['round4']['mean']}; median {agg['round4']['median']}; lowest "
           f"{agg['round4']['lowest']}; highest {agg['round4']['highest']} "
-          f"(95 analytical; 5 status pages unscored).", "",
-          "| # | Company | Status | R4 | " + " | ".join(d[:5] for d in DIMS) +
-          " | Current | Next |",
-          "|---|---|---|---|" + "---|" * len(DIMS) + "---|---|"]
+          f"(95 analytical; 5 status pages unscored).", ""]
+    if latest:
+        md += [f"Round {latest}: 10/10 = {cur['ten_of_ten']}; mean {cur['mean']}; "
+               f"median {cur['median']}; lowest {cur['lowest']}; highest "
+               f"{cur['highest']}; vs round 4: {cur['up']} up, {cur['down']} "
+               f"down, {cur['same']} unchanged.", ""]
+    md += ["| # | Company | Status | R4 | "
+           + (f"R{latest} | " if latest else "")
+           + " | ".join(d[:5] for d in DIMS) + " | Next |",
+           "|---|---|---|---|" + ("---|" if latest else "")
+           + "---|" * len(DIMS) + "---|"]
     abbrev = {"PASS": "P", "BOUNDED": "b", "FAIL": "**F**", "N/A": "–",
               "NOT_MEASURED": "?"}
     for r in rows:
-        g = r["round4_grades"]
+        g = (r.get(f"round{latest}_grades") if latest else None) \
+            or r["round4_grades"]
+        cur_s = r.get(f"round{latest}_score") if latest else None
         md.append(f"| {r['prospect_id']} | {r['company']} | "
                   f"{'status' if r['kind'] == 'STATUS_PAGE' else 'analysis'} | "
                   f"{r['round4_score'] if r['round4_score'] is not None else '–'} | "
+                  + (f"{cur_s if cur_s is not None else '–'} | " if latest else "")
                   + " | ".join(abbrev.get(g.get(d), "?") for d in DIMS)
-                  + f" | not re-run | {r['next_action']} |")
+                  + f" | {r['next_action']} |")
     md += ["", "P = PASS, b = BOUNDED, F = FAIL, – = not applicable."]
     (OUT / "SCORECARD.md").write_text("\n".join(md) + "\n")
 

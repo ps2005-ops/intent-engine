@@ -173,6 +173,25 @@ def journey(name, entity_id, *, verbose=True, extra=None) -> dict:
                     {"typed": typed, "ticker": ticker,
                      "offered": top.get("legal_name")})
                 continue
+            # A SHARED PREFIX IS THE SAME CASE, AND THE RUBRIC ALREADY SAYS SO.
+            #
+            # Datarails is typed as "Data" (half its name), and Dataiku is a
+            # correct answer to "Data". search_matrix grades exactly this as
+            # BOUNDED_SHARED_PREFIX under the search dimension; here it voided
+            # the whole analysis as a PRODUCT_DEFECT and failed its strategy
+            # grade. Bounded only when the offered name genuinely starts with
+            # what was typed AND the typed text is a strict prefix of the
+            # company's own name -- the company must still be found first by
+            # its own name, which `picked` below continues to require.
+            offered = str(top.get("common_name") or top.get("legal_name")
+                          or "").strip().lower()
+            t = str(typed).strip().lower()
+            if (t and offered.startswith(t) and name.lower().startswith(t)
+                    and len(t) < len(name)):
+                row.setdefault("bounded_prefixes", []).append(
+                    {"typed": typed, "shared_prefix": True,
+                     "offered": top.get("legal_name")})
+                continue
             first_ok = False
             note("PRODUCT_DEFECT",
                  f"{typed!r} offered {top.get('legal_name')!r} first, "

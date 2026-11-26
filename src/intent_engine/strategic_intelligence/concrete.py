@@ -266,6 +266,18 @@ def clean_title(title: str, company: str = "") -> str:
 
 # --- the takeover decision ----------------------------------------------------
 
+#: Imperatives a page addresses to its READER. A reported action has a
+#: subject ("Sentry acquired Codecov"); a call to action opens on the verb.
+_CALL_TO_ACTION = re.compile(
+    r"^(find|get|become|join|learn|discover|explore|contact|request|start|"
+    r"try|book|download|see|meet|talk|sign|register|read|watch|schedule|"
+    r"apply|buy|shop|subscribe|visit|call|chat|let's|lets)\b", re.I)
+
+
+def _is_call_to_action(title: str) -> bool:
+    return bool(_CALL_TO_ACTION.match((title or "").strip()))
+
+
 def select_founder_claim_anchor(observations, *, company="") -> dict:
     """Decide whether a concrete fact is strong enough to lead the analysis.
 
@@ -283,8 +295,25 @@ def select_founder_claim_anchor(observations, *, company="") -> dict:
     developments = concrete_developments(observations)
     if not developments:
         return {}
-    lead = developments[0]
-    fact = clean_title(lead.get("title", ""), company)
+    # THE FIRST DEVELOPMENT THAT IS ONE, not the first in the list. Measured
+    # on the prospect-100 round 5: WEKA's deck opened "The insight: Find a
+    # WEKA Partner." -- a partner-page call to action, which `action_kind`
+    # read as a partnership and `_has_finite_verb` passed, because an
+    # imperative has a finite verb. A page telling the READER to do something
+    # reports nothing the company did. Skipping it, rather than giving up,
+    # lets the next real development lead; none left still returns {}.
+    lead, fact = None, ""
+    for candidate in developments:
+        cleaned = clean_title(candidate.get("title", ""), company)
+        if _is_call_to_action(cleaned):
+            continue
+        lead, fact = candidate, cleaned
+        break
+    if lead is None:
+        return {}
+    developments = [lead] + [d for d in developments if d is not lead
+                             and not _is_call_to_action(
+                                 clean_title(d.get("title", ""), company))]
     # A title that cleans down to nothing, or that names no company-specific
     # subject beyond the company itself, has not earned the takeover.
     if len(fact.split()) < 3:

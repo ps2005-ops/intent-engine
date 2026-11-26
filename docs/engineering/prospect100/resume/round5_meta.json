@@ -1,0 +1,15 @@
+{
+ "round": 5,
+ "analysis_commit": "568e200c",
+ "scored_with": "scripts/prospect100/qualify100.py (original rubric, unchanged)",
+ "captures": "live journey captures (reports/prospect100_resume/r5/s*/reports/next40_ui) -- what a visitor was served during the run",
+ "browser_matrix": "ui_matrix_r5.json: 848 pages x 10 widths x 2 themes = 16,960 measurements on the round-5 re-render (568e200c code), slides included",
+ "server": "local, ZERO_ANTHROPIC=1, fresh store, Nov 9 SEC filing cache reused, read-only copy of the live market snapshots",
+ "why_live_not_rerender_for_text": "Recomposing a stored run in a fresh process dropped outside evidence for WEKA and served a different brief than the live run; the live pages are the faithful record of what was shown. The re-render is used only for /slides availability and the browser matrix.",
+ "known_round5_defects_fixed_in_round6": [
+  "N-able: deferred evidence recomposed after PARTIAL and stranded the run non-terminal (score 3.0)",
+  "Datarails: journey harness voided the analysis for a shared generic prefix",
+  "8 decks redirected because read-triggered recomposes left runs non-terminal",
+  "Sherweb/Softchoice/BlackLine evidence admission (header dedup, refusal notices, translated pages)"
+ ]
+}

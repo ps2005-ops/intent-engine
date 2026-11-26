@@ -632,4 +632,28 @@ def block(company: str, run_id: str, adaptive, *, role_id: str = "ceo",
         run_id, adaptive, current=role_id, base=base, csrf=csrf,
         lens_selection=getattr(adaptive, "lens_selection", None)))
     parts.append(value_block(company, adaptive))
-    return _one_quote_per_passage("".join(p for p in parts if p))
+    sel = getattr(adaptive, "lens_selection", None)
+    return _one_reason_per_block(
+        _one_quote_per_passage("".join(p for p in parts if p)),
+        getattr(sel, "why_selected", "") or "")
+
+
+def _one_reason_per_block(html: str, why: str) -> str:
+    """The lens-selection reason, said once.
+
+    `why_different`, `lens_block` and `bounded_block` each print
+    `why_selected`, and `block` concatenates all three: measured on the
+    prospect-100 round-5 pages, the same two sentences appeared twice on the
+    intro, sources and result pages of 15-18 companies, which is what held
+    their presentation grade below PASS. The first copy stays where the
+    composer put it; a later copy loses the reason and keeps anything else
+    its paragraph says (the lens name), so no section is emptied of meaning.
+    """
+    reason = _e(why).strip()
+    if not reason or html.count(reason) < 2:
+        return html
+    head, _sep, tail = html.partition(reason)
+    tail = tail.replace(f"<p>{reason}</p>", "")
+    tail = tail.replace(f" — {reason}</p>", "</p>")
+    tail = tail.replace(reason, "")
+    return head + reason + tail

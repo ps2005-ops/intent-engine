@@ -262,7 +262,8 @@ def _get_document(url, *, fetcher=None, timeout=25.0,
 
 
 def assess_filing_mention(*, html: str, company_name: str,
-                          author_name: str = "") -> dict:
+                          author_name: str = "",
+                          subject_domain: str = "") -> dict:
     """What this filing actually says about the subject, from its own text.
 
     THE STAGE THAT DID NOT EXIST. `classify_mention` is the same adjudication,
@@ -286,6 +287,7 @@ def assess_filing_mention(*, html: str, company_name: str,
     # disclosing its own supplier -- measured live, that shape was half of
     # this company's supposed independent support.
     verdict = _REL.adjudicate({"text_content": text}, subject_name=company_name,
+                              subject_domain=subject_domain,
                               author_name=author_name)
     # THE EXCERPT IS THE SPAN THE VERDICT WAS BUILT FROM.
     #

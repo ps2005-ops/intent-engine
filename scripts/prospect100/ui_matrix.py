@@ -40,6 +40,8 @@ import time
 
 WIDTHS = (320, 375, 390, 430, 768, 820, 1024, 1280, 1440, 1920)
 THEMES = ("light", "dark")
+#: Widths that also get a screenshot; --screen-widths overrides.
+SCREEN_WIDTHS = (320, 768, 1440)
 HEIGHT = 900
 
 _PROBE = r"""
@@ -221,7 +223,8 @@ async def _measure(browser, files, out, screens, screen_slugs, progress):
                 except Exception as exc:                      # noqa: BLE001
                     m = {"error": str(exc)[:200]}
                 rows[f"{theme}:{width}"] = m
-                if screens and slug in screen_slugs and width in (320, 768, 1440):
+                if screens and (slug in screen_slugs or "*" in screen_slugs) \
+                        and width in SCREEN_WIDTHS:
                     shot = screens / f"{slug}-{surface}-{width}-{theme}.jpg"
                     await page.screenshot(path=str(shot), type="jpeg",
                                           quality=55, full_page=False)
@@ -319,6 +322,7 @@ async def main_async(args):
 
 
 def main():
+    global SCREEN_WIDTHS
     ap = argparse.ArgumentParser()
     ap.add_argument("--captures", required=True)
     ap.add_argument("--out", required=True)
@@ -326,7 +330,13 @@ def main():
     ap.add_argument("--screens", default="")
     ap.add_argument("--screen-slugs", default="")
     ap.add_argument("--workers", type=int, default=6)
-    asyncio.run(main_async(ap.parse_args()))
+    ap.add_argument("--screen-widths", default="",
+                    help="comma list, e.g. 390,1440 (phone, laptop); '*' in "
+                         "--screen-slugs screenshots every company")
+    args = ap.parse_args()
+    if args.screen_widths:
+        SCREEN_WIDTHS = tuple(int(w) for w in args.screen_widths.split(","))
+    asyncio.run(main_async(args))
 
 
 if __name__ == "__main__":

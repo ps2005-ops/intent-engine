@@ -117,7 +117,8 @@ def evidence_standing(coverage, *, has_filing=None) -> str:
     return "none"
 
 
-def standing_limitation(coverage, *, has_filing=None) -> str:
+def standing_limitation(coverage, *, has_filing=None,
+                        read_independent=False) -> str:
     """The honest one-line limit of this evidence mixture, or "" if none.
 
     Written to be read by a founder, so it says what is missing and what that
@@ -133,6 +134,14 @@ def standing_limitation(coverage, *, has_filing=None) -> str:
         return ("the company's filings carry this, so it is stated under legal "
                 "obligation rather than in marketing — but no outside account "
                 "has tested whether it is working")
+    if read_independent and standing in ("asserted", "none"):
+        # OUTSIDE REPORTS WERE READ AND SAID NOTHING USABLE. "Every source
+        # here is published by the company itself" was printed on 26 of 95
+        # round-5 pages whose runs had read trade press: false about the
+        # sources, true only about the findings. Say the true thing.
+        return ("outside reports were read, but none of them speaks to the "
+                "findings here, so nothing in this reading has been checked "
+                "against an outside account of it")
     if standing == "asserted":
         # Deliberately does NOT mention filings. This is the branch a company
         # with an investor-relations page and no filing now lands in.

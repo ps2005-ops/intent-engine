@@ -1250,6 +1250,48 @@ def observation_sentence(subject: str, signal: str, label: str) -> str:
     return f"{sentence}, {because}." if because else f"{sentence}."
 
 
+#: An outside publisher reporting a dated, concrete company action.
+#:
+#: MEASURED on the prospect-100 round-5 store: 132 independent-reporting
+#: documents produced 33 observations. 71 of the losses are other
+#: registrants' filings with no prose naming the subject (correctly dropped);
+#: 28 are trade-press articles -- "Vena Solutions set to acquire Morpheo AI",
+#: "WekaIO revamps AI data storage platform" -- that matched no signal,
+#: because the signal vocabulary is the PATTERN LIBRARY's ("product suite",
+#: "government and commercial") and a news report of an action uses none of
+#: it. The run read the outside account and the analysis never saw it, and
+#: 26 pages then told the reader every source was the company's own.
+#:
+#: NO PATTERN CONSUMES THIS SIGNAL, by design: it adds no hypothesis and no
+#: mechanism. It records that an outside publisher reported, in a sentence
+#: naming the subject, that the subject did something concrete -- which is
+#: exactly what independent coverage is.
+REPORTED_DEVELOPMENT = "reported_development"
+_REPORTED_DEVELOPMENT_CLASSES = ("independent_reporting", "customer_voice")
+_LEGAL_SUFFIX = re.compile(
+    r",?\s+(inc|incorporated|corp|corporation|ltd|limited|llc|plc|gmbh|"
+    r"s\.?a|n\.?v|ag|co)\.?$", re.I)
+
+
+def _subject_stem(company: str) -> str:
+    return _LEGAL_SUFFIX.sub("", (company or "").strip()).strip(" ,.")
+
+
+def _reported_development(text: str, company: str) -> str:
+    """The first sentence that names the subject and reports an action."""
+    from intent_engine.strategic_intelligence.concrete import action_kind
+    stem = _subject_stem(company)
+    if len(stem) < 3:
+        return ""
+    name = re.compile(r"\b" + re.escape(stem) + r"\b", re.I)
+    for sentence in re.split(r"(?<=[.!?])\s+", " ".join((text or "").split())):
+        if len(sentence.split()) < 6 or len(sentence) > 400:
+            continue
+        if name.search(sentence) and action_kind(sentence):
+            return sentence.strip()
+    return ""
+
+
 def derive_observations(documents, *, company: str = "",
                         subject_cik: str = "",
                         subject_only: bool = False,
@@ -1376,6 +1418,15 @@ def derive_observations(documents, *, company: str = "",
             text = " ".join(filter(None, [title, body_text[:800],
                                           subject_passage]))
         signals = _detect_signals(text, source_class, company)
+        reported = ""
+        if not signals and source_class in _REPORTED_DEVELOPMENT_CLASSES \
+                and not is_filing:
+            # The article body first: a headline glued to the site name
+            # ("... | BetaKit FinTech company ...") is not a sentence.
+            reported = (_reported_development(body_text, company)
+                        or _reported_development(text, company))
+            if reported:
+                signals = [REPORTED_DEVELOPMENT]
         if not signals:
             continue
         otype = _TYPE_FOR_SIGNAL.get(signals[0], "messaging")
@@ -1411,6 +1462,10 @@ def derive_observations(documents, *, company: str = "",
             # never has to be guessed from the text.
             excerpt, section = FS.best_excerpt(
                 body_text, form=(doc.get("filing") or {}).get("form", ""))
+        if reported and not excerpt:
+            # The sentence that reports the development IS the evidence;
+            # see `evidence-must-be-the-matching-span`.
+            excerpt = reported
         if not excerpt:
             # THE MEASURED DEFECT this replaced read
             #     (meta_description or text_content[:280])
@@ -1507,3 +1562,13 @@ _TYPE_FOR_SIGNAL.update({
     "pricing_published": "messaging",
     "pricing_gated": "buyer_segment",
 })
+
+
+# An outside report of a concrete move. `market_context`, because it is what
+# the world recorded about the company rather than a claim about its product.
+_TYPE_FOR_SIGNAL[REPORTED_DEVELOPMENT] = "market_context"
+_SIGNAL_LABEL[REPORTED_DEVELOPMENT] = ("was reported by an outside publisher "
+                                       "to have made a concrete move")
+_SIGNAL_RELEVANCE[REPORTED_DEVELOPMENT] = (
+    "it is an account of what the company did that the company did not "
+    "write, which is what an outside check of its own story starts from")

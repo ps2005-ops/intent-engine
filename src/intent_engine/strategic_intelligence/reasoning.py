@@ -1037,7 +1037,13 @@ def build_strategic_report(*, company_name, observations,
     # page -- and treating the two alike is what made a run that HAD retrieved
     # the 10-K report "every source here is published by the company itself"
     # and withhold every option. See `evidence_classes` for the measurement.
-    limitation = EC.standing_limitation(coverage, has_filing=has_filing)
+    _families = ((source_coverage or {}).get("families") or {}) \
+        if isinstance(source_coverage, dict) else {}
+    limitation = EC.standing_limitation(
+        coverage, has_filing=has_filing,
+        read_independent=any(
+            int((_families.get(c) or {}).get("documents") or 0) > 0
+            for c in EC.INDEPENDENT_CLASSES))
     if limitation:
         evidence_gaps.insert(0, limitation)
 

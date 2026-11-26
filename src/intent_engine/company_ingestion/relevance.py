@@ -292,6 +292,42 @@ _AUTHOR_LEGAL_FORMS = frozenset({
 })
 
 
+_CORPORATE_FORM = (r"(?:,?\s+(?:Inc|Incorporated|Corp|Corporation|Ltd|"
+                   r"Limited|LLC|L\.L\.C|SAS|S\.A\.S|SA|GmbH|AG|plc|PLC|"
+                   r"Technologies|Technology|Software|Solutions|Labs|Systems|"
+                   r"Holdings|Group)\b)")
+
+
+def _used_as_ordinary_word(text: str, terms) -> str:
+    """The single-word term this document writes in lowercase, if any."""
+    for term in terms:
+        t = str(term or "").strip()
+        if not t or " " in t or not t.isalpha() or t == t.lower():
+            continue
+        if re.search(r"(?<![A-Za-z0-9.@/-])" + re.escape(t.lower())
+                     + r"(?![A-Za-z0-9-])", text):
+            return t
+    return ""
+
+
+def _qualified_mention(sentence: str, subject_name: str,
+                       subject_domain: str = "", aliases=()) -> bool:
+    """Names the subject in a way an ordinary word cannot."""
+    s = sentence or ""
+    host = (subject_domain or "").strip().lower()
+    if host and host in s.lower():
+        return True
+    name = (subject_name or "").strip()
+    lead = re.split(r"[,\s]+", name)[0] if name else ""
+    for full in [name, *[str(a) for a in aliases or ()]]:
+        full = full.strip()
+        if " " in full and full != lead and re.search(
+                r"\b" + re.escape(full) + r"\b", s):
+            return True
+    return bool(lead) and re.search(
+        r"\b" + re.escape(lead) + _CORPORATE_FORM, s) is not None
+
+
 def adjudicate(document: dict, *, subject_name: str = "",
                subject_domain: str = "", aliases: Sequence[str] = (),
                author_name: str = "",
@@ -325,6 +361,31 @@ def adjudicate(document: dict, *, subject_name: str = "",
             IRRELEVANT,
             "the document never names the company, so it cannot support a "
             "claim about it", 0, 0)
+    # A NAME THIS DOCUMENT USES AS AN ORDINARY WORD.
+    #
+    # Measured on the prospect-100 round 5: Pigment, a planning-software
+    # company, was credited with two independent origins and a decision-grade
+    # reading from 10-Ks by Kronos Worldwide ("titanium dioxide pigments"),
+    # Valhi ("former manufacturers of lead pigment") and Energy Fuels -- the
+    # mention test matched the noun, case-insensitively. Case alone cannot
+    # separate them (those filings also write "TiO2 Pigment" in headings).
+    #
+    # So the document decides: if it uses the subject's name in lowercase as
+    # a word, the bare name is ambiguous IN THIS DOCUMENT and only a qualified
+    # mention counts -- the subject's domain, its multi-word name, or the
+    # name followed by a corporate form. A document that never lowercases it
+    # (every filing that names Brex) is untouched.
+    ambiguous = _used_as_ordinary_word(text, terms)
+    if ambiguous:
+        mentions = [s for s in mentions
+                    if _qualified_mention(s, subject_name, subject_domain,
+                                          aliases)]
+        if not mentions:
+            return _verdict(
+                IRRELEVANT,
+                f"the document uses “{ambiguous}” as an ordinary word and "
+                f"never names the company itself, so it cannot support a "
+                f"claim about it", 0, 0)
 
     substantive = 0
     incidental = 0

@@ -1718,6 +1718,21 @@ class CompanyIngestionService:
                         "page returned no readable text (JavaScript-only or "
                         "empty document)", False))
                     continue
+                from intent_engine.company_ingestion.parsing import (
+                    is_block_notice,
+                )
+                if is_block_notice(parsed["text"]):
+                    # The site answered, but with a refusal notice for
+                    # automated readers instead of its content. That is the
+                    # same fact as a JavaScript-only shell -- the content
+                    # exists and was not served to us -- and the reader is
+                    # told so, rather than shown a run "thinly evidenced" by
+                    # thirteen copies of one notice.
+                    failed.append(self._fail(
+                        run_id, domain, candidate_id, "javascript_only",
+                        "page served a browser or robot refusal notice "
+                        "instead of its content", False))
+                    continue
                 freshness = "CURRENT"
                 if parsed.get("modified_date"):
                     from datetime import datetime, timezone

@@ -10038,12 +10038,37 @@ class WebApp:
         # dropping any one of them loses a named part of the business.
         _QUOTAS = {"product": 5, "customers": 2, "investor": 2}
 
+        # A TRANSLATION IS NOT A SECOND SOURCE, AND THIS ANALYSIS READS ENGLISH.
+        #
+        # Measured on the prospect-100 store: BlackLine's run approved six
+        # /de/ pages (about, services, partners, customers, support,
+        # training), the readiness gate correctly set all six aside as not
+        # English, and the run kept 4 of 10 documents and no deck. Sherweb
+        # spent slots on /fr/ copies the same way. The English originals were
+        # on the same site. ORDER ONLY, inside one relevance tier: a localized
+        # copy still ranks, it just stops beating the page it translates.
+        # An explicit list, never "any two letters": /ir/ is investor
+        # relations and /hr/ is a product page far more often than either is
+        # Persian or Croatian, so ambiguous codes are left out on purpose.
+        _LOCALES = frozenset((
+            "de", "fr", "es", "it", "ja", "jp", "ko", "kr", "zh", "cn", "pt",
+            "nl", "sv", "se", "da", "dk", "fi", "pl", "ru", "tr", "cs", "hu",
+            "ro", "he", "ar", "el", "th", "vi", "br", "mx"))
+
+        def _non_english_locale(candidate) -> int:
+            from urllib.parse import urlparse as _up
+            first = (_up(candidate.get("url") or "").path.strip("/")
+                     .split("/", 1)[0].lower())
+            lang = first.split("-", 1)[0].split("_", 1)[0]
+            return int(lang in _LOCALES and len(first) <= 5)
+
         buckets = []
         claimed = set()
         for name, matches in cls._EVIDENCE_FAMILIES:
             group = [c for c in candidates
                      if c["candidate_id"] not in claimed and matches(c)]
-            group.sort(key=_relevance_first)
+            group.sort(key=lambda c: (_relevance_first(c),
+                                      _non_english_locale(c)))
             claimed.update(c["candidate_id"] for c in group)
             buckets.append((name, group))
         # AMONG EQUALLY USEFUL CANDIDATES, PREFER AN ORIGIN WE DO NOT HAVE.
@@ -11375,7 +11400,16 @@ class WebApp:
         the request thread, measured at 98% CPU for 2h52m in one suite, and
         for a reader it is a poisoned run that never opens.
         """
-        fresh = self._compose(run_id, deep=False)
+        # Marked by run id rather than by a new `_compose` keyword: `_compose`
+        # is a contract other code and tests replace, and the worker calls it
+        # with deep=False too, so neither the signature nor `deep` may carry
+        # "this is a read".
+        reading = self.__dict__.setdefault("_reading", set())
+        reading.add(run_id)
+        try:
+            fresh = self._compose(run_id, deep=False)
+        finally:
+            reading.discard(run_id)
         if not previous:
             # Nothing to protect: whatever compose produced IS the answer for
             # this run, and it is a dict, so it can be cached and not redone.
@@ -11435,10 +11469,25 @@ class WebApp:
         # The FULL budget, not the reserved view: the reserve exists to
         # protect composition, so composition is what spends it — including
         # the targeted retry passes the quality gate can order from inside.
+        # A READ COMPOSES FROM WHAT IS STORED; IT NEVER GATHERS.
+        #
+        # The quality gate's retry loop fetches new sources and appends a
+        # `ci.run_transitioned -> DISCOVERING_SOURCES` per pass. Reached from
+        # a page read (`_recompose_for_reader`: a fresh process, or a cache
+        # made stale by a code change), that wrote an in-progress state onto
+        # a FINISHED run, and nothing after it writes the terminal state back
+        # -- the analysis worker does that, and no worker exists on a read.
+        # Measured on the prospect-100 store: Matillion PARTIAL at 21:02:57,
+        # re-read at 22:25:55, two retry transitions, then nothing; 8 of 95
+        # runs left non-terminal for good, so their decks redirected forever.
+        # The live run already spent its retry budget; a reader gets that
+        # run's evidence, composed by today's code, and nothing else.
         result = self.ci.compose_with_quality(
             run_id, fi_service=self.fi, previous_model=previous_model,
             deadline=self._analysis_deadlines.get(run_id), deep=deep,
-            trace=trace)
+            trace=trace, **({"max_passes": 0}
+                            if run_id in self.__dict__.get("_reading", ())
+                            else {}))
         # THE GATE MUST JUDGE THE EVIDENCE THAT ARRIVED, NOT THE EVIDENCE
         # THAT HAD ARRIVED WHEN IT RAN.
         #

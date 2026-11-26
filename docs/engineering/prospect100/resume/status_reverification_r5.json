@@ -1,0 +1,64 @@
+{
+ "contract": "prospect100_status_reverification.v1",
+ "verified_on": "2026-11-26",
+ "method": "Web search for the acquirer's or administrator's own announcement, read on this Mac (network open). Where a primary page refuses automated readers (Snowflake's blog answers 403 behind Cloudflare), the search index's title and date for that exact URL are recorded and the refusal is stated, never hidden.",
+ "companies": [
+  {
+   "prospect_id": 17, "company": "Observe", "state": "ACQUIRED_ABSORBED",
+   "counterparty": "Snowflake Inc.",
+   "finding": "CLOSED. Snowflake's own post 'Snowflake Closes Acquisition of Observe to Bring AI-Powered Observability to Customers' is dated 2026-02-02 (search index; page 403 to automated fetch). The registry had the 2026-01-08 'intent to acquire' release as its only evidence and that date as 'effective'.",
+   "change": "effective 2026-01-08 -> 2026-02-02; close post linked first, intent release kept",
+   "primary_sources": [
+    "https://www.snowflake.com/fr/blog/observe-acquisition-ai-powered-observability/",
+    "https://snowflake.com/en/news/press-releases/snowflake-announces-intent-to-acquire-observe-to-deliver-ai-powered-observability-at-enterprise-scale"
+   ],
+   "corroborating": ["https://www.constellationr.com/index%2ephp/insights/news/snowflake-acquires-observe-expands-telemetry-data-observability"],
+   "status_page_grades": {"corporate_status": "PASS", "ownership": "PASS", "evidence": "PASS"}
+  },
+  {
+   "prospect_id": 25, "company": "Tecton", "state": "ACQUIRED_ABSORBED",
+   "counterparty": "Databricks",
+   "finding": "ANNOUNCED Aug 2025 by Databricks ('Tecton joining Databricks'); Fenwick (Databricks' counsel) describes it as an acquisition of Tecton's ASSETS. No separate closing release was found. On 2026-11-09 the product's fetcher followed tecton.ai to www.databricks.com (domain_verification.json); on 2026-11-26 a plain request to tecton.ai answers 403, so the redirect was not re-observed today. So the company no longer publishes as itself, which is what the status page needs.",
+   "change": "none",
+   "primary_sources": [
+    "https://databricks.com/blog/tecton-joining-databricks-power-real-time-data-personalized-ai-agents",
+    "https://www.fenwick.com/insights/experience/fenwick-represents-databricks-in-acquisition-of-the-assets-of-tecton"
+   ],
+   "status_page_grades": {"corporate_status": "PASS", "ownership": "PASS", "evidence": "BOUNDED"},
+   "bounded_because": "no closing announcement located; the absorption is evidenced by the announcement plus the redirect, not by a close notice"
+  },
+  {
+   "prospect_id": 43, "company": "Cervest", "state": "CEASED_OPERATING",
+   "counterparty": "Mitiga Solutions (IP only)",
+   "finding": "CONFIRMED. Administrator Interpath: Cervest ceased trading, 71 staff made redundant, certain intangible assets sold to Mitiga Solutions SL on 2023-06-25. Mitiga's own release dated 2023-07-05 announces the IP purchase. The cloud pass's 'link is Mitiga's homepage' was a LABEL defect: the href was already the press release, but the visible text was the bare host.",
+   "change": "status-page link labels now carry the document headline (webapp.app.announcement_label); no data change",
+   "primary_sources": [
+    "https://www.mitigasolutions.com/press/mitiga-solutions-acquires-cervests-intellectual-property-rights",
+    "https://interpath.com/?p=4443"
+   ],
+   "status_page_grades": {"corporate_status": "PASS", "ownership": "PASS", "evidence": "PASS"}
+  },
+  {
+   "prospect_id": 54, "company": "Mosaic", "state": "ACQUIRED_ABSORBED",
+   "counterparty": "HiBob",
+   "finding": "ANNOUNCED 2025-02-13 on HiBob's own newsroom; reported subject to closing conditions at announcement, no separate close notice found. Mosaic now ships inside HiBob as 'Bob Finance' (secondary: Sacra). Measured 2026-11-26: https://mosaic.tech and https://www.mosaic.tech both redirect to https://www.hibob.com/platform/finance/ (the Nov 9 fetch of mosaic.tech failed and recorded no redirect).",
+   "change": "none",
+   "primary_sources": [
+    "https://www.hibob.com/news/hibob-acquires-financial-planning-and-analysis-platform-mosaic-expanding-capabilities-to-empower-people-first-cfos/"
+   ],
+   "status_page_grades": {"corporate_status": "PASS", "ownership": "PASS", "evidence": "BOUNDED"},
+   "bounded_because": "close inferred from the product's absorption and the redirect, not from a close notice"
+  },
+  {
+   "prospect_id": 84, "company": "Red Canary", "state": "ACQUIRED_ABSORBED",
+   "counterparty": "Zscaler",
+   "finding": "CLOSED 2025-08-01 per Zscaler's own release; Zscaler's FY2025 10-K states total consideration of $675.0M in cash.",
+   "change": "none",
+   "primary_sources": [
+    "https://ir.zscaler.com/node/15086",
+    "https://www.sec.gov/Archives/edgar/data/1713683/000171368325000158/zs-20250731.htm"
+   ],
+   "status_page_grades": {"corporate_status": "PASS", "ownership": "PASS", "evidence": "PASS"}
+  }
+ ]
+}

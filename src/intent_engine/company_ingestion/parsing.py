@@ -223,6 +223,34 @@ class _Extractor(HTMLParser):
             self._buffer.append(data)
 
 
+#: A page whose WHOLE text is the site turning an automated reader away.
+#: Measured: every softchoice.com page (13 of 13) returned the same 119
+#: characters, "Browser not supported. Sorry, softchoice.com is not
+#: compatible with Internet Explorer...", and each was admitted as a
+#: company document -- so the run read as thinly evidenced when it had read
+#: nothing at all.
+_BLOCK_NOTICE = _re.compile(
+    r"browser (is )?not supported|not compatible with (internet explorer|"
+    r"your browser)|(please )?(enable|turn on) (javascript|cookies)|"
+    r"verify (that )?you are (a )?human|are you a robot|checking your "
+    r"browser|attention required|access denied|you have been blocked|"
+    r"unsupported browser|upgrade your browser", _re.I)
+#: Real pages that merely MENTION a browser are long; a refusal is a notice.
+_BLOCK_NOTICE_MAX_CHARS = 400
+
+
+def is_block_notice(text: str) -> bool:
+    """True when the extracted text is only a browser/robot refusal notice.
+
+    Both conditions are required: the notice wording AND a page too short to
+    be anything else. A support article about browser compatibility, or a
+    homepage whose footer says "enable cookies", is long and stays a document.
+    """
+    flat = " ".join((text or "").split())
+    return (0 < len(flat) <= _BLOCK_NOTICE_MAX_CHARS
+            and bool(_BLOCK_NOTICE.search(flat)))
+
+
 def _jsonld_text(raw_blocks: list) -> list:
     """Descriptive strings from JSON-LD structured data. JavaScript-rendered
     marketing sites almost always still ship server-rendered JSON-LD/OpenGraph,

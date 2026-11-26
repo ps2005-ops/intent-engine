@@ -24,6 +24,7 @@ never invents, and never upgrades a state to be helpful.
 """
 from __future__ import annotations
 
+import hashlib
 import re
 
 from intent_engine.company_ingestion.coverage import (
@@ -95,7 +96,15 @@ def usable_documents(documents) -> list:
         text = (document.get("text_content") or "").strip()
         if len(text) < 40:
             continue
-        fingerprint = " ".join(text.lower().split())[:400]
+        # THE WHOLE TEXT, NOT ITS FIRST 400 CHARACTERS. A site's navigation
+        # menu is the first thing its pages say: every sherweb.com page opens
+        # with the same ~400 characters ("Marketplace. Platform. Partner
+        # platform. Your control panel for billing..."), so About, Services,
+        # the 92 KB newsroom and Our Team were nine "copies" of one page and
+        # the run kept 2 of 13. Identical pages are identical all the way
+        # down; distinct pages that share a header are not duplicates.
+        fingerprint = hashlib.sha256(
+            " ".join(text.lower().split()).encode("utf-8")).hexdigest()
         if fingerprint in seen:
             continue
         seen.add(fingerprint)

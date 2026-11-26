@@ -26,10 +26,28 @@ class IngestionStore(AppendOnlyStore):
     def for_run(self, run_id: str) -> list:
         return [r for r in self.read_all() if r.run_id == run_id]
 
+    #: States after which the run has an answer. Mirrors WebApp.TERMINAL_STATES.
+    TERMINAL = frozenset({"COMPLETE", "PARTIAL", "FAILED", "REJECTED",
+                          "INTERRUPTED"})
+
     def run_state(self, run_id: str):
+        """The run's state. A RETRY PASS AFTER THE ANSWER DOES NOT REOPEN IT.
+
+        `compose_with_quality` records each targeted-retry pass as a
+        transition to DISCOVERING_SOURCES. On the first, live pass the worker
+        writes the terminal state after it. A RE-composition of a finished
+        run -- the retry button, or a read in a fresh process -- records the
+        same pass, and nothing writes a terminal state after it, so a finished
+        run read as "discovering sources" forever: 8 of 95 prospect-100 runs,
+        decks redirecting for good. Activity during such a recompose is the
+        in-flight check's to report, not the ledger's.
+        """
         state = None
         for row in self.for_run(run_id):
             if row.event_type == "ci.run_transitioned":
+                if (state in self.TERMINAL
+                        and "retry_pass" in (row.payload or {})):
+                    continue
                 state = row.payload["to"]
             elif row.event_type == "ci.run_created":
                 state = "VALIDATING_COMPANY"
