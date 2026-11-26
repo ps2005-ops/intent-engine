@@ -47,8 +47,11 @@ def main() -> int:
             "mean": round(statistics.mean(scores), 3),
             "median": statistics.median(scores),
             "ten_of_ten_original": sum(1 for s in scores if s == 10.0),
-            "pass_original": {d: sum(1 for c in q if (c.get("grades") or {})
-                                     .get(d) == "PASS") for d in DIMS},
+            # Of the ANALYTICAL companies only: a status page's identity and
+            # search grades are real but not part of "of 95".
+            "pass_original": {d: sum(1 for c in q if c.get("score") is not None
+                                     and (c.get("grades") or {}).get(d)
+                                     == "PASS") for d in DIMS},
             "pass_strengthened": (strong.get("summary") or {})
             .get("pass_by_metric", {}).get("B"),
             "pass_commercial": (strong.get("summary") or {})

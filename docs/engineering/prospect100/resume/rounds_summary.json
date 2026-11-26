@@ -7,8 +7,8 @@
   "median": 7.5,
   "ten_of_ten_original": 0,
   "pass_original": {
-   "search": 99,
-   "identity": 100,
+   "search": 94,
+   "identity": 95,
    "coverage": 80,
    "independence": 7,
    "economics": 14,
@@ -33,8 +33,8 @@
   "median": 8.0,
   "ten_of_ten_original": 0,
   "pass_original": {
-   "search": 99,
-   "identity": 99,
+   "search": 94,
+   "identity": 94,
    "coverage": 81,
    "independence": 9,
    "economics": 15,
@@ -63,8 +63,8 @@
   "median": 8.0,
   "ten_of_ten_original": 0,
   "pass_original": {
-   "search": 99,
-   "identity": 100,
+   "search": 94,
+   "identity": 95,
    "coverage": 78,
    "independence": 6,
    "economics": 16,
@@ -103,8 +103,8 @@
   "median": 8.0,
   "ten_of_ten_original": 0,
   "pass_original": {
-   "search": 99,
-   "identity": 100,
+   "search": 94,
+   "identity": 95,
    "coverage": 77,
    "independence": 8,
    "economics": 16,
@@ -171,8 +171,8 @@
   "median": 8.0,
   "ten_of_ten_original": 0,
   "pass_original": {
-   "search": 99,
-   "identity": 100,
+   "search": 94,
+   "identity": 95,
    "coverage": 73,
    "independence": 11,
    "economics": 7,
@@ -230,8 +230,8 @@
   "median": 8.0,
   "ten_of_ten_original": 0,
   "pass_original": {
-   "search": 99,
-   "identity": 100,
+   "search": 94,
+   "identity": 95,
    "coverage": 79,
    "independence": 7,
    "economics": 7,
@@ -282,6 +282,67 @@
    "FAIL": 32,
    "BOUNDED": 36,
    "PASS": 27
+  }
+ },
+ {
+  "round": 10,
+  "commit": "c48dfac0",
+  "analytical": 95,
+  "mean": 7.763,
+  "median": 8.0,
+  "ten_of_ten_original": 0,
+  "pass_original": {
+   "search": 94,
+   "identity": 95,
+   "coverage": 79,
+   "independence": 7,
+   "economics": 7,
+   "strategy": 57,
+   "presentation": 32,
+   "history": 12,
+   "visual": 95,
+   "performance": 95
+  },
+  "pass_strengthened": {
+   "search": 94,
+   "identity": 95,
+   "coverage": 79,
+   "independence": 4,
+   "economics": 46,
+   "strategy": 55,
+   "presentation": 32,
+   "history": 12,
+   "visual": 95,
+   "performance": 95
+  },
+  "pass_commercial": {
+   "surfaces": 95,
+   "deck_or_limited_page": 89,
+   "browser_matrix": 95,
+   "performance": 95,
+   "identity": 95
+  },
+  "fully_qualified": {
+   "A": 0,
+   "B": 0,
+   "C": 89
+  },
+  "false_decision_grade": [
+   "Epicor",
+   "Softchoice"
+  ],
+  "decks_missing": [
+   "CData",
+   "Enverus",
+   "Epicor",
+   "IFS",
+   "Plex",
+   "Softchoice"
+  ],
+  "history_expanded": {
+   "BOUNDED": 36,
+   "PASS": 28,
+   "FAIL": 31
   }
  }
 ]

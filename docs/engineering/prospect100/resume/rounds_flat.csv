@@ -1,0 +1,8 @@
+round,commit,mean,median,a_search,a_identity,a_coverage,a_independence,a_economics,a_strategy,a_presentation,a_history,a_visual,a_performance,b_search,b_identity,b_coverage,b_independence,b_economics,b_strategy,b_presentation,b_history,b_visual,b_performance,c_fully_qualified,decks_missing,history_expanded_pass
+4,cc04b23a,7.616,7.5,94,95,80,7,14,49,25,11,94,95,,,,,,,,,,,,,
+5,568e200c,7.721,8.0,94,94,81,9,15,53,29,11,94,94,,,,,,,,,,,,,11
+6,d6bb2d10,7.726,8.0,94,95,78,6,16,51,30,12,95,95,,,,,,,,,,,,9,12
+7,5719b271,7.795,8.0,94,95,77,8,16,56,29,12,95,95,94,95,77,3,16,50,28,12,95,95,86,9,14
+8,35a09899,7.726,8.0,94,95,73,11,7,56,26,12,95,95,94,95,73,9,45,55,26,12,95,95,90,5,14
+9,f8aac885,7.758,8.0,94,95,79,7,7,57,28,12,95,95,94,95,79,4,45,54,27,12,95,95,89,6,27
+10,c48dfac0,7.763,8.0,94,95,79,7,7,57,32,12,95,95,94,95,79,4,46,55,32,12,95,95,89,6,28

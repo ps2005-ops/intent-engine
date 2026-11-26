@@ -21,24 +21,20 @@ from intent_engine.company_ingestion import independent_reporting as IR
 
 #: (name, host, tag feed, search feed, sample companies from the 100)
 CANDIDATES = (
-    ("BigDATAwire", "www.bigdatawire.com", "/tag/{slug}/feed/",
-     "/?s={q}&feed=rss2", ("Qlik", "Matillion", "Neo4j")),
-    ("The New Stack", "thenewstack.io", "/tag/{slug}/feed/",
-     "/?s={q}&feed=rss2", ("Chronosphere", "SingleStore", "Neo4j")),
-    ("SecurityWeek", "www.securityweek.com", "/tag/{slug}/feed/",
-     "/?s={q}&feed=rss2", ("Tanium", "ReliaQuest", "Torq")),
-    ("MSSP Alert", "www.msspalert.com", "/tag/{slug}/feed/",
-     "/?s={q}&feed=rss2", ("Pax8", "ConnectWise", "Blackpoint Cyber")),
-    ("ChannelE2E", "www.channele2e.com", "/tag/{slug}/feed/",
-     "/?s={q}&feed=rss2", ("Pax8", "Sherweb", "Kaseya")),
-    ("FinTech Global", "fintech.global", "/tag/{slug}/feed/",
-     "/?s={q}&feed=rss2", ("Ramp", "Brex", "Datarails")),
-    ("HR Executive", "hrexecutive.com", "/tag/{slug}/feed/",
-     "/?s={q}&feed=rss2", ("Dayforce", "Rippling", "Deel")),
-    ("ESG Today", "www.esgtoday.com", "/tag/{slug}/feed/",
-     "/?s={q}&feed=rss2", ("Watershed", "Persefoni", "EcoVadis")),
-    ("CPA Practice Advisor", "www.cpapracticeadvisor.com", "/tag/{slug}/feed/",
-     "/?s={q}&feed=rss2", ("FloQast", "BlackLine", "Planful")),
+    ("Blocks & Files", "blocksandfiles.com", "/tag/{slug}/feed/",
+     "/?s={q}&feed=rss2", ("WEKA", "Hammerspace", "Pure Storage")),
+    ("insideBIGDATA", "insidebigdata.com", "/tag/{slug}/feed/",
+     "/?s={q}&feed=rss2", ("Qlik", "SingleStore", "Neo4j")),
+    ("diginomica", "diginomica.com", "/tag/{slug}/feed/",
+     "/?s={q}&feed=rss2", ("Workday", "Anaplan", "Epicor")),
+    ("VentureBeat", "venturebeat.com", "/tag/{slug}/feed/",
+     "/?s={q}&feed=rss2", ("Rippling", "Deel", "Ramp")),
+    ("TechCrunch", "techcrunch.com", "/tag/{slug}/feed/",
+     "/?s={q}&feed=rss2", ("Rippling", "Brex", "Gusto")),
+    ("SDxCentral", "www.sdxcentral.com", "/tag/{slug}/feed/",
+     "/?s={q}&feed=rss2", ("Auvik", "Barracuda", "Tanium")),
+    ("FinTech Futures", "www.fintechfutures.com", "/tag/{slug}/feed/",
+     "/?s={q}&feed=rss2", ("Brex", "Ramp", "BILL")),
 )
 
 

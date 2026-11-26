@@ -3,7 +3,7 @@
  "worktree_branch": "qual/prospect100-resume",
  "base_commit": "3536cf41 (integration/unified-2026-11-25)",
  "current_wave": 0,
- "current_round": 10,
+ "current_round": 11,
  "completed_company_ids": [],
  "pending_company_ids": [
   1,
@@ -108,8 +108,8 @@
   100
  ],
  "scorecard": "docs/engineering/prospect100/resume/scorecard_live.json",
- "last_baseline_build": "2026-11-26T10:55:30+00:00",
- "last_verified_commit": "f8aac885",
+ "last_baseline_build": "2026-11-26T11:36:20+00:00",
+ "last_verified_commit": "c48dfac0",
  "resume_command": ".venv/bin/python scripts/prospect100/resume/build_baseline.py",
  "operations_log": "docs/engineering/prospect100/resume/OPERATIONS.json",
  "last_completed_operation": "V.1 Shared frontend fix: session nav wrapped as text at 375/390 px leaving a bare separator at the start of line 2; now flex items with decorative separators hidden on phones. Unstyled links in light mode used browser #0000EE; now the product accent at zero specificity. Full suite: 0 new failures",
@@ -129,7 +129,8 @@
   "6": "d6bb2d10",
   "7": "5719b271",
   "8": "35a09899",
-  "9": "f8aac885"
+  "9": "f8aac885",
+  "10": "c48dfac0"
  },
  "status": "round 9 running on the round-9 candidate tree (committed through the guard in parallel)",
  "active_processes": "none recorded here; check `ps` for live_pass/runserver before assuming",
@@ -165,5 +166,7 @@
  ],
  "research_memory": "reports/prospect100_resume/research_memory (local, per company domain; seeded from rounds 5-9; re-verified on use)",
  "regression_universe": "scripts/prospect100/resume/regression75_pass.py (ASI-25 + Next-40 + Final-Ten = 75, no overlap with prospect-100)",
- "unseen_universe": "docs/engineering/prospect100/resume/UNSEEN_UNIVERSE.json (frozen, sha256 beside it; 20 companies)"
+ "unseen_universe": "docs/engineering/prospect100/resume/UNSEEN_UNIVERSE.json (frozen, sha256 beside it; 20 companies)",
+ "dashboard": "https://claude.ai/artifact/FZStd3EF6YgnoM3JkPUpMQ (private until shared; data = rounds_flat.csv + rounds_companies.csv)",
+ "evaluations_running": "regression75 (2 shards) + unseen20 on the round-10 server, port 8610, commit c48dfac0"
 }

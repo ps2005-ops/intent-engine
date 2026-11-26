@@ -942,6 +942,7 @@ def _bounded_rewind(bounded, company: str) -> str:
     _first_linked = next((getattr(st, "date", "") for st in bounded.stops
                           if getattr(st, "economic_state", "")
                           == _HR.ECON_LINKED), "")
+    _prev_econ = ""
     for stop in bounded.stops:
         # THE ECONOMIC PANEL IS PRESENT OR IT SAYS WHY. Rendering nothing
         # would leave a reader unable to tell "the period was quiet" from
@@ -949,7 +950,14 @@ def _bounded_rewind(bounded, company: str) -> str:
         # drawer was repaired for.
         econ = getattr(stop, "economic_then", "")
         state = getattr(stop, "economic_state", "")
-        if econ:
+        if econ and econ == _prev_econ:
+            # THE SAME RELEASES AS THE STOP BEFORE. Rystad Energy's 24 and 28
+            # September stops (round 9) printed one 80-word paragraph twice:
+            # nothing was released between them, which is itself the reading.
+            econ_html = ('<p><strong>Economic conditions then:</strong> '
+                         'unchanged since the previous stop; no new release '
+                         'came out between the two dates.</p>')
+        elif econ:
             econ_html = (f'<p><strong>Economic conditions then:</strong> '
                          f'{_e(econ)}</p>')
         elif (state == _HR.ECON_NO_STATE_FOR_DATE and _any_linked
@@ -969,6 +977,7 @@ def _bounded_rewind(bounded, company: str) -> str:
                          + '. Using a later reading would be hindsight.</p>')
         else:
             econ_html = ""
+        _prev_econ = econ or _prev_econ
         lesson = getattr(stop, "lesson", "")
         lesson_html = (f'<p><strong>What this teaches about the '
                        f'strategy:</strong> {_e(lesson)}</p>' if lesson

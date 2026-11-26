@@ -116,6 +116,14 @@ PUBLISHERS = (
     Publisher("The New Stack", "thenewstack.io", "", "/?s={q}&feed=rss2",
               "2026-11-26: robots allow the search feed; 26 items per query, "
               "loose, so items must name the subject (as ZDNET)"),
+    # ADMITTED 2026-11-26 by probe_publishers.py (publisher_probe_r11.json):
+    # a second voice for venture-backed companies, where the first channel
+    # was one publisher and independence needs two. Six other candidates
+    # (Blocks & Files, insideBIGDATA, diginomica, VentureBeat, SDxCentral,
+    # FinTech Futures) refused or returned nothing and are not here.
+    Publisher("TechCrunch", "techcrunch.com", "/tag/{slug}/feed/", "",
+              "2026-11-26: robots allow the tag feed; 19 (Rippling), 20 "
+              "(Brex), 20 (Gusto) items"),
 )
 
 #: Hosts that are never independent reporting about a company, whatever

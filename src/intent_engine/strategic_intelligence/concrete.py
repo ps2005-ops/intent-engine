@@ -271,7 +271,8 @@ def clean_title(title: str, company: str = "") -> str:
 _CALL_TO_ACTION = re.compile(
     r"^(find|get|become|join|learn|discover|explore|contact|request|start|"
     r"try|book|download|see|meet|talk|sign|register|read|watch|schedule|"
-    r"apply|buy|shop|subscribe|visit|call|chat|let's|lets)\b", re.I)
+    r"apply|buy|shop|subscribe|visit|call|chat|let's|lets|identify|unlock|"
+    r"transform|accelerate|empower|reduce|simplify|streamline)\b", re.I)
 
 
 def _is_call_to_action(title: str) -> bool:

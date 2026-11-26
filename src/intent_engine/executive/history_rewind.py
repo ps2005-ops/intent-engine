@@ -888,7 +888,13 @@ def _titles_of(records: Sequence[DatedRecord], limit: int = 3) -> str:
     for record in reversed(list(records)):
         title = " ".join(str(record.title or "").split())
         key = title.lower()
-        if not title or key in seen:
+        # A page addressed to the READER ("Book a demo.", "Identify
+        # opportunities and reduce risk...") is not the company saying
+        # anything; round 9 printed it as Rystad Energy's own words.
+        from intent_engine.strategic_intelligence.concrete import (
+            _is_call_to_action,
+        )
+        if not title or key in seen or _is_call_to_action(title):
             continue
         seen.add(key)
         out.append(title if len(title) <= 70 else title[:67] + "...")
