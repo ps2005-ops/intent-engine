@@ -1,0 +1,12 @@
+{
+ "queries": 157,
+ "rank1": 157,
+ "in_list": 157,
+ "misses": [],
+ "latency_ms_local": {
+  "p50": 4.3,
+  "p95": 6.3,
+  "p99": 10.3,
+  "mean": 5.6
+ }
+}

@@ -132,6 +132,13 @@ def _sec(url, timeout, max_bytes=None):
 
 @pytest.fixture()
 def sec_on(monkeypatch):
+    # HERMETIC: the injected transport answers, but `_fetch_bytes` still
+    # resolves www.sec.gov through the SSRF wall first. Without this the
+    # fixture silently depended on live DNS and the whole slice read as an
+    # empty ticker table on any host that cannot resolve (CI, sandboxes).
+    from intent_engine.company_ingestion import edgar as _edgar
+    monkeypatch.setattr(_edgar, "resolve_public_addresses",
+                        lambda host, resolver=None: ["162.159.140.1"])
     monkeypatch.setattr(SG, "_TICKERS", None)
     monkeypatch.setattr(SG, "_PREFIX_INDEX", {})
     monkeypatch.setattr(SG, "_INDEXED_TABLE", [])

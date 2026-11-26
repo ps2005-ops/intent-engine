@@ -1,0 +1,36 @@
+{
+ "completed": [
+  "R0.1 Recovered Nov 9 artifacts from feat/founder-market-integration (cc04b23a): list, registry, harness, 4 rounds, rubric (PASS=1, BOUNDED=0.5, FAIL=0 over 10 dims)",
+  "R0.2 Confirmed cc04b23a, e3762f22, 49edf9d3, 7729503d are ancestors of integration/unified-2026-11-25 (3536cf41); the 4 crash-fix files are byte-unchanged since 7729503d",
+  "R0.3 Recovered the 8 presentation-crash companies from qualification_100_pass4.json: WEKA, Reltio, Ataccama, Immuta, Chronosphere, Neo4j, KX, Datarails",
+  "R0.4 Checked the 19 Nov 25 demand-weakening dossier corrections: none is one of the 100 (all market-runtime companies)",
+  "R0.5 Full suite on 3536cf41 in a clean Linux container: 13,057 passed, 39 failed; every failure classified as environment-only (see test_report below)",
+  "R0.6 Fixed a test-hermeticity defect: tests/test_prospect100_identity.py sec_on fixture depended on live DNS for www.sec.gov; 11 tests failed on any host without DNS (also on cc04b23a). Now 269/269 prospect-100 tests pass offline",
+  "W5.1 Local browser matrix, 5 status pages x 5 widths x 2 themes = 50 cells: all show the status page, open no run, name the successor, no overflow, no console errors",
+  "W5.2 Local search: 157/157 typed names (common + legal) rank the right company first; p50 4.3 ms, p95 6.3 ms, p99 10.3 ms LOCAL (SEC registrant table not loaded: network blocked)",
+  "V.1 Shared frontend fix: session nav wrapped as text at 375/390 px leaving a bare separator at the start of line 2; now flex items with decorative separators hidden on phones. Unstyled links in light mode used browser #0000EE; now the product accent at zero specificity. Full suite: 0 new failures"
+ ],
+ "test_report": {
+  "commit": "3536cf41 + this branch",
+  "passed": 13058,
+  "failed_environment_only": {
+   "needs production market runtime on the Mac (*_live.py)": 26,
+   "needs macOS launchd": 2,
+   "needs live SEC (catalog collisions, curated filer)": 4,
+   "runs as root, so chmod cannot make storage unwritable": 3,
+   "needs ANTHROPIC gate open (passes without ZERO_ANTHROPIC=1)": 3,
+   "timing flake under -n 4 (passes alone, 4/4)": 1
+  }
+ },
+ "blockers": [
+  "NETWORK: the session's environment allows package registries only. Company sites, SEC, Wikidata, Wikipedia, trade-press feeds, FRED and the Render preview are all refused (HTTP 403 at the egress proxy). Creating an environment with 18 exact hosts was rejected by the environments service. Re-analysis, independent-evidence acquisition, corporate-status re-verification and the Vena/WEKA live checks all need this.",
+  "REASONING BACKEND: the Founder analyst (strategic_intelligence/analyst/runner.py) needs ANTHROPIC_API_KEY with credit; none in this environment, the Nov 9 logs show 'credit balance is too low', and the brief forbids buying credits. Strategy, presentation and History text for the 95 analytical companies cannot be regenerated without it.",
+  "RUN DATA: the 95 Nov 9 analyses live on the Render preview disk and the Mac; no analyst cache is committed, so existing runs cannot be re-rendered or re-scored here.",
+  "RUNTIMES: market and learning runtimes, ledgers and research caches are on the Mac (~/ie-market-runtime, ~/ie-learning-runtime, ~/ie-prospect100, ~/ie-paper-validation)."
+ ],
+ "outstanding_defects": [
+  "Cervest status page: the 'Announcement' link is Mitiga's homepage, not an announcement; no successor action (may be intended: ceased trading, IP sold). Needs a primary-source re-check before changing.",
+  "Observe registry evidence is the Jan 8 2026 'intent to acquire' release; completion not evidenced in the registry row. Re-verify.",
+  "demand_reading v2.1 remains SHADOW; prospect-100 runs that form market beliefs still use belief_formation.direction_of. Auditing their beliefs needs the stored runs."
+ ]
+}

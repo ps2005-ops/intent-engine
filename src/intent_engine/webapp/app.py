@@ -228,6 +228,19 @@ a[href]{overflow-wrap:anywhere}
    their neighbours, on every company and every surface. Inline links in
    running text are exempt and untouched; only chrome is enlarged. */
 nav a[href],aside a[href],nav button{padding-top:4px;padding-bottom:4px}
+/* THE SESSION BAR WRAPS AS ITEMS, NOT AS TEXT. Measured at 375/390px on the
+   prospect-100 status pages: the bar broke between "Getting started" and
+   "signed in as", so the second line opened with a bare "·" under a tall gap.
+   The separators are decorative (aria-hidden) and drop on narrow screens,
+   where the gap carries the grouping instead. */
+nav[aria-label="Session"]{display:flex;flex-wrap:wrap;align-items:center;
+column-gap:.45rem;row-gap:.15rem}
+nav[aria-label="Session"] form{display:inline-flex;margin:0}
+@media (max-width:600px){nav[aria-label="Session"] .sep{display:none}
+nav[aria-label="Session"]{column-gap:.9rem}}
+/* A link nobody styled is the product's link, not the browser's #0000EE.
+   Zero specificity: any page or component rule still wins. */
+:where(a[href]){color:#1d4ed8}
 summary{min-height:24px}
 /* AND THE SAME IS TRUE OF A QUOTE, FOR A STRONGER REASON. <q> and
    <blockquote> exist to hold text THIS PRODUCT DID NOT WRITE, so their
@@ -1915,25 +1928,25 @@ class WebApp:
 
     def _nav(self, session, csrf=""):
         if session is None:
-            return ('<nav aria-label="Session"><a href="/">Home</a> · '
+            return ('<nav aria-label="Session"><a href="/">Home</a> <span class="sep" aria-hidden="true">·</span> '
                     '<a href="/login">Log in</a></nav>')
         if session.get("anonymous"):
             # A link back to your own analyses. Without it, navigating away
             # from a result loses it: there was no index, no history and no
             # way to reach a run again except the URL you no longer have.
-            mine = ('<a href="/analyses">Your analyses</a> · '
+            mine = ('<a href="/analyses">Your analyses</a> <span class="sep" aria-hidden="true">·</span> '
                     if self.web_store.runs_owned_by(session["user_id"])
                     else '')
-            return (f'<nav aria-label="Session"><a href="/">Home</a> · '
+            return (f'<nav aria-label="Session"><a href="/">Home</a> <span class="sep" aria-hidden="true">·</span> '
                     f'{mine}'
                     f'<span>Guest demo session</span> '
                     f'<form action="/logout" method="post" '
                     f'style="display:inline">'
                     f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
                     f'<button type="submit">Leave demo</button></form></nav>')
-        return (f'<nav aria-label="Session"><a href="/">Home</a> · '
-                f'<a href="/onboarding">Getting started</a> · '
-                f'signed in as {_e(session["email"])} '
+        return (f'<nav aria-label="Session"><a href="/">Home</a> <span class="sep" aria-hidden="true">·</span> '
+                f'<a href="/onboarding">Getting started</a> <span class="sep" aria-hidden="true">·</span> '
+                f'<span class="who">signed in as {_e(session["email"])}</span> '
                 f'<form action="/logout" method="post" style="display:inline">'
                 f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
                 f'<button type="submit">Log out</button></form></nav>')
