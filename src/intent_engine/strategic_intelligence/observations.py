@@ -1513,8 +1513,14 @@ def derive_observations(documents, *, company: str = "",
             # was found.
             signal_spans=signal_spans(text, signals, company),
             source_title=title or source_class,
+            # AN OUTSIDE REPORT IS DATED BY ITS ARTICLE. Round 6 showed
+            # "2026-11-26 · Vena Solutions set to acquire Morpheo AI" -- the
+            # day we fetched it; BetaKit published it on 2026-07-28. Scoped
+            # to this signal, where the publication date IS the event date.
             origin=doc.get("final_url", ""),
-            date=(doc.get("retrieved_at", "") or "")[:10],
+            date=((str(doc.get("published_date") or "")[:10]
+                   if reported else "")
+                  or (doc.get("retrieved_at", "") or "")[:10]),
             strategic_signal=_SIGNAL_LABEL.get(dominant, ""),
             relevance=_SIGNAL_RELEVANCE.get(dominant, "adds context to the "
                                             "strategic picture"),
@@ -1569,6 +1575,7 @@ _TYPE_FOR_SIGNAL.update({
 _TYPE_FOR_SIGNAL[REPORTED_DEVELOPMENT] = "market_context"
 _SIGNAL_LABEL[REPORTED_DEVELOPMENT] = ("was reported by an outside publisher "
                                        "to have made a concrete move")
-_SIGNAL_RELEVANCE[REPORTED_DEVELOPMENT] = (
-    "it is an account of what the company did that the company did not "
-    "write, which is what an outside check of its own story starts from")
+# Short on purpose: `observation_sentence` appends this after a comma and
+# the whole sentence is cut at 200 characters. Round 6 printed "...which is
+# what an outside check of its ow." on Vena's brief.
+_SIGNAL_RELEVANCE[REPORTED_DEVELOPMENT] = "an account the company did not write"

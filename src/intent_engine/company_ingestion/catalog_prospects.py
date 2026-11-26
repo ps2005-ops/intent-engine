@@ -406,9 +406,12 @@ PROSPECT_CATALOG = (
          'effective': '2025-08',
          'counterparty': 'Databricks',
          'counterparty_domain': 'databricks.com',
-         'summary': 'Acquired by Databricks; tecton.ai now redirects to '
-                    'databricks.com',
-         'evidence': ('https://www.fenwick.com/insights/experience/fenwick-represents-databricks-in-acquisition-of-the-assets-of-tecton',)},
+         'summary': 'Databricks announced in August 2025 that it would '
+                    "acquire Tecton's assets; no completion notice was "
+                    'found, and tecton.ai last redirected to databricks.com '
+                    'when checked on 2026-11-09',
+         'evidence': ('https://databricks.com/blog/tecton-joining-databricks-power-real-time-data-personalized-ai-agents',
+                      'https://www.fenwick.com/insights/experience/fenwick-represents-databricks-in-acquisition-of-the-assets-of-tecton')},
     },
     {
         "entity_id": 'interos',
@@ -810,8 +813,10 @@ PROSPECT_CATALOG = (
          'effective': '2025-02-13',
          'counterparty': 'HiBob',
          'counterparty_domain': 'hibob.com',
-         'summary': "Acquired by HiBob; mosaic.tech now redirects to HiBob's "
-                    'finance product',
+         'summary': 'HiBob announced its acquisition of Mosaic on 13 '
+                    'February 2025; no separate completion notice was found, '
+                    "and mosaic.tech now redirects to HiBob's finance "
+                    'product',
          'evidence': ('https://www.hibob.com/news/hibob-acquires-financial-planning-and-analysis-platform-mosaic-expanding-capabilities-to-empower-people-first-cfos/',)},
     },
     {

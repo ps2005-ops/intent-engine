@@ -164,6 +164,15 @@ def _load_uncached(runtime_root, *, as_of: str = "") -> EconContext:
             f"the shared economic state could not be read ({exc}); the "
             "company analysis continues on its own evidence and this "
             "section states what is missing")
+    # ONE KIND, TWO CONTRACTS. `market.econ_bridge` appends the
+    # `economic_state.v1` snapshot and `market.steps` appends an
+    # `econ_shock_set.v1` row under the SAME kind on the same day, after it.
+    # Taking `rows[-1]` handed the shock set to the state validator, which
+    # refused it, so every founder page read "the published economic state
+    # failed the shared contract" while a valid state sat one row above --
+    # measured on the live market root, 2026-11-25. Read the state.
+    rows = [r for r in rows if isinstance(r, dict)
+            and r.get("contract") == ES.CONTRACT]
     if not rows:
         return unavailable(
             "no economic state has been published to this deployment. The "

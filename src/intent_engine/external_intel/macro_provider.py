@@ -73,6 +73,12 @@ def _cache(root, name: str) -> pathlib.Path:
     return pathlib.Path(root) / "cache" / "macro" / f"{name}.json"
 
 
+def _is_refusal(body) -> bool:
+    """A provider's own "not processed" answer, delivered with a 200."""
+    status = body.get("status") if isinstance(body, dict) else None
+    return bool(status) and str(status).upper() != "REQUEST_SUCCEEDED"
+
+
 def _cached_get(root, name: str, url: str, now: Optional[float] = None,
                 fetcher=None):
     now = time.time() if now is None else now
@@ -85,6 +91,14 @@ def _cached_get(root, name: str, url: str, now: Optional[float] = None,
         except (OSError, json.JSONDecodeError):
             pass
     body = (fetcher or _http_get)(url)
+    # A REFUSAL IS NOT DATA. BLS answers an exhausted daily quota with a
+    # normal 200 and {"status": "REQUEST_NOT_PROCESSED", "Results": {}}.
+    # That body was cached as a success and served for a day: measured on
+    # the prospect-100 rounds of 2026-11-26, both BLS series held the
+    # refusal, so CPI and unemployment were silently absent from every run.
+    # Treated as a failed fetch, the last GOOD copy is served instead.
+    if _is_refusal(body):
+        body = None
     if body is None:
         # Serve a stale cache rather than nothing: the observation carries its
         # own date, and the contract's currency check is what decides whether

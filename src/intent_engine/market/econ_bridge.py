@@ -291,7 +291,10 @@ def publish_state(*, observations: Sequence[MS.MacroObservation],
 
 def read_state(runtime_root, *, as_of: str = "") -> Optional[dict]:
     """The most recent shared state at or before `as_of`. Read-only."""
-    snapshots = EST.load(runtime_root, "state_snapshot", upto=as_of)
+    snapshots = [s for s in EST.load(runtime_root, "state_snapshot",
+                                      upto=as_of)
+                 if isinstance(s, dict) and s.get("contract") == ES.CONTRACT]
+    # The shock set shares this kind; see `external_intel.econ_context`.
     return snapshots[-1] if snapshots else None
 
 

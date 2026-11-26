@@ -97,6 +97,25 @@ PUBLISHERS = (
     Publisher("ZDNET", "www.zdnet.com", "", "/?s={q}&feed=rss2",
               "2026-11-09: robots allow; search feed returns a full page of "
               "loose matches, so items must name the subject"),
+    # ADMITTED 2026-11-26 by scripts/prospect100/resume/probe_publishers.py
+    # (docs/engineering/prospect100/resume/publisher_probe_r7.json), for the
+    # sectors round 5 left with no outside account: fintech, accounting,
+    # security, cloud-native infrastructure. Nine candidates were probed;
+    # five were refused or empty and are not here.
+    Publisher("FinTech Global", "fintech.global", "/tag/{slug}/feed/", "",
+              "2026-11-26: robots allow the tag feed; 10 (Ramp), 10 (Brex), "
+              "4 (Datarails) items"),
+    Publisher("CPA Practice Advisor", "www.cpapracticeadvisor.com",
+              "/tag/{slug}/feed/", "",
+              "2026-11-26: robots allow the tag feed; 2 (FloQast), 8 "
+              "(BlackLine) items"),
+    Publisher("SecurityWeek", "www.securityweek.com", "", "/?s={q}&feed=rss2",
+              "2026-11-26: robots allow the search feed; 10 items per query, "
+              "the same for three companies, so it is loose and items must "
+              "name the subject (as ZDNET)"),
+    Publisher("The New Stack", "thenewstack.io", "", "/?s={q}&feed=rss2",
+              "2026-11-26: robots allow the search feed; 26 items per query, "
+              "loose, so items must name the subject (as ZDNET)"),
 )
 
 #: Hosts that are never independent reporting about a company, whatever

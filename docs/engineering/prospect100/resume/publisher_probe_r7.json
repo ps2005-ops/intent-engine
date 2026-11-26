@@ -1,0 +1,353 @@
+[
+ {
+  "publisher": "BigDATAwire",
+  "host": "www.bigdatawire.com",
+  "samples": [
+   "Qlik",
+   "Matillion",
+   "Neo4j"
+  ],
+  "tag": [
+   {
+    "robots_allows": false,
+    "items": 0
+   },
+   {
+    "robots_allows": false,
+    "items": 0
+   },
+   {
+    "robots_allows": false,
+    "items": 0
+   }
+  ],
+  "search": [
+   {
+    "robots_allows": false,
+    "items": 0
+   },
+   {
+    "robots_allows": false,
+    "items": 0
+   },
+   {
+    "robots_allows": false,
+    "items": 0
+   }
+  ],
+  "admit_tag": false,
+  "admit_search": false
+ },
+ {
+  "publisher": "The New Stack",
+  "host": "thenewstack.io",
+  "samples": [
+   "Chronosphere",
+   "SingleStore",
+   "Neo4j"
+  ],
+  "tag": [
+   {
+    "robots_allows": true,
+    "items": -1
+   },
+   {
+    "robots_allows": true,
+    "items": -1
+   },
+   {
+    "robots_allows": true,
+    "items": -1
+   }
+  ],
+  "search": [
+   {
+    "robots_allows": true,
+    "items": 26
+   },
+   {
+    "robots_allows": true,
+    "items": 26
+   },
+   {
+    "robots_allows": true,
+    "items": 26
+   }
+  ],
+  "admit_tag": false,
+  "admit_search": true
+ },
+ {
+  "publisher": "SecurityWeek",
+  "host": "www.securityweek.com",
+  "samples": [
+   "Tanium",
+   "ReliaQuest",
+   "Torq"
+  ],
+  "tag": [
+   {
+    "robots_allows": true,
+    "items": -1
+   },
+   {
+    "robots_allows": true,
+    "items": -1
+   },
+   {
+    "robots_allows": true,
+    "items": -1
+   }
+  ],
+  "search": [
+   {
+    "robots_allows": true,
+    "items": 10
+   },
+   {
+    "robots_allows": true,
+    "items": 10
+   },
+   {
+    "robots_allows": true,
+    "items": 10
+   }
+  ],
+  "admit_tag": false,
+  "admit_search": true
+ },
+ {
+  "publisher": "MSSP Alert",
+  "host": "www.msspalert.com",
+  "samples": [
+   "Pax8",
+   "ConnectWise",
+   "Blackpoint Cyber"
+  ],
+  "tag": [
+   {
+    "robots_allows": true,
+    "items": -1
+   },
+   {
+    "robots_allows": true,
+    "items": -1
+   },
+   {
+    "robots_allows": true,
+    "items": -1
+   }
+  ],
+  "search": [
+   {
+    "robots_allows": true,
+    "items": -1
+   },
+   {
+    "robots_allows": true,
+    "items": -1
+   },
+   {
+    "robots_allows": true,
+    "items": -1
+   }
+  ],
+  "admit_tag": false,
+  "admit_search": false
+ },
+ {
+  "publisher": "ChannelE2E",
+  "host": "www.channele2e.com",
+  "samples": [
+   "Pax8",
+   "Sherweb",
+   "Kaseya"
+  ],
+  "tag": [
+   {
+    "robots_allows": true,
+    "items": -1
+   },
+   {
+    "robots_allows": true,
+    "items": -1
+   },
+   {
+    "robots_allows": true,
+    "items": -1
+   }
+  ],
+  "search": [
+   {
+    "robots_allows": true,
+    "items": -1
+   },
+   {
+    "robots_allows": true,
+    "items": -1
+   },
+   {
+    "robots_allows": true,
+    "items": -1
+   }
+  ],
+  "admit_tag": false,
+  "admit_search": false
+ },
+ {
+  "publisher": "FinTech Global",
+  "host": "fintech.global",
+  "samples": [
+   "Ramp",
+   "Brex",
+   "Datarails"
+  ],
+  "tag": [
+   {
+    "robots_allows": true,
+    "items": 10
+   },
+   {
+    "robots_allows": true,
+    "items": 10
+   },
+   {
+    "robots_allows": true,
+    "items": 4
+   }
+  ],
+  "search": [
+   {
+    "robots_allows": true,
+    "items": -1
+   },
+   {
+    "robots_allows": true,
+    "items": -1
+   },
+   {
+    "robots_allows": true,
+    "items": -1
+   }
+  ],
+  "admit_tag": true,
+  "admit_search": false
+ },
+ {
+  "publisher": "HR Executive",
+  "host": "hrexecutive.com",
+  "samples": [
+   "Dayforce",
+   "Rippling",
+   "Deel"
+  ],
+  "tag": [
+   {
+    "robots_allows": false,
+    "items": 0
+   },
+   {
+    "robots_allows": false,
+    "items": 0
+   },
+   {
+    "robots_allows": false,
+    "items": 0
+   }
+  ],
+  "search": [
+   {
+    "robots_allows": false,
+    "items": 0
+   },
+   {
+    "robots_allows": false,
+    "items": 0
+   },
+   {
+    "robots_allows": false,
+    "items": 0
+   }
+  ],
+  "admit_tag": false,
+  "admit_search": false
+ },
+ {
+  "publisher": "ESG Today",
+  "host": "www.esgtoday.com",
+  "samples": [
+   "Watershed",
+   "Persefoni",
+   "EcoVadis"
+  ],
+  "tag": [
+   {
+    "robots_allows": true,
+    "items": -1
+   },
+   {
+    "robots_allows": true,
+    "items": -1
+   },
+   {
+    "robots_allows": true,
+    "items": -1
+   }
+  ],
+  "search": [
+   {
+    "robots_allows": true,
+    "items": 0
+   },
+   {
+    "robots_allows": true,
+    "items": 0
+   },
+   {
+    "robots_allows": true,
+    "items": 0
+   }
+  ],
+  "admit_tag": false,
+  "admit_search": false
+ },
+ {
+  "publisher": "CPA Practice Advisor",
+  "host": "www.cpapracticeadvisor.com",
+  "samples": [
+   "FloQast",
+   "BlackLine",
+   "Planful"
+  ],
+  "tag": [
+   {
+    "robots_allows": true,
+    "items": 2
+   },
+   {
+    "robots_allows": true,
+    "items": 8
+   },
+   {
+    "robots_allows": true,
+    "items": -1
+   }
+  ],
+  "search": [
+   {
+    "robots_allows": true,
+    "items": 0
+   },
+   {
+    "robots_allows": true,
+    "items": 0
+   },
+   {
+    "robots_allows": true,
+    "items": 0
+   }
+  ],
+  "admit_tag": true,
+  "admit_search": false
+ }
+]

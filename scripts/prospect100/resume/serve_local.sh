@@ -25,6 +25,16 @@ SNAP="$ST/market_snapshots"
 mkdir -p "$SNAP/reports/market/demo_snapshots"
 cp -n "$HOME/intent-engine-market/reports/market/demo_snapshots/"*.json \
   "$SNAP/reports/market/demo_snapshots/" 2>/dev/null || true
+# THE ECONOMIC STATE, BRIDGED THE SAME WAY: a read-only copy of what the
+# market engine published (state snapshot, forward expectations and their
+# resolutions) into this round's founder runtime, which is where the founder
+# side reads it. The live econ root is never opened for writing.
+ECON_SRC="$HOME/intent-engine-market/econ"
+mkdir -p "$ST/runtime/econ"
+for k in state_snapshot expectation expectation_resolution; do
+  [ -f "$ECON_SRC/$k.jsonl" ] && [ ! -f "$ST/runtime/econ/$k.jsonl" ] && \
+    cp "$ECON_SRC/$k.jsonl" "$ST/runtime/econ/$k.jsonl"
+done
 cd "$ROOT"
 export PYTHONPATH="$ROOT/src" ZERO_ANTHROPIC=1 WEBAPP_ENV=development \
   WEBAPP_SECRET=$(python3 -c 'import secrets;print(secrets.token_hex(32))') \

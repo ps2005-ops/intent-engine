@@ -221,6 +221,7 @@ pre,code{overflow-x:auto;max-width:100%}
 code,.src,.prov{overflow-wrap:anywhere;word-break:break-word}
 .muted{overflow-wrap:anywhere;word-break:break-word}
 li{overflow-wrap:break-word}
+h1,h2,h3,h4{overflow-wrap:break-word}
 a[href]{overflow-wrap:anywhere}
 /* TARGET SIZE (WCAG 2.2, 2.5.8). Measured on the prospect-100 pass at 10
    widths x 2 themes: the page navigation, the side navigation and the

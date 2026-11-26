@@ -1,0 +1,21 @@
+{
+ "round": 6,
+ "analysis_tree": "924df73e3b1a6ec6bdc0e5b8ebe1c98a84180c33",
+ "analysis_commit": "d6bb2d10",
+ "scored_with": "scripts/prospect100/qualify100.py (original rubric, unchanged)",
+ "server": "local, ZERO_ANTHROPIC=1, fresh store, Nov 9 SEC filing cache reused, read-only copy of the live market snapshots",
+ "changes_under_test": [
+  "a retry pass after a terminal state never reopens a run; a read never gathers",
+  "dedup on whole text; refusal notices are access failures; translations rank after originals",
+  "ordinary-word subject names need a qualified mention in documents that use the word",
+  "outside reports of a concrete move become reported_development observations",
+  "the evidence line describes what was read",
+  "a call to action never leads the deck; the lens reason is printed once",
+  "journey harness: shared generic prefix is BOUNDED (Datarails)"
+ ],
+ "known_environment_limits": [
+  "BLS answered REQUEST_NOT_PROCESSED (daily quota) and the provider cached it as data; CPI and unemployment factors were absent in rounds 5 and 6 (and the Nov 9 store). Fixed for round 7: a refusal is never cached.",
+  "No economic state reached the founder runtime: the founder reads <runtime>/econ, the market engine publishes to its own root, and its latest state_snapshot row is a shock set. Fixed for round 7: readers select economic_state.v1; serve_local bridges a read-only copy."
+ ],
+ "guard": "13151 passed, 9 skipped, EXIT=0 (outbound HTTP to a dead proxy, localhost exempt)"
+}
