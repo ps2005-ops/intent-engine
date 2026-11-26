@@ -1,0 +1,11 @@
+pair_id,version,factual_accuracy,economic_reasoning,company_relevance,strategic_insight,evidence_quality,actionability,executive_usefulness,uncertainty_handling,overall_preference_A_B_or_tie,reason_one_sentence,reviewer
+PAIR-1,A,,,,,,,,,,,
+PAIR-1,B,,,,,,,,,(answer on row A),,
+PAIR-2,A,,,,,,,,,,,
+PAIR-2,B,,,,,,,,,(answer on row A),,
+PAIR-3,A,,,,,,,,,,,
+PAIR-3,B,,,,,,,,,(answer on row A),,
+PAIR-4,A,,,,,,,,,,,
+PAIR-4,B,,,,,,,,,(answer on row A),,
+PAIR-5,A,,,,,,,,,,,
+PAIR-5,B,,,,,,,,,(answer on row A),,

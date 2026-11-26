@@ -1,0 +1,10 @@
+HISTORICAL FIXTURE (not a forward forecast; never written to a ledger). FIRST_TRIGGER_DATE overridden for this demonstration only.
+
+1. DECLARED INTENTION: Caterpillar Raises Sales Outlook on Data Center Boom - Yahoo Finance. | available 2026-08-04 | reader demand_reading.v2.1
+2. OBSERVED BEHAVIOUR AT CUTOFF: last filed quarter 2026-03-31 revenue 17415000000.0 | acceleration 0.042234
+3. DISCREPANCY TESTED: guidance says UP vs own-trajectory persistence baseline UP
+4. MECHANISM: declared revenue expectation (guidance) precedes reported revenue acceleration
+5. CONDITIONAL EXPECTATION: UP = sign of next-filed quarter YoY revenue growth minus YoY growth of the quarter ended 2026-03-31
+6. RESOLUTION RULE: first quarter with period end after 2026-03-31 and filed after 2026-08-04; SEC XBRL | source SEC XBRL companyfacts (filed-date walled) | invalidation no later quarter filed within 200 days of the cutoff -> EXPIRED, never scored
+
+RESOLVED (historical): {'state': 'RESOLVED', 'actual': 'UP', 'correct': True, 'baseline_correct': {'PERSISTENCE': True, 'DECELERATE': False}}

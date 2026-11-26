@@ -92,10 +92,26 @@ def run(*, evidence_path, audit_path, ledger_path, today, facts_fn, write=True):
         if r.get("record") == "evidence":
             ev.setdefault(r["evidence_id"], r)
     sym = {}
+    # ACTOR IDENTIFICATION (fixed 2026-11-25): the audit rows name only the
+    # instruments the runtime happened to price, so 10 of the 28 evidence
+    # subjects (J&J, JPMorgan, ASML, Duolingo, ...) could never register. The
+    # runtime's own research universe keys tickers by the SAME subject ids.
+    try:
+        from intent_engine.universe.companies import default_universe
+        for c in default_universe().companies:
+            if getattr(c, "ticker", None):
+                sym[c.company_id] = c.ticker
+    except Exception:                                   # noqa: BLE001
+        pass
     for r in _read(audit_path):
         sym[r["company_id"]] = r["instrument"]
-    company_of = lambda e: sym.get((e.get("subject_company") or "")
-                                   .replace("_", "-")) or sym.get(e.get("subject_company"))
+
+    def company_of(e):
+        subj = (e.get("subject_company") or "").strip()
+        for k in (subj, subj.replace("_", "-"), subj.replace("-", "_")):
+            if k in sym:
+                return sym[k]
+        return None
     new = IB.register(ev.values(), revenue_facts=facts_fn, company_of=company_of,
                       today=today, existing_ids=list(state))
     admitted, held = [], []
