@@ -5329,9 +5329,20 @@ class WebApp:
         # so the real Competition section is outvoted by risk-factor prose
         # and the run reports that no competitor account was retrieved.
         documents = _with_annual_filing_sections(documents)
+        # THE SAME FETCH POLICY AS THE MARKET EXPORT ABOVE. `build_factors`
+        # was called with no fetcher, so it dialled BLS and the Treasury from
+        # a page render (which this method promises never fetches) and from
+        # an app whose transport was injected (a test or a replay). The last
+        # was measured: test_work_beyond_capacity_is_refused_not_silently_
+        # dropped held open sockets to the Treasury's CDN and stalled the
+        # full suite for minutes. Without a live fetch the cache is served,
+        # and a factor with no cached series is omitted, never guessed.
+        _macro_live = allow_fetch and self._transport is None
         try:
             macro = mp.build_factors(observations + documents,
-                                     root=self._runtime_root, today=today)
+                                     root=self._runtime_root, today=today,
+                                     fetcher=None if _macro_live
+                                     else (lambda _url: None))
         except Exception:  # noqa: BLE001
             _LOG.warning("macro context unavailable for %s", run_id)
         try:
@@ -5528,6 +5539,22 @@ class WebApp:
         "treasury": "treasury_10y", "yield": "treasury_10y",
         "real_yield": "real_yield",
     }
+
+    def _founder_economy(self, run_id) -> dict:
+        """The economic block for this run when no market dossier carries one.
+
+        Read from the run's own external context (cached; a render never
+        fetches), so the X-Ray and the canonical selection get one answer.
+        Never raises: no economy is {} and the dossier's own block stands.
+        """
+        try:
+            from intent_engine.external_intel import founder_economy as _FE
+            ctx = self._external_context(run_id)
+            return _FE.block(getattr(ctx, "economy", None),
+                             getattr(ctx, "economy_exposures", ()) or ())
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("founder economy unavailable for %s", run_id)
+            return {}
 
     def _econ_exposures(self, macro_factors, observations) -> tuple:
         """Which shared economic quantities THIS company is exposed to.
@@ -6388,11 +6415,12 @@ class WebApp:
         # primary screen for every privately held company.
         canonical = self._canonical_selection(
             run_id, name, str(meta.get("domain") or ""))
+        _own = dict(self._canonical_profile_inputs(
+            run_id, name, str(meta.get("domain") or "")))
+        _own["founder_economy"] = self._founder_economy(run_id)
         decision = self._executive_read(
             dossier, profile=getattr(canonical, "profile", None),
-            own=self._canonical_profile_inputs(
-                run_id, name, str(meta.get("domain") or ""))) \
-            if dossier is not None else None
+            own=_own) if dossier is not None else None
         if decision is None:
             # A RUN THAT RETRIEVED NOTHING IS NOT A FAULT IN THE PRODUCT.
             # This answered "Something went wrong on our side ... This is a
@@ -6658,13 +6686,23 @@ class WebApp:
                 registrant=inputs["registrant"],
                 evidence_text=inputs["evidence_text"],
                 published_text=inputs["published_text"])
+            # THE SAME ECONOMIC CHANNELS THE X-RAY COMPOSER READS. `select`
+            # built empty facts here, so /intro and /brief could never be
+            # moved by the economy while the X-Ray could -- one run saying
+            # two things. Empty when no exposure meets a measured condition.
+            from intent_engine.executive.analysis_selection import (
+                RecordFacts as _RF,
+            )
+            _econ_ids = tuple(
+                (self._founder_economy(run_id) or {}).get("ids") or ())
             selection = select(
                 _sc_company_key(resolved) or run_id,
                 name=resolved, domain=resolved_domain,
                 profile=profile,
                 registrant=inputs["registrant"],
                 evidence_text=inputs["evidence_text"],
-                published_text=inputs["published_text"])
+                published_text=inputs["published_text"],
+                facts=_RF(economic_ids=_econ_ids) if _econ_ids else None)
         except Exception:                                    # noqa: BLE001
             _LOG.exception("canonical_selection_failed run=%s", run_id)
         memo[key] = selection
@@ -8899,8 +8937,9 @@ class WebApp:
                            registrant=self._registrant(dossier),
                            profile=profile,
                            evidence_text=own.get("evidence_text", ""),
-                           published_text=own.get("published_text",
-                                                  "")).as_dict()
+                           published_text=own.get("published_text", ""),
+                           founder_economy=own.get("founder_economy")
+                           ).as_dict()
         except Exception:                                   # noqa: BLE001
             _LOG.warning("executive read not composed for %s",
                          dossier.company_id)

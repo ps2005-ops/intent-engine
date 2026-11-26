@@ -1,0 +1,10 @@
+{
+ "round": 7,
+ "analysis_commit": "5719b271",
+ "analysis_tree": "52cb6c9c1cf2a9c605595c5157e3aa1eda8096eb",
+ "scored_with": "scripts/prospect100/qualify100.py (original rubric, unchanged)",
+ "journeys": "95/95 PASS; CORE p50 28.4s, max 53.8s",
+ "browser_matrix": "17,120 measurements, 0 overflow (ui_matrix_r7.json)",
+ "strengthened_gate": "strengthened_r7.json: A 0, B 0, C 86 fully qualified; 6 false decision-grade (Gusto, BlackLine, Epicor, IFS, Lansweeper, Softchoice)",
+ "server": "local, ZERO_ANTHROPIC=1, fresh store, economic state bridged read-only (state_snapshot)"
+}

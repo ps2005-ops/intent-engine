@@ -60,6 +60,11 @@ MIN_SLIDE_UNITS = 5
 MIN_SOURCES_LIMITED = 2
 MIN_FAMILIES_LIMITED = 2
 MIN_SLIDE_UNITS_LIMITED = 3
+#: Outside-in floor: the company's own site gave nothing usable.
+OUTSIDE_IN_MIN_ARTICLES = 3
+OUTSIDE_IN_MIN_PUBLISHERS = 2
+#: The readable part of a mostly foreign-language record must be real text.
+ENGLISH_SUBSET_MIN_CHARS = 2000
 # Deterministic retry budget. One targeted second pass, then stop — an
 # unbounded retry loop is how a "still trying" spinner becomes the product.
 MAX_DISCOVERY_ATTEMPTS = 2
@@ -546,9 +551,50 @@ def assess_readiness(*, documents, identity=None, failures=(),
     missing_families = _missing_families(counts)
     retry_plan = _retry_plan(missing_families, failures, attempt)
 
+    # OUTSIDE-IN: the company's own site gave us nothing usable, and outside
+    # publishers did. Lansweeper's run (round 7) read five trade-press
+    # articles and its own site refused us; every article was the single
+    # family "independent", so the run tripped "one dominant family" and "no
+    # official page" and produced NO report -- while four of the five yielded
+    # observations. An independent account is not thinner evidence than the
+    # company's marketing. It may carry a LIMITED report, never a full one,
+    # and only from >= 3 articles by >= 2 distinct publishers.
+    from urllib.parse import urlparse as _up
+    own = [d for d in usable if family_of(d) != INDEPENDENT]
+    outside = [d for d in usable if family_of(d) == INDEPENDENT]
+    publishers = {".".join(((_up(str(d.get("final_url") or "")).hostname or "")
+                            .split("."))[-2:]) for d in outside} - {""}
+    outside_in = (not own and len(outside) >= OUTSIDE_IN_MIN_ARTICLES
+                  and len(publishers) >= OUTSIDE_IN_MIN_PUBLISHERS)
+    checks.append(_check(
+        "outside_in", outside_in or bool(own),
+        "the company's own pages were read" if own else
+        (f"built from {len(outside)} outside article(s) by "
+         f"{len(publishers)} publisher(s); the company's own site gave "
+         f"nothing usable" if outside_in else
+         "the company's own site gave nothing usable and too little outside "
+         "reporting was found to stand in for it"),
+        required_for_full=False))
+    # THE READABLE SUBSET, MEASURED ON ITSELF. `usable` falls back to every
+    # document when none is English, so it cannot stand for "what we read":
+    # a wholly German company would have been given a limited report built
+    # from German pages (tests/test_product_maturity a3 caught exactly that).
+    english = [d for d in retrieved if is_english(d)]
+    # AND IT MUST BE READING, NOT A FEW WORDS. Language detection on a short
+    # page is unreliable -- a terse German product list ("Planetengetriebe,
+    # Stirnradgetriebe ...") passes as English -- so the subset must carry
+    # real text before it may stand for the company.
+    english_chars = sum(len(str(d.get("text_content") or ""))
+                        for d in english)
+    english_ok = (english_chars >= ENGLISH_SUBSET_MIN_CHARS
+                  and len(english) >= MIN_SOURCES_LIMITED
+                  and len({family_of(d) for d in english})
+                  >= MIN_FAMILIES_LIMITED
+                  and len(slide_units(english)) >= MIN_SLIDE_UNITS_LIMITED)
     material = _material_level(total=total, families=families, units=units,
                                failed=failed, expects=expects,
-                               readable=readable)
+                               readable=readable, outside_in=outside_in,
+                               english_subset_ok=english_ok)
     state = _decide(identity_ok=identity_ok, material=material,
                     retry_plan=retry_plan)
 
@@ -650,7 +696,8 @@ def _retry_plan(missing_families, failures, attempt) -> dict:
 
 
 def _material_level(*, total, families, units, failed, expects=None,
-                    readable=1.0) -> str:
+                    readable=1.0, outside_in=False,
+                    english_subset_ok=False) -> str:
     """How much this evidence can honestly carry: 'full', 'limited', 'none'.
 
     Deliberately independent of whether a retry is worth running. Those are
@@ -662,8 +709,18 @@ def _material_level(*, total, families, units, failed, expects=None,
     # any level. Producing nothing and saying nothing is the failure this
     # replaces: the reader deserves "we could not read this company's
     # evidence", which is a finding they can act on.
+    # A LIMITED READING OF THE PART WE CAN READ. The unreadable pages are
+    # already set aside above (`usable` is the English subset), so `total`,
+    # `families` and `units` describe only what was understood. Refusing on the
+    # SHARE alone voided BlackLine (round 7): 5 English sources across four
+    # families -- three filings, its blog, an outside article -- beside six
+    # German pages. When the English subset clears the limited floor on its
+    # own, it carries a limited report; never a full one, since much of the
+    # company's own material was not read.
     if readable < MIN_ENGLISH_SHARE:
-        return "none"
+        return "limited" if english_subset_ok else "none"
+    if outside_in and failed:
+        return "limited"
     if not failed:
         return "full"
     # A small business genuinely has fewer distinct subjects to present, so the

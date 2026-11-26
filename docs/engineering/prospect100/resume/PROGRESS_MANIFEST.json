@@ -3,7 +3,7 @@
  "worktree_branch": "qual/prospect100-resume",
  "base_commit": "3536cf41 (integration/unified-2026-11-25)",
  "current_wave": 0,
- "current_round": 5,
+ "current_round": 8,
  "completed_company_ids": [],
  "pending_company_ids": [
   1,
@@ -108,8 +108,8 @@
   100
  ],
  "scorecard": "docs/engineering/prospect100/resume/scorecard_live.json",
- "last_baseline_build": "2026-11-26T08:23:47+00:00",
- "last_verified_commit": "d6bb2d10",
+ "last_baseline_build": "2026-11-26T09:27:07+00:00",
+ "last_verified_commit": "5719b271",
  "resume_command": ".venv/bin/python scripts/prospect100/resume/build_baseline.py",
  "operations_log": "docs/engineering/prospect100/resume/OPERATIONS.json",
  "last_completed_operation": "V.1 Shared frontend fix: session nav wrapped as text at 375/390 px leaving a bare separator at the start of line 2; now flex items with decorative separators hidden on phones. Unstyled links in light mode used browser #0000EE; now the product accent at zero specificity. Full suite: 0 new failures",
@@ -123,5 +123,42 @@
   "Cervest status page: the 'Announcement' link is Mitiga's homepage, not an announcement; no successor action (may be intended: ceased trading, IP sold). Needs a primary-source re-check before changing.",
   "Observe registry evidence is the Jan 8 2026 'intent to acquire' release; completion not evidenced in the registry row. Re-verify.",
   "demand_reading v2.1 remains SHADOW; prospect-100 runs that form market beliefs still use belief_formation.direction_of. Auditing their beliefs needs the stored runs."
+ ],
+ "completed_rounds": {
+  "5": "568e200c",
+  "6": "d6bb2d10",
+  "7": "5719b271"
+ },
+ "status": "round 8 = targeted cases on the round-8 candidate tree, then full universe",
+ "active_processes": "none recorded here; check `ps` for live_pass/runserver before assuming",
+ "server_ports_by_round": {
+  "5": 8605,
+  "6": 8606,
+  "7": 8607,
+  "8": 8608
+ },
+ "stores": "reports/prospect100_resume/r{N}_store (local, not committed)",
+ "scorecards": {
+  "original": "qualification_r{N}.json",
+  "strengthened": "strengthened_r{N}.json",
+  "history_expanded": "history_expanded_r{N}.json",
+  "report_availability": "report_availability_r{N}.json",
+  "browser_matrix": "ui_matrix_r{N}.json"
+ },
+ "browser_artifacts": "reports/prospect100_resume/r{N}/screens (390 and 1440 px, light and dark)",
+ "pending_patches": [],
+ "resume_instructions": [
+  "cd ~/ie-prospect100-resume; git log -1",
+  "round N: scripts/prospect100/resume/serve_local.sh rN 860N  (background)",
+  "JOURNEY_BASE=http://127.0.0.1:860N PYTHONPATH=src python scripts/prospect100/live_pass.py --cohort ALL --out reports/prospect100_resume/rN/s1 --shard 1/2  (and 2/2)",
+  "after: rerender_current.py, ui_matrix.py (job-application-agent venv), qualify100.py (QUALIFY_PASS=prospect100_resume/rN_live), diagnose_reports.py, history_expanded.py, strengthened_gate.py N, build_baseline.py",
+  "commit with GUARD_PYTHON=~/intent-engine/.venv/bin/python; never edit src while the guard or a round is running"
+ ],
+ "unresolved_defects": [
+  "independence: 87/95 non-PASS; 21 companies read outside reporting the analysis never used (r7)",
+  "economics: decisions moved only via founder-economy bridge (round 8 candidate)",
+  "history: expanded grade blocked by the absence of vintage economic readings for past stops",
+  "presentation: prose repeats remain the main BOUNDED cause",
+  "BLS daily quota: needs BLS_API_KEY (owner action)"
  ]
 }

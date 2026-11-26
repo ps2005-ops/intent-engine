@@ -69,6 +69,16 @@ def main() -> int:
                 readiness_inputs=res.get("readiness_inputs"),
                 has_report=rep is not None,
                 deep_status=(rep or {}).get("deep_status"),
+                # Which source classes the analysis actually REASONED from --
+                # an outside document that yielded no observation was read
+                # but did not inform anything.
+                observation_classes=dict(collections.Counter(
+                    (o.get("source_class") if isinstance(o, dict)
+                     else getattr(o, "source_class", "")) or ""
+                    for o in ((rep or {}).get("observations") or ()))),
+                decision_readiness=((rep or {}).get("decision") or {}).get(
+                    "readiness") if isinstance((rep or {}).get("decision"),
+                                               dict) else None,
                 availability={k: av.get(k) for k in
                               ("state", "has_report", "slides_ready")},
             )

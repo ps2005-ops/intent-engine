@@ -639,12 +639,35 @@ def _recommendation(standing: str, selection, facts) -> tuple:
             f"known." if lever else "")
 
 
+def _with_founder_economy(dossier, founder_economy):
+    """The dossier, with the founder's economic block where its own is absent.
+
+    A shallow copy, one block replaced: every reader below (`_economic`,
+    `_facts`, the guardrail sentence) sees it through `_block` unchanged, and
+    the dossier's own availability -- "the market engine has no snapshot for
+    this company" -- is not touched. See `external_intel.founder_economy`.
+    """
+    if not founder_economy:
+        return dossier
+    import copy
+    market = dict(getattr(dossier, "market_block", None) or {})
+    blocks = dict(market.get("blocks") or {})
+    if (blocks.get("economic_state") or {}).get("state") == "AVAILABLE":
+        return dossier
+    blocks["economic_state"] = dict(founder_economy)
+    market["blocks"] = blocks
+    clone = copy.copy(dossier)
+    object.__setattr__(clone, "market_block", market)
+    return clone
+
+
 def compose(dossier, *, previous: Optional[Any] = None,
             prior_decision: Optional[Any] = None,
             registrant: Optional[dict] = None,
             profile: Optional[Any] = None,
             evidence_text: str = "",
-            published_text: str = "") -> FounderDecision:
+            published_text: str = "",
+            founder_economy: Optional[dict] = None) -> FounderDecision:
     """Build one FounderDecision from one company demo dossier.
 
     ZERO MODEL CALLS. Verified by a break proof, not by intent.
@@ -657,6 +680,7 @@ def compose(dossier, *, previous: Optional[Any] = None,
     varying afterwards is how the same reading came out for a payments
     network, a vaccine maker and a hosting provider.
     """
+    dossier = _with_founder_economy(dossier, founder_economy)
     company = dossier.canonical_name or dossier.company_id
     standing = _standing_of(dossier)
     hidden = _hidden_state(dossier)

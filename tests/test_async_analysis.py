@@ -749,19 +749,29 @@ def test_work_beyond_capacity_is_refused_not_silently_dropped(tmp_path):
 
     app = _async_app(tmp_path, transport=slow)
     limit = app.MAX_ACTIVE_ANALYSES + app.MAX_PENDING_ANALYSES
-    accepted, runs = 0, []
+    accepted, refused = [], []
     for i in range(limit + 3):
         run = app.ci.create_run(company_name=f"Acme{i}",
                                 website=f"https://acme{i}.example",
                                 user_id="u",
                                 as_of="2026-08-02T00:00:00+00:00")
-        runs.append(run["run_id"])
-        if app._schedule_analysis("u", run["run_id"]):
-            accepted += 1
-    assert accepted <= limit, f"accepted {accepted} beyond a bound of {limit}"
+        (accepted if app._schedule_analysis("u", run["run_id"])
+         else refused).append(run["run_id"])
+    assert len(accepted) <= limit, \
+        f"accepted {len(accepted)} beyond a bound of {limit}"
+    # REFUSED IS SAID, NOT SWALLOWED: the work beyond the bound was turned
+    # away by a False the caller can act on, and none of it claims to run.
+    assert refused, "nothing beyond capacity was refused"
+    with app._analysis_lock:
+        assert not set(refused) & set(app._analysis_inflight)
     release.set()
-    for run_id in runs:
-        app.wait_for_analysis(run_id, timeout=30)
+    # EVERY ACCEPTED RUN FINISHES. This waited on all runs and ignored the
+    # answer, so a refused run (never queued, never terminal) cost the full
+    # 30 s timeout each -- 100 s of a test whose property takes milliseconds
+    # -- and an accepted run that never finished would have passed unnoticed.
+    for run_id in accepted:
+        assert app.wait_for_analysis(run_id, timeout=30), \
+            f"accepted run {run_id} never reached a terminal state"
 
 
 def test_a_refused_submission_never_leaves_a_run_claiming_to_run(tmp_path):
