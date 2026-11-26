@@ -1,6 +1,6 @@
 {
   "contract": "equilibrium_phase_tracker.v1",
-  "updated": "2026-11-26T18:30-05:00",
+  "updated": "2026-11-26T17:45-05:00",
   "statuses": [
     "NOT_STARTED",
     "IN_PROGRESS",
@@ -11,7 +11,7 @@
   "state": {
     "integration_branch": "integration/unified-2026-11-25",
     "integration_head_before_session": "78c30238",
-    "runtime_market": "f7690938 (~/ie-market-runtime-v2)",
+    "runtime_market": "2216bd07 (~/ie-market-runtime-v3) since 2026-11-26 17:3x EST; rollback: ~/intent-engine-safety-backups/ROLLBACK_market_runtime_20261126-evening.sh",
     "runtime_learning": "f7690938 (~/ie-learning-runtime)",
     "qualification": "qual/prospect100-resume @ 7d128431 (R12, mean 7.742)",
     "session_start": "scripts/session_identity_check.sh"
@@ -26,8 +26,7 @@
         "session identity check"
       ],
       "pending": [
-        "off-machine copy: needs a destination chosen by the user (no authorised destination exists)",
-        "publish non-sensitive scorecards/manifests to qual branch"
+        "off-machine copy of ~/ie-backups/prospect100_r5_r12_20261126.tar.enc to a destination the user chooses"
       ],
       "accept": "an off-machine copy restores and checksums match"
     },
@@ -38,7 +37,8 @@
         "root defect: knowledge_step parsed the ledger file, bypassing 30 grade invalidations (37 vs 21 tests); now reads store.rows()",
         "belief-level cap applied where maturity is published",
         "occurrence identity collapses aggregator redirects (108 more duplicate rows removed, 0 bindings lost; ids unchanged)",
-        "6 live tests rewritten to properties on the masked view; break proofs CAUGHT 3/3"
+        "6 live tests rewritten to properties on the masked view; break proofs CAUGHT 3/3",
+        "live audit: 158 passed, 0 failed on 2216bd07"
       ],
       "accept": "live tests pass on the masked view; no incoherent state published"
     },
@@ -71,14 +71,19 @@
     "P6_actor_attribution": {
       "status": "IN_PROGRESS",
       "done": [
-        "holding notices and unit grants (session 1)"
+        "holding notices and unit grants (session 1)",
+        "33 of 195 beliefs never name their subject; model-labelled review set REVIEW_actor_attribution_2026-11-26.tsv (21 not subject events, 10 alias gaps); awaiting independent labels"
       ],
       "accept": "acting vs affected entity represented; audit of insider, buyback, subsidiary, competitor, industry-statistic sentences over 1,538-sentence corpus"
     },
     "P7_eleven_withdrawals": {
-      "status": "NOT_STARTED",
-      "blocker": "needs runtime upgrade to a commit defining BELIEF_INVALIDATION",
-      "accept": "11 appended under lock, beliefs masked in every reader, snapshots republished"
+      "status": "IN_PROGRESS",
+      "done": [
+        "11 appended under lock on 2216bd07; idempotent; 206 -> 195; original lines byte-identical"
+      ],
+      "pending": [
+        "verify demo snapshots republished by the first scheduled cycle on 2216bd07 (night 2026-11-26 20:30)"
+      ]
     },
     "P8_proxy_mechanisms": {
       "status": "NOT_STARTED"
@@ -108,17 +113,35 @@
       ]
     },
     "P15_december_readiness": {
-      "status": "NOT_STARTED",
-      "accept": "readiness audit of 977 forecasts (Dec 11) and 13 econ expectations (Dec 25); fixture maturity simulation"
+      "status": "DONE",
+      "done": [
+        "977 forecasts: entry 11-10, exit 12-10, resolvable 12-11; fixture simulation on a copy: 964 resolve in 0.46s with one feed late, voids after 7d grace, idempotent; ledger refuses early outcomes",
+        "econ: only 1 of 13 due 12-25 (PERMIT); 12 mature Feb-Aug 2027"
+      ],
+      "risk": [
+        "host must be awake/on AC at 19:15 Dec 11",
+        "977 forecasts over 79 instruments and one date: effective sample far below 977"
+      ]
     },
     "P16_100_company_strategy": {
-      "status": "NOT_STARTED"
+      "status": "IN_PROGRESS",
+      "done": [
+        "history passes exactly the 12 SEC filers; independence 7 private; economics 7; intersections empty -> no company can qualify under the preserved rubric"
+      ],
+      "next": "independent-evidence acquisition for SEC filers; run the 12 public companies only"
     },
     "P17_stagnation_detector": {
-      "status": "NOT_STARTED"
+      "status": "DONE",
+      "done": [
+        "scripts/prospect100/stagnation.py on qual/prospect100-resume; verdict STRUCTURAL_CEILING from R4"
+      ]
     },
     "P18_runtime_upgrade": {
-      "status": "NOT_STARTED"
+      "status": "DONE",
+      "done": [
+        "market runtime 2216bd07, rollback tested"
+      ],
+      "kept": "learning runtime at f7690938 until after Dec 11 resolution"
     }
   },
   "master_plan_phases": {
