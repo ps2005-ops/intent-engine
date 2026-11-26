@@ -2141,7 +2141,11 @@ def learning_health_step(ctx: C.CycleContext) -> dict:
     # be attributed to a commit cannot answer "did that change help", which is
     # most of what the history is for.
     try:
-        runtime_sha = (H.git_state(root).get("commit") or "")[:12]
+        # The CODE's commit, not the data root's: since the code/data split
+        # (2026-11-25) the root is a different checkout, and this recorded
+        # 195c6f4a for a cycle that ran 92ce0f39.
+        runtime_sha = (H.git_state(pathlib.Path(__file__).resolve().parents[3])
+                       .get("commit") or "")[:12]
     except Exception:  # noqa: BLE001 - an unknown sha must not stop the cycle
         runtime_sha = ""
     try:

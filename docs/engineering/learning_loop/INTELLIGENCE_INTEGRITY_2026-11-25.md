@@ -12,9 +12,67 @@ Status labels used below:
 Every number links to an artifact in `reports/learning_loop/`. **Nothing is
 PROSP or COMM.**
 
-## 1. Scheduled production cycles
+## 1. Scheduled production cycles (verified)
 
-See §14, filled after the 19:15 learning run and the 20:30 night cycle.
+### Learning cycle, 19:15
+
+* **Run:** `com.intentengine.learning.daily`, 19:15:05 → 19:15:10 ET,
+  code 3536cf41.
+* **Steps, all rc 0:**
+  * `paper daily`: 977 open, 0 overdue, resolvable from 2026-12-11.
+  * `learn`: 977 chain entries, 0 resolved, 0 candidates.
+  * `register --if-due`: not due, 12 of 21 sessions.
+  * `econ_resolve`: 13 open.
+  * `fx4`: 0 registered, 0 held.
+* **Quality gate:** held 0; no quarantine file was created.
+* **Ledgers:** both hashes unchanged. Error log empty.
+
+### Night cycle, 20:30
+
+* **Run:** `com.intentengine.market.night`, 20:30:05 → 21:38:09 ET, exit 0,
+  code 92ce0f39 (health: `92ce0f39dc3e on HEAD clean`).
+* **Steps:** all 17 ok, including the new `econ_publish` and
+  `econ_aggregate`.
+* **Research:** 1 run; 14 accepted, 4 refused, 14 new events.
+* **Records written:** 30 expectation records, 620 knowledge effects, 72
+  method checks.
+* **Outcome resolution:** ran automatically, 481 → 481. The Nov 4 records
+  mature tomorrow, and the 18 pending were unchanged, so nothing was
+  re-appended.
+* **Shadow momentum:** recorded on every new audit row, with a true reason.
+* **Behavioural evidence:** BLS answered tonight (66 nodes), so Bayes ran in
+  production on the old code. That code still counts serially dependent
+  readings as independent, so tonight's published collective posterior is
+  overconfident. The fix (930e4aed) is in the pending runtime upgrade.
+* **Sources:** BLS UNCLASSIFIED once; the rest healthy.
+* **Single writer:** three market jobs on `~/intent-engine-market`, one
+  learning job on the paper and econ ledgers, nothing else.
+
+### Defects found by this verification, fixed in the pending upgrade
+
+* **False DEGRADED status.** `health` has reported DEGRADED on every cycle
+  since August. The reused lock file's mtime made each cycle's own lock
+  look 117 days old. Lock acquisition now marks the file.
+* **Wrong commit recorded.** `learning_health` recorded runtime 195c6f4a
+  (the data root's checkout) for a 92ce0f39 cycle. It now reads the code's
+  own repository.
+* **Clock-dependent test.** `tests/test_market_runtime.py` failed every
+  evening from 19:00 to 24:00 ET: a local date against the ledger's UTC
+  clock. Fixed in 0b4271c6.
+* **First thesis transitions.** The night cycle recorded the first thesis
+  transitions since August: 10 revisions to CONTESTED, standing unchanged at
+  PROPOSED.
+  * Both isolated runs on the new code reproduced them exactly, from the
+    same two triggers.
+  * 5 come from genuinely new evidence: an América Movil filing on financing
+    costs, 2026-11-25.
+  * 5 come from a JPMorgan research sentence dated 2026-08-05, an old item
+    that only now moved theses. **Open finding:** why old evidence first
+    counted under the new code is not yet established.
+  * Two live-ledger tests pinned "no thesis ever moved" and failed on this
+    correct behaviour. They now derive the expected status from the live
+    revisions, and still fail when the export is forced to NO_MOVEMENT
+    (mutation-checked).
 
 ## 2. Weekly regime report (OPER, replacing the LLM job)
 
