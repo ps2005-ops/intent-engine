@@ -57,3 +57,60 @@ def test_a_guidance_revision_after_a_result_is_a_different_figure():
     assert DR.same_reporting_event("revenue rose 12%", "2026-08-01",
                                    "beats on revenue", "2026-08-03",
                                    "EARNINGS_RESULT", "EARNINGS_SURPRISE")
+
+
+# --- admissibility rules found in the 2026-11-26 qualification cycle --------
+import pytest
+
+
+@pytest.mark.parametrize("text", [
+    "Caterpillar (CAT) Reports Next Week: Wall Street Expects Earnings Growth",
+    "JPMorgan Chase & Co. Has Lowered Expectations for Costco Wholesale (NASDAQ:COST)",
+    "Regions Financial (NYSE:RF) Stock Price Expected to Rise, JPMorgan Chase & Co. Analyst Says",
+    "Grab Holdings Limited (GRAB) vs. Sea Limited (SE): Grab Raises Its Outlook",
+])
+def test_previews_comparisons_and_analyst_actions_never_grade(text):
+    subject = "jpmorgan" if "JPMorgan" in text else ("sea_limited" if "Sea" in text else "caterpillar")
+    assert DR.grading_admissible(subject, text, DR.STRENGTHENING)[0] is False
+
+
+def test_a_customer_case_study_never_grades_the_vendor():
+    t = ("FOOTDISTRICT grew revenue by 14%, returning customers by 28%, and "
+         "average order value by 5% after moving from Magento 2 to Shopify.")
+    assert DR.grading_admissible("shopify", t, DR.STRENGTHENING)[0] is False
+
+
+def test_an_account_that_does_not_name_the_subject_never_grades():
+    assert DR.grading_admissible("bhp", "Copper prices rose 8% this quarter", DR.STRENGTHENING)[0] is False
+
+
+def test_supply_and_surprise_accounts_do_not_test_a_demand_belief():
+    assert DR.grading_admissible("bhp", "BHP Group's Copper Output Falls in Q1 on Grade Declines",
+                                 DR.STRENGTHENING)[0] is False
+    assert DR.grading_admissible("mercadolibre", "MercadoLibre Earnings Missed Analyst Estimates",
+                                 DR.STRENGTHENING)[0] is False
+
+
+def test_a_recap_of_the_same_figure_is_the_same_report():
+    assert DR.shares_a_reported_figure("Cloudflare Q2: Revenue Rises 36%",
+                                       "Cloudflare stock reports 36 percent revenue growth")
+
+
+def test_a_bare_quarter_matches_the_same_quarter_with_a_year():
+    assert DR.same_reporting_event("posts Q2 2026 results", "2026-07-22",
+                                   "3.1 percent Q2 revenue growth", "2026-09-24")
+
+
+def test_an_unnamed_recap_inside_a_reporting_cycle_is_the_same_report():
+    assert DR.same_reporting_event("Sea revenue growth story", "2026-07-21",
+                                   "Sea Limited stock holds after revenue growth", "2026-09-22",
+                                   "EARNINGS_RESULT", "EARNINGS_RESULT")
+
+
+def test_an_explicitly_later_quarter_is_a_new_observation():
+    assert not DR.same_reporting_event("Toyota Q2 vehicle sales up", "2026-08-05",
+                                       "Toyota Motor US Reports Higher Q3 Vehicle Sales", "2026-10-01",
+                                       "EARNINGS_RESULT", "EARNINGS_RESULT")
+    ok, _ = DR.grading_admissible("shopify", "Shopify Reports Third-Quarter 2026 Revenue Up 32%",
+                                  DR.STRENGTHENING)
+    assert ok

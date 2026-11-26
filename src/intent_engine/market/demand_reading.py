@@ -39,7 +39,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import date
-from typing import Optional
+from typing import Optional, Tuple
 
 CONTRACT = "demand_reading.v2.1"
 
@@ -125,8 +125,11 @@ def read(text: str) -> Reading:
     return Reading(ABSTAIN, "", "", "no demand quantity with a direction")
 
 
-#: a later reporting period is at least this far after the basis
-MIN_PERIOD_GAP_DAYS = 45
+#: An account that names no period is "the next reported figure" only a
+#: reporting cycle later. 45 days admitted recaps of the same quarter
+#: published 47-57 days after it (ad-hoc-news "stock reports X percent
+#: revenue growth"); quarterly reports arrive about 90 days apart.
+MIN_PERIOD_GAP_DAYS = 75
 
 
 def admissible_grade(basis_observed_at: str, grade_observed_at: str) -> bool:
@@ -162,6 +165,36 @@ _RESULT_KINDS = {"EARNINGS_RESULT", "EARNINGS_SURPRISE"}
 RELEASE_WINDOW_DAYS = 7
 
 
+def _quarter_end(q: int, year: int) -> date:
+    return date(year, 3 * q, 31 if q in (1, 4) else 30)
+
+
+def names_an_already_reported_quarter(grade_text: str, basis_at: str,
+                                      grade_at: str) -> bool:
+    """A grade naming quarter Qn is OLD NEWS if Qn had ended before the
+    basis was written (its results were the basis's subject or earlier).
+    A bare "Q2" takes the latest year whose Q2 ended before the grade."""
+    p = reporting_period(grade_text)
+    if not p or not p.startswith("Q"):
+        return False
+    q = int(p[1]); yr = p[3:].strip()
+    try:
+        g = date.fromisoformat(grade_at[:10]); b = date.fromisoformat(basis_at[:10])
+    except ValueError:
+        return False
+    y = int(yr) if yr else g.year
+    if not yr and _quarter_end(q, y) > g:
+        y -= 1
+    return _quarter_end(q, y) <= b
+
+
+def names_a_later_quarter(grade_text: str, basis_at: str, grade_at: str) -> bool:
+    p = reporting_period(grade_text)
+    if not p or not p.startswith("Q"):
+        return False
+    return not names_an_already_reported_quarter(grade_text, basis_at, grade_at)
+
+
 def same_reporting_event(basis_text: str, basis_at: str,
                          grade_text: str, grade_at: str,
                          basis_kind: str = "", grade_kind: str = "") -> bool:
@@ -175,8 +208,13 @@ def same_reporting_event(basis_text: str, basis_at: str,
       falsifier itself names "the next reported revenue OR GUIDANCE figure".
     """
     pb, pg = reporting_period(basis_text), reporting_period(grade_text)
-    if pb is not None and pb == pg:
+    if pb is not None and pg is not None and pb[:2] == pg[:2] and (
+            pb == pg or len(pb) == 2 or len(pg) == 2):
+        return True          # same quarter, with or without the year written
+    if names_an_already_reported_quarter(grade_text, basis_at, grade_at):
         return True
+    if names_a_later_quarter(grade_text, basis_at, grade_at):
+        return False         # an explicitly later period is a new observation
     if admissible_grade(basis_at, grade_at):
         return False
     kinds = {basis_kind, grade_kind}
@@ -189,3 +227,59 @@ def same_reporting_event(basis_text: str, basis_at: str,
             and not kinds <= _RESULT_KINDS and gap > RELEASE_WINDOW_DAYS:
         return False
     return True
+
+
+#: Accounts that are not an observation of the subject's own business.
+_NOT_AN_OBSERVATION = re.compile(
+    r"\b(reports? next week|earnings preview|preview\b|what to expect|"
+    r"expected to report|wall street expects|ahead of (its |q\d )?earnings|"
+    r"has (lowered|raised|boosted|cut) (its )?(expectations|price target) for|"
+    r"analysts? says?|stock price expected|price target|"
+    r"\bvs\.?\b|versus)\b", re.I)
+_CASE_STUDY = re.compile(
+    r"\b(mov(?:ed|ing)\b[^.]{0,40}\bto|migrat\w*\b[^.]{0,40}\bto|"
+    r"switch\w*\b[^.]{0,40}\bto|on shopify|with stripe|"
+    r"using (shopify|stripe)|partners? with|"
+    r"helping (enterprises|merchants|brands)|our (customers?|merchants?) )", re.I)
+
+
+_PCT = re.compile(r"(\d+(?:\.\d+)?)\s*(?:%|percent|per cent)", re.I)
+
+
+def shares_a_reported_figure(basis_text: str, grade_text: str) -> bool:
+    """The same percentage in opener and grade ("36%" / "36 percent") is a
+    recap of the same report, whatever the date."""
+    norm = lambda t: {f"{float(x):g}" for x in _PCT.findall(t or "")}
+    return bool(norm(basis_text) & norm(grade_text))
+
+
+def names_the_subject(subject: str, text: str) -> bool:
+    """Third-party accounts must name the subject; first-person filings count."""
+    t = (text or "").lower()
+    if re.search(r"\b(we|our)\b", t):
+        return True
+    tokens = [w for w in re.split(r"[_\-\s]+", (subject or "").lower()) if len(w) > 2]
+    return any(re.search(rf"\b{re.escape(w)}", t) for w in tokens[:1])
+
+
+def grading_admissible(subject: str, grade_text: str, family: str) -> Tuple[bool, str]:
+    """May this account grade an expectation about `subject`?
+
+    Refuses previews and expectations (not observations), comparisons with
+    other companies, analyst actions on other companies, and customer case
+    studies. For demand families the account must also READ as a demand
+    movement under demand_reading (surprises, price, profit and cost do not
+    test a demand belief).
+    """
+    t = grade_text or ""
+    if not names_the_subject(subject, t):
+        return False, "the account does not name the subject (another company's result)"
+    if _NOT_AN_OBSERVATION.search(t):
+        return False, "preview, comparison or analyst action, not an observation of the subject"
+    if _CASE_STUDY.search(t):
+        return False, "a customer or partner case study, not the subject's own result"
+    if family in (WEAKENING, STRENGTHENING):
+        r = read(t)
+        if r.family not in (WEAKENING, STRENGTHENING):
+            return False, f"no demand movement in the account ({r.family}: {r.reason[:60]})"
+    return True, ""

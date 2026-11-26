@@ -211,9 +211,26 @@ def bind(expectations: Sequence[EXP.ExpectedObservation],
                     for o in openers):
                 refused["same_reporting_period_as_opener"] += 1
                 continue
+            if openers and any(_DR.shares_a_reported_figure(o.fact, item.fact)
+                               for o in openers):
+                refused["recaps_a_figure_the_opener_reported"] += 1
+                continue
+            ok, why = _DR.grading_admissible(subject, item.fact, family)
+            if not ok:
+                # "No demand movement" is the established no-direction verdict.
+                refused["no_readable_direction" if why.startswith(
+                    "no demand movement") else
+                    "not_an_observation_of_the_subject"] += 1
+                continue
             if item.evidence_type not in relevant_types:
                 continue
             direction = _evidence_direction(item)
+            if family in (_DR.WEAKENING, _DR.STRENGTHENING):
+                # The demand direction is the demand QUANTITY's direction, the
+                # same reading that admitted this account. The word reader
+                # graded "Revenue Up, Profitability Falls" as DOWN.
+                direction = {_DR.STRENGTHENING: EXP.UP, _DR.WEAKENING: EXP.DOWN}.get(
+                    _DR.read(item.fact).family, "")
             if not direction:
                 refused["no_readable_direction"] += 1
                 continue

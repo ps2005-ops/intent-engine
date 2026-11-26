@@ -1,0 +1,10 @@
+QUALIFICATION CYCLE on 9b4910a8 (isolated copy of production), as_of 2026-11-25
+behavioural evidence: fetched 48 | failures []
+bayes: updates 1 informative 1 | dependence model: local-level Kalman filter per series
+   series quits readings 24 already_folded 0 effective_n 0.937 posterior_sd 0.1033
+outcome events 626 | events written this cycle: {'INELIGIBLE': 41}
+health overall OK | lock {'held': True, 'stale': False, 'age_seconds': 1689.8}
+learning_health runtime_sha: 195c6f4a23bf | status: LEARNING_DEGRADING | calibration n: None
+new ledger rows this cycle: 107 {'knowledge_effect': 50, 'reconciliation': 21, 'belief_update': 21, 'source_health': 6, 'thesis_revision': 5, 'evidence': 2, 'research_decision': 1, 'research_outcome': 1}
+re-grades this cycle: [('caterpillar', 'CONFIRMED'), ('duolingo', 'CONTRADICTED'), ('honda', 'CONTRADICTED'), ('infosys', 'CONTRADICTED'), ('jpmorgan', 'CONTRADICTED'), ('nextera', 'CONTRADICTED'), ('shopify', 'CONFIRMED'), ('toyota', 'CONFIRMED'), ('etsy', 'CONFIRMED'), ('mercadolibre', 'CONTRADICTED'), ('cloudflare', 'CONFIRMED'), ('cloudflare', 'CONTRADICTED'), ('duolingo', 'CONFIRMED'), ('jpmorgan', 'CONTRADICTED'), ('sea_limited', 'CONFIRMED'), ('america_movil', 'CONFIRMED'), ('jpmorgan', 'CONTRADICTED'), ('linde', 'CONFIRMED'), ('bhp', 'CONTRADICTED'), ('jpmorgan', 'CONFIRMED'), ('mercadolibre', 'CONTRADICTED')]
+thesis revisions this cycle: {'CONTESTED': 5}
