@@ -129,8 +129,10 @@ def test_a_genuinely_different_later_fact_still_binds():
         fact="Acme Corp revenue rose 12% in the second quarter")
     later = ME.MicroEvidence(
         evidence_id="ev_new", subject_company="acme", actor="acme",
-        evidence_type="GUIDANCE_REVISION", observed_at="2026-08-06",
-        available_at="2026-08-06", source="https://b.test",
+        # Outside the earnings-release window: guidance published WITH the
+        # result is the same event (demand_reading.RELEASE_WINDOW_DAYS).
+        evidence_type="GUIDANCE_REVISION", observed_at="2026-08-20",
+        available_at="2026-08-20", source="https://b.test",
         fact="Acme Corp raised full-year guidance after strong bookings")
     exp = EXP.ExpectedObservation(
         expectation_id="e1", hypothesis_id="b1", subject="acme",
@@ -138,7 +140,7 @@ def test_a_genuinely_different_later_fact_still_binds():
         preregistered_at="2026-08-01", evaluation_window_ends="2026-12-01",
         falsifier="a lower figure", metric="demand_strengthening",
         evidence_basis=("ev_open",))
-    bound, _ = OB.bind([exp], [opener, later], as_of="2026-08-07")
+    bound, _ = OB.bind([exp], [opener, later], as_of="2026-08-21")
     assert bound["e1"]["evidence_ids"] == ("ev_new",)
 
 

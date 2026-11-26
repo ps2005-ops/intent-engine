@@ -138,3 +138,54 @@ def admissible_grade(basis_observed_at: str, grade_observed_at: str) -> bool:
     except ValueError:
         return False
     return gap >= MIN_PERIOD_GAP_DAYS
+
+
+_PERIOD = re.compile(r"\b(?:Q([1-4])|(first|second|third|fourth)[- ]quarter)\b"
+                     r"[^0-9]{0,12}((?:19|20)\d\d)?|\bfy\s?((?:19|20)\d\d)\b", re.I)
+_QWORD = {"first": "1", "second": "2", "third": "3", "fourth": "4"}
+
+
+def reporting_period(text: str) -> Optional[str]:
+    """'Q2 2026', 'Q1', 'FY2027' or None: the period a report names."""
+    m = _PERIOD.search(text or "")
+    if not m:
+        return None
+    q = m.group(1) or _QWORD.get((m.group(2) or "").lower())
+    return f"Q{q} {m.group(3) or ''}".strip() if q else f"FY{m.group(4)}"
+
+
+_RESULT_KINDS = {"EARNINGS_RESULT", "EARNINGS_SURPRISE"}
+#: Results, guidance and coverage of one earnings release arrive together.
+#: Measured on the audited grades: the same-release guidance followed the
+#: result by 0-1 days (Duolingo, Honda, Shopify, Cloudflare); genuinely later
+#: guidance or results came 11-35 days later (Etsy, P&G, Canadian National).
+RELEASE_WINDOW_DAYS = 7
+
+
+def same_reporting_event(basis_text: str, basis_at: str,
+                         grade_text: str, grade_at: str,
+                         basis_kind: str = "", grade_kind: str = "") -> bool:
+    """Two accounts of ONE report.
+
+    * The same named period ("Q2 2026" in both) is one report, however far
+      apart the articles are.
+    * Otherwise, under a reporting period apart AND the same kind of figure
+      (a result and another account of a result) is one report.
+    * A guidance revision after a result is a DIFFERENT figure: the
+      falsifier itself names "the next reported revenue OR GUIDANCE figure".
+    """
+    pb, pg = reporting_period(basis_text), reporting_period(grade_text)
+    if pb is not None and pb == pg:
+        return True
+    if admissible_grade(basis_at, grade_at):
+        return False
+    kinds = {basis_kind, grade_kind}
+    try:
+        gap = (date.fromisoformat(grade_at[:10])
+               - date.fromisoformat(basis_at[:10])).days
+    except ValueError:
+        return True
+    if basis_kind and grade_kind and basis_kind != grade_kind \
+            and not kinds <= _RESULT_KINDS and gap > RELEASE_WINDOW_DAYS:
+        return False
+    return True
