@@ -169,7 +169,11 @@ _FAMILIES: Tuple[Tuple[str, str, str], ...] = (
      _any(r"\bjob cuts?\b", r"\blayoffs?\b", r"\bredundanc\w+\b",
           r"\bworkforce reduction\b", r"\bheadcount\b", r"\bpositions?\b",
           r"\brestructuring (?:plan|programme|program)\b",
-          r"\b\d[\d,]* (?:employees|jobs|roles|staff)\b")),
+          r"\b\d[\d,]* (?:employees|jobs|roles|staff)\b",
+          # "ETSY Cuts 12% Of Workforce" classified as nothing: a real layoff
+          # missed because the share of the workforce was never an object.
+          r"\b\d+(?:\.\d+)?%\s+of\s+(?:its\s+|the\s+|our\s+)?"
+          r"(?:global\s+)?(?:workforce|staff|employees)\b")),
     (ME.HIRING,
      _any(r"hir\w+", r"add\w+", r"expand\w+", r"grew", r"grow\w+",
           r"recruit\w+", r"onboard\w+", _SAY),
@@ -321,6 +325,32 @@ _COMPILED = tuple(
 # Every one of these was taken from the real corpus. They are the sentences a
 # loosened classifier turns into events, and they are why recall is bought by
 # selecting better text rather than by lowering this bar.
+HOLDING_NOTICE_PATTERNS = (
+    # A FUND'S TRADE IN THE SHARES IS NOT THE COMPANY'S ACTION.
+    #
+    # "Royal Fund Management LLC Cuts Position in Honda Motor Co." matched
+    # LAYOFF on cut + "position"; "Plato Investment Management Ltd Purchases
+    # New Stake in Cloudflare" matched MA_ACTIVITY. The actor is a holder of
+    # the stock, and the company did nothing. Measured on the live learning
+    # ledger 2026-11-26: 11 of 206 expectations rested ENTIRELY on sentences
+    # like these, 7 of them among the 17 `margin_protection` beliefs ("X is
+    # protecting margin by taking cost out") -- opened by a fund rebalancing.
+    #
+    # Phrased on the holding, not the publisher: a strategic stake taken by
+    # a company ("acquires a 49% stake in") still classifies.
+    # "market share position in" is a competitive position, not a holding.
+    r"(?<!market )\b(?:stock|share|equity)\s+(?:position|holdings?)\s+in\b",
+    r"\b(?:cuts|trims|reduces|lowers|raises|boosts|increases|decreases|"
+    r"lifts|grows|sells|buys|takes|purchases|acquires)\s+(?:its\s+)?"
+    r"(?:new\s+)?(?:position|holdings?|stake)\s+in\b.{0,80}\$[A-Z]{1,5}\b",
+    r"\bnew (?:stake|position) in\b",
+    r"\bshares? (?:sold|bought|purchased|acquired) by\b",
+    # An award of share units to an executive is compensation, not a change
+    # of office: "Caterpillar (CAT) CEO holds 11,234 share-linked units".
+    r"\b(?:share|stock)-linked units\b",
+)
+
+
 _NON_EVENT = tuple(re.compile(p, re.I) for p in (
     # habitual / standing capability, not a dated occurrence
     r"\b(?:we|our company|the company) (?:partner|work|help|serve|support|"
@@ -371,6 +401,7 @@ _NON_EVENT = tuple(re.compile(p, re.I) for p in (
     r"\bread in conjunction with\b",
     r"\breclassified to conform\b",
     r"\bderived from the audited\b",
+    *HOLDING_NOTICE_PATTERNS,
     # CONDITIONALS AND HYPOTHETICALS. Something that would happen if
     # something else happened has not happened. Both of these are real
     # corpus sentences that classified: "Factors that could affect the

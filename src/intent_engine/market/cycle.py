@@ -135,6 +135,10 @@ class Step:
     code: Optional[str] = None
     error: Optional[str] = None
     attempts: int = 1
+    #: Wall-clock seconds the step took, retries included. Recorded because
+    #: the Nov 18-22 night cycles ran 11-22h, held the shared lock past 06:30
+    #: and cost five day cycles -- and the ledger could not say which step.
+    seconds: Optional[float] = None
 
     @property
     def ok(self) -> bool:
@@ -143,7 +147,8 @@ class Step:
     def as_dict(self) -> dict:
         return {"name": self.name, "status": self.status,
                 "detail": self.detail, "code": self.code,
-                "error": self.error, "attempts": self.attempts}
+                "error": self.error, "attempts": self.attempts,
+                "seconds": self.seconds}
 
 
 @dataclass(frozen=True)
@@ -342,12 +347,15 @@ def run_step(name: str, fn: StepFn, ctx: CycleContext, *,
     from being produced, because those are exactly what a human needs in order
     to see that the feed was unreachable.
     """
+    started = time.monotonic()
     detail, attempt = F.retry(lambda: fn(ctx), attempts=attempts, sleep=sleep)
+    seconds = round(time.monotonic() - started, 3)
     if attempt.ok:
         ctx.results[name] = detail or {}
-        return Step(name, "ok", detail or {}, attempts=attempt.attempts)
+        return Step(name, "ok", detail or {}, attempts=attempt.attempts,
+                    seconds=seconds)
     return Step(name, "failed", {}, code=attempt.code, error=attempt.error,
-                attempts=attempt.attempts)
+                attempts=attempt.attempts, seconds=seconds)
 
 
 def run_cycle(cycle: str, *, root, steps: Sequence[Tuple[str, StepFn]],
