@@ -463,6 +463,26 @@ def _analyst_cache_for(config):
         return None
 
 
+def announcement_label(url: str) -> str:
+    """`host — Document title from its path`, or the host alone.
+
+    Publishers put the headline in the slug (Business Wire, company
+    newsrooms, blogs), so the last path segment that contains words is the
+    document's own title. A path without one (a homepage, an id) gives the
+    host alone rather than an invented title.
+    """
+    from urllib.parse import unquote, urlsplit
+    parts = urlsplit(url)
+    host = (parts.hostname or url).removeprefix("www.")
+    for seg in reversed([s for s in parts.path.split("/") if s]):
+        seg = unquote(seg).rsplit(".", 1)[0] if "." in seg[-6:] else unquote(seg)
+        words = [w for w in re.split(r"[-_]+", seg) if w]
+        if len(words) >= 3 and sum(w.isalpha() for w in words) >= 3:
+            title = " ".join(words)
+            return f"{host} — {title[0].upper()}{title[1:]}"
+    return host
+
+
 def _conf_para(grade, reason) -> str:
     """Reason first, grade only if it adds something. See render.py."""
     from intent_engine.founder_brief.render import confidence_sentence
@@ -2779,9 +2799,13 @@ class WebApp:
                 when = _dt.date.fromisoformat(when + "-01").strftime("%B %Y")
         except ValueError:
             pass
+        # THE LINK SAYS WHICH DOCUMENT IT IS, not only whose site it is on.
+        # The label was the bare host, so Mitiga's press release about buying
+        # Cervest's IP read as "www.mitigasolutions.com" -- indistinguishable
+        # from a homepage, and a qualification pass reported it as one.
         evidence = "".join(
             f'<li><a href="{_e(u)}" rel="noopener noreferrer">'
-            f'{_e(u.split("/")[2] if u.count("/") >= 2 else u)}</a></li>'
+            f'{_e(announcement_label(u))}</a></li>'
             for u in (st.get("evidence") or ()))
         offer = ""
         if absorbed and cp and cp_domain:

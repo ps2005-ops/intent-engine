@@ -322,6 +322,44 @@ def test_a_closed_company_is_answered_without_offering_an_analysis(app):
     assert session["analyses"] == [] and _spent(app) == 0
 
 
+def test_the_announcement_link_names_the_document_not_only_the_site(app):
+    """Cervest's link was labelled "www.mitigasolutions.com" -- the press
+    release read as Mitiga's homepage and a qualification pass reported it
+    as one. The label now carries the document's own headline."""
+    (status, _h, body), _s = _analyze(app, company_name="Cervest")
+    assert ('href="https://www.mitigasolutions.com/press/mitiga-solutions-'
+            'acquires-cervests-intellectual-property-rights"') in body
+    assert ("mitigasolutions.com — Mitiga solutions acquires cervests "
+            "intellectual property rights") in body
+
+
+def test_an_announcement_label_never_invents_a_title():
+    """POSITIVE CONTROL beside the property: a path with no words in it is
+    labelled by its host alone, never by a made-up headline."""
+    from intent_engine.webapp.app import announcement_label
+    assert announcement_label("https://www.mitigasolutions.com/") == \
+        "mitigasolutions.com"
+    assert announcement_label("https://ir.zscaler.com/node/15086") == \
+        "ir.zscaler.com"
+    assert announcement_label(
+        "https://www.snowflake.com/fr/blog/observe-acquisition-ai-powered-"
+        "observability/") == ("snowflake.com — Observe acquisition ai "
+                              "powered observability")
+
+
+def test_observe_is_dated_by_its_close_not_the_intent_to_acquire():
+    """Jan 8 2026 was "announces intent to acquire"; Snowflake's own post of
+    2026-02-02 says the acquisition closed. The status page states the
+    close and links it first."""
+    from intent_engine.company_ingestion.catalog_prospects import (
+        PROSPECT_CATALOG,
+    )
+    row = next(r for r in PROSPECT_CATALOG if r["entity_id"] == "observe-inc")
+    st = row["corporate_status"]
+    assert st["effective"] == "2026-02-02"
+    assert "observe-acquisition-ai-powered-observability" in st["evidence"][0]
+
+
 def test_an_acquired_company_that_still_publishes_opens_a_run(app):
     """POSITIVE CONTROL: Chronosphere is owned by Palo Alto Networks and still
     publishes as itself, so it is analysed like any other company."""

@@ -677,11 +677,12 @@ prospects:
   disambiguation_group: observe
   corporate_status:
     state: ACQUIRED_ABSORBED
-    effective: '2026-01-08'
+    effective: '2026-02-02'
     counterparty: Snowflake Inc.
     counterparty_domain: snowflake.com
     summary: Acquired by Snowflake; observeinc.com now redirects to Snowflake's Observe product page
     evidence:
+    - https://www.snowflake.com/fr/blog/observe-acquisition-ai-powered-observability/
     - https://www.businesswire.com/news/home/20260108681865/en/Snowflake-Announces-Intent-to-Acquire-Observe-to-Deliver-AI-Powered-Observability-at-Enterprise-Scale
   identity_notes: Not Observe.AI (observe.ai), a contact-centre AI company; "Observe" is offered as a
     choice between the two.

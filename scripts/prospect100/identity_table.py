@@ -54,9 +54,13 @@ ROWS = [
  dict(pid=16, id="anomalo", legal="Anomalo", common="Anomalo", country=US, domain="anomalo.com", host="www.anomalo.com", aliases=("anomalo",)),
  dict(pid=17, id="observe-inc", legal="Observe, Inc.", common="Observe", country=US, domain="observeinc.com", host="", aliases=("observe", "observe inc", "observeinc"), group="observe",
       note="Not Observe.AI (observe.ai), a contact-centre AI company; \"Observe\" is offered as a choice between the two.",
-      status=S("ACQUIRED_ABSORBED", "2026-01-08", "Snowflake Inc.",
+      # The CLOSE, not the intent: Jan 8 was "announces intent to acquire";
+      # Snowflake's own post dated 2026-02-02 says it closed (re-verified
+      # 2026-11-26). The intent release stays as the second link.
+      status=S("ACQUIRED_ABSORBED", "2026-02-02", "Snowflake Inc.",
                "Acquired by Snowflake; observeinc.com now redirects to Snowflake's Observe product page",
-               ["https://www.businesswire.com/news/home/20260108681865/en/Snowflake-Announces-Intent-to-Acquire-Observe-to-Deliver-AI-Powered-Observability-at-Enterprise-Scale"], "snowflake.com")),
+               ["https://www.snowflake.com/fr/blog/observe-acquisition-ai-powered-observability/",
+                "https://www.businesswire.com/news/home/20260108681865/en/Snowflake-Announces-Intent-to-Acquire-Observe-to-Deliver-AI-Powered-Observability-at-Enterprise-Scale"], "snowflake.com")),
  dict(pid=18, id="chronosphere", legal="Chronosphere, Inc.", common="Chronosphere", country=US, domain="chronosphere.io", host="chronosphere.io", aliases=("chronosphere",),
       status=S("ACQUIRED_OPERATING", "2026-01-29", "Palo Alto Networks", "Part of Palo Alto Networks since January 2026",
                ["https://investors.paloaltonetworks.com/news-releases/news-release-details/palo-alto-networks-completes-chronosphere-acquisition-unifying"], "paloaltonetworks.com")),
