@@ -340,9 +340,16 @@ def render_actions(actions) -> str:
     """Prepared artefacts. Every card states what will NOT happen."""
     if not actions:
         return ""
+    from intent_engine.founder_brief.layers import APPROVAL_NOTICE
+    # THE NOTICE ONCE, THE LABEL ON EVERY CARD. Each card repeated the full
+    # sentence, so a five-card page said it five times (round 8: Deel's story
+    # page lost its presentation grade to it). The safeguard stays visible on
+    # every card as "Approval required."; a card whose approval text differs
+    # from the standard notice still shows its own text in full.
     out = [LAYER_CSS, "<h2>What this can prepare for you</h2>",
            '<p class="small muted">Intelligence is above. These are artefacts '
-           'the product can draft from it — nothing leaves this page.</p>']
+           'the product can draft from it — nothing leaves this page.</p>',
+           f'<p class="approve">{_e(APPROVAL_NOTICE)}</p>']
     for a in actions:
         d = a if isinstance(a, dict) else a.as_dict()
         out.append(f'<div class="act"><h3>{_e(d["title"])}</h3><dl>')
@@ -353,8 +360,10 @@ def render_actions(actions) -> str:
             if d.get(key):
                 out.append(f'<dt>{label}</dt><dd>{_e(d[key])}</dd>')
         out.append("</dl>")
-        out.append(f'<p class="approve"><strong>Approval required.</strong> '
-                   f'{_e(d["approval_required"])}</p></div>')
+        own = str(d.get("approval_required") or "")
+        out.append(f'<p class="approve"><strong>Approval required.</strong>'
+                   f'{" " + _e(own) if own and own != APPROVAL_NOTICE else ""}'
+                   f'</p></div>')
     return "".join(out)
 
 

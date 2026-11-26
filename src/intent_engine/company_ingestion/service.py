@@ -3389,7 +3389,10 @@ class CompanyIngestionService:
                 today=_date.today().isoformat(),
                 deadline=time.monotonic() +
                 self._INDEPENDENT_REPORTING_CAP_S - 1.5,
-                namesake_free=self._namesake_free(meta))
+                namesake_free=self._namesake_free(meta),
+                remembered=IR.recall(str(meta.get("domain") or "")))
+            IR.remember(str(meta.get("domain") or ""),
+                        report.get("candidates") or ())
         except Exception as exc:                          # noqa: BLE001
             _LOG.warning("independent_reporting_raised company=%r %s: %s",
                          name, type(exc).__name__, exc)

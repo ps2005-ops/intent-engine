@@ -1,0 +1,287 @@
+[
+ {
+  "round": 4,
+  "commit": "cc04b23a",
+  "analytical": 95,
+  "mean": 7.616,
+  "median": 7.5,
+  "ten_of_ten_original": 0,
+  "pass_original": {
+   "search": 99,
+   "identity": 100,
+   "coverage": 80,
+   "independence": 7,
+   "economics": 14,
+   "strategy": 49,
+   "presentation": 25,
+   "history": 11,
+   "visual": 94,
+   "performance": 95
+  },
+  "pass_strengthened": null,
+  "pass_commercial": null,
+  "fully_qualified": null,
+  "false_decision_grade": null,
+  "decks_missing": null,
+  "history_expanded": null
+ },
+ {
+  "round": 5,
+  "commit": "568e200c",
+  "analytical": 95,
+  "mean": 7.721,
+  "median": 8.0,
+  "ten_of_ten_original": 0,
+  "pass_original": {
+   "search": 99,
+   "identity": 99,
+   "coverage": 81,
+   "independence": 9,
+   "economics": 15,
+   "strategy": 53,
+   "presentation": 29,
+   "history": 11,
+   "visual": 94,
+   "performance": 94
+  },
+  "pass_strengthened": null,
+  "pass_commercial": null,
+  "fully_qualified": null,
+  "false_decision_grade": null,
+  "decks_missing": null,
+  "history_expanded": {
+   "BOUNDED": 48,
+   "FAIL": 36,
+   "PASS": 11
+  }
+ },
+ {
+  "round": 6,
+  "commit": "d6bb2d10",
+  "analytical": 95,
+  "mean": 7.726,
+  "median": 8.0,
+  "ten_of_ten_original": 0,
+  "pass_original": {
+   "search": 99,
+   "identity": 100,
+   "coverage": 78,
+   "independence": 6,
+   "economics": 16,
+   "strategy": 51,
+   "presentation": 30,
+   "history": 12,
+   "visual": 95,
+   "performance": 95
+  },
+  "pass_strengthened": null,
+  "pass_commercial": null,
+  "fully_qualified": null,
+  "false_decision_grade": null,
+  "decks_missing": [
+   "BlackLine",
+   "CData",
+   "Enverus",
+   "Epicor",
+   "Gusto",
+   "IFS",
+   "Lansweeper",
+   "Plex",
+   "Softchoice"
+  ],
+  "history_expanded": {
+   "BOUNDED": 46,
+   "FAIL": 37,
+   "PASS": 12
+  }
+ },
+ {
+  "round": 7,
+  "commit": "5719b271",
+  "analytical": 95,
+  "mean": 7.795,
+  "median": 8.0,
+  "ten_of_ten_original": 0,
+  "pass_original": {
+   "search": 99,
+   "identity": 100,
+   "coverage": 77,
+   "independence": 8,
+   "economics": 16,
+   "strategy": 56,
+   "presentation": 29,
+   "history": 12,
+   "visual": 95,
+   "performance": 95
+  },
+  "pass_strengthened": {
+   "search": 94,
+   "identity": 95,
+   "coverage": 77,
+   "independence": 3,
+   "economics": 16,
+   "strategy": 50,
+   "presentation": 28,
+   "history": 12,
+   "visual": 95,
+   "performance": 95
+  },
+  "pass_commercial": {
+   "surfaces": 95,
+   "deck_or_limited_page": 86,
+   "browser_matrix": 95,
+   "performance": 95,
+   "identity": 95
+  },
+  "fully_qualified": {
+   "A": 0,
+   "B": 0,
+   "C": 86
+  },
+  "false_decision_grade": [
+   "Gusto",
+   "BlackLine",
+   "Epicor",
+   "IFS",
+   "Lansweeper",
+   "Softchoice"
+  ],
+  "decks_missing": [
+   "BlackLine",
+   "CData",
+   "Enverus",
+   "Epicor",
+   "Gusto",
+   "IFS",
+   "Lansweeper",
+   "Plex",
+   "Softchoice"
+  ],
+  "history_expanded": {
+   "BOUNDED": 47,
+   "FAIL": 34,
+   "PASS": 14
+  }
+ },
+ {
+  "round": 8,
+  "commit": "35a09899",
+  "analytical": 95,
+  "mean": 7.726,
+  "median": 8.0,
+  "ten_of_ten_original": 0,
+  "pass_original": {
+   "search": 99,
+   "identity": 100,
+   "coverage": 73,
+   "independence": 11,
+   "economics": 7,
+   "strategy": 56,
+   "presentation": 26,
+   "history": 12,
+   "visual": 95,
+   "performance": 95
+  },
+  "pass_strengthened": {
+   "search": 94,
+   "identity": 95,
+   "coverage": 73,
+   "independence": 9,
+   "economics": 45,
+   "strategy": 55,
+   "presentation": 26,
+   "history": 12,
+   "visual": 95,
+   "performance": 95
+  },
+  "pass_commercial": {
+   "surfaces": 95,
+   "deck_or_limited_page": 90,
+   "browser_matrix": 95,
+   "performance": 95,
+   "identity": 95
+  },
+  "fully_qualified": {
+   "A": 0,
+   "B": 0,
+   "C": 90
+  },
+  "false_decision_grade": [
+   "IFS"
+  ],
+  "decks_missing": [
+   "CData",
+   "Enverus",
+   "Epicor",
+   "IFS",
+   "Plex"
+  ],
+  "history_expanded": {
+   "FAIL": 31,
+   "BOUNDED": 50,
+   "PASS": 14
+  }
+ },
+ {
+  "round": 9,
+  "commit": "f8aac885",
+  "analytical": 95,
+  "mean": 7.758,
+  "median": 8.0,
+  "ten_of_ten_original": 0,
+  "pass_original": {
+   "search": 99,
+   "identity": 100,
+   "coverage": 79,
+   "independence": 7,
+   "economics": 7,
+   "strategy": 57,
+   "presentation": 28,
+   "history": 12,
+   "visual": 95,
+   "performance": 95
+  },
+  "pass_strengthened": {
+   "search": 94,
+   "identity": 95,
+   "coverage": 79,
+   "independence": 4,
+   "economics": 45,
+   "strategy": 54,
+   "presentation": 27,
+   "history": 12,
+   "visual": 95,
+   "performance": 95
+  },
+  "pass_commercial": {
+   "surfaces": 95,
+   "deck_or_limited_page": 89,
+   "browser_matrix": 95,
+   "performance": 95,
+   "identity": 95
+  },
+  "fully_qualified": {
+   "A": 0,
+   "B": 0,
+   "C": 89
+  },
+  "false_decision_grade": [
+   "Epicor",
+   "IFS",
+   "Softchoice"
+  ],
+  "decks_missing": [
+   "CData",
+   "Enverus",
+   "Epicor",
+   "IFS",
+   "Plex",
+   "Softchoice"
+  ],
+  "history_expanded": {
+   "FAIL": 32,
+   "BOUNDED": 36,
+   "PASS": 27
+  }
+ }
+]

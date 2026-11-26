@@ -574,7 +574,8 @@ def discover(*, company: str, domain: str = "", aliases: Sequence[str] = (),
              use_gdelt: Optional[bool] = None, use_wikipedia: bool = True,
              limit: int = MAX_ARTICLES_FETCHED,
              deadline: Optional[float] = None,
-             clock=time.monotonic, namesake_free: bool = False) -> dict:
+             clock=time.monotonic, namesake_free: bool = False,
+             remembered: Sequence[dict] = ()) -> dict:
     """Independent reporting about `company`: candidates plus the search record.
 
     `fetch(url, extra_mimes) -> {ok, status_code, body, final_url,
@@ -618,11 +619,23 @@ def discover(*, company: str, domain: str = "", aliases: Sequence[str] = (),
             if name == "FEED" and got:
                 report["channels_successful"].append("publisher_feed")
             pointers += got
-    pointers = [p for p in dedupe(pointers) if not _too_old(
-        p.get("published", ""), today)]
+    # RESEARCH ALREADY DONE IS NOT THROWN AWAY. Search feeds return what is
+    # newest, so an article verified about this company on one run can be
+    # gone from the feed on the next: prospect-100 rounds 8 and 9 counted 9
+    # and then 4 companies with two independent origins on unchanged code.
+    # An article this company's runs VERIFIED before is offered again --
+    # first, but still re-fetched and re-verified like any pointer, so a page
+    # that moved or changed is refused, never trusted from memory.
+    remembered = [dict(p, channel="remembered") for p in (remembered or ())
+                  if isinstance(p, dict) and p.get("url")]
+    if remembered:
+        report["remembered_offered"] = len(remembered)
+    pointers = [p for p in dedupe(list(remembered) + pointers)
+                if not _too_old(p.get("published", ""), today)]
     report["pointers_found"] = len(pointers)
-    # Newest first; undated pointers (references) after dated ones.
-    pointers.sort(key=lambda p: p.get("published") or "", reverse=True)
+    # Remembered first, then newest first; undated pointers after dated ones.
+    pointers.sort(key=lambda p: (p.get("channel") == "remembered",
+                                 p.get("published") or ""), reverse=True)
     # AT MOST `MAX_PER_PUBLISHER` per publisher, then verified CONCURRENTLY
     # (different hosts in parallel; one host's requests stay paced).
     per_pub, chosen = {}, []
@@ -708,6 +721,54 @@ def _polite(url: str, *, clock=time.monotonic, sleeper=time.sleep) -> None:
         _HOST_NEXT[host] = start + PER_HOST_INTERVAL_S
     if start > now:
         sleeper(start - now)
+
+
+def memory_path(domain: str):
+    """Where verified articles about one company are remembered, or None."""
+    import os
+    import pathlib
+    root = (os.environ.get("INDEPENDENT_MEMORY_DIR")
+            or (os.path.join(os.environ["ACQUISITION_MEMORY_DIR"],
+                             "independent_reporting")
+                if os.environ.get("ACQUISITION_MEMORY_DIR") else ""))
+    key = _registrable(domain or "")
+    if not root or not key:
+        return None
+    return pathlib.Path(root) / f"{key}.json"
+
+
+def recall(domain: str) -> List[dict]:
+    """Articles verified about this company on earlier runs. Never raises."""
+    import json as _json
+    path = memory_path(domain)
+    try:
+        return list(_json.loads(path.read_text())) if path and \
+            path.exists() else []
+    except Exception:                                    # noqa: BLE001
+        return []
+
+
+def remember(domain: str, candidates: Sequence[dict]) -> None:
+    """Add this run's verified articles to the company's memory."""
+    import json as _json
+    path = memory_path(domain)
+    if not path or not candidates:
+        return
+    known = {p.get("url"): p for p in recall(domain)}
+    for c in candidates:
+        if c.get("source_class") != "independent_reporting" or not c.get("url"):
+            continue
+        known[c["url"]] = {"url": c["url"], "title": c.get("title", ""),
+                           "published": c.get("published_date")
+                           or c.get("published", ""),
+                           "publisher": c.get("publisher", "")}
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(".tmp")
+        tmp.write_text(_json.dumps(list(known.values()), indent=1))
+        tmp.replace(path)
+    except OSError:                                      # memory is best-effort
+        pass
 
 
 def live_fetchers():

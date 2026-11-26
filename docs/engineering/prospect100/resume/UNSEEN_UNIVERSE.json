@@ -1,0 +1,29 @@
+{
+ "contract": "prospect100_unseen_universe.v1",
+ "frozen_at": "2026-11-26",
+ "frozen_before_any_run_on_commit": "f8aac885",
+ "selection_rule": "Not in the prospect-100 list, not in the 75-company regression (ASI-25 + Next-40 + Final-Ten), and zero case-insensitive whole-word mentions in src/, tests/ or scripts/ at freeze time (checked with git grep). Mixed: private and public, software and non-software, several names that are ordinary English words (Mercury, Toast, Glean, Faire, Carta, Plaid) to stress identity.",
+ "rule": "No mechanism may be changed on the evidence of these companies' results and then re-scored on them as 'unseen'. A change motivated by them is recorded, and the universe is retired.",
+ "companies": [
+  {"name": "Airtable", "website": "https://www.airtable.com"},
+  {"name": "Miro", "website": "https://miro.com"},
+  {"name": "Celonis", "website": "https://www.celonis.com"},
+  {"name": "Personio", "website": "https://www.personio.com"},
+  {"name": "Navan", "website": "https://navan.com"},
+  {"name": "Mercury", "website": "https://mercury.com"},
+  {"name": "Benchling", "website": "https://www.benchling.com"},
+  {"name": "Flexport", "website": "https://www.flexport.com"},
+  {"name": "Sweetgreen", "website": "https://www.sweetgreen.com"},
+  {"name": "Toast", "website": "https://pos.toasttab.com"},
+  {"name": "Attentive", "website": "https://www.attentive.com"},
+  {"name": "Glean", "website": "https://www.glean.com"},
+  {"name": "Coupa", "website": "https://www.coupa.com"},
+  {"name": "Chainalysis", "website": "https://www.chainalysis.com"},
+  {"name": "Carta", "website": "https://carta.com"},
+  {"name": "Ironclad", "website": "https://ironcladapp.com"},
+  {"name": "Faire", "website": "https://www.faire.com"},
+  {"name": "Plaid", "website": "https://plaid.com"},
+  {"name": "Checkr", "website": "https://checkr.com"},
+  {"name": "Anduril", "website": "https://www.anduril.com"}
+ ]
+}

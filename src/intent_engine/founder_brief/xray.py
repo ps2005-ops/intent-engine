@@ -601,8 +601,12 @@ def _beliefs_body(d: dict) -> str:
                           "Nothing is currently preregistered for this "
                           "company."))
     changed = d.get("what_changed") or ()
-    parts.append("<h2>What changed</h2>" +
-                 _bullets(changed, "Nothing changed since the last reading."))
+    # SAID ONCE. The summary grid above already prints the first change; when
+    # that is the whole list (round 8: "Nothing in the published market
+    # record changed since the previous reading."), repeating it here was the
+    # page saying the same sentence twice.
+    if len(changed) > 1:
+        parts.append("<h2>What changed</h2>" + _bullets(changed, ""))
     mind = d.get("what_changed_mind") or ()
     parts.append("<h2>What changed our mind</h2>" +
                  _bullets(mind,

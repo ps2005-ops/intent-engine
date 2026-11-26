@@ -43,5 +43,6 @@ export PYTHONPATH="$ROOT/src" ZERO_ANTHROPIC=1 WEBAPP_ENV=development \
   WEBAPP_COMMIT=$(git -C "$ROOT" rev-parse HEAD) \
   WEBAPP_STORE="$ST/w.jsonl" WEBAPP_FI_STORE="$ST/fi.jsonl" WEBAPP_CI_STORE="$ST/ci.jsonl" \
   RUNTIME_ROOT="$ST/runtime" ACQUISITION_MEMORY_DIR="$ST/acq" SEC_FILING_CACHE_DIR="$ST/sec" \
-  MARKET_SNAPSHOT_ROOT="$SNAP"
+  MARKET_SNAPSHOT_ROOT="$SNAP" \
+  INDEPENDENT_MEMORY_DIR="$ROOT/reports/prospect100_resume/research_memory"
 exec "${PY:-$HOME/intent-engine/.venv/bin/python}" -m intent_engine.webapp runserver --port "$PORT"
