@@ -34,6 +34,11 @@ DEFAULT_PATH = "reports/market/learning_ledger.jsonl"
 
 BELIEF = "belief"
 BELIEF_UPDATE = "belief_update"
+#: An appended audit event that withdraws a historical grade. The original
+#: reconciliation line stays in the file; the store's VIEW renames it (and the
+#: belief update it caused) so no consumer that filters on "reconciliation"
+#: or "belief_update" can count it again.
+GRADE_INVALIDATION = "grade_invalidation"
 EXPECTATION = "expectation"
 RECONCILIATION = "reconciliation"
 EVIDENCE = "evidence"
@@ -924,7 +929,7 @@ class LearningStore:
             except json.JSONDecodeError:
                 self._corrupt += 1
                 continue
-        return rows
+        return _mask_invalidated(rows)
 
     def beliefs(self) -> Tuple[B.StrategicBelief, ...]:
         """Fold declarations and updates into current beliefs.
@@ -1135,3 +1140,33 @@ class LearningStore:
         return {"path": str(self.path), "rows": len(rows),
                 "by_record": counts, "corrupt_lines_skipped": self._corrupt,
                 "exists": self.path.exists()}
+
+
+def _mask_invalidated(rows):
+    """Apply appended grade invalidations to the row VIEW (the file is never
+    rewritten). A reconciliation named by an invalidation becomes
+    `reconciliation_invalidated`; the belief_update it drove (same expectation,
+    same date, basis from a preregistered expectation) becomes
+    `belief_update_invalidated`. The expectation is therefore open again and
+    may be graded by genuinely later evidence."""
+    inv = {}
+    for r in rows:
+        if r.get("record") == GRADE_INVALIDATION:
+            g = r.get("invalidates") or {}
+            inv[r.get("expectation_id")] = g.get("evaluated_at", "")
+    if not inv:
+        return rows
+    out = []
+    for r in rows:
+        rec = r.get("record")
+        if rec == RECONCILIATION and r.get("expectation_id") in inv and (
+                not inv[r["expectation_id"]]
+                or r.get("evaluated_at", "") == inv[r["expectation_id"]]):
+            r = {**r, "record": "reconciliation_invalidated"}
+        elif rec == BELIEF_UPDATE and str(r.get("basis", "")).startswith(
+                "preregistered expectation") and any(
+                e in inv and (not inv[e] or r.get("at", "") == inv[e])
+                for e in (r.get("evidence_ids") or ())):
+            r = {**r, "record": "belief_update_invalidated"}
+        out.append(r)
+    return out

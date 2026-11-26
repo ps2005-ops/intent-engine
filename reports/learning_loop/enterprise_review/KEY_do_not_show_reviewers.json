@@ -1,21 +1,26 @@
 {
- "america-movil": {
+ "PAIR-1": {
+  "company": "america-movil",
   "A": "after",
   "B": "before"
  },
- "johnson-johnson": {
+ "PAIR-2": {
+  "company": "johnson-johnson",
   "A": "after",
   "B": "before"
  },
- "mercadolibre-inc": {
+ "PAIR-3": {
+  "company": "mercadolibre-inc",
   "A": "before",
   "B": "after"
  },
- "sasol-limited": {
+ "PAIR-4": {
+  "company": "sasol-limited",
   "A": "after",
   "B": "before"
  },
- "vale-s-a": {
+ "PAIR-5": {
+  "company": "vale-s-a",
   "A": "after",
   "B": "before"
  }

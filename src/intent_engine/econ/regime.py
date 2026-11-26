@@ -132,8 +132,44 @@ PERIODS_PER_YEAR = {
     "DRCCLACBS": 4,      # quarterly
     "UNRATE": 12,        # monthly
     "CPIAUCSL": 12,      # monthly
-    "DFF": 12,           # monthly average in this panel
+    "DFF": 12,           # v1 ONLY. The comment said "monthly average in
+                         # this panel"; measured 2026-11-25, the panel's DFF
+                         # is DAILY (366 cells in 2024), so v1's "change over
+                         # a year" is a change over twelve days, in the replay
+                         # and forward alike. Kept verbatim for v1.
 }
+
+#: Protocol versions. v1 is preserved exactly for every result already
+#: recorded against it; v2 is the amendment registered 2026-11-25.
+V1, V2 = "econ_regime.v1", "econ_regime.v2"
+
+
+def _monthly_mean_change(hist, as_of: str) -> Optional[Tuple[float, str, str]]:
+    """v2 policy change: mean DFF of the latest COMPLETED calendar month
+    minus the mean of the same month a year earlier.
+
+    Completed months only: the current month's average is not knowable until
+    it ends, and a partial month would move with the day of the run. Input of
+    any frequency works (daily cells are averaged; one monthly cell is its own
+    mean), so the same function is correct on the replay panel, the forward
+    snapshot and a FRED monthly-average request.
+    """
+    cur = as_of[:7]
+    by_month: Dict[str, List[float]] = {}
+    for period, value in hist:
+        m = str(period)[:7]
+        if m < cur:
+            by_month.setdefault(m, []).append(float(value))
+    if not by_month:
+        return None
+    last = max(by_month)
+    y, mo = int(last[:4]), int(last[5:7])
+    prior = f"{y - 1:04d}-{mo:02d}"
+    if prior not in by_month:
+        return None
+    a = sum(by_month[last]) / len(by_month[last])
+    b = sum(by_month[prior]) / len(by_month[prior])
+    return a - b, last, prior
 
 
 def _yoy(hist, periods: int) -> Optional[float]:
@@ -149,7 +185,7 @@ def _diff(hist, periods: int) -> Optional[float]:
     return hist[-1][1] - hist[-1 - periods][1]
 
 
-def classify(panel, as_of: str) -> RegimeReading:
+def classify(panel, as_of: str, *, version: str = V1) -> RegimeReading:
     """Every regime whose condition holds, from the walled read at `as_of`.
 
     Reads through `Panel.history(..., as_of=)`, the same primitive every
@@ -199,7 +235,14 @@ def classify(panel, as_of: str) -> RegimeReading:
         elif c_yoy <= THRESHOLDS["inflation_low"]:
             out.append(DISINFLATION)
 
-    p_ch = _diff(dff, PERIODS_PER_YEAR['DFF']) if dff else None
+    if version == V2:
+        dff_all = panel.history("DFF", as_of=as_of, lookback=500)
+        got = _monthly_mean_change(dff_all, as_of) if dff_all else None
+        p_ch = got[0] if got else None
+        if got is None and "DFF" not in missing:
+            missing.append("DFF")
+    else:
+        p_ch = _diff(dff, PERIODS_PER_YEAR['DFF']) if dff else None
     if p_ch is not None:
         ev["policy_change_pp"] = round(p_ch, 5)
         if p_ch >= THRESHOLDS["policy_move_pp"]:

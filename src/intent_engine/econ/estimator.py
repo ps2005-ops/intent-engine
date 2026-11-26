@@ -68,23 +68,84 @@ LAGS: Dict[str, LagModel] = {
 }
 
 
-def _latest_per_series(readings):
-    """One reading per (series, publisher, dimension): the latest period.
+def _filter_series(readings, prior=None):
+    """One dependence-aware observation per series: a local-level Kalman filter.
 
-    WHY (traced 2026-11-25, the first live run in which `bayes.update`
-    executed): 24 monthly quits readings were precision-combined as 24
-    independent measurements of TODAY's state, giving uncertainty 0.020 and
-    confidence 0.959 from one slowly moving series. Consecutive months of one
-    series are not independent evidence about the present; the history
-    reaches the posterior through the prior carried from earlier cycles.
+    WHY (2026-11-25): the first live update precision-combined 24 monthly
+    quits readings as 24 independent measurements of today's state
+    (uncertainty 0.020, confidence 0.959). Consecutive months of one series
+    share one slowly moving state; they are not independent evidence about
+    the present. An interim fix kept only the latest reading, which discards
+    real information. This is the standard model for the situation:
+
+        state       x_t = x_{t-1} + w_t,   w ~ N(0, q)   (the state drifts)
+        observation y_t = x_t + v_t,       v ~ N(0, r)   (instrument noise)
+
+    TWO KINDS OF ERROR, BECAUSE ONLY ONE OF THEM AVERAGES OUT. The proxy's
+    stated noise is mostly CONSTRUCT error -- how well "quits" measures
+    "perceived control" -- and that error is shared by every reading of the
+    series. Repetition cannot reduce it. It is therefore added to the filtered
+    variance at the end, in full (`r_shared`). What repetition CAN reduce is
+    month-to-month idiosyncratic noise, filtered with a local level:
+
+        state       x_t = x_{t-1} + w_t,   w ~ N(0, q)
+        observation y_t = x_t + v_t,       v ~ N(0, r_idio)
+
+    Under a local level Var(y_t - y_{t-1}) = q + 2 r_idio. q and r_idio are
+    not separately identified from that one moment, so they are split evenly
+    (q = r_idio = Var(dy)/3) -- a stated assumption, with the 1/4-3/4 splits
+    reported as sensitivity. The result: an instrument read 24 times is worth
+    a little more than once, never 24 times; two DIFFERENT instruments with
+    independent construct errors still combine.
+
+    Only readings not already folded into `prior` are filtered, so the same
+    history cannot be counted again on the next cycle; the prior is combined
+    once, downstream, by `bayes.update`.
     """
-    best = {}
+    import math
+    from statistics import pvariance
+    seen = set(getattr(prior, "evidence", ()) or ()) if prior is not None else set()
+    groups = {}
     for r in readings:
-        k = (r.kind, r.publisher, r.dimension)
-        if k not in best or (r.as_of or "") > (best[k].as_of or ""):
-            best[k] = r
-    kept = list(best.values())
-    return kept, len(readings) - len(kept)
+        groups.setdefault((r.kind, r.publisher, r.dimension), []).append(r)
+    kept, diag = [], []
+    for key, rs in sorted(groups.items()):
+        rs = sorted(rs, key=lambda x: (x.as_of or "", x.node_id))
+        new = [x for x in rs if x.node_id not in seen]
+        if not new:
+            continue
+        r_shared = float(rs[-1].proxy.noise) ** 2
+        ys = [float(x.placed) for x in rs]
+        dys = [b - a for a, b in zip(ys, ys[1:])]
+        vdy = pvariance(dys) if len(dys) >= 2 else 0.0
+        eps = 1e-8
+
+        def _filter(split):
+            q = max(vdy * split, eps)
+            ri = max(vdy * (1 - split) / 2, eps)
+            m, P = float(new[0].placed), ri
+            for x in new[1:]:
+                P = P + q
+                K = P / (P + ri)
+                m = m + K * (float(x.placed) - m)
+                P = (1 - K) * P
+            return m, P
+        m, P_idio = _filter(1 / 3)
+        P = P_idio + r_shared
+        sens = {f"split_{a}": round(math.sqrt(_filter(a)[1] + r_shared), 4)
+                for a in (0.25, 0.75)}
+        last = new[-1]
+        kept.append((last, min(1.0, max(0.0, m)), math.sqrt(P),
+                     tuple(x.node_id for x in new)))
+        diag.append({"series": "|".join(str(k) for k in key), "readings": len(new),
+                     "already_folded": len(rs) - len(new),
+                     "r_shared": round(r_shared, 6), "var_dy": round(vdy, 6),
+                     "filtered_idio_sd": round(math.sqrt(P_idio), 4),
+                     "posterior_sd": round(math.sqrt(P), 4),
+                     "effective_n": round(r_shared / P, 3),
+                     "naive_independent_sd": round(math.sqrt(r_shared / len(new)), 4),
+                     "sensitivity_posterior_sd": sens})
+    return kept, diag
 
 
 def estimate(*, population: Population, as_of: str, nodes: Iterable,
@@ -102,11 +163,13 @@ def estimate(*, population: Population, as_of: str, nodes: Iterable,
     by_dim = {c.dimension: c for c in register}
     retired = {d for d, c in by_dim.items() if c.state == RETIRED}
 
-    readings, serially_dependent = _latest_per_series(proxies.read_nodes(nodes))
+    all_readings = proxies.read_nodes(nodes)
+    readings = all_readings
     grouped = proxies.group_by_dimension(readings)
 
     dimensions: List[DimensionEstimate] = []
     updates: List[bayes.Update] = []
+    series_diag: List[dict] = []
     skipped_retired: List[str] = []
 
     for dim, rs in sorted(grouped.items()):
@@ -122,9 +185,20 @@ def estimate(*, population: Population, as_of: str, nodes: Iterable,
                         promotion_state=(by_dim[dim].state if dim in by_dim
                                          else CANDIDATE))
 
-        upd = bayes.update(start, [r.observation() for r in rs], at=as_of)
+        filtered, fdiag = _filter_series(rs, prior=(prior.dimension(dim)
+                                                    if prior is not None else None))
+        series_diag.extend(fdiag)
+        obs = [replace(r.observation(), value=round(m, 4), noise=max(sd, 1e-4))
+               for r, m, sd, _ids in filtered]
+        folded = {i for *_x, ids in filtered for i in ids}
+        upd = bayes.update(start, obs, at=as_of)
         updates.append(upd)
         moved = bayes.apply(start, upd)
+        if folded:
+            # Every reading the filter consumed is folded in, not only the
+            # one that carried the result -- or the next cycle re-reads them.
+            moved = replace(moved, evidence=tuple(sorted(
+                set(moved.evidence) | folded)))
 
         if proxies.sole_contested(rs) and moved.posterior_mean is not None:
             moved = replace(moved,
@@ -153,7 +227,8 @@ def estimate(*, population: Population, as_of: str, nodes: Iterable,
         "readings": proxies.summarise(readings),
         "updates": bayes.summarise(updates),
         "skipped_retired": skipped_retired,
-        "serially_dependent_readings_not_counted": serially_dependent,
+        "dependence": {"model": "local-level Kalman filter per series",
+                       "readings": len(all_readings), "series": series_diag},
         "dimensions_estimated": len([d for d in dimensions
                                      if d.posterior_mean is not None]),
         "dimensions_no_proxy": proxies.uncovered_dimensions(),

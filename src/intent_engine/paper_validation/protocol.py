@@ -39,6 +39,23 @@ PROTOCOL: Dict[str, Any] = {
     "contract": CONTRACT,
     "declared_at": "2026-11-09",
     "paper_only": True,
+    # AMENDMENTS ARE PROSPECTIVE. A decision dated before `effective_from`
+    # is evaluated exactly as originally declared; the replay and the Nov 9
+    # cohort are untouched. Registered 2026-11-25 with approval.
+    "amendments": [
+        {"id": "A1-regime-fed-funds-frequency",
+         "registered_at": "2026-11-25", "effective_from": "2026-11-26",
+         "changes": "econ.regime policy change: v1 differenced the 12th-last "
+                    "DFF cell, which on the panel's DAILY series is a "
+                    "12-day change; v2 compares the mean of the latest "
+                    "completed calendar month with the same month a year "
+                    "earlier (econ_regime.v2)",
+         "affects": ["regime_* features (feature set D)",
+                     "regime_label / regime_at_decision on new records"],
+         "does_not_affect": ["any record decided before effective_from",
+                             "the 2007-2026 replay result",
+                             "the 2026-11-09 forward cohort"]},
+    ],
     "execution": {
         "cadence_sessions": 21,
         "horizon_sessions": 21,
@@ -185,3 +202,14 @@ BORROW_BPS_YEAR = PROTOCOL["execution"]["short_borrow_bps_per_year"]
 RULE_P = PROTOCOL["rule_probabilities"]["directional_rule"]
 MODEL_MARGIN = PROTOCOL["replay"]["model_trade_margin"]
 MIN_HISTORY = PROTOCOL["replay"]["min_history_sessions"]
+
+
+
+def regime_version_for(decision_date: str) -> str:
+    """The econ.regime version the protocol prescribes for a decision date."""
+    from intent_engine.econ import regime as RG
+    for a in PROTOCOL.get("amendments", ()):
+        if a["id"] == "A1-regime-fed-funds-frequency" and \
+                decision_date[:10] >= a["effective_from"]:
+            return RG.V2
+    return RG.V1

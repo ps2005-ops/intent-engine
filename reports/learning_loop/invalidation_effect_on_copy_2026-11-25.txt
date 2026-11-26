@@ -1,0 +1,7 @@
+beliefs whose posterior changed: 33 | mean |change| 0.0673
+   canadian_national is seeing demand strengthen rather than pl 0.682 -> 0.622
+   caterpillar is seeing demand strengthen rather than plateau 0.646 -> 0.586
+   duolingo is seeing demand weaken rather than pause 0.506 -> 0.586
+   honda is seeing demand strengthen rather than plateau 0.68 -> 0.62
+   infosys is seeing demand strengthen rather than plateau 0.638 -> 0.578
+reopened: 33 | would be re-graded now: 23 | refusals: {'evidence_proposed_this_expectation': 52, 'restates_the_evidence_that_opened_it': 41, 'same_reporting_period_as_opener': 786, 'no_readable_direction': 30, 'corroborates_the_opening_event': 6, 'no_qualifying_observation_yet': 10, 'corroborating_accounts': 6}

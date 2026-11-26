@@ -160,15 +160,21 @@ def test_the_live_ledger_reports_no_movement_rather_than_no_history():
 
     subjects = {str(s.get("subject") or "") for s in snapshots} - {""}
     assert subjects, "snapshots must name their subject"
-    seen = set()
+    # The expected status is DERIVED from the live revisions, never pinned:
+    # until 2026-11-25 every live revision was CREATED and this asserted
+    # NO_MOVEMENT for everyone; that night ten theses transitioned and the
+    # pinned form failed on correct behaviour. The invariant is the mapping.
     for subject in subjects:
         mine = [t for t in snapshots if SP._belongs(t, subject)]
         theirs = SP._revisions_for(revisions, mine)
-        seen.add(SE._thesis_history(theirs, True)["status"])
-    assert seen == {SE.HISTORY_AVAILABLE_NO_MOVEMENT}, (
-        "every live revision is CREATED, so every subject must read "
-        "AVAILABLE_NO_MOVEMENT; MOVED would mean a thesis transitioned and "
-        "UNAVAILABLE would mean the transport regressed")
+        status = SE._thesis_history(theirs, True)["status"]
+        moved = any(str(r.get("transition") or "CREATED") != "CREATED"
+                    for r in theirs)
+        assert status != SE.HISTORY_UNAVAILABLE, (
+            f"{subject}: UNAVAILABLE would mean the transport regressed")
+        assert status == (SE.HISTORY_AVAILABLE_MOVED if moved
+                          else SE.HISTORY_AVAILABLE_NO_MOVEMENT), (
+            f"{subject}: status {status} disagrees with its revisions")
 
 
 # --- both row shapes are real -----------------------------------------------
@@ -208,5 +214,9 @@ def test_the_live_snapshots_survive_the_export():
         thesis_revisions=SP._revisions_for(store.thesis_revisions(), mine),
         history_available=True)
     assert len(payload["economic_theses"]) == len(mine)
-    assert payload["thesis_history"]["status"] == \
-        SE.HISTORY_AVAILABLE_NO_MOVEMENT
+    theirs = SP._revisions_for(store.thesis_revisions(), mine)
+    moved = any(str(r.get("transition") or "CREATED") != "CREATED"
+                for r in theirs)
+    assert payload["thesis_history"]["status"] == (
+        SE.HISTORY_AVAILABLE_MOVED if moved
+        else SE.HISTORY_AVAILABLE_NO_MOVEMENT)

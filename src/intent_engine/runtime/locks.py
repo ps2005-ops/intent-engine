@@ -13,6 +13,7 @@ next run — that is the "restart-safe" property.
 """
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 try:
@@ -44,6 +45,15 @@ class JobLock:
                 self._fh = None
                 raise JobLockedError(
                     f"job {self.name!r} is already running") from exc
+        # The file is reused across runs and flock never touches its mtime, so
+        # `lock_state` read the age of a file created in August as the age of
+        # tonight's lock: every cycle's own health check reported its lock
+        # "held 117 days, stale" and the runtime DEGRADED (2026-11-25). Mark
+        # the acquisition, so the age is the holding time.
+        try:
+            os.utime(self.path, None)
+        except OSError:  # pragma: no cover
+            pass
         return self
 
     def __exit__(self, *exc):

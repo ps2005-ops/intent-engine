@@ -492,7 +492,7 @@ def test_binding_produces_a_contradiction_when_evidence_points_the_other_way():
     """The whole point: a bound observation must be able to refute."""
     from intent_engine.market import expectation as EXP
     exp = _expectation("e1")
-    ev = [_evidence("ev1", "Revenue fell sharply and guidance was cut")]
+    ev = [_evidence("ev1", "Acme revenue fell sharply and guidance was cut")]
     bound, _ = OB.bind([exp], ev, as_of="2026-08-07")
     assert bound["e1"]["observed_direction"] == EXP.DOWN
 
@@ -504,7 +504,7 @@ def test_binding_produces_a_contradiction_when_evidence_points_the_other_way():
 def test_binding_confirms_when_evidence_points_the_expected_way():
     from intent_engine.market import expectation as EXP
     exp = _expectation("e1")
-    ev = [_evidence("ev1", "Revenue rose and the company raised guidance")]
+    ev = [_evidence("ev1", "Acme revenue rose and the company raised guidance")]
     bound, _ = OB.bind([exp], ev, as_of="2026-08-07")
     result = EXP.reconcile(exp, as_of="2026-08-07", **{
         k: v for k, v in bound["e1"].items() if k != "binding"})
@@ -514,7 +514,7 @@ def test_binding_confirms_when_evidence_points_the_expected_way():
 def test_the_evidence_that_proposed_a_belief_never_tests_it():
     """Otherwise every belief confirms itself the moment it is declared."""
     exp = _expectation("e1", basis=("ev1",))
-    ev = [_evidence("ev1", "Revenue rose strongly")]
+    ev = [_evidence("ev1", "Acme revenue rose strongly")]
     bound, refused = OB.bind([exp], ev, as_of="2026-08-07")
     assert bound == {}
     assert refused["evidence_proposed_this_expectation"] == 1
@@ -522,7 +522,7 @@ def test_the_evidence_that_proposed_a_belief_never_tests_it():
 
 def test_evidence_about_another_company_never_binds():
     exp = _expectation("e1", subject="acme")
-    ev = [_evidence("ev1", "Revenue rose strongly", subject="wayne")]
+    ev = [_evidence("ev1", "Acme revenue rose strongly", subject="wayne")]
     bound, _ = OB.bind([exp], ev, as_of="2026-08-07")
     assert bound == {}
 
@@ -530,7 +530,7 @@ def test_evidence_about_another_company_never_binds():
 def test_evidence_predating_preregistration_never_binds():
     """Retrodiction is refused before reconcile is even asked."""
     exp = _expectation("e1")
-    ev = [_evidence("ev1", "Revenue rose strongly", observed_at="2026-07-01")]
+    ev = [_evidence("ev1", "Acme revenue rose strongly", observed_at="2026-07-01")]
     bound, _ = OB.bind([exp], ev, as_of="2026-08-07")
     assert bound == {}
 
@@ -538,9 +538,9 @@ def test_evidence_predating_preregistration_never_binds():
 def test_the_earliest_qualifying_observation_wins_not_the_kindest():
     """Choosing among candidates is where scoring becomes flattering."""
     exp = _expectation("e1")
-    ev = [_evidence("ev_late", "Revenue rose strongly",
+    ev = [_evidence("ev_late", "Acme revenue rose strongly",
                     observed_at="2026-08-06"),
-          _evidence("ev_early", "Revenue fell and guidance was cut",
+          _evidence("ev_early", "Acme revenue fell and guidance was cut",
                     observed_at="2026-08-02")]
     bound, _ = OB.bind([exp], ev, as_of="2026-08-07")
     assert bound["e1"]["evidence_ids"] == ("ev_early",)
@@ -548,7 +548,7 @@ def test_the_earliest_qualifying_observation_wins_not_the_kindest():
 
 def test_unfalsifiable_family_is_refused_with_a_reason():
     exp = _expectation("e1", metric="capacity_expansion")
-    ev = [_evidence("ev1", "The company raised capex plans",
+    ev = [_evidence("ev1", "Acme raised capex plans",
                     etype="CAPEX_SIGNAL")]
     bound, refused = OB.bind([exp], ev, as_of="2026-08-07")
     assert bound == {}
@@ -557,7 +557,7 @@ def test_unfalsifiable_family_is_refused_with_a_reason():
 
 def test_evidence_with_no_readable_direction_is_not_a_verdict():
     exp = _expectation("e1")
-    ev = [_evidence("ev1", "The company reported its quarterly results")]
+    ev = [_evidence("ev1", "Acme reported its quarterly results")]
     bound, refused = OB.bind([exp], ev, as_of="2026-08-07")
     assert bound == {}
     assert refused["no_readable_direction"] == 1

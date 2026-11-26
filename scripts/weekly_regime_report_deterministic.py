@@ -95,7 +95,7 @@ def margin_line(label, ev):
 
 def render(as_of, fetcher=None):
     panel, vint = build(as_of, fetcher)
-    r = RG.classify(panel, as_of)
+    r = RG.classify(panel, as_of, version=RG.V2)   # amendment A1 (2026-11-25)
     lines = [f"REGIME READING (deterministic, {RG.CONTRACT}) as of {as_of}",
              "=" * 72,
              "Inputs as known on the report date (latest period per series):"]

@@ -13,8 +13,13 @@ from intent_engine.runtime.market import MarketRuntime
 # different code path from the one these tests mean to exercise, and it was
 # silently accepted until `eligibility` gained its `future_dated` guard --
 # which is how 7 tests in this file turned red without their subject changing.
-# Anchor both dates to the same clock the ledger writes with.
-TODAY = date.today()
+# Anchor both dates to the same clock the ledger writes with -- which is UTC.
+# `date.today()` is LOCAL: from 19:00 to midnight Eastern the UTC date is
+# already tomorrow, every recorded prediction is "future-dated" against a
+# local as_of, and these 7 tests failed every evening (found 2026-11-25 20:20
+# EST by the pre-commit guard; green at 16:59 the same day).
+from datetime import datetime, timezone
+TODAY = datetime.now(timezone.utc).date()
 AS_OF = TODAY.isoformat()
 FUTURE = (TODAY + timedelta(days=365)).isoformat()
 

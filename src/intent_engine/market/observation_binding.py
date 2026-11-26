@@ -198,9 +198,39 @@ def bind(expectations: Sequence[EXP.ExpectedObservation],
                 continue
             if item.observed_at[:10] < exp.preregistered_at[:10]:
                 continue
+            # THE NEXT REPORT, NOT ANOTHER ACCOUNT OF THIS ONE. The falsifier
+            # names "the next reported figure"; 33 of 47 historical grades
+            # (audited 2026-11-25) were graded by a different outlet's
+            # article about the SAME report, which the fingerprint and the
+            # event grouping above both missed.
+            from . import demand_reading as _DR
+            openers = [e for e in evidence if e.evidence_id in basis]
+            if openers and any(_DR.same_reporting_event(
+                    o.fact, o.observed_at, item.fact, item.observed_at,
+                    o.evidence_type, item.evidence_type)
+                    for o in openers):
+                refused["same_reporting_period_as_opener"] += 1
+                continue
+            if openers and any(_DR.shares_a_reported_figure(o.fact, item.fact)
+                               for o in openers):
+                refused["recaps_a_figure_the_opener_reported"] += 1
+                continue
+            ok, why = _DR.grading_admissible(subject, item.fact, family)
+            if not ok:
+                # "No demand movement" is the established no-direction verdict.
+                refused["no_readable_direction" if why.startswith(
+                    "no demand movement") else
+                    "not_an_observation_of_the_subject"] += 1
+                continue
             if item.evidence_type not in relevant_types:
                 continue
             direction = _evidence_direction(item)
+            if family in (_DR.WEAKENING, _DR.STRENGTHENING):
+                # The demand direction is the demand QUANTITY's direction, the
+                # same reading that admitted this account. The word reader
+                # graded "Revenue Up, Profitability Falls" as DOWN.
+                direction = {_DR.STRENGTHENING: EXP.UP, _DR.WEAKENING: EXP.DOWN}.get(
+                    _DR.read(item.fact).family, "")
             if not direction:
                 refused["no_readable_direction"] += 1
                 continue

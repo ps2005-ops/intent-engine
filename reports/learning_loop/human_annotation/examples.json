@@ -1,0 +1,192 @@
+[
+ {
+  "example_id": "AMB-01",
+  "evidence_id": "ev_4bde32cec1a5f4c6",
+  "passage": "Procter & Gamble Co (PG) Q4 2026 Earnings Call Highlights: Navigating Growth Amidst Margin ... - Yahoo Finance.",
+  "source": "news.google.com",
+  "source_role": "independent_reporting",
+  "publication_date": "2026-07-29",
+  "company": "procter_gamble",
+  "evidence_type_as_classified": "EARNINGS_RESULT"
+ },
+ {
+  "example_id": "AMB-02",
+  "evidence_id": "ev_8bb0e8b3032d5244",
+  "passage": "Update: Canadian National Railway Reports Higher Q2 Adjusted Net Income YoY, Raises Guidance - Yahoo Finance.",
+  "source": "news.google.com",
+  "source_role": "independent_reporting",
+  "publication_date": "2026-07-24",
+  "company": "canadian_national",
+  "evidence_type_as_classified": "EARNINGS_RESULT"
+ },
+ {
+  "example_id": "AMB-03",
+  "evidence_id": "ev_91e80d80bfca83ba",
+  "passage": "1Password has expanded its business-to-business customer base and it now accounts for over two-thirds of the company\u2019s total revenue.",
+  "source": "executive_statement",
+  "source_role": "regulatory_filing",
+  "publication_date": "2026-08-08",
+  "company": "stripe",
+  "evidence_type_as_classified": "EARNINGS_RESULT"
+ },
+ {
+  "example_id": "AMB-04",
+  "evidence_id": "ev_c9142fa7b9b9ad48",
+  "passage": "JPMorgan Sees Investment Banking and Trading Powering Q3 Growth - Yahoo Finance.",
+  "source": "news.google.com",
+  "source_role": "independent_reporting",
+  "publication_date": "2026-09-18",
+  "company": "jpmorgan",
+  "evidence_type_as_classified": "EARNINGS_RESULT"
+ },
+ {
+  "example_id": "AMB-05",
+  "evidence_id": "ev_b04b7d0f88e29e6b",
+  "passage": "Infosys narrows FY27 guidance to 1.5%-3%, appoints Dash as CEO - scanx.trade.",
+  "source": "news.google.com",
+  "source_role": "independent_reporting",
+  "publication_date": "2026-09-23",
+  "company": "infosys",
+  "evidence_type_as_classified": "GUIDANCE_REVISION"
+ },
+ {
+  "example_id": "AMB-06",
+  "evidence_id": "ev_03ac5e77e37cb329",
+  "passage": "\u201cThe third quarter was Cloudflare's best quarter ever.",
+  "source": "investor_material",
+  "source_role": "regulatory_filing",
+  "publication_date": "2026-11-06",
+  "company": "cloudflare",
+  "evidence_type_as_classified": "EARNINGS_RESULT"
+ },
+ {
+  "example_id": "AMB-07",
+  "evidence_id": "ev_243f13c1fab765f4",
+  "passage": "Cloudflare (NET) Soars 10.5% on Upbeat Outlook, Says Opportunities \u2018Larger\u2019 Than Business - Yahoo Finance.",
+  "source": "news.google.com",
+  "source_role": "independent_reporting",
+  "publication_date": "2026-09-10",
+  "company": "cloudflare",
+  "evidence_type_as_classified": "GUIDANCE_REVISION"
+ },
+ {
+  "example_id": "AMB-08",
+  "evidence_id": "ev_9b387eea07f0f26e",
+  "passage": "ASML Holding NV (ASML) Q3 2026 Earnings Call Highlights: Record EUR11. ... - Yahoo Finance.",
+  "source": "news.google.com",
+  "source_role": "independent_reporting",
+  "publication_date": "2026-10-15",
+  "company": "asml",
+  "evidence_type_as_classified": "EARNINGS_RESULT"
+ },
+ {
+  "example_id": "AMB-09",
+  "evidence_id": "ev_a980264b9a77c9ab",
+  "passage": "PayPal tops Q2 estimates and raises full-year forecast amid Stripe takeover bid - SiliconANGLE",
+  "source": "news.google.com",
+  "source_role": "independent_reporting",
+  "publication_date": "2026-07-28",
+  "company": "stripe",
+  "evidence_type_as_classified": "GUIDANCE_REVISION"
+ },
+ {
+  "example_id": "AMB-10",
+  "evidence_id": "ev_8ab179154fff5000",
+  "passage": "Caterpillar Q3: Growth With A Caveat, Shares Fairly Valued (NYSE:CAT) - Seeking Alpha.",
+  "source": "news.google.com",
+  "source_role": "analyst_coverage",
+  "publication_date": "2026-10-30",
+  "company": "caterpillar",
+  "evidence_type_as_classified": "EARNINGS_RESULT"
+ },
+ {
+  "example_id": "AMB-11",
+  "evidence_id": "ev_b40c30c008547737",
+  "passage": "America Movil stock faces mixed analyst signals after Q3 growth - ad-hoc-news.de.",
+  "source": "news.google.com",
+  "source_role": "independent_reporting",
+  "publication_date": "2026-10-31",
+  "company": "america_movil",
+  "evidence_type_as_classified": "EARNINGS_RESULT"
+ },
+ {
+  "example_id": "AMB-12",
+  "evidence_id": "ev_c22e7e6c8faf68fc",
+  "passage": "PG Raises Sales Outlook as Thorne Acquisition Adds Growth Potential - TradingView.",
+  "source": "news.google.com",
+  "source_role": "analyst_coverage",
+  "publication_date": "2026-11-19",
+  "company": "procter_gamble",
+  "evidence_type_as_classified": "GUIDANCE_REVISION"
+ },
+ {
+  "example_id": "AMB-13",
+  "evidence_id": "ev_bf301027299cdb47",
+  "passage": "Johnson & Johnson Reports Q3 2026 Results, Raises Full-Year Guidance - VisionMonday.com.",
+  "source": "news.google.com",
+  "source_role": "independent_reporting",
+  "publication_date": "2026-10-14",
+  "company": "johnson_johnson",
+  "evidence_type_as_classified": "EARNINGS_RESULT"
+ },
+ {
+  "example_id": "AMB-14",
+  "evidence_id": "ev_6a6876e244ddcbb3",
+  "passage": "Etsy Q3: Platform Growth Has Inflected (NYSE:ETSY) - Seeking Alpha.",
+  "source": "news.google.com",
+  "source_role": "analyst_coverage",
+  "publication_date": "2026-10-28",
+  "company": "etsy",
+  "evidence_type_as_classified": "EARNINGS_RESULT"
+ },
+ {
+  "example_id": "AMB-15",
+  "evidence_id": "ev_c6fac0606bd7706b",
+  "passage": "Earnings call transcript: Infosys Q2 2026 beats revenue, cuts outlook By Investing.com - Investing.com India.",
+  "source": "news.google.com",
+  "source_role": "independent_reporting",
+  "publication_date": "2026-10-23",
+  "company": "infosys",
+  "evidence_type_as_classified": "GUIDANCE_REVISION"
+ },
+ {
+  "example_id": "AMB-16",
+  "evidence_id": "ev_11cb219a71e0dbb7",
+  "passage": "Check Point Software Technologies Sees Product Revenue Returning to Growth in Q2 2027 - Yahoo Finance.",
+  "source": "news.google.com",
+  "source_role": "independent_reporting",
+  "publication_date": "2026-11-23",
+  "company": "checkpoint",
+  "evidence_type_as_classified": "EARNINGS_RESULT"
+ },
+ {
+  "example_id": "AMB-17",
+  "evidence_id": "ev_1b4806501cc9bc3c",
+  "passage": "Cloudflare shares jump after forecast raise on higher AI-driven spending - finance.yahoo.com.",
+  "source": "news.google.com",
+  "source_role": "independent_reporting",
+  "publication_date": "2026-08-07",
+  "company": "cloudflare",
+  "evidence_type_as_classified": "GUIDANCE_REVISION"
+ },
+ {
+  "example_id": "AMB-18",
+  "evidence_id": "ev_59aaaba65f044deb",
+  "passage": "Sasol lifts fuel sales outlook but cuts gas forecast after floods - Stock Titan.",
+  "source": "news.google.com",
+  "source_role": "independent_reporting",
+  "publication_date": "2026-04-22",
+  "company": "sasol",
+  "evidence_type_as_classified": "GUIDANCE_REVISION"
+ },
+ {
+  "example_id": "AMB-19",
+  "evidence_id": "ev_7a7c055b9b7e1794",
+  "passage": "Grifols SA (GRFS) Q3 2026 Earnings Call Highlights: Biopharma Growth Accelerates as Margin ... - Yahoo Finance.",
+  "source": "news.google.com",
+  "source_role": "independent_reporting",
+  "publication_date": "2026-11-03",
+  "company": "grifols",
+  "evidence_type_as_classified": "EARNINGS_RESULT"
+ }
+]
