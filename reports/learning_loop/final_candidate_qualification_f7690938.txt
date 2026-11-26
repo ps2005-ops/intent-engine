@@ -1,0 +1,12 @@
+QUALIFICATION of f7690938 on an isolated copy of production, as_of 2026-11-25
+evidence acquisition (research): {'companies': 28}
+behavioural evidence: fetched 48 | failures []
+bayes: updates 1 | model local-level Kalman filter per series | [(24, 0.937, 0.1033)]
+health overall OK | lock {'held': True, 'stale': False}
+learning_health: ['**Learning status: LEARNING_DEGRADING**', '- Runtime: `f7690938671a`']
+outcome resolution: events 626 | written this cycle: {'INELIGIBLE': 41}
+ledger rows this cycle: 76 {'knowledge_effect': 34, 'reconciliation': 13, 'belief_update': 13, 'source_health': 6, 'thesis_revision': 5, 'evidence': 2, 'research_decision': 1, 'research_outcome': 1}
+re-grades: [('duolingo', 'CONTRADICTED'), ('honda', 'CONFIRMED'), ('infosys', 'CONTRADICTED'), ('shopify', 'CONFIRMED'), ('toyota', 'CONFIRMED'), ('etsy', 'CONFIRMED'), ('mercadolibre', 'CONFIRMED'), ('cloudflare', 'CONFIRMED'), ('cloudflare', 'CONTRADICTED'), ('duolingo', 'CONFIRMED'), ('sea_limited', 'CONFIRMED'), ('america_movil', 'CONFIRMED'), ('linde', 'CONFIRMED')]
+thesis revisions: {'CONTESTED': 5}
+shadow momentum (last rows): [('HMC', ''), ('AMX', 'long'), ('GRFS', '')]
+LIVE RUNTIME UNCHANGED
