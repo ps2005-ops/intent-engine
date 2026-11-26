@@ -1277,6 +1277,18 @@ def _subject_stem(company: str) -> str:
     return _LEGAL_SUFFIX.sub("", (company or "").strip()).strip(" ,.")
 
 
+#: Verbs the trade press uses for a company's moves that `concrete`'s action
+#: vocabulary (built for the company's OWN page titles) does not carry.
+#: Scoped to outside reports naming the subject; the deck's anchor selection
+#: is unchanged. Measured on round 7: "Tanium adds endpoint behavior
+#: detection", "N-able released a second security hotfix" yielded nothing.
+_OUTSIDE_ACTION = re.compile(
+    r"\b(adds?|added|rolls? out|rolled out|releases?|released|debuts?|"
+    r"revamps?|partners? with|partnered with|collaborat\w+|teams? up with|"
+    r"expands?|expanded|surpass\w*|hires?|hired|lays? off|wins?|won|"
+    r"selected by|chosen by|signs?|signed)\b", re.I)
+
+
 def _reported_development(text: str, company: str) -> str:
     """The first sentence that names the subject and reports an action."""
     from intent_engine.strategic_intelligence.concrete import action_kind
@@ -1287,7 +1299,8 @@ def _reported_development(text: str, company: str) -> str:
     for sentence in re.split(r"(?<=[.!?])\s+", " ".join((text or "").split())):
         if len(sentence.split()) < 6 or len(sentence) > 400:
             continue
-        if name.search(sentence) and action_kind(sentence):
+        if name.search(sentence) and (action_kind(sentence)
+                                      or _OUTSIDE_ACTION.search(sentence)):
             return sentence.strip()
     return ""
 

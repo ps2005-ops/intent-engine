@@ -465,7 +465,17 @@ def _hypotheses(company: str, model: str, ground, state) -> Tuple[
     defect names, so it is not produced at all.
     """
     rivals = list(getattr(ground, "rivals", ()) or ())
-    non_firm = [r for r in rivals if r.kind in _NOT_A_COMPANY_KINDS]
+    # A NON-FIRM ALTERNATIVE THIS COMPANY'S RECORD SUPPLIED -- not one its
+    # business model always faces. `competitive_ground._MODEL_ALTERNATIVES`
+    # adds "the customer's own engineering" to EVERY subscription-software
+    # ladder, correctly labelled as a reading of the model; binding the
+    # headline "possibility worth testing" to it put the same paragraph on 70
+    # of 95 prospect-100 round-7 briefs ("closed-lost reasons dominated by
+    # no-decision ... customers who built it in-house"). A model prior stays
+    # on the ladder where it is labelled as one; it does not become a
+    # company-specific hypothesis.
+    non_firm = [r for r in rivals if r.kind in _NOT_A_COMPANY_KINDS
+                and (r.from_subject_words or r.is_attributed)]
     named = [r for r in rivals if r.from_subject_words or r.is_attributed]
     engine, metric, _break = _engine_for(model)
     growth = (state or ("", ""))[0]

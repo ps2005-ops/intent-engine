@@ -31,7 +31,7 @@ cp -n "$HOME/intent-engine-market/reports/market/demo_snapshots/"*.json \
 # side reads it. The live econ root is never opened for writing.
 ECON_SRC="$HOME/intent-engine-market/econ"
 mkdir -p "$ST/runtime/econ"
-for k in state_snapshot expectation expectation_resolution; do
+for k in state_snapshot expectation expectation_resolution node; do
   [ -f "$ECON_SRC/$k.jsonl" ] && [ ! -f "$ST/runtime/econ/$k.jsonl" ] && \
     cp "$ECON_SRC/$k.jsonl" "$ST/runtime/econ/$k.jsonl"
 done

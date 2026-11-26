@@ -2059,9 +2059,11 @@ def _level6(name, profile, selection, run_decision, standing,
                               or _kill_switch(profile)),
         falsifier=_sentence(_falsifier(profile, selection, run_decision)),
         voi_band=_voi(profile, standing, observations),
+        # NAMES WHAT IS BEING COMMITTED. The same sentence stood on 71 of 95
+        # round-7 briefs; the lever is the thing a reader would over-commit.
         guardrail=_sentence(
-            f"commit no more than can be withdrawn inside one planning cycle "
-            f"until the check below returns"))
+            f"commit no more to {_lower_first(lever)} than can be withdrawn "
+            f"inside one planning cycle until the check below returns"))
 
 
 def _action_now(profile, selection, lever) -> str:

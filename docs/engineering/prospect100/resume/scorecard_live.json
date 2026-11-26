@@ -1,7 +1,7 @@
 {
  "summary": {
-  "generated_at": "2026-11-26T09:27:07+00:00",
-  "generated_on_commit": "5719b271",
+  "generated_at": "2026-11-26T10:16:16+00:00",
+  "generated_on_commit": "35a09899",
   "round4_evaluated_on": "cc04b23a",
   "companies": 100,
   "analytical": 95,
@@ -36,26 +36,26 @@
    }
   },
   "current": {
-   "round": 7,
-   "analysis_commit": "5719b271",
+   "round": 8,
+   "analysis_commit": "35a09899",
    "evaluated": 95,
    "ten_of_ten": 0,
    "fully_qualified_analytical": 0,
-   "mean": 7.795,
+   "mean": 7.726,
    "median": 8.0,
-   "lowest": 6.0,
-   "highest": 9.5,
-   "up": 27,
-   "down": 11,
-   "same": 57,
+   "lowest": 5.5,
+   "highest": 9.0,
+   "up": 26,
+   "down": 19,
+   "same": 50,
    "pass_count_by_metric": {
     "search": 94,
     "identity": 95,
-    "coverage": 77,
-    "independence": 8,
-    "economics": 16,
+    "coverage": 73,
+    "independence": 11,
+    "economics": 7,
     "strategy": 56,
-    "presentation": 29,
+    "presentation": 26,
     "history": 12,
     "visual": 95,
     "performance": 95
@@ -153,8 +153,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 3 prose sentence(s) repeated on",
    "round5_score": 8.0,
@@ -199,6 +199,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 3 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 3 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -242,13 +256,13 @@
    "changes_since_round4": [
     "presentation crash (/slides 500) fixed in 7729503d; fix unchanged in HEAD; regression test passes; NOT re-scored"
    ],
-   "current_original_rubric_score": 8.5,
+   "current_original_rubric_score": 9.0,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
     "identity": "PASS",
     "coverage": "PASS",
-    "independence": "BOUNDED",
+    "independence": "PASS",
     "economics": "BOUNDED",
     "strategy": "PASS",
     "presentation": "PASS",
@@ -264,10 +278,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level B (no mult",
+   "next_action": "no decision could be formed from the evidence; History Rewind level B (no multi-year filed series)",
    "round5_score": 9.0,
    "round5_grades": {
     "search": "PASS",
@@ -310,8 +324,21 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level B (no multi-year filed series)",
+   "round8_score": 9.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "PASS",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "no decision could be formed from the evidence; History Rewind level B (no multi-year filed series)",
    "failed_metrics_current": [
-    "independence",
     "economics",
     "history"
    ]
@@ -374,8 +401,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
    "round5_score": 8.5,
@@ -420,6 +447,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; History Rewind level B (no multi-year filed series)",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; History Rewind level B (no multi-year filed series)",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -484,10 +525,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level B (no mult",
    "round5_score": 8.5,
    "round5_grades": {
     "search": "PASS",
@@ -530,6 +571,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; History Rewind level B (no multi-year filed series)",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level B (no multi-year filed series)",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -590,8 +645,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; History Rewind level B (no multi-year filed series)",
    "round5_score": 9.0,
@@ -636,6 +691,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; History Rewind level B (no multi-year filed series)",
+   "round8_score": 9.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "PASS",
+    "strategy": "PASS",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; History Rewind level B (no multi-year filed series)",
    "failed_metrics_current": [
     "independence",
     "history"
@@ -698,10 +767,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_H",
    "round5_score": 7.0,
    "round5_grades": {
     "search": "PASS",
@@ -744,6 +813,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
+   "round8_score": 7.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -808,8 +891,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
    "round5_score": 8.0,
@@ -854,6 +937,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; History Rewind level C (no multi-year filed series)",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; History Rewind level C (no multi-year filed series)",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -917,8 +1014,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
    "round5_score": 7.0,
@@ -963,6 +1060,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
+   "round8_score": 7.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -1029,8 +1140,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "only 1 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "round5_score": 6.0,
@@ -1075,6 +1186,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "only 1 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
+   "round8_score": 6.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "FAIL",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 1 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "failed_metrics_current": [
     "coverage",
     "independence",
@@ -1140,8 +1265,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level B (no mult",
    "round5_score": 8.0,
@@ -1186,6 +1311,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level B (no multi-year filed series)",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level B (no multi-year filed series)",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -1248,8 +1387,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
    "round5_score": 8.0,
@@ -1294,6 +1433,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -1359,8 +1512,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
    "round5_score": 8.0,
@@ -1405,6 +1558,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 5 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -1468,8 +1635,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "only 2 document(s) read; 1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "round5_score": 7.0,
@@ -1514,6 +1681,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "only 2 document(s) read; 1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
+   "round8_score": 7.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "FAIL",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 2 document(s) read; 1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "failed_metrics_current": [
     "coverage",
     "independence",
@@ -1556,7 +1737,7 @@
     "history"
    ],
    "changes_since_round4": [],
-   "current_original_rubric_score": 8.0,
+   "current_original_rubric_score": 8.5,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
@@ -1565,7 +1746,7 @@
     "independence": "BOUNDED",
     "economics": "BOUNDED",
     "strategy": "PASS",
-    "presentation": "BOUNDED",
+    "presentation": "PASS",
     "history": "BOUNDED",
     "visual": "PASS",
     "performance": "PASS"
@@ -1578,10 +1759,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level B (no mult",
    "round5_score": 8.0,
    "round5_grades": {
     "search": "PASS",
@@ -1624,10 +1805,23 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 1 prose sentence(s) repeated on a page",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level B (no multi-year filed series)",
    "failed_metrics_current": [
     "independence",
     "economics",
-    "presentation",
     "history"
    ]
   },
@@ -1686,10 +1880,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level C (no mult",
    "round5_score": 8.5,
    "round5_grades": {
     "search": "PASS",
@@ -1732,6 +1926,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; History Rewind level C (no multi-year filed series)",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level C (no multi-year filed series)",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -1793,10 +2001,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 4 prose sentence(s) repeated on",
    "round5_score": 8.5,
    "round5_grades": {
     "search": "PASS",
@@ -1839,6 +2047,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 4 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -1903,7 +2125,7 @@
     "desktop_dark_1440": true
    },
    "last_evaluation": "2026-11-26T06:35:34+00:00",
-   "evaluated_commit": "5719b271+dirty",
+   "evaluated_commit": "35a09899+dirty",
    "qualification_status": "STATUS_PAGE_PRODUCT_PASS_STATUS_UNVERIFIED",
    "why_not_re_evaluated": "Product surface verified locally at 5 widths x 2 themes; the corporate status itself still needs re-verification against a current outside source (network blocked).",
    "next_action": "Re-verify corporate status from a primary source",
@@ -1948,7 +2170,21 @@
     "visual": "N/A",
     "performance": "N/A"
    },
-   "round7_blocker": "no longer independent -- the product shows the status page and opens no run (verified live)"
+   "round7_blocker": "no longer independent -- the product shows the status page and opens no run (verified live)",
+   "round8_score": null,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "N/A",
+    "independence": "N/A",
+    "economics": "N/A",
+    "strategy": "N/A",
+    "presentation": "N/A",
+    "history": "N/A",
+    "visual": "N/A",
+    "performance": "N/A"
+   },
+   "round8_blocker": "no longer independent -- the product shows the status page and opens no run (verified live)"
   },
   {
    "prospect_id": 18,
@@ -2007,8 +2243,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "the decision question is the business-model default, not derived from this company's evidence; History Rewind level B (no multi-year filed series)",
    "round5_score": 9.0,
@@ -2053,6 +2289,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "the decision question is the business-model default, not derived from this company's evidence; History Rewind level B (no multi-year filed series)",
+   "round8_score": 9.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "PASS",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "the decision question is the business-model default, not derived from this company's evidence; History Rewind level B (no multi-year filed series)",
    "failed_metrics_current": [
     "economics",
     "history"
@@ -2093,7 +2343,7 @@
     "history"
    ],
    "changes_since_round4": [],
-   "current_original_rubric_score": 7.5,
+   "current_original_rubric_score": 7.0,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
@@ -2102,7 +2352,7 @@
     "independence": "FAIL",
     "economics": "BOUNDED",
     "strategy": "BOUNDED",
-    "presentation": "PASS",
+    "presentation": "BOUNDED",
     "history": "BOUNDED",
     "visual": "PASS",
     "performance": "PASS"
@@ -2115,8 +2365,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_H",
    "round5_score": 7.5,
@@ -2161,10 +2411,25 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
+   "round8_score": 7.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
     "strategy",
+    "presentation",
     "history"
    ]
   },
@@ -2224,10 +2489,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: ",
    "round5_score": 7.5,
    "round5_grades": {
     "search": "PASS",
@@ -2270,6 +2535,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
+   "round8_score": 7.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -2333,8 +2612,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
    "round5_score": 8.0,
@@ -2379,6 +2658,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 3 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 3 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -2427,8 +2720,8 @@
    "current_grades": {
     "search": "PASS",
     "identity": "PASS",
-    "coverage": "BOUNDED",
-    "independence": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
     "economics": "BOUNDED",
     "strategy": "PASS",
     "presentation": "BOUNDED",
@@ -2444,10 +2737,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "only 7 document(s) read; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
+   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 5 prose sentence(s) repeated on",
    "round5_score": 8.5,
    "round5_grades": {
     "search": "PASS",
@@ -2490,8 +2783,22 @@
     "performance": "PASS"
    },
    "round7_blocker": "only 7 document(s) read; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 5 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
-    "coverage",
+    "independence",
     "economics",
     "presentation",
     "history"
@@ -2554,8 +2861,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: ",
    "round5_score": 7.0,
@@ -2600,6 +2907,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
+   "round8_score": 7.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -2667,10 +2988,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: ",
    "round5_score": 7.0,
    "round5_grades": {
     "search": "PASS",
@@ -2713,6 +3034,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
+   "round8_score": 7.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -2778,7 +3113,7 @@
     "desktop_dark_1440": true
    },
    "last_evaluation": "2026-11-26T06:35:34+00:00",
-   "evaluated_commit": "5719b271+dirty",
+   "evaluated_commit": "35a09899+dirty",
    "qualification_status": "STATUS_PAGE_PRODUCT_PASS_STATUS_UNVERIFIED",
    "why_not_re_evaluated": "Product surface verified locally at 5 widths x 2 themes; the corporate status itself still needs re-verification against a current outside source (network blocked).",
    "next_action": "Re-verify corporate status from a primary source",
@@ -2823,7 +3158,21 @@
     "visual": "N/A",
     "performance": "N/A"
    },
-   "round7_blocker": "no longer independent -- the product shows the status page and opens no run (verified live)"
+   "round7_blocker": "no longer independent -- the product shows the status page and opens no run (verified live)",
+   "round8_score": null,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "N/A",
+    "independence": "N/A",
+    "economics": "N/A",
+    "strategy": "N/A",
+    "presentation": "N/A",
+    "history": "N/A",
+    "visual": "N/A",
+    "performance": "N/A"
+   },
+   "round8_blocker": "no longer independent -- the product shows the status page and opens no run (verified live)"
   },
   {
    "prospect_id": 26,
@@ -2880,8 +3229,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; 4 prose sentence(s) repeated on a page; History Rewind level C (no multi-year ",
    "round5_score": 8.5,
@@ -2926,6 +3275,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; 4 prose sentence(s) repeated on a page; History Rewind level C (no multi-year filed series)",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "PASS",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; 4 prose sentence(s) repeated on a page; History Rewind level C (no multi-year filed series)",
    "failed_metrics_current": [
     "independence",
     "presentation",
@@ -2989,8 +3352,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: ",
    "round5_score": 7.0,
@@ -3035,6 +3398,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
+   "round8_score": 7.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -3099,8 +3476,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one; 2 ",
    "round5_score": 8.0,
@@ -3145,6 +3522,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one; 2 prose sentence(s) repeated on a page",
+   "round8_score": 7.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "PASS",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one; 2 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
     "strategy",
@@ -3185,14 +3576,14 @@
     "history"
    ],
    "changes_since_round4": [],
-   "current_original_rubric_score": 8.5,
+   "current_original_rubric_score": 8.0,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
     "identity": "PASS",
     "coverage": "PASS",
     "independence": "BOUNDED",
-    "economics": "PASS",
+    "economics": "BOUNDED",
     "strategy": "PASS",
     "presentation": "BOUNDED",
     "history": "BOUNDED",
@@ -3207,10 +3598,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; 4 prose sentence(s) repeated on a page; History Rewind level C (no multi-year ",
+   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 4 prose sentence(s) repeated on",
    "round5_score": 8.5,
    "round5_grades": {
     "search": "PASS",
@@ -3253,8 +3644,23 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; 4 prose sentence(s) repeated on a page; History Rewind level C (no multi-year filed series)",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 4 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
+    "economics",
     "presentation",
     "history"
    ]
@@ -3314,8 +3720,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "only 5 document(s) read; 1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, ",
    "round5_score": 6.0,
@@ -3360,6 +3766,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "only 5 document(s) read; 1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence",
+   "round8_score": 7.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "BOUNDED",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 5 document(s) read; 1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence",
    "failed_metrics_current": [
     "coverage",
     "independence",
@@ -3424,10 +3844,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one; 4 ",
+   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one; 3 ",
    "round5_score": 7.5,
    "round5_grades": {
     "search": "PASS",
@@ -3470,6 +3890,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one; 4 prose sentence(s) repeated on a page",
+   "round8_score": 7.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "PASS",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one; 3 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
     "strategy",
@@ -3534,8 +3968,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_H",
    "round5_score": 7.0,
@@ -3580,6 +4014,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
+   "round8_score": 7.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -3644,10 +4092,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: ",
    "round5_score": 7.5,
    "round5_grades": {
     "search": "PASS",
@@ -3690,6 +4138,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
+   "round8_score": 7.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "PASS",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -3754,10 +4216,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "only 5 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, ",
+   "next_action": "only 5 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "round5_score": 7.0,
    "round5_grades": {
     "search": "PASS",
@@ -3800,6 +4262,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "only 5 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence",
+   "round8_score": 7.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "BOUNDED",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "PASS",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 5 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "failed_metrics_current": [
     "coverage",
     "independence",
@@ -3863,10 +4339,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: ",
    "round5_score": 8.0,
    "round5_grades": {
     "search": "PASS",
@@ -3909,6 +4385,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "PASS",
+    "history": "PASS",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -3972,10 +4462,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 11 prose sentence(s) repeated o",
    "round5_score": 8.5,
    "round5_grades": {
     "search": "PASS",
@@ -4018,6 +4508,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 11 prose sentence(s) repeated on a page",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "PASS",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 11 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -4056,14 +4560,14 @@
     "presentation"
    ],
    "changes_since_round4": [],
-   "current_original_rubric_score": 9.0,
+   "current_original_rubric_score": 8.5,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
     "identity": "PASS",
     "coverage": "PASS",
     "independence": "BOUNDED",
-    "economics": "PASS",
+    "economics": "BOUNDED",
     "strategy": "PASS",
     "presentation": "BOUNDED",
     "history": "PASS",
@@ -4078,10 +4582,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; 7 prose sentence(s) repeated on a page",
+   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 8 prose sentence(s) repeated on",
    "round5_score": 9.0,
    "round5_grades": {
     "search": "PASS",
@@ -4124,8 +4628,23 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; 7 prose sentence(s) repeated on a page",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "PASS",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 8 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
+    "economics",
     "presentation"
    ]
   },
@@ -4187,8 +4706,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "only 1 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "round5_score": 5.5,
@@ -4233,6 +4752,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "only 1 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
+   "round8_score": 6.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "FAIL",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 1 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "failed_metrics_current": [
     "coverage",
     "independence",
@@ -4298,10 +4831,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level B (no mult",
    "round5_score": 8.0,
    "round5_grades": {
     "search": "PASS",
@@ -4344,6 +4877,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; History Rewind level B (no multi-year filed series)",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level B (no multi-year filed series)",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -4405,10 +4952,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "the decision question is the business-model default, not derived from this company's evidence; 2 prose sentence(s) repeated on a page; History Rewind level B (n",
+   "next_action": "no decision could be formed from the evidence; 2 prose sentence(s) repeated on a page; History Rewind level B (no multi-year filed series)",
    "round5_score": 8.5,
    "round5_grades": {
     "search": "PASS",
@@ -4451,6 +4998,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "the decision question is the business-model default, not derived from this company's evidence; 2 prose sentence(s) repeated on a page; History Rewind level B (no multi-year filed series)",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "PASS",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "no decision could be formed from the evidence; 2 prose sentence(s) repeated on a page; History Rewind level B (no multi-year filed series)",
    "failed_metrics_current": [
     "economics",
     "presentation",
@@ -4492,14 +5053,14 @@
     "presentation"
    ],
    "changes_since_round4": [],
-   "current_original_rubric_score": 8.5,
+   "current_original_rubric_score": 8.0,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
     "identity": "PASS",
     "coverage": "PASS",
     "independence": "FAIL",
-    "economics": "PASS",
+    "economics": "BOUNDED",
     "strategy": "BOUNDED",
     "presentation": "PASS",
     "history": "PASS",
@@ -4514,10 +5075,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
+   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: ",
    "round5_score": 8.5,
    "round5_grades": {
     "search": "PASS",
@@ -4560,8 +5121,23 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "PASS",
+    "history": "PASS",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
+    "economics",
     "strategy"
    ]
   },
@@ -4623,8 +5199,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "only 7 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "round5_score": 6.5,
@@ -4669,6 +5245,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "only 7 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
+   "round8_score": 6.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "BOUNDED",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 7 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "failed_metrics_current": [
     "coverage",
     "independence",
@@ -4735,7 +5325,7 @@
     "desktop_dark_1440": true
    },
    "last_evaluation": "2026-11-26T06:35:34+00:00",
-   "evaluated_commit": "5719b271+dirty",
+   "evaluated_commit": "35a09899+dirty",
    "qualification_status": "STATUS_PAGE_PRODUCT_PASS_STATUS_UNVERIFIED",
    "why_not_re_evaluated": "Product surface verified locally at 5 widths x 2 themes; the corporate status itself still needs re-verification against a current outside source (network blocked).",
    "next_action": "Re-verify corporate status from a primary source",
@@ -4780,7 +5370,21 @@
     "visual": "N/A",
     "performance": "N/A"
    },
-   "round7_blocker": "no longer independent -- the product shows the status page and opens no run (verified live)"
+   "round7_blocker": "no longer independent -- the product shows the status page and opens no run (verified live)",
+   "round8_score": null,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "N/A",
+    "independence": "N/A",
+    "economics": "N/A",
+    "strategy": "N/A",
+    "presentation": "N/A",
+    "history": "N/A",
+    "visual": "N/A",
+    "performance": "N/A"
+   },
+   "round8_blocker": "no longer independent -- the product shows the status page and opens no run (verified live)"
   },
   {
    "prospect_id": 44,
@@ -4817,14 +5421,14 @@
     "history"
    ],
    "changes_since_round4": [],
-   "current_original_rubric_score": 7.5,
+   "current_original_rubric_score": 7.0,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
     "identity": "PASS",
     "coverage": "PASS",
     "independence": "FAIL",
-    "economics": "PASS",
+    "economics": "BOUNDED",
     "strategy": "BOUNDED",
     "presentation": "BOUNDED",
     "history": "BOUNDED",
@@ -4839,10 +5443,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a deci",
+   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_H",
    "round5_score": 9.0,
    "round5_grades": {
     "search": "PASS",
@@ -4885,8 +5489,23 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one; 4 prose sentence(s) repeated on a page",
+   "round8_score": 7.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
+    "economics",
     "strategy",
     "presentation",
     "history"
@@ -4949,10 +5568,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_H",
    "round5_score": 7.5,
    "round5_grades": {
     "search": "PASS",
@@ -4995,6 +5614,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
+   "round8_score": 7.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -5060,10 +5693,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: ",
    "round5_score": 7.0,
    "round5_grades": {
     "search": "PASS",
@@ -5106,6 +5739,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
+   "round8_score": 7.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -5171,8 +5818,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
    "round5_score": 7.0,
@@ -5217,6 +5864,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
+   "round8_score": 7.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -5282,8 +5943,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "only 6 document(s) read; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
    "round5_score": 7.5,
@@ -5328,6 +5989,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "only 6 document(s) read; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "BOUNDED",
+    "independence": "PASS",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 6 document(s) read; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "coverage",
     "economics",
@@ -5391,8 +6066,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
    "round5_score": 7.5,
@@ -5437,6 +6112,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
+   "round8_score": 7.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -5501,8 +6190,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_H",
    "round5_score": 7.0,
@@ -5547,6 +6236,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
+   "round8_score": 7.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -5611,10 +6314,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: ",
    "round5_score": 7.5,
    "round5_grades": {
     "search": "PASS",
@@ -5657,6 +6360,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
+   "round8_score": 7.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -5720,8 +6437,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level B (no mult",
    "round5_score": 8.0,
@@ -5766,6 +6483,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level B (no multi-year filed series)",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level B (no multi-year filed series)",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -5828,8 +6559,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
    "round5_score": 7.5,
@@ -5874,6 +6605,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
+   "round8_score": 7.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -5938,7 +6683,7 @@
     "desktop_dark_1440": true
    },
    "last_evaluation": "2026-11-26T06:35:34+00:00",
-   "evaluated_commit": "5719b271+dirty",
+   "evaluated_commit": "35a09899+dirty",
    "qualification_status": "STATUS_PAGE_PRODUCT_PASS_STATUS_UNVERIFIED",
    "why_not_re_evaluated": "Product surface verified locally at 5 widths x 2 themes; the corporate status itself still needs re-verification against a current outside source (network blocked).",
    "next_action": "Re-verify corporate status from a primary source",
@@ -5983,7 +6728,21 @@
     "visual": "N/A",
     "performance": "N/A"
    },
-   "round7_blocker": "no longer independent -- the product shows the status page and opens no run (verified live)"
+   "round7_blocker": "no longer independent -- the product shows the status page and opens no run (verified live)",
+   "round8_score": null,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "N/A",
+    "independence": "N/A",
+    "economics": "N/A",
+    "strategy": "N/A",
+    "presentation": "N/A",
+    "history": "N/A",
+    "visual": "N/A",
+    "performance": "N/A"
+   },
+   "round8_blocker": "no longer independent -- the product shows the status page and opens no run (verified live)"
   },
   {
    "prospect_id": 55,
@@ -6041,8 +6800,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level C (no mult",
    "round5_score": 8.0,
@@ -6087,6 +6846,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level C (no multi-year filed series)",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level C (no multi-year filed series)",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -6148,8 +6921,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
    "round5_score": 7.5,
@@ -6194,6 +6967,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 7 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 7 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -6256,10 +7043,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level C (no mult",
    "round5_score": 8.5,
    "round5_grades": {
     "search": "PASS",
@@ -6302,6 +7089,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; History Rewind level C (no multi-year filed series)",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level C (no multi-year filed series)",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -6363,10 +7164,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 4 prose sentence(s) repeated on",
    "round5_score": 8.5,
    "round5_grades": {
     "search": "PASS",
@@ -6409,6 +7210,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "PASS",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 4 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -6450,15 +7265,15 @@
     "history"
    ],
    "changes_since_round4": [],
-   "current_original_rubric_score": 7.0,
+   "current_original_rubric_score": 8.5,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
     "identity": "PASS",
     "coverage": "PASS",
-    "independence": "FAIL",
+    "independence": "PASS",
     "economics": "BOUNDED",
-    "strategy": "BOUNDED",
+    "strategy": "PASS",
     "presentation": "BOUNDED",
     "history": "BOUNDED",
     "visual": "PASS",
@@ -6472,10 +7287,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "no decision could be formed from the evidence; 4 prose sentence(s) repeated on a page; History Rewind level B (no multi-year filed series)",
    "round5_score": 7.0,
    "round5_grades": {
     "search": "PASS",
@@ -6518,10 +7333,22 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "PASS",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "no decision could be formed from the evidence; 4 prose sentence(s) repeated on a page; History Rewind level B (no multi-year filed series)",
    "failed_metrics_current": [
-    "independence",
     "economics",
-    "strategy",
     "presentation",
     "history"
    ]
@@ -6560,12 +7387,12 @@
     "history"
    ],
    "changes_since_round4": [],
-   "current_original_rubric_score": 8.0,
+   "current_original_rubric_score": 7.5,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
     "identity": "PASS",
-    "coverage": "PASS",
+    "coverage": "BOUNDED",
     "independence": "BOUNDED",
     "economics": "BOUNDED",
     "strategy": "PASS",
@@ -6582,10 +7409,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "only 6 document(s) read; 1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, ",
    "round5_score": 8.0,
    "round5_grades": {
     "search": "PASS",
@@ -6628,7 +7455,22 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 3 prose sentence(s) repeated on a page",
+   "round8_score": 7.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "BOUNDED",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 6 document(s) read; 1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence",
    "failed_metrics_current": [
+    "coverage",
     "independence",
     "economics",
     "presentation",
@@ -6668,16 +7510,16 @@
     "history"
    ],
    "changes_since_round4": [],
-   "current_original_rubric_score": 7.5,
+   "current_original_rubric_score": 6.5,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
     "identity": "PASS",
-    "coverage": "PASS",
+    "coverage": "BOUNDED",
     "independence": "FAIL",
     "economics": "BOUNDED",
     "strategy": "BOUNDED",
-    "presentation": "PASS",
+    "presentation": "BOUNDED",
     "history": "BOUNDED",
     "visual": "PASS",
     "performance": "PASS"
@@ -6690,10 +7532,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_H",
+   "next_action": "only 7 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "round5_score": 8.5,
    "round5_grades": {
     "search": "PASS",
@@ -6736,10 +7578,26 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
+   "round8_score": 6.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "BOUNDED",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 7 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "failed_metrics_current": [
+    "coverage",
     "independence",
     "economics",
     "strategy",
+    "presentation",
     "history"
    ]
   },
@@ -6777,16 +7635,16 @@
     "history"
    ],
    "changes_since_round4": [],
-   "current_original_rubric_score": 7.5,
+   "current_original_rubric_score": 6.5,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
     "identity": "PASS",
-    "coverage": "PASS",
+    "coverage": "BOUNDED",
     "independence": "FAIL",
     "economics": "BOUNDED",
     "strategy": "BOUNDED",
-    "presentation": "PASS",
+    "presentation": "BOUNDED",
     "history": "BOUNDED",
     "visual": "PASS",
     "performance": "PASS"
@@ -6799,10 +7657,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "only 4 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "round5_score": 7.5,
    "round5_grades": {
     "search": "PASS",
@@ -6845,10 +7703,26 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
+   "round8_score": 6.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "BOUNDED",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 4 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "failed_metrics_current": [
+    "coverage",
     "independence",
     "economics",
     "strategy",
+    "presentation",
     "history"
    ]
   },
@@ -6909,10 +7783,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "only 6 document(s) read; no decision could be formed from the evidence; 1 prose sentence(s) repeated on a page",
+   "next_action": "only 6 document(s) read; no decision could be formed from the evidence; 8 prose sentence(s) repeated on a page",
    "round5_score": 8.0,
    "round5_grades": {
     "search": "PASS",
@@ -6955,6 +7829,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "only 6 document(s) read; no decision could be formed from the evidence; 1 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "BOUNDED",
+    "independence": "PASS",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 6 document(s) read; no decision could be formed from the evidence; 8 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "coverage",
     "economics",
@@ -6996,15 +7884,15 @@
     "history"
    ],
    "changes_since_round4": [],
-   "current_original_rubric_score": 8.0,
+   "current_original_rubric_score": 6.5,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
     "identity": "PASS",
-    "coverage": "PASS",
-    "independence": "BOUNDED",
+    "coverage": "BOUNDED",
+    "independence": "FAIL",
     "economics": "BOUNDED",
-    "strategy": "PASS",
+    "strategy": "BOUNDED",
     "presentation": "BOUNDED",
     "history": "BOUNDED",
     "visual": "PASS",
@@ -7018,10 +7906,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "only 7 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, ",
    "round5_score": 8.0,
    "round5_grades": {
     "search": "PASS",
@@ -7064,9 +7952,25 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 1 prose sentence(s) repeated on a page",
+   "round8_score": 6.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "BOUNDED",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 7 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence",
    "failed_metrics_current": [
+    "coverage",
     "independence",
     "economics",
+    "strategy",
     "presentation",
     "history"
    ]
@@ -7127,10 +8031,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 3 prose sentence(s) repeated on",
    "round5_score": 8.0,
    "round5_grades": {
     "search": "PASS",
@@ -7173,6 +8077,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 3 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -7212,16 +8130,16 @@
     "strategy"
    ],
    "changes_since_round4": [],
-   "current_original_rubric_score": 9.5,
+   "current_original_rubric_score": 8.0,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
     "identity": "PASS",
-    "coverage": "PASS",
+    "coverage": "BOUNDED",
     "independence": "BOUNDED",
-    "economics": "PASS",
+    "economics": "BOUNDED",
     "strategy": "PASS",
-    "presentation": "PASS",
+    "presentation": "BOUNDED",
     "history": "PASS",
     "visual": "PASS",
     "performance": "PASS"
@@ -7234,10 +8152,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources",
+   "next_action": "only 6 document(s) read; 1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "round5_score": 8.5,
    "round5_grades": {
     "search": "PASS",
@@ -7280,8 +8198,25 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "BOUNDED",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "PASS",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 6 document(s) read; 1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "failed_metrics_current": [
-    "independence"
+    "coverage",
+    "independence",
+    "economics",
+    "presentation"
    ]
   },
   {
@@ -7318,7 +8253,7 @@
     "history"
    ],
    "changes_since_round4": [],
-   "current_original_rubric_score": 8.0,
+   "current_original_rubric_score": 8.5,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
@@ -7327,7 +8262,7 @@
     "independence": "BOUNDED",
     "economics": "BOUNDED",
     "strategy": "PASS",
-    "presentation": "BOUNDED",
+    "presentation": "PASS",
     "history": "BOUNDED",
     "visual": "PASS",
     "performance": "PASS"
@@ -7340,10 +8275,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level C (no mult",
    "round5_score": 7.5,
    "round5_grades": {
     "search": "PASS",
@@ -7386,10 +8321,23 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level C (no multi-year filed series)",
    "failed_metrics_current": [
     "independence",
     "economics",
-    "presentation",
     "history"
    ]
   },
@@ -7425,14 +8373,14 @@
     "presentation"
    ],
    "changes_since_round4": [],
-   "current_original_rubric_score": 9.0,
+   "current_original_rubric_score": 8.5,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
     "identity": "PASS",
-    "coverage": "PASS",
-    "independence": "BOUNDED",
-    "economics": "PASS",
+    "coverage": "BOUNDED",
+    "independence": "PASS",
+    "economics": "BOUNDED",
     "strategy": "PASS",
     "presentation": "BOUNDED",
     "history": "PASS",
@@ -7447,10 +8395,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; 3 prose sentence(s) repeated on a page",
+   "next_action": "only 7 document(s) read; no decision could be formed from the evidence; 5 prose sentence(s) repeated on a page",
    "round5_score": 9.0,
    "round5_grades": {
     "search": "PASS",
@@ -7493,8 +8441,23 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; 3 prose sentence(s) repeated on a page",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "BOUNDED",
+    "independence": "PASS",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "PASS",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 7 document(s) read; no decision could be formed from the evidence; 5 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
-    "independence",
+    "coverage",
+    "economics",
     "presentation"
    ]
   },
@@ -7536,16 +8499,16 @@
    "changes_since_round4": [
     "presentation crash (/slides 500) fixed in 7729503d; fix unchanged in HEAD; regression test passes; NOT re-scored"
    ],
-   "current_original_rubric_score": 8.5,
+   "current_original_rubric_score": 7.5,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "BOUNDED",
     "identity": "PASS",
     "coverage": "PASS",
     "independence": "BOUNDED",
-    "economics": "PASS",
+    "economics": "BOUNDED",
     "strategy": "PASS",
-    "presentation": "PASS",
+    "presentation": "BOUNDED",
     "history": "BOUNDED",
     "visual": "PASS",
     "performance": "PASS"
@@ -7558,10 +8521,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "a typed prefix puts another company first; 1 independent relevant origin(s); the reading rests on company-published sources; History Rewind level B (no multi-ye",
+   "next_action": "a typed prefix puts another company first; 1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from th",
    "round5_score": 7.0,
    "round5_grades": {
     "search": "BOUNDED",
@@ -7604,9 +8567,25 @@
     "performance": "PASS"
    },
    "round7_blocker": "a typed prefix puts another company first; 1 independent relevant origin(s); the reading rests on company-published sources; History Rewind level B (no multi-year filed series)",
+   "round8_score": 7.5,
+   "round8_grades": {
+    "search": "BOUNDED",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "a typed prefix puts another company first; 1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "failed_metrics_current": [
     "search",
     "independence",
+    "economics",
+    "presentation",
     "history"
    ]
   },
@@ -7666,10 +8645,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_H",
    "round5_score": 7.5,
    "round5_grades": {
     "search": "PASS",
@@ -7712,6 +8691,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
+   "round8_score": 7.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -7774,10 +8767,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 5 prose sentence(s) repeated on",
    "round5_score": 8.0,
    "round5_grades": {
     "search": "PASS",
@@ -7820,6 +8813,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 5 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -7861,17 +8868,17 @@
     "history"
    ],
    "changes_since_round4": [],
-   "current_original_rubric_score": 7.0,
+   "current_original_rubric_score": 5.5,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
     "identity": "PASS",
     "coverage": "FAIL",
-    "independence": "BOUNDED",
+    "independence": "FAIL",
     "economics": "BOUNDED",
-    "strategy": "PASS",
+    "strategy": "BOUNDED",
     "presentation": "BOUNDED",
-    "history": "BOUNDED",
+    "history": "FAIL",
     "visual": "PASS",
     "performance": "PASS"
    },
@@ -7883,10 +8890,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "only 1 document(s) read; 1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
+   "next_action": "only 0 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "round5_score": 7.0,
    "round5_grades": {
     "search": "PASS",
@@ -7929,10 +8936,25 @@
     "performance": "PASS"
    },
    "round7_blocker": "only 1 document(s) read; 1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
+   "round8_score": 5.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "FAIL",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "FAIL",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 0 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "failed_metrics_current": [
     "coverage",
     "independence",
     "economics",
+    "strategy",
     "presentation",
     "history"
    ]
@@ -7972,7 +8994,7 @@
     "history"
    ],
    "changes_since_round4": [],
-   "current_original_rubric_score": 6.0,
+   "current_original_rubric_score": 5.5,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
@@ -7981,7 +9003,7 @@
     "independence": "FAIL",
     "economics": "BOUNDED",
     "strategy": "BOUNDED",
-    "presentation": "PASS",
+    "presentation": "BOUNDED",
     "history": "FAIL",
     "visual": "PASS",
     "performance": "PASS"
@@ -7994,8 +9016,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "only 0 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "round5_score": 6.0,
@@ -8040,11 +9062,26 @@
     "performance": "PASS"
    },
    "round7_blocker": "only 0 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
+   "round8_score": 5.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "FAIL",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "FAIL",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 0 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "failed_metrics_current": [
     "coverage",
     "independence",
     "economics",
     "strategy",
+    "presentation",
     "history"
    ]
   },
@@ -8106,8 +9143,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "only 4 document(s) read; 1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "round5_score": 7.5,
@@ -8152,6 +9189,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "only 4 document(s) read; 1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
+   "round8_score": 7.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "BOUNDED",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 4 document(s) read; 1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "failed_metrics_current": [
     "coverage",
     "independence",
@@ -8194,14 +9245,14 @@
     "history"
    ],
    "changes_since_round4": [],
-   "current_original_rubric_score": 7.5,
+   "current_original_rubric_score": 7.0,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
     "identity": "PASS",
     "coverage": "PASS",
     "independence": "FAIL",
-    "economics": "PASS",
+    "economics": "BOUNDED",
     "strategy": "BOUNDED",
     "presentation": "BOUNDED",
     "history": "BOUNDED",
@@ -8216,10 +9267,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a deci",
+   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_H",
    "round5_score": 7.5,
    "round5_grades": {
     "search": "PASS",
@@ -8262,8 +9313,23 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one; 1 prose sentence(s) repeated on a page",
+   "round8_score": 7.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
+    "economics",
     "strategy",
     "presentation",
     "history"
@@ -8326,8 +9392,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
    "round5_score": 7.5,
@@ -8372,6 +9438,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -8435,8 +9515,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
    "round5_score": 8.0,
@@ -8481,6 +9561,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -8544,10 +9638,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_H",
    "round5_score": 7.5,
    "round5_grades": {
     "search": "PASS",
@@ -8590,6 +9684,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
+   "round8_score": 7.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -8635,8 +9743,8 @@
     "search": "PASS",
     "identity": "PASS",
     "coverage": "PASS",
-    "independence": "BOUNDED",
-    "economics": "PASS",
+    "independence": "PASS",
+    "economics": "BOUNDED",
     "strategy": "PASS",
     "presentation": "BOUNDED",
     "history": "PASS",
@@ -8651,10 +9759,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; 7 prose sentence(s) repeated on a page",
+   "next_action": "no decision could be formed from the evidence; 8 prose sentence(s) repeated on a page",
    "round5_score": 3.0,
    "round5_grades": {
     "search": "PASS",
@@ -8697,8 +9805,22 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; 7 prose sentence(s) repeated on a page",
+   "round8_score": 9.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "PASS",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "PASS",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "no decision could be formed from the evidence; 8 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
-    "independence",
+    "economics",
     "presentation"
    ]
   },
@@ -8759,10 +9881,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: ",
    "round5_score": 7.5,
    "round5_grades": {
     "search": "PASS",
@@ -8805,6 +9927,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
+   "round8_score": 7.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -8869,10 +10005,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "only 7 document(s) read; 1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, ",
+   "next_action": "only 7 document(s) read; 1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "round5_score": 8.0,
    "round5_grades": {
     "search": "PASS",
@@ -8915,6 +10051,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "only 7 document(s) read; 1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence",
+   "round8_score": 7.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "BOUNDED",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 7 document(s) read; 1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence",
    "failed_metrics_current": [
     "coverage",
     "independence",
@@ -8978,8 +10128,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
    "round5_score": 8.0,
@@ -9024,6 +10174,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -9086,8 +10250,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
    "round5_score": 8.5,
@@ -9132,6 +10296,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; History Rewind level B (no multi-year filed series)",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; History Rewind level B (no multi-year filed series)",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -9195,7 +10373,7 @@
     "desktop_dark_1440": true
    },
    "last_evaluation": "2026-11-26T06:35:34+00:00",
-   "evaluated_commit": "5719b271+dirty",
+   "evaluated_commit": "35a09899+dirty",
    "qualification_status": "STATUS_PAGE_PRODUCT_PASS_STATUS_UNVERIFIED",
    "why_not_re_evaluated": "Product surface verified locally at 5 widths x 2 themes; the corporate status itself still needs re-verification against a current outside source (network blocked).",
    "next_action": "Re-verify corporate status from a primary source",
@@ -9240,7 +10418,21 @@
     "visual": "N/A",
     "performance": "N/A"
    },
-   "round7_blocker": "no longer independent -- the product shows the status page and opens no run (verified live)"
+   "round7_blocker": "no longer independent -- the product shows the status page and opens no run (verified live)",
+   "round8_score": null,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "N/A",
+    "independence": "N/A",
+    "economics": "N/A",
+    "strategy": "N/A",
+    "presentation": "N/A",
+    "history": "N/A",
+    "visual": "N/A",
+    "performance": "N/A"
+   },
+   "round8_blocker": "no longer independent -- the product shows the status page and opens no run (verified live)"
   },
   {
    "prospect_id": 85,
@@ -9297,8 +10489,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; 3 prose sentence(s) repeated on a page; History Rewind level B (no multi-year ",
    "round5_score": 8.5,
@@ -9343,6 +10535,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; 3 prose sentence(s) repeated on a page; History Rewind level B (no multi-year filed series)",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "PASS",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; 3 prose sentence(s) repeated on a page; History Rewind level B (no multi-year filed series)",
    "failed_metrics_current": [
     "independence",
     "presentation",
@@ -9405,8 +10611,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 3 prose sentence(s) repeated on",
    "round5_score": 8.0,
@@ -9451,6 +10657,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 3 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 3 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -9514,10 +10734,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "only 5 document(s) read; no decision could be formed from the evidence; 1 prose sentence(s) repeated on a page",
+   "next_action": "only 4 document(s) read; the decision question is the business-model default, not derived from this company's evidence; 1 prose sentence(s) repeated on a page",
    "round5_score": 8.0,
    "round5_grades": {
     "search": "PASS",
@@ -9560,6 +10780,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "only 5 document(s) read; no decision could be formed from the evidence; 1 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "BOUNDED",
+    "independence": "PASS",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 4 document(s) read; the decision question is the business-model default, not derived from this company's evidence; 1 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "coverage",
     "economics",
@@ -9623,8 +10857,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
    "round5_score": 8.0,
@@ -9669,6 +10903,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -9733,8 +10981,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
    "round5_score": 7.0,
@@ -9779,6 +11027,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 4 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -9843,8 +11105,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: ",
    "round5_score": 7.0,
@@ -9889,6 +11151,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
+   "round8_score": 7.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -9954,10 +11230,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: ",
    "round5_score": 7.0,
    "round5_grades": {
     "search": "PASS",
@@ -10000,6 +11276,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
+   "round8_score": 7.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -10065,8 +11355,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
    "round5_score": 7.0,
@@ -10111,6 +11401,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
+   "round8_score": 7.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -10152,12 +11456,12 @@
     "history"
    ],
    "changes_since_round4": [],
-   "current_original_rubric_score": 7.5,
+   "current_original_rubric_score": 8.0,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
     "identity": "PASS",
-    "coverage": "FAIL",
+    "coverage": "BOUNDED",
     "independence": "PASS",
     "economics": "BOUNDED",
     "strategy": "PASS",
@@ -10174,10 +11478,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "only 2 document(s) read; no decision could be formed from the evidence; 1 prose sentence(s) repeated on a page",
+   "next_action": "only 4 document(s) read; no decision could be formed from the evidence; 6 prose sentence(s) repeated on a page",
    "round5_score": 8.5,
    "round5_grades": {
     "search": "PASS",
@@ -10220,6 +11524,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "only 2 document(s) read; no decision could be formed from the evidence; 1 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "BOUNDED",
+    "independence": "PASS",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 4 document(s) read; no decision could be formed from the evidence; 6 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "coverage",
     "economics",
@@ -10282,8 +11600,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "only 6 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; outcome DEFENSIBLE_ABSTENTION: an honest reading, not",
    "round5_score": 8.0,
@@ -10328,6 +11646,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "only 6 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "BOUNDED",
+    "independence": "FAIL",
+    "economics": "PASS",
+    "strategy": "BOUNDED",
+    "presentation": "PASS",
+    "history": "PASS",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 6 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "coverage",
     "independence",
@@ -10390,8 +11722,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 2 prose sentence(s) repeated on",
    "round5_score": 8.0,
@@ -10436,6 +11768,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 2 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 2 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
     "economics",
@@ -10499,8 +11845,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; 4 prose sentence(s) repeated on a page; History Rewind level C (no multi-year ",
    "round5_score": 8.0,
@@ -10545,6 +11891,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; 4 prose sentence(s) repeated on a page; History Rewind level C (no multi-year filed series)",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "PASS",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; 4 prose sentence(s) repeated on a page; History Rewind level C (no multi-year filed series)",
    "failed_metrics_current": [
     "independence",
     "presentation",
@@ -10607,8 +11967,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "only 6 document(s) read; no decision could be formed from the evidence; 5 prose sentence(s) repeated on a page",
    "round5_score": 8.0,
@@ -10653,6 +12013,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "only 6 document(s) read; no decision could be formed from the evidence; 5 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "BOUNDED",
+    "independence": "PASS",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "only 6 document(s) read; no decision could be formed from the evidence; 5 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "coverage",
     "economics",
@@ -10694,7 +12068,7 @@
     "history"
    ],
    "changes_since_round4": [],
-   "current_original_rubric_score": 7.0,
+   "current_original_rubric_score": 7.5,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
@@ -10703,7 +12077,7 @@
     "independence": "FAIL",
     "economics": "BOUNDED",
     "strategy": "BOUNDED",
-    "presentation": "BOUNDED",
+    "presentation": "PASS",
     "history": "BOUNDED",
     "visual": "PASS",
     "performance": "PASS"
@@ -10716,8 +12090,8 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
    "next_action": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_H",
    "round5_score": 8.5,
@@ -10762,11 +12136,24 @@
     "performance": "PASS"
    },
    "round7_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
+   "round8_score": 7.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "0 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
    "failed_metrics_current": [
     "independence",
     "economics",
     "strategy",
-    "presentation",
     "history"
    ]
   },
@@ -10803,15 +12190,15 @@
     "presentation"
    ],
    "changes_since_round4": [],
-   "current_original_rubric_score": 7.0,
+   "current_original_rubric_score": 8.5,
    "current_strengthened_rubric_score": null,
    "current_grades": {
     "search": "PASS",
     "identity": "PASS",
-    "coverage": "BOUNDED",
-    "independence": "FAIL",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
     "economics": "BOUNDED",
-    "strategy": "BOUNDED",
+    "strategy": "PASS",
     "presentation": "BOUNDED",
     "history": "PASS",
     "visual": "PASS",
@@ -10825,10 +12212,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "only 5 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, ",
+   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 3 prose sentence(s) repeated on",
    "round5_score": 8.5,
    "round5_grades": {
     "search": "PASS",
@@ -10871,11 +12258,23 @@
     "performance": "PASS"
    },
    "round7_blocker": "only 5 document(s) read; 0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence",
+   "round8_score": 8.5,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "PASS",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 3 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
-    "coverage",
     "independence",
     "economics",
-    "strategy",
     "presentation"
    ]
   },
@@ -10934,10 +12333,10 @@
     "mobile_dark": null
    },
    "last_evaluation": null,
-   "evaluated_commit": "5719b271",
-   "qualification_status": "ROUND_7_SCORED",
+   "evaluated_commit": "35a09899",
+   "qualification_status": "ROUND_8_SCORED",
    "why_not_re_evaluated": null,
-   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this com",
+   "next_action": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 3 prose sentence(s) repeated on",
    "round5_score": 8.0,
    "round5_grades": {
     "search": "PASS",
@@ -10980,6 +12379,20 @@
     "performance": "PASS"
    },
    "round7_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; 2 prose sentence(s) repeated on a page",
+   "round8_score": 8.0,
+   "round8_grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "round8_blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 3 prose sentence(s) repeated on a page",
    "failed_metrics_current": [
     "independence",
     "economics",

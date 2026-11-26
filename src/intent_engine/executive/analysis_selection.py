@@ -315,6 +315,11 @@ class RecordFacts:
     available: bool = True
 
 
+def _lower_first(text: str) -> str:
+    text = str(text or "")
+    return text[:1].lower() + text[1:] if text[:2] != text[:2].upper() else text
+
+
 def _channel_of(economic_id: str) -> str:
     """'US:MARKET_RATE' -> 'MARKET_RATE'. The region is not the channel."""
     text = str(economic_id or "")
@@ -1196,8 +1201,13 @@ def _scenarios(profile, archetype: str, facts: RecordFacts,
             outcome_range=("direction is supportable from the published "
                            "record; magnitude is not, and no figure is put "
                            "on it here"),
-            kill_switch=("if the direction is not visible by the next review, "
-                         "the assumption under the decision has failed")),
+            # NAMES THE VARIABLE THAT HAS TO MOVE. "If the direction is not
+            # visible by the next review" was the same sentence on 71 of 95
+            # prospect-100 round-7 briefs; the base case already says WHICH
+            # quantity must respond, so the stopping rule watches that one.
+            kill_switch=(f"if {_lower_first(drivers[0])} has not moved the "
+                         f"way this decision assumes by the next review, the "
+                         f"assumption under it has failed")),
         Scenario(
             name="UPSIDE", lever=lever,
             first_order=f"{drivers[0]} responds further than assumed",

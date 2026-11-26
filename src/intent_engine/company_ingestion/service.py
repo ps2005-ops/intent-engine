@@ -3341,6 +3341,31 @@ class CompanyIngestionService:
             return base
         return _merge_reporting(base, news)
 
+    @staticmethod
+    def _namesake_free(meta) -> bool:
+        """Does the reviewed registry record NO namesake for this company?
+
+        True only for a catalogued entity whose review left no ambiguity note
+        and no disambiguation group ("Cube" also names Cube Dev and
+        CubeSmart; Observe also names Observe.AI). Unknown companies are not
+        namesake-free: absence of a review is not evidence of uniqueness.
+        """
+        domain = str(meta.get("domain") or "").lower()
+        domain = domain[4:] if domain.startswith("www.") else domain
+        if not domain:
+            return False
+        try:
+            from intent_engine.company_ingestion.catalog import (
+                CATALOG_REGISTRY,
+            )
+        except Exception:                                # noqa: BLE001
+            return False
+        for profile in CATALOG_REGISTRY:
+            if profile.primary_domain.lower() == domain:
+                return not (profile.ambiguity_notes
+                            or profile.disambiguation_group)
+        return False
+
     def _independent_reporting_candidates(self, meta, run_id: str = "") -> list:
         """Articles by other publishers about this company. Never raises.
 
@@ -3363,7 +3388,8 @@ class CompanyIngestionService:
                 fetch=fetch, fetch_json=fetch_json,
                 today=_date.today().isoformat(),
                 deadline=time.monotonic() +
-                self._INDEPENDENT_REPORTING_CAP_S - 1.5)
+                self._INDEPENDENT_REPORTING_CAP_S - 1.5,
+                namesake_free=self._namesake_free(meta))
         except Exception as exc:                          # noqa: BLE001
             _LOG.warning("independent_reporting_raised company=%r %s: %s",
                          name, type(exc).__name__, exc)

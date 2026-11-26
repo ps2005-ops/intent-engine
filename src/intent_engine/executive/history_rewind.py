@@ -694,7 +694,11 @@ LEVEL_TITLES = {
 ECON_LINKED = "ECONOMIC_CONTEXT_LINKED"
 ECON_NO_STATE_FOR_DATE = "NO_ECONOMIC_STATE_PUBLISHED_FOR_THIS_DATE"
 ECON_NOT_ATTEMPTED = "ECONOMIC_CONTEXT_NOT_ATTEMPTED"
-ECON_STATES = (ECON_LINKED, ECON_NO_STATE_FOR_DATE, ECON_NOT_ATTEMPTED)
+#: A stop placed by official statistics as released by its date, rebuilt
+#: today (`external_intel.econ_history`) -- never a state published then.
+ECON_RECONSTRUCTED = "ECONOMIC_CONTEXT_RECONSTRUCTED"
+ECON_STATES = (ECON_LINKED, ECON_RECONSTRUCTED, ECON_NO_STATE_FOR_DATE,
+               ECON_NOT_ATTEMPTED)
 
 #: What a published page of each kind lets a reader establish. The VALUE is
 #: what the reader learns, so a company whose record is three newsroom posts
@@ -1128,6 +1132,17 @@ def _economic_then(econ_at, when: _dt.date, company: str) -> tuple:
     conditions = getattr(context, "conditions", None) or {}
     shocks = tuple(getattr(context, "shocks", ()) or ())
     area = str(getattr(context, "area", "") or "the economy")
+    if getattr(context, "reconstructed", False):
+        plain = getattr(context, "plain_names", None) or {}
+        named = _join([_condition_english(plain.get(k, k), v)
+                       for k, v in sorted(conditions.items())[:4]])
+        if not named:
+            return "", ECON_NO_STATE_FOR_DATE
+        return (_stop(f"Official {area} statistics as released by "
+                      f"{as_of or when.isoformat()} recorded {named} ("
+                      f"{getattr(context, 'note', '')}). Nothing released "
+                      f"after {when.isoformat()} was used"),
+                ECON_RECONSTRUCTED)
     named = _join([_condition_english(k, v)
                    for k, v in sorted(conditions.items())[:3]
                    if not isinstance(v, dict) or v.get("known")])

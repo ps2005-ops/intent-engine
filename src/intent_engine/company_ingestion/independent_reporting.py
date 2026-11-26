@@ -445,7 +445,8 @@ def _too_old(published: str, today: str) -> bool:
         return False
 
 
-def needs_identity_anchor(company: str, text: str) -> bool:
+def needs_identity_anchor(company: str, text: str, *,
+                          namesake_free: bool = False) -> bool:
     """Does the NAME alone fail to identify the company in this text?
 
     Decided from the text, not from a list of names: a one-word name that the
@@ -457,7 +458,15 @@ def needs_identity_anchor(company: str, text: str) -> bool:
     name = (company or "").strip()
     if not name or " " in name:
         return False
-    if len(name) <= 4 or name.isupper():
+    # SHORT IS A PROXY FOR "MAY BE A WORD OR ANOTHER COMPANY", AND THE
+    # REVIEWED REGISTRY CAN ANSWER THE SECOND HALF DIRECTLY. Round 7: every
+    # article about Qlik, Deel, Brex, Torq and Pax8 needed the company's
+    # domain in its text to count, and the press rarely prints one, so these
+    # companies read as having no outside coverage. A mixed-case name whose
+    # registry entry records no namesake skips the length rule; an acronym
+    # (BILL, IFS, KX) never does, and the lowercase-word test below still
+    # applies to every article.
+    if name.isupper() or (len(name) <= 4 and not namesake_free):
         return True
     return bool(re.search(rf"(?<![\w-]){re.escape(name.lower())}(?![\w-])",
                           text or ""))
@@ -479,7 +488,7 @@ def identity_anchors(company: str, domain: str, aliases=()) -> List[str]:
 
 
 def verify(pointer, *, company, domain, aliases, fetch, robots,
-           report) -> Optional[dict]:
+           report, namesake_free: bool = False) -> Optional[dict]:
     """Fetch, read and judge one article. A candidate, or None with a reason."""
     from intent_engine.company_ingestion import relevance as REL
     from intent_engine.company_ingestion.parsing import parse_html
@@ -515,7 +524,7 @@ def verify(pointer, *, company, domain, aliases, fetch, robots,
         return None
     text = page.get("text") or page.get("text_content") or ""
     title = pointer.get("title") or page.get("title") or ""
-    if needs_identity_anchor(company, text):
+    if needs_identity_anchor(company, text, namesake_free=namesake_free):
         anchors = identity_anchors(company, domain, aliases)
         if not any(a.lower() in text.lower() for a in anchors):
             report["rejection_reasons"]["AMBIGUOUS_NAME_NO_IDENTITY_ANCHOR"] += 1
@@ -565,7 +574,7 @@ def discover(*, company: str, domain: str = "", aliases: Sequence[str] = (),
              use_gdelt: Optional[bool] = None, use_wikipedia: bool = True,
              limit: int = MAX_ARTICLES_FETCHED,
              deadline: Optional[float] = None,
-             clock=time.monotonic) -> dict:
+             clock=time.monotonic, namesake_free: bool = False) -> dict:
     """Independent reporting about `company`: candidates plus the search record.
 
     `fetch(url, extra_mimes) -> {ok, status_code, body, final_url,
@@ -634,7 +643,7 @@ def discover(*, company: str, domain: str = "", aliases: Sequence[str] = (),
         try:
             return verify(pointer, company=company, domain=domain,
                           aliases=aliases, fetch=fetch, robots=robots,
-                          report=report)
+                          report=report, namesake_free=namesake_free)
         except Exception:                                # noqa: BLE001
             report["rejection_reasons"]["VERIFY_RAISED"] += 1
             return None

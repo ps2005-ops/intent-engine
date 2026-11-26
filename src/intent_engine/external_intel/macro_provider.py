@@ -73,10 +73,37 @@ def _cache(root, name: str) -> pathlib.Path:
     return pathlib.Path(root) / "cache" / "macro" / f"{name}.json"
 
 
+def _bls_key() -> str:
+    """`&registrationkey=...` when BLS_API_KEY is set, else "".
+
+    The free registered tier raises BLS's daily quota from 25 to 500 queries.
+    The key travels only in the request: it is never cached (the cache stores
+    the body), logged, or written anywhere this module controls.
+    """
+    import os
+    key = os.environ.get("BLS_API_KEY", "").strip()
+    return f"&registrationkey={key}" if key else ""
+
+
 def _is_refusal(body) -> bool:
-    """A provider's own "not processed" answer, delivered with a 200."""
-    status = body.get("status") if isinstance(body, dict) else None
-    return bool(status) and str(status).upper() != "REQUEST_SUCCEEDED"
+    """Anything that is not usable data, delivered with a 200.
+
+    A provider's own "not processed" status (BLS's exhausted quota), a BLS
+    success that carries no series data, a Treasury answer with no rows, and
+    anything that is not a JSON object at all -- an HTML error page parses to
+    nothing here and never reaches the cache.
+    """
+    if not isinstance(body, dict):
+        return True
+    status = body.get("status")
+    if status is not None:
+        if str(status).upper() != "REQUEST_SUCCEEDED":
+            return True
+        series = ((body.get("Results") or {}).get("series") or [])
+        return not any((s or {}).get("data") for s in series)
+    if "data" in body:
+        return not body.get("data")
+    return False
 
 
 def _cached_get(root, name: str, url: str, now: Optional[float] = None,
@@ -138,7 +165,7 @@ def _month_end(year: int, month: int) -> str:
 # --- BLS --------------------------------------------------------------------
 def _bls_series(root, series_id: str, fetcher=None):
     """Latest two monthly readings, newest first."""
-    url = _BLS.format(series=series_id) + "?latest=true"
+    url = _BLS.format(series=series_id) + "?latest=true" + _bls_key()
     body = _cached_get(root, f"bls_{series_id}", url, fetcher=fetcher)
     latest = _bls_rows(body)
     # `latest=true` returns one point, so the comparison point needs its own
@@ -150,7 +177,8 @@ def _bls_series(root, series_id: str, fetcher=None):
     year = int(latest[0]["year"])
     span = _cached_get(root, f"bls_{series_id}_{year}",
                        _BLS.format(series=series_id)
-                       + f"?startyear={year - 1}&endyear={year}",
+                       + f"?startyear={year - 1}&endyear={year}"
+                       + _bls_key(),
                        fetcher=fetcher)
     rows = _bls_rows(span)
     current = latest[0]

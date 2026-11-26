@@ -51,6 +51,12 @@ def expanded(history: dict) -> tuple:
     wall = h.get("hindsight_wall") == "PRESENT"
     span = _months(str(h.get("earliest") or ""), str(h.get("latest") or ""))
     econ = int(h.get("economic_links") or 0)
+    # Reconstructed readings (official statistics as released by the stop's
+    # date, rebuilt today) are counted SEPARATELY and named in the reason: they
+    # respect release timing and are labelled on the page, but they are not a
+    # state the engine published at the time.
+    rebuilt = int((h.get("econ_states") or {}).get(
+        "ECONOMIC_CONTEXT_RECONSTRUCTED", 0) or 0)
     if level == "A":
         return "PASS", "a filed multi-year series (original level A)"
     if level != "B" or not wall:
@@ -59,9 +65,13 @@ def expanded(history: dict) -> tuple:
     missing = [w for w, ok in (
         (f"{stops} dated stop(s) of 4", stops >= 4),
         (f"a {span}-month span of 24", span >= 24),
-        ("no vintage-safe economic reading on any stop", econ >= 1)) if not ok]
+        ("no economic reading placed on any stop", econ + rebuilt >= 1))
+        if not ok]
     if not missing:
-        return "PASS", f"{stops} stops over {span} months, {econ} economic"
+        basis = (f"{econ} published" if econ else "") + \
+                (" and " if econ and rebuilt else "") + \
+                (f"{rebuilt} reconstructed (release-timed)" if rebuilt else "")
+        return "PASS", f"{stops} stops over {span} months; economy: {basis}"
     if stops >= 2:
         return "BOUNDED", "; ".join(missing)
     return "FAIL", "; ".join(missing)
@@ -86,6 +96,8 @@ def main() -> int:
                       "stops": h.get("stops"), "earliest": h.get("earliest"),
                       "latest": h.get("latest"),
                       "economic_links": h.get("economic_links"),
+                      "reconstructed_links": (h.get("econ_states") or {}).get(
+                          "ECONOMIC_CONTEXT_RECONSTRUCTED", 0),
                       "econ_states": h.get("econ_states")})
     summary = {"original": dict(orig), "expanded": dict(exp),
                "blocking_reasons": dict(collections.Counter(

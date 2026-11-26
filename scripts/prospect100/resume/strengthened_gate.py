@@ -78,6 +78,14 @@ def main() -> int:
         deck = (surfaces.get("slides") or {}).get("status") == 200 \
             and has_report
         B = dict(g)
+        # ECONOMICS: a decision the published economy moved through a channel
+        # THIS company's evidence establishes (founder_economy.block) is
+        # evidence-led economics. The original classifier checks economic
+        # phrasing before evidence phrasing and grades ECON_LED BOUNDED, so a
+        # company that gains a measured channel on top of its own evidence
+        # can fall from PASS -- recorded, and left unchanged in view A.
+        if c.get("decision_force") == "ECON_LED" and g.get("economics") != "FAIL":
+            B["economics"] = "PASS"
         B["strategy"] = ("PASS" if g.get("strategy") == "PASS" and has_report
                          else "BOUNDED" if has_report or g.get("strategy")
                          in ("PASS", "BOUNDED") else "FAIL")

@@ -158,3 +158,20 @@ def test_a_reason_said_once_is_left_alone():
     from intent_engine.adaptive.render import _one_reason_per_block
     html = "<p>It scored 19.0.</p><p>Other.</p>"
     assert _one_reason_per_block(html, "It scored 19.0.") == html
+
+
+def test_a_press_verb_for_a_move_counts():
+    obs = O.derive_observations([_article(
+        "Tanium adds endpoint behavior detection and AI-assisted threat "
+        "hunting to its platform this week.", title="Tanium news")],
+        company="Tanium")
+    assert obs and O.REPORTED_DEVELOPMENT in obs[0].signals
+
+
+def test_a_press_verb_on_the_company_s_own_page_is_not_outside_coverage():
+    """CONTROL: the wider vocabulary is for outside reports only."""
+    obs = O.derive_observations([_article(
+        "Tanium adds endpoint behavior detection and AI-assisted threat "
+        "hunting to its platform this week.", title="Tanium news",
+        source_class="company_owned")], company="Tanium")
+    assert all(O.REPORTED_DEVELOPMENT not in o.signals for o in obs)

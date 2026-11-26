@@ -7101,7 +7101,14 @@ class WebApp:
             # this product has shipped an inert feature before.
             def _econ_at(iso_date, _root=self._runtime_root):
                 from intent_engine.external_intel import econ_context as _EC
-                return _EC.load(_root, as_of=iso_date)
+                # A state the engine PUBLISHED by then wins; only where none
+                # exists is the stop placed by statistics as released by its
+                # date, rebuilt today and labelled so (econ_history).
+                published = _EC.load(_root, as_of=iso_date)
+                if getattr(published, "available", False):
+                    return published
+                from intent_engine.external_intel import econ_history as _EH
+                return _EH.reconstruct_at(_root, iso_date) or published
 
             bounded = HR.bounded_rewind(company=timeline.company or name,
                                         records=records, econ_at=_econ_at)

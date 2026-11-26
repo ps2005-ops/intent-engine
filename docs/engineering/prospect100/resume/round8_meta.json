@@ -1,0 +1,4 @@
+{"round": 8, "analysis_commit": "35a09899", "analysis_tree": "a2ab897ac0def8385747d45971ad25c145562b29",
+ "journeys": "95/95 PASS; CORE p50 24.5s, max 61.4s", "browser_matrix": "17,140 measurements, 0 overflow",
+ "views": "A 0, B 0, C 90 fully qualified; B economics 45 (A 7: original classifier grades ECON_LED as BOUNDED); false decision-grade 1 (IFS)",
+ "decks_missing": ["CData", "Enverus", "Epicor", "Plex", "IFS"]}
