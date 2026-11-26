@@ -1,0 +1,169 @@
+{
+ "universe_sha256": "d7f9f517dce946e2087f89ab326a9290f7eaeab9ae89a7bdda3d564a3d2e640d",
+ "code": "c48dfac0",
+ "journeys": "20/20 PASS; CORE p50 53.3s, p90 66.3s, max 81.8s",
+ "autocomplete_found": "0/20 (none are in the catalog; the visitor's typed website was used)",
+ "classes": {
+  "DECISION_GRADE_READING": 17,
+  "RETRIEVAL_LIMITATION_HANDLED_CORRECTLY": 2,
+  "DEFENSIBLE_ABSTENTION": 1
+ },
+ "identity_defects": [
+  {
+   "company": "Mercury",
+   "adopted_cik": "1049521",
+   "registrant": "MERCURY SYSTEMS INC",
+   "effect": "History Rewind level A built from another company's 10-K/10-Q",
+   "fix": "round 12: an unconfirmed run takes a filer only on an exact name"
+  }
+ ],
+ "correct_filer_adoptions": [
+  {
+   "company": "Navan",
+   "cik": "1639723"
+  }
+ ],
+ "status": "RETIRED as unseen: its results motivated the round-12 identity fix",
+ "companies": [
+  {
+   "company": "Airtable",
+   "final_class": "DECISION_GRADE_READING",
+   "history_level": "C",
+   "independent_origins": 1,
+   "autocomplete_found": false
+  },
+  {
+   "company": "Toast",
+   "final_class": "RETRIEVAL_LIMITATION_HANDLED_CORRECTLY",
+   "history_level": "?",
+   "independent_origins": 0,
+   "autocomplete_found": false
+  },
+  {
+   "company": "Attentive",
+   "final_class": "DECISION_GRADE_READING",
+   "history_level": "C",
+   "independent_origins": 1,
+   "autocomplete_found": false
+  },
+  {
+   "company": "Glean",
+   "final_class": "DECISION_GRADE_READING",
+   "history_level": "C",
+   "independent_origins": 1,
+   "autocomplete_found": false
+  },
+  {
+   "company": "Coupa",
+   "final_class": "DECISION_GRADE_READING",
+   "history_level": "B",
+   "independent_origins": 4,
+   "autocomplete_found": false
+  },
+  {
+   "company": "Chainalysis",
+   "final_class": "DECISION_GRADE_READING",
+   "history_level": "B",
+   "independent_origins": 1,
+   "autocomplete_found": false
+  },
+  {
+   "company": "Carta",
+   "final_class": "DECISION_GRADE_READING",
+   "history_level": "B",
+   "independent_origins": 3,
+   "autocomplete_found": false
+  },
+  {
+   "company": "Ironclad",
+   "final_class": "DECISION_GRADE_READING",
+   "history_level": "B",
+   "independent_origins": 1,
+   "autocomplete_found": false
+  },
+  {
+   "company": "Faire",
+   "final_class": "RETRIEVAL_LIMITATION_HANDLED_CORRECTLY",
+   "history_level": "?",
+   "independent_origins": null,
+   "autocomplete_found": false
+  },
+  {
+   "company": "Plaid",
+   "final_class": "DECISION_GRADE_READING",
+   "history_level": "B",
+   "independent_origins": 1,
+   "autocomplete_found": false
+  },
+  {
+   "company": "Checkr",
+   "final_class": "DECISION_GRADE_READING",
+   "history_level": "B",
+   "independent_origins": 1,
+   "autocomplete_found": false
+  },
+  {
+   "company": "Miro",
+   "final_class": "DECISION_GRADE_READING",
+   "history_level": "B",
+   "independent_origins": 2,
+   "autocomplete_found": false
+  },
+  {
+   "company": "Anduril",
+   "final_class": "DECISION_GRADE_READING",
+   "history_level": "C",
+   "independent_origins": 1,
+   "autocomplete_found": false
+  },
+  {
+   "company": "Celonis",
+   "final_class": "DECISION_GRADE_READING",
+   "history_level": "C",
+   "independent_origins": 1,
+   "autocomplete_found": false
+  },
+  {
+   "company": "Personio",
+   "final_class": "DECISION_GRADE_READING",
+   "history_level": "C",
+   "independent_origins": 1,
+   "autocomplete_found": false
+  },
+  {
+   "company": "Navan",
+   "final_class": "DECISION_GRADE_READING",
+   "history_level": "A",
+   "independent_origins": 1,
+   "autocomplete_found": false
+  },
+  {
+   "company": "Mercury",
+   "final_class": "DECISION_GRADE_READING",
+   "history_level": "A",
+   "independent_origins": 1,
+   "autocomplete_found": false
+  },
+  {
+   "company": "Benchling",
+   "final_class": "DECISION_GRADE_READING",
+   "history_level": "C",
+   "independent_origins": 1,
+   "autocomplete_found": false
+  },
+  {
+   "company": "Flexport",
+   "final_class": "DECISION_GRADE_READING",
+   "history_level": "B",
+   "independent_origins": 1,
+   "autocomplete_found": false
+  },
+  {
+   "company": "Sweetgreen",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "history_level": "A",
+   "independent_origins": 0,
+   "autocomplete_found": false
+  }
+ ]
+}

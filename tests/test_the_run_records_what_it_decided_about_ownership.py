@@ -107,12 +107,12 @@ def test_a_run_started_from_a_website_still_knows_whose_documents_these_are():
     """
     with tempfile.TemporaryDirectory() as tmp:
         ci = _service(tmp)
-        run = ci.create_run(company_name="Acme", website="https://acme.com",
+        run = ci.create_run(company_name="Acme United", website="https://acme.com",
                             user_id="u", as_of=AS_OF)
         rid = run["run_id"]
         assert str((ci.run_meta(rid) or {}).get("cik") or "") == "", (
             "the premise of this test is a run that carries no typed CIK")
-        ci._strategic_report("Acme", [_doc(FILING, "jpm")], [], run_id=rid)
+        ci._strategic_report("Acme United", [_doc(FILING, "jpm")], [], run_id=rid)
         record = ci.ownership_record(rid)
         assert record, "a run with no typed CIK recorded nothing at all"
         assert record["subject_cik"] == "2098"

@@ -3,7 +3,7 @@
  "worktree_branch": "qual/prospect100-resume",
  "base_commit": "3536cf41 (integration/unified-2026-11-25)",
  "current_wave": 0,
- "current_round": 11,
+ "current_round": 12,
  "completed_company_ids": [],
  "pending_company_ids": [
   1,
@@ -130,7 +130,8 @@
   "7": "5719b271",
   "8": "35a09899",
   "9": "f8aac885",
-  "10": "c48dfac0"
+  "10": "c48dfac0",
+  "11": "d6c3186e"
  },
  "status": "round 9 running on the round-9 candidate tree (committed through the guard in parallel)",
  "active_processes": "none recorded here; check `ps` for live_pass/runserver before assuming",
@@ -168,5 +169,7 @@
  "regression_universe": "scripts/prospect100/resume/regression75_pass.py (ASI-25 + Next-40 + Final-Ten = 75, no overlap with prospect-100)",
  "unseen_universe": "docs/engineering/prospect100/resume/UNSEEN_UNIVERSE.json (frozen, sha256 beside it; 20 companies)",
  "dashboard": "https://claude.ai/artifact/FZStd3EF6YgnoM3JkPUpMQ (private until shared; data = rounds_flat.csv + rounds_companies.csv)",
- "evaluations_running": "regression75 (2 shards) + unseen20 on the round-10 server, port 8610, commit c48dfac0"
+ "evaluations_running": null,
+ "unseen_eval": "unseen_eval_r10.json: 20/20 journeys on c48dfac0; Mercury identity defect fixed in round 12; universe RETIRED as unseen",
+ "regression75": "regression75_r10.json: 74/75 on c48dfac0; Clio naming fixed in round 12"
 }

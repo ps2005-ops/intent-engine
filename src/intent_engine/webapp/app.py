@@ -4473,6 +4473,7 @@ class WebApp:
                 + (getattr(_contract, "run_contribution", "") or
                    "This run did not add enough independent evidence to "
                    "strengthen it."))
+        company = self._recognisable_name(company)
         heading = f'Limited analysis of {_e(company)}'
         body = (
             f'<!doctype html><html lang="en"><head><meta charset="utf-8">'

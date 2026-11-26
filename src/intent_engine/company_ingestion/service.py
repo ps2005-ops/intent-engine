@@ -3169,7 +3169,7 @@ class CompanyIngestionService:
             from intent_engine.company_ingestion.edgar import resolve_cik
             resolved = resolve_cik(name,
                                    transport=self.transport,
-                                   resolver=self.resolver)
+                                   resolver=self.resolver, exact=True)
             out = str((resolved or {}).get("cik") or "")
         except Exception:  # noqa: BLE001 - subject identification is best-effort
             return ""

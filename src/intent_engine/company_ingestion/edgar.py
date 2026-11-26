@@ -388,7 +388,8 @@ def _tokens(name: str) -> set:
     return {w for w in words if w and w not in _DROP_TOKENS}
 
 
-def resolve_cik(company_name, *, ticker=None, transport=None, resolver=None):
+def resolve_cik(company_name, *, ticker=None, transport=None, resolver=None,
+                exact=False):
     """Best-effort resolve a company to its zero-padded 10-digit CIK using the
     official SEC ticker map. Matches by ticker first, then by name tokens.
     Returns {cik, cik10, title, ticker} or None. Never raises."""
@@ -411,7 +412,19 @@ def resolve_cik(company_name, *, ticker=None, transport=None, resolver=None):
         if want_ticker and row_ticker == want_ticker:
             best = (cik, title, row_ticker)
             break
-        if want_tokens and want_tokens <= _tokens(title):
+        # EXACT, WHEN NOBODY CONFIRMED THE FILER. MEASURED on the frozen
+        # unseen universe (c48dfac0): "Mercury" + mercury.com, a private bank,
+        # contained-matched MERCURY SYSTEMS INC and History Rewind built a
+        # level-A series from a defence contractor's 10-Ks. Containment is a
+        # suggestion for a person to confirm; a run that nobody confirmed may
+        # only take a registrant whose name IS the typed name, legal form
+        # aside ("Navan" = "NAVAN, INC.", "Lowe's Companies" = "LOWES
+        # COMPANIES INC").
+        title_tokens = _tokens(title)
+        if exact and want_tokens and want_tokens == title_tokens:
+            best = (cik, title, row_ticker)
+            continue
+        if not exact and want_tokens and want_tokens <= title_tokens:
             # Full token containment (e.g. {palantir} <= {palantir}); keep the
             # shortest title to prefer the exact entity over subsidiaries.
             if best is None or len(title) < len(best[1]):
@@ -649,7 +662,8 @@ def propose_edgar_candidates(*, company_name, ticker=None, transport=None,
                             "title": company_name, "ticker": ticker or ""}
             else:
                 resolved = resolve_cik(company_name, ticker=ticker,
-                                       transport=transport, resolver=resolver)
+                                       transport=transport, resolver=resolver,
+                                       exact=True)
         if not resolved:
             return []
         return filing_candidates(resolved, transport=transport,
