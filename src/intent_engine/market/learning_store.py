@@ -948,8 +948,16 @@ class LearningStore:
                      if r.get("record") == LIFECYCLE)
 
     # --- reading ----------------------------------------------------------
-    def _rows(self) -> List[dict]:
+    def rows(self) -> List[dict]:
+        """Every row as readers must see it: invalidations applied.
+
+        The one reader for anything that folds the whole ledger. Parsing the
+        file directly skips grade and belief invalidations silently.
+        """
         return _mask_invalidated(self._raw_rows())
+
+    def _rows(self) -> List[dict]:
+        return self.rows()
 
     def _raw_rows(self) -> List[dict]:
         if not self.path.exists():

@@ -1,34 +1,33 @@
-"""A cycle that overruns must be able to say which step overran.
+"""A cycle that overruns must say which step, and whether the host slept.
 
-The Nov 18-22 night cycles ran 11-22 hours and held the shared lock through
-five 06:30 day cycles. The ledger recorded every step as "ok" and no duration,
-so the slow step could not be identified after the fact.
+Nov 18-22: night cycles ran 11-22h of wall time on battery (60-248 sleep
+entries each) for ~1h of work. On macOS time.monotonic pauses in sleep, so
+wall and awake seconds are both recorded: they differ only when the host slept.
 """
 import json
 
 from intent_engine.market import cycle as C
 
 
-def test_run_step_records_its_duration_and_the_ledger_keeps_it():
-    clock = iter([100.0, 107.25])
-    real = C.time.monotonic
-    C.time.monotonic = lambda: next(clock)
-    try:
-        ctx = C.CycleContext(cycle="night", as_of="2026-11-26", root=None,
-                             session=None, run_id="t", dry_run=True)
-        step = C.run_step("replay", lambda c: {"n": 1}, ctx,
-                          sleep=lambda s: None)
-    finally:
-        C.time.monotonic = real
-    assert step.seconds == 7.25
-    assert json.loads(json.dumps(step.as_dict()))["seconds"] == 7.25
+def _ctx():
+    return C.CycleContext(cycle="night", as_of="2026-11-26", root=None,
+                          session=None, run_id="t", dry_run=True)
+
+
+def test_a_suspended_step_shows_wall_far_above_awake(monkeypatch):
+    wall = iter([1000.0, 1000.0 + 22 * 3600])     # 22h of wall time
+    awake = iter([50.0, 50.0 + 3600])             # 1h awake
+    monkeypatch.setattr(C.time, "time", lambda: next(wall))
+    monkeypatch.setattr(C.time, "monotonic", lambda: next(awake))
+    step = C.run_step("research", lambda c: {"n": 1}, _ctx(), sleep=lambda s: None)
+    assert step.seconds == 22 * 3600 and step.awake_seconds == 3600
+    d = json.loads(json.dumps(step.as_dict()))
+    assert d["seconds"] == 79200 and d["awake_seconds"] == 3600
 
 
 def test_a_failed_step_is_timed_too():
     def boom(ctx):
         raise ValueError("bad payload")
-    ctx = C.CycleContext(cycle="night", as_of="2026-11-26", root=None,
-                         session=None, run_id="t", dry_run=True)
-    step = C.run_step("research", boom, ctx, attempts=1, sleep=lambda s: None)
+    step = C.run_step("research", boom, _ctx(), attempts=1, sleep=lambda s: None)
     assert step.status == "failed"
-    assert step.seconds is not None and step.seconds >= 0
+    assert step.seconds is not None and step.awake_seconds is not None

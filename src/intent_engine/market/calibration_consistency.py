@@ -200,6 +200,32 @@ def cap_mechanism_summary(summary: dict,
     return out
 
 
+def cap_belief_maturities(maturities: Sequence, incoherences: Sequence[Incoherence],
+                          *, family_of: dict):
+    """Hold each belief's published maturity at its mechanism's ceiling.
+
+    The belief-level twin of `cap_mechanism_summary`. `check` has always
+    reported BELIEF_ABOVE_ITS_MECHANISM_CEILING and nothing applied it, so
+    two demand_weakening beliefs (vale, johnson_johnson) were published
+    SUPPORTED under a mechanism graded FAILING. The ledger is untouched; the
+    uncapped state is returned beside the capped one so the gap stays visible.
+    """
+    import dataclasses
+    ceiling = {(i.subject, i.family): i.permitted for i in incoherences
+               if i.kind == "BELIEF_ABOVE_ITS_MECHANISM_CEILING"}
+    out, capped = [], []
+    for m in maturities:
+        key = (getattr(m, "subject", ""),
+               family_of.get(getattr(m, "belief_id", ""), ""))
+        if key in ceiling and getattr(m, "state", "") != ceiling[key]:
+            capped.append({"belief_id": m.belief_id, "subject": key[0],
+                           "family": key[1], "uncapped": m.state,
+                           "published": ceiling[key]})
+            m = dataclasses.replace(m, state=ceiling[key])
+        out.append(m)
+    return tuple(out), capped
+
+
 def summarise(incoherences: Sequence[Incoherence]) -> dict:
     return {
         "contract": CONTRACT,

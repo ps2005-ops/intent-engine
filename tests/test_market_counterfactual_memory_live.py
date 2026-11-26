@@ -33,8 +33,10 @@ REAL_LEDGER = pathlib.Path(
 
 
 def rows():
-    return [json.loads(line) for line in
-            REAL_LEDGER.read_text().splitlines() if line.strip()]
+    # The store's view: grade and belief invalidations applied. Parsing the
+    # file directly counted 30 withdrawn grades as if they still stood.
+    from intent_engine.market import learning_store as LS
+    return LS.LearningStore(REAL_LEDGER).rows()
 
 
 def valid(**overrides):
@@ -132,21 +134,24 @@ def test_a_past_episode_is_offered_against_a_new_case_of_the_same_shape():
                    opening_evidence=[
                        "Etsy Q3 2026: Revenue Rises 12% as Restructuring "
                        "Widens Operating Loss"])
-    assert len(got) == 1
-    assert got[0].from_subject == "cloudflare"
-    assert got[0].to_subject == "etsy"
-    assert "sharing a sentence" in got[0].shared_shape
+    # Membership, not cardinality: the corpus gains comparable episodes.
+    cloudflare = [a for a in got if a.from_subject == "cloudflare"]
+    assert cloudflare, [a.from_subject for a in got]
+    assert all(a.to_subject == "etsy" for a in got)
+    assert "sharing a sentence" in cloudflare[0].shared_shape
 
 
 def test_an_analogy_carries_no_evidence_and_says_so():
     episodes = CM.build(rows())
-    (got,) = CM.apply(episodes, subject="etsy", family="demand_weakening",
-                      opening_evidence=["Revenue Rises as Loss Widens"])
-    assert got.is_evidence is False
-    assert got.as_dict()["evidence_ids"] == []
-    assert got.kind == CM.ANALOGY
-    assert "cannot update a posterior" in got.what_it_is_not
-    assert "cannot resolve an expectation" in got.what_it_is_not
+    applied = CM.apply(episodes, subject="etsy", family="demand_weakening",
+                       opening_evidence=["Revenue Rises as Loss Widens"])
+    assert applied
+    for got in applied:          # every analogy, not the only one
+        assert got.is_evidence is False
+        assert got.as_dict()["evidence_ids"] == []
+        assert got.kind == CM.ANALOGY
+        assert "cannot update a posterior" in got.what_it_is_not
+        assert "cannot resolve an expectation" in got.what_it_is_not
 
 
 def test_a_different_shape_retrieves_nothing():
@@ -192,7 +197,8 @@ def test_an_episode_is_never_an_analogy_for_its_own_subject():
 
 def test_the_price_shape_retrieves_the_duolingo_episode():
     episodes = CM.build(rows())
-    (got,) = CM.apply(episodes, subject="etsy", family="demand_weakening",
-                      opening_evidence=["Etsy Stock Falls on Q3 Earnings"])
-    assert got.from_subject == "duolingo"
-    assert "share-price" in got.shared_shape
+    applied = CM.apply(episodes, subject="etsy", family="demand_weakening",
+                       opening_evidence=["Etsy Stock Falls on Q3 Earnings"])
+    duolingo = [a for a in applied if a.from_subject == "duolingo"]
+    assert duolingo, [a.from_subject for a in applied]
+    assert "share-price" in duolingo[0].shared_shape

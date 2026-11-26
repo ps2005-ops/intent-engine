@@ -135,10 +135,14 @@ class Step:
     code: Optional[str] = None
     error: Optional[str] = None
     attempts: int = 1
-    #: Wall-clock seconds the step took, retries included. Recorded because
-    #: the Nov 18-22 night cycles ran 11-22h, held the shared lock past 06:30
-    #: and cost five day cycles -- and the ledger could not say which step.
+    #: Wall-clock seconds the step took, retries included, and the seconds the
+    #: machine was AWAKE for it. They differ only when the host slept: on
+    #: macOS `time.monotonic` is mach_absolute_time, which pauses in sleep.
+    #: The Nov 18-22 night cycles ran 11-22h of wall time on battery, with
+    #: 60-248 sleep entries each and ~1h of work; without both numbers a
+    #: suspended step and a slow step look the same.
     seconds: Optional[float] = None
+    awake_seconds: Optional[float] = None
 
     @property
     def ok(self) -> bool:
@@ -148,7 +152,7 @@ class Step:
         return {"name": self.name, "status": self.status,
                 "detail": self.detail, "code": self.code,
                 "error": self.error, "attempts": self.attempts,
-                "seconds": self.seconds}
+                "seconds": self.seconds, "awake_seconds": self.awake_seconds}
 
 
 @dataclass(frozen=True)
@@ -336,6 +340,24 @@ class CycleContext:
     company_names: Dict[str, Any] = field(default_factory=dict)
 
 
+#: How long a cycle may wait for the shared lock, as a local wall-clock
+#: deadline derived from what the cycle is FOR. The day cycle is pre-market:
+#: it is still worth running until shortly before the 09:30 open, so it waits
+#: for a night run that is still finishing instead of skipping (five were
+#: skipped Nov 19-23 behind night runs suspended by system sleep). The night
+#: cycle has no such deadline pressure and keeps failing fast.
+LOCK_DEADLINE = {"day": (9, 25)}
+
+
+def lock_wait_seconds(cycle: str, now: datetime) -> float:
+    deadline = LOCK_DEADLINE.get(cycle)
+    if not deadline or now is None:
+        return 0.0
+    until = now.replace(hour=deadline[0], minute=deadline[1], second=0,
+                        microsecond=0)
+    return max(0.0, (until - now).total_seconds())
+
+
 def run_step(name: str, fn: StepFn, ctx: CycleContext, *,
              attempts: int = 3, sleep: Callable[[float], None] = time.sleep
              ) -> Step:
@@ -347,15 +369,16 @@ def run_step(name: str, fn: StepFn, ctx: CycleContext, *,
     from being produced, because those are exactly what a human needs in order
     to see that the feed was unreachable.
     """
-    started = time.monotonic()
+    wall0, awake0 = time.time(), time.monotonic()
     detail, attempt = F.retry(lambda: fn(ctx), attempts=attempts, sleep=sleep)
-    seconds = round(time.monotonic() - started, 3)
+    seconds = round(time.time() - wall0, 3)
+    awake = round(time.monotonic() - awake0, 3)
     if attempt.ok:
         ctx.results[name] = detail or {}
         return Step(name, "ok", detail or {}, attempts=attempt.attempts,
-                    seconds=seconds)
+                    seconds=seconds, awake_seconds=awake)
     return Step(name, "failed", {}, code=attempt.code, error=attempt.error,
-                attempts=attempt.attempts, seconds=seconds)
+                attempts=attempt.attempts, seconds=seconds, awake_seconds=awake)
 
 
 def run_cycle(cycle: str, *, root, steps: Sequence[Tuple[str, StepFn]],
@@ -422,7 +445,9 @@ def run_cycle(cycle: str, *, root, steps: Sequence[Tuple[str, StepFn]],
                       f"{rid} already completed", mode=mode)
 
     try:
-        with JobLock(LOCK_NAME, root=root):
+        with JobLock(LOCK_NAME, root=root, wait_seconds=lock_wait_seconds(
+                cycle, now), owner={"run_id": rid, "cycle": cycle},
+                sleep=sleep):
             # 5. Re-check under the lock: two processes can both pass (3).
             if store.completed(rid):
                 return finish(SKIPPED_DUPLICATE,

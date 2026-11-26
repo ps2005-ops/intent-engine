@@ -1,0 +1,158 @@
+{
+  "contract": "equilibrium_phase_tracker.v1",
+  "updated": "2026-11-26T18:30-05:00",
+  "statuses": [
+    "NOT_STARTED",
+    "IN_PROGRESS",
+    "DONE",
+    "BLOCKED_ON_USER",
+    "BLOCKED_ON_TIME"
+  ],
+  "state": {
+    "integration_branch": "integration/unified-2026-11-25",
+    "integration_head_before_session": "78c30238",
+    "runtime_market": "f7690938 (~/ie-market-runtime-v2)",
+    "runtime_learning": "f7690938 (~/ie-learning-runtime)",
+    "qualification": "qual/prospect100-resume @ 7d128431 (R12, mean 7.742)",
+    "session_start": "scripts/session_identity_check.sh"
+  },
+  "priorities_session_2": {
+    "P1_protect_work": {
+      "status": "IN_PROGRESS",
+      "done": [
+        "sha256 manifest of 59,820 files",
+        "local tar ~/ie-backups/prospect100_r5_r12_20261126.tar restore-verified byte-identical",
+        "AES-256 copy .tar.enc decrypt-verified",
+        "session identity check"
+      ],
+      "pending": [
+        "off-machine copy: needs a destination chosen by the user (no authorised destination exists)",
+        "publish non-sensitive scorecards/manifests to qual branch"
+      ],
+      "accept": "an off-machine copy restores and checksums match"
+    },
+    "P2_ledger_inconsistencies_and_6_tests": {
+      "status": "DONE",
+      "done": [
+        "3 incoherences identified: demand_strengthening ESTABLISHED under CONTESTED causal; vale and johnson_johnson demand_weakening SUPPORTED under FAILING mechanism",
+        "root defect: knowledge_step parsed the ledger file, bypassing 30 grade invalidations (37 vs 21 tests); now reads store.rows()",
+        "belief-level cap applied where maturity is published",
+        "occurrence identity collapses aggregator redirects (108 more duplicate rows removed, 0 bindings lost; ids unchanged)",
+        "6 live tests rewritten to properties on the masked view; break proofs CAUGHT 3/3"
+      ],
+      "accept": "live tests pass on the masked view; no incoherent state published"
+    },
+    "P3_night_overruns": {
+      "status": "DONE",
+      "cause": "host sleep on battery: slow nights had 60-248 sleep entries and ~0 AC lines; fast runs ~0 sleeps; health job silent 35h. Session-1 'sleep falsified' was a parser error (Wake Requests lines) and is corrected.",
+      "done": [
+        "Step.seconds (wall) + Step.awake_seconds (mach_absolute_time) so suspension is visible"
+      ],
+      "remaining": "operational: keep the host on AC for scheduled cycles (user); no software bottleneck was found to correct",
+      "accept": "next overrun shows seconds >> awake_seconds or names a slow step"
+    },
+    "P4_scheduling_recovery": {
+      "status": "IN_PROGRESS",
+      "done": [
+        "day cycle waits for the lock until 09:25 local (pre-market deadline) instead of skipping; night still fails fast",
+        "lock owner (run_id, pid, acquired_at) written beside the lock and named in contention errors",
+        "fake-sleep-safe wait (no busy-spin)"
+      ],
+      "pending": [
+        "catch-up of a missed day cycle after 09:25",
+        "simulated crash/restart/partial-write suite",
+        "runtime SLO"
+      ]
+    },
+    "P5_market_freshness": {
+      "status": "NOT_STARTED",
+      "accept": "20:30 trading-day probe recorded; cause classified"
+    },
+    "P6_actor_attribution": {
+      "status": "IN_PROGRESS",
+      "done": [
+        "holding notices and unit grants (session 1)"
+      ],
+      "accept": "acting vs affected entity represented; audit of insider, buyback, subsidiary, competitor, industry-statistic sentences over 1,538-sentence corpus"
+    },
+    "P7_eleven_withdrawals": {
+      "status": "NOT_STARTED",
+      "blocker": "needs runtime upgrade to a commit defining BELIEF_INVALIDATION",
+      "accept": "11 appended under lock, beliefs masked in every reader, snapshots republished"
+    },
+    "P8_proxy_mechanisms": {
+      "status": "NOT_STARTED"
+    },
+    "P9_partial_mechanisms": {
+      "status": "NOT_STARTED"
+    },
+    "P10_base_rates": {
+      "status": "NOT_STARTED"
+    },
+    "P11_time_aware_evaluation": {
+      "status": "NOT_STARTED"
+    },
+    "P12_unobservable": {
+      "status": "NOT_STARTED"
+    },
+    "P13_leadership_research_only": {
+      "status": "DONE",
+      "done": [
+        "classified RESEARCH_ONLY in mechanism_observability with stated condition for promotion"
+      ]
+    },
+    "P14_observation_contracts": {
+      "status": "IN_PROGRESS",
+      "done": [
+        "16/16 classified and pinned to code"
+      ]
+    },
+    "P15_december_readiness": {
+      "status": "NOT_STARTED",
+      "accept": "readiness audit of 977 forecasts (Dec 11) and 13 econ expectations (Dec 25); fixture maturity simulation"
+    },
+    "P16_100_company_strategy": {
+      "status": "NOT_STARTED"
+    },
+    "P17_stagnation_detector": {
+      "status": "NOT_STARTED"
+    },
+    "P18_runtime_upgrade": {
+      "status": "NOT_STARTED"
+    }
+  },
+  "master_plan_phases": {
+    "0": "DONE",
+    "1.1": "DONE",
+    "1.2": "IN_PROGRESS",
+    "2": "IN_PROGRESS",
+    "3": "IN_PROGRESS (3.1: invalidated grades now excluded from knowledge_step)",
+    "4": "NOT_STARTED",
+    "5": "NOT_STARTED",
+    "6": "NOT_STARTED",
+    "7": "NOT_STARTED",
+    "8": "NOT_STARTED",
+    "9": "NOT_STARTED",
+    "10": "NOT_STARTED",
+    "11": "NOT_STARTED",
+    "12": "NOT_STARTED",
+    "13": "NOT_STARTED",
+    "14": "NOT_STARTED",
+    "15": "NOT_STARTED",
+    "16": "NOT_STARTED (R12 recovered)",
+    "17": "NOT_STARTED",
+    "18": "NOT_STARTED",
+    "19": "NOT_STARTED",
+    "20": "NOT_STARTED",
+    "21": "NOT_STARTED",
+    "22": "NOT_STARTED",
+    "23": "ongoing",
+    "24": "NOT_STARTED"
+  },
+  "continuation": [
+    "scripts/session_identity_check.sh",
+    "read this file; take the first NOT_STARTED priority in order P3, P15, P18+P7, P6",
+    "tests: PYTHONPATH=$PWD/src ~/intent-engine-market/.venv/bin/python -m pytest -o pythonpath=$PWD/src",
+    "commit: GUARD_PYTHON=~/intent-engine-market/.venv/bin/python git commit"
+  ]
+}

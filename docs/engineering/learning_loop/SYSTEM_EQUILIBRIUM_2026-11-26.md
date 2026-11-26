@@ -58,11 +58,17 @@ Not yet occurred at time of writing (16:30 EST): 2026-11-26 19:15 learning,
 | 11-23 → 11-25 | 0.9–1.2 h | COMPLETED |
 
 The lock did its job (a slow night correctly blocked a concurrent day run).
-The defect is the overrun. **Cause not established.** Falsified: laptop
-sleep — `pmset` shows the machine fully awake for 21.5 of the 22.2 h of the
-11-19 run. Step output sizes were the same on slow and fast nights, so the
-slow nights did the same work more slowly. The ledger recorded no per-step
-timing, so the slow step cannot be named after the fact.
+
+> **CORRECTED in session 2 (2026-11-26 evening).** This section originally
+> said laptop sleep was *falsified*. That was wrong: the `pmset` parser
+> counted "Wake Requests" bookkeeping lines as wake transitions. Re-measured
+> with real transitions only: every slow night was **on battery** with
+> 60–248 sleep entries (11-19: 248; asleep ~21.7 of 22.2 h, ~32 min of
+> DarkWake), every fast run had ~0. The hourly health check, also a launchd
+> job, did not fire for 35 h (11-19 12:40 → 11-20 23:45) — consistent only
+> with sleep. A `caffeinate` assertion has been held since ~Nov 9, and macOS
+> honours PreventSystemSleep only on AC power. The cause is host sleep, not a
+> software bottleneck: the cycle advanced only in Power Nap wakes.
 
 Repair (this session): `Step.seconds` — wall time per step, retries
 included, written to the cycle ledger (`cycle.py`, `test_cycle_step_timing`).

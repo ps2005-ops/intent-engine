@@ -54,8 +54,8 @@ def test_the_real_ledger_is_currently_coherent():
         return
     from intent_engine.universe.companies import default_universe
 
-    rows = [json.loads(line) for line in
-            REAL_LEDGER.read_text().splitlines() if line.strip()]
+    from intent_engine.market import learning_store as LS
+    rows = LS.LearningStore(REAL_LEDGER).rows()
     industry = {c.company_id: (getattr(c, "industry", "") or "")
                 for c in default_universe().prediction_companies()}
     family_of = {r.get("hypothesis_id"): r.get("metric") for r in rows
@@ -64,4 +64,25 @@ def test_the_real_ledger_is_currently_coherent():
                    mechanisms=MC.calibrate(rows),
                    causal_families=CC.calibrate(rows, industry_of=industry),
                    family_of=family_of)
-    assert got == ()
+    # NOT "the ledger is coherent": since 2026-11-26 it is not -- 17 of 21
+    # demand_strengthening grades confirm under a CONTESTED causal family,
+    # and two demand_weakening beliefs read SUPPORTED under a FAILING
+    # mechanism. Those are true states of the evidence. The invariant is
+    # that no incoherent state is PUBLISHED: every one is capped where it is
+    # released, and re-checking the capped output finds nothing.
+    maturities = BM.classify(rows, as_of="2026-08-07")
+    capped, _ = CK.cap_belief_maturities(maturities, got, family_of=family_of)
+    mechanisms = CK.cap_mechanism_summary(
+        MC.summarise(MC.calibrate(rows)), got)
+    published = {m.get("mechanism"): m.get("maturity")
+                 for m in (mechanisms.get("mechanisms") or [])}
+    for inc in got:
+        if inc.kind == "MECHANISM_ABOVE_ITS_CAUSAL_CEILING":
+            assert published.get(inc.family) == inc.permitted, (inc, published)
+    again = CK.check(maturities=capped, mechanisms=(),
+                     causal_families=(), family_of=family_of)
+    assert not [i for i in again if i.kind == "BELIEF_ABOVE_ITS_MECHANISM_CEILING"]
+    recheck = CK.check(maturities=capped, mechanisms=MC.calibrate(rows),
+                       causal_families=(), family_of=family_of)
+    assert not [i for i in recheck
+                if i.kind == "BELIEF_ABOVE_ITS_MECHANISM_CEILING"], recheck

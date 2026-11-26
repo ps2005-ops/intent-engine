@@ -289,6 +289,43 @@ def occurrence_key(*, subject_company: str, evidence_type: str, fact: str,
     carries no direction, so it could not have tested anything, while a
     belief scoring itself corrupts every downstream measurement.
     """
+    fact_key, source_key = _occurrence_source(fact, source)
+    return "|".join((subject_company.strip().lower(), evidence_type,
+                     fact_key, source_key))
+
+
+# A news aggregator's redirect URL is a per-click token, not an outlet. The
+# same article reached through two Google News links carried two different
+# `source` strings, so occurrence identity kept both: measured 2026-11-26, 73
+# same-subject same-sentence groups survived dedupe with distinct sources, and
+# 4 of 16 self-test refusals remained after it. The outlet is the one named in
+# the headline's trailing attribution, normalised so "MarketBeat" and
+# "marketbeat.com" are one publisher. Two different outlets stay two items.
+_AGGREGATOR_HOSTS = ("news.google.com",)
+_ATTRIBUTION = re.compile(r"\s+[-\u2013\u2014]\s+([^-\u2013\u2014]{2,80}?)\.?\s*$")
+
+
+def _publisher_key(name: str) -> str:
+    name = name.strip().lower()
+    name = re.sub(r"^www\.", "", name)
+    name = re.sub(r"\.(?:com|net|org|co\.uk|co|io|ca|news)$", "", name)
+    return re.sub(r"[^a-z0-9]", "", name)
+
+
+def _occurrence_source(fact: str, source: str):
+    src = (source or "").strip().lower()
+    if any(h in src for h in _AGGREGATOR_HOSTS):
+        m = _ATTRIBUTION.search(fact or "")
+        if m and _publisher_key(m.group(1)):
+            return (_normalise(fact[:m.start()]),
+                    "outlet:" + _publisher_key(m.group(1)))
+    return _normalise(fact), src
+
+
+def _id_key(*, subject_company: str, evidence_type: str, fact: str,
+            source: str) -> str:
+    """The key evidence ids have always hashed. Frozen so that improving
+    occurrence identity never renames a stored row that beliefs cite."""
     return "|".join((subject_company.strip().lower(), evidence_type,
                      _normalise(fact), source.strip().lower()))
 
@@ -305,9 +342,8 @@ def evidence_id_for(*, subject_company: str, evidence_type: str,
     are both deliberate.
     """
     del observed_at                       # see `occurrence_key`
-    raw = occurrence_key(subject_company=subject_company,
-                         evidence_type=evidence_type, fact=fact,
-                         source=source)
+    raw = _id_key(subject_company=subject_company,
+                  evidence_type=evidence_type, fact=fact, source=source)
     return "ev_" + hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
 
 
