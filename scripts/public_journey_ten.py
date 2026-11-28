@@ -112,6 +112,22 @@ def _quotes(html):
                        re.S | re.I)]
 
 
+def _name_tokens(text):
+    return re.findall(r"[a-z0-9]+", str(text or "").lower())
+
+
+def names_same_company(names, headline) -> bool:
+    """Does `headline` name the company known by any of `names`?
+
+    Each name contributes its leading alphanumeric token, and the headline
+    must contain one as a whole word: punctuation and legal form never make
+    one company two ("Tonic.ai" / "Tonic AI, Inc."), and a different
+    registrant sharing a prefix never makes two companies one ("Coupa" /
+    "Coupang, Inc.")."""
+    anchors = {t[0] for t in (_name_tokens(n) for n in names) if t}
+    return bool(anchors & set(_name_tokens(headline)))
+
+
 def journey(name, entity_id, *, verbose=True, extra=None) -> dict:
     """`extra(op, run_id, row, surfaces)` runs AFTER the gates are measured and
     BEFORE they are scored, on the SAME authenticated session.
@@ -420,9 +436,14 @@ def journey(name, entity_id, *, verbose=True, extra=None) -> dict:
     # adds an honest qualifier about the evidence. An equality test would
     # flag every bounded run as a contradiction -- inventing a uniform defect
     # out of a correctly-worded page.
-    canonical = (picked.get("common_name")
-                 or picked.get("legal_name") or name).lower()
-    head_word = canonical.split(",")[0].split()[0]
+    # ONE IDENTITY, COMPARED ON ITS TOKENS. MEASURED 2026-11-28 (prospect-98
+    # untouched set): "Tonic.ai" (the common name) against the headline
+    # "Tonic AI, Inc." (the legal name) failed because the first WHITESPACE
+    # word "tonic.ai" is not a substring of "tonic ai, inc." -- punctuation
+    # alone made one company two. Every name the suggestion carries (common,
+    # legal) contributes its leading alphanumeric token, and a headline names
+    # the company when it contains one of them as a whole word.
+    _names = (picked.get("common_name"), picked.get("legal_name"), name)
     heads, mismatched = [], []
     for key in ("intro", "brief", "full"):
         m2 = re.search(r"<h1[^>]*>(.*?)</h1>", surfaces[key]["html"],
@@ -431,7 +452,7 @@ def journey(name, entity_id, *, verbose=True, extra=None) -> dict:
             continue
         text = visible(m2.group(1)).split("—")[0].strip()
         heads.append(f"{key}:{text}")
-        if head_word not in text.lower():
+        if not names_same_company(_names, text):
             mismatched.append(f"{key}:{text}")
     row["headline_names"] = heads
     gate("PROFILE_CONSISTENCY", not mismatched,

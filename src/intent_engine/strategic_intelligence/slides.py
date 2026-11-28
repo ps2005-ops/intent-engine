@@ -1754,6 +1754,20 @@ def render_deck(slides, *, company="", as_of="", analysis_version="",
         f'<a href="#slide-{_e(s["id"])}" aria-label="Go to slide {n + 1}: '
         f'{_e(s["title"])}">{n + 1}</a>' for n, s in enumerate(slides))
 
+    # ONE FULL REFERENCE PER SOURCE, NUMBERED IN DECK ORDER. MEASURED
+    # 2026-11-28 (prospect-98 round 8): 20 decks printed the same source
+    # title under several slides, because one source supports several of
+    # them. The first citation carries the title; later ones cite it as
+    # "Source N" -- still linked to the same evidence -- the way a printed
+    # report cites a reference it has already given in full.
+    cite_no: dict = {}
+
+    def _cite_label(c):
+        if c in cite_no:
+            return f"Source {cite_no[c]} (cited above)"
+        cite_no[c] = len(cite_no) + 1
+        return f"{cite_no[c]}. {cite_labels.get(c) or c}"
+
     out = []
     for n, slide in enumerate(slides):
         prev_id = slides[n - 1]["id"] if n > 0 else slides[-1]["id"]
@@ -1777,7 +1791,7 @@ def render_deck(slides, *, company="", as_of="", analysis_version="",
             f'<details class="cites"><summary>Evidence behind this slide '
             f'({len(citations)})</summary><ul>'
             + "".join(f'<li><a href="/runs/{_e(run_id)}/evidence/{_e(c)}">'
-                      f'{_e(cite_labels.get(c) or c)}</a></li>'
+                      f'{_e(_cite_label(c))}</a></li>'
                       for c in citations)
             + '</ul></details>') if citations and run_id else ''
         ask = (

@@ -38,6 +38,13 @@ from typing import Iterable, List, Sequence, Tuple
 
 CONTRACT = "exposure_map.v1"
 
+#: The founder-side join's own kind->channel table (one definition).
+try:
+    from intent_engine.external_intel.founder_economy import (
+        KIND_CHANNEL as _KIND_CHANNEL)
+except Exception:                                           # noqa: BLE001
+    _KIND_CHANNEL = {}
+
 OBSERVED = "OBSERVED_IN_COMPANY_RECORD"
 #: The engine measures the channel this exposure transmits through.
 MEASURED = "MEASURED"
@@ -66,6 +73,10 @@ class ExposureSpec:
     #: one use-case blog post (FalkorDB's "supply chain database guide",
     #: Writer's finance article) carries two or three phrases and is not one.
     min_phrases: int = 2
+    #: The economic-state KIND this exposure joins in `founder_economy`
+    #: (KIND_CHANNEL). "" where the engine publishes no such series -- that
+    #: exposure is then UNMEASURED and says so, never silently measured.
+    econ_kind: str = ""
 
 
 _SOFTWARE = ("SUBSCRIPTION_SOFTWARE",)
@@ -107,7 +118,7 @@ SPECS: Tuple[ExposureSpec, ...] = (
         "financing tightens -> small-customer churn rises", "one to three quarters",
         "requires the rate move to reach venture funding volumes",
         "small-customer churn flat through a funding contraction",
-        "churn and contraction by customer size (internal data)"),
+        "churn and contraction by customer size (internal data)", econ_kind="financial_conditions"),
     ExposureSpec(
         "international_revenue", "exchange rates", "CURRENCY",
         "the company sells and operates across currencies",
@@ -120,7 +131,7 @@ SPECS: Tuple[ExposureSpec, ...] = (
         "home currency up -> translated revenue down", "immediate for translation; quarters for pricing",
         "requires revenue billed in other currencies (a single-currency biller is not exposed this way)",
         "reported and constant-currency growth staying equal through a currency move",
-        "revenue by billing currency (internal data)"),
+        "revenue by billing currency (internal data)", econ_kind="fx_dxy"),
     ExposureSpec(
         "delivery_labour", "wages and the market for skilled delivery staff", "LABOR",
         "revenue is delivered by people, so their cost and availability set margin and capacity",
@@ -132,7 +143,7 @@ SPECS: Tuple[ExposureSpec, ...] = (
         "wages up faster than rates -> margin down", "two to four quarters",
         "requires a large share of cost to be delivery headcount",
         "margin held through a period of wage growth above bill-rate growth",
-        "utilisation, bill rates and delivery wage cost (internal data)", _SERVICES),
+        "utilisation, bill rates and delivery wage cost (internal data)", _SERVICES, econ_kind="wages"),
     ExposureSpec(
         "customer_procurement_budgets", "corporate procurement and supply-chain activity", "INDUSTRIAL_DEMAND",
         "the product serves customers' procurement or supply-chain functions (the customers' domain, not the vendor's own supply chain)",
@@ -144,7 +155,7 @@ SPECS: Tuple[ExposureSpec, ...] = (
         "ambiguous: need up, budgets down", "one to three quarters",
         "requires customers' cost pressure to be large enough to justify new software",
         "deal cycles lengthening while cost-control demand is reported rising",
-        "win rate and cycle length by use case (internal data)", _SOFTWARE, min_phrases=4),
+        "win rate and cycle length by use case (internal data)", _SOFTWARE, min_phrases=4, econ_kind="industrial_production"),
     ExposureSpec(
         "customer_finance_budgets", "corporate planning cycles and financing costs", "MARKET_RATE",
         "the product serves the finance function (planning, close, billing or cash)",
@@ -156,7 +167,7 @@ SPECS: Tuple[ExposureSpec, ...] = (
         "rates up -> finance-software priority up", "one to two quarters",
         "requires buyers to be finance leaders with their own budget",
         "finance-software deal volume falling as fast as other software in a rate rise",
-        "pipeline by buyer function (internal data)", _SOFTWARE, min_phrases=4),
+        "pipeline by buyer function (internal data)", _SOFTWARE, min_phrases=4, econ_kind="policy_rate"),
     ExposureSpec(
         "public_sector_demand", "public-sector budgets and appropriations", "",
         "a material part of demand comes from government buyers",
@@ -225,6 +236,13 @@ def _sentences_with(raw: str, phrases: Sequence[str], limit: int = 2) -> Tuple[s
     return tuple(out)
 
 
+def econ_kinds(emap: dict) -> tuple:
+    """The economic-state kinds this company's evidenced exposures join."""
+    by_key = {spec.key: spec.econ_kind for spec in SPECS}
+    return tuple(dict.fromkeys(by_key.get(e["key"], "") for e in
+                               (emap or {}).get("exposures", ()) if by_key.get(e["key"])))
+
+
 def build(own_texts: Iterable[str], *, business_model_class: str = "",
           measured_channels: Iterable[str] = ()) -> dict:
     """The exposure map for one company. Never raises.
@@ -244,7 +262,9 @@ def build(own_texts: Iterable[str], *, business_model_class: str = "",
             hits = tuple(sorted({p for p in spec.phrases if _says(text, p)}))
             if len(hits) < max(MIN_PHRASES, spec.min_phrases):
                 continue
-            measurement = (MEASURED if spec.channel and spec.channel in channels
+            measurement = (MEASURED if spec.econ_kind and (
+                               spec.channel in channels or
+                               _KIND_CHANNEL.get(spec.econ_kind, "") in channels)
                            else UNMEASURED)
             out.append(Exposure(
                 key=spec.key, variable=spec.variable, channel=spec.channel,

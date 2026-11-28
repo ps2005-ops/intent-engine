@@ -118,6 +118,27 @@ def _passage(document: dict) -> str:
     `trim_to_word`, the already-short one through `elide`, which marks the
     cut only when it makes one.
     """
+    # A FILING'S FIRST CHARACTERS ARE ITS COVER PAGE. MEASURED 2026-11-28
+    # (prospect-98 round 8): evidence rows quoted "(Mark One). ANNUAL REPORT
+    # PURSUANT TO SECTION 13 OR 15(d)..." and "UNITED STATES SECURITIES AND
+    # EXCHANGE COMMISSION" -- the same words on every 10-K, so the same
+    # sentence printed under several sources. The substance is found by
+    # POSITION (`filing_sections.best_excerpt`), the way the report already
+    # quotes filings; a filing with no findable section falls through.
+    if document.get("filing") or "/Archives/edgar/" in str(
+            document.get("final_url") or document.get("original_url") or ""):
+        try:
+            from intent_engine.strategic_intelligence.filing_sections import (
+                best_excerpt)
+            excerpt, _label = best_excerpt(
+                str(document.get("text_content") or ""),
+                form=str(document.get("form") or ""))
+        except Exception:                                   # noqa: BLE001
+            excerpt = ""
+        excerpt = " ".join(excerpt.split())
+        if len(excerpt) >= 40:
+            return (trim_to_word(excerpt, MAX_PASSAGE)
+                    if len(excerpt) > MAX_PASSAGE else elide(excerpt))
     for key in ("meta_description", "text_content"):
         text = " ".join(str(document.get(key) or "").split())
         # WHAT A BROWSER PRODUCED IS NOT WHAT A PUBLISHER SAID. Coveo's

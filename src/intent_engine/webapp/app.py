@@ -5657,6 +5657,38 @@ class WebApp:
         "real_yield": "real_yield",
     }
 
+    def _run_exposure_kinds(self, run_id) -> tuple:
+        """Economic-state kinds this run's company-authored evidence establishes.
+
+        Uses the SAME profile inputs as the canonical selection (one
+        classification per run), memoised per request, and never the
+        economy itself, so the selection that reads `_founder_economy` does
+        not recurse into it."""
+        memo = getattr(self._request, "exposure_kinds", None)
+        if memo is None:
+            memo = self._request.exposure_kinds = {}
+        if run_id in memo:
+            return memo[run_id]
+        kinds = ()
+        try:
+            from intent_engine.executive import company_profile as CPF
+            from intent_engine.executive import exposure_map as XM
+            meta = self.ci.run_meta(run_id) or {}
+            name = str(meta.get("company_name") or "")
+            domain = str(meta.get("domain") or "")
+            inputs = self._canonical_profile_inputs(run_id, name=name,
+                                                    domain=domain)
+            prof = CPF.profile_for(run_id, name=name, domain=domain, **inputs)
+            own = [str(d.get("text_content") or "")
+                   for d in self.ci.store.retrieved(run_id)
+                   if d.get("source_class") in self._EXPOSURE_OWN_CLASSES]
+            kinds = XM.econ_kinds(XM.build(
+                own, business_model_class=str(prof.business_model_class or "")))
+        except Exception:                                   # noqa: BLE001
+            kinds = ()
+        memo[run_id] = kinds
+        return kinds
+
     def _founder_economy(self, run_id) -> dict:
         """The economic block for this run when no market dossier carries one.
 
@@ -5667,8 +5699,16 @@ class WebApp:
         try:
             from intent_engine.external_intel import founder_economy as _FE
             ctx = self._external_context(run_id)
-            return _FE.block(getattr(ctx, "economy", None),
-                             getattr(ctx, "economy_exposures", ()) or ())
+            # THE COMPANY'S OWN EXPOSURES JOIN THE MEASURED STATE TOO.
+            # MEASURED 2026-11-28 (prospect-98 round 8): only 8 of 70 companies
+            # had an evidenced exposure meet a measured channel, because this
+            # join saw only macro factors cited in retrieved documents (mostly
+            # rates). An exposure the company's own material establishes
+            # (`exposure_map`) is the same kind of input; it joins only kinds
+            # the published economic state actually measures.
+            exposures = tuple(getattr(ctx, "economy_exposures", ()) or ()) \
+                + self._run_exposure_kinds(run_id)
+            return _FE.block(getattr(ctx, "economy", None), exposures)
         except Exception:                                   # noqa: BLE001
             _LOG.warning("founder economy unavailable for %s", run_id)
             return {}
@@ -6638,7 +6678,9 @@ class WebApp:
             quote = (f'<blockquote>{_e(x["evidence"][0])}</blockquote>'
                      if x["evidence"] else "")
             rows.append(
-                f'<div class="xm-row"><h3>{_e(x["variable"][:1].upper() + x["variable"][1:])}'
+                f'<div class="xm-row" data-channel="{_e(x["channel"])}" '
+                f'data-measured="{1 if x["measurement"] == "MEASURED" else 0}">'
+                f'<h3>{_e(x["variable"][:1].upper() + x["variable"][1:])}'
                 f' <span class="badge">{badge}</span></h3>'
                 f'<p><strong>How {who} stands to it.</strong> {_e(x["relationship"])}. '
                 f'Its own material says so in {len(x["phrases"])} distinct terms '
@@ -8641,6 +8683,22 @@ class WebApp:
         def _norm(text: str) -> str:
             return " ".join(str(text or "").split()).strip().lower()
 
+        seen_reasons = set()
+
+        def _reason(rec):
+            # A REASON IS STATED ONCE PER PAGE. MEASURED 2026-11-28 (prospect-98
+            # round 8): "the document never names the company, so it cannot
+            # support a claim about it" printed under every set-aside row --
+            # true of each, said ten times. The first row carries it; later
+            # rows say so in four words, and still say why they were set aside.
+            reason = str(rec.get("relevance_reason") or "").strip()
+            if not reason:
+                return ""
+            if _norm(reason) in seen_reasons:
+                return '<p class="none">Same reason as above.</p>'
+            seen_reasons.add(_norm(reason))
+            return f'<p class="none">{_e(reason)}</p>'
+
         def _card(rec):
             bits = []
             for label, key in (("Author", "author"), ("Host", "host"),
@@ -8684,8 +8742,7 @@ class WebApp:
                   f'{_e(self._plain_state(rec.get("relevance")))} · '
                   f'Counts as corroboration: '
                   f'{"yes" if rec.get("independence_bearing") else "no"}</p>'
-                + (f'<p class="none">{_e(rec.get("relevance_reason") or "")}'
-                   f'</p>' if rec.get("relevance_reason") else "")
+                + _reason(rec)
                 + '</section>')
 
         sections = [headline]
