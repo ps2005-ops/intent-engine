@@ -31,8 +31,10 @@ REAL_LEDGER = pathlib.Path(
 
 
 def rows():
-    return [json.loads(line) for line in
-            REAL_LEDGER.read_text().splitlines() if line.strip()]
+    # The store's view: grade and belief invalidations applied. Parsing the
+    # file directly counted 30 withdrawn grades as if they still stood.
+    from intent_engine.market import learning_store as LS
+    return LS.LearningStore(REAL_LEDGER).rows()
 
 
 def synthetic(family, results, *, industries=None):
@@ -114,7 +116,21 @@ def test_unresolved_expectations_are_reported_separately_from_failures():
     # flipped (measured 2026-08-22: 13 tests, 11 unresolved). The claim this
     # test exists to protect is that the two counters do not MERGE -- an open
     # window may never be counted as a failed test anywhere.
-    assert strengthening.contradicted == 0
+    # Asserted as the property: every contradiction counted is a CONTRADICTED
+    # reconciliation of this family, so no open window can be among them.
+    # (`contradicted == 0` held until real contradictions arrived.)
+    from intent_engine.market import expectation as EXP
+    r = rows()
+    family_of = {x.get("expectation_id"): x.get("metric") for x in r
+                 if x.get("record") == "expectation"}
+    contradictions = sum(
+        1 for x in r if x.get("record") == "reconciliation"
+        and x.get("outcome") == EXP.CONTRADICTED
+        and family_of.get(x.get("expectation_id")) == "demand_strengthening")
+    assert strengthening.contradicted <= contradictions
+    for fam in families:
+        # tests is exactly the graded outcomes; an open window is in neither.
+        assert fam.tests == fam.supported + fam.contradicted + fam.ambiguous
     for f in families:
         assert f.unresolved >= 0 and f.tests >= 0
         # An unresolved expectation contributes to neither side of the score.

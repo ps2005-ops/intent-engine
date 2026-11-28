@@ -1221,21 +1221,29 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
     path = pathlib.Path(ctx.root) / LS.DEFAULT_PATH
     store = LS.LearningStore(path)
     payload: dict = {}
-    rows: List[dict] = []
-    if path.exists():
-        for line in path.read_text(encoding="utf-8").splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                rows.append(_json.loads(line))
-            except ValueError:
-                continue      # a corrupt line is skipped, never repaired
+    # THE STORE'S VIEW, NOT THE FILE. This step used to parse the ledger
+    # itself, so the 30 grade invalidations of 2026-11-25 (and every belief
+    # invalidation) were invisible to belief maturity, knowledge decay, value
+    # of information, causal calibration and counterfactual memory, while
+    # `learning_health` -- which reads the store -- honoured them. Measured
+    # 2026-11-26: this step counted 37 demand_strengthening tests where the
+    # masked view holds 21. One reader, or two answers.
+    rows: List[dict] = store.rows()
 
     maturities: tuple = ()
     try:
+        from . import calibration_consistency as CK
         maturities = BM.classify(rows, as_of=ctx.as_of)
-        payload["belief_maturity"] = BM.summarise(maturities)
+        family_of = {r.get("hypothesis_id"): r.get("metric") for r in rows
+                     if r.get("record") == "expectation"}
+        incoherent = CK.check(
+            maturities=maturities, mechanisms=MC.calibrate(rows),
+            causal_families=CCAL.calibrate(rows, industry_of=_industries()),
+            family_of=family_of)
+        maturities, capped = CK.cap_belief_maturities(
+            maturities, incoherent, family_of=family_of)
+        payload["belief_maturity"] = {**BM.summarise(maturities),
+                                      "capped_at_mechanism_ceiling": capped}
     except Exception as exc:  # noqa: BLE001
         payload["belief_maturity"] = {"error": str(exc)}
 

@@ -39,6 +39,13 @@ BELIEF_UPDATE = "belief_update"
 #: belief update it caused) so no consumer that filters on "reconciliation"
 #: or "belief_update" can count it again.
 GRADE_INVALIDATION = "grade_invalidation"
+#: A belief whose ENTIRE evidence basis was never an event of the subject (a
+#: fund trading the shares, an executive's unit grant). Masks the belief, its
+#: preregistered expectation and the knowledge effects it produced -- but only
+#: rows that precede the invalidation in the file. Belief ids are keyed on
+#: (subject, family), so a later, legitimately evidenced belief about the same
+#: company reuses the id and must not be hidden by an old correction.
+BELIEF_INVALIDATION = "belief_invalidation"
 EXPECTATION = "expectation"
 RECONCILIATION = "reconciliation"
 EVIDENCE = "evidence"
@@ -178,7 +185,7 @@ RECORD_KINDS = frozenset({BELIEF, BELIEF_UPDATE, EXPECTATION,
                           METHOD_PERFORMANCE, METHOD_ASSUMPTION_CHECK,
                           STRATEGIC_INTERACTION, ACTOR_RESPONSE_EPISODE,
                           MACRO_OBSERVATION, SOURCE_HEALTH,
-                          CAUSAL_ESTIMATE})
+                          CAUSAL_ESTIMATE, BELIEF_INVALIDATION})
 
 # What a session actually produced. Recorded as a class, not as a count,
 # because "3 things happened" is the sentence this project keeps having to
@@ -253,6 +260,32 @@ class LearningStore:
             return False
         self._append(BELIEF, belief.as_dict())
         return True
+
+    def invalidate_belief(self, belief_id: str, *, reason: str, rule: str,
+                          evidence_ids: Sequence[str], at: str) -> bool:
+        """Withdraw a belief whose whole basis was not an event of the subject.
+
+        Idempotent: a belief already invalidated after its latest declaration
+        is not invalidated again. Returns True when a record was appended.
+        """
+        raw = self._raw_rows()
+        last_decl = max((i for i, r in enumerate(raw)
+                         if r.get("record") == BELIEF
+                         and r.get("belief_id") == belief_id), default=-1)
+        if last_decl < 0:
+            return False
+        if any(r.get("record") == BELIEF_INVALIDATION
+               and r.get("belief_id") == belief_id
+               for r in raw[last_decl + 1:]):
+            return False
+        self._append(BELIEF_INVALIDATION, {
+            "belief_id": belief_id, "reason": reason, "rule": rule,
+            "evidence_ids": list(evidence_ids), "invalidated_at": at})
+        return True
+
+    def invalidated_belief_ids(self) -> frozenset:
+        return frozenset(r.get("belief_id") for r in self._raw_rows()
+                         if r.get("record") == BELIEF_INVALIDATION)
 
     def belief_ids(self) -> frozenset:
         return frozenset(r.get("belief_id") for r in self._rows()
@@ -915,7 +948,18 @@ class LearningStore:
                      if r.get("record") == LIFECYCLE)
 
     # --- reading ----------------------------------------------------------
+    def rows(self) -> List[dict]:
+        """Every row as readers must see it: invalidations applied.
+
+        The one reader for anything that folds the whole ledger. Parsing the
+        file directly skips grade and belief invalidations silently.
+        """
+        return _mask_invalidated(self._raw_rows())
+
     def _rows(self) -> List[dict]:
+        return self.rows()
+
+    def _raw_rows(self) -> List[dict]:
         if not self.path.exists():
             return []
         rows: List[dict] = []
@@ -929,7 +973,7 @@ class LearningStore:
             except json.JSONDecodeError:
                 self._corrupt += 1
                 continue
-        return _mask_invalidated(rows)
+        return rows
 
     def beliefs(self) -> Tuple[B.StrategicBelief, ...]:
         """Fold declarations and updates into current beliefs.
@@ -1142,6 +1186,40 @@ class LearningStore:
                 "exists": self.path.exists()}
 
 
+def _belief_key(row: dict) -> str:
+    rec = row.get("record")
+    if rec in (BELIEF, BELIEF_UPDATE):
+        return row.get("belief_id") or ""
+    if rec == EXPECTATION:
+        return row.get("hypothesis_id") or ""
+    if rec == KNOWLEDGE_EFFECT and row.get("target_type") == "BELIEF":
+        return row.get("target_id") or ""
+    return ""
+
+
+def _mask_invalidated_beliefs(rows):
+    """Apply appended belief invalidations to the row VIEW, positionally.
+
+    A row is masked only when it names an invalidated belief AND appears
+    before that belief's (first) invalidation in the file. The file is never
+    rewritten; the masked kinds are suffixed `_invalidated` so an audit can
+    still read exactly what was withdrawn.
+    """
+    first = {}
+    for i, r in enumerate(rows):
+        if r.get("record") == BELIEF_INVALIDATION and r.get("belief_id"):
+            first.setdefault(r["belief_id"], i)
+    if not first:
+        return rows
+    out = []
+    for i, r in enumerate(rows):
+        key = _belief_key(r)
+        if key and key in first and i < first[key]:
+            r = {**r, "record": f"{r.get('record')}_invalidated"}
+        out.append(r)
+    return out
+
+
 def _mask_invalidated(rows):
     """Apply appended grade invalidations to the row VIEW (the file is never
     rewritten). A reconciliation named by an invalidation becomes
@@ -1154,6 +1232,7 @@ def _mask_invalidated(rows):
         if r.get("record") == GRADE_INVALIDATION:
             g = r.get("invalidates") or {}
             inv[r.get("expectation_id")] = g.get("evaluated_at", "")
+    rows = _mask_invalidated_beliefs(rows)
     if not inv:
         return rows
     out = []
