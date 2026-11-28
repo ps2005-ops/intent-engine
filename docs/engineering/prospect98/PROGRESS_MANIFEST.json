@@ -1664,7 +1664,7 @@
   "then VALIDATION (fresh memory: unset P98_MEMORY): scripts/prospect98/run_round.sh val1 8710 <frozen tree> VALIDATION 2 --registered --sealed  (out dir must be sealed_*: use ROUND=sealed_val1)",
   "then FINAL_UNTOUCHED once on the frozen candidate: ROUND=sealed_final1, record permanently before any change"
  ],
- "updated": "2026-11-28T06:17:18",
+ "updated": "2026-11-28T07:28:40",
  "operational": {
   "power": "2026-11-28 ~04:40: battery 25%, still on battery; work committed+pushed before anything else"
  },
@@ -1724,29 +1724,36 @@
     "commit": "514c1e66 (guard 13,754 passed; pushed)"
    },
    "3 full development (A in the completion prompt)": {
-    "state": "RUNNING",
-    "rounds": [
-     "r_w8 on c2-7fa8ec5f (curated business model, exposure map, press names)"
-    ]
+    "state": "VERIFIED",
+    "result": "qualification_w8.json: mean 8.079, 0/70 at 10/10 (tree c2-7fa8ec5f)"
    },
    "4 validation (B)": {
-    "state": "RUNNING",
-    "rounds": [
-     "r_sealed_val1 on c2-7fa8ec5f, fresh research memory -- ORIGINAL validation result"
-    ]
+    "state": "VERIFIED",
+    "result": "ORIGINAL_VALIDATION_*.json (sha256 in ORIGINAL_VALIDATION.sha256): mean 8.321, 0/14 at 10/10"
    },
    "5 untouched evaluation (C)": {
-    "state": "NOT_STARTED",
-    "rule": "run once on a frozen candidate after validation; record before any change"
+    "state": "VERIFIED",
+    "result": "ORIGINAL_UNTOUCHED_*.json (sha256 recorded): mean 8.214, 0/14 at 10/10; first-exposure defects: Tonic.ai PROFILE_CONSISTENCY (punctuation normalisation in the gate), Sysdig coverage (site refuses fetcher)"
    },
    "6 commercial qualification + final 98 matrix + previous-company regression (D)": {
-    "state": "NOT_STARTED"
+    "state": "PARTIAL",
+    "done": [
+     "FINAL_98_MATRIX.json/.md on one frozen tree",
+     "prospect-100 search regression 100/100"
+    ],
+    "not_done": [
+     "post-exposure fixes (Tonic.ai gate normalisation, listing-page repetition, measured-channel coverage)",
+     "previous 175-position JOURNEY regression on c2",
+     "off-machine backup (needs destination)"
+    ]
    }
   },
   "commits": {
    "48ed1972": "frozen split",
    "514c1e66": "waves 0-2 + headquarters provenance (pushed)",
-   "pending": "c2-7fa8ec5f tree: curated business model, exposure map (not yet guard-committed)"
+   "pending": "c2 guard commit launched (log ~/ie-prospect98-guard5.log, message reports/prospect98/commit_msg_c2.txt); on EXIT=0 run: git push",
+   "69c19103": "curated business model + exposure map + validation (guard 13,767 passed; pushed)"
   }
- }
+ },
+ "session_end": "2026-11-28T06:23:32 usage limit; r_w8 and the c2 guard were still running"
 }

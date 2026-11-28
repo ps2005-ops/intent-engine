@@ -1,0 +1,73 @@
+{
+ "summary": {
+  "totals": {
+   "measurements": 3024
+  },
+  "per_company": {
+   "amplitude": {
+    "status": "PASS"
+   },
+   "astronomer": {
+    "status": "PASS"
+   },
+   "cb-insights": {
+    "status": "PASS"
+   },
+   "critical-start": {
+    "status": "PASS"
+   },
+   "highradius": {
+    "status": "PASS"
+   },
+   "hyperscience": {
+    "status": "PASS"
+   },
+   "manhattan-associates": {
+    "status": "PASS"
+   },
+   "onestream": {
+    "status": "PASS"
+   },
+   "rapid7": {
+    "status": "PASS"
+   },
+   "safe-security": {
+    "status": "PASS"
+   },
+   "sourceday": {
+    "status": "PASS"
+   },
+   "sysdig": {
+    "status": "PASS"
+   },
+   "tonic-ai": {
+    "status": "PASS"
+   },
+   "tonkean": {
+    "status": "PASS"
+   }
+  },
+  "examples": {},
+  "pages": 126,
+  "widths": [
+   320,
+   360,
+   375,
+   390,
+   414,
+   430,
+   768,
+   820,
+   1024,
+   1280,
+   1440,
+   1920
+  ],
+  "themes": [
+   "light",
+   "dark"
+  ],
+  "seconds": 23.3
+ },
+ "full_results": "reports/prospect98/ui/ui_matrix_sealed_final1.json"
+}

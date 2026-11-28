@@ -1,0 +1,563 @@
+{
+ "summary": {
+  "companies": 14,
+  "mean": 8.214,
+  "ten_of_ten": 0,
+  "verdicts": {
+   "FUNCTIONAL_EVIDENCE_LIMITED": 12,
+   "INCOMPLETE_ANALYSIS": 1,
+   "FUNCTIONAL_WITH_DEFECTS": 1
+  },
+  "dimensions": {
+   "identity": {
+    "PASS": 13,
+    "FAIL": 1
+   },
+   "search": {
+    "PASS": 13,
+    "BOUNDED": 1
+   },
+   "coverage": {
+    "PASS": 13,
+    "BOUNDED": 1
+   },
+   "independence": {
+    "PASS": 7,
+    "BOUNDED": 4,
+    "FAIL": 3
+   },
+   "economics": {
+    "BOUNDED": 13,
+    "PASS": 1
+   },
+   "strategy": {
+    "PASS": 10,
+    "FAIL": 1,
+    "BOUNDED": 3
+   },
+   "presentation": {
+    "PASS": 7,
+    "BOUNDED": 7
+   },
+   "history": {
+    "BOUNDED": 11,
+    "PASS": 3
+   },
+   "visual": {
+    "PASS": 14
+   },
+   "performance": {
+    "PASS": 14
+   }
+  },
+  "rubric": "scripts/prospect100/qualify100.py::grade (imported unchanged)"
+ },
+ "companies": [
+  {
+   "prospect_id": 7,
+   "tier": "C1",
+   "company": "Astronomer",
+   "entity_id": "p98-7",
+   "listing": null,
+   "entry": "READY_SITE",
+   "search_bounded": [],
+   "live_verified": false,
+   "live_class": null,
+   "local_verified": true,
+   "class": "DECISION_GRADE_READING",
+   "documents_read": 12,
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "prose_repeats": 0,
+   "ui": {
+    "status": "PASS"
+   },
+   "core_s": 16.3,
+   "grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "PASS",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "score": 9.0,
+   "blocker": "the decision question is the business-model default, not derived from this company's evidence; History Rewind level B (no multi-year filed series)",
+   "verdict": "FUNCTIONAL_EVIDENCE_LIMITED",
+   "split": "FINAL_UNTOUCHED"
+  },
+  {
+   "prospect_id": 18,
+   "tier": "C1",
+   "company": "Tonic.ai",
+   "entity_id": "p98-18",
+   "listing": null,
+   "entry": "READY_SITE",
+   "search_bounded": [],
+   "live_verified": false,
+   "live_class": null,
+   "local_verified": true,
+   "class": "PRODUCT_DEFECT",
+   "documents_read": 10,
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "prose_repeats": 2,
+   "ui": {
+    "status": "PASS"
+   },
+   "core_s": 28.2,
+   "grades": {
+    "search": "PASS",
+    "identity": "FAIL",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "FAIL",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "score": 6.0,
+   "blocker": "the run's surfaces do not name the company consistently; 1 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence",
+   "verdict": "INCOMPLETE_ANALYSIS",
+   "split": "FINAL_UNTOUCHED"
+  },
+  {
+   "prospect_id": 23,
+   "tier": "C1",
+   "company": "Hyperscience",
+   "entity_id": "p98-23",
+   "listing": null,
+   "entry": "READY_SITE",
+   "search_bounded": [],
+   "live_verified": false,
+   "live_class": null,
+   "local_verified": true,
+   "class": "DECISION_GRADE_READING",
+   "documents_read": 13,
+   "decision_force": "ECON_LED",
+   "prose_repeats": 2,
+   "ui": {
+    "status": "PASS"
+   },
+   "core_s": 20.2,
+   "grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "PASS",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "score": 8.5,
+   "blocker": "no decision could be formed from the evidence; 2 prose sentence(s) repeated on a page; History Rewind level B (no multi-year filed series)",
+   "verdict": "FUNCTIONAL_EVIDENCE_LIMITED",
+   "split": "FINAL_UNTOUCHED"
+  },
+  {
+   "prospect_id": 26,
+   "tier": "C1",
+   "company": "Amplitude",
+   "entity_id": "p98-26",
+   "listing": null,
+   "entry": "READY_SITE",
+   "search_bounded": [],
+   "live_verified": false,
+   "live_class": null,
+   "local_verified": true,
+   "class": "DECISION_GRADE_READING",
+   "documents_read": 14,
+   "decision_force": "ECON_LED",
+   "prose_repeats": 0,
+   "ui": {
+    "status": "PASS"
+   },
+   "core_s": 24.2,
+   "grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "PASS",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "PASS",
+    "history": "PASS",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "score": 9.5,
+   "blocker": "no decision could be formed from the evidence",
+   "verdict": "FUNCTIONAL_EVIDENCE_LIMITED",
+   "split": "FINAL_UNTOUCHED"
+  },
+  {
+   "prospect_id": 33,
+   "tier": "C2",
+   "company": "Manhattan Associates",
+   "entity_id": "p98-33",
+   "listing": null,
+   "entry": "READY_SITE",
+   "search_bounded": [],
+   "live_verified": false,
+   "live_class": null,
+   "local_verified": true,
+   "class": "DECISION_GRADE_READING",
+   "documents_read": 13,
+   "decision_force": "ECON_LED",
+   "prose_repeats": 3,
+   "ui": {
+    "status": "PASS"
+   },
+   "core_s": 32.6,
+   "grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "PASS",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "score": 8.5,
+   "blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 3 prose sentence(s) repeated on a page",
+   "verdict": "FUNCTIONAL_EVIDENCE_LIMITED",
+   "split": "FINAL_UNTOUCHED"
+  },
+  {
+   "prospect_id": 36,
+   "tier": "C2",
+   "company": "SourceDay",
+   "entity_id": "p98-36",
+   "listing": null,
+   "entry": "READY_SITE",
+   "search_bounded": [],
+   "live_verified": false,
+   "live_class": null,
+   "local_verified": true,
+   "class": "DEFENSIBLE_ABSTENTION",
+   "documents_read": 12,
+   "decision_force": "EVIDENCE_LED",
+   "prose_repeats": 0,
+   "ui": {
+    "status": "PASS"
+   },
+   "core_s": 29.0,
+   "grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "PASS",
+    "strategy": "BOUNDED",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "score": 8.0,
+   "blocker": "0 independent relevant origin(s); the reading rests on company-published sources; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one; History Rewind level B (no multi-year filed series)",
+   "verdict": "FUNCTIONAL_EVIDENCE_LIMITED",
+   "split": "FINAL_UNTOUCHED"
+  },
+  {
+   "prospect_id": 48,
+   "tier": "C2",
+   "company": "Safe Security",
+   "entity_id": "p98-48",
+   "listing": null,
+   "entry": "READY_SITE",
+   "search_bounded": [],
+   "live_verified": false,
+   "live_class": null,
+   "local_verified": true,
+   "class": "DEFENSIBLE_ABSTENTION",
+   "documents_read": 12,
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "prose_repeats": 0,
+   "ui": {
+    "status": "PASS"
+   },
+   "core_s": 20.1,
+   "grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "score": 7.5,
+   "blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome DEFENSIBLE_ABSTENTION: an honest reading, not a decision-grade one",
+   "verdict": "FUNCTIONAL_EVIDENCE_LIMITED",
+   "split": "FINAL_UNTOUCHED"
+  },
+  {
+   "prospect_id": 55,
+   "tier": "C2",
+   "company": "CB Insights",
+   "entity_id": "p98-55",
+   "listing": null,
+   "entry": "READY_SITE",
+   "search_bounded": [],
+   "live_verified": false,
+   "live_class": null,
+   "local_verified": true,
+   "class": "DECISION_GRADE_READING",
+   "documents_read": 14,
+   "decision_force": "ECON_LED",
+   "prose_repeats": 0,
+   "ui": {
+    "status": "PASS"
+   },
+   "core_s": 49.9,
+   "grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "PASS",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "score": 9.0,
+   "blocker": "no decision could be formed from the evidence; History Rewind level B (no multi-year filed series)",
+   "verdict": "FUNCTIONAL_EVIDENCE_LIMITED",
+   "split": "FINAL_UNTOUCHED"
+  },
+  {
+   "prospect_id": 56,
+   "tier": "C3",
+   "company": "OneStream",
+   "entity_id": "p98-56",
+   "listing": null,
+   "entry": "READY_SITE",
+   "search_bounded": [],
+   "live_verified": false,
+   "live_class": null,
+   "local_verified": true,
+   "class": "DECISION_GRADE_READING",
+   "documents_read": 12,
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "prose_repeats": 1,
+   "ui": {
+    "status": "PASS"
+   },
+   "core_s": 45.6,
+   "grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "PASS",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "score": 8.5,
+   "blocker": "the decision question is the business-model default, not derived from this company's evidence; 1 prose sentence(s) repeated on a page; History Rewind level B (no multi-year filed series)",
+   "verdict": "FUNCTIONAL_EVIDENCE_LIMITED",
+   "split": "FINAL_UNTOUCHED"
+  },
+  {
+   "prospect_id": 72,
+   "tier": "C3",
+   "company": "Tonkean",
+   "entity_id": "p98-72",
+   "listing": null,
+   "entry": "READY_SITE",
+   "search_bounded": [],
+   "live_verified": false,
+   "live_class": null,
+   "local_verified": true,
+   "class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "documents_read": 8,
+   "decision_force": "CLASS_PRIOR_ONLY",
+   "prose_repeats": 3,
+   "ui": {
+    "status": "PASS"
+   },
+   "core_s": 24.5,
+   "grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "FAIL",
+    "economics": "BOUNDED",
+    "strategy": "BOUNDED",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "score": 7.0,
+   "blocker": "0 independent relevant origin(s); the reading rests on company-published sources; the decision question is the business-model default, not derived from this company's evidence; outcome INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY: an honest reading, not a decision-grade one",
+   "verdict": "FUNCTIONAL_EVIDENCE_LIMITED",
+   "split": "FINAL_UNTOUCHED"
+  },
+  {
+   "prospect_id": 76,
+   "tier": "C3",
+   "company": "HighRadius",
+   "entity_id": "p98-76",
+   "listing": null,
+   "entry": "READY_SITE",
+   "search_bounded": [],
+   "live_verified": false,
+   "live_class": null,
+   "local_verified": true,
+   "class": "DECISION_GRADE_READING",
+   "documents_read": 14,
+   "decision_force": "ECON_LED",
+   "prose_repeats": 2,
+   "ui": {
+    "status": "PASS"
+   },
+   "core_s": 16.5,
+   "grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "score": 8.0,
+   "blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; 2 prose sentence(s) repeated on a page",
+   "verdict": "FUNCTIONAL_EVIDENCE_LIMITED",
+   "split": "FINAL_UNTOUCHED"
+  },
+  {
+   "prospect_id": 82,
+   "tier": "C4",
+   "company": "Sysdig",
+   "entity_id": "p98-82",
+   "listing": null,
+   "entry": "READY_SITE",
+   "search_bounded": [
+    "Sys -> SYSPRO"
+   ],
+   "live_verified": false,
+   "live_class": null,
+   "local_verified": true,
+   "class": "DECISION_GRADE_READING",
+   "documents_read": 7,
+   "decision_force": "NO_DECISION",
+   "prose_repeats": 1,
+   "ui": {
+    "status": "PASS"
+   },
+   "core_s": 29.0,
+   "grades": {
+    "search": "BOUNDED",
+    "identity": "PASS",
+    "coverage": "BOUNDED",
+    "independence": "PASS",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "BOUNDED",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "score": 7.5,
+   "blocker": "a typed prefix puts another company first; only 7 document(s) read; no decision could be formed from the evidence",
+   "verdict": "FUNCTIONAL_WITH_DEFECTS",
+   "split": "FINAL_UNTOUCHED"
+  },
+  {
+   "prospect_id": 84,
+   "tier": "C4",
+   "company": "Rapid7",
+   "entity_id": "p98-84",
+   "listing": null,
+   "entry": "READY_SITE",
+   "search_bounded": [],
+   "live_verified": false,
+   "live_class": null,
+   "local_verified": true,
+   "class": "DECISION_GRADE_READING",
+   "documents_read": 13,
+   "decision_force": "ECON_LED",
+   "prose_repeats": 0,
+   "ui": {
+    "status": "PASS"
+   },
+   "core_s": 20.5,
+   "grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "PASS",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "PASS",
+    "history": "PASS",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "score": 9.5,
+   "blocker": "no decision could be formed from the evidence",
+   "verdict": "FUNCTIONAL_EVIDENCE_LIMITED",
+   "split": "FINAL_UNTOUCHED"
+  },
+  {
+   "prospect_id": 89,
+   "tier": "C4",
+   "company": "Critical Start",
+   "entity_id": "p98-89",
+   "listing": null,
+   "entry": "READY_SITE",
+   "search_bounded": [],
+   "live_verified": false,
+   "live_class": null,
+   "local_verified": true,
+   "class": "DECISION_GRADE_READING",
+   "documents_read": 11,
+   "decision_force": "NO_DECISION",
+   "prose_repeats": 0,
+   "ui": {
+    "status": "PASS"
+   },
+   "core_s": 36.9,
+   "grades": {
+    "search": "PASS",
+    "identity": "PASS",
+    "coverage": "PASS",
+    "independence": "BOUNDED",
+    "economics": "BOUNDED",
+    "strategy": "PASS",
+    "presentation": "PASS",
+    "history": "BOUNDED",
+    "visual": "PASS",
+    "performance": "PASS"
+   },
+   "score": 8.5,
+   "blocker": "1 independent relevant origin(s); the reading rests on company-published sources; no decision could be formed from the evidence; History Rewind level C (no multi-year filed series)",
+   "verdict": "FUNCTIONAL_EVIDENCE_LIMITED",
+   "split": "FINAL_UNTOUCHED"
+  }
+ ]
+}

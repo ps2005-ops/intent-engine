@@ -1,0 +1,236 @@
+{
+ "summary": {
+  "original": {
+   "BOUNDED": 11,
+   "PASS": 3
+  },
+  "expanded": {
+   "BOUNDED": 5,
+   "FAIL": 4,
+   "PASS": 5
+  },
+  "blocking_reasons": {
+   "no bounded rewind": 3,
+   "dated stop(s)": 3,
+   "a 2-month span": 2,
+   "a 19-month span": 1,
+   "a 3-month span": 1,
+   "a 6-month span": 1
+  }
+ },
+ "companies": [
+  {
+   "prospect_id": 7,
+   "company": "Astronomer",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "a 19-month span of 24",
+   "stops": 5,
+   "earliest": "2025-03-31",
+   "latest": "2026-10-22",
+   "economic_links": 0,
+   "reconstructed_links": 5,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 5
+   }
+  },
+  {
+   "prospect_id": 18,
+   "company": "Tonic.ai",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 23,
+   "company": "Hyperscience",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "PASS",
+   "why": "6 stops over 27 months; economy: 6 reconstructed (release-timed)",
+   "stops": 6,
+   "earliest": "2024-07-01",
+   "latest": "2026-10-06",
+   "economic_links": 0,
+   "reconstructed_links": 6,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 6
+   }
+  },
+  {
+   "prospect_id": 26,
+   "company": "Amplitude",
+   "level": "A",
+   "original": "PASS",
+   "expanded": "PASS",
+   "why": "a filed multi-year series (original level A)",
+   "stops": 0,
+   "earliest": "2021-08-30",
+   "latest": "2026-11-05",
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 33,
+   "company": "Manhattan Associates",
+   "level": "A",
+   "original": "PASS",
+   "expanded": "PASS",
+   "why": "a filed multi-year series (original level A)",
+   "stops": 0,
+   "earliest": "2012-02-23",
+   "latest": "2026-10-30",
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 36,
+   "company": "SourceDay",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "a 3-month span of 24",
+   "stops": 5,
+   "earliest": "2026-08-31",
+   "latest": "2026-11-19",
+   "economic_links": 0,
+   "reconstructed_links": 5,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 5
+   }
+  },
+  {
+   "prospect_id": 48,
+   "company": "Safe Security",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "1 dated stop(s) of 4; a 2-month span of 24",
+   "stops": 1,
+   "earliest": "2026-09-30",
+   "latest": "2026-11-05",
+   "economic_links": 0,
+   "reconstructed_links": 1,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 1
+   }
+  },
+  {
+   "prospect_id": 55,
+   "company": "CB Insights",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "3 dated stop(s) of 4",
+   "stops": 3,
+   "earliest": "2024-03-01",
+   "latest": "2026-03-25",
+   "economic_links": 0,
+   "reconstructed_links": 3,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 3
+   }
+  },
+  {
+   "prospect_id": 56,
+   "company": "OneStream",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "2 dated stop(s) of 4; a 2-month span of 24",
+   "stops": 2,
+   "earliest": "2025-11-30",
+   "latest": "2026-01-07",
+   "economic_links": 0,
+   "reconstructed_links": 2,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 2
+   }
+  },
+  {
+   "prospect_id": 72,
+   "company": "Tonkean",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 76,
+   "company": "HighRadius",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "PASS",
+   "why": "6 stops over 65 months; economy: 3 reconstructed (release-timed)",
+   "stops": 6,
+   "earliest": "2020-09-18",
+   "latest": "2026-02-19",
+   "economic_links": 0,
+   "reconstructed_links": 3,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 3,
+    "NO_ECONOMIC_STATE_PUBLISHED_FOR_THIS_DATE": 3
+   }
+  },
+  {
+   "prospect_id": 82,
+   "company": "Sysdig",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "a 6-month span of 24",
+   "stops": 6,
+   "earliest": "2026-05-31",
+   "latest": "2026-11-20",
+   "economic_links": 0,
+   "reconstructed_links": 6,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 6
+   }
+  },
+  {
+   "prospect_id": 84,
+   "company": "Rapid7",
+   "level": "A",
+   "original": "PASS",
+   "expanded": "PASS",
+   "why": "a filed multi-year series (original level A)",
+   "stops": 0,
+   "earliest": "2016-03-10",
+   "latest": "2026-11-04",
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 89,
+   "company": "Critical Start",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  }
+ ]
+}
