@@ -1,0 +1,241 @@
+{
+ "summary": {
+  "totals": {
+   "measurements": 15144
+  },
+  "per_company": {
+   "abacum": {
+    "status": "PASS"
+   },
+   "alteryx": {
+    "status": "PASS"
+   },
+   "aptean": {
+    "status": "PASS"
+   },
+   "aqua-security": {
+    "status": "PASS"
+   },
+   "arkestro": {
+    "status": "PASS"
+   },
+   "arthur-ai": {
+    "status": "PASS"
+   },
+   "avetta": {
+    "status": "PASS"
+   },
+   "bitsight": {
+    "status": "PASS"
+   },
+   "bounteous": {
+    "status": "PASS"
+   },
+   "celonis": {
+    "status": "PASS"
+   },
+   "censys": {
+    "status": "PASS"
+   },
+   "chargebee": {
+    "status": "PASS"
+   },
+   "claroty": {
+    "status": "PASS"
+   },
+   "clickhouse": {
+    "status": "PASS"
+   },
+   "concentric-ai": {
+    "status": "PASS"
+   },
+   "corelight": {
+    "status": "PASS"
+   },
+   "coupa": {
+    "status": "PASS"
+   },
+   "deltek": {
+    "status": "PASS"
+   },
+   "domino-data-lab": {
+    "status": "PASS"
+   },
+   "domo": {
+    "status": "PASS"
+   },
+   "drivetrain": {
+    "status": "PASS"
+   },
+   "eci-software-solutions": {
+    "status": "PASS"
+   },
+   "eurasia-group": {
+    "status": "PASS"
+   },
+   "fairmarkit": {
+    "status": "PASS"
+   },
+   "falkordb": {
+    "status": "PASS"
+   },
+   "fiddler-ai": {
+    "status": "PASS"
+   },
+   "firebolt": {
+    "status": "PASS"
+   },
+   "forescout": {
+    "status": "PASS"
+   },
+   "fullstory": {
+    "status": "PASS"
+   },
+   "fusion-risk-management": {
+    "status": "PASS"
+   },
+   "gartner": {
+    "status": "PASS"
+   },
+   "gep": {
+    "status": "PASS"
+   },
+   "glean": {
+    "status": "PASS"
+   },
+   "improving": {
+    "status": "PASS"
+   },
+   "insightsoftware": {
+    "status": "PASS"
+   },
+   "ivalua": {
+    "status": "PASS"
+   },
+   "jaggaer": {
+    "status": "PASS"
+   },
+   "kantata": {
+    "status": "PASS"
+   },
+   "kissflow": {
+    "status": "PASS"
+   },
+   "kpa": {
+    "status": "PASS"
+   },
+   "labelbox": {
+    "status": "PASS"
+   },
+   "landingai": {
+    "status": "PASS"
+   },
+   "launch-consulting": {
+    "status": "PASS"
+   },
+   "levadata": {
+    "status": "PASS"
+   },
+   "maxio": {
+    "status": "PASS"
+   },
+   "navex": {
+    "status": "PASS"
+   },
+   "netstock": {
+    "status": "PASS"
+   },
+   "nintex": {
+    "status": "PASS"
+   },
+   "oxford-economics": {
+    "status": "PASS"
+   },
+   "pegasystems": {
+    "status": "PASS"
+   },
+   "pendo": {
+    "status": "PASS"
+   },
+   "pinecone": {
+    "status": "PASS"
+   },
+   "prophix": {
+    "status": "PASS"
+   },
+   "rane": {
+    "status": "PASS"
+   },
+   "riskonnect": {
+    "status": "PASS"
+   },
+   "securityscorecard": {
+    "status": "PASS"
+   },
+   "sentinelone": {
+    "status": "PASS"
+   },
+   "shi-international": {
+    "status": "PASS"
+   },
+   "snorkel-ai": {
+    "status": "PASS"
+   },
+   "softserve": {
+    "status": "PASS"
+   },
+   "sparq": {
+    "status": "PASS"
+   },
+   "startree": {
+    "status": "PASS"
+   },
+   "toolsgroup": {
+    "status": "PASS"
+   },
+   "uipath": {
+    "status": "PASS"
+   },
+   "unstructured": {
+    "status": "PASS"
+   },
+   "weaviate": {
+    "status": "PASS"
+   },
+   "wiz": {
+    "status": "PASS"
+   },
+   "writer": {
+    "status": "PASS"
+   },
+   "zilliz": {
+    "status": "PASS"
+   },
+   "zip": {
+    "status": "PASS"
+   }
+  },
+  "examples": {},
+  "pages": 631,
+  "widths": [
+   320,
+   360,
+   375,
+   390,
+   414,
+   430,
+   768,
+   820,
+   1024,
+   1280,
+   1440,
+   1920
+  ],
+  "themes": [
+   "light",
+   "dark"
+  ],
+  "seconds": 117.8
+ },
+ "full_results": "reports/prospect98/ui/ui_matrix_baseline.json"
+}

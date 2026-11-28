@@ -272,9 +272,20 @@ def render_intro(read, *, run_id: str, company: str,
                            f'{_e(_capitalise(value))}</p>')
         out.append('</div>')
 
-    if read.what_matters_now:
+    # SAID ONCE. MEASURED 2026-11-28 (prospect-98 baseline, 57 pages): when
+    # the business kind is unestablished, the read box prints the standing
+    # reason and "What matters now" item 01 printed the identical paragraph
+    # directly below it. A statement the read box already made is not a new
+    # thing that matters; it is skipped and the list renumbers.
+    def _said_key(text):
+        return " ".join(_re.findall(r"[a-z0-9]+", str(text or "").lower()))
+    _said = {_said_key(read.standing_reason)}
+    _said |= {_said_key(st.text) for st in (read.level1_facts or ())}
+    _matters = [st for st in (read.what_matters_now or ())
+                if _said_key(st.text) and _said_key(st.text) not in _said]
+    if _matters:
         out.append('<h2>What matters now</h2><ul class="matters">')
-        for index, statement in enumerate(read.what_matters_now, start=1):
+        for index, statement in enumerate(_matters, start=1):
             out.append(f'<li><span class="n">{index:02d}</span> '
                        f'{_e(statement.text)}{_badge(statement.standing)}</li>')
         out.append('</ul>')

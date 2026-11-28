@@ -1,0 +1,3263 @@
+{
+ "summary": {
+  "companies": 98,
+  "pass": 98,
+  "partial": [],
+  "fail": [],
+  "shared_prefix": [
+   [
+    "Celonis",
+    "Cel",
+    "Celigo, Inc."
+   ],
+   [
+    "Sysdig",
+    "Sys",
+    "SYSPRO"
+   ],
+   [
+    "Claroty",
+    "Cla",
+    "Clari Inc."
+   ]
+  ],
+  "p50_ms": 12.74,
+  "p95_ms": 17.07
+ },
+ "rows": [
+  {
+   "prospect_id": 1,
+   "entity_id": "alteryx",
+   "typed": "Alteryx",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Alt",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Altimmune, Inc.",
+     "top_ticker": "ALT"
+    },
+    {
+     "typed": "alteryx",
+     "verdict": "PASS",
+     "top": "Alteryx, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "ALTERYX",
+     "verdict": "PASS",
+     "top": "Alteryx, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Alteryx",
+     "verdict": "PASS",
+     "top": "Alteryx, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 2,
+   "entity_id": "domo",
+   "typed": "Domo",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Dom",
+     "verdict": "PASS",
+     "top": "Domo",
+     "top_ticker": ""
+    },
+    {
+     "typed": "domo",
+     "verdict": "PASS",
+     "top": "Domo",
+     "top_ticker": ""
+    },
+    {
+     "typed": "DOMO",
+     "verdict": "PASS",
+     "top": "Domo",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Domo",
+     "verdict": "PASS",
+     "top": "Domo",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 3,
+   "entity_id": "startree",
+   "typed": "StarTree",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Star",
+     "verdict": "PASS",
+     "top": "StarTree, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "startree",
+     "verdict": "PASS",
+     "top": "StarTree, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "STARTREE",
+     "verdict": "PASS",
+     "top": "StarTree, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "StarTree",
+     "verdict": "PASS",
+     "top": "StarTree, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 4,
+   "entity_id": "clickhouse",
+   "typed": "ClickHouse",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Click",
+     "verdict": "PASS",
+     "top": "ClickHouse, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "clickhouse",
+     "verdict": "PASS",
+     "top": "ClickHouse, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "CLICKHOUSE",
+     "verdict": "PASS",
+     "top": "ClickHouse, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "ClickHouse",
+     "verdict": "PASS",
+     "top": "ClickHouse, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 5,
+   "entity_id": "firebolt",
+   "typed": "Firebolt",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Fire",
+     "verdict": "PASS",
+     "top": "Firebolt Analytics, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "firebolt",
+     "verdict": "PASS",
+     "top": "Firebolt Analytics, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "FIREBOLT",
+     "verdict": "PASS",
+     "top": "Firebolt Analytics, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Firebolt",
+     "verdict": "PASS",
+     "top": "Firebolt Analytics, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 6,
+   "entity_id": "motherduck",
+   "typed": "MotherDuck",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "Mothe",
+     "verdict": "PASS",
+     "top": "MotherDuck Corporation",
+     "top_ticker": ""
+    },
+    {
+     "typed": "motherduck",
+     "verdict": "PASS",
+     "top": "MotherDuck Corporation",
+     "top_ticker": ""
+    },
+    {
+     "typed": "MOTHERDUCK",
+     "verdict": "PASS",
+     "top": "MotherDuck Corporation",
+     "top_ticker": ""
+    },
+    {
+     "typed": "MotherDuck",
+     "verdict": "PASS",
+     "top": "MotherDuck Corporation",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 7,
+   "entity_id": "astronomer",
+   "typed": "Astronomer",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Astro",
+     "verdict": "PASS",
+     "top": "Astronomer, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "astronomer",
+     "verdict": "PASS",
+     "top": "Astronomer, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "ASTRONOMER",
+     "verdict": "PASS",
+     "top": "Astronomer, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Astronomer",
+     "verdict": "PASS",
+     "top": "Astronomer, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 8,
+   "entity_id": "falkordb",
+   "typed": "FalkorDB",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Falk",
+     "verdict": "PASS",
+     "top": "FalkorDB",
+     "top_ticker": ""
+    },
+    {
+     "typed": "falkordb",
+     "verdict": "PASS",
+     "top": "FalkorDB",
+     "top_ticker": ""
+    },
+    {
+     "typed": "FALKORDB",
+     "verdict": "PASS",
+     "top": "FalkorDB",
+     "top_ticker": ""
+    },
+    {
+     "typed": "FalkorDB",
+     "verdict": "PASS",
+     "top": "FalkorDB",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 9,
+   "entity_id": "pinecone",
+   "typed": "Pinecone",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Pine",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Alpine Income Property Trust, Inc.",
+     "top_ticker": "PINE"
+    },
+    {
+     "typed": "pinecone",
+     "verdict": "PASS",
+     "top": "Pinecone Systems, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "PINECONE",
+     "verdict": "PASS",
+     "top": "Pinecone Systems, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Pinecone",
+     "verdict": "PASS",
+     "top": "Pinecone Systems, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 10,
+   "entity_id": "weaviate",
+   "typed": "Weaviate",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Weav",
+     "verdict": "PASS",
+     "top": "Weaviate B.V.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "weaviate",
+     "verdict": "PASS",
+     "top": "Weaviate B.V.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "WEAVIATE",
+     "verdict": "PASS",
+     "top": "Weaviate B.V.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Weaviate",
+     "verdict": "PASS",
+     "top": "Weaviate B.V.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 11,
+   "entity_id": "zilliz",
+   "typed": "Zilliz",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Zil",
+     "verdict": "PASS",
+     "top": "Zilliz",
+     "top_ticker": ""
+    },
+    {
+     "typed": "zilliz",
+     "verdict": "PASS",
+     "top": "Zilliz",
+     "top_ticker": ""
+    },
+    {
+     "typed": "ZILLIZ",
+     "verdict": "PASS",
+     "top": "Zilliz",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Zilliz",
+     "verdict": "PASS",
+     "top": "Zilliz",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 12,
+   "entity_id": "glean",
+   "typed": "Glean",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Gle",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Global Engine Group Holding Ltd",
+     "top_ticker": "GLE"
+    },
+    {
+     "typed": "glean",
+     "verdict": "PASS",
+     "top": "Glean Technologies, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "GLEAN",
+     "verdict": "PASS",
+     "top": "Glean Technologies, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Glean",
+     "verdict": "PASS",
+     "top": "Glean Technologies, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 13,
+   "entity_id": "writer-ai",
+   "typed": "Writer",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Wri",
+     "verdict": "PASS",
+     "top": "Writer, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "writer",
+     "verdict": "PASS",
+     "top": "Writer, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "WRITER",
+     "verdict": "PASS",
+     "top": "Writer, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Writer",
+     "verdict": "PASS",
+     "top": "Writer, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 14,
+   "entity_id": "c3-ai",
+   "typed": "C3 AI",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "C3 ",
+     "verdict": "PASS",
+     "top": "C3.ai, Inc.",
+     "top_ticker": "AI"
+    },
+    {
+     "typed": "c3 ai",
+     "verdict": "PASS",
+     "top": "C3.ai, Inc.",
+     "top_ticker": "AI"
+    },
+    {
+     "typed": "C3 AI",
+     "verdict": "PASS",
+     "top": "C3.ai, Inc.",
+     "top_ticker": "AI"
+    },
+    {
+     "typed": "C3 AI",
+     "verdict": "PASS",
+     "top": "C3.ai, Inc.",
+     "top_ticker": "AI"
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 15,
+   "entity_id": "domino-data-lab",
+   "typed": "Domino Data Lab",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Domino ",
+     "verdict": "PASS",
+     "top": "Domino Data Lab, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "domino data lab",
+     "verdict": "PASS",
+     "top": "Domino Data Lab, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "DOMINO DATA LAB",
+     "verdict": "PASS",
+     "top": "Domino Data Lab, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Domino Data Lab",
+     "verdict": "PASS",
+     "top": "Domino Data Lab, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 16,
+   "entity_id": "fiddler-ai",
+   "typed": "Fiddler AI",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Fiddl",
+     "verdict": "PASS",
+     "top": "Fiddler Labs, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "fiddler ai",
+     "verdict": "PASS",
+     "top": "Fiddler Labs, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "FIDDLER AI",
+     "verdict": "PASS",
+     "top": "Fiddler Labs, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Fiddler AI",
+     "verdict": "PASS",
+     "top": "Fiddler Labs, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 17,
+   "entity_id": "arthur-ai",
+   "typed": "Arthur AI",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Arth",
+     "verdict": "PASS",
+     "top": "Arthur",
+     "top_ticker": ""
+    },
+    {
+     "typed": "arthur ai",
+     "verdict": "PASS",
+     "top": "Arthur",
+     "top_ticker": ""
+    },
+    {
+     "typed": "ARTHUR AI",
+     "verdict": "PASS",
+     "top": "Arthur",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Arthur AI",
+     "verdict": "PASS",
+     "top": "Arthur",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 18,
+   "entity_id": "tonic-ai",
+   "typed": "Tonic.ai",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Toni",
+     "verdict": "PASS",
+     "top": "Tonic AI, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "tonic.ai",
+     "verdict": "PASS",
+     "top": "Tonic AI, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "TONIC.AI",
+     "verdict": "PASS",
+     "top": "Tonic AI, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Tonic.ai",
+     "verdict": "PASS",
+     "top": "Tonic AI, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 19,
+   "entity_id": "unstructured",
+   "typed": "Unstructured",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Unstru",
+     "verdict": "PASS",
+     "top": "Unstructured Technologies, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "unstructured",
+     "verdict": "PASS",
+     "top": "Unstructured Technologies, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "UNSTRUCTURED",
+     "verdict": "PASS",
+     "top": "Unstructured Technologies, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Unstructured",
+     "verdict": "PASS",
+     "top": "Unstructured Technologies, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 20,
+   "entity_id": "landingai",
+   "typed": "LandingAI",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Land",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "GLADSTONE LAND Corp",
+     "top_ticker": "LAND"
+    },
+    {
+     "typed": "landingai",
+     "verdict": "PASS",
+     "top": "LandingAI",
+     "top_ticker": ""
+    },
+    {
+     "typed": "LANDINGAI",
+     "verdict": "PASS",
+     "top": "LandingAI",
+     "top_ticker": ""
+    },
+    {
+     "typed": "LandingAI",
+     "verdict": "PASS",
+     "top": "LandingAI",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 21,
+   "entity_id": "snorkel-ai",
+   "typed": "Snorkel AI",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Snork",
+     "verdict": "PASS",
+     "top": "Snorkel AI, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "snorkel ai",
+     "verdict": "PASS",
+     "top": "Snorkel AI, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "SNORKEL AI",
+     "verdict": "PASS",
+     "top": "Snorkel AI, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Snorkel AI",
+     "verdict": "PASS",
+     "top": "Snorkel AI, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 22,
+   "entity_id": "labelbox",
+   "typed": "Labelbox",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Labe",
+     "verdict": "PASS",
+     "top": "Labelbox, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "labelbox",
+     "verdict": "PASS",
+     "top": "Labelbox, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "LABELBOX",
+     "verdict": "PASS",
+     "top": "Labelbox, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Labelbox",
+     "verdict": "PASS",
+     "top": "Labelbox, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 23,
+   "entity_id": "hyperscience",
+   "typed": "Hyperscience",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Hypers",
+     "verdict": "PASS",
+     "top": "Hyperscience",
+     "top_ticker": ""
+    },
+    {
+     "typed": "hyperscience",
+     "verdict": "PASS",
+     "top": "Hyperscience",
+     "top_ticker": ""
+    },
+    {
+     "typed": "HYPERSCIENCE",
+     "verdict": "PASS",
+     "top": "Hyperscience",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Hyperscience",
+     "verdict": "PASS",
+     "top": "Hyperscience",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 24,
+   "entity_id": "alkymi",
+   "typed": "Alkymi",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "Alk",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Alaska Air Group, Inc.",
+     "top_ticker": "ALK"
+    },
+    {
+     "typed": "alkymi",
+     "verdict": "PASS",
+     "top": "Alkymi, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "ALKYMI",
+     "verdict": "PASS",
+     "top": "Alkymi, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Alkymi",
+     "verdict": "PASS",
+     "top": "Alkymi, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 25,
+   "entity_id": "ocrolus",
+   "typed": "Ocrolus",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "Ocr",
+     "verdict": "PASS",
+     "top": "Ocrolus, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "ocrolus",
+     "verdict": "PASS",
+     "top": "Ocrolus, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "OCROLUS",
+     "verdict": "PASS",
+     "top": "Ocrolus, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Ocrolus",
+     "verdict": "PASS",
+     "top": "Ocrolus, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 26,
+   "entity_id": "amplitude",
+   "typed": "Amplitude",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Ampl",
+     "verdict": "PASS",
+     "top": "Amplitude, Inc.",
+     "top_ticker": "AMPL"
+    },
+    {
+     "typed": "amplitude",
+     "verdict": "PASS",
+     "top": "Amplitude, Inc.",
+     "top_ticker": "AMPL"
+    },
+    {
+     "typed": "AMPLITUDE",
+     "verdict": "PASS",
+     "top": "Amplitude, Inc.",
+     "top_ticker": "AMPL"
+    },
+    {
+     "typed": "Amplitude",
+     "verdict": "PASS",
+     "top": "Amplitude, Inc.",
+     "top_ticker": "AMPL"
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 27,
+   "entity_id": "pendo",
+   "typed": "Pendo",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Pen",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Penumbra Inc",
+     "top_ticker": "PEN"
+    },
+    {
+     "typed": "pendo",
+     "verdict": "PASS",
+     "top": "Pendo.io, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "PENDO",
+     "verdict": "PASS",
+     "top": "Pendo.io, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Pendo",
+     "verdict": "PASS",
+     "top": "Pendo.io, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 28,
+   "entity_id": "fullstory",
+   "typed": "Fullstory",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Full",
+     "verdict": "PASS",
+     "top": "FullStory, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "fullstory",
+     "verdict": "PASS",
+     "top": "FullStory, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "FULLSTORY",
+     "verdict": "PASS",
+     "top": "FullStory, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Fullstory",
+     "verdict": "PASS",
+     "top": "FullStory, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 29,
+   "entity_id": "coupa",
+   "typed": "Coupa",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Cou",
+     "verdict": "PASS",
+     "top": "Coupa Software Inc",
+     "top_ticker": ""
+    },
+    {
+     "typed": "coupa",
+     "verdict": "PASS",
+     "top": "Coupa Software Inc",
+     "top_ticker": ""
+    },
+    {
+     "typed": "COUPA",
+     "verdict": "PASS",
+     "top": "Coupa Software Inc",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Coupa",
+     "verdict": "PASS",
+     "top": "Coupa Software Inc",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 30,
+   "entity_id": "jaggaer",
+   "typed": "JAGGAER",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "JAG",
+     "verdict": "PASS",
+     "top": "JAGGAER, LLC",
+     "top_ticker": ""
+    },
+    {
+     "typed": "jaggaer",
+     "verdict": "PASS",
+     "top": "JAGGAER, LLC",
+     "top_ticker": ""
+    },
+    {
+     "typed": "JAGGAER",
+     "verdict": "PASS",
+     "top": "JAGGAER, LLC",
+     "top_ticker": ""
+    },
+    {
+     "typed": "JAGGAER",
+     "verdict": "PASS",
+     "top": "JAGGAER, LLC",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 31,
+   "entity_id": "gep",
+   "typed": "GEP",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "GEP",
+     "verdict": "PASS",
+     "top": "GEP Worldwide",
+     "top_ticker": ""
+    },
+    {
+     "typed": "gep",
+     "verdict": "PASS",
+     "top": "GEP Worldwide",
+     "top_ticker": ""
+    },
+    {
+     "typed": "GEP",
+     "verdict": "PASS",
+     "top": "GEP Worldwide",
+     "top_ticker": ""
+    },
+    {
+     "typed": "GEP",
+     "verdict": "PASS",
+     "top": "GEP Worldwide",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 32,
+   "entity_id": "ivalua",
+   "typed": "Ivalua",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Iva",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Inventiva S.A.",
+     "top_ticker": "IVA"
+    },
+    {
+     "typed": "ivalua",
+     "verdict": "PASS",
+     "top": "Ivalua",
+     "top_ticker": ""
+    },
+    {
+     "typed": "IVALUA",
+     "verdict": "PASS",
+     "top": "Ivalua",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Ivalua",
+     "verdict": "PASS",
+     "top": "Ivalua",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 33,
+   "entity_id": "manhattan-associates",
+   "typed": "Manhattan Associates",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Manhattan ",
+     "verdict": "PASS",
+     "top": "Manhattan Associates, Inc.",
+     "top_ticker": "MANH"
+    },
+    {
+     "typed": "manhattan associates",
+     "verdict": "PASS",
+     "top": "Manhattan Associates, Inc.",
+     "top_ticker": "MANH"
+    },
+    {
+     "typed": "MANHATTAN ASSOCIATES",
+     "verdict": "PASS",
+     "top": "Manhattan Associates, Inc.",
+     "top_ticker": "MANH"
+    },
+    {
+     "typed": "Manhattan Associates",
+     "verdict": "PASS",
+     "top": "Manhattan Associates, Inc.",
+     "top_ticker": "MANH"
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 34,
+   "entity_id": "toolsgroup",
+   "typed": "ToolsGroup",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Tools",
+     "verdict": "PASS",
+     "top": "ToolsGroup",
+     "top_ticker": ""
+    },
+    {
+     "typed": "toolsgroup",
+     "verdict": "PASS",
+     "top": "ToolsGroup",
+     "top_ticker": ""
+    },
+    {
+     "typed": "TOOLSGROUP",
+     "verdict": "PASS",
+     "top": "ToolsGroup",
+     "top_ticker": ""
+    },
+    {
+     "typed": "ToolsGroup",
+     "verdict": "PASS",
+     "top": "ToolsGroup",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 35,
+   "entity_id": "netstock",
+   "typed": "Netstock",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Nets",
+     "verdict": "PASS",
+     "top": "Netstock",
+     "top_ticker": ""
+    },
+    {
+     "typed": "netstock",
+     "verdict": "PASS",
+     "top": "Netstock",
+     "top_ticker": ""
+    },
+    {
+     "typed": "NETSTOCK",
+     "verdict": "PASS",
+     "top": "Netstock",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Netstock",
+     "verdict": "PASS",
+     "top": "Netstock",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 36,
+   "entity_id": "sourceday",
+   "typed": "SourceDay",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Sour",
+     "verdict": "PASS",
+     "top": "SourceDay, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "sourceday",
+     "verdict": "PASS",
+     "top": "SourceDay, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "SOURCEDAY",
+     "verdict": "PASS",
+     "top": "SourceDay, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "SourceDay",
+     "verdict": "PASS",
+     "top": "SourceDay, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 37,
+   "entity_id": "levadata",
+   "typed": "LevaData",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Leva",
+     "verdict": "PASS",
+     "top": "LevaData, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "levadata",
+     "verdict": "PASS",
+     "top": "LevaData, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "LEVADATA",
+     "verdict": "PASS",
+     "top": "LevaData, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "LevaData",
+     "verdict": "PASS",
+     "top": "LevaData, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 38,
+   "entity_id": "arkestro",
+   "typed": "Arkestro",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Arke",
+     "verdict": "PASS",
+     "top": "Arkestro, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "arkestro",
+     "verdict": "PASS",
+     "top": "Arkestro, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "ARKESTRO",
+     "verdict": "PASS",
+     "top": "Arkestro, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Arkestro",
+     "verdict": "PASS",
+     "top": "Arkestro, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 39,
+   "entity_id": "fairmarkit",
+   "typed": "Fairmarkit",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Fairm",
+     "verdict": "PASS",
+     "top": "Fairmarkit, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "fairmarkit",
+     "verdict": "PASS",
+     "top": "Fairmarkit, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "FAIRMARKIT",
+     "verdict": "PASS",
+     "top": "Fairmarkit, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Fairmarkit",
+     "verdict": "PASS",
+     "top": "Fairmarkit, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 40,
+   "entity_id": "zip-procurement",
+   "typed": "Zip",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Zip",
+     "verdict": "PASS",
+     "top": "Zip",
+     "top_ticker": ""
+    },
+    {
+     "typed": "zip",
+     "verdict": "PASS",
+     "top": "Zip",
+     "top_ticker": ""
+    },
+    {
+     "typed": "ZIP",
+     "verdict": "PASS",
+     "top": "Zip",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Zip",
+     "verdict": "PASS",
+     "top": "Zip",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 41,
+   "entity_id": "order-co",
+   "typed": "Order.co",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "Orde",
+     "verdict": "PASS",
+     "top": "Order.co",
+     "top_ticker": ""
+    },
+    {
+     "typed": "order.co",
+     "verdict": "PASS",
+     "top": "Order.co",
+     "top_ticker": ""
+    },
+    {
+     "typed": "ORDER.CO",
+     "verdict": "PASS",
+     "top": "Order.co",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Order.co",
+     "verdict": "PASS",
+     "top": "Order.co",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 42,
+   "entity_id": "avetta",
+   "typed": "Avetta",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Ave",
+     "verdict": "PASS",
+     "top": "Avetta, LLC",
+     "top_ticker": ""
+    },
+    {
+     "typed": "avetta",
+     "verdict": "PASS",
+     "top": "Avetta, LLC",
+     "top_ticker": ""
+    },
+    {
+     "typed": "AVETTA",
+     "verdict": "PASS",
+     "top": "Avetta, LLC",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Avetta",
+     "verdict": "PASS",
+     "top": "Avetta, LLC",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 43,
+   "entity_id": "rapidratings",
+   "typed": "RapidRatings",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "RapidR",
+     "verdict": "PASS",
+     "top": "RapidRatings International Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "rapidratings",
+     "verdict": "PASS",
+     "top": "RapidRatings International Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "RAPIDRATINGS",
+     "verdict": "PASS",
+     "top": "RapidRatings International Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "RapidRatings",
+     "verdict": "PASS",
+     "top": "RapidRatings International Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 44,
+   "entity_id": "fusion-risk-management",
+   "typed": "Fusion Risk Management",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Fusion Risk",
+     "verdict": "PASS",
+     "top": "Fusion Risk Management, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "fusion risk management",
+     "verdict": "PASS",
+     "top": "Fusion Risk Management, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "FUSION RISK MANAGEMENT",
+     "verdict": "PASS",
+     "top": "Fusion Risk Management, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Fusion Risk Management",
+     "verdict": "PASS",
+     "top": "Fusion Risk Management, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 45,
+   "entity_id": "riskonnect",
+   "typed": "Riskonnect",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Risko",
+     "verdict": "PASS",
+     "top": "Riskonnect, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "riskonnect",
+     "verdict": "PASS",
+     "top": "Riskonnect, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "RISKONNECT",
+     "verdict": "PASS",
+     "top": "Riskonnect, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Riskonnect",
+     "verdict": "PASS",
+     "top": "Riskonnect, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 46,
+   "entity_id": "metricstream",
+   "typed": "MetricStream",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "Metric",
+     "verdict": "PASS",
+     "top": "MetricStream, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "metricstream",
+     "verdict": "PASS",
+     "top": "MetricStream, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "METRICSTREAM",
+     "verdict": "PASS",
+     "top": "MetricStream, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "MetricStream",
+     "verdict": "PASS",
+     "top": "MetricStream, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 47,
+   "entity_id": "navex",
+   "typed": "NAVEX",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "NAV",
+     "verdict": "PASS",
+     "top": "NAVEX Global, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "navex",
+     "verdict": "PASS",
+     "top": "NAVEX Global, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "NAVEX",
+     "verdict": "PASS",
+     "top": "NAVEX Global, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "NAVEX",
+     "verdict": "PASS",
+     "top": "NAVEX Global, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 48,
+   "entity_id": "safe-security",
+   "typed": "Safe Security",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Safe S",
+     "verdict": "PASS",
+     "top": "Safe Security, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "safe security",
+     "verdict": "PASS",
+     "top": "Safe Security, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "SAFE SECURITY",
+     "verdict": "PASS",
+     "top": "Safe Security, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Safe Security",
+     "verdict": "PASS",
+     "top": "Safe Security, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 49,
+   "entity_id": "kpa",
+   "typed": "KPA",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "KPA",
+     "verdict": "PASS",
+     "top": "KPA Services, LLC",
+     "top_ticker": ""
+    },
+    {
+     "typed": "kpa",
+     "verdict": "PASS",
+     "top": "KPA Services, LLC",
+     "top_ticker": ""
+    },
+    {
+     "typed": "KPA",
+     "verdict": "PASS",
+     "top": "KPA Services, LLC",
+     "top_ticker": ""
+    },
+    {
+     "typed": "KPA",
+     "verdict": "PASS",
+     "top": "KPA Services, LLC",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 50,
+   "entity_id": "rane",
+   "typed": "RANE",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "RAN",
+     "verdict": "PASS",
+     "top": "RANE",
+     "top_ticker": ""
+    },
+    {
+     "typed": "rane",
+     "verdict": "PASS",
+     "top": "RANE",
+     "top_ticker": ""
+    },
+    {
+     "typed": "RANE",
+     "verdict": "PASS",
+     "top": "RANE",
+     "top_ticker": ""
+    },
+    {
+     "typed": "RANE",
+     "verdict": "PASS",
+     "top": "RANE",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 51,
+   "entity_id": "eurasia-group",
+   "typed": "Eurasia Group",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Eurasi",
+     "verdict": "PASS",
+     "top": "Eurasia Group",
+     "top_ticker": ""
+    },
+    {
+     "typed": "eurasia group",
+     "verdict": "PASS",
+     "top": "Eurasia Group",
+     "top_ticker": ""
+    },
+    {
+     "typed": "EURASIA GROUP",
+     "verdict": "PASS",
+     "top": "Eurasia Group",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Eurasia Group",
+     "verdict": "PASS",
+     "top": "Eurasia Group",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 52,
+   "entity_id": "oxford-economics",
+   "typed": "Oxford Economics",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Oxford E",
+     "verdict": "PASS",
+     "top": "Oxford Economics Ltd",
+     "top_ticker": ""
+    },
+    {
+     "typed": "oxford economics",
+     "verdict": "PASS",
+     "top": "Oxford Economics Ltd",
+     "top_ticker": ""
+    },
+    {
+     "typed": "OXFORD ECONOMICS",
+     "verdict": "PASS",
+     "top": "Oxford Economics Ltd",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Oxford Economics",
+     "verdict": "PASS",
+     "top": "Oxford Economics Ltd",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 53,
+   "entity_id": "gartner",
+   "typed": "Gartner",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Gar",
+     "verdict": "PASS",
+     "top": "Gartner, Inc.",
+     "top_ticker": "IT"
+    },
+    {
+     "typed": "gartner",
+     "verdict": "PASS",
+     "top": "Gartner, Inc.",
+     "top_ticker": "IT"
+    },
+    {
+     "typed": "GARTNER",
+     "verdict": "PASS",
+     "top": "Gartner, Inc.",
+     "top_ticker": "IT"
+    },
+    {
+     "typed": "Gartner",
+     "verdict": "PASS",
+     "top": "Gartner, Inc.",
+     "top_ticker": "IT"
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 54,
+   "entity_id": "forrester",
+   "typed": "Forrester",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "Forr",
+     "verdict": "PASS",
+     "top": "Forrester Research, Inc.",
+     "top_ticker": "FORR"
+    },
+    {
+     "typed": "forrester",
+     "verdict": "PASS",
+     "top": "Forrester Research, Inc.",
+     "top_ticker": "FORR"
+    },
+    {
+     "typed": "FORRESTER",
+     "verdict": "PASS",
+     "top": "Forrester Research, Inc.",
+     "top_ticker": "FORR"
+    },
+    {
+     "typed": "Forrester",
+     "verdict": "PASS",
+     "top": "Forrester Research, Inc.",
+     "top_ticker": "FORR"
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 55,
+   "entity_id": "cb-insights",
+   "typed": "CB Insights",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "CB In",
+     "verdict": "PASS",
+     "top": "CB Insights",
+     "top_ticker": ""
+    },
+    {
+     "typed": "cb insights",
+     "verdict": "PASS",
+     "top": "CB Insights",
+     "top_ticker": ""
+    },
+    {
+     "typed": "CB INSIGHTS",
+     "verdict": "PASS",
+     "top": "CB Insights",
+     "top_ticker": ""
+    },
+    {
+     "typed": "CB Insights",
+     "verdict": "PASS",
+     "top": "CB Insights",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 56,
+   "entity_id": "onestream",
+   "typed": "OneStream",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "OneS",
+     "verdict": "PASS",
+     "top": "OneStream, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "onestream",
+     "verdict": "PASS",
+     "top": "OneStream, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "ONESTREAM",
+     "verdict": "PASS",
+     "top": "OneStream, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "OneStream",
+     "verdict": "PASS",
+     "top": "OneStream, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 57,
+   "entity_id": "insightsoftware",
+   "typed": "insightsoftware",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "insight",
+     "verdict": "PASS",
+     "top": "insightsoftware",
+     "top_ticker": ""
+    },
+    {
+     "typed": "insightsoftware",
+     "verdict": "PASS",
+     "top": "insightsoftware",
+     "top_ticker": ""
+    },
+    {
+     "typed": "INSIGHTSOFTWARE",
+     "verdict": "PASS",
+     "top": "insightsoftware",
+     "top_ticker": ""
+    },
+    {
+     "typed": "insightsoftware",
+     "verdict": "PASS",
+     "top": "insightsoftware",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 58,
+   "entity_id": "prophix",
+   "typed": "Prophix",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Pro",
+     "verdict": "PASS",
+     "top": "Prophix Software Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "prophix",
+     "verdict": "PASS",
+     "top": "Prophix Software Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "PROPHIX",
+     "verdict": "PASS",
+     "top": "Prophix Software Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Prophix",
+     "verdict": "PASS",
+     "top": "Prophix Software Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 59,
+   "entity_id": "cfo-ai",
+   "typed": "Runway Financial",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "Runway F",
+     "verdict": "PASS",
+     "top": "Runway Financial, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "runway financial",
+     "verdict": "PASS",
+     "top": "Runway Financial, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "RUNWAY FINANCIAL",
+     "verdict": "PASS",
+     "top": "Runway Financial, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Runway Financial",
+     "verdict": "PASS",
+     "top": "Runway Financial, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 60,
+   "entity_id": "drivetrain",
+   "typed": "Drivetrain",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Drive",
+     "verdict": "PASS",
+     "top": "Drivetrain",
+     "top_ticker": ""
+    },
+    {
+     "typed": "drivetrain",
+     "verdict": "PASS",
+     "top": "Drivetrain",
+     "top_ticker": ""
+    },
+    {
+     "typed": "DRIVETRAIN",
+     "verdict": "PASS",
+     "top": "Drivetrain",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Drivetrain",
+     "verdict": "PASS",
+     "top": "Drivetrain",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 61,
+   "entity_id": "abacum",
+   "typed": "Abacum",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Aba",
+     "verdict": "PASS",
+     "top": "Abacum",
+     "top_ticker": ""
+    },
+    {
+     "typed": "abacum",
+     "verdict": "PASS",
+     "top": "Abacum",
+     "top_ticker": ""
+    },
+    {
+     "typed": "ABACUM",
+     "verdict": "PASS",
+     "top": "Abacum",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Abacum",
+     "verdict": "PASS",
+     "top": "Abacum",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 62,
+   "entity_id": "maxio",
+   "typed": "Maxio",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Max",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "MediaAlpha, Inc.",
+     "top_ticker": "MAX"
+    },
+    {
+     "typed": "maxio",
+     "verdict": "PASS",
+     "top": "Maxio",
+     "top_ticker": ""
+    },
+    {
+     "typed": "MAXIO",
+     "verdict": "PASS",
+     "top": "Maxio",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Maxio",
+     "verdict": "PASS",
+     "top": "Maxio",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 63,
+   "entity_id": "chargebee",
+   "typed": "Chargebee",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Char",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Charlton Aria Acquisition Corp",
+     "top_ticker": "CHAR"
+    },
+    {
+     "typed": "chargebee",
+     "verdict": "PASS",
+     "top": "Chargebee, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "CHARGEBEE",
+     "verdict": "PASS",
+     "top": "Chargebee, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Chargebee",
+     "verdict": "PASS",
+     "top": "Chargebee, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 64,
+   "entity_id": "deltek",
+   "typed": "Deltek",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Del",
+     "verdict": "PASS",
+     "top": "Deltek, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "deltek",
+     "verdict": "PASS",
+     "top": "Deltek, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "DELTEK",
+     "verdict": "PASS",
+     "top": "Deltek, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Deltek",
+     "verdict": "PASS",
+     "top": "Deltek, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 65,
+   "entity_id": "eci-software-solutions",
+   "typed": "ECI Software Solutions",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "ECI Softwar",
+     "verdict": "PASS",
+     "top": "ECI Software Solutions, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "eci software solutions",
+     "verdict": "PASS",
+     "top": "ECI Software Solutions, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "ECI SOFTWARE SOLUTIONS",
+     "verdict": "PASS",
+     "top": "ECI Software Solutions, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "ECI Software Solutions",
+     "verdict": "PASS",
+     "top": "ECI Software Solutions, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 66,
+   "entity_id": "aptean",
+   "typed": "Aptean",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Apt",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Alpha Pro Tech Ltd",
+     "top_ticker": "APT"
+    },
+    {
+     "typed": "aptean",
+     "verdict": "PASS",
+     "top": "Aptean, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "APTEAN",
+     "verdict": "PASS",
+     "top": "Aptean, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Aptean",
+     "verdict": "PASS",
+     "top": "Aptean, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 67,
+   "entity_id": "syspro",
+   "typed": "SYSPRO",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "SYS",
+     "verdict": "PASS",
+     "top": "SYSPRO",
+     "top_ticker": ""
+    },
+    {
+     "typed": "syspro",
+     "verdict": "PASS",
+     "top": "SYSPRO",
+     "top_ticker": ""
+    },
+    {
+     "typed": "SYSPRO",
+     "verdict": "PASS",
+     "top": "SYSPRO",
+     "top_ticker": ""
+    },
+    {
+     "typed": "SYSPRO",
+     "verdict": "PASS",
+     "top": "SYSPRO",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 68,
+   "entity_id": "appian",
+   "typed": "Appian",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "App",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "AppLovin Corp",
+     "top_ticker": "APP"
+    },
+    {
+     "typed": "appian",
+     "verdict": "PASS",
+     "top": "Appian Corporation",
+     "top_ticker": "APPN"
+    },
+    {
+     "typed": "APPIAN",
+     "verdict": "PASS",
+     "top": "Appian Corporation",
+     "top_ticker": "APPN"
+    },
+    {
+     "typed": "Appian",
+     "verdict": "PASS",
+     "top": "Appian Corporation",
+     "top_ticker": "APPN"
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 69,
+   "entity_id": "pegasystems",
+   "typed": "Pegasystems",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Pegas",
+     "verdict": "PASS",
+     "top": "Pegasystems Inc.",
+     "top_ticker": "PEGA"
+    },
+    {
+     "typed": "pegasystems",
+     "verdict": "PASS",
+     "top": "Pegasystems Inc.",
+     "top_ticker": "PEGA"
+    },
+    {
+     "typed": "PEGASYSTEMS",
+     "verdict": "PASS",
+     "top": "Pegasystems Inc.",
+     "top_ticker": "PEGA"
+    },
+    {
+     "typed": "Pegasystems",
+     "verdict": "PASS",
+     "top": "Pegasystems Inc.",
+     "top_ticker": "PEGA"
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 70,
+   "entity_id": "celonis",
+   "typed": "Celonis",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Cel",
+     "verdict": "BOUNDED_SHARED_PREFIX",
+     "top": "Celigo, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "celonis",
+     "verdict": "PASS",
+     "top": "Celonis SE",
+     "top_ticker": ""
+    },
+    {
+     "typed": "CELONIS",
+     "verdict": "PASS",
+     "top": "Celonis SE",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Celonis",
+     "verdict": "PASS",
+     "top": "Celonis SE",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 71,
+   "entity_id": "kissflow",
+   "typed": "Kissflow",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Kiss",
+     "verdict": "PASS",
+     "top": "Kissflow",
+     "top_ticker": ""
+    },
+    {
+     "typed": "kissflow",
+     "verdict": "PASS",
+     "top": "Kissflow",
+     "top_ticker": ""
+    },
+    {
+     "typed": "KISSFLOW",
+     "verdict": "PASS",
+     "top": "Kissflow",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Kissflow",
+     "verdict": "PASS",
+     "top": "Kissflow",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 72,
+   "entity_id": "tonkean",
+   "typed": "Tonkean",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Ton",
+     "verdict": "PASS",
+     "top": "Tonkean, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "tonkean",
+     "verdict": "PASS",
+     "top": "Tonkean, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "TONKEAN",
+     "verdict": "PASS",
+     "top": "Tonkean, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Tonkean",
+     "verdict": "PASS",
+     "top": "Tonkean, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 73,
+   "entity_id": "nintex",
+   "typed": "Nintex",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Nin",
+     "verdict": "PASS",
+     "top": "Nintex",
+     "top_ticker": ""
+    },
+    {
+     "typed": "nintex",
+     "verdict": "PASS",
+     "top": "Nintex",
+     "top_ticker": ""
+    },
+    {
+     "typed": "NINTEX",
+     "verdict": "PASS",
+     "top": "Nintex",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Nintex",
+     "verdict": "PASS",
+     "top": "Nintex",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 74,
+   "entity_id": "uipath",
+   "typed": "UiPath",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "UiP",
+     "verdict": "PASS",
+     "top": "UiPath, Inc.",
+     "top_ticker": "PATH"
+    },
+    {
+     "typed": "uipath",
+     "verdict": "PASS",
+     "top": "UiPath, Inc.",
+     "top_ticker": "PATH"
+    },
+    {
+     "typed": "UIPATH",
+     "verdict": "PASS",
+     "top": "UiPath, Inc.",
+     "top_ticker": "PATH"
+    },
+    {
+     "typed": "UiPath",
+     "verdict": "PASS",
+     "top": "UiPath, Inc.",
+     "top_ticker": "PATH"
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 75,
+   "entity_id": "kantata",
+   "typed": "Kantata",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Kan",
+     "verdict": "PASS",
+     "top": "Kantata, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "kantata",
+     "verdict": "PASS",
+     "top": "Kantata, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "KANTATA",
+     "verdict": "PASS",
+     "top": "Kantata, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Kantata",
+     "verdict": "PASS",
+     "top": "Kantata, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 76,
+   "entity_id": "highradius",
+   "typed": "HighRadius",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "HighR",
+     "verdict": "PASS",
+     "top": "HighRadius Corporation",
+     "top_ticker": ""
+    },
+    {
+     "typed": "highradius",
+     "verdict": "PASS",
+     "top": "HighRadius Corporation",
+     "top_ticker": ""
+    },
+    {
+     "typed": "HIGHRADIUS",
+     "verdict": "PASS",
+     "top": "HighRadius Corporation",
+     "top_ticker": ""
+    },
+    {
+     "typed": "HighRadius",
+     "verdict": "PASS",
+     "top": "HighRadius Corporation",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 77,
+   "entity_id": "securityscorecard",
+   "typed": "SecurityScorecard",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Security",
+     "verdict": "PASS",
+     "top": "SecurityScorecard, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "securityscorecard",
+     "verdict": "PASS",
+     "top": "SecurityScorecard, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "SECURITYSCORECARD",
+     "verdict": "PASS",
+     "top": "SecurityScorecard, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "SecurityScorecard",
+     "verdict": "PASS",
+     "top": "SecurityScorecard, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 78,
+   "entity_id": "bitsight",
+   "typed": "BitSight",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "BitS",
+     "verdict": "PASS",
+     "top": "BitSight Technologies, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "bitsight",
+     "verdict": "PASS",
+     "top": "BitSight Technologies, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "BITSIGHT",
+     "verdict": "PASS",
+     "top": "BitSight Technologies, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "BitSight",
+     "verdict": "PASS",
+     "top": "BitSight Technologies, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 79,
+   "entity_id": "censys",
+   "typed": "Censys",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Cen",
+     "verdict": "PASS",
+     "top": "Censys, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "censys",
+     "verdict": "PASS",
+     "top": "Censys, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "CENSYS",
+     "verdict": "PASS",
+     "top": "Censys, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Censys",
+     "verdict": "PASS",
+     "top": "Censys, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 80,
+   "entity_id": "wiz",
+   "typed": "Wiz",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Wiz",
+     "verdict": "PASS",
+     "top": "Wiz, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "wiz",
+     "verdict": "PASS",
+     "top": "Wiz, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "WIZ",
+     "verdict": "PASS",
+     "top": "Wiz, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Wiz",
+     "verdict": "PASS",
+     "top": "Wiz, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 81,
+   "entity_id": "aqua-security",
+   "typed": "Aqua Security",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Aqua S",
+     "verdict": "PASS",
+     "top": "Aqua Security Software Ltd.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "aqua security",
+     "verdict": "PASS",
+     "top": "Aqua Security Software Ltd.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "AQUA SECURITY",
+     "verdict": "PASS",
+     "top": "Aqua Security Software Ltd.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Aqua Security",
+     "verdict": "PASS",
+     "top": "Aqua Security Software Ltd.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 82,
+   "entity_id": "sysdig",
+   "typed": "Sysdig",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Sys",
+     "verdict": "BOUNDED_SHARED_PREFIX",
+     "top": "SYSPRO",
+     "top_ticker": ""
+    },
+    {
+     "typed": "sysdig",
+     "verdict": "PASS",
+     "top": "Sysdig, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "SYSDIG",
+     "verdict": "PASS",
+     "top": "Sysdig, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Sysdig",
+     "verdict": "PASS",
+     "top": "Sysdig, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 83,
+   "entity_id": "tenable",
+   "typed": "Tenable",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "Ten",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Tsakos Energy Navigation Ltd",
+     "top_ticker": "TEN"
+    },
+    {
+     "typed": "tenable",
+     "verdict": "PASS",
+     "top": "Tenable Holdings, Inc.",
+     "top_ticker": "TENB"
+    },
+    {
+     "typed": "TENABLE",
+     "verdict": "PASS",
+     "top": "Tenable Holdings, Inc.",
+     "top_ticker": "TENB"
+    },
+    {
+     "typed": "Tenable",
+     "verdict": "PASS",
+     "top": "Tenable Holdings, Inc.",
+     "top_ticker": "TENB"
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 84,
+   "entity_id": "rapid7",
+   "typed": "Rapid7",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Rap",
+     "verdict": "PASS",
+     "top": "Rapid7, Inc.",
+     "top_ticker": "RPD"
+    },
+    {
+     "typed": "rapid7",
+     "verdict": "PASS",
+     "top": "Rapid7, Inc.",
+     "top_ticker": "RPD"
+    },
+    {
+     "typed": "RAPID7",
+     "verdict": "PASS",
+     "top": "Rapid7, Inc.",
+     "top_ticker": "RPD"
+    },
+    {
+     "typed": "Rapid7",
+     "verdict": "PASS",
+     "top": "Rapid7, Inc.",
+     "top_ticker": "RPD"
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 85,
+   "entity_id": "sentinelone",
+   "typed": "SentinelOne",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Senti",
+     "verdict": "PASS",
+     "top": "SentinelOne, Inc.",
+     "top_ticker": "S"
+    },
+    {
+     "typed": "sentinelone",
+     "verdict": "PASS",
+     "top": "SentinelOne, Inc.",
+     "top_ticker": "S"
+    },
+    {
+     "typed": "SENTINELONE",
+     "verdict": "PASS",
+     "top": "SentinelOne, Inc.",
+     "top_ticker": "S"
+    },
+    {
+     "typed": "SentinelOne",
+     "verdict": "PASS",
+     "top": "SentinelOne, Inc.",
+     "top_ticker": "S"
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 86,
+   "entity_id": "claroty",
+   "typed": "Claroty",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Cla",
+     "verdict": "BOUNDED_SHARED_PREFIX",
+     "top": "Clari Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "claroty",
+     "verdict": "PASS",
+     "top": "Claroty Ltd.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "CLAROTY",
+     "verdict": "PASS",
+     "top": "Claroty Ltd.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Claroty",
+     "verdict": "PASS",
+     "top": "Claroty Ltd.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 87,
+   "entity_id": "forescout",
+   "typed": "Forescout",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Fore",
+     "verdict": "PASS",
+     "top": "Forescout Technologies, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "forescout",
+     "verdict": "PASS",
+     "top": "Forescout Technologies, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "FORESCOUT",
+     "verdict": "PASS",
+     "top": "Forescout Technologies, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Forescout",
+     "verdict": "PASS",
+     "top": "Forescout Technologies, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 88,
+   "entity_id": "corelight",
+   "typed": "Corelight",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Core",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Core Specialty Insurance Holdings, Inc.",
+     "top_ticker": "CORE"
+    },
+    {
+     "typed": "corelight",
+     "verdict": "PASS",
+     "top": "Corelight, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "CORELIGHT",
+     "verdict": "PASS",
+     "top": "Corelight, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Corelight",
+     "verdict": "PASS",
+     "top": "Corelight, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 89,
+   "entity_id": "critical-start",
+   "typed": "Critical Start",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Critica",
+     "verdict": "PASS",
+     "top": "Critical Start, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "critical start",
+     "verdict": "PASS",
+     "top": "Critical Start, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "CRITICAL START",
+     "verdict": "PASS",
+     "top": "Critical Start, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Critical Start",
+     "verdict": "PASS",
+     "top": "Critical Start, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 90,
+   "entity_id": "eplus",
+   "typed": "ePlus",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "ePl",
+     "verdict": "PASS",
+     "top": "ePlus inc.",
+     "top_ticker": "PLUS"
+    },
+    {
+     "typed": "eplus",
+     "verdict": "PASS",
+     "top": "ePlus inc.",
+     "top_ticker": "PLUS"
+    },
+    {
+     "typed": "EPLUS",
+     "verdict": "PASS",
+     "top": "ePlus inc.",
+     "top_ticker": "PLUS"
+    },
+    {
+     "typed": "ePlus",
+     "verdict": "PASS",
+     "top": "ePlus inc.",
+     "top_ticker": "PLUS"
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 91,
+   "entity_id": "shi-international",
+   "typed": "SHI International",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "SHI Inte",
+     "verdict": "PASS",
+     "top": "SHI International Corp.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "shi international",
+     "verdict": "PASS",
+     "top": "SHI International Corp.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "SHI INTERNATIONAL",
+     "verdict": "PASS",
+     "top": "SHI International Corp.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "SHI International",
+     "verdict": "PASS",
+     "top": "SHI International Corp.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 92,
+   "entity_id": "insight-enterprises",
+   "typed": "Insight Enterprises",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "Insight E",
+     "verdict": "PASS",
+     "top": "Insight Enterprises, Inc.",
+     "top_ticker": "NSIT"
+    },
+    {
+     "typed": "insight enterprises",
+     "verdict": "PASS",
+     "top": "Insight Enterprises, Inc.",
+     "top_ticker": "NSIT"
+    },
+    {
+     "typed": "INSIGHT ENTERPRISES",
+     "verdict": "PASS",
+     "top": "Insight Enterprises, Inc.",
+     "top_ticker": "NSIT"
+    },
+    {
+     "typed": "Insight Enterprises",
+     "verdict": "PASS",
+     "top": "Insight Enterprises, Inc.",
+     "top_ticker": "NSIT"
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 93,
+   "entity_id": "concentric-ai",
+   "typed": "Concentric AI",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Concen",
+     "verdict": "PASS",
+     "top": "Concentric AI",
+     "top_ticker": ""
+    },
+    {
+     "typed": "concentric ai",
+     "verdict": "PASS",
+     "top": "Concentric AI",
+     "top_ticker": ""
+    },
+    {
+     "typed": "CONCENTRIC AI",
+     "verdict": "PASS",
+     "top": "Concentric AI",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Concentric AI",
+     "verdict": "PASS",
+     "top": "Concentric AI",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 94,
+   "entity_id": "improving",
+   "typed": "Improving",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Impr",
+     "verdict": "PASS",
+     "top": "Improving Enterprises, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "improving",
+     "verdict": "PASS",
+     "top": "Improving Enterprises, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "IMPROVING",
+     "verdict": "PASS",
+     "top": "Improving Enterprises, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Improving",
+     "verdict": "PASS",
+     "top": "Improving Enterprises, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 95,
+   "entity_id": "launch-consulting",
+   "typed": "Launch Consulting",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Launch C",
+     "verdict": "PASS",
+     "top": "Launch Consulting Group",
+     "top_ticker": ""
+    },
+    {
+     "typed": "launch consulting",
+     "verdict": "PASS",
+     "top": "Launch Consulting Group",
+     "top_ticker": ""
+    },
+    {
+     "typed": "LAUNCH CONSULTING",
+     "verdict": "PASS",
+     "top": "Launch Consulting Group",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Launch Consulting",
+     "verdict": "PASS",
+     "top": "Launch Consulting Group",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 96,
+   "entity_id": "sparq",
+   "typed": "Sparq",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Spa",
+     "verdict": "PASS",
+     "top": "Sparq",
+     "top_ticker": ""
+    },
+    {
+     "typed": "sparq",
+     "verdict": "PASS",
+     "top": "Sparq",
+     "top_ticker": ""
+    },
+    {
+     "typed": "SPARQ",
+     "verdict": "PASS",
+     "top": "Sparq",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Sparq",
+     "verdict": "PASS",
+     "top": "Sparq",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 97,
+   "entity_id": "bounteous",
+   "typed": "Bounteous",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Boun",
+     "verdict": "PASS",
+     "top": "Bounteous",
+     "top_ticker": ""
+    },
+    {
+     "typed": "bounteous",
+     "verdict": "PASS",
+     "top": "Bounteous",
+     "top_ticker": ""
+    },
+    {
+     "typed": "BOUNTEOUS",
+     "verdict": "PASS",
+     "top": "Bounteous",
+     "top_ticker": ""
+    },
+    {
+     "typed": "Bounteous",
+     "verdict": "PASS",
+     "top": "Bounteous",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  },
+  {
+   "prospect_id": 98,
+   "entity_id": "softserve",
+   "typed": "SoftServe",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Soft",
+     "verdict": "PASS",
+     "top": "SoftServe, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "softserve",
+     "verdict": "PASS",
+     "top": "SoftServe, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "SOFTSERVE",
+     "verdict": "PASS",
+     "top": "SoftServe, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "SoftServe",
+     "verdict": "PASS",
+     "top": "SoftServe, Inc.",
+     "top_ticker": ""
+    }
+   ],
+   "search_status": "PASS"
+  }
+ ]
+}

@@ -178,7 +178,19 @@ def test_fallback_candidates_match_the_discovery_candidate_shape():
 @pytest.mark.parametrize("entity_id", [p.entity_id for p in REGISTRY])
 def test_every_registry_entity_is_internally_consistent(entity_id):
     profile = resolve_choice(entity_id).profile
-    assert profile.legal_name and profile.common_name and profile.country
+    assert profile.legal_name and profile.common_name
+    # HEADQUARTERS: a country, or an explicit non-asserting status with its
+    # reason -- never silence, never a guess (see entities.HQ_*).
+    from intent_engine.company_ingestion.entities import (
+        HQ_ASSERTING, HQ_NON_ASSERTING)
+    if profile.hq_status in HQ_NON_ASSERTING:
+        assert not profile.country, (
+            "a non-asserting headquarters status may not carry a displayed country")
+        assert profile.hq_note.strip(), "an unestablished headquarters must say why"
+    else:
+        assert profile.country, (
+            "an entity with no non-asserting headquarters status must state a country")
+        assert profile.hq_status in ("",) + tuple(HQ_ASSERTING)
     assert profile.primary_domain
     # An entry with no official source is allowed ONLY when it says why, in
     # one of two auditable ways: it never opens a run (absorbed or closed),

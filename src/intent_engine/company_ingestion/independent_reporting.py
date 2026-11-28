@@ -124,6 +124,27 @@ PUBLISHERS = (
     Publisher("TechCrunch", "techcrunch.com", "/tag/{slug}/feed/", "",
               "2026-11-26: robots allow the tag feed; 19 (Rippling), 20 "
               "(Brex), 20 (Gusto) items"),
+    # ADMITTED 2026-11-28 by scripts/prospect98/probe_publishers98.py
+    # (docs/engineering/prospect98/publisher_probe98.json): category voices for
+    # developer tooling, supply chain and security. Twelve other candidates
+    # refused or returned nothing; FinSMEs, AIthority, Security Boulevard and
+    # Unite.AI were not probed because they mostly republish the company's own
+    # words (press-release rewrites, syndicated vendor blogs, interviews).
+    Publisher("SD Times", "sdtimes.com", "", "/?s={q}&feed=rss2",
+              "2026-11-28: robots allow the search feed; "
+              "[10, 1, 5] items (Pendo, Fullstory, ClickHouse); "
+              "loose, so items must name the subject"),
+    Publisher("Logistics Viewpoints", "logisticsviewpoints.com",
+              "/tag/{slug}/feed/", "/?s={q}&feed=rss2",
+              "2026-11-28: robots allow both; tag "
+              "[3, -1, 2], search "
+              "[15, 0, 58] (ToolsGroup, Netstock, "
+              "Coupa); the search feed is loose"),
+    Publisher("CyberScoop", "cyberscoop.com", "/tag/{slug}/feed/",
+              "/?s={q}&feed=rss2",
+              "2026-11-28: robots allow both; tag [10, 10, 3], "
+              "search [10, 10, 10] (SentinelOne, Wiz, Claroty); "
+              "the search feed is loose"),
 )
 
 #: Hosts that are never independent reporting about a company, whatever
@@ -480,6 +501,25 @@ def needs_identity_anchor(company: str, text: str, *,
                           text or ""))
 
 
+def links_to_domain(html: str, domain: str) -> bool:
+    """Does the publisher's own page LINK to the company's verified domain?
+
+    A hyperlink is the publisher saying which company it means. MEASURED
+    2026-11-28 (prospect-98 w4): Wiz -- the subject of a $32B acquisition --
+    read as having NO outside coverage, because "Wiz" is short and has real
+    namesakes (WiZ lighting, Wizz Air), so every article needed "wiz.io" or a
+    multi-word name in its TEXT, and the press prints neither; text
+    extraction drops the links that carry it. A namesake's article links to
+    the namesake's site, so this keeps the protection the anchor exists for.
+    Relevance is still adjudicated on the text after this."""
+    reg = _registrable(domain or "")
+    if not reg or "." not in reg or not html:
+        return False
+    return bool(re.search(
+        r"""href\s*=\s*["'](?:https?:)?//(?:[\w-]+\.)*""" + re.escape(reg)
+        + r"""(?:[/"'?#:]|$)""", html, re.I))
+
+
 def identity_anchors(company: str, domain: str, aliases=()) -> List[str]:
     """Strings that name THIS company and nothing else: its domain, and any
     multi-word name it is known by."""
@@ -534,7 +574,8 @@ def verify(pointer, *, company, domain, aliases, fetch, robots,
     title = pointer.get("title") or page.get("title") or ""
     if needs_identity_anchor(company, text, namesake_free=namesake_free):
         anchors = identity_anchors(company, domain, aliases)
-        if not any(a.lower() in text.lower() for a in anchors):
+        if not any(a.lower() in text.lower() for a in anchors) and \
+                not links_to_domain(str(result.get("body") or ""), domain):
             report["rejection_reasons"]["AMBIGUOUS_NAME_NO_IDENTITY_ANCHOR"] += 1
             return None
     wire = bool(_WIRE.search(text[:4000]))

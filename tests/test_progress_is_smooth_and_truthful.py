@@ -147,3 +147,14 @@ def test_the_poller_enforces_the_same_ownership_as_the_page():
         if leak in src:
             assert src.index(leak) > owned_at, (
                 f"{leak} reads run data before ownership is established")
+
+
+def test_the_poller_says_when_the_reading_is_final():
+    """A run is terminal at CORE, and deferred evidence can still change the
+    answer after it (prospect-98 w3, ClickHouse: 4 -> 11 documents, 1 -> 3
+    independent origins, 1.6 s after COMPLETE). `settled` is the signal a
+    client waits for, and it must be computed from the in-flight registry --
+    not a literal (memory: a-silence-can-be-a-constant)."""
+    src = _code_only(WebApp._progress_json)
+    assert '"settled"' in src
+    assert "_analysis_in_flight(run_id)" in src[src.index('"settled"'):]

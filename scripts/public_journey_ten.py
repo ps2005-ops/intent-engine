@@ -68,6 +68,9 @@ PREFIXES = {
 }
 CORE_BUDGET_S = 120
 POLL_S = 4.0
+#: How long a terminal run may keep working (deferred evidence) before the
+#: surfaces are read anyway; the wait is recorded as `settled_s`.
+SETTLE_BUDGET_S = 120
 
 QUESTIONS = [
     "What is this company's business model?",
@@ -310,6 +313,27 @@ def journey(name, entity_id, *, verbose=True, extra=None) -> dict:
             break
         time.sleep(POLL_S)
     row["core_s"] = core
+    # THE SURFACES ARE READ ONCE THE RUN HAS SETTLED, NOT AT CORE.
+    #
+    # A run is terminal at CORE; deferred evidence can still be recomposed and
+    # the dossier republished after it (prospect-98 w3, ClickHouse: 1 -> 3
+    # independent origins 1.6s after COMPLETE). Grading the page a reader
+    # would see after the work finished, and timing CORE as before. A server
+    # without the `settled` field (older trees) is read immediately, exactly
+    # as this harness always did.
+    if core is not None:
+        _settle_began = time.monotonic()
+        while time.monotonic() - _settle_began < SETTLE_BUDGET_S:
+            st, body, _u, _t, _h = _req(op, f"/runs/{run_id}/progress.json",
+                                        timeout=45)
+            try:
+                js = json.loads(body)
+            except Exception:                                # noqa: BLE001
+                js = {}
+            if "settled" not in js or js.get("settled"):
+                break
+            time.sleep(POLL_S)
+        row["settled_s"] = round(core + time.monotonic() - _settle_began, 1)
     if core is None:
         # Not a spinner that lies -- a spinner that never ends.
         spinner_ok = False

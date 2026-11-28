@@ -1,0 +1,4936 @@
+{
+ "program": "prospect98",
+ "generated_by": "scripts/prospect98/identity_registry.py",
+ "rules": "Verified identity for the 98 positions. Writes docs/engineering/prospect98/IDENTITY_REGISTRY.json.\n\nEvery row was checked 2026-11-28:\n  * domain: fetched through the product's own safe_fetch\n    (reports/prospect98/identity/domain_verification*.json); the title and text\n    head name the company, or the row says the site refused the fetcher;\n  * SEC identity: sec.gov company_tickers.json (current filers) and\n    data.sec.gov submissions (former filers: 25-NSE / 15-12G dates);\n  * ownership change: cited by URL in `status.evidence` (acquirer, target or\n    regulator announcement first; trade press only as corroboration).\n\nhq_country is EMPTY where it could not be stated with confidence (a wrong\ncountry renders a falsehood under the company's name). An ownership state with\nno deal found in the 2026-11-28 sweep is recorded as such, never as a proof\nthat no deal exists.\n\nPosition, category and the as-listed name are copied from UNIVERSE_AS_LISTED.tsv\nand never edited; the analysis target is a separate field.",
+ "companies": [
+  {
+   "position": 1,
+   "category": "C1",
+   "name_as_listed": "Alteryx",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Alteryx",
+   "legal_name": "Alteryx, Inc.",
+   "primary_domain": "alteryx.com",
+   "hq_country": "United States",
+   "aliases": [
+    "alteryx"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": {
+    "cik": "1689923",
+    "until": "2024-03-19"
+   },
+   "ownership": {
+    "state": "TAKEN_PRIVATE",
+    "effective": "2024-03-19",
+    "counterparty": "Clearlake Capital Group and Insight Partners",
+    "counterparty_cik": "",
+    "summary": "Taken private for about $4.4B; Nasdaq delisting (25-NSE) 2024-03-19",
+    "evidence": [
+     "https://clearlake.com/wp-content/uploads/2024/03/04_Hideaway-Closing_Press-Release_v20240318_2-1.pdf"
+    ]
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "Insight Partners (co-owner) is not Insight Enterprises (#92) nor insightsoftware (#57)"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "alteryx.com",
+     "final_host": "www.alteryx.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Alteryx: Automate Data Workflows & Get AI-Powered Insights"
+    }
+   ],
+   "identity_status": "VERIFIED_WITH_CHANGE",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 2,
+   "category": "C1",
+   "name_as_listed": "Domo",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Domo",
+   "legal_name": "Domo",
+   "primary_domain": "domo.com",
+   "hq_country": "United States",
+   "aliases": [
+    "domo",
+    "domo inc"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": {
+    "cik": "1505952",
+    "until": "2026-09",
+    "now_named": "Huckleberry.ai, Inc. (HUCK)"
+   },
+   "ownership": {
+    "state": "ACQUIRED_OPERATING",
+    "effective": "2026-09",
+    "counterparty": "Progress Software Corporation",
+    "counterparty_cik": "876167",
+    "summary": "Progress bought substantially all Domo assets and employees for $400M (announced 2026-07-22); the listed shell kept the NOLs and is now Huckleberry.ai, Inc.",
+    "evidence": [
+     "https://www.businesswire.com/news/home/20260722324001/en/",
+     "https://www.progress.com/blogs/progress-software-acquires-domo-to-strengthen-its-ai-data-platform"
+    ]
+   },
+   "ownership_prior_in_split": "public",
+   "ownership_prior_was_wrong": true,
+   "site_access": "domo.com answers 405 to automated readers (2026-11-28)",
+   "collision_risks": [
+    "CIK 1505952 is now Huckleberry.ai, a shell: its filings after the asset sale are NOT Domo's",
+    "closing month from the Progress blog (updated 2026-09-22); no independent confirmation of the closing date found"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "domo.com",
+     "final_host": "domo.com",
+     "safe_fetch_status": 405,
+     "safe_fetch_failure": "http_status",
+     "title": ""
+    },
+    {
+     "candidate_domain": "domo.com",
+     "final_host": "domo.com",
+     "safe_fetch_status": 405,
+     "safe_fetch_failure": "http_status",
+     "title": ""
+    },
+    {
+     "candidate_domain": "www.domo.com",
+     "final_host": "www.domo.com",
+     "safe_fetch_status": 405,
+     "safe_fetch_failure": "http_status",
+     "title": ""
+    }
+   ],
+   "identity_status": "VERIFIED_WITH_CHANGE",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 3,
+   "category": "C1",
+   "name_as_listed": "StarTree",
+   "split": "DEVELOPMENT",
+   "analysis_target": "StarTree",
+   "legal_name": "StarTree, Inc.",
+   "primary_domain": "startree.ai",
+   "hq_country": "United States",
+   "aliases": [
+    "startree"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "startree.ai",
+     "final_host": "startree.ai",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Query Engine for Real-Time Analytics at Scale | StarTree"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 4,
+   "category": "C1",
+   "name_as_listed": "ClickHouse",
+   "split": "DEVELOPMENT",
+   "analysis_target": "ClickHouse",
+   "legal_name": "ClickHouse, Inc.",
+   "primary_domain": "clickhouse.com",
+   "hq_country": "United States",
+   "aliases": [
+    "clickhouse"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "clickhouse.com",
+     "final_host": "clickhouse.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "ClickHouse | Built for Data-Intensive Workloads"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 5,
+   "category": "C1",
+   "name_as_listed": "Firebolt",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Firebolt",
+   "legal_name": "Firebolt Analytics, Inc.",
+   "primary_domain": "firebolt.io",
+   "hq_country": "",
+   "aliases": [
+    "firebolt"
+   ],
+   "headquarters": {
+    "status": "CONFLICTING",
+    "displayed_country": "",
+    "note": "official /about lists San Francisco, Munich, Tel Aviv and Bangalore and names no headquarters; the company LinkedIn profile says Palo Alto (lead supplied by the program owner); aggregators disagree (Tel Aviv, Palo Alto, San Francisco). Not displayed.",
+    "sources": [
+     [
+      "https://www.firebolt.io/about",
+      "2026-11-28",
+      "locations: San Francisco, Munich, Tel Aviv, Bangalore; no HQ named"
+     ],
+     [
+      "https://www.linkedin.com/company/firebolt/",
+      "",
+      "Palo Alto, California (owner-supplied lead; not re-fetched: LinkedIn refuses automated readers)"
+     ],
+     [
+      "https://www.cbinsights.com/company/firebolt",
+      "2026-11-28",
+      "aggregator: HQ listed differently by source"
+     ]
+    ],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "Firebolt is also a common product/brand word (e.g. Firebolt smartwatches)"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "firebolt.io",
+     "final_host": "firebolt.io",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Firebolt: The Analytical Database for Engineers"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 6,
+   "category": "C1",
+   "name_as_listed": "MotherDuck",
+   "split": "VALIDATION",
+   "analysis_target": "MotherDuck",
+   "legal_name": "MotherDuck Corporation",
+   "primary_domain": "motherduck.com",
+   "hq_country": "United States",
+   "aliases": [
+    "motherduck"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "motherduck.com",
+     "final_host": "motherduck.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "MotherDuck | Your AI Data Team"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 7,
+   "category": "C1",
+   "name_as_listed": "Astronomer",
+   "split": "FINAL_UNTOUCHED",
+   "analysis_target": "Astronomer",
+   "legal_name": "Astronomer, Inc.",
+   "primary_domain": "astronomer.io",
+   "hq_country": "United States",
+   "aliases": [
+    "astronomer",
+    "astro"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "common noun; requires the domain or 'Airflow' context"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "astronomer.io",
+     "final_host": "www.astronomer.io",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Astronomer: The Best Place to Run Apache Airflow®"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 8,
+   "category": "C1",
+   "name_as_listed": "FalkorDB",
+   "split": "DEVELOPMENT",
+   "analysis_target": "FalkorDB",
+   "legal_name": "FalkorDB",
+   "primary_domain": "falkordb.com",
+   "hq_country": "Israel",
+   "aliases": [
+    "falkordb"
+   ],
+   "headquarters": {
+    "status": "COMPANY_REPORTED",
+    "displayed_country": "Israel",
+    "note": "Tel Aviv per the company's LinkedIn profile (owner-supplied lead; not re-fetched: LinkedIn refuses automated readers; falkordb.com/about answers 404)",
+    "sources": [
+     [
+      "https://www.linkedin.com/company/falkordb/",
+      "",
+      "headquarters Tel Aviv"
+     ]
+    ],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "falkordb.com",
+     "final_host": "www.falkordb.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "FalkorDB: Open Source Graph Database for AI Agents & GraphRAG"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 9,
+   "category": "C1",
+   "name_as_listed": "Pinecone",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Pinecone",
+   "legal_name": "Pinecone Systems, Inc.",
+   "primary_domain": "pinecone.io",
+   "hq_country": "United States",
+   "aliases": [
+    "pinecone",
+    "pinecone systems"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "common noun"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "pinecone.io",
+     "final_host": "pinecone.io",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "The trusted AI knowledge company | Pinecone"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 10,
+   "category": "C1",
+   "name_as_listed": "Weaviate",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Weaviate",
+   "legal_name": "Weaviate B.V.",
+   "primary_domain": "weaviate.io",
+   "hq_country": "Netherlands",
+   "aliases": [
+    "weaviate",
+    "semi technologies"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "Netherlands",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "weaviate.io",
+     "final_host": "weaviate.io",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "The AI database developers love | Weaviate"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 11,
+   "category": "C1",
+   "name_as_listed": "Zilliz",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Zilliz",
+   "legal_name": "Zilliz",
+   "primary_domain": "zilliz.com",
+   "hq_country": "United States",
+   "aliases": [
+    "zilliz",
+    "milvus"
+   ],
+   "headquarters": {
+    "status": "VERIFIED",
+    "displayed_country": "United States",
+    "note": "Redwood City, California",
+    "sources": [
+     [
+      "https://zilliz.com/contact-sales",
+      "2026-11-28",
+      "Headquarters: 201 Redwood Shores Pkwy, Suite 330, Redwood City, CA 94065"
+     ]
+    ],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "zilliz.com",
+     "final_host": "zilliz.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Zilliz Vector Lakebase for Enterprise AI, Powered by Milvus"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 12,
+   "category": "C1",
+   "name_as_listed": "Glean",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Glean",
+   "legal_name": "Glean Technologies, Inc.",
+   "primary_domain": "glean.com",
+   "hq_country": "United States",
+   "aliases": [
+    "glean"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "common verb; exposed in unseen-20"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "glean.com",
+     "final_host": "www.glean.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Glean – Enterprise AI that Works | Agents, Assistant & Search"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 13,
+   "category": "C1",
+   "name_as_listed": "Writer",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Writer",
+   "legal_name": "Writer, Inc.",
+   "primary_domain": "writer.com",
+   "hq_country": "United States",
+   "aliases": [
+    "writer",
+    "writer.com"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "common noun; 'Writer' must resolve only with the domain or enterprise-AI context"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "writer.com",
+     "final_host": "writer.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "WRITER - Reach the frontier of enterprise growth"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 14,
+   "category": "C1",
+   "name_as_listed": "C3 AI",
+   "split": "VALIDATION",
+   "analysis_target": "C3 AI",
+   "legal_name": "C3.ai, Inc.",
+   "primary_domain": "c3.ai",
+   "hq_country": "United States",
+   "aliases": [
+    "c3 ai",
+    "c3.ai",
+    "c3"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": {
+    "ticker": "AI",
+    "exchange": "NYSE",
+    "cik": "1577526"
+   },
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "public",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "ticker 'AI' is a common word"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "c3.ai",
+     "final_host": "c3.ai",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Home Page | C3 AI"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 15,
+   "category": "C1",
+   "name_as_listed": "Domino Data Lab",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Domino Data Lab",
+   "legal_name": "Domino Data Lab, Inc.",
+   "primary_domain": "domino.ai",
+   "hq_country": "United States",
+   "aliases": [
+    "domino data lab",
+    "domino",
+    "dominodatalab"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "'Domino' alone collides with Domino's Pizza (DPZ) and Domino Printing; dominodatalab.com now redirects off-host (refused by safe_fetch)"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "domino.ai",
+     "final_host": "domino.ai",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Domino Data Lab | Accelerate and scale enterprise AI"
+    },
+    {
+     "candidate_domain": "dominodatalab.com",
+     "final_host": "dominodatalab.com",
+     "safe_fetch_status": null,
+     "safe_fetch_failure": "unsafe_redirect",
+     "title": ""
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 16,
+   "category": "C1",
+   "name_as_listed": "Fiddler AI",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Fiddler AI",
+   "legal_name": "Fiddler Labs, Inc.",
+   "primary_domain": "fiddler.ai",
+   "hq_country": "United States",
+   "aliases": [
+    "fiddler",
+    "fiddler ai",
+    "fiddler labs"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "ACQUISITION_PENDING",
+    "effective": "2026-11-03",
+    "counterparty": "CrowdStrike Holdings, Inc.",
+    "counterparty_cik": "1535527",
+    "summary": "CrowdStrike agreed to acquire Fiddler (to become Falcon Observe); signed, not closed as of 2026-11-28",
+    "evidence": [
+     "https://ir.crowdstrike.com/news-releases/news-release-details/crowdstrike-acquire-fiddler-deliver-agent-observability-ai-trust"
+    ]
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "fiddler.ai",
+     "final_host": "www.fiddler.ai",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Fiddler AI: The Control Plane for Enterprise AI Agents"
+    }
+   ],
+   "identity_status": "VERIFIED_WITH_CHANGE",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 17,
+   "category": "C1",
+   "name_as_listed": "Arthur AI",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Arthur AI",
+   "legal_name": "Arthur",
+   "primary_domain": "arthur.ai",
+   "hq_country": "United States",
+   "aliases": [
+    "arthur",
+    "arthur ai"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "personal first name"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "arthur.ai",
+     "final_host": "arthur.ai",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Arthur | AI governance for everyone"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 18,
+   "category": "C1",
+   "name_as_listed": "Tonic.ai",
+   "split": "FINAL_UNTOUCHED",
+   "analysis_target": "Tonic.ai",
+   "legal_name": "Tonic AI, Inc.",
+   "primary_domain": "tonic.ai",
+   "hq_country": "United States",
+   "aliases": [
+    "tonic",
+    "tonic.ai",
+    "tonic ai"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "tonic.ai",
+     "final_host": "www.tonic.ai",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Tonic.ai: Synthetic Data for Software and AI Development"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 19,
+   "category": "C1",
+   "name_as_listed": "Unstructured",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Unstructured",
+   "legal_name": "Unstructured Technologies, Inc.",
+   "primary_domain": "unstructured.io",
+   "hq_country": "United States",
+   "aliases": [
+    "unstructured",
+    "unstructured.io"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "common adjective ('unstructured data')"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "unstructured.io",
+     "final_host": "unstructured.io",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Convert Documents into Structured, AI-Ready Data | Unstructured"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 20,
+   "category": "C1",
+   "name_as_listed": "LandingAI",
+   "split": "DEVELOPMENT",
+   "analysis_target": "LandingAI",
+   "legal_name": "LandingAI",
+   "primary_domain": "landing.ai",
+   "hq_country": "United States",
+   "aliases": [
+    "landingai",
+    "landing ai",
+    "landing.ai"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "landing.ai",
+     "final_host": "landing.ai",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "LandingAI: Accurate AI Document Extraction APIs"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 21,
+   "category": "C1",
+   "name_as_listed": "Snorkel AI",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Snorkel AI",
+   "legal_name": "Snorkel AI, Inc.",
+   "primary_domain": "snorkel.ai",
+   "hq_country": "United States",
+   "aliases": [
+    "snorkel",
+    "snorkel ai"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "snorkel.ai",
+     "final_host": "snorkel.ai",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Expert data development for frontier AI | Snorkel AI"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 22,
+   "category": "C1",
+   "name_as_listed": "Labelbox",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Labelbox",
+   "legal_name": "Labelbox, Inc.",
+   "primary_domain": "labelbox.com",
+   "hq_country": "United States",
+   "aliases": [
+    "labelbox"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "labelbox.com",
+     "final_host": "labelbox.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Labelbox | Where AI learns to do real work"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 23,
+   "category": "C1",
+   "name_as_listed": "Hyperscience",
+   "split": "FINAL_UNTOUCHED",
+   "analysis_target": "Hyperscience",
+   "legal_name": "Hyperscience",
+   "primary_domain": "hyperscience.ai",
+   "hq_country": "United States",
+   "aliases": [
+    "hyperscience",
+    "hyperscience.com"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "hyperscience.com redirects to hyperscience.ai",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "hyperscience.ai",
+     "final_host": "www.hyperscience.ai",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Hyperscience - Industry Leading Enterprise AI Platform"
+    },
+    {
+     "candidate_domain": "hyperscience.com",
+     "final_host": "www.hyperscience.ai",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Hyperscience - Industry Leading Enterprise AI Platform"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 24,
+   "category": "C1",
+   "name_as_listed": "Alkymi",
+   "split": "VALIDATION",
+   "analysis_target": "Alkymi",
+   "legal_name": "Alkymi, Inc.",
+   "primary_domain": "alkymi.io",
+   "hq_country": "United States",
+   "aliases": [
+    "alkymi"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "alkymi.io",
+     "final_host": "www.alkymi.io",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Alkymi | Trusted Infrastructure for Institutional Investors"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 25,
+   "category": "C1",
+   "name_as_listed": "Ocrolus",
+   "split": "VALIDATION",
+   "analysis_target": "Ocrolus",
+   "legal_name": "Ocrolus, Inc.",
+   "primary_domain": "ocrolus.com",
+   "hq_country": "United States",
+   "aliases": [
+    "ocrolus"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "ocrolus.com",
+     "final_host": "www.ocrolus.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Ocrolus | AI Workflow and Analytics Platform for Lenders."
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 26,
+   "category": "C1",
+   "name_as_listed": "Amplitude",
+   "split": "FINAL_UNTOUCHED",
+   "analysis_target": "Amplitude",
+   "legal_name": "Amplitude, Inc.",
+   "primary_domain": "amplitude.com",
+   "hq_country": "United States",
+   "aliases": [
+    "amplitude",
+    "ampl"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": {
+    "ticker": "AMPL",
+    "exchange": "NASDAQ",
+    "cik": "1866692"
+   },
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "public",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "common noun"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "amplitude.com",
+     "final_host": "amplitude.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Amplitude | A new era for product teams"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 27,
+   "category": "C1",
+   "name_as_listed": "Pendo",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Pendo",
+   "legal_name": "Pendo.io, Inc.",
+   "primary_domain": "pendo.io",
+   "hq_country": "United States",
+   "aliases": [
+    "pendo",
+    "pendo.io"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "pendo.io",
+     "final_host": "www.pendo.io",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Pendo | Product Context for Your Apps and AI Agents"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 28,
+   "category": "C1",
+   "name_as_listed": "Fullstory",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Fullstory",
+   "legal_name": "FullStory, Inc.",
+   "primary_domain": "fullstory.com",
+   "hq_country": "United States",
+   "aliases": [
+    "fullstory",
+    "full story"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "fullstory.com",
+     "final_host": "www.fullstory.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Fullstory | The Intelligent Digital Experience Company"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 29,
+   "category": "C2",
+   "name_as_listed": "Coupa",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Coupa",
+   "legal_name": "Coupa Software Inc",
+   "primary_domain": "coupa.com",
+   "hq_country": "United States",
+   "aliases": [
+    "coupa",
+    "coupa software"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": {
+    "cik": "1385867",
+    "until": "2023-02-28"
+   },
+   "ownership": {
+    "state": "TAKEN_PRIVATE",
+    "effective": "2023-02-28",
+    "counterparty": "Thoma Bravo",
+    "counterparty_cik": "",
+    "summary": "Taken private by Thoma Bravo; Nasdaq delisting (25-NSE) 2023-02-28",
+    "evidence": [
+     "https://data.sec.gov/submissions/CIK0001385867.json"
+    ]
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "coupa.com 403 to the product's fetcher (2026-11-28)",
+   "collision_risks": [
+    "prefix 'coupa' matches Coupang, Inc. (CPNG) in the EDGAR typeahead",
+    "acquired Tonkean (#72) in 2026: corporate-family overlap inside the universe",
+    "exposed in unseen-20"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "coupa.com",
+     "final_host": "coupa.com",
+     "safe_fetch_status": 403,
+     "safe_fetch_failure": "http_status",
+     "title": ""
+    }
+   ],
+   "identity_status": "VERIFIED_WITH_CHANGE",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 30,
+   "category": "C2",
+   "name_as_listed": "JAGGAER",
+   "split": "DEVELOPMENT",
+   "analysis_target": "JAGGAER",
+   "legal_name": "JAGGAER, LLC",
+   "primary_domain": "jaggaer.com",
+   "hq_country": "United States",
+   "aliases": [
+    "jaggaer",
+    "sciquest"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "403 to the product's fetcher (2026-11-28)",
+   "collision_risks": [],
+   "notes": "owned by Vista Equity Partners (per Tracxn; acquirer announcement not retrieved)",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "jaggaer.com",
+     "final_host": "jaggaer.com",
+     "safe_fetch_status": 403,
+     "safe_fetch_failure": "http_status",
+     "title": ""
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 31,
+   "category": "C2",
+   "name_as_listed": "GEP",
+   "split": "DEVELOPMENT",
+   "analysis_target": "GEP",
+   "legal_name": "GEP Worldwide",
+   "primary_domain": "gep.com",
+   "hq_country": "United States",
+   "aliases": [
+    "gep",
+    "gep worldwide"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "three-letter acronym (e.g. GE HealthCare products, Gruppo...); requires domain"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "gep.com",
+     "final_host": "www.gep.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "GEP | AI-Powered Procurement and Supply Chain Software, Strategy & Managed Services"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 32,
+   "category": "C2",
+   "name_as_listed": "Ivalua",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Ivalua",
+   "legal_name": "Ivalua",
+   "primary_domain": "ivalua.com",
+   "hq_country": "France",
+   "aliases": [
+    "ivalua"
+   ],
+   "headquarters": {
+    "status": "VERIFIED",
+    "displayed_country": "France",
+    "note": "global headquarters Paris; Americas headquarters Redwood City",
+    "sources": [
+     [
+      "https://info.ivalua.com/hubfs/2025-2026%20-%20Ivalua%20Sustainability%20Report.pdf",
+      "2026-11-28",
+      "Headquartered in Paris, France; Ivalua SAS serving as the company headquarters in France"
+     ]
+    ],
+    "regional": [
+     [
+      "Americas",
+      "Redwood City, United States"
+     ]
+    ],
+    "legal_domicile": "France (Ivalua SAS)"
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "connection refused / 403 to automated readers (2026-11-28)",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "ivalua.com",
+     "final_host": "ivalua.com",
+     "safe_fetch_status": null,
+     "safe_fetch_failure": "connection",
+     "title": ""
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 33,
+   "category": "C2",
+   "name_as_listed": "Manhattan Associates",
+   "split": "FINAL_UNTOUCHED",
+   "analysis_target": "Manhattan Associates",
+   "legal_name": "Manhattan Associates, Inc.",
+   "primary_domain": "manh.com",
+   "hq_country": "United States",
+   "aliases": [
+    "manhattan associates",
+    "manh"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": {
+    "ticker": "MANH",
+    "exchange": "NASDAQ",
+    "cik": "1056696"
+   },
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "public",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "'Manhattan' alone collides with Manhattan Bridge Capital and place names"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "manh.com",
+     "final_host": "www.manh.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Retail and Supply Chain Management Software Solutions | Manhattan Associates"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 34,
+   "category": "C2",
+   "name_as_listed": "ToolsGroup",
+   "split": "DEVELOPMENT",
+   "analysis_target": "ToolsGroup",
+   "legal_name": "ToolsGroup",
+   "primary_domain": "toolsgroup.com",
+   "hq_country": "United States",
+   "aliases": [
+    "toolsgroup",
+    "tools group"
+   ],
+   "headquarters": {
+    "status": "CORROBORATED",
+    "displayed_country": "United States",
+    "note": "Boston, Massachusetts (two aggregators agree)",
+    "sources": [
+     [
+      "https://www.zoominfo.com/c/toolsgroup-inc/38486276",
+      "2026-11-28",
+      "Boston, MA"
+     ],
+     [
+      "https://www.crunchbase.com/organization/toolsgroup",
+      "2026-11-28",
+      "Boston, MA"
+     ]
+    ],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "toolsgroup.com",
+     "final_host": "www.toolsgroup.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "ToolsGroup — Always-On Intelligence for Supply Chain Planning"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 35,
+   "category": "C2",
+   "name_as_listed": "Netstock",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Netstock",
+   "legal_name": "Netstock",
+   "primary_domain": "netstock.com",
+   "hq_country": "United States",
+   "aliases": [
+    "netstock"
+   ],
+   "headquarters": {
+    "status": "COMPANY_REPORTED",
+    "displayed_country": "United States",
+    "note": "United States per the company's LinkedIn profile, its Gartner vendor profile and its privacy policy (owner-supplied leads; netstock.com answers 403 to our reader); city not reconciled, so not stated",
+    "sources": [
+     [
+      "https://www.linkedin.com/company/netstock/",
+      "",
+      "United States"
+     ],
+     [
+      "https://www.gartner.com/reviews/market/supply-chain-planning-solutions/vendor/netstock",
+      "",
+      "United States"
+     ],
+     [
+      "https://www.netstock.com/privacy-policy/",
+      "",
+      "United States (legal notice)"
+     ]
+    ],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "netstock.com",
+     "final_host": "www.netstock.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Netstock | Supply and Demand Planning Software"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 36,
+   "category": "C2",
+   "name_as_listed": "SourceDay",
+   "split": "FINAL_UNTOUCHED",
+   "analysis_target": "SourceDay",
+   "legal_name": "SourceDay, Inc.",
+   "primary_domain": "sourceday.com",
+   "hq_country": "United States",
+   "aliases": [
+    "sourceday"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "sourceday.com",
+     "final_host": "sourceday.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "SourceDay: PO Management Software for Manufacturers"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 37,
+   "category": "C2",
+   "name_as_listed": "LevaData",
+   "split": "DEVELOPMENT",
+   "analysis_target": "LevaData",
+   "legal_name": "LevaData, Inc.",
+   "primary_domain": "levadata.com",
+   "hq_country": "United States",
+   "aliases": [
+    "levadata"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "levadata.com",
+     "final_host": "levadata.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "LevaData — Benchmark Variance Analysis"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 38,
+   "category": "C2",
+   "name_as_listed": "Arkestro",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Arkestro",
+   "legal_name": "Arkestro, Inc.",
+   "primary_domain": "arkestro.com",
+   "hq_country": "United States",
+   "aliases": [
+    "arkestro"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "arkestro.com",
+     "final_host": "arkestro.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Arkestro | Predictive Procurement Platform"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 39,
+   "category": "C2",
+   "name_as_listed": "Fairmarkit",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Fairmarkit",
+   "legal_name": "Fairmarkit, Inc.",
+   "primary_domain": "fairmarkit.com",
+   "hq_country": "United States",
+   "aliases": [
+    "fairmarkit"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "fairmarkit.com",
+     "final_host": "www.fairmarkit.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Fairmarkit | AI Agents for Autonomous Sourcing"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 40,
+   "category": "C2",
+   "name_as_listed": "Zip",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Zip",
+   "legal_name": "Zip",
+   "primary_domain": "zip.com",
+   "hq_country": "United States",
+   "aliases": [
+    "zip",
+    "ziphq",
+    "zip hq",
+    "zip procurement"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "Zip Co Limited (ASX: ZIP, zip.co) is an unrelated BNPL lender",
+    "zip codes, ZipRecruiter (ZIP on NYSE)",
+    "legal entity name not confirmed from a primary source"
+   ],
+   "notes": "ziphq.com redirects to zip.com (fetched 2026-11-28); company press through Jan 2026 still cites ziphq.com",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "ziphq.com",
+     "final_host": "zip.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "AI for Procurement | Zip AI Procurement Platform"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 41,
+   "category": "C2",
+   "name_as_listed": "Order.co",
+   "split": "VALIDATION",
+   "analysis_target": "Order.co",
+   "legal_name": "Order.co",
+   "primary_domain": "order.co",
+   "hq_country": "United States",
+   "aliases": [
+    "order.co",
+    "orderco"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "'order' is a common word; requires the domain"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "order.co",
+     "final_host": "www.order.co",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Simplify Buying for Your Business | Order.co"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 42,
+   "category": "C2",
+   "name_as_listed": "Avetta",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Avetta",
+   "legal_name": "Avetta, LLC",
+   "primary_domain": "avetta.com",
+   "hq_country": "United States",
+   "aliases": [
+    "avetta"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "avetta.com",
+     "final_host": "www.avetta.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Contractor Risk Management & Supply Chain Safety | Avetta"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 43,
+   "category": "C2",
+   "name_as_listed": "RapidRatings",
+   "split": "VALIDATION",
+   "analysis_target": "RapidRatings",
+   "legal_name": "RapidRatings International Inc.",
+   "primary_domain": "rapidratings.com",
+   "hq_country": "United States",
+   "aliases": [
+    "rapidratings",
+    "rapid ratings"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "Rapid7 (#84) shares a prefix"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "rapidratings.com",
+     "final_host": "www.rapidratings.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Home | RapidRatings"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 44,
+   "category": "C2",
+   "name_as_listed": "Fusion Risk Management",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Fusion Risk Management",
+   "legal_name": "Fusion Risk Management, Inc.",
+   "primary_domain": "fusionrm.com",
+   "hq_country": "United States",
+   "aliases": [
+    "fusion risk management",
+    "fusion risk",
+    "fusionrm"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "'Fusion' alone is ambiguous"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "fusionrm.com",
+     "final_host": "www.fusionrm.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Enterprise Resilience Software | Fusion Risk Management"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 45,
+   "category": "C2",
+   "name_as_listed": "Riskonnect",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Riskonnect",
+   "legal_name": "Riskonnect, Inc.",
+   "primary_domain": "riskonnect.com",
+   "hq_country": "United States",
+   "aliases": [
+    "riskonnect"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "riskonnect.com",
+     "final_host": "riskonnect.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Risk Management Software Solutions - Riskonnect Inc."
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 46,
+   "category": "C2",
+   "name_as_listed": "MetricStream",
+   "split": "VALIDATION",
+   "analysis_target": "MetricStream",
+   "legal_name": "MetricStream, Inc.",
+   "primary_domain": "metricstream.com",
+   "hq_country": "United States",
+   "aliases": [
+    "metricstream"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "metricstream.com",
+     "final_host": "www.metricstream.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "GRC That Thinks, Advises & Acts | MetricStream"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 47,
+   "category": "C2",
+   "name_as_listed": "NAVEX",
+   "split": "DEVELOPMENT",
+   "analysis_target": "NAVEX",
+   "legal_name": "NAVEX Global, Inc.",
+   "primary_domain": "navex.com",
+   "hq_country": "United States",
+   "aliases": [
+    "navex",
+    "navex global"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "navex.com",
+     "final_host": "www.navex.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Risk & Compliance Software Solutions | NAVEX"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 48,
+   "category": "C2",
+   "name_as_listed": "RiskLens / SAFE",
+   "split": "FINAL_UNTOUCHED",
+   "analysis_target": "SAFE",
+   "legal_name": "Safe Security, Inc.",
+   "primary_domain": "safe.security",
+   "hq_country": "United States",
+   "aliases": [
+    "safe security",
+    "safe",
+    "risklens",
+    "safe one"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "ACQUIRED_ABSORBED",
+    "effective": "2023-07-12",
+    "counterparty": "Safe Security, Inc.",
+    "counterparty_cik": "",
+    "summary": "Safe Security acquired RiskLens (FAIR cyber-risk quantification); RiskLens platform was to be retired into SAFE; risklens.com no longer answers the product's fetcher",
+    "evidence": [
+     "https://safe.security/resources/press-release/safe-security-acquires-risklens/",
+     "https://siliconangle.com/2023/07/13/safe-security-acquires-risklens-enhanced-risk-management/"
+    ]
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "'safe' is a common word: entry requires 'Safe Security', the domain, or 'RiskLens'"
+   ],
+   "notes": "analysis target is SAFE (the successor that operates RiskLens's FAIR business); RiskLens is a former brand",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "risklens.com",
+     "final_host": "risklens.com",
+     "safe_fetch_status": null,
+     "safe_fetch_failure": "blocked",
+     "title": ""
+    },
+    {
+     "candidate_domain": "safe.security",
+     "final_host": "safe.security",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Autonomous Cyber Risk Management | SAFE"
+    },
+    {
+     "candidate_domain": "www.risklens.com",
+     "final_host": "www.risklens.com",
+     "safe_fetch_status": null,
+     "safe_fetch_failure": "blocked",
+     "title": ""
+    }
+   ],
+   "identity_status": "VERIFIED_WITH_CHANGE",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 49,
+   "category": "C2",
+   "name_as_listed": "KPA",
+   "split": "DEVELOPMENT",
+   "analysis_target": "KPA",
+   "legal_name": "KPA Services, LLC",
+   "primary_domain": "kpa.io",
+   "hq_country": "United States",
+   "aliases": [
+    "kpa",
+    "kpa.io"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "three-letter acronym; homepage describes EHS and automotive-dealer compliance",
+    "legal entity name not confirmed from a primary source"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "kpa.io",
+     "final_host": "kpa.io",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "KPA"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 50,
+   "category": "C2",
+   "name_as_listed": "RANE",
+   "split": "DEVELOPMENT",
+   "analysis_target": "RANE",
+   "legal_name": "RANE",
+   "primary_domain": "ranenetwork.com",
+   "hq_country": "United States",
+   "aliases": [
+    "rane",
+    "rane network",
+    "ranenetwork"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "RANE (Rane Corp) audio equipment; requires the domain"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "ranenetwork.com",
+     "final_host": "www.ranenetwork.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Enterprise Risk Intelligence Platform | RANE"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 51,
+   "category": "C2",
+   "name_as_listed": "Eurasia Group",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Eurasia Group",
+   "legal_name": "Eurasia Group",
+   "primary_domain": "eurasiagroup.net",
+   "hq_country": "United States",
+   "aliases": [
+    "eurasia group"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "safe_fetch connection failure on the bare domain; www host answers 200 to curl",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "eurasiagroup.net",
+     "final_host": "eurasiagroup.net",
+     "safe_fetch_status": null,
+     "safe_fetch_failure": "connection",
+     "title": ""
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 52,
+   "category": "C2",
+   "name_as_listed": "Oxford Economics",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Oxford Economics",
+   "legal_name": "Oxford Economics Ltd",
+   "primary_domain": "oxfordeconomics.com",
+   "hq_country": "United Kingdom",
+   "aliases": [
+    "oxford economics"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United Kingdom",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "403 to the product's fetcher (2026-11-28)",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "oxfordeconomics.com",
+     "final_host": "oxfordeconomics.com",
+     "safe_fetch_status": 403,
+     "safe_fetch_failure": "http_status",
+     "title": ""
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 53,
+   "category": "C2",
+   "name_as_listed": "Gartner",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Gartner",
+   "legal_name": "Gartner, Inc.",
+   "primary_domain": "gartner.com",
+   "hq_country": "United States",
+   "aliases": [
+    "gartner"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": {
+    "ticker": "IT",
+    "exchange": "NYSE",
+    "cik": "749251"
+   },
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "public",
+   "ownership_prior_was_wrong": false,
+   "site_access": "403 to the product's fetcher (2026-11-28)",
+   "collision_risks": [
+    "ticker 'IT' is a common word"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "gartner.com",
+     "final_host": "gartner.com",
+     "safe_fetch_status": 403,
+     "safe_fetch_failure": "http_status",
+     "title": ""
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 54,
+   "category": "C2",
+   "name_as_listed": "Forrester",
+   "split": "VALIDATION",
+   "analysis_target": "Forrester",
+   "legal_name": "Forrester Research, Inc.",
+   "primary_domain": "forrester.com",
+   "hq_country": "United States",
+   "aliases": [
+    "forrester",
+    "forrester research"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": {
+    "ticker": "FORR",
+    "exchange": "NASDAQ",
+    "cik": "1023313"
+   },
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "public",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "forrester.com",
+     "final_host": "www.forrester.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Forrester Helps Organizations Thrive Through Volatility"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 55,
+   "category": "C2",
+   "name_as_listed": "CB Insights",
+   "split": "FINAL_UNTOUCHED",
+   "analysis_target": "CB Insights",
+   "legal_name": "CB Insights",
+   "primary_domain": "cbinsights.com",
+   "hq_country": "United States",
+   "aliases": [
+    "cb insights",
+    "cbinsights"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "CB Insights pages about OTHER companies are third-party profiles, not their own statements"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "cbinsights.com",
+     "final_host": "www.cbinsights.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "find the deal that will transform your company"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 56,
+   "category": "C3",
+   "name_as_listed": "OneStream",
+   "split": "FINAL_UNTOUCHED",
+   "analysis_target": "OneStream",
+   "legal_name": "OneStream, Inc.",
+   "primary_domain": "onestream.com",
+   "hq_country": "United States",
+   "aliases": [
+    "onestream",
+    "onestream software"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": {
+    "cik": "1889956",
+    "until": "2026-04-01"
+   },
+   "ownership": {
+    "state": "TAKEN_PRIVATE",
+    "effective": "2026-04-01",
+    "counterparty": "Hg",
+    "counterparty_cik": "",
+    "summary": "Taken private by Hg for about $6.4B ($24.00/share); 15-12G filed 2026-04-13",
+    "evidence": [
+     "https://www.onestream.com/news/onestream-announces-completion-of-acquisition-by-hg-for-usd6-4-billion/",
+     "https://www.cfodive.com/news/onestream-closes-64b-go-private-deal-hg/816799/"
+    ]
+   },
+   "ownership_prior_in_split": "public",
+   "ownership_prior_was_wrong": true,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "listed as public in the split prior; corrected here, split NOT recomputed"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "onestream.com",
+     "final_host": "www.onestream.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "OneStream | AI Operating System for Modern Finance | EPM Platform"
+    }
+   ],
+   "identity_status": "VERIFIED_WITH_CHANGE",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 57,
+   "category": "C3",
+   "name_as_listed": "insightsoftware",
+   "split": "DEVELOPMENT",
+   "analysis_target": "insightsoftware",
+   "legal_name": "insightsoftware",
+   "primary_domain": "insightsoftware.com",
+   "hq_country": "United States",
+   "aliases": [
+    "insightsoftware",
+    "insight software"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "Insight Enterprises (#92) and Insight Partners share the stem"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "insightsoftware.com",
+     "final_host": "insightsoftware.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "insightsoftware"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 58,
+   "category": "C3",
+   "name_as_listed": "Prophix",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Prophix",
+   "legal_name": "Prophix Software Inc.",
+   "primary_domain": "prophix.com",
+   "hq_country": "Canada",
+   "aliases": [
+    "prophix"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "Canada",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "403 to the product's fetcher (2026-11-28)",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "prophix.com",
+     "final_host": "prophix.com",
+     "safe_fetch_status": 403,
+     "safe_fetch_failure": "http_status",
+     "title": ""
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 59,
+   "category": "C3",
+   "name_as_listed": "Runway",
+   "split": "VALIDATION",
+   "analysis_target": "cfo.ai",
+   "legal_name": "Runway Financial, Inc.",
+   "primary_domain": "cfo.ai",
+   "hq_country": "United States",
+   "aliases": [
+    "runway financial",
+    "cfo.ai",
+    "runway fp&a"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "RENAMED_SUCCESSOR",
+    "effective": "2026-08",
+    "counterparty": "",
+    "counterparty_cik": "",
+    "summary": "Runway Financial pivoted from FP&A software and operates as cfo.ai (AI CFO 'Ari'); the runway.com domain now belongs to Runway AI, Inc. (generative video)",
+    "evidence": [
+     "https://siliconangle.com/?p=837986",
+     "https://ffnews.com/news/cfo-ai-launches-an-ai-cfo-built-for-founders-b684fc82"
+    ]
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "runway.com = Runway AI, Inc. (video generation): fetching it analyses the WRONG company",
+    "'runway' alone also means cash runway; never resolve the bare word",
+    "rebrand month differs between sources (Aug vs Sep 2026)"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "runway.com",
+     "final_host": "runway.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Runway | Intelligent tools for scaling content and teams."
+    },
+    {
+     "candidate_domain": "cfo.ai",
+     "final_host": "cfo.ai",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Meet Ari, your personal CFO. | cfo.ai"
+    }
+   ],
+   "identity_status": "VERIFIED_WITH_CHANGE",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 60,
+   "category": "C3",
+   "name_as_listed": "Drivetrain",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Drivetrain",
+   "legal_name": "Drivetrain",
+   "primary_domain": "drivetrain.ai",
+   "hq_country": "United States",
+   "aliases": [
+    "drivetrain",
+    "drivetrain.ai"
+   ],
+   "headquarters": {
+    "status": "COMPANY_REPORTED",
+    "displayed_country": "United States",
+    "note": "Sunnyvale, California per the company's LinkedIn profile (owner-supplied lead; drivetrain.ai answers 429 to our reader)",
+    "sources": [
+     [
+      "https://www.linkedin.com/company/drivetrainai/",
+      "",
+      "Sunnyvale, California"
+     ]
+    ],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "429 to the product's fetcher (2026-11-28)",
+   "collision_risks": [
+    "common automotive noun"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "drivetrain.ai",
+     "final_host": "drivetrain.ai",
+     "safe_fetch_status": 429,
+     "safe_fetch_failure": "http_status",
+     "title": ""
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 61,
+   "category": "C3",
+   "name_as_listed": "Abacum",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Abacum",
+   "legal_name": "Abacum",
+   "primary_domain": "abacum.ai",
+   "hq_country": "United States",
+   "aliases": [
+    "abacum"
+   ],
+   "headquarters": {
+    "status": "VERIFIED",
+    "displayed_country": "United States",
+    "note": "New York City (company-stated on two official pages)",
+    "sources": [
+     [
+      "https://www.abacum.ai/company/about",
+      "2026-11-28",
+      "a global company headquartered in New York City, with offices in Barcelona, Toronto and Buenos Aires"
+     ],
+     [
+      "https://www.abacum.ai/newsroom/series-b-announcement",
+      "2026-11-28",
+      "Headquartered in New York"
+     ]
+    ],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "abacum.ai",
+     "final_host": "abacum.ai",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Abacum | The AI-native business planning platform"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 62,
+   "category": "C3",
+   "name_as_listed": "Maxio",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Maxio",
+   "legal_name": "Maxio",
+   "primary_domain": "maxio.com",
+   "hq_country": "United States",
+   "aliases": [
+    "maxio",
+    "saasoptics",
+    "chargify"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "RENAMED_SUCCESSOR",
+    "effective": "2022-04-13",
+    "counterparty": "",
+    "counterparty_cik": "",
+    "summary": "SaaSOptics and Chargify merged and rebranded as Maxio; saasoptics.com and chargify.com redirect to maxio.com",
+    "evidence": [
+     "https://www.businesswire.com/news/home/20220413005024/en/SaaSOptics-and-Chargify-Announce-Merger-Rebrand-to-Maxio"
+    ]
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "Maxio, not Chargebee, is the successor of SaaSOptics and Chargify",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "chargify.com",
+     "final_host": "www.maxio.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Billing and Financial Reporting for B2B SaaS & AI | Maxio"
+    },
+    {
+     "candidate_domain": "maxio.com",
+     "final_host": "www.maxio.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Billing and Financial Reporting for B2B SaaS & AI | Maxio"
+    },
+    {
+     "candidate_domain": "saasoptics.com",
+     "final_host": "www.maxio.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Billing and Financial Reporting for B2B SaaS & AI | Maxio"
+    }
+   ],
+   "identity_status": "VERIFIED_WITH_CHANGE",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 63,
+   "category": "C3",
+   "name_as_listed": "SaaSOptics / Chargify successor alternatives — Chargebee",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Chargebee",
+   "legal_name": "Chargebee, Inc.",
+   "primary_domain": "chargebee.com",
+   "hq_country": "United States",
+   "aliases": [
+    "chargebee"
+   ],
+   "headquarters": {
+    "status": "CORROBORATED",
+    "displayed_country": "United States",
+    "note": "North Bethesda, Maryland (Crunchbase, TexAu); engineering in Chennai and Bengaluru",
+    "sources": [
+     [
+      "https://www.crunchbase.com/organization/chargebee",
+      "2026-11-28",
+      "Bethesda, MD"
+     ],
+     [
+      "https://texau.com/profiles/chargebee",
+      "2026-11-28",
+      "Bethesda, MD"
+     ]
+    ],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "As listed ('SaaSOptics / Chargify successor alternatives — Chargebee'): Chargebee is an ALTERNATIVE, not a successor. No ownership relationship to SaaSOptics, Chargify or Maxio was found; Chargebee markets itself as a Maxio alternative and migrates Chargify/SaaSOptics customers.",
+   "extra_evidence": [
+    "https://www.chargebee.com/compare-competitors/chargify/"
+   ],
+   "domain_probes": [
+    {
+     "candidate_domain": "chargebee.com",
+     "final_host": "www.chargebee.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Chargebee: Billing & Monetization for SaaS and AI Companies"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 64,
+   "category": "C3",
+   "name_as_listed": "Deltek",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Deltek",
+   "legal_name": "Deltek, Inc.",
+   "primary_domain": "deltek.com",
+   "hq_country": "United States",
+   "aliases": [
+    "deltek"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "a Roper Technologies business since 2016 (Roper ARS FY2025 lists Deltek); parent filer CIK 882835",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "deltek.com",
+     "final_host": "www.deltek.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "The Intelligent Platform for Project-Driven Work | Deltek"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 65,
+   "category": "C3",
+   "name_as_listed": "ECI Software Solutions",
+   "split": "DEVELOPMENT",
+   "analysis_target": "ECI Software Solutions",
+   "legal_name": "ECI Software Solutions, Inc.",
+   "primary_domain": "ecisolutions.com",
+   "hq_country": "United States",
+   "aliases": [
+    "eci software solutions",
+    "eci"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "'ECI' alone collides with ECI Telecom and others"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "ecisolutions.com",
+     "final_host": "www.ecisolutions.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "AI Powered ERP & Business Management for Your Industry"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 66,
+   "category": "C3",
+   "name_as_listed": "Aptean",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Aptean",
+   "legal_name": "Aptean, Inc.",
+   "primary_domain": "aptean.com",
+   "hq_country": "United States",
+   "aliases": [
+    "aptean"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "aptean.com",
+     "final_host": "www.aptean.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Aptean: Industry-Specific, AI-Powered Enterprise Software"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 67,
+   "category": "C3",
+   "name_as_listed": "SYSPRO",
+   "split": "VALIDATION",
+   "analysis_target": "SYSPRO",
+   "legal_name": "SYSPRO",
+   "primary_domain": "syspro.com",
+   "hq_country": "South Africa",
+   "aliases": [
+    "syspro"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "South Africa",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "syspro.com",
+     "final_host": "www.syspro.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "ERP Software for Manufacturing & Distribution | Syspro"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 68,
+   "category": "C3",
+   "name_as_listed": "Appian",
+   "split": "VALIDATION",
+   "analysis_target": "Appian",
+   "legal_name": "Appian Corporation",
+   "primary_domain": "appian.com",
+   "hq_country": "United States",
+   "aliases": [
+    "appian"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": {
+    "ticker": "APPN",
+    "exchange": "NASDAQ",
+    "cik": "1441683"
+   },
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "public",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "Appian Way / Appian Capital"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "appian.com",
+     "final_host": "appian.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "AI-Powered Process Orchestration Across the Enterprise | Appian"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 69,
+   "category": "C3",
+   "name_as_listed": "Pegasystems",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Pegasystems",
+   "legal_name": "Pegasystems Inc.",
+   "primary_domain": "pega.com",
+   "hq_country": "United States",
+   "aliases": [
+    "pegasystems",
+    "pega"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": {
+    "ticker": "PEGA",
+    "exchange": "NASDAQ",
+    "cik": "1013857"
+   },
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "public",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "pega.com",
+     "final_host": "www.pega.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "The leading AI-powered platform for enterprise transformation | Pega"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 70,
+   "category": "C3",
+   "name_as_listed": "Celonis",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Celonis",
+   "legal_name": "Celonis SE",
+   "primary_domain": "celonis.com",
+   "hq_country": "Germany",
+   "aliases": [
+    "celonis"
+   ],
+   "headquarters": {
+    "status": "CORROBORATED",
+    "displayed_country": "Germany",
+    "note": "Munich; secondary headquarters New York",
+    "sources": [
+     [
+      "https://en.wikipedia.org/wiki/Celonis",
+      "2026-11-28",
+      "headquartered in Munich, Germany"
+     ],
+     [
+      "https://www.cbinsights.com/company/celonis1",
+      "2026-11-28",
+      "Munich"
+     ]
+    ],
+    "regional": [
+     [
+      "Secondary",
+      "New York, United States"
+     ]
+    ],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "exposed in unseen-20"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "celonis.com",
+     "final_host": "www.celonis.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Enterprise AI powered by Celonis"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 71,
+   "category": "C3",
+   "name_as_listed": "Kissflow",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Kissflow",
+   "legal_name": "Kissflow",
+   "primary_domain": "kissflow.com",
+   "hq_country": "India",
+   "aliases": [
+    "kissflow",
+    "orangescape"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "India",
+    "note": "Chennai (one listing agrees with the curated value)",
+    "sources": [
+     [
+      "https://www.guvi.in/blog/top-product-based-companies-in-chennai/",
+      "2026-11-28",
+      "Chennai"
+     ]
+    ],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "kissflow.com",
+     "final_host": "kissflow.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Kissflow | Build Custom Enterprise Apps Fast with AI & Low-Code"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 72,
+   "category": "C3",
+   "name_as_listed": "Tonkean",
+   "split": "FINAL_UNTOUCHED",
+   "analysis_target": "Tonkean",
+   "legal_name": "Tonkean, Inc.",
+   "primary_domain": "tonkean.com",
+   "hq_country": "United States",
+   "aliases": [
+    "tonkean"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "ACQUIRED_OPERATING",
+    "effective": "2026-05-21",
+    "counterparty": "Coupa Software",
+    "counterparty_cik": "",
+    "summary": "Coupa acquired Tonkean (agentic intake and orchestration); tonkean.com still publishes as Tonkean",
+    "evidence": [
+     "https://www.prnewswire.com/il/news-releases/coupa-acquires-tonkean-to-accelerate-agentic-intake-and-orchestration-for-global-trade-302779619.html"
+    ]
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "parent Coupa (#29) is in the same universe"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "tonkean.com",
+     "final_host": "www.tonkean.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Tonkean - The No. 1 Agentic Orchestration Platform for the Enterprise"
+    }
+   ],
+   "identity_status": "VERIFIED_WITH_CHANGE",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 73,
+   "category": "C3",
+   "name_as_listed": "Nintex",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Nintex",
+   "legal_name": "Nintex",
+   "primary_domain": "nintex.com",
+   "hq_country": "United States",
+   "aliases": [
+    "nintex"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "nintex.com",
+     "final_host": "www.nintex.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Process Management & Workflow Automation Software | Nintex"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 74,
+   "category": "C3",
+   "name_as_listed": "UiPath",
+   "split": "DEVELOPMENT",
+   "analysis_target": "UiPath",
+   "legal_name": "UiPath, Inc.",
+   "primary_domain": "uipath.com",
+   "hq_country": "United States",
+   "aliases": [
+    "uipath",
+    "ui path"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": {
+    "ticker": "PATH",
+    "exchange": "NYSE",
+    "cik": "1734722"
+   },
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "public",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "ticker 'PATH' is a common word"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "uipath.com",
+     "final_host": "www.uipath.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "The UiPath Platform™ for Business Orchestration and Automation | UiPath"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 75,
+   "category": "C3",
+   "name_as_listed": "Kantata",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Kantata",
+   "legal_name": "Kantata, Inc.",
+   "primary_domain": "kantata.com",
+   "hq_country": "United States",
+   "aliases": [
+    "kantata",
+    "mavenlink",
+    "kimble"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "formed from Mavenlink and Kimble",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "kantata.com",
+     "final_host": "www.kantata.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Kantata PSA | Leading Professional Services Automation Platform"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 76,
+   "category": "C3",
+   "name_as_listed": "HighRadius",
+   "split": "FINAL_UNTOUCHED",
+   "analysis_target": "HighRadius",
+   "legal_name": "HighRadius Corporation",
+   "primary_domain": "highradius.com",
+   "hq_country": "United States",
+   "aliases": [
+    "highradius",
+    "high radius"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "highradius.com",
+     "final_host": "www.highradius.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Autonomous Finance for O2C, R2R , AP & Treasury | HighRadius"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 77,
+   "category": "C4",
+   "name_as_listed": "SecurityScorecard",
+   "split": "DEVELOPMENT",
+   "analysis_target": "SecurityScorecard",
+   "legal_name": "SecurityScorecard, Inc.",
+   "primary_domain": "securityscorecard.com",
+   "hq_country": "United States",
+   "aliases": [
+    "securityscorecard",
+    "security scorecard"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "securityscorecard.com",
+     "final_host": "securityscorecard.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "SecurityScorecard | Supply Chain & Third-Party Risk Platform"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 78,
+   "category": "C4",
+   "name_as_listed": "BitSight",
+   "split": "DEVELOPMENT",
+   "analysis_target": "BitSight",
+   "legal_name": "BitSight Technologies, Inc.",
+   "primary_domain": "bitsight.com",
+   "hq_country": "United States",
+   "aliases": [
+    "bitsight"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "403 to the product's fetcher (2026-11-28)",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "bitsight.com",
+     "final_host": "bitsight.com",
+     "safe_fetch_status": 403,
+     "safe_fetch_failure": "http_status",
+     "title": ""
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 79,
+   "category": "C4",
+   "name_as_listed": "Censys",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Censys",
+   "legal_name": "Censys, Inc.",
+   "primary_domain": "censys.com",
+   "hq_country": "United States",
+   "aliases": [
+    "censys"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "census (spelling neighbour)"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "censys.com",
+     "final_host": "censys.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Censys | The Authority for Internet Intelligence and Insights"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 80,
+   "category": "C4",
+   "name_as_listed": "Wiz",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Wiz",
+   "legal_name": "Wiz, Inc.",
+   "primary_domain": "wiz.io",
+   "hq_country": "United States",
+   "aliases": [
+    "wiz"
+   ],
+   "headquarters": {
+    "status": "CORROBORATED",
+    "displayed_country": "United States",
+    "note": "New York; part of Alphabet (Google Cloud) since 2026-03-11",
+    "sources": [
+     [
+      "https://en.wikipedia.org/wiki/Wiz,_Inc.",
+      "2026-11-28",
+      "New York City"
+     ],
+     [
+      "https://www.cbinsights.com/company/wiz",
+      "2026-11-28",
+      "New York"
+     ]
+    ],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "ACQUIRED_OPERATING",
+    "effective": "2026-03-11",
+    "counterparty": "Alphabet Inc. (Google Cloud)",
+    "counterparty_cik": "1652044",
+    "summary": "Google completed its $32B acquisition; Wiz keeps its brand inside Google Cloud and stays multi-cloud",
+    "evidence": [
+     "https://www.nasdaq.com/press-release/google-completes-acquisition-wiz-2026-03-11",
+     "https://cloud.google.com/blog/products/identity-security/google-completes-acquisition-of-wiz"
+    ]
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "'wiz' is slang/common; Wizz Air; WiZ smart lighting (Signify)"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "wiz.io",
+     "final_host": "wiz.io",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Wiz: AI Cybersecurity for All Your Cloud and AI Applications"
+    }
+   ],
+   "identity_status": "VERIFIED_WITH_CHANGE",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 81,
+   "category": "C4",
+   "name_as_listed": "Aqua Security",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Aqua Security",
+   "legal_name": "Aqua Security Software Ltd.",
+   "primary_domain": "aquasec.com",
+   "hq_country": "",
+   "aliases": [
+    "aqua security",
+    "aquasec",
+    "aqua"
+   ],
+   "headquarters": {
+    "status": "PROVISIONAL",
+    "displayed_country": "",
+    "note": "Burlington, Massachusetts per one aggregator only; founded in Israel. Not displayed until a primary source is read.",
+    "sources": [
+     [
+      "https://www.crunchbase.com/organization/aquasecurity",
+      "2026-11-28",
+      "Burlington, MA"
+     ]
+    ],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "'Aqua' alone is ambiguous"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "aquasec.com",
+     "final_host": "www.aquasec.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Aquasec Container Runtime and AI Security"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 82,
+   "category": "C4",
+   "name_as_listed": "Sysdig",
+   "split": "FINAL_UNTOUCHED",
+   "analysis_target": "Sysdig",
+   "legal_name": "Sysdig, Inc.",
+   "primary_domain": "sysdig.com",
+   "hq_country": "United States",
+   "aliases": [
+    "sysdig"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "safe_fetch connection failure on sysdig.com and no attested source from www.sysdig.com (2026-11-28)",
+   "collision_risks": [],
+   "notes": "www.sysdig.com answers 200 to curl",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "sysdig.com",
+     "final_host": "sysdig.com",
+     "safe_fetch_status": null,
+     "safe_fetch_failure": "connection",
+     "title": ""
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 83,
+   "category": "C4",
+   "name_as_listed": "Tenable",
+   "split": "VALIDATION",
+   "analysis_target": "Tenable",
+   "legal_name": "Tenable Holdings, Inc.",
+   "primary_domain": "tenable.com",
+   "hq_country": "United States",
+   "aliases": [
+    "tenable"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": {
+    "ticker": "TENB",
+    "exchange": "NASDAQ",
+    "cik": "1660280"
+   },
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "public",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "common adjective"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "tenable.com",
+     "final_host": "www.tenable.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Vulnerability and exposure management | Cloud and AI security | Tenable®"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 84,
+   "category": "C4",
+   "name_as_listed": "Rapid7",
+   "split": "FINAL_UNTOUCHED",
+   "analysis_target": "Rapid7",
+   "legal_name": "Rapid7, Inc.",
+   "primary_domain": "rapid7.com",
+   "hq_country": "United States",
+   "aliases": [
+    "rapid7",
+    "rapid 7"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": {
+    "ticker": "RPD",
+    "exchange": "NASDAQ",
+    "cik": "1560327"
+   },
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "public",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "rapid7.com",
+     "final_host": "www.rapid7.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Rapid7 Managed Cybersecurity: Outpace Attackers"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 85,
+   "category": "C4",
+   "name_as_listed": "SentinelOne",
+   "split": "DEVELOPMENT",
+   "analysis_target": "SentinelOne",
+   "legal_name": "SentinelOne, Inc.",
+   "primary_domain": "sentinelone.com",
+   "hq_country": "United States",
+   "aliases": [
+    "sentinelone",
+    "sentinel one",
+    "s1"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": {
+    "ticker": "S",
+    "exchange": "NYSE",
+    "cik": "1583708"
+   },
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "public",
+   "ownership_prior_was_wrong": false,
+   "site_access": "429 to the product's fetcher (2026-11-28)",
+   "collision_risks": [
+    "single-letter ticker 'S'",
+    "Microsoft Sentinel"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "sentinelone.com",
+     "final_host": "sentinelone.com",
+     "safe_fetch_status": 429,
+     "safe_fetch_failure": "http_status",
+     "title": ""
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 86,
+   "category": "C4",
+   "name_as_listed": "Claroty",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Claroty",
+   "legal_name": "Claroty Ltd.",
+   "primary_domain": "claroty.com",
+   "hq_country": "United States",
+   "aliases": [
+    "claroty"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "New York (one aggregator agrees with the curated value)",
+    "sources": [
+     [
+      "https://www.cbinsights.com/company/claroty",
+      "2026-11-28",
+      "1 Pennsylvania Plaza, New York"
+     ]
+    ],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "claroty.com",
+     "final_host": "claroty.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Secure Your Cyber-Physical Systems | Claroty"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 87,
+   "category": "C4",
+   "name_as_listed": "Forescout",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Forescout",
+   "legal_name": "Forescout Technologies, Inc.",
+   "primary_domain": "forescout.com",
+   "hq_country": "United States",
+   "aliases": [
+    "forescout"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "former SEC filer (taken private by Advent, 2020); not checked for filings",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "forescout.com",
+     "final_host": "www.forescout.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Forescout – Manage cyber risk and mitigate threats, continuously."
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 88,
+   "category": "C4",
+   "name_as_listed": "Corelight",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Corelight",
+   "legal_name": "Corelight, Inc.",
+   "primary_domain": "corelight.com",
+   "hq_country": "United States",
+   "aliases": [
+    "corelight"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "corelight.com",
+     "final_host": "corelight.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Corelight | Evidence-Based NDR & Threat Hunting Platform"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 89,
+   "category": "C4",
+   "name_as_listed": "Critical Start",
+   "split": "FINAL_UNTOUCHED",
+   "analysis_target": "Critical Start",
+   "legal_name": "Critical Start, Inc.",
+   "primary_domain": "criticalstart.com",
+   "hq_country": "United States",
+   "aliases": [
+    "critical start",
+    "criticalstart"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "criticalstart.com",
+     "final_host": "www.criticalstart.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Critical Start | Managed Detection and Response (MDR)"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 90,
+   "category": "C4",
+   "name_as_listed": "ePlus",
+   "split": "VALIDATION",
+   "analysis_target": "ePlus",
+   "legal_name": "ePlus inc.",
+   "primary_domain": "eplus.com",
+   "hq_country": "United States",
+   "aliases": [
+    "eplus",
+    "e plus"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": {
+    "ticker": "PLUS",
+    "exchange": "NASDAQ",
+    "cik": "1022408"
+   },
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "public",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "ticker 'PLUS' is a common word"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "eplus.com",
+     "final_host": "eplus.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Home"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 91,
+   "category": "C4",
+   "name_as_listed": "SHI International",
+   "split": "DEVELOPMENT",
+   "analysis_target": "SHI International",
+   "legal_name": "SHI International Corp.",
+   "primary_domain": "shi.com",
+   "hq_country": "United States",
+   "aliases": [
+    "shi international",
+    "shi"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "403 to the product's fetcher (2026-11-28)",
+   "collision_risks": [
+    "'SHI' alone is ambiguous"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "shi.com",
+     "final_host": "shi.com",
+     "safe_fetch_status": 403,
+     "safe_fetch_failure": "http_status",
+     "title": ""
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 92,
+   "category": "C4",
+   "name_as_listed": "Insight Enterprises",
+   "split": "VALIDATION",
+   "analysis_target": "Insight Enterprises",
+   "legal_name": "Insight Enterprises, Inc.",
+   "primary_domain": "insight.com",
+   "hq_country": "United States",
+   "aliases": [
+    "insight enterprises",
+    "nsit"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": {
+    "ticker": "NSIT",
+    "exchange": "NASDAQ",
+    "cik": "932696"
+   },
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "public",
+   "ownership_prior_was_wrong": false,
+   "site_access": "403 to the product's fetcher (2026-11-28)",
+   "collision_risks": [
+    "'insight' is a common word; insightsoftware (#57) and Insight Partners share the stem"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "insight.com",
+     "final_host": "insight.com",
+     "safe_fetch_status": 403,
+     "safe_fetch_failure": "http_status",
+     "title": ""
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 93,
+   "category": "C4",
+   "name_as_listed": "Concentric AI",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Concentric AI",
+   "legal_name": "Concentric AI",
+   "primary_domain": "concentric.ai",
+   "hq_country": "United States",
+   "aliases": [
+    "concentric ai",
+    "concentric",
+    "concentric.ai"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "'Concentric' alone collides with Concentric (engineering) and others"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "concentric.ai",
+     "final_host": "concentric.ai",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "DSPM & Data Security Governance Software | Concentric AI"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 94,
+   "category": "C4",
+   "name_as_listed": "Improving",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Improving",
+   "legal_name": "Improving Enterprises, Inc.",
+   "primary_domain": "improving.com",
+   "hq_country": "United States",
+   "aliases": [
+    "improving",
+    "improving enterprises"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "common verb: entry requires the domain"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "improving.com",
+     "final_host": "www.improving.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Enterprise AI, Data & Application Services | Improving"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 95,
+   "category": "C4",
+   "name_as_listed": "Launch Consulting",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Launch Consulting",
+   "legal_name": "Launch Consulting Group",
+   "primary_domain": "launchconsulting.com",
+   "hq_country": "United States",
+   "aliases": [
+    "launch consulting",
+    "launch consulting group"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "NOT 'Launch by NTT DATA' (an NTT DATA unit formed 2023 from Nexient, Postlight, Umvel and Vectorform); no NTT DATA acquisition of Launch Consulting was found",
+    "'launch' is a common word"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "launchconsulting.com",
+     "final_host": "www.launchconsulting.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "Digital Transformation & AI Consulting Services | Launch"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 96,
+   "category": "C4",
+   "name_as_listed": "Sparq",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Sparq",
+   "legal_name": "Sparq",
+   "primary_domain": "teamsparq.com",
+   "hq_country": "United States",
+   "aliases": [
+    "sparq",
+    "teamsparq"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "Spark / SPARQ (SPARQL); requires the domain"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "teamsparq.com",
+     "final_host": "www.teamsparq.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "AI-Native Digital Engineering Services Partner | Sparq"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 97,
+   "category": "C4",
+   "name_as_listed": "Bounteous",
+   "split": "DEVELOPMENT",
+   "analysis_target": "Bounteous",
+   "legal_name": "Bounteous",
+   "primary_domain": "bounteous.com",
+   "hq_country": "United States",
+   "aliases": [
+    "bounteous",
+    "bounteous x accolite",
+    "accolite"
+   ],
+   "headquarters": {
+    "status": "CURATED_UNSOURCED",
+    "displayed_country": "United States",
+    "note": "",
+    "sources": [],
+    "regional": [],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "RENAMED_SUCCESSOR",
+    "effective": "2025-01-13",
+    "counterparty": "",
+    "counterparty_cik": "",
+    "summary": "Bounteous and Accolite merged (2024-02-01, New Mountain Capital) and operate as Bounteous since 2025",
+    "evidence": [
+     "https://www.bounteous.com/insights/2024/02/01/press-release-bounteous-and-accolite-join-forces-forming-global-leader-digital/",
+     "https://bounteous.com/insights/2025/01/13/press-release-bounteous-x-accolite-rebrand-bounteous"
+    ]
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "bounteous.com",
+     "final_host": "www.bounteous.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "AI Services for Enterprise Transformation | Bounteous"
+    }
+   ],
+   "identity_status": "VERIFIED_WITH_CHANGE",
+   "last_verified": "2026-11-28"
+  },
+  {
+   "position": 98,
+   "category": "C4",
+   "name_as_listed": "SoftServe",
+   "split": "DEVELOPMENT",
+   "analysis_target": "SoftServe",
+   "legal_name": "SoftServe, Inc.",
+   "primary_domain": "softserveinc.com",
+   "hq_country": "United States",
+   "aliases": [
+    "softserve",
+    "soft serve"
+   ],
+   "headquarters": {
+    "status": "CORROBORATED",
+    "displayed_country": "United States",
+    "note": "Austin, Texas (global); European headquarters Lviv, Ukraine",
+    "sources": [
+     [
+      "https://en.wikipedia.org/wiki/SoftServe",
+      "2026-11-28",
+      "Austin, Texas (Global)"
+     ]
+    ],
+    "regional": [
+     [
+      "Europe",
+      "Lviv, Ukraine"
+     ]
+    ],
+    "legal_domicile": ""
+   },
+   "public_listing": null,
+   "former_sec_filer": null,
+   "ownership": {
+    "state": "INDEPENDENT_OR_UNCHANGED",
+    "summary": "no ownership change found in the 2026-11-28 search sweep",
+    "evidence": []
+   },
+   "ownership_prior_in_split": "private",
+   "ownership_prior_was_wrong": false,
+   "site_access": "readable by safe_fetch",
+   "collision_risks": [
+    "soft-serve ice cream"
+   ],
+   "notes": "",
+   "extra_evidence": [],
+   "domain_probes": [
+    {
+     "candidate_domain": "softserveinc.com",
+     "final_host": "www.softserveinc.com",
+     "safe_fetch_status": 200,
+     "safe_fetch_failure": "",
+     "title": "SoftServe | Software Development & Digital Services Company"
+    }
+   ],
+   "identity_status": "VERIFIED",
+   "last_verified": "2026-11-28"
+  }
+ ]
+}

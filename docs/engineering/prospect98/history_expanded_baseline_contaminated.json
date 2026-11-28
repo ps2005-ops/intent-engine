@@ -1,0 +1,1079 @@
+{
+ "summary": {
+  "original": {
+   "BOUNDED": 65,
+   "FAIL": 1,
+   "PASS": 4
+  },
+  "expanded": {
+   "PASS": 19,
+   "FAIL": 35,
+   "BOUNDED": 16
+  },
+  "blocking_reasons": {
+   "no bounded rewind": 35,
+   "dated stop(s)": 7,
+   "a 15-month span": 2,
+   "a 10-month span": 2,
+   "a 6-month span": 1,
+   "a 14-month span": 1
+  }
+ },
+ "companies": [
+  {
+   "prospect_id": 1,
+   "company": "Alteryx",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "PASS",
+   "why": "5 stops over 54 months; economy: 3 reconstructed (release-timed)",
+   "stops": 5,
+   "earliest": "2022-05-23",
+   "latest": "2026-11-19",
+   "economic_links": 0,
+   "reconstructed_links": 3,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 3,
+    "NO_ECONOMIC_STATE_PUBLISHED_FOR_THIS_DATE": 2
+   }
+  },
+  {
+   "prospect_id": 2,
+   "company": "Domo",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 3,
+   "company": "StarTree",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "PASS",
+   "why": "6 stops over 29 months; economy: 6 reconstructed (release-timed)",
+   "stops": 6,
+   "earliest": "2024-06-01",
+   "latest": "2026-11-23",
+   "economic_links": 0,
+   "reconstructed_links": 6,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 6
+   }
+  },
+  {
+   "prospect_id": 4,
+   "company": "ClickHouse",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "3 dated stop(s) of 4; a 6-month span of 24",
+   "stops": 3,
+   "earliest": "2026-03-31",
+   "latest": "2026-09-25",
+   "economic_links": 0,
+   "reconstructed_links": 3,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 3
+   }
+  },
+  {
+   "prospect_id": 5,
+   "company": "Firebolt",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "a 15-month span of 24",
+   "stops": 6,
+   "earliest": "2025-08-31",
+   "latest": "2026-11-17",
+   "economic_links": 0,
+   "reconstructed_links": 6,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 6
+   }
+  },
+  {
+   "prospect_id": 8,
+   "company": "FalkorDB",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "a 10-month span of 24",
+   "stops": 4,
+   "earliest": "2026-01-31",
+   "latest": "2026-11-27",
+   "economic_links": 1,
+   "reconstructed_links": 3,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_LINKED": 1,
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 3
+   }
+  },
+  {
+   "prospect_id": 9,
+   "company": "Pinecone",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 10,
+   "company": "Weaviate",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 11,
+   "company": "Zilliz",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "2 dated stop(s) of 4",
+   "stops": 2,
+   "earliest": "2021-05-19",
+   "latest": "2024-11-19",
+   "economic_links": 0,
+   "reconstructed_links": 1,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 1,
+    "NO_ECONOMIC_STATE_PUBLISHED_FOR_THIS_DATE": 1
+   }
+  },
+  {
+   "prospect_id": 12,
+   "company": "Glean",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 13,
+   "company": "Writer",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "PASS",
+   "why": "4 stops over 56 months; economy: 3 reconstructed (release-timed)",
+   "stops": 4,
+   "earliest": "2022-03-08",
+   "latest": "2026-11-13",
+   "economic_links": 0,
+   "reconstructed_links": 3,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 3,
+    "NO_ECONOMIC_STATE_PUBLISHED_FOR_THIS_DATE": 1
+   }
+  },
+  {
+   "prospect_id": 15,
+   "company": "Domino Data Lab",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 16,
+   "company": "Fiddler AI",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 17,
+   "company": "Arthur AI",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 19,
+   "company": "Unstructured",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 20,
+   "company": "LandingAI",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "2 dated stop(s) of 4; a 14-month span of 24",
+   "stops": 2,
+   "earliest": "2025-08-31",
+   "latest": "2026-10-13",
+   "economic_links": 0,
+   "reconstructed_links": 2,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 2
+   }
+  },
+  {
+   "prospect_id": 21,
+   "company": "Snorkel AI",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "PASS",
+   "why": "4 stops over 56 months; economy: 3 reconstructed (release-timed)",
+   "stops": 4,
+   "earliest": "2022-03-18",
+   "latest": "2026-11-04",
+   "economic_links": 0,
+   "reconstructed_links": 3,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 3,
+    "NO_ECONOMIC_STATE_PUBLISHED_FOR_THIS_DATE": 1
+   }
+  },
+  {
+   "prospect_id": 22,
+   "company": "Labelbox",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 27,
+   "company": "Pendo",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "a 15-month span of 24",
+   "stops": 6,
+   "earliest": "2025-08-31",
+   "latest": "2026-11-18",
+   "economic_links": 0,
+   "reconstructed_links": 6,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 6
+   }
+  },
+  {
+   "prospect_id": 28,
+   "company": "Fullstory",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "PASS",
+   "why": "6 stops over 80 months; economy: 5 reconstructed (release-timed)",
+   "stops": 6,
+   "earliest": "2019-09-01",
+   "latest": "2026-05-19",
+   "economic_links": 0,
+   "reconstructed_links": 5,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 5,
+    "NO_ECONOMIC_STATE_PUBLISHED_FOR_THIS_DATE": 1
+   }
+  },
+  {
+   "prospect_id": 29,
+   "company": "Coupa",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "3 dated stop(s) of 4; a 9-month span of 24",
+   "stops": 3,
+   "earliest": "2025-08-31",
+   "latest": "2026-05-14",
+   "economic_links": 0,
+   "reconstructed_links": 3,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 3
+   }
+  },
+  {
+   "prospect_id": 30,
+   "company": "JAGGAER",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 31,
+   "company": "GEP",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 32,
+   "company": "Ivalua",
+   "level": "?",
+   "original": "FAIL",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": "2026-11-28",
+   "latest": "2026-11-28",
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 34,
+   "company": "ToolsGroup",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "PASS",
+   "why": "6 stops over 94 months; economy: 2 reconstructed (release-timed)",
+   "stops": 6,
+   "earliest": "2018-12-18",
+   "latest": "2026-10-29",
+   "economic_links": 0,
+   "reconstructed_links": 2,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 2,
+    "NO_ECONOMIC_STATE_PUBLISHED_FOR_THIS_DATE": 4
+   }
+  },
+  {
+   "prospect_id": 35,
+   "company": "Netstock",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "PASS",
+   "why": "5 stops over 52 months; economy: 4 reconstructed (release-timed)",
+   "stops": 5,
+   "earliest": "2022-03-17",
+   "latest": "2026-07-24",
+   "economic_links": 0,
+   "reconstructed_links": 4,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 4,
+    "NO_ECONOMIC_STATE_PUBLISHED_FOR_THIS_DATE": 1
+   }
+  },
+  {
+   "prospect_id": 37,
+   "company": "LevaData",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 38,
+   "company": "Arkestro",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "a 4-month span of 24",
+   "stops": 6,
+   "earliest": "2026-06-30",
+   "latest": "2026-10-08",
+   "economic_links": 0,
+   "reconstructed_links": 6,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 6
+   }
+  },
+  {
+   "prospect_id": 39,
+   "company": "Fairmarkit",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 40,
+   "company": "Zip",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 42,
+   "company": "Avetta",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 44,
+   "company": "Fusion Risk Management",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "a 22-month span of 24",
+   "stops": 6,
+   "earliest": "2025-01-31",
+   "latest": "2026-11-16",
+   "economic_links": 0,
+   "reconstructed_links": 6,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 6
+   }
+  },
+  {
+   "prospect_id": 45,
+   "company": "Riskonnect",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "PASS",
+   "why": "4 stops over 75 months; economy: 2 reconstructed (release-timed)",
+   "stops": 4,
+   "earliest": "2020-02-22",
+   "latest": "2026-05-29",
+   "economic_links": 0,
+   "reconstructed_links": 2,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 2,
+    "NO_ECONOMIC_STATE_PUBLISHED_FOR_THIS_DATE": 2
+   }
+  },
+  {
+   "prospect_id": 47,
+   "company": "NAVEX",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 49,
+   "company": "KPA",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 50,
+   "company": "RANE",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 51,
+   "company": "Eurasia Group",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 52,
+   "company": "Oxford Economics",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 53,
+   "company": "Gartner",
+   "level": "A",
+   "original": "PASS",
+   "expanded": "PASS",
+   "why": "a filed multi-year series (original level A)",
+   "stops": 0,
+   "earliest": "2011-02-15",
+   "latest": "2026-11-19",
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 57,
+   "company": "insightsoftware",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 58,
+   "company": "Prophix",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "3 dated stop(s) of 4; a 8-month span of 24",
+   "stops": 3,
+   "earliest": "2025-02-28",
+   "latest": "2025-10-08",
+   "economic_links": 0,
+   "reconstructed_links": 3,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 3
+   }
+  },
+  {
+   "prospect_id": 60,
+   "company": "Drivetrain",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 61,
+   "company": "Abacum",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "3 dated stop(s) of 4; a 2-month span of 24",
+   "stops": 3,
+   "earliest": "2026-09-30",
+   "latest": "2026-11-22",
+   "economic_links": 0,
+   "reconstructed_links": 3,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 3
+   }
+  },
+  {
+   "prospect_id": 62,
+   "company": "Maxio",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "PASS",
+   "why": "6 stops over 29 months; economy: 6 reconstructed (release-timed)",
+   "stops": 6,
+   "earliest": "2024-05-01",
+   "latest": "2026-10-14",
+   "economic_links": 0,
+   "reconstructed_links": 6,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 6
+   }
+  },
+  {
+   "prospect_id": 63,
+   "company": "Chargebee",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 64,
+   "company": "Deltek",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 65,
+   "company": "ECI Software Solutions",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "PASS",
+   "why": "6 stops over 30 months; economy: 6 reconstructed (release-timed)",
+   "stops": 6,
+   "earliest": "2024-05-01",
+   "latest": "2026-11-24",
+   "economic_links": 0,
+   "reconstructed_links": 6,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 6
+   }
+  },
+  {
+   "prospect_id": 66,
+   "company": "Aptean",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 69,
+   "company": "Pegasystems",
+   "level": "A",
+   "original": "PASS",
+   "expanded": "PASS",
+   "why": "a filed multi-year series (original level A)",
+   "stops": 0,
+   "earliest": "2012-02-29",
+   "latest": "2026-10-20",
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 70,
+   "company": "Celonis",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 71,
+   "company": "Kissflow",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "PASS",
+   "why": "6 stops over 36 months; economy: 5 reconstructed (release-timed)",
+   "stops": 6,
+   "earliest": "2023-11-13",
+   "latest": "2026-11-02",
+   "economic_links": 0,
+   "reconstructed_links": 5,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 5,
+    "NO_ECONOMIC_STATE_PUBLISHED_FOR_THIS_DATE": 1
+   }
+  },
+  {
+   "prospect_id": 73,
+   "company": "Nintex",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "PASS",
+   "why": "6 stops over 121 months; economy: 2 reconstructed (release-timed)",
+   "stops": 6,
+   "earliest": "2016-10-31",
+   "latest": "2026-11-24",
+   "economic_links": 0,
+   "reconstructed_links": 2,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 2,
+    "NO_ECONOMIC_STATE_PUBLISHED_FOR_THIS_DATE": 4
+   }
+  },
+  {
+   "prospect_id": 74,
+   "company": "UiPath",
+   "level": "A",
+   "original": "PASS",
+   "expanded": "PASS",
+   "why": "a filed multi-year series (original level A)",
+   "stops": 0,
+   "earliest": "2021-03-26",
+   "latest": "2026-09-08",
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 75,
+   "company": "Kantata",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 77,
+   "company": "SecurityScorecard",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "a 10-month span of 24",
+   "stops": 6,
+   "earliest": "2026-01-31",
+   "latest": "2026-11-06",
+   "economic_links": 0,
+   "reconstructed_links": 6,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 6
+   }
+  },
+  {
+   "prospect_id": 78,
+   "company": "BitSight",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "PASS",
+   "why": "6 stops over 25 months; economy: 6 reconstructed (release-timed)",
+   "stops": 6,
+   "earliest": "2024-09-30",
+   "latest": "2026-10-16",
+   "economic_links": 0,
+   "reconstructed_links": 6,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 6
+   }
+  },
+  {
+   "prospect_id": 79,
+   "company": "Censys",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "a 11-month span of 24",
+   "stops": 5,
+   "earliest": "2025-12-31",
+   "latest": "2026-11-17",
+   "economic_links": 0,
+   "reconstructed_links": 5,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 5
+   }
+  },
+  {
+   "prospect_id": 80,
+   "company": "Wiz",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 81,
+   "company": "Aqua Security",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "PASS",
+   "why": "6 stops over 56 months; economy: 3 reconstructed (release-timed)",
+   "stops": 6,
+   "earliest": "2021-07-28",
+   "latest": "2026-03-04",
+   "economic_links": 0,
+   "reconstructed_links": 3,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 3,
+    "NO_ECONOMIC_STATE_PUBLISHED_FOR_THIS_DATE": 3
+   }
+  },
+  {
+   "prospect_id": 85,
+   "company": "SentinelOne",
+   "level": "A",
+   "original": "PASS",
+   "expanded": "PASS",
+   "why": "a filed multi-year series (original level A)",
+   "stops": 0,
+   "earliest": "2021-06-03",
+   "latest": "2026-11-12",
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 86,
+   "company": "Claroty",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "PASS",
+   "why": "6 stops over 51 months; economy: 2 reconstructed (release-timed)",
+   "stops": 6,
+   "earliest": "2022-07-15",
+   "latest": "2026-10-13",
+   "economic_links": 0,
+   "reconstructed_links": 2,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 2,
+    "NO_ECONOMIC_STATE_PUBLISHED_FOR_THIS_DATE": 4
+   }
+  },
+  {
+   "prospect_id": 87,
+   "company": "Forescout",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "a 19-month span of 24",
+   "stops": 4,
+   "earliest": "2025-04-30",
+   "latest": "2026-11-16",
+   "economic_links": 0,
+   "reconstructed_links": 4,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 4
+   }
+  },
+  {
+   "prospect_id": 88,
+   "company": "Corelight",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 91,
+   "company": "SHI International",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 93,
+   "company": "Concentric AI",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "a 20-month span of 24",
+   "stops": 4,
+   "earliest": "2025-03-31",
+   "latest": "2026-11-16",
+   "economic_links": 0,
+   "reconstructed_links": 4,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 4
+   }
+  },
+  {
+   "prospect_id": 94,
+   "company": "Improving",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 95,
+   "company": "Launch Consulting",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 96,
+   "company": "Sparq",
+   "level": "B",
+   "original": "BOUNDED",
+   "expanded": "BOUNDED",
+   "why": "2 dated stop(s) of 4; a 3-month span of 24",
+   "stops": 2,
+   "earliest": "2025-05-31",
+   "latest": "2025-08-05",
+   "economic_links": 0,
+   "reconstructed_links": 2,
+   "econ_states": {
+    "ECONOMIC_CONTEXT_RECONSTRUCTED": 2
+   }
+  },
+  {
+   "prospect_id": 97,
+   "company": "Bounteous",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  },
+  {
+   "prospect_id": 98,
+   "company": "SoftServe",
+   "level": "C",
+   "original": "BOUNDED",
+   "expanded": "FAIL",
+   "why": "no bounded rewind",
+   "stops": 0,
+   "earliest": null,
+   "latest": null,
+   "economic_links": 0,
+   "reconstructed_links": 0,
+   "econ_states": {}
+  }
+ ]
+}

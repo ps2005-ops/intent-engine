@@ -160,7 +160,8 @@ def _plain_label(row: dict, *, self_authored: bool, host: str) -> str:
 
 
 def project(documents: Sequence[dict], *, subject_filers=(),
-            subject_domain: str = "", subject_name: str = "") -> Dict[str, Any]:
+            subject_domain: str = "", subject_name: str = "",
+            aliases: Sequence[str] = ()) -> Dict[str, Any]:
     """One sanitized provenance record per retrieved document.
 
     Takes the SAME subject identification `independence.assess` takes, and
@@ -175,7 +176,7 @@ def project(documents: Sequence[dict], *, subject_filers=(),
 
     rows = IND.classify(documents, subject_filers=subject_filers,
                         subject_domain=subject_domain,
-                        subject_name=subject_name)
+                        subject_name=subject_name, aliases=aliases)
     records: List[dict] = []
     for row, document in zip(rows, documents):
         url = str(row.get("url") or "")

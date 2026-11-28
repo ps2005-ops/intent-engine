@@ -1,0 +1,3591 @@
+{
+ "why_no_deck": {
+  "no_report:RETRYABLE_EVIDENCE_GAP": 5,
+  "no_report:None": 1
+ },
+ "companies": {
+  "Alteryx": {
+   "prospect_id": 1,
+   "run_id": "01M8GJYDHTS7X2NVCD2G3FHWQY",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 9,
+    "usable_at_compose": 9,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "independent",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-e6619ced0521",
+     "src-57d8afd254a0",
+     "src-a66263e555fb",
+     "src-3720b65c8537",
+     "src-b34409d32ce4",
+     "src-8454ef08243e",
+     "src-e18bcf17c0dc",
+     "src-d07c193b0512",
+     "src-4dd82151545f"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Domo": {
+   "prospect_id": 2,
+   "run_id": "01M8GJYDJM41T7TQ01MSASDDDY",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "may_synthesize": false,
+   "readiness_state": "RETRYABLE_EVIDENCE_GAP",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 4,
+    "usable_at_compose": 4,
+    "families_at_compose": [
+     "independent"
+    ],
+    "source_ids": [
+     "src-6dfd5646d8d9",
+     "src-38fae788e775",
+     "src-3720b65c8537",
+     "src-6e100329eb7a"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": false,
+   "deep_status": null,
+   "observation_classes": {},
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": false,
+    "slides_ready": false
+   }
+  },
+  "StarTree": {
+   "prospect_id": 3,
+   "run_id": "01M8GJZ4AV3ASACRHV8DEMEKBK",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 13,
+    "usable_at_compose": 13,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-59e0c9c1d4f3",
+     "src-196df522be57",
+     "src-d998c5d6fad0",
+     "src-998f82395088",
+     "src-0ee9330a290d",
+     "src-7b9feabea9b6",
+     "src-4eccd680d941",
+     "src-c53794d6fcfe",
+     "src-3a91ea7c898c",
+     "src-eaa16d4d6865",
+     "src-197974ff1172",
+     "src-5295db9b35a5",
+     "src-be69aa312de9"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 6,
+    "independent_reporting": 1,
+    "executive_statement": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "ClickHouse": {
+   "prospect_id": 4,
+   "run_id": "01M8GJZEYABYWRD5MY5YNJ4VSR",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 11,
+    "usable_at_compose": 11,
+    "families_at_compose": [
+     "identity",
+     "independent",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-c0f814351ae3",
+     "src-ec35921d766b",
+     "src-b40146c306d6",
+     "src-f3a37544d413",
+     "src-098bb86daff9",
+     "src-2d6935257b9a",
+     "src-413112d63a86",
+     "src-12a0045fc0c4",
+     "src-bb834c590a4e",
+     "src-b36a29f8534e",
+     "src-515bde89b4cf"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "independent_reporting": 1,
+    "company_owned": 4,
+    "executive_statement": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Firebolt": {
+   "prospect_id": 5,
+   "run_id": "01M8GK005EG4ZS7DD7VF02F53C",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 14,
+    "usable_at_compose": 14,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-d7f0404c1dde",
+     "src-39d756241bac",
+     "src-a7d0e0dd2168",
+     "src-c8a702dd3f70",
+     "src-f080f48e8dba",
+     "src-ff33e7d07803",
+     "src-2bb390bfca59",
+     "src-2f4332e70fad",
+     "src-8b7c137a998c",
+     "src-0a435b764e5f",
+     "src-f16d5cb85f3e",
+     "src-4b54defdebc6",
+     "src-7ac58fd3ed7d",
+     "src-f0229218975c"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 5,
+    "executive_statement": 2,
+    "independent_reporting": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "COMPLETE",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "FalkorDB": {
+   "prospect_id": 8,
+   "run_id": "01M8GK0BMB8Z7G116RNND8N9PC",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 13,
+    "usable_at_compose": 13,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "product",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-5ea6c18506ad",
+     "src-ef0d312ac311",
+     "src-983fde659c1f",
+     "src-a3e9c784d65c",
+     "src-87cc476ab10d",
+     "src-ebbdc9aae2cd",
+     "src-2987e86bef50",
+     "src-8f7da212b387",
+     "src-bd5571e0942a",
+     "src-c2e87697c25b",
+     "src-380d4a1c317e",
+     "src-79455df84a38",
+     "src-b40234e200e0"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 9,
+    "executive_statement": 2
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Pinecone": {
+   "prospect_id": 9,
+   "run_id": "01M8GK0RXEMFB8QX70JSA20XMN",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 13,
+    "usable_at_compose": 13,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-6eba5d90e892",
+     "src-f333686bf009",
+     "src-f14d82a277a5",
+     "src-5f519fa31dd1",
+     "src-abb9f1c3a83f",
+     "src-8a60743172a3",
+     "src-139aaeca3d0b",
+     "src-97cf710fdd4d",
+     "src-34c51d391542",
+     "src-c022b2a144bd",
+     "src-bee368ef18a4",
+     "src-cbbae69e1084",
+     "src-0b48c2964b62"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 7,
+    "executive_statement": 1,
+    "independent_reporting": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Weaviate": {
+   "prospect_id": 10,
+   "run_id": "01M8GK12KQSBPCDFRS05QDPP8E",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 1,
+    "dropped_language": 0,
+    "documents_at_compose": 14,
+    "usable_at_compose": 13,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "independent",
+     "investor",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-6800f49b9e71",
+     "src-25badc2b7dc8",
+     "src-c10b993671fd",
+     "src-035b84353586",
+     "src-a639b4426b7c",
+     "src-f50e1a428f03",
+     "src-e4153a9ab038",
+     "src-6599061ba9d5",
+     "src-624dc912749c",
+     "src-18f1e51b17df",
+     "src-e43c675c777f",
+     "src-a3a762ac262d",
+     "src-ef202e3625ef",
+     "src-1d15f530a209"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 7,
+    "executive_statement": 1,
+    "independent_reporting": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "COMPLETE",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Zilliz": {
+   "prospect_id": 11,
+   "run_id": "01M8GK1PRZQSR5FZ5KV29345YG",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 14,
+    "usable_at_compose": 14,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-b605aae6ae57",
+     "src-ccb68bf65353",
+     "src-335aef6daaa1",
+     "src-385f521efc0a",
+     "src-196184335650",
+     "src-2e918182626b",
+     "src-71ac01763a85",
+     "src-d2aa9f18df7a",
+     "src-0032473fb190",
+     "src-da1f004a04ef",
+     "src-030d0989a127",
+     "src-9b281bf5e888",
+     "src-ac7867f1f316",
+     "src-2c3928afff03"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 6,
+    "executive_statement": 3,
+    "independent_reporting": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "COMPLETE",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Glean": {
+   "prospect_id": 12,
+   "run_id": "01M8GK22FEWMY74P8PE6PMZM5J",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 1,
+    "dropped_language": 0,
+    "documents_at_compose": 9,
+    "usable_at_compose": 8,
+    "families_at_compose": [
+     "identity",
+     "independent",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-4dcbaf0237aa",
+     "src-a2dfb97956ad",
+     "src-9d4801c1bb99",
+     "src-f0fb178dd0c2",
+     "src-85b4dd2eab0f",
+     "src-eb669b1d8fb3",
+     "src-d1e32a26e78c",
+     "src-62d8c17531ae",
+     "src-1b14b9556e47"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 4
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Writer": {
+   "prospect_id": 13,
+   "run_id": "01M8GK2N3KT90K913Q45DVJ4B6",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 14,
+    "usable_at_compose": 14,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-783bd65efb29",
+     "src-497a1ad33f6b",
+     "src-f33d3e576ea5",
+     "src-1839ee0dac94",
+     "src-b6016b7a5041",
+     "src-627a3f4f24b5",
+     "src-8945e6c81a6e",
+     "src-0263783e2526",
+     "src-93ed2c250c39",
+     "src-0d9a1d7f5d4f",
+     "src-2d0606cbbb3f",
+     "src-7fe4d5d27d69",
+     "src-97d843dfed37",
+     "src-0dba76716dcc"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 6,
+    "executive_statement": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "COMPLETE",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Domino Data Lab": {
+   "prospect_id": 15,
+   "run_id": "01M8GK34J75FMAE8ARRP230DB4",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 14,
+    "usable_at_compose": 14,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-60989923acd8",
+     "src-535747fbf966",
+     "src-89444d01eff0",
+     "src-0ce642bafa06",
+     "src-d547db71460f",
+     "src-6b260942223a",
+     "src-60dd5e41e5c8",
+     "src-07bbd23fc6e3",
+     "src-ed9dab238cfc",
+     "src-846ab97c3c77",
+     "src-9860d88375e0",
+     "src-baf22d78b760",
+     "src-e71aa0b7a1ca",
+     "src-81d9f663801a"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "executive_statement": 3,
+    "company_owned": 3
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "COMPLETE",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Fiddler AI": {
+   "prospect_id": 16,
+   "run_id": "01M8GK3K9FNS2PH9HPJQ7PDNDM",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 1,
+    "dropped_language": 0,
+    "documents_at_compose": 13,
+    "usable_at_compose": 12,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "independent",
+     "investor",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-b6c1ca764889",
+     "src-7a4de995f348",
+     "src-05476b70eac4",
+     "src-66ed0ceaddac",
+     "src-a540787fafdf",
+     "src-568771592686",
+     "src-424d54277345",
+     "src-83f13f5e0843",
+     "src-11fd09efc2a9",
+     "src-f5ec8cfdc28c",
+     "src-7ad6fe07db94",
+     "src-f15a769d4989",
+     "src-ca63e6f47dda"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 8,
+    "investor_material": 1,
+    "independent_reporting": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Arthur AI": {
+   "prospect_id": 17,
+   "run_id": "01M8GK43KJ00G7Q9YP0AB3XV8G",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 12,
+    "usable_at_compose": 12,
+    "families_at_compose": [
+     "commercial",
+     "identity",
+     "independent",
+     "product",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-736189f85d09",
+     "src-a9ba77a2e390",
+     "src-887136dba19b",
+     "src-1b3d09c52caf",
+     "src-321e27228202",
+     "src-15d95ef123b4",
+     "src-a4e8a62de54e",
+     "src-78fcf8047a6a",
+     "src-eec9c41c70ef",
+     "src-6dc4a2e82007",
+     "src-c28be2efb530",
+     "src-776c5af9b855"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 5,
+    "executive_statement": 2
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Unstructured": {
+   "prospect_id": 19,
+   "run_id": "01M8GK4MVDQD8Z4HQ5FE5S0R9D",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 12,
+    "usable_at_compose": 12,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "product",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-627909588885",
+     "src-1d6c714674db",
+     "src-e3356796f6c0",
+     "src-07ab748b740b",
+     "src-617e1f1448ab",
+     "src-5ed6d1caa6c8",
+     "src-40212a4c7f75",
+     "src-20cae88952d0",
+     "src-9d448c7c4c69",
+     "src-33e32a3d0a34",
+     "src-b3e58faea422",
+     "src-98b312c705ce"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 7,
+    "executive_statement": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "LandingAI": {
+   "prospect_id": 20,
+   "run_id": "01M8GK57GN3PRAZ89M2A1S48JN",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 12,
+    "usable_at_compose": 12,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "investor",
+     "product",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-0f8c01659d89",
+     "src-31cab3f946fa",
+     "src-af98f468ae7f",
+     "src-c656f4d613e6",
+     "src-2fefc754ae5c",
+     "src-d2d21593a736",
+     "src-ec072526e57d",
+     "src-e29dfab0417c",
+     "src-1334ac75709a",
+     "src-9aa83268bb92",
+     "src-e16f61131f4e",
+     "src-af6bb043d634"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 7,
+    "investor_material": 2,
+    "executive_statement": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Snorkel AI": {
+   "prospect_id": 21,
+   "run_id": "01M8GK5KXNH6NPGCVVZV5RTGN5",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 13,
+    "usable_at_compose": 13,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-48572607288d",
+     "src-df466f87bd6d",
+     "src-0c745b1c670f",
+     "src-9036d35984c4",
+     "src-f5e227999000",
+     "src-c2913ee4dc52",
+     "src-e49f4c205d92",
+     "src-2b80b6ff1fa3",
+     "src-85233836f588",
+     "src-164cf6e91541",
+     "src-3afe3826e4a1",
+     "src-7b4f2b960afd",
+     "src-ca3f545f6ac9"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 7,
+    "independent_reporting": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Labelbox": {
+   "prospect_id": 22,
+   "run_id": "01M8GK618T99NNNWNP83AYP8Q1",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 12,
+    "usable_at_compose": 12,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-bc05606ba844",
+     "src-9e2909d5f3cd",
+     "src-097269aa47d3",
+     "src-23e54af7d77b",
+     "src-327aff1c9bb7",
+     "src-0f4a0ff38e94",
+     "src-71cb6a2b8f0d",
+     "src-bbf3e0e5b5e0",
+     "src-d4d11e51805d",
+     "src-81658863d0d7",
+     "src-3f512108e98f",
+     "src-99b3cef84aab"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 6
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Pendo": {
+   "prospect_id": 27,
+   "run_id": "01M8GK6EX82ZC81T06C7PSG905",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 12,
+    "usable_at_compose": 12,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-edc8f567f26a",
+     "src-5ea152200847",
+     "src-04209d35b1d6",
+     "src-3af80701e579",
+     "src-6ad21a2882fc",
+     "src-e690e4b57fef",
+     "src-2ec180c6016a",
+     "src-077df5580400",
+     "src-cd3d2bc600a0",
+     "src-b39d659e7b52",
+     "src-617a940630b5",
+     "src-0321ceafc83e"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 4
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Fullstory": {
+   "prospect_id": 28,
+   "run_id": "01M8GK6WCK4JZBRCW53GZ58HEB",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 14,
+    "usable_at_compose": 14,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-87a8e829cdbb",
+     "src-11c65f4450f5",
+     "src-dbd082a56825",
+     "src-0100e2675fd6",
+     "src-e4f55ee03a6b",
+     "src-9bde4d5c1eb9",
+     "src-201f001891e3",
+     "src-e4ee0b9a59cf",
+     "src-ceb12d542c6e",
+     "src-ed91a21fbbcb",
+     "src-65c62c384e57",
+     "src-5f1203604241",
+     "src-5a442263bb95",
+     "src-37e566a1fe9f"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 6,
+    "executive_statement": 2,
+    "independent_reporting": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "COMPLETE",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Coupa": {
+   "prospect_id": 29,
+   "run_id": "01M8GK79KC3W8QH7KB98GYZ6C8",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "RETRYABLE_EVIDENCE_GAP",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 3,
+    "usable_at_compose": 3,
+    "families_at_compose": [
+     "independent"
+    ],
+    "source_ids": [
+     "src-7629395551e1",
+     "src-390168668a3f",
+     "src-9d919d30c803"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "independent_reporting": 3
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "JAGGAER": {
+   "prospect_id": 30,
+   "run_id": "01M8GK82NK6P9PJ2BZJWHTXXSB",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": false,
+   "readiness_state": "RETRYABLE_EVIDENCE_GAP",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 1,
+    "usable_at_compose": 1,
+    "families_at_compose": [
+     "independent"
+    ],
+    "source_ids": [
+     "src-0c1c25d52659"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": false,
+   "deep_status": null,
+   "observation_classes": {},
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": false,
+    "slides_ready": false
+   }
+  },
+  "GEP": {
+   "prospect_id": 31,
+   "run_id": "01M8GK8AYFGTKMPNSEDJFX1PWC",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 10,
+    "usable_at_compose": 10,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-2bf6982419b1",
+     "src-c1d1af492ab3",
+     "src-d4aa15db168c",
+     "src-97f2baf6b10e",
+     "src-f4ba7e02c971",
+     "src-4ecfc20e4b84",
+     "src-46b56af56d00",
+     "src-4896d91662a5",
+     "src-70658578a86d",
+     "src-840565d4bc12"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 5,
+    "executive_statement": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Ivalua": {
+   "prospect_id": 32,
+   "run_id": "01M8GK8MQ48ZJVKY1RDRZSHWCX",
+   "final_class": "RETRIEVAL_LIMITATION_HANDLED_CORRECTLY",
+   "may_synthesize": null,
+   "readiness_state": null,
+   "readiness_reason": null,
+   "readiness_inputs": null,
+   "has_report": false,
+   "deep_status": null,
+   "observation_classes": {},
+   "decision_readiness": null,
+   "availability": {
+    "state": "FAILED",
+    "has_report": false,
+    "slides_ready": false
+   }
+  },
+  "ToolsGroup": {
+   "prospect_id": 34,
+   "run_id": "01M8GK99BXXPC01F666ZYQC7GP",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 11,
+    "usable_at_compose": 11,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-d80a5182c83d",
+     "src-233689644c44",
+     "src-d93ac73b74a0",
+     "src-7a86d77aaa34",
+     "src-78ccd2d0fdc8",
+     "src-4d14dcee3b95",
+     "src-97abe037b090",
+     "src-a188bebcffd6",
+     "src-2498a7b7dbd9",
+     "src-7908eac609a0",
+     "src-ddf330237a2f"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 4,
+    "executive_statement": 2
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Netstock": {
+   "prospect_id": 35,
+   "run_id": "01M8GK9HP9XZ40J2JPEHP5R0WD",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 1,
+    "documents_at_compose": 13,
+    "usable_at_compose": 12,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-0238f8e84959",
+     "src-cdc27f55ca10",
+     "src-14d1a4bfc0f9",
+     "src-c260ae330ab6",
+     "src-9c9d0fa1955a",
+     "src-f98123d56b78",
+     "src-f3b9e8be6662",
+     "src-f0959eaf596e",
+     "src-0d1c693770ae",
+     "src-57bdd5766084",
+     "src-a5c3e6c476b9",
+     "src-e20042f7e93b",
+     "src-622db17768ec"
+    ],
+    "attempt": 1,
+    "language_rejected": [
+     {
+      "source_id": "src-622db17768ec",
+      "url": "https://www.netstock.com/de/executive-dashboard/",
+      "chars": 3517,
+      "marker_density": 187.5,
+      "accent_density": 18.47
+     }
+    ],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 6,
+    "executive_statement": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "LevaData": {
+   "prospect_id": 37,
+   "run_id": "01M8GKA4DQ7H48H5K0WQ7AXF9C",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "may_synthesize": true,
+   "readiness_state": "RETRYABLE_EVIDENCE_GAP",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 2,
+    "dropped_language": 0,
+    "documents_at_compose": 10,
+    "usable_at_compose": 8,
+    "families_at_compose": [
+     "identity",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-69acff1870b1",
+     "src-d2d60ea93168",
+     "src-fb58a50f32ae",
+     "src-138478a5b949",
+     "src-eb7ce62b4cdc",
+     "src-1193abc27b6a",
+     "src-3013255ace2f",
+     "src-5716892a20a0",
+     "src-a3ddbc01b5a6",
+     "src-da586ce152f2"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 4,
+    "executive_statement": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Arkestro": {
+   "prospect_id": 38,
+   "run_id": "01M8GKAJXMPPWZQFN3GD2SSGN1",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 12,
+    "usable_at_compose": 12,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "product",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-c6eaeeec2751",
+     "src-7810b29473bb",
+     "src-8b37bd4a07b5",
+     "src-434da53f2905",
+     "src-bb1dc10ff424",
+     "src-4678c7be7930",
+     "src-a22f83df19b5",
+     "src-99bd33cb8dec",
+     "src-83a28d8055f4",
+     "src-1dfd395dcf79",
+     "src-23515142767e",
+     "src-8ceb8bdf5e2a"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 5
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Fairmarkit": {
+   "prospect_id": 39,
+   "run_id": "01M8GKB5QST7RPFZWF7QJWEGNS",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 1,
+    "dropped_language": 0,
+    "documents_at_compose": 7,
+    "usable_at_compose": 6,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-e48be3582801",
+     "src-d999277f7aea",
+     "src-911fa4a46638",
+     "src-91bed5d05a4b",
+     "src-5cdf5a92f8a6",
+     "src-f346f1170aab",
+     "src-3543dd1fa2b1"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 5
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Zip": {
+   "prospect_id": 40,
+   "run_id": "01M8GKBG8MSD09ZJM2PABCJYEX",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 8,
+    "usable_at_compose": 8,
+    "families_at_compose": [
+     "identity",
+     "independent",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-c6c15c851f9f",
+     "src-7303cf36bd4a",
+     "src-b0fd9fd7b6a4",
+     "src-073c515105ad",
+     "src-a2ef8114a063",
+     "src-72b66fb8037e",
+     "src-4df753b9ed28",
+     "src-74eaedfbadc2"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 3
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Avetta": {
+   "prospect_id": 42,
+   "run_id": "01M8GKBS7NC0H9QTHF7CH5YEZ1",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 1,
+    "dropped_language": 0,
+    "documents_at_compose": 13,
+    "usable_at_compose": 12,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "investor",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-aab04f6217d3",
+     "src-e060bfa8cbbe",
+     "src-165785e1689a",
+     "src-f31e3c454f0d",
+     "src-7a77b01b4a59",
+     "src-1ce62c9675e6",
+     "src-2e0c054c6d58",
+     "src-819b91499b06",
+     "src-ddff7c152a54",
+     "src-ccdc717c544e",
+     "src-595c38f04f7f",
+     "src-2935d0e8ee59",
+     "src-dde807ab7b6c"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 6,
+    "investor_material": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Fusion Risk Management": {
+   "prospect_id": 44,
+   "run_id": "01M8GKC8HC55PHXY5M0J2STGT5",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 13,
+    "usable_at_compose": 13,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-2b512be5ed5f",
+     "src-e1aede759beb",
+     "src-3d9024df97ca",
+     "src-1027cf85a6a5",
+     "src-bd24371ace50",
+     "src-1ef8a284a4fa",
+     "src-0dd89e254e8e",
+     "src-fcc19446f96d",
+     "src-4e15794d7f37",
+     "src-93522710ed3a",
+     "src-9650d6258c15",
+     "src-7593b8804306",
+     "src-f981df3329c1"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 4
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Riskonnect": {
+   "prospect_id": 45,
+   "run_id": "01M8GKDHNP4ZP9QPMXXJ5B8P7T",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 1,
+    "documents_at_compose": 12,
+    "usable_at_compose": 11,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-debbf87277b0",
+     "src-6759239e52d7",
+     "src-232cdc4b358b",
+     "src-a9c0ce8ba74e",
+     "src-e39004057d84",
+     "src-998fa1c99d46",
+     "src-6a380e88e8c4",
+     "src-77d455ccdbea",
+     "src-676046221c04",
+     "src-2a239118306a",
+     "src-cee1a5133a5c",
+     "src-877574dfe2b4"
+    ],
+    "attempt": 1,
+    "language_rejected": [
+     {
+      "source_id": "src-877574dfe2b4",
+      "url": "https://riskonnect.com/fr/leadership-eclaire/remuneration-gestion-des-risques/",
+      "chars": 4440,
+      "marker_density": 214.9,
+      "accent_density": 29.27
+     }
+    ],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 4
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "NAVEX": {
+   "prospect_id": 47,
+   "run_id": "01M8GKDZDYYGDRM7H80QGPVQ13",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 1,
+    "dropped_language": 0,
+    "documents_at_compose": 13,
+    "usable_at_compose": 12,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-487d55f77bd8",
+     "src-a9f8d633ad76",
+     "src-f8570f9aacdf",
+     "src-eeed5ef6a5ae",
+     "src-e9f11bf20846",
+     "src-f23e7be878cb",
+     "src-04cd3b52fc92",
+     "src-510e66bd541b",
+     "src-191bccc4b1b3",
+     "src-c6439223bacf",
+     "src-2bb9f62558b1",
+     "src-fdac06cd25f3",
+     "src-24172d6a9caa"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 6
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "KPA": {
+   "prospect_id": 49,
+   "run_id": "01M8GKECZ6NEK1FJKZMTMNGBX8",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 13,
+    "usable_at_compose": 13,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-475f58e0db54",
+     "src-2348666e2317",
+     "src-3e032b7e0f7a",
+     "src-e55812738928",
+     "src-02c4494f9852",
+     "src-3768f9a47813",
+     "src-657736a22243",
+     "src-77605f4d0772",
+     "src-13d07545ff46",
+     "src-e6a2ef8cec5f",
+     "src-e8a2798f7135",
+     "src-5cadd6a25ab3",
+     "src-0017e23d33d3"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 6,
+    "executive_statement": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "RANE": {
+   "prospect_id": 50,
+   "run_id": "01M8GKFCHQH6Q6V4EFMM5SD1F7",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "may_synthesize": true,
+   "readiness_state": "RETRYABLE_EVIDENCE_GAP",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 1,
+    "dropped_language": 0,
+    "documents_at_compose": 8,
+    "usable_at_compose": 7,
+    "families_at_compose": [
+     "identity",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-55926bf892ea",
+     "src-e8cd53ee8cee",
+     "src-9cbff7a4c134",
+     "src-c7eaa017699b",
+     "src-5c45f3f9fe24",
+     "src-e2dcc9ca046f",
+     "src-5b4c733183a6",
+     "src-42a220d488c4"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 5
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Eurasia Group": {
+   "prospect_id": 51,
+   "run_id": "01M8GKG4TYV4Z0DKDJ3D4NR5EC",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": false,
+   "readiness_state": "RETRYABLE_EVIDENCE_GAP",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 1,
+    "usable_at_compose": 1,
+    "families_at_compose": [
+     "independent"
+    ],
+    "source_ids": [
+     "src-df838c5b2432"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": false,
+   "deep_status": null,
+   "observation_classes": {},
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": false,
+    "slides_ready": false
+   }
+  },
+  "Oxford Economics": {
+   "prospect_id": 52,
+   "run_id": "01M8GKGEJEJRT1WH2WCKVRBJGA",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "RETRYABLE_EVIDENCE_GAP",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 4,
+    "usable_at_compose": 4,
+    "families_at_compose": [
+     "independent"
+    ],
+    "source_ids": [
+     "src-e76d215384ed",
+     "src-ad420da74075",
+     "src-7982dc67a8e6",
+     "src-acfd166b6591"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "independent_reporting": 4
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Gartner": {
+   "prospect_id": 53,
+   "run_id": "01M8GKGP8WBFPZAAY9T0BM1RM0",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 14,
+    "usable_at_compose": 14,
+    "families_at_compose": [
+     "identity",
+     "independent",
+     "investor",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-7de2445d0fca",
+     "src-1db24173e4c4",
+     "src-c7a49b753c69",
+     "src-75a95b1b29cb",
+     "src-6376ef644635",
+     "src-34ce1c1d4a73",
+     "src-59330d26e299",
+     "src-ec10c8b5c891",
+     "src-d5e65206eed9",
+     "src-cd0a8ec862f7",
+     "src-d86fde181fd7",
+     "src-a678a1bd64be",
+     "src-34e627979f58",
+     "src-f2da4cb7a89a"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "investor_material": 3,
+    "independent_reporting": 2
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "insightsoftware": {
+   "prospect_id": 57,
+   "run_id": "01M8GKH4NXP4DRZ0PHA1MF6WQY",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 13,
+    "usable_at_compose": 13,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "independent",
+     "investor",
+     "product",
+     "talent"
+    ],
+    "source_ids": [
+     "src-653514a084bd",
+     "src-f43a85c46cce",
+     "src-db0d54550ec9",
+     "src-29c40f2c851a",
+     "src-44d17c65e859",
+     "src-8522e445636f",
+     "src-574777a35729",
+     "src-45a40e93db0a",
+     "src-07d9428ee5d3",
+     "src-c8ecb0cf226c",
+     "src-3d87d5f4682f",
+     "src-bd915c89e3c0",
+     "src-48fa761838d8"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 8,
+    "investor_material": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Prophix": {
+   "prospect_id": 58,
+   "run_id": "01M8GKJG9N641ZX1W0FQ9N1MBY",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "RETRYABLE_EVIDENCE_GAP",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 4,
+    "usable_at_compose": 4,
+    "families_at_compose": [
+     "independent"
+    ],
+    "source_ids": [
+     "src-a736b9a1ba23",
+     "src-b2e709ece1fb",
+     "src-76a756b331c3",
+     "src-a933361dbfcb"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "independent_reporting": 3
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Drivetrain": {
+   "prospect_id": 60,
+   "run_id": "01M8GKJV3PB8CQBA14MT2N25QF",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": false,
+   "readiness_state": "RETRYABLE_EVIDENCE_GAP",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 4,
+    "usable_at_compose": 4,
+    "families_at_compose": [
+     "independent"
+    ],
+    "source_ids": [
+     "src-480941c7dec6",
+     "src-ac317c3c568a",
+     "src-5442a3d14c1c",
+     "src-6a00220d92dd"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": false,
+   "deep_status": null,
+   "observation_classes": {},
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": false,
+    "slides_ready": false
+   }
+  },
+  "Abacum": {
+   "prospect_id": 61,
+   "run_id": "01M8GKKDPHE5889TVWG2EV2ZQ9",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 1,
+    "dropped_language": 0,
+    "documents_at_compose": 12,
+    "usable_at_compose": 11,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "investor",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-3bf8f716db4b",
+     "src-55e75eac7252",
+     "src-9ed9d4ac3c64",
+     "src-3432164e35e3",
+     "src-d37bd80a09f0",
+     "src-ff83d2b37fda",
+     "src-371bfc2ee5b1",
+     "src-1f8ca3fc1f8d",
+     "src-a85c46177dac",
+     "src-f2d014dc4f3d",
+     "src-50a9779750fa",
+     "src-0e33f073eca6"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 8,
+    "investor_material": 1,
+    "executive_statement": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Maxio": {
+   "prospect_id": 62,
+   "run_id": "01M8GKM4YRB6CCZ1EVJNXEWXGX",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 13,
+    "usable_at_compose": 13,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "investor",
+     "product",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-67366b2b6b1f",
+     "src-916393b82d30",
+     "src-076bd42749ca",
+     "src-335e6c282f7a",
+     "src-437e526f58a2",
+     "src-74cb16092e5c",
+     "src-6ea0864ca11a",
+     "src-2a6a150fc11b",
+     "src-9516efb5fad6",
+     "src-7fbdf575beaa",
+     "src-8f5659cb71ee",
+     "src-19066bd787f4",
+     "src-40376f19f5bd"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 9,
+    "investor_material": 1,
+    "executive_statement": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Chargebee": {
+   "prospect_id": 63,
+   "run_id": "01M8GKMKGXKTNQ7QZY67FXQ27A",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 14,
+    "usable_at_compose": 14,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "independent",
+     "investor",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-1f2942f2020f",
+     "src-b38f1f3a8cfa",
+     "src-e2a3f4555ed8",
+     "src-de3f957c3526",
+     "src-6cd8342ec5c7",
+     "src-ea91f9f82eec",
+     "src-0cf045b2ded1",
+     "src-044aa1cd9f08",
+     "src-3dadaa0a37c1",
+     "src-9ccb7013e91a",
+     "src-aff17d0ecc1c",
+     "src-93b74a8003bc",
+     "src-c84281fa2ade",
+     "src-3a30f3cb6070"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 9,
+    "investor_material": 1,
+    "executive_statement": 1,
+    "independent_reporting": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "COMPLETE",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Deltek": {
+   "prospect_id": 64,
+   "run_id": "01M8GKN0VM8Z5HA04V70YQA8VQ",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 1,
+    "dropped_language": 0,
+    "documents_at_compose": 11,
+    "usable_at_compose": 10,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-d01e669eb934",
+     "src-35eb8bf94f77",
+     "src-af0c9f5aee1c",
+     "src-9af891286af4",
+     "src-af9236a758eb",
+     "src-de90c97dc5e0",
+     "src-8adddf52b5a5",
+     "src-313a86f0ecb5",
+     "src-d11fff786733",
+     "src-351c97af73e5",
+     "src-bafb20d767ba"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 5,
+    "independent_reporting": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "ECI Software Solutions": {
+   "prospect_id": 65,
+   "run_id": "01M8GKNP4MRERX0WJS90V01NY8",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "may_synthesize": true,
+   "readiness_state": "RETRYABLE_EVIDENCE_GAP",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 1,
+    "dropped_language": 1,
+    "documents_at_compose": 8,
+    "usable_at_compose": 6,
+    "families_at_compose": [
+     "identity",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-216c823ab32e",
+     "src-3aeb20a0dc6b",
+     "src-e445a1dc63c8",
+     "src-d90bdbd4e527",
+     "src-a095aefc6237",
+     "src-5c2c90ae9c9f",
+     "src-cf1596cc46a6",
+     "src-1e7d8e0fd8e1"
+    ],
+    "attempt": 1,
+    "language_rejected": [
+     {
+      "source_id": "src-a095aefc6237",
+      "url": "https://www.ecisolutions.com/be/",
+      "chars": 5485,
+      "marker_density": 86.91,
+      "accent_density": 0.73
+     }
+    ],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 3,
+    "executive_statement": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Aptean": {
+   "prospect_id": 66,
+   "run_id": "01M8GKNX4A79SDWVY7WRT66EZJ",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 1,
+    "dropped_language": 0,
+    "documents_at_compose": 10,
+    "usable_at_compose": 9,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-9cf2e1616f3f",
+     "src-380a117d5c51",
+     "src-08d7862e9ba9",
+     "src-33081d2d3171",
+     "src-681939760f22",
+     "src-06db361e501c",
+     "src-84644bcb7a1e",
+     "src-c87c1a630bfc",
+     "src-a0d67d0e2214",
+     "src-18a4b664ddd8"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 6
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Pegasystems": {
+   "prospect_id": 69,
+   "run_id": "01M8GKPSJ5HNXJQSXCGZR0H98M",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 1,
+    "documents_at_compose": 13,
+    "usable_at_compose": 12,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "independent",
+     "investor",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-1e127629335a",
+     "src-eff6297cb0a6",
+     "src-8640d325521b",
+     "src-3d40f71e98cd",
+     "src-eec54ca9aeed",
+     "src-8a52358e7f83",
+     "src-d4e1dfebf3a6",
+     "src-b0a69051db24",
+     "src-51c97e8f5809",
+     "src-3f23ddc5f50d",
+     "src-c4798917c9c5",
+     "src-a0c9fdf77e69",
+     "src-1f253f3b86a8"
+    ],
+    "attempt": 1,
+    "language_rejected": [
+     {
+      "source_id": "src-3f23ddc5f50d",
+      "url": "https://www.pega.com/de/platform-trial",
+      "chars": 2289,
+      "marker_density": 120.69,
+      "accent_density": 10.91
+     }
+    ],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "investor_material": 2,
+    "company_owned": 2,
+    "competitor": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Celonis": {
+   "prospect_id": 70,
+   "run_id": "01M8GKQBYMRDZ4S2ECA57H0MV7",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 13,
+    "usable_at_compose": 13,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-c598556f3c96",
+     "src-8a49541ca32b",
+     "src-90ee36edbc02",
+     "src-417908c7a187",
+     "src-c7344e057907",
+     "src-18e8a058cad0",
+     "src-5bd9cffd3140",
+     "src-d19f7e971b56",
+     "src-6b42fcfd3070",
+     "src-c5e45fa055d0",
+     "src-58824e8f5e0d",
+     "src-0f31a2131e1e",
+     "src-59e6bda1e5ab"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 4,
+    "executive_statement": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Kissflow": {
+   "prospect_id": 71,
+   "run_id": "01M8GKRE6CP4KSV6JX7ZXJQCAX",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 4,
+    "documents_at_compose": 12,
+    "usable_at_compose": 8,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-7a40b8e89de3",
+     "src-6ac067c0ff7d",
+     "src-bdb0c5e11d35",
+     "src-1a669f89d3e1",
+     "src-fc2abc25b701",
+     "src-a9f9a9d599d2",
+     "src-33e957a28372",
+     "src-b49395414b9f",
+     "src-7b08fd123543",
+     "src-28adb2ffc7b6",
+     "src-4ab540d50587",
+     "src-a902f4a0a694"
+    ],
+    "attempt": 1,
+    "language_rejected": [
+     {
+      "source_id": "src-7a40b8e89de3",
+      "url": "https://kissflow.com/es/appstore/management-of-change-moc-app",
+      "chars": 12548,
+      "marker_density": 241.44,
+      "accent_density": 16.49
+     },
+     {
+      "source_id": "src-b49395414b9f",
+      "url": "https://kissflow.com/it/platform",
+      "chars": 13326,
+      "marker_density": 122.91,
+      "accent_density": 3.83
+     },
+     {
+      "source_id": "src-28adb2ffc7b6",
+      "url": "https://kissflow.com/fr/appstore/management-of-change-moc-app",
+      "chars": 13156,
+      "marker_density": 201.26,
+      "accent_density": 25.84
+     },
+     {
+      "source_id": "src-4ab540d50587",
+      "url": "https://kissflow.com/de/partners/",
+      "chars": 2865,
+      "marker_density": 125.0,
+      "accent_density": 8.37
+     }
+    ],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 6,
+    "executive_statement": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Nintex": {
+   "prospect_id": 73,
+   "run_id": "01M8GKRRNMB9KMPB0JB7XMBPS7",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 10,
+    "usable_at_compose": 10,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-68123dcc6085",
+     "src-580ba6d5fc66",
+     "src-2763a4586278",
+     "src-57182c5cdbbb",
+     "src-50ee7f8e7ddf",
+     "src-d0caac87ffcb",
+     "src-986e81783867",
+     "src-0cc4f6c5c3ce",
+     "src-48874012058b",
+     "src-97a8289548eb"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 4,
+    "executive_statement": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "UiPath": {
+   "prospect_id": 74,
+   "run_id": "01M8GKSP0AWSH5H5Y2A2SS62KW",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 1,
+    "documents_at_compose": 14,
+    "usable_at_compose": 13,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "independent",
+     "investor",
+     "product",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-3d43e6704204",
+     "src-7016a663da03",
+     "src-57ea462328bb",
+     "src-03ae3dd76a3c",
+     "src-88ac15f69b4c",
+     "src-0f31a2131e1e",
+     "src-30660784bb69",
+     "src-52c5839db9e3",
+     "src-43d4fc845695",
+     "src-5a2f1ec82c87",
+     "src-bca3271f2ca2",
+     "src-54896564646a",
+     "src-7e3b6fee1191",
+     "src-71fd2f048aeb"
+    ],
+    "attempt": 1,
+    "language_rejected": [
+     {
+      "source_id": "src-7e3b6fee1191",
+      "url": "https://www.uipath.com/es/learning/certification",
+      "chars": 6520,
+      "marker_density": 195.05,
+      "accent_density": 13.95
+     }
+    ],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "investor_material": 2,
+    "company_owned": 5,
+    "executive_statement": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "COMPLETE",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Kantata": {
+   "prospect_id": 75,
+   "run_id": "01M8GKT4YARP6ATZVJYP0FAGVB",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 13,
+    "usable_at_compose": 13,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "independent",
+     "investor",
+     "product",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-420b309f6d9c",
+     "src-b3003a4cafdc",
+     "src-8ad6fc1497c2",
+     "src-228719e0f0c4",
+     "src-95941356d2bb",
+     "src-e7347432ebf0",
+     "src-0d4cdd076107",
+     "src-e5148e321df7",
+     "src-ba5c8f004acd",
+     "src-dd2e810a606b",
+     "src-91eacbb58043",
+     "src-c02bcc078e97",
+     "src-d01108e13b54"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 6,
+    "investor_material": 2,
+    "executive_statement": 1,
+    "independent_reporting": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "SecurityScorecard": {
+   "prospect_id": 77,
+   "run_id": "01M8GKTYK61BGPS2ZG1JJ1M41S",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 14,
+    "usable_at_compose": 14,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-5ace270729dd",
+     "src-887a8ca0398b",
+     "src-6c3f28e9708c",
+     "src-afe030705a05",
+     "src-1a78bcb18383",
+     "src-5a0c1ce84a80",
+     "src-e01cd88180e3",
+     "src-671f4f1bad3d",
+     "src-d25509e7c2d3",
+     "src-dd68373570eb",
+     "src-fe856cfadca8",
+     "src-35523618b3c8",
+     "src-8bedd08986c9",
+     "src-ed11ea30ce8b"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 3,
+    "executive_statement": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "COMPLETE",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "BitSight": {
+   "prospect_id": 78,
+   "run_id": "01M8GKV9Q1DGQ0FFBQSXVJPW4T",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "RETRYABLE_EVIDENCE_GAP",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 8,
+    "usable_at_compose": 8,
+    "families_at_compose": [
+     "independent"
+    ],
+    "source_ids": [
+     "src-a28ba5117dfb",
+     "src-b59736b72fdf",
+     "src-2a71cb3c0050",
+     "src-7a06bf7a5d29",
+     "src-a4a8e831095d",
+     "src-de1bc3a0c014",
+     "src-ae91d1616d31",
+     "src-fd7bd5157a32"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "independent_reporting": 5
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Censys": {
+   "prospect_id": 79,
+   "run_id": "01M8GKVP8QXGV5876EDWWY0MKH",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 10,
+    "usable_at_compose": 10,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "independent",
+     "investor",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-da7d93a41051",
+     "src-a0a2ff35d954",
+     "src-ffd06c962a43",
+     "src-85e5e6881589",
+     "src-2ba47c3f3701",
+     "src-4fca9008c7b2",
+     "src-dce74925db8c",
+     "src-81c12bc8bf5a",
+     "src-65cb1a60a4a7",
+     "src-5c4b986caf8d"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 5,
+    "investor_material": 1,
+    "executive_statement": 3
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Wiz": {
+   "prospect_id": 80,
+   "run_id": "01M8GKW390QEV0S8WY4TFP7X0X",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 15,
+    "usable_at_compose": 15,
+    "families_at_compose": [
+     "commercial",
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-a2c438cf27a0",
+     "src-3704db06baf3",
+     "src-c9aa7800d46d",
+     "src-1da7ce69b35d",
+     "src-f335a54fcb27",
+     "src-383a73989aba",
+     "src-d01d4c11743a",
+     "src-36a94ad74e1f",
+     "src-1be858ddda8a",
+     "src-a9d6c5e5aeb5",
+     "src-59b57f63cc6a",
+     "src-67aefa679df0",
+     "src-943ff773e22e",
+     "src-4b03312ec9cd",
+     "src-9d623a08b80f"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 5,
+    "executive_statement": 1,
+    "independent_reporting": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "COMPLETE",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Aqua Security": {
+   "prospect_id": 81,
+   "run_id": "01M8GKWH04259Y5XFZNA0H02T5",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 1,
+    "dropped_language": 0,
+    "documents_at_compose": 7,
+    "usable_at_compose": 6,
+    "families_at_compose": [
+     "identity",
+     "independent",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-790d7b87c10d",
+     "src-a96bd1b7b93a",
+     "src-4ea0b1c79c04",
+     "src-f596c78ef9bb",
+     "src-64423b783810",
+     "src-211b7b51f349",
+     "src-bdcf1ae93241"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 2,
+    "executive_statement": 3,
+    "independent_reporting": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "SentinelOne": {
+   "prospect_id": 85,
+   "run_id": "01M8GKXB341FRJ5E7CVAVNP4RN",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 13,
+    "usable_at_compose": 13,
+    "families_at_compose": [
+     "identity",
+     "independent",
+     "investor",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-839b15e71812",
+     "src-7550bd9a35c5",
+     "src-dedaf031b5ae",
+     "src-eca0854a138f",
+     "src-4c40d48c9711",
+     "src-b3ef1c8e1a48",
+     "src-89409f395d81",
+     "src-4c0ee8bbd7e8",
+     "src-bd3f01c2b085",
+     "src-e3a5033f58ed",
+     "src-aab4ec4bab31",
+     "src-56a7ba454dc4",
+     "src-f86843c64115"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "investor_material": 5,
+    "independent_reporting": 3
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Claroty": {
+   "prospect_id": 86,
+   "run_id": "01M8GKXZYNDHQHGTW4DXSRB5FA",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 1,
+    "dropped_language": 0,
+    "documents_at_compose": 14,
+    "usable_at_compose": 13,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-1f978a947750",
+     "src-4278771b5089",
+     "src-4ff98bdbabe1",
+     "src-4a07c2490fe9",
+     "src-95cbed6e048f",
+     "src-6f232606a130",
+     "src-e5ff9ef59ec4",
+     "src-d5c6308d32c3",
+     "src-8fe7661ff69e",
+     "src-a158fac01c8a",
+     "src-777353b51964",
+     "src-3979a4d44eee",
+     "src-e4c633aaa86d",
+     "src-55aa4db288a0"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 10,
+    "executive_statement": 1,
+    "independent_reporting": 2
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Forescout": {
+   "prospect_id": 87,
+   "run_id": "01M8GKZECSY9EWNJ51YDN293K0",
+   "final_class": "DEFENSIBLE_ABSTENTION",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 11,
+    "usable_at_compose": 11,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-2e37b7f100e9",
+     "src-73fe052cfd92",
+     "src-5277058b52df",
+     "src-362fe6e4da05",
+     "src-fa4b910f5865",
+     "src-aa9e6164d6c7",
+     "src-d6baf9dd8d4a",
+     "src-9176c9426a1e",
+     "src-0656a323afac",
+     "src-a6ed1942f2f9",
+     "src-0dfaea3d4f5e"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 5
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Corelight": {
+   "prospect_id": 88,
+   "run_id": "01M8GKZXWNWHMXM1D0SK7AM2MG",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 11,
+    "usable_at_compose": 11,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-2084f9021a29",
+     "src-e824bea5ac9c",
+     "src-ff295b8ad024",
+     "src-e32e2b7163b8",
+     "src-debdfdeb9f22",
+     "src-28b2a3e8feff",
+     "src-357ced121207",
+     "src-5b32989d1153",
+     "src-e5d1c9503103",
+     "src-ef78a749516d",
+     "src-76f735275679"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 7,
+    "independent_reporting": 2
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "SHI International": {
+   "prospect_id": 91,
+   "run_id": "01M8GM0HACHDFZYM4AZE2D13B4",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": false,
+   "readiness_state": "RETRYABLE_EVIDENCE_GAP",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 2,
+    "usable_at_compose": 2,
+    "families_at_compose": [
+     "independent"
+    ],
+    "source_ids": [
+     "src-6203fc39d06b",
+     "src-bb82f52cb6bf"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": false,
+   "deep_status": null,
+   "observation_classes": {},
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": false,
+    "slides_ready": false
+   }
+  },
+  "Concentric AI": {
+   "prospect_id": 93,
+   "run_id": "01M8GM11RR8S93D0QM61ZQ1BKG",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 1,
+    "dropped_language": 0,
+    "documents_at_compose": 7,
+    "usable_at_compose": 6,
+    "families_at_compose": [
+     "identity",
+     "independent",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-ecde82796a5b",
+     "src-5d157fb1c4eb",
+     "src-be396efcca4e",
+     "src-c521ca413b13",
+     "src-7f5366618b8a",
+     "src-44f31fd4ef38",
+     "src-bc30ed1f6fe0"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 2,
+    "independent_reporting": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Improving": {
+   "prospect_id": 94,
+   "run_id": "01M8GM1EAK708M2VSBDQQB8CTW",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 2,
+    "documents_at_compose": 12,
+    "usable_at_compose": 10,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "product",
+     "talent"
+    ],
+    "source_ids": [
+     "src-1473c5757887",
+     "src-8efd33a66853",
+     "src-6b30fb0618e6",
+     "src-12aa74c48755",
+     "src-adef5bedf31a",
+     "src-dfd7b7c15581",
+     "src-fe98f0b7fc59",
+     "src-4fe09f75e60d",
+     "src-391de35c3864",
+     "src-baa648e78e69",
+     "src-2f9cea289706",
+     "src-f9346300895a"
+    ],
+    "attempt": 1,
+    "language_rejected": [
+     {
+      "source_id": "src-12aa74c48755",
+      "url": "https://www.improving.com/es-mx/media-kit/",
+      "chars": 733,
+      "marker_density": 247.71,
+      "accent_density": 10.88
+     },
+     {
+      "source_id": "src-391de35c3864",
+      "url": "https://www.improving.com/es-mx/services/training/",
+      "chars": 5702,
+      "marker_density": 31.85,
+      "accent_density": 3.33
+     }
+    ],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 5
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Launch Consulting": {
+   "prospect_id": 95,
+   "run_id": "01M8GM20TCQJHNGN78H8VNV3TB",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 1,
+    "dropped_language": 0,
+    "documents_at_compose": 8,
+    "usable_at_compose": 7,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-7bf8bb725f28",
+     "src-f85daf61509e",
+     "src-45f3b42d2885",
+     "src-8b97c10ee5fa",
+     "src-07521929bbe7",
+     "src-45362f2f9a34",
+     "src-81d529f32668",
+     "src-e98d30b57c60"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 4
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Sparq": {
+   "prospect_id": 96,
+   "run_id": "01M8GM2V9ZG16D9XYC7VG4CBKJ",
+   "final_class": "DECISION_GRADE_READING",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 2,
+    "dropped_language": 0,
+    "documents_at_compose": 13,
+    "usable_at_compose": 11,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-d48cf937163a",
+     "src-d977e07386ed",
+     "src-51057bfe7235",
+     "src-b40f44bad729",
+     "src-8d664eade97a",
+     "src-276d13112336",
+     "src-74244957e8cf",
+     "src-9cf6b0e855f4",
+     "src-a00c2ab044cf",
+     "src-6c6655dfbf39",
+     "src-eddb78d637e7",
+     "src-8fbe7e15fc89",
+     "src-6d7d3eab5a4d"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 5,
+    "executive_statement": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "Bounteous": {
+   "prospect_id": 97,
+   "run_id": "01M8GM36X2595K72YEB8BD6ENN",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 13,
+    "usable_at_compose": 13,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "independent",
+     "product",
+     "strategy",
+     "talent"
+    ],
+    "source_ids": [
+     "src-78408c0c28ef",
+     "src-fb42e4ee9632",
+     "src-4448f8a919c2",
+     "src-6a303a618d51",
+     "src-29812e0b0302",
+     "src-ba12d655e99a",
+     "src-46deb079f02f",
+     "src-6b5400da301e",
+     "src-088183863723",
+     "src-6bf6a86e6d13",
+     "src-1f9a5b83618e",
+     "src-6bb4d1a676ac",
+     "src-0ea1c771976f"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 5,
+    "executive_statement": 1
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  },
+  "SoftServe": {
+   "prospect_id": 98,
+   "run_id": "01M8GM3TE5BANNSSDN6FV8SRSQ",
+   "final_class": "INSUFFICIENT_EVIDENCE_HANDLED_CORRECTLY",
+   "may_synthesize": true,
+   "readiness_state": "READY_FOR_FULL_REPORT",
+   "readiness_reason": null,
+   "readiness_inputs": {
+    "dropped_not_ok": 0,
+    "dropped_empty": 0,
+    "dropped_duplicate": 0,
+    "dropped_language": 0,
+    "documents_at_compose": 11,
+    "usable_at_compose": 11,
+    "families_at_compose": [
+     "customers",
+     "identity",
+     "product",
+     "strategy"
+    ],
+    "source_ids": [
+     "src-e712a9801526",
+     "src-935f94d08c27",
+     "src-c80f12b82d19",
+     "src-da615c75633a",
+     "src-9c521d2bf667",
+     "src-f2d103dccd53",
+     "src-88cb468a0d44",
+     "src-88d927658eb4",
+     "src-58d65f96af51",
+     "src-5bb9423c742d",
+     "src-10171ff03300"
+    ],
+    "attempt": 1,
+    "language_rejected": [],
+    "dropped_unexplained": 0
+   },
+   "has_report": true,
+   "deep_status": "PENDING",
+   "observation_classes": {
+    "company_owned": 4
+   },
+   "decision_readiness": null,
+   "availability": {
+    "state": "PARTIAL",
+    "has_report": true,
+    "slides_ready": true
+   }
+  }
+ }
+}

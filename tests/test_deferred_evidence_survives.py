@@ -340,3 +340,22 @@ def test_a_read_caches_its_recompose_and_never_stores_none():
     app._results["r2"] = good
     assert app._real_result("r2") is good
     assert app._results["r2"] is good
+
+
+def test_a_recomposed_answer_republishes_its_dossier():
+    """MEASURED 2026-11-28 (prospect-98 w2, ClickHouse): the dossier was written
+    once from the CORE's four documents; seven more were recomposed into the
+    answer 0.8 s later, and the evidence page, X-Ray and independence count
+    still read "1 of 4 sources". The worker must republish after a recompose,
+    and only then (an unchanged core needs no second version)."""
+    import inspect
+
+    from intent_engine.webapp.app import WebApp
+
+    raw = inspect.getsource(WebApp._run_analysis)
+    source = "\n".join(line for line in raw.split("\n")
+                       if not line.strip().startswith("#"))
+    acquire = source.index("_acquire_deferred")
+    republish = source.index("self._publish_demo_dossier(run_id, core)", acquire)
+    assert "recomposed = widened is not core" in source[acquire:republish]
+    assert "if recomposed:" in source[acquire:republish]

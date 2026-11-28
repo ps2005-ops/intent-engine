@@ -1,0 +1,3346 @@
+{
+ "summary": {
+  "companies": 98,
+  "pass": 0,
+  "partial": [],
+  "fail": [
+   "Alteryx",
+   "Domo",
+   "StarTree",
+   "ClickHouse",
+   "Firebolt",
+   "MotherDuck",
+   "Astronomer",
+   "FalkorDB",
+   "Pinecone",
+   "Weaviate",
+   "Zilliz",
+   "Glean",
+   "Writer",
+   "C3 AI",
+   "Domino Data Lab",
+   "Fiddler AI",
+   "Arthur AI",
+   "Tonic.ai",
+   "Unstructured",
+   "LandingAI",
+   "Snorkel AI",
+   "Labelbox",
+   "Hyperscience",
+   "Alkymi",
+   "Ocrolus",
+   "Amplitude",
+   "Pendo",
+   "Fullstory",
+   "Coupa",
+   "JAGGAER",
+   "GEP",
+   "Ivalua",
+   "Manhattan Associates",
+   "ToolsGroup",
+   "Netstock",
+   "SourceDay",
+   "LevaData",
+   "Arkestro",
+   "Fairmarkit",
+   "Zip",
+   "Order.co",
+   "Avetta",
+   "RapidRatings",
+   "Fusion Risk Management",
+   "Riskonnect",
+   "MetricStream",
+   "NAVEX",
+   "Safe Security",
+   "KPA",
+   "RANE",
+   "Eurasia Group",
+   "Oxford Economics",
+   "Gartner",
+   "Forrester",
+   "CB Insights",
+   "OneStream",
+   "insightsoftware",
+   "Prophix",
+   "Runway Financial",
+   "Drivetrain",
+   "Abacum",
+   "Maxio",
+   "Chargebee",
+   "Deltek",
+   "ECI Software Solutions",
+   "Aptean",
+   "SYSPRO",
+   "Appian",
+   "Pegasystems",
+   "Celonis",
+   "Kissflow",
+   "Tonkean",
+   "Nintex",
+   "UiPath",
+   "Kantata",
+   "HighRadius",
+   "SecurityScorecard",
+   "BitSight",
+   "Censys",
+   "Wiz",
+   "Aqua Security",
+   "Sysdig",
+   "Tenable",
+   "Rapid7",
+   "SentinelOne",
+   "Claroty",
+   "Forescout",
+   "Corelight",
+   "Critical Start",
+   "ePlus",
+   "SHI International",
+   "Insight Enterprises",
+   "Concentric AI",
+   "Improving",
+   "Launch Consulting",
+   "Sparq",
+   "Bounteous",
+   "SoftServe"
+  ],
+  "shared_prefix": [],
+  "p50_ms": 3.01,
+  "p95_ms": 5.11
+ },
+ "rows": [
+  {
+   "prospect_id": 1,
+   "entity_id": "<unregistered>",
+   "typed": "Alteryx",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Alt",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Altimmune, Inc.",
+     "top_ticker": "ALT"
+    },
+    {
+     "typed": "alteryx",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "ALTERYX",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Alteryx",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 2,
+   "entity_id": "<unregistered>",
+   "typed": "Domo",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Dom",
+     "verdict": "WRONG_FIRST",
+     "top": "Dominari Holdings Inc.",
+     "top_ticker": "DOMH"
+    },
+    {
+     "typed": "domo",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "DOMO",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Domo",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 3,
+   "entity_id": "<unregistered>",
+   "typed": "StarTree",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Star",
+     "verdict": "WRONG_FIRST",
+     "top": "Star Holdings",
+     "top_ticker": "STHO"
+    },
+    {
+     "typed": "startree",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "STARTREE",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "StarTree",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 4,
+   "entity_id": "<unregistered>",
+   "typed": "ClickHouse",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Click",
+     "verdict": "WRONG_FIRST",
+     "top": "Click Holdings Ltd.",
+     "top_ticker": "CLIK"
+    },
+    {
+     "typed": "clickhouse",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "CLICKHOUSE",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "ClickHouse",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 5,
+   "entity_id": "<unregistered>",
+   "typed": "Firebolt",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Fire",
+     "verdict": "WRONG_FIRST",
+     "top": "FireFly Robotics, Inc.",
+     "top_ticker": "FFLY"
+    },
+    {
+     "typed": "firebolt",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "FIREBOLT",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Firebolt",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 6,
+   "entity_id": "<unregistered>",
+   "typed": "MotherDuck",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "Mothe",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "motherduck",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "MOTHERDUCK",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "MotherDuck",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 7,
+   "entity_id": "<unregistered>",
+   "typed": "Astronomer",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Astro",
+     "verdict": "WRONG_FIRST",
+     "top": "Astronics Corp",
+     "top_ticker": "ATRO"
+    },
+    {
+     "typed": "astronomer",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "ASTRONOMER",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Astronomer",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 8,
+   "entity_id": "<unregistered>",
+   "typed": "FalkorDB",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Falk",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "falkordb",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "FALKORDB",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "FalkorDB",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 9,
+   "entity_id": "<unregistered>",
+   "typed": "Pinecone",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Pine",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Alpine Income Property Trust, Inc.",
+     "top_ticker": "PINE"
+    },
+    {
+     "typed": "pinecone",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "PINECONE",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Pinecone",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 10,
+   "entity_id": "<unregistered>",
+   "typed": "Weaviate",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Weav",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "weaviate",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "WEAVIATE",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Weaviate",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 11,
+   "entity_id": "<unregistered>",
+   "typed": "Zilliz",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Zil",
+     "verdict": "WRONG_FIRST",
+     "top": "Zillow Group, Inc.",
+     "top_ticker": "ZG"
+    },
+    {
+     "typed": "zilliz",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "ZILLIZ",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Zilliz",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 12,
+   "entity_id": "<unregistered>",
+   "typed": "Glean",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Gle",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Global Engine Group Holding Ltd",
+     "top_ticker": "GLE"
+    },
+    {
+     "typed": "glean",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "GLEAN",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Glean",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 13,
+   "entity_id": "<unregistered>",
+   "typed": "Writer",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Wri",
+     "verdict": "WRONG_FIRST",
+     "top": "Wright Investors Service Holdings, Inc.",
+     "top_ticker": "IWSH"
+    },
+    {
+     "typed": "writer",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "WRITER",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Writer",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 14,
+   "entity_id": "<unregistered>",
+   "typed": "C3 AI",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "C3 ",
+     "verdict": "WRONG_FIRST",
+     "top": "C3is Inc.",
+     "top_ticker": "CISS"
+    },
+    {
+     "typed": "c3 ai",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "C3 AI",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "C3 AI",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 15,
+   "entity_id": "<unregistered>",
+   "typed": "Domino Data Lab",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Domino ",
+     "verdict": "WRONG_FIRST",
+     "top": "Dominos Pizza Inc",
+     "top_ticker": "DPZ"
+    },
+    {
+     "typed": "domino data lab",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "DOMINO DATA LAB",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Domino Data Lab",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 16,
+   "entity_id": "<unregistered>",
+   "typed": "Fiddler AI",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Fiddl",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "fiddler ai",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "FIDDLER AI",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Fiddler AI",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 17,
+   "entity_id": "<unregistered>",
+   "typed": "Arthur AI",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Arth",
+     "verdict": "WRONG_FIRST",
+     "top": "Arthur J. Gallagher & Co.",
+     "top_ticker": "AJG"
+    },
+    {
+     "typed": "arthur ai",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "ARTHUR AI",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Arthur AI",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 18,
+   "entity_id": "<unregistered>",
+   "typed": "Tonic.ai",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Toni",
+     "verdict": "WRONG_FIRST",
+     "top": "Tonix Pharmaceuticals Holding Corp.",
+     "top_ticker": "TNXP"
+    },
+    {
+     "typed": "tonic.ai",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "TONIC.AI",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Tonic.ai",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 19,
+   "entity_id": "<unregistered>",
+   "typed": "Unstructured",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Unstru",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "unstructured",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "UNSTRUCTURED",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Unstructured",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 20,
+   "entity_id": "<unregistered>",
+   "typed": "LandingAI",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Land",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "GLADSTONE LAND Corp",
+     "top_ticker": "LAND"
+    },
+    {
+     "typed": "landingai",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "LANDINGAI",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "LandingAI",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 21,
+   "entity_id": "<unregistered>",
+   "typed": "Snorkel AI",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Snork",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "snorkel ai",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "SNORKEL AI",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Snorkel AI",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 22,
+   "entity_id": "<unregistered>",
+   "typed": "Labelbox",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Labe",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "labelbox",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "LABELBOX",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Labelbox",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 23,
+   "entity_id": "<unregistered>",
+   "typed": "Hyperscience",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Hypers",
+     "verdict": "WRONG_FIRST",
+     "top": "Hyperscale Data, Inc.",
+     "top_ticker": "GPUS"
+    },
+    {
+     "typed": "hyperscience",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "HYPERSCIENCE",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Hyperscience",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 24,
+   "entity_id": "<unregistered>",
+   "typed": "Alkymi",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "Alk",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Alaska Air Group, Inc.",
+     "top_ticker": "ALK"
+    },
+    {
+     "typed": "alkymi",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "ALKYMI",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Alkymi",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 25,
+   "entity_id": "<unregistered>",
+   "typed": "Ocrolus",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "Ocr",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "ocrolus",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "OCROLUS",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Ocrolus",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 26,
+   "entity_id": "<unregistered>",
+   "typed": "Amplitude",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Ampl",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Amplitude, Inc.",
+     "top_ticker": "AMPL"
+    },
+    {
+     "typed": "amplitude",
+     "verdict": "WRONG_FIRST",
+     "top": "Amplitude, Inc.",
+     "top_ticker": "AMPL"
+    },
+    {
+     "typed": "AMPLITUDE",
+     "verdict": "WRONG_FIRST",
+     "top": "Amplitude, Inc.",
+     "top_ticker": "AMPL"
+    },
+    {
+     "typed": "Amplitude",
+     "verdict": "WRONG_FIRST",
+     "top": "Amplitude, Inc.",
+     "top_ticker": "AMPL"
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 27,
+   "entity_id": "<unregistered>",
+   "typed": "Pendo",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Pen",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Penumbra Inc",
+     "top_ticker": "PEN"
+    },
+    {
+     "typed": "pendo",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "PENDO",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Pendo",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 28,
+   "entity_id": "<unregistered>",
+   "typed": "Fullstory",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Full",
+     "verdict": "WRONG_FIRST",
+     "top": "FullPAC, Inc.",
+     "top_ticker": "GOTV"
+    },
+    {
+     "typed": "fullstory",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "FULLSTORY",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Fullstory",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 29,
+   "entity_id": "<unregistered>",
+   "typed": "Coupa",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Cou",
+     "verdict": "WRONG_FIRST",
+     "top": "Coupang, Inc.",
+     "top_ticker": "CPNG"
+    },
+    {
+     "typed": "coupa",
+     "verdict": "WRONG_FIRST",
+     "top": "Coupang, Inc.",
+     "top_ticker": "CPNG"
+    },
+    {
+     "typed": "COUPA",
+     "verdict": "WRONG_FIRST",
+     "top": "Coupang, Inc.",
+     "top_ticker": "CPNG"
+    },
+    {
+     "typed": "Coupa",
+     "verdict": "WRONG_FIRST",
+     "top": "Coupang, Inc.",
+     "top_ticker": "CPNG"
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 30,
+   "entity_id": "<unregistered>",
+   "typed": "JAGGAER",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "JAG",
+     "verdict": "WRONG_FIRST",
+     "top": "Jaguar Health, Inc.",
+     "top_ticker": "JAGX"
+    },
+    {
+     "typed": "jaggaer",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "JAGGAER",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "JAGGAER",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 31,
+   "entity_id": "<unregistered>",
+   "typed": "GEP",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "GEP",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "gep",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "GEP",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "GEP",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 32,
+   "entity_id": "<unregistered>",
+   "typed": "Ivalua",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Iva",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Inventiva S.A.",
+     "top_ticker": "IVA"
+    },
+    {
+     "typed": "ivalua",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "IVALUA",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Ivalua",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 33,
+   "entity_id": "<unregistered>",
+   "typed": "Manhattan Associates",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Manhattan ",
+     "verdict": "WRONG_FIRST",
+     "top": "Manhattan Associates Inc",
+     "top_ticker": "MANH"
+    },
+    {
+     "typed": "manhattan associates",
+     "verdict": "WRONG_FIRST",
+     "top": "Manhattan Associates Inc",
+     "top_ticker": "MANH"
+    },
+    {
+     "typed": "MANHATTAN ASSOCIATES",
+     "verdict": "WRONG_FIRST",
+     "top": "Manhattan Associates Inc",
+     "top_ticker": "MANH"
+    },
+    {
+     "typed": "Manhattan Associates",
+     "verdict": "WRONG_FIRST",
+     "top": "Manhattan Associates Inc",
+     "top_ticker": "MANH"
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 34,
+   "entity_id": "<unregistered>",
+   "typed": "ToolsGroup",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Tools",
+     "verdict": "WRONG_FIRST",
+     "top": "Drilling Tools International Corp",
+     "top_ticker": "DTI"
+    },
+    {
+     "typed": "toolsgroup",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "TOOLSGROUP",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "ToolsGroup",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 35,
+   "entity_id": "<unregistered>",
+   "typed": "Netstock",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Nets",
+     "verdict": "WRONG_FIRST",
+     "top": "Netskope, Inc.",
+     "top_ticker": "NTSK"
+    },
+    {
+     "typed": "netstock",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "NETSTOCK",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Netstock",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 36,
+   "entity_id": "<unregistered>",
+   "typed": "SourceDay",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Sour",
+     "verdict": "WRONG_FIRST",
+     "top": "Source Capital",
+     "top_ticker": "SOR"
+    },
+    {
+     "typed": "sourceday",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "SOURCEDAY",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "SourceDay",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 37,
+   "entity_id": "<unregistered>",
+   "typed": "LevaData",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Leva",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "levadata",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "LEVADATA",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "LevaData",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 38,
+   "entity_id": "<unregistered>",
+   "typed": "Arkestro",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Arke",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "arkestro",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "ARKESTRO",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Arkestro",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 39,
+   "entity_id": "<unregistered>",
+   "typed": "Fairmarkit",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Fairm",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "fairmarkit",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "FAIRMARKIT",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Fairmarkit",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 40,
+   "entity_id": "<unregistered>",
+   "typed": "Zip",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Zip",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Ziprecruiter, Inc.",
+     "top_ticker": "ZIP"
+    },
+    {
+     "typed": "zip",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Ziprecruiter, Inc.",
+     "top_ticker": "ZIP"
+    },
+    {
+     "typed": "ZIP",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Ziprecruiter, Inc.",
+     "top_ticker": "ZIP"
+    },
+    {
+     "typed": "Zip",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Ziprecruiter, Inc.",
+     "top_ticker": "ZIP"
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 41,
+   "entity_id": "<unregistered>",
+   "typed": "Order.co",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "Orde",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "order.co",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "ORDER.CO",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Order.co",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 42,
+   "entity_id": "<unregistered>",
+   "typed": "Avetta",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Ave",
+     "verdict": "WRONG_FIRST",
+     "top": "AvePoint, Inc.",
+     "top_ticker": "AVPT"
+    },
+    {
+     "typed": "avetta",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "AVETTA",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Avetta",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 43,
+   "entity_id": "<unregistered>",
+   "typed": "RapidRatings",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "RapidR",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "rapidratings",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "RAPIDRATINGS",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "RapidRatings",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 44,
+   "entity_id": "<unregistered>",
+   "typed": "Fusion Risk Management",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Fusion Risk",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "fusion risk management",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "FUSION RISK MANAGEMENT",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Fusion Risk Management",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 45,
+   "entity_id": "<unregistered>",
+   "typed": "Riskonnect",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Risko",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "riskonnect",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "RISKONNECT",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Riskonnect",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 46,
+   "entity_id": "<unregistered>",
+   "typed": "MetricStream",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "Metric",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "metricstream",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "METRICSTREAM",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "MetricStream",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 47,
+   "entity_id": "<unregistered>",
+   "typed": "NAVEX",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "NAV",
+     "verdict": "WRONG_FIRST",
+     "top": "Navan, Inc.",
+     "top_ticker": "NAVN"
+    },
+    {
+     "typed": "navex",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "NAVEX",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "NAVEX",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 48,
+   "entity_id": "<unregistered>",
+   "typed": "Safe Security",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Safe S",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "safe security",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "SAFE SECURITY",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Safe Security",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 49,
+   "entity_id": "<unregistered>",
+   "typed": "KPA",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "KPA",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "kpa",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "KPA",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "KPA",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 50,
+   "entity_id": "<unregistered>",
+   "typed": "RANE",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "RAN",
+     "verdict": "WRONG_FIRST",
+     "top": "Ranpak Holdings Corp.",
+     "top_ticker": "PACK"
+    },
+    {
+     "typed": "rane",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "RANE",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "RANE",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 51,
+   "entity_id": "<unregistered>",
+   "typed": "Eurasia Group",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Eurasi",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "eurasia group",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "EURASIA GROUP",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Eurasia Group",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 52,
+   "entity_id": "<unregistered>",
+   "typed": "Oxford Economics",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Oxford E",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "oxford economics",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "OXFORD ECONOMICS",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Oxford Economics",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 53,
+   "entity_id": "<unregistered>",
+   "typed": "Gartner",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Gar",
+     "verdict": "WRONG_FIRST",
+     "top": "Garmin Ltd",
+     "top_ticker": "GRMN"
+    },
+    {
+     "typed": "gartner",
+     "verdict": "WRONG_FIRST",
+     "top": "Gartner Inc",
+     "top_ticker": "IT"
+    },
+    {
+     "typed": "GARTNER",
+     "verdict": "WRONG_FIRST",
+     "top": "Gartner Inc",
+     "top_ticker": "IT"
+    },
+    {
+     "typed": "Gartner",
+     "verdict": "WRONG_FIRST",
+     "top": "Gartner Inc",
+     "top_ticker": "IT"
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 54,
+   "entity_id": "<unregistered>",
+   "typed": "Forrester",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "Forr",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Forrester Research, Inc.",
+     "top_ticker": "FORR"
+    },
+    {
+     "typed": "forrester",
+     "verdict": "WRONG_FIRST",
+     "top": "Forrester Research, Inc.",
+     "top_ticker": "FORR"
+    },
+    {
+     "typed": "FORRESTER",
+     "verdict": "WRONG_FIRST",
+     "top": "Forrester Research, Inc.",
+     "top_ticker": "FORR"
+    },
+    {
+     "typed": "Forrester",
+     "verdict": "WRONG_FIRST",
+     "top": "Forrester Research, Inc.",
+     "top_ticker": "FORR"
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 55,
+   "entity_id": "<unregistered>",
+   "typed": "CB Insights",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "CB In",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "cb insights",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "CB INSIGHTS",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "CB Insights",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 56,
+   "entity_id": "<unregistered>",
+   "typed": "OneStream",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "OneS",
+     "verdict": "WRONG_FIRST",
+     "top": "OneSpan Inc.",
+     "top_ticker": "OSPN"
+    },
+    {
+     "typed": "onestream",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "ONESTREAM",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "OneStream",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 57,
+   "entity_id": "<unregistered>",
+   "typed": "insightsoftware",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "insight",
+     "verdict": "WRONG_FIRST",
+     "top": "Insight Enterprises Inc",
+     "top_ticker": "NSIT"
+    },
+    {
+     "typed": "insightsoftware",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "INSIGHTSOFTWARE",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "insightsoftware",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 58,
+   "entity_id": "<unregistered>",
+   "typed": "Prophix",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Pro",
+     "verdict": "WRONG_FIRST",
+     "top": "Procore Technologies, Inc.",
+     "top_ticker": "PCOR"
+    },
+    {
+     "typed": "prophix",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "PROPHIX",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Prophix",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 59,
+   "entity_id": "<unregistered>",
+   "typed": "Runway Financial",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "Runway F",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "runway financial",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "RUNWAY FINANCIAL",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Runway Financial",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 60,
+   "entity_id": "<unregistered>",
+   "typed": "Drivetrain",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Drive",
+     "verdict": "WRONG_FIRST",
+     "top": "Driveitaway Holdings, Inc.",
+     "top_ticker": "DWAY"
+    },
+    {
+     "typed": "drivetrain",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "DRIVETRAIN",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Drivetrain",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 61,
+   "entity_id": "<unregistered>",
+   "typed": "Abacum",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Aba",
+     "verdict": "WRONG_FIRST",
+     "top": "Abaxx Technologies Inc.",
+     "top_ticker": "ABXXF"
+    },
+    {
+     "typed": "abacum",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "ABACUM",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Abacum",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 62,
+   "entity_id": "<unregistered>",
+   "typed": "Maxio",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Max",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "MediaAlpha, Inc.",
+     "top_ticker": "MAX"
+    },
+    {
+     "typed": "maxio",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "MAXIO",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Maxio",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 63,
+   "entity_id": "<unregistered>",
+   "typed": "Chargebee",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Char",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Charlton Aria Acquisition Corp",
+     "top_ticker": "CHAR"
+    },
+    {
+     "typed": "chargebee",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "CHARGEBEE",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Chargebee",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 64,
+   "entity_id": "<unregistered>",
+   "typed": "Deltek",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Del",
+     "verdict": "WRONG_FIRST",
+     "top": "Deluxe Corp",
+     "top_ticker": "DLX"
+    },
+    {
+     "typed": "deltek",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "DELTEK",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Deltek",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 65,
+   "entity_id": "<unregistered>",
+   "typed": "ECI Software Solutions",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "ECI Softwar",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "eci software solutions",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "ECI SOFTWARE SOLUTIONS",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "ECI Software Solutions",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 66,
+   "entity_id": "<unregistered>",
+   "typed": "Aptean",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Apt",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Alpha Pro Tech Ltd",
+     "top_ticker": "APT"
+    },
+    {
+     "typed": "aptean",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "APTEAN",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Aptean",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 67,
+   "entity_id": "<unregistered>",
+   "typed": "SYSPRO",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "SYS",
+     "verdict": "WRONG_FIRST",
+     "top": "Sysco Corp",
+     "top_ticker": "SYY"
+    },
+    {
+     "typed": "syspro",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "SYSPRO",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "SYSPRO",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 68,
+   "entity_id": "<unregistered>",
+   "typed": "Appian",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "App",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "AppLovin Corp",
+     "top_ticker": "APP"
+    },
+    {
+     "typed": "appian",
+     "verdict": "WRONG_FIRST",
+     "top": "Appian Corp",
+     "top_ticker": "APPN"
+    },
+    {
+     "typed": "APPIAN",
+     "verdict": "WRONG_FIRST",
+     "top": "Appian Corp",
+     "top_ticker": "APPN"
+    },
+    {
+     "typed": "Appian",
+     "verdict": "WRONG_FIRST",
+     "top": "Appian Corp",
+     "top_ticker": "APPN"
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 69,
+   "entity_id": "<unregistered>",
+   "typed": "Pegasystems",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Pegas",
+     "verdict": "WRONG_FIRST",
+     "top": "Pegasystems Inc",
+     "top_ticker": "PEGA"
+    },
+    {
+     "typed": "pegasystems",
+     "verdict": "WRONG_FIRST",
+     "top": "Pegasystems Inc",
+     "top_ticker": "PEGA"
+    },
+    {
+     "typed": "PEGASYSTEMS",
+     "verdict": "WRONG_FIRST",
+     "top": "Pegasystems Inc",
+     "top_ticker": "PEGA"
+    },
+    {
+     "typed": "Pegasystems",
+     "verdict": "WRONG_FIRST",
+     "top": "Pegasystems Inc",
+     "top_ticker": "PEGA"
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 70,
+   "entity_id": "<unregistered>",
+   "typed": "Celonis",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Cel",
+     "verdict": "WRONG_FIRST",
+     "top": "Celigo, Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "celonis",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "CELONIS",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Celonis",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 71,
+   "entity_id": "<unregistered>",
+   "typed": "Kissflow",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Kiss",
+     "verdict": "WRONG_FIRST",
+     "top": "Kisses From Italy Inc.",
+     "top_ticker": "KITL"
+    },
+    {
+     "typed": "kissflow",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "KISSFLOW",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Kissflow",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 72,
+   "entity_id": "<unregistered>",
+   "typed": "Tonkean",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Ton",
+     "verdict": "WRONG_FIRST",
+     "top": "TON Strategy Co",
+     "top_ticker": "TONX"
+    },
+    {
+     "typed": "tonkean",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "TONKEAN",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Tonkean",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 73,
+   "entity_id": "<unregistered>",
+   "typed": "Nintex",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Nin",
+     "verdict": "WRONG_FIRST",
+     "top": "NinjaOne, LLC",
+     "top_ticker": ""
+    },
+    {
+     "typed": "nintex",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "NINTEX",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Nintex",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 74,
+   "entity_id": "<unregistered>",
+   "typed": "UiPath",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "UiP",
+     "verdict": "WRONG_FIRST",
+     "top": "UiPath, Inc.",
+     "top_ticker": "PATH"
+    },
+    {
+     "typed": "uipath",
+     "verdict": "WRONG_FIRST",
+     "top": "UiPath, Inc.",
+     "top_ticker": "PATH"
+    },
+    {
+     "typed": "UIPATH",
+     "verdict": "WRONG_FIRST",
+     "top": "UiPath, Inc.",
+     "top_ticker": "PATH"
+    },
+    {
+     "typed": "UiPath",
+     "verdict": "WRONG_FIRST",
+     "top": "UiPath, Inc.",
+     "top_ticker": "PATH"
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 75,
+   "entity_id": "<unregistered>",
+   "typed": "Kantata",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Kan",
+     "verdict": "WRONG_FIRST",
+     "top": "Kanzhun Ltd",
+     "top_ticker": "BZ"
+    },
+    {
+     "typed": "kantata",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "KANTATA",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Kantata",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 76,
+   "entity_id": "<unregistered>",
+   "typed": "HighRadius",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "HighR",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "highradius",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "HIGHRADIUS",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "HighRadius",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 77,
+   "entity_id": "<unregistered>",
+   "typed": "SecurityScorecard",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Security",
+     "verdict": "WRONG_FIRST",
+     "top": "Security Federal Corp",
+     "top_ticker": "SFDL"
+    },
+    {
+     "typed": "securityscorecard",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "SECURITYSCORECARD",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "SecurityScorecard",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 78,
+   "entity_id": "<unregistered>",
+   "typed": "BitSight",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "BitS",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "bitsight",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "BITSIGHT",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "BitSight",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 79,
+   "entity_id": "<unregistered>",
+   "typed": "Censys",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Cen",
+     "verdict": "WRONG_FIRST",
+     "top": "Centage",
+     "top_ticker": ""
+    },
+    {
+     "typed": "censys",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "CENSYS",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Censys",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 80,
+   "entity_id": "<unregistered>",
+   "typed": "Wiz",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Wiz",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "wiz",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "WIZ",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Wiz",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 81,
+   "entity_id": "<unregistered>",
+   "typed": "Aqua Security",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Aqua S",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "aqua security",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "AQUA SECURITY",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Aqua Security",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 82,
+   "entity_id": "<unregistered>",
+   "typed": "Sysdig",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Sys",
+     "verdict": "WRONG_FIRST",
+     "top": "Sysco Corp",
+     "top_ticker": "SYY"
+    },
+    {
+     "typed": "sysdig",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "SYSDIG",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Sysdig",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 83,
+   "entity_id": "<unregistered>",
+   "typed": "Tenable",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "Ten",
+     "verdict": "WRONG_FIRST",
+     "top": "TEN Holdings, Inc.",
+     "top_ticker": "XHLD"
+    },
+    {
+     "typed": "tenable",
+     "verdict": "WRONG_FIRST",
+     "top": "Tenable Holdings, Inc.",
+     "top_ticker": "TENB"
+    },
+    {
+     "typed": "TENABLE",
+     "verdict": "WRONG_FIRST",
+     "top": "Tenable Holdings, Inc.",
+     "top_ticker": "TENB"
+    },
+    {
+     "typed": "Tenable",
+     "verdict": "WRONG_FIRST",
+     "top": "Tenable Holdings, Inc.",
+     "top_ticker": "TENB"
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 84,
+   "entity_id": "<unregistered>",
+   "typed": "Rapid7",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Rap",
+     "verdict": "WRONG_FIRST",
+     "top": "Rapid7, Inc.",
+     "top_ticker": "RPD"
+    },
+    {
+     "typed": "rapid7",
+     "verdict": "WRONG_FIRST",
+     "top": "Rapid7, Inc.",
+     "top_ticker": "RPD"
+    },
+    {
+     "typed": "RAPID7",
+     "verdict": "WRONG_FIRST",
+     "top": "Rapid7, Inc.",
+     "top_ticker": "RPD"
+    },
+    {
+     "typed": "Rapid7",
+     "verdict": "WRONG_FIRST",
+     "top": "Rapid7, Inc.",
+     "top_ticker": "RPD"
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 85,
+   "entity_id": "<unregistered>",
+   "typed": "SentinelOne",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Senti",
+     "verdict": "WRONG_FIRST",
+     "top": "Sentinel Holdings Ltd.",
+     "top_ticker": "SNTL"
+    },
+    {
+     "typed": "sentinelone",
+     "verdict": "WRONG_FIRST",
+     "top": "SentinelOne, Inc.",
+     "top_ticker": "S"
+    },
+    {
+     "typed": "SENTINELONE",
+     "verdict": "WRONG_FIRST",
+     "top": "SentinelOne, Inc.",
+     "top_ticker": "S"
+    },
+    {
+     "typed": "SentinelOne",
+     "verdict": "WRONG_FIRST",
+     "top": "SentinelOne, Inc.",
+     "top_ticker": "S"
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 86,
+   "entity_id": "<unregistered>",
+   "typed": "Claroty",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Cla",
+     "verdict": "WRONG_FIRST",
+     "top": "Clari Inc.",
+     "top_ticker": ""
+    },
+    {
+     "typed": "claroty",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "CLAROTY",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Claroty",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 87,
+   "entity_id": "<unregistered>",
+   "typed": "Forescout",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Fore",
+     "verdict": "WRONG_FIRST",
+     "top": "Forestar Group Inc.",
+     "top_ticker": "FOR"
+    },
+    {
+     "typed": "forescout",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "FORESCOUT",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Forescout",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 88,
+   "entity_id": "<unregistered>",
+   "typed": "Corelight",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Core",
+     "verdict": "BOUNDED_EXACT_TICKER",
+     "top": "Core Specialty Insurance Holdings, Inc.",
+     "top_ticker": "CORE"
+    },
+    {
+     "typed": "corelight",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "CORELIGHT",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Corelight",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 89,
+   "entity_id": "<unregistered>",
+   "typed": "Critical Start",
+   "split": "FINAL_UNTOUCHED",
+   "queries": [
+    {
+     "typed": "Critica",
+     "verdict": "WRONG_FIRST",
+     "top": "Critical Metals Corp.",
+     "top_ticker": "CRML"
+    },
+    {
+     "typed": "critical start",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "CRITICAL START",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Critical Start",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 90,
+   "entity_id": "<unregistered>",
+   "typed": "ePlus",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "ePl",
+     "verdict": "WRONG_FIRST",
+     "top": "Eplus Inc",
+     "top_ticker": "PLUS"
+    },
+    {
+     "typed": "eplus",
+     "verdict": "WRONG_FIRST",
+     "top": "Eplus Inc",
+     "top_ticker": "PLUS"
+    },
+    {
+     "typed": "EPLUS",
+     "verdict": "WRONG_FIRST",
+     "top": "Eplus Inc",
+     "top_ticker": "PLUS"
+    },
+    {
+     "typed": "ePlus",
+     "verdict": "WRONG_FIRST",
+     "top": "Eplus Inc",
+     "top_ticker": "PLUS"
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 91,
+   "entity_id": "<unregistered>",
+   "typed": "SHI International",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "SHI Inte",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "shi international",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "SHI INTERNATIONAL",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "SHI International",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 92,
+   "entity_id": "<unregistered>",
+   "typed": "Insight Enterprises",
+   "split": "VALIDATION",
+   "queries": [
+    {
+     "typed": "Insight E",
+     "verdict": "WRONG_FIRST",
+     "top": "Insight Enterprises Inc",
+     "top_ticker": "NSIT"
+    },
+    {
+     "typed": "insight enterprises",
+     "verdict": "WRONG_FIRST",
+     "top": "Insight Enterprises Inc",
+     "top_ticker": "NSIT"
+    },
+    {
+     "typed": "INSIGHT ENTERPRISES",
+     "verdict": "WRONG_FIRST",
+     "top": "Insight Enterprises Inc",
+     "top_ticker": "NSIT"
+    },
+    {
+     "typed": "Insight Enterprises",
+     "verdict": "WRONG_FIRST",
+     "top": "Insight Enterprises Inc",
+     "top_ticker": "NSIT"
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 93,
+   "entity_id": "<unregistered>",
+   "typed": "Concentric AI",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Concen",
+     "verdict": "WRONG_FIRST",
+     "top": "Concentrix Corp",
+     "top_ticker": "CNXC"
+    },
+    {
+     "typed": "concentric ai",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "CONCENTRIC AI",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Concentric AI",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 94,
+   "entity_id": "<unregistered>",
+   "typed": "Improving",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Impr",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "improving",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "IMPROVING",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Improving",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 95,
+   "entity_id": "<unregistered>",
+   "typed": "Launch Consulting",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Launch C",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "launch consulting",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "LAUNCH CONSULTING",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Launch Consulting",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 96,
+   "entity_id": "<unregistered>",
+   "typed": "Sparq",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Spa",
+     "verdict": "WRONG_FIRST",
+     "top": "Space Exploration Technologies Corp.",
+     "top_ticker": "SPCX"
+    },
+    {
+     "typed": "sparq",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "SPARQ",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Sparq",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 97,
+   "entity_id": "<unregistered>",
+   "typed": "Bounteous",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Boun",
+     "verdict": "WRONG_FIRST",
+     "top": "Boundless Group",
+     "top_ticker": "BLTG"
+    },
+    {
+     "typed": "bounteous",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "BOUNTEOUS",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "Bounteous",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  },
+  {
+   "prospect_id": 98,
+   "entity_id": "<unregistered>",
+   "typed": "SoftServe",
+   "split": "DEVELOPMENT",
+   "queries": [
+    {
+     "typed": "Soft",
+     "verdict": "WRONG_FIRST",
+     "top": "Softchoice Corporation",
+     "top_ticker": ""
+    },
+    {
+     "typed": "softserve",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "SOFTSERVE",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    },
+    {
+     "typed": "SoftServe",
+     "verdict": "EMPTY",
+     "top": null,
+     "top_ticker": null
+    }
+   ],
+   "search_status": "FAIL"
+  }
+ ]
+}

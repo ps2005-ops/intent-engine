@@ -187,6 +187,27 @@ class CorporateStatus:
                 "summary": self.summary, "evidence": list(self.evidence)}
 
 
+
+#: HEADQUARTERS PROVENANCE. A country is DISPLAYED only under an asserting
+#: status; a non-asserting one keeps `country` empty (which every surface
+#: renders as nothing) and says why in `hq_note`. Added 2026-11-28 because a
+#: required-country invariant forced a choice between blocking verified code
+#: and guessing a country for six private companies; a guessed country renders
+#: a falsehood under the company's name, so neither is acceptable.
+HQ_VERIFIED = "VERIFIED"                  # stated by an official/primary source we read
+HQ_COMPANY_REPORTED = "COMPANY_REPORTED"  # the company's own listing of itself
+HQ_CORROBORATED = "CORROBORATED"          # two or more independent sources agree
+HQ_CURATED = "CURATED_UNSOURCED"          # curated without a recorded source (legacy standard)
+HQ_PROVISIONAL = "PROVISIONAL"
+HQ_CONFLICTING = "CONFLICTING"
+HQ_UNKNOWN = "UNKNOWN"
+HQ_OUTDATED = "OUTDATED"
+HQ_ASSERTING = frozenset({HQ_VERIFIED, HQ_COMPANY_REPORTED, HQ_CORROBORATED,
+                          HQ_CURATED})
+HQ_NON_ASSERTING = frozenset({HQ_PROVISIONAL, HQ_CONFLICTING, HQ_UNKNOWN,
+                              HQ_OUTDATED})
+
+
 @dataclass(frozen=True)
 class EntityProfile:
     """A company we can name precisely, with its official publishing surface."""
@@ -214,6 +235,20 @@ class EntityProfile:
     # identity-only entry still stops a wrong-company match; it must say why
     # it cannot also help a blocked run, rather than look like an omission.
     retrieval_note: str = ""
+    # Headquarters provenance (see HQ_* above). "" = a legacy row curated
+    # before this field existed, which must carry a country.
+    hq_status: str = ""
+    hq_note: str = ""
+    #: ((url, observed ISO date, what it states), ...)
+    hq_sources: tuple = ()
+    #: regional headquarters, e.g. (("Americas", "Redwood City, United States"),)
+    regional_hq: tuple = ()
+    legal_domicile: str = ""
+
+    @property
+    def headquarters_displayable(self) -> bool:
+        """May a surface state this entity's headquarters country as a fact?"""
+        return bool(self.country) and self.hq_status not in HQ_NON_ASSERTING
 
     # -- derived ------------------------------------------------------------
     @property
@@ -653,6 +688,34 @@ def resolve_entity(*, company_name: str = "", website: str = "") \
         UNKNOWN,
         reason="not a company in the verified registry; ordinary source "
                "discovery applies")
+
+
+def press_names(website: str = "") -> tuple:
+    """(common name, aliases) the press uses for the CURATED company at this
+    website, or ("", ()) when the website resolves to no registry entity.
+
+    ONE DEFINITION for every stage that asks "is this text about the
+    company?": independent discovery, the independence count and the
+    provenance drawer. MEASURED 2026-11-28 (prospect-98): discovery verified
+    three articles about Wiz and the count then called all three "never names
+    the company", because measurement built its terms from the legal name
+    "Wiz, Inc." and drops a bare name of three letters as a collision risk.
+    The identity is not in doubt here -- the DOMAIN resolved the curated
+    entity -- so its stated common name is a term. Aliases shorter than the
+    common name are left out ("safe" for SAFE would match the word).
+    """
+    try:
+        got = resolve_entity(website=website or "")
+    except Exception:                                       # noqa: BLE001
+        return "", ()
+    prof = got.profile if got.status == RESOLVED else None
+    name = (getattr(prof, "common_name", "") or "").strip() if prof else ""
+    if not name:
+        return "", ()
+    aliases = tuple(dict.fromkeys(
+        a for a in (prof.legal_name, *prof.aliases)
+        if a and len(a) >= len(name) and a.lower() != name.lower()))
+    return name, aliases
 
 
 def _common_name_group(company_name: str) -> tuple:

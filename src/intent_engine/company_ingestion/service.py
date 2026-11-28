@@ -3380,11 +3380,31 @@ class CompanyIngestionService:
         from intent_engine.company_ingestion.suggest import _common
         legal = str(meta.get("company_name") or "").strip()
         name = _common(legal) or legal
+        aliases = [legal]
+        # THE NAME THE PRESS USES, WHEN THE REGISTRY KNOWS IT.
+        #
+        # A confirmed pick carries the LEGAL name, and `_common` strips only
+        # the legal form: "Prophix Software Inc." became "Prophix Software",
+        # a name no trade publication uses. MEASURED 2026-11-28 (prospect-98
+        # w4): Prophix typed by website found four articles directly about
+        # it; the same company picked from the registry searched for
+        # "Prophix Software" and found none (2 -> 0 origins; Drivetrain the
+        # same). The run's DOMAIN resolves the curated entity -- the strongest
+        # identity signal there is -- and its stated common name is the query.
+        # Aliases shorter than that name are not passed: "safe" for SAFE
+        # would let any article using the word count as being about it.
+        from intent_engine.company_ingestion.entities import press_names
+        _pn, _pa = press_names(str(meta.get("website") or meta.get("domain") or ""))
+        if _pn:
+            name = _pn
+            aliases += list(_pa)
+        aliases = tuple(dict.fromkeys(
+            a for a in aliases if a and a.lower() != name.lower()))
         try:
             fetch, fetch_json = IR.live_fetchers()
             report = IR.discover(
                 company=name, domain=str(meta.get("domain") or ""),
-                aliases=tuple(a for a in (legal,) if a and a != name),
+                aliases=aliases,
                 fetch=fetch, fetch_json=fetch_json,
                 today=_date.today().isoformat(),
                 deadline=time.monotonic() +

@@ -63,3 +63,10 @@ def test_ordinary_prose_is_not_broken_mid_word():
     css = _chrome_css()
     assert "break-all" not in css, (
         "break-all breaks every long word, not only the ones that do not fit")
+
+
+def test_a_source_hostname_wraps_on_a_phone():
+    """prospect-98 w4: Deltek's evidence page ran 2px past 320px because a
+    <dd> held "www.washingtontechnology.com" -- a hostname is one word."""
+    css = _chrome_css()
+    assert re.search(r"(^|[\s,}])dd\s*,\s*dt\s*\{\s*overflow-wrap\s*:\s*anywhere", css, re.M)

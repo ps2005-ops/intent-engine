@@ -223,6 +223,11 @@ code,.src,.prov{overflow-wrap:anywhere;word-break:break-word}
 li{overflow-wrap:break-word}
 h1,h2,h3,h4{overflow-wrap:break-word}
 a[href]{overflow-wrap:anywhere}
+/* A HOSTNAME IS ONE WORD TOO. The evidence page states each source's
+   Author and Host in a <dl>; "www.washingtontechnology.com" has no break
+   opportunity and pushed Deltek's page 2px past a 320px screen
+   (prospect-98 w4). Same rule as code and links: wrap only if it cannot fit. */
+dd,dt{overflow-wrap:anywhere}
 /* TARGET SIZE (WCAG 2.2, 2.5.8). Measured on the prospect-100 pass at 10
    widths x 2 themes: the page navigation, the side navigation and the
    disclosure toggles rendered 16-17px tall and sat closer than 24px to
@@ -592,6 +597,95 @@ def _sc_company_key(name: str) -> str:
         return _sc.company_key(name) or ""
     except Exception:                                        # noqa: BLE001
         return ""
+
+
+
+# ---------------------------------------------------------------------------
+# A NARRATIVE PAGE SAYS A THING ONCE.
+# ---------------------------------------------------------------------------
+#: Row furniture that legitimately repeats once per record (the same list the
+#: qualification rubric exempts); never deduplicated.
+_SAY_ONCE_FURNITURE = re.compile(
+    r"^(Independent voice:|Another document from a source already counted|"
+    r"No source of this kind was found to try|Would sit with:|"
+    r"This is the first published reading|A regulatory filing written by|"
+    r"public daily closes)", re.I)
+_SAY_ONCE_MASK = re.compile(r"<(script|style|svg|textarea)\b.*?</\1>", re.S | re.I)
+_SAY_ONCE_BLOCK = re.compile(r"<(p|li|blockquote)\b([^>]*)>(.*?)</\1>", re.S | re.I)
+_SAY_ONCE_NESTED = re.compile(r"<(p|li|ul|ol|div|section|table|form|button|dl)\b", re.I)
+_SAY_ONCE_MIN = 60
+
+
+def say_once(page: str) -> str:
+    """Drop what a narrative page has ALREADY said.
+
+    MEASURED 2026-11-28 (prospect-98 w4, 70 companies): 52 had prose repeated
+    on a page, from a dozen producers -- a pattern's mechanism sentence under
+    two sections, the classification note in two panels, a sufficiency caveat
+    under every claim. Deduplicating each producer is how rounds 5-12 kept
+    finding the next one; the PAGE is where repetition is visible, so the rule
+    lives where the page is assembled (as `_one_quote_per_passage` does for
+    quotations).
+
+    Only sentences of >= 60 characters count (labels and short furniture are
+    left alone), the rubric's furniture list is exempt, and nothing inside
+    script/style/svg is touched. A paragraph or list item is removed only when
+    EVERY substantive sentence in it was said earlier on the page and little
+    else remains; a plain-text paragraph loses only its repeated sentences;
+    one with inline markup is kept whole (cutting markup is how a link loses
+    its text). Applied to the narrative surfaces only: History Rewind keeps a
+    panel per year by design, and the evidence and sources pages state a
+    reason per record.
+    """
+    if not page or "<body" not in page:
+        return page
+    masks = []
+
+    def _mask(m):
+        masks.append(m.group(0))
+        return f"\x00{len(masks) - 1}\x00"
+
+    work = _SAY_ONCE_MASK.sub(_mask, page)
+    seen = set()
+
+    def _key(sentence):
+        return " ".join(re.findall(r"[a-z0-9]+", sentence.lower()))
+
+    def _sentences(text):
+        return [x.strip() for x in re.split(r"(?<=[.?!])\s+", text) if x.strip()]
+
+    def _block(m):
+        tag, attrs, inner = m.group(1), m.group(2), m.group(3)
+        if _SAY_ONCE_NESTED.search(inner) or "\x00" in inner:
+            return m.group(0)
+        visible = " ".join(_html.unescape(re.sub(r"<[^>]+>", " ", inner)).split())
+        parts = _sentences(visible)
+        subst = [x for x in parts if len(x) >= _SAY_ONCE_MIN
+                 and not _SAY_ONCE_FURNITURE.match(x)]
+        if not subst:
+            return m.group(0)
+        repeated = [x for x in subst if _key(x) in seen]
+        seen.update(_key(x) for x in subst)
+        if not repeated:
+            return m.group(0)
+        rest = len(visible) - sum(len(x) + 1 for x in repeated)
+        # A LINK OR A CONTROL IS NEVER DROPPED with the prose around it: the
+        # first version removed "<p>{repeat} See <a>the source</a>.</p>" and
+        # the page lost its citation.
+        actionable = re.search(r"<(a|button|input|form|select)\b", inner, re.I)
+        if len(repeated) == len(subst) and rest < 25 and not actionable:
+            return ""
+        if "<" not in inner:
+            kept = [x for x in _sentences(inner)
+                    if _key(_html.unescape(x)) not in {_key(r) for r in repeated}]
+            return f"<{tag}{attrs}>{' '.join(kept)}</{tag}>" if kept else ""
+        return m.group(0)
+
+    body_at = work.find("<body")
+    head, body = work[:body_at], work[body_at:]
+    body = _SAY_ONCE_BLOCK.sub(_block, body)
+    out = head + body
+    return re.sub(r"\x00(\d+)\x00", lambda m: masks[int(m.group(1))], out)
 
 
 class WebApp:
@@ -1553,6 +1647,18 @@ class WebApp:
 
         rest = _STYLE_BLOCK.sub(_take, rest)
         return head + head_extra + "".join(hoisted) + sep + rest
+
+    @staticmethod
+    def _said_once(response):
+        """`say_once` over a narrative route's HTML response; anything else
+        (a redirect, JSON, a refusal) passes through untouched."""
+        try:
+            status, headers, body = response
+        except (TypeError, ValueError):
+            return response
+        if not isinstance(body, str) or not str(status).startswith("200"):
+            return response
+        return status, headers, say_once(body)
 
     def _html(self, body, *, status="200 OK", extra_headers=()):
         return status, [("Content-Type", "text/html; charset=utf-8"),
@@ -3369,7 +3475,15 @@ class WebApp:
         if open_at is None and status in ("COMPLETE", "PARTIAL"):
             open_at = f"/runs/{run_id}"
         payload = {"run_id": run_id, "status": status, "terminal": terminal,
-                   "open_at": open_at}
+                   "open_at": open_at,
+                   # SETTLED: no work for this run is still in flight here.
+                   # A run reaches a terminal state at CORE, and deferred
+                   # evidence may still be read and recomposed after it
+                   # (MEASURED: ClickHouse's answer and dossier changed 1.6s
+                   # after COMPLETE, from 4 documents to 11). A client that
+                   # wants the final reading waits for this, not `terminal`.
+                   "settled": bool(terminal
+                                   and not self._analysis_in_flight(run_id))}
         if open_at is None and not terminal:
             try:
                 hyd = self._hydration_state(run_id, terminal=terminal)
@@ -7601,6 +7715,14 @@ class WebApp:
         Fails open: a page that cannot build the form is still a page. Losing
         the follow-up box costs a feature; raising here would cost the report.
         """
+        # A NARRATIVE PAGE SAYS A THING ONCE (see `say_once`). Applied here
+        # because every report surface passes through this one wrapper; the
+        # evidence page, which states a reason per record, is recognised by
+        # its machine-readable search-state marker and left alone.
+        if not (isinstance(response, tuple) and len(response) == 3
+                and isinstance(response[2], str)
+                and "data-search-state=" in response[2]):
+            response = self._said_once(response)
         try:
             status, headers, body = response
         except (TypeError, ValueError):
@@ -10084,7 +10206,22 @@ class WebApp:
         # platforms AND the market segments it sells them into. For Palantir
         # that is five pages (Foundry, Gotham, AIP, government, commercial) and
         # dropping any one of them loses a named part of the business.
-        _QUOTAS = {"product": 5, "customers": 2, "investor": 2}
+        #
+        # INDEPENDENT ACCOUNTS GET UP TO THREE SLOTS, EACH A DIFFERENT ORIGIN.
+        #
+        # MEASURED 2026-11-28 (prospect-98 baseline, 38 runs): the quotas
+        # above plus one slot for every other family summed to EXACTLY the
+        # 14-slot budget, so the leftover fill below never ran and every run
+        # read AT MOST ONE independent document. Offline, the same discovery
+        # found 2-3 distinct independent origins for ClickHouse, Pinecone,
+        # Glean, Prophix, Claroty, Corelight and Censys; the runs counted 1.
+        # Whether an outside party's account agrees with the company's is the
+        # question a strategic reading turns on, and it is worth more than a
+        # fourth product page. The extra slots are taken ONLY when a further
+        # independent candidate from an origin not yet held exists (see the
+        # loop), so a company with one outside account loses nothing.
+        _QUOTAS = {"product": 5, "customers": 2, "investor": 2,
+                   "independent": 3}
 
         # A TRANSLATION IS NOT A SECOND SOURCE, AND THIS ANALYSIS READS ENGLISH.
         #
@@ -10110,13 +10247,39 @@ class WebApp:
             lang = first.split("-", 1)[0].split("_", 1)[0]
             return int(lang in _LOCALES and len(first) <= 5)
 
+        # INSIDE THE INDEPENDENT FAMILY, ABOUT-THE-SUBJECT DECIDES FIRST.
+        #
+        # `_relevance_first` ranks by VENUE (a third-party filing is 1, an
+        # article 3-4), which was right while the family had one slot and the
+        # alternative was a guessed review URL. With up to three slots it
+        # spent all of them on other registrants' passing mentions. MEASURED
+        # 2026-11-28 (prospect-98 w1, Alteryx): a compensation peer-group list
+        # (Coursera), an executive biography (Mitesco), a peer list
+        # (LivePerson) and an integrations list (UiPath) took the slots, while
+        # "Crowe Expands Alteryx Use..." (CPA Practice Advisor, six passages
+        # about Alteryx) and a TechRepublic review were left unread. The
+        # verifier already says how much each document is ABOUT the company
+        # (`relevance` for articles, `mention_relevance` for filings); that
+        # verdict now orders the family and the venue only breaks ties.
+        _SUBJECT_RANK = {"DIRECTLY_RELEVANT": 0, "CONTEXTUALLY_RELEVANT": 1}
+
+        def _independent_key(c):
+            if c.get("source_class") == "customer_voice":
+                return (3, _relevance_first(c))
+            verdict = c.get("relevance") or c.get("mention_relevance") or ""
+            return (_SUBJECT_RANK.get(verdict, 2), _relevance_first(c))
+
+        def _tier(name, c):
+            return (_independent_key(c) if name == "independent"
+                    else _relevance_first(c))
+
         buckets = []
         claimed = set()
         for name, matches in cls._EVIDENCE_FAMILIES:
             group = [c for c in candidates
                      if c["candidate_id"] not in claimed and matches(c)]
-            group.sort(key=lambda c: (_relevance_first(c),
-                                      _non_english_locale(c)))
+            group.sort(key=lambda c, _n=name: (_tier(_n, c),
+                                               _non_english_locale(c)))
             claimed.update(c["candidate_id"] for c in group)
             buckets.append((name, group))
         # AMONG EQUALLY USEFUL CANDIDATES, PREFER AN ORIGIN WE DO NOT HAVE.
@@ -10150,12 +10313,22 @@ class WebApp:
                     continue
                 # `pool` is already sorted by relevance, so its head defines
                 # the best tier available in this family right now.
-                best_tier = _relevance_first(pool[0])
+                best_tier = _tier(name, pool[0])
                 choice = next(
                     (c for c in pool
-                     if _relevance_first(c) == best_tier
+                     if _tier(name, c) == best_tier
                      and origin_family(c.get("url", "")) not in seen_origins),
                     pool[0])
+                if name == "independent" and used[name] >= 1:
+                    # A second account from an origin already held is the
+                    # same voice twice; only a NEW origin earns the slot.
+                    fresh = [c for c in pool if origin_family(
+                        c.get("url", "")) not in seen_origins
+                        and c.get("source_class") != "customer_voice"]
+                    if not fresh:
+                        pools[name] = []
+                        continue
+                    choice = min(fresh, key=lambda c: _tier(name, c))
                 pool.remove(choice)
                 picked.append(choice["candidate_id"])
                 seen_origins.add(origin_family(choice.get("url", "")))
@@ -11048,10 +11221,30 @@ class WebApp:
             # do.
             if deferred_ids:
                 try:
-                    core = self._acquire_deferred(run_id, core, deferred_ids,
-                                                  trace=trace)
+                    widened = self._acquire_deferred(run_id, core,
+                                                     deferred_ids,
+                                                     trace=trace)
+                    recomposed = widened is not core
+                    core = widened
                     self._results[run_id] = core
                     self.ci.record_trace(run_id, "core", trace.waterfall())
+                    # THE DOSSIER FOLLOWS THE ANSWER IT DESCRIBES.
+                    #
+                    # MEASURED 2026-11-28 (prospect-98 w2, ClickHouse): the
+                    # dossier was written once, from the CORE's first four
+                    # documents; seven more -- TechCrunch's "ClickHouse
+                    # triples annualized revenue to $250M" and SiliconANGLE
+                    # among them -- arrived 0.8s later and were recomposed
+                    # into the answer, but the evidence page, X-Ray and the
+                    # independence count kept reading the four-document
+                    # dossier ("1 of 4 sources"). A recomposed answer now
+                    # writes a new dossier version; `latest()` serves it.
+                    if recomposed:
+                        try:
+                            self._publish_demo_dossier(run_id, core)
+                        except Exception:       # noqa: BLE001 - never a run
+                            _LOG.warning("dossier republish failed run=%s",
+                                         run_id)
                 except Exception as exc:            # noqa: BLE001
                     _LOG.warning("deferred acquisition failed run=%s %s: %s",
                                  run_id, type(exc).__name__, str(exc)[:200])
@@ -11975,11 +12168,19 @@ class WebApp:
                 # which is the ordinary case, so the filter received an empty
                 # subject and the live claim never changed. Filing discovery
                 # had the fallback all along; this is the same one.
+                # THE NAMES THE PRESS USES, from the one definition discovery
+                # uses too (`entities.press_names`), or the count calls a
+                # verified article about "Wiz" one that never names "Wiz, Inc.".
+                from intent_engine.company_ingestion.entities import (
+                    press_names as _press_names)
+                _pn, _pa = _press_names(str(meta.get("website")
+                                            or meta.get("domain") or ""))
+                _press = tuple(a for a in (_pn, *_pa) if a)
                 _assessed = _IND.assess(
                     self.ci.store.retrieved(run_id),
                     subject_filers=(self.ci.subject_cik(meta),),
                     subject_domain=str(meta.get("domain") or ""),
-                    subject_name=name)
+                    subject_name=name, aliases=_press)
             except Exception:  # noqa: BLE001 - a read model may not fail a run
                 _assessed = None
             # THE SAME SUBJECT, THE SAME DOCUMENTS, ONE MORE PROJECTION.
@@ -11988,11 +12189,15 @@ class WebApp:
             # whether a document is the company's own.
             try:
                 from intent_engine.company_ingestion import provenance as _PRV
+                try:
+                    _press
+                except NameError:
+                    _press = ()
                 _provenance = _PRV.project(
                     self.ci.store.retrieved(run_id),
                     subject_filers=(self.ci.subject_cik(meta),),
                     subject_domain=str(meta.get("domain") or ""),
-                    subject_name=name)
+                    subject_name=name, aliases=_press)
             except Exception:  # noqa: BLE001 - a read model may not fail a run
                 # A projection that could not be built is UNAVAILABLE, which
                 # is a fact about us. An empty record list would read as "this

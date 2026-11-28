@@ -50,6 +50,10 @@ EXACT = 0
 LEADING = 1
 INITIALISM = 2
 CONTAINS = 3
+#: A near-miss spelling of a CURATED name (one edit; two for long names).
+#: Weakest rank, registry only: the 10,000-row registrant table would turn a
+#: typo into a list of strangers.
+FUZZY = 4
 
 
 @dataclasses.dataclass(frozen=True)
@@ -208,8 +212,21 @@ def _match(typed: str, name: str, ticker: str = "") -> Optional[int]:
     name_words = _words(name)
     if not name_words:
         return None
-    if typed_words == name_words:
+    # EXACT MEANS THE WHOLE NAME, LESS ONLY ITS LEGAL FORM.
+    #
+    # `_words` also drops "group" and "holdings", which is right for a
+    # LEADING match while someone types, and wrong for EXACT: "Click" is not
+    # the whole name of "Click Holdings Ltd.", it is the start of it. MEASURED
+    # 2026-11-28 (prospect-98): the half-typed "Click" ranked Click Holdings
+    # EXACT above the curated ClickHouse, and "Star" did the same for Star
+    # Holdings over StarTree -- a descriptor-only equality outranked a real
+    # answer. `identity_key` already encodes this distinction for the merge;
+    # EXACT now uses the same one, and a descriptor-only equality is a
+    # whole-word LEADING match.
+    if identity_key(typed) == identity_key(name):
         return EXACT
+    if typed_words == name_words:
+        return LEADING
     if ticker and str(typed).strip().upper() == ticker.strip().upper():
         return EXACT
     if len(typed_words) <= len(name_words) \
@@ -251,13 +268,24 @@ def _from_registry(typed: str) -> List[Suggestion]:
     except Exception:                                       # noqa: BLE001
         return []
     out = []
+    host = _as_host(typed)
     for profile in _registry_profiles(E):
         names = [profile.legal_name] + list(getattr(profile, "aliases", ()))
+        common = (getattr(profile, "common_name", "") or "").strip()
+        if common:
+            names.append(common)
         best = None
         for name in names:
             rank = _match(typed, name)
             if rank is not None and (best is None or rank < best):
                 best = rank
+        # A TYPED WEBSITE IS AN IDENTIFIER. The registry stores each company's
+        # verified domain and nothing matched on it: "zip.com" found nothing
+        # while "Zip" found Zip (prospect-98: 87 of 98 domain queries EMPTY).
+        if host and _same_site(host, getattr(profile, "primary_domain", "")):
+            best = EXACT
+        if best is None and _near_miss(typed, names):
+            best = FUZZY
         if best is None:
             continue
         out.append(Suggestion(
@@ -312,6 +340,57 @@ def _from_registry(typed: str) -> List[Suggestion]:
                                  "state", "") or "",
             source=REGISTRY, match=best))
     return out
+
+
+def _as_host(typed: str) -> str:
+    """The host a typed website names, or "" when the text is not one."""
+    t = str(typed or "").strip().lower()
+    if " " in t or "." not in t:
+        return ""
+    for prefix in ("https://", "http://"):
+        if t.startswith(prefix):
+            t = t[len(prefix):]
+    t = t.split("/", 1)[0].split("?", 1)[0].removeprefix("www.")
+    head, _, tld = t.rpartition(".")
+    return t if head and len(tld) >= 2 and tld.isalpha() else ""
+
+
+def _same_site(host: str, domain: str) -> bool:
+    d = str(domain or "").strip().lower().removeprefix("www.")
+    return bool(d) and (host == d or host.endswith("." + d))
+
+
+def _edits_within(a: str, b: str, k: int) -> bool:
+    """Optimal-string-alignment distance(a, b) <= k (adjacent swaps cost 1)."""
+    if abs(len(a) - len(b)) > k:
+        return False
+    prev2, prev = None, list(range(len(b) + 1))
+    for i in range(1, len(a) + 1):
+        cur = [i] + [0] * len(b)
+        for j in range(1, len(b) + 1):
+            cost = 0 if a[i - 1] == b[j - 1] else 1
+            cur[j] = min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost)
+            if (prev2 is not None and i > 1 and j > 1 and a[i - 1] == b[j - 2]
+                    and a[i - 2] == b[j - 1]):
+                cur[j] = min(cur[j], prev2[j - 2] + 1)
+        if min(cur) > k:
+            return False
+        prev2, prev = prev, cur
+    return prev[len(b)] <= k
+
+
+def _near_miss(typed: str, names) -> bool:
+    """A typo of a whole curated name. Short names never fuzz: at four
+    letters one edit reaches another real company ("Zip" -> "Zap")."""
+    t = "".join(_words(typed))
+    if len(t) < 5:
+        return False
+    k = 2 if len(t) >= 10 else 1
+    for name in names:
+        n = "".join(_words(name))
+        if len(n) >= 5 and t != n and _edits_within(t, n, k):
+            return True
+    return False
 
 
 def _status_line(profile) -> str:

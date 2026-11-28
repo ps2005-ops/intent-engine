@@ -1725,7 +1725,12 @@ from intent_engine.company_ingestion.catalog_prospects import (  # noqa: E402
     PROSPECT_CATALOG,
 )
 
-CATALOG = CATALOG + PROSPECT_CATALOG
+#: The 98-company prospect universe (2026-11-28), same contract, own module.
+from intent_engine.company_ingestion.catalog_prospects98 import (  # noqa: E402
+    PROSPECT98_CATALOG,
+)
+
+CATALOG = CATALOG + PROSPECT_CATALOG + PROSPECT98_CATALOG
 
 
 def _status(row: dict):
@@ -1758,6 +1763,11 @@ def _profile(row: dict) -> EntityProfile:
         corporate_status=_status(row),
         disambiguation_group=row.get("disambiguation_group", ""),
         retrieval_note=row.get("retrieval_note", ""),
+        hq_status=row.get("hq_status", ""),
+        hq_note=row.get("hq_note", ""),
+        hq_sources=tuple(tuple(x) for x in row.get("hq_sources", ())),
+        regional_hq=tuple(tuple(x) for x in row.get("regional_hq", ())),
+        legal_domicile=row.get("legal_domicile", ""),
         official_sources=tuple(
             OfficialSource(url, kind, label, authority)
             for (url, kind, label, authority) in row.get("sources", ())),
