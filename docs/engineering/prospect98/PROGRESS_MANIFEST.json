@@ -1664,7 +1664,7 @@
   "then VALIDATION (fresh memory: unset P98_MEMORY): scripts/prospect98/run_round.sh val1 8710 <frozen tree> VALIDATION 2 --registered --sealed  (out dir must be sealed_*: use ROUND=sealed_val1)",
   "then FINAL_UNTOUCHED once on the frozen candidate: ROUND=sealed_final1, record permanently before any change"
  ],
- "updated": "2026-11-28T07:28:40",
+ "updated": "2026-11-28T14:41:25",
  "operational": {
   "power": "2026-11-28 ~04:40: battery 25%, still on battery; work committed+pushed before anything else"
  },
@@ -1736,15 +1736,20 @@
     "result": "ORIGINAL_UNTOUCHED_*.json (sha256 recorded): mean 8.214, 0/14 at 10/10; first-exposure defects: Tonic.ai PROFILE_CONSISTENCY (punctuation normalisation in the gate), Sysdig coverage (site refuses fetcher)"
    },
    "6 commercial qualification + final 98 matrix + previous-company regression (D)": {
-    "state": "PARTIAL",
+    "state": "PARTIAL (post-exposure)",
     "done": [
-     "FINAL_98_MATRIX.json/.md on one frozen tree",
-     "prospect-100 search regression 100/100"
+     "c4 = commit 759c0fec (guard 13,777 passed): company exposures join the measured economy, identity gate normalised, evidence/deck repetition fixed",
+     "all 98 re-rendered on c4 (stored analyses; no new research): original mean 8.199, presentation 54 -> 67, economics (original) 5, strengthened economic standard 23 PASS / 43 BOUNDED / 32 FAIL",
+     "browser matrix on c4: 21,192 measurements, 98/98 PASS",
+     "forecast fix handoff written (FORECAST_RELIABILITY_HANDOFF.md)"
     ],
     "not_done": [
-     "post-exposure fixes (Tonic.ai gate normalisation, listing-page repetition, measured-channel coverage)",
-     "previous 175-position JOURNEY regression on c2",
-     "off-machine backup (needs destination)"
+     "previous 175-position end-to-end regression on c4",
+     "supplemental unseen evaluation (fresh universe) on a frozen candidate",
+     "independent-evidence channel expansion (27+ companies still DISCOVERY_EXHAUSTED)",
+     "FX and industrial-production series in the market engine (market-runtime change)",
+     "post-exposure journeys (Tonic.ai identity gate fix needs a new journey to register)",
+     "off-machine backup destination (owner)"
     ]
    }
   },
@@ -1752,7 +1757,8 @@
    "48ed1972": "frozen split",
    "514c1e66": "waves 0-2 + headquarters provenance (pushed)",
    "pending": "c2 guard commit launched (log ~/ie-prospect98-guard5.log, message reports/prospect98/commit_msg_c2.txt); on EXIT=0 run: git push",
-   "69c19103": "curated business model + exposure map + validation (guard 13,767 passed; pushed)"
+   "69c19103": "curated business model + exposure map + validation (guard 13,767 passed; pushed)",
+   "759c0fec": "c4 post-exposure (guard 13,777 passed)"
   }
  },
  "session_end": "2026-11-28T06:23:32 usage limit; r_w8 and the c2 guard were still running"
