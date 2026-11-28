@@ -279,15 +279,57 @@ def resolve_open(ledger: LG.Ledger, bars: Dict[str, BR.Bars], *,
 
 # --- inputs for the forward path --------------------------------------------------
 
+#: Network failures worth another attempt. `bars.fetch` wraps the network
+#: exception as "<SYM>: <ExceptionTypeName>"; a parse failure ("empty result",
+#: "no usable bars", a chart error) is an answer, not a transient, and is not
+#: retried. MEASURED 2026-11-27 19:17 ET: one SPY request timed out, there was
+#: no second attempt, and `register --if-due` died on KeyError('SPY').
+_TRANSIENT = ("timeout", "TimeoutError", "URLError", "HTTPError",
+              "RemoteDisconnected", "ConnectionResetError", "ConnectionError",
+              "IncompleteRead", "SSLError", "OSError")
+RETRY_BACKOFF_S = (2.0, 8.0)
+
+
+def is_transient(message: str) -> bool:
+    tail = str(message).rsplit(":", 1)[-1].strip()
+    return tail in _TRANSIENT
+
+
+def _fetch_with_retry(sym, *, now, log, fetch, sleep, backoff):
+    attempts = 1 + len(backoff)
+    for i in range(attempts):
+        try:
+            return BR.fetch(sym, now=now) if fetch is None else fetch(sym, now=now)
+        except Exception as exc:                        # noqa: BLE001
+            last = exc
+            if i + 1 < attempts and is_transient(str(exc)):
+                log(f"forward price {sym}: attempt {i + 1}/{attempts} "
+                    f"failed ({exc}); retrying in {backoff[i]:.0f}s")
+                sleep(backoff[i])
+                continue
+            raise last
+
+
 def forward_bars(symbols: Sequence[str], *, now: _dt.datetime,
-                 log=print) -> Tuple[Dict[str, BR.Bars], Dict[str, str]]:
+                 log=print, fetch=None, sleep=None,
+                 backoff=RETRY_BACKOFF_S
+                 ) -> Tuple[Dict[str, BR.Bars], Dict[str, str]]:
     """Fresh bars for forward use, kept in their own cache directory so the
-    replay's committed inputs never change underneath it."""
+    replay's committed inputs never change underneath it.
+
+    A transient network failure is retried (bounded: len(backoff) extra
+    attempts). Nothing is ever substituted for a bar that did not arrive -- no
+    stale cache, no other provider: the protocol names its price source, and a
+    forecast registered on a different vintage would not be the registered
+    experiment. A symbol that still fails is reported in `failed`."""
+    import time as _time
+    sleep = sleep or _time.sleep
     out, failed = {}, {}
     FORWARD_PRICES.mkdir(parents=True, exist_ok=True)
     for sym in symbols:
         try:
-            doc = BR.fetch(sym, now=now)
+            doc = _fetch_with_retry(sym, now=now, log=log, fetch=fetch,
+                                    sleep=sleep, backoff=backoff)
         except Exception as exc:                        # noqa: BLE001
             failed[sym] = str(exc)
             log(f"forward price {sym}: FAILED {exc}")
@@ -475,6 +517,29 @@ def rehearse(inp: dict, *, now: _dt.datetime, ledger_path=REHEARSAL_LEDGER,
 
 # --- CLI ----------------------------------------------------------------------------
 
+#: Exit status of a run that could not decide because the benchmark is missing.
+#: Distinct from 1 (a crash) so the scheduler log and the health job can say
+#: what happened instead of showing a traceback.
+RC_BENCHMARK_UNAVAILABLE = 2
+
+
+def benchmark_unavailable(failures: Dict[str, str], *, stage: str,
+                          emit=print) -> int:
+    """Refuse to register without the benchmark, and say so explicitly.
+
+    Nothing is written: no snapshot, no ledger row. The next scheduled run
+    retries, and because the cadence is counted in COMPLETED SPY SESSIONS
+    after the last decision date, a run that succeeds later registers on its
+    own decision date -- never back-dated, never on a stale price."""
+    emit(json.dumps({"registered": 0, "due": None,
+                     "status": "BENCHMARK_UNAVAILABLE", "stage": stage,
+                     "benchmark": U.BENCHMARK,
+                     "price_failures": failures,
+                     "recovery": "the next scheduled run retries; nothing "
+                                 "was written"}))
+    return RC_BENCHMARK_UNAVAILABLE
+
+
 def add_commands(sub, load_inputs) -> None:
     def _now():
         return _dt.datetime.now(_dt.timezone.utc)
@@ -485,7 +550,9 @@ def add_commands(sub, load_inputs) -> None:
         inp = load_inputs()
         syms = [i.symbol for i in inp["etfs"] + inp["companies"]]
         if args.if_due:
-            spy_now, _f = forward_bars([U.BENCHMARK], now=now)
+            spy_now, f0 = forward_bars([U.BENCHMARK], now=now)
+            if U.BENCHMARK not in spy_now:
+                return benchmark_unavailable(f0, stage="cadence check")
             gap = sessions_since_last_registration(spy_now[U.BENCHMARK])
             if gap is not None and gap < PROTOCOL["execution"][
                     "cadence_sessions"]:
@@ -493,6 +560,8 @@ def add_commands(sub, load_inputs) -> None:
                                   "sessions_since_last": gap}))
                 return 0
         fresh, failed = forward_bars(syms, now=now)
+        if U.BENCHMARK not in fresh:
+            return benchmark_unavailable(failed, stage="registration")
         snap = M.build_forward_snapshot(inp["panel"], retrieved=now,
                                         log=print)
         snap_path = M.FORWARD_DIR / f"{stamp}.jsonl"
