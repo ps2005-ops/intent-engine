@@ -244,6 +244,11 @@ class EntityProfile:
     #: regional headquarters, e.g. (("Americas", "Redwood City, United States"),)
     regional_hq: tuple = ()
     legal_domicile: str = ""
+    # The reviewed registry's business-model class (company_profile.MODEL_CLASSES)
+    # and the company's own words it rests on. Consulted ONLY where no
+    # regulator classifies the company; "" = not curated (left to evidence).
+    business_model_class: str = ""
+    business_model_basis: str = ""
 
     @property
     def headquarters_displayable(self) -> bool:

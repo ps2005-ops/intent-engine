@@ -1694,7 +1694,46 @@ def profile_for(company_id: str = "", *, name: str = "", domain: str = "",
         sic_text = str((registrant or {}).get("sic_description") or "").strip()
         derived = classify_sic(sic)
         evidence_read = None
-        if derived is None and published_text:
+        curated = None
+        if derived is None:
+            # THE REVIEWED REGISTRY, WHERE NO REGULATOR CLASSIFIES THE COMPANY.
+            #
+            # MEASURED 2026-11-28 (prospect-98 w6): 22 of 70 private companies
+            # read "what kind of business this is has not been established",
+            # which switches off the pattern library, per-class metrics and the
+            # macro transmission table at once -- for Coupa-like SaaS vendors and
+            # IT consultancies the registry had already reviewed. The registry is
+            # curated identity (the same standing the validation manifest has),
+            # resolved by the company's DOMAIN, and every class it carries cites
+            # the company's own description of itself. Ranked after the
+            # regulator's code and before the text classifier; a business the
+            # registry did not classify is left to the evidence as before.
+            try:
+                from intent_engine.company_ingestion.entities import (
+                    RESOLVED as _RES, resolve_entity as _resolve)
+                _got = _resolve(website=domain or "")
+                _prof = _got.profile if _got.status == _RES else None
+                if _prof is not None and getattr(
+                        _prof, "business_model_class", "") in _ECONOMICS:
+                    curated = _prof
+            except Exception:                               # noqa: BLE001
+                curated = None
+        if curated is not None:
+            company = _Classified(
+                company_id=company_id or display, canonical_name=display,
+                sector=UNKNOWN,
+                business_model_class=curated.business_model_class)
+            state = PROFILE_PARTIAL
+            source = "CURATED_REGISTRY"
+            limitation = (
+                f"Classified by the reviewed company registry from this "
+                f"company's own description of itself "
+                f"(\u201c{curated.business_model_basis}\u201d), because no "
+                f"regulator classifies it. The business model is therefore "
+                f"established and the analysis is selected for it; capital "
+                f"intensity, demand cyclicality and regulatory regime are not, "
+                f"and are shown as not established.")
+        if curated is None and derived is None and published_text:
             # THE THIRD CLASSIFIER. Consulted only where both authored
             # sources refused, and it may not guess: it returns UNKNOWN with
             # a stated reason unless this company's own material carries a
@@ -1705,7 +1744,9 @@ def profile_for(company_id: str = "", *, name: str = "", domain: str = "",
                 evidence_read = classify_from_evidence(published_text)
             except Exception:                               # noqa: BLE001
                 evidence_read = None
-        if derived is None and evidence_read is not None \
+        if curated is not None:
+            pass
+        elif derived is None and evidence_read is not None \
                 and evidence_read.known:
             company = _Classified(
                 company_id=company_id or display, canonical_name=display,

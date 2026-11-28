@@ -15,6 +15,10 @@
    "aliases": [
     "alteryx"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Alteryx: Automate Data Workflows & Get AI-Powered Insights"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -71,6 +75,10 @@
     "domo",
     "domo inc"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": ""
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -143,6 +151,10 @@
    "aliases": [
     "startree"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Query Engine for Real-Time Analytics at Scale | StarTree"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -188,6 +200,10 @@
    "aliases": [
     "clickhouse"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "ClickHouse | Built for Data-Intensive Workloads"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -233,6 +249,10 @@
    "aliases": [
     "firebolt"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Firebolt: The Analytical Database for Engineers"
+   },
    "headquarters": {
     "status": "CONFLICTING",
     "displayed_country": "",
@@ -296,6 +316,10 @@
    "aliases": [
     "motherduck"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "MotherDuck | Your AI Data Team"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -342,6 +366,10 @@
     "astronomer",
     "astro"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Astronomer: The Best Place to Run Apache Airflow®"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -389,6 +417,10 @@
    "aliases": [
     "falkordb"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "FalkorDB: Open Source Graph Database for AI Agents & GraphRAG"
+   },
    "headquarters": {
     "status": "COMPANY_REPORTED",
     "displayed_country": "Israel",
@@ -441,6 +473,10 @@
     "pinecone",
     "pinecone systems"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "The trusted AI knowledge company | Pinecone"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -489,6 +525,10 @@
     "weaviate",
     "semi technologies"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "The AI database developers love | Weaviate"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "Netherlands",
@@ -535,6 +575,10 @@
     "zilliz",
     "milvus"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Zilliz Vector Lakebase for Enterprise AI, Powered by Milvus"
+   },
    "headquarters": {
     "status": "VERIFIED",
     "displayed_country": "United States",
@@ -586,6 +630,10 @@
    "aliases": [
     "glean"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Glean – Enterprise AI that Works | Agents, Assistant & Search"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -634,6 +682,10 @@
     "writer",
     "writer.com"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "WRITER - Reach the frontier of enterprise growth"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -683,6 +735,7 @@
     "c3.ai",
     "c3"
    ],
+   "business_model": null,
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -736,6 +789,10 @@
     "domino",
     "dominodatalab"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Domino Data Lab | Accelerate and scale enterprise AI"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -792,6 +849,10 @@
     "fiddler ai",
     "fiddler labs"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Fiddler AI: The Control Plane for Enterprise AI Agents"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -843,6 +904,10 @@
     "arthur",
     "arthur ai"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Arthur | AI governance for everyone"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -892,6 +957,10 @@
     "tonic.ai",
     "tonic ai"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Tonic.ai: Synthetic Data for Software and AI Development"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -938,6 +1007,10 @@
     "unstructured",
     "unstructured.io"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Convert Documents into Structured, AI-Ready Data | Unstructured"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -987,6 +1060,10 @@
     "landing ai",
     "landing.ai"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "LandingAI: Accurate AI Document Extraction APIs"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -1033,6 +1110,10 @@
     "snorkel",
     "snorkel ai"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Expert data development for frontier AI | Snorkel AI"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -1078,6 +1159,10 @@
    "aliases": [
     "labelbox"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Labelbox | Where AI learns to do real work"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -1124,6 +1209,10 @@
     "hyperscience",
     "hyperscience.com"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Hyperscience - Industry Leading Enterprise AI Platform"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -1176,6 +1265,10 @@
    "aliases": [
     "alkymi"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Alkymi | Trusted Infrastructure for Institutional Investors"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -1221,6 +1314,10 @@
    "aliases": [
     "ocrolus"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Ocrolus | AI Workflow and Analytics Platform for Lenders."
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -1267,6 +1364,7 @@
     "amplitude",
     "ampl"
    ],
+   "business_model": null,
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -1319,6 +1417,10 @@
     "pendo",
     "pendo.io"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Pendo | Product Context for Your Apps and AI Agents"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -1365,6 +1467,10 @@
     "fullstory",
     "full story"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Fullstory | The Intelligent Digital Experience Company"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -1411,6 +1517,10 @@
     "coupa",
     "coupa software"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": ""
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -1469,6 +1579,10 @@
     "jaggaer",
     "sciquest"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": ""
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -1515,6 +1629,7 @@
     "gep",
     "gep worldwide"
    ],
+   "business_model": null,
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -1562,6 +1677,10 @@
    "aliases": [
     "ivalua"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": ""
+   },
    "headquarters": {
     "status": "VERIFIED",
     "displayed_country": "France",
@@ -1619,6 +1738,7 @@
     "manhattan associates",
     "manh"
    ],
+   "business_model": null,
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -1671,6 +1791,10 @@
     "toolsgroup",
     "tools group"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "ToolsGroup — Always-On Intelligence for Supply Chain Planning"
+   },
    "headquarters": {
     "status": "CORROBORATED",
     "displayed_country": "United States",
@@ -1727,6 +1851,10 @@
    "aliases": [
     "netstock"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Netstock | Supply and Demand Planning Software"
+   },
    "headquarters": {
     "status": "COMPANY_REPORTED",
     "displayed_country": "United States",
@@ -1788,6 +1916,10 @@
    "aliases": [
     "sourceday"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "SourceDay: PO Management Software for Manufacturers"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -1833,6 +1965,10 @@
    "aliases": [
     "levadata"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "LevaData — Benchmark Variance Analysis"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -1878,6 +2014,10 @@
    "aliases": [
     "arkestro"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Arkestro | Predictive Procurement Platform"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -1923,6 +2063,10 @@
    "aliases": [
     "fairmarkit"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Fairmarkit | AI Agents for Autonomous Sourcing"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -1971,6 +2115,10 @@
     "zip hq",
     "zip procurement"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "AI for Procurement | Zip AI Procurement Platform"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -2021,6 +2169,7 @@
     "order.co",
     "orderco"
    ],
+   "business_model": null,
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -2068,6 +2217,10 @@
    "aliases": [
     "avetta"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Contractor Risk Management & Supply Chain Safety | Avetta"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -2114,6 +2267,10 @@
     "rapidratings",
     "rapid ratings"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Home | RapidRatings"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -2163,6 +2320,10 @@
     "fusion risk",
     "fusionrm"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Enterprise Resilience Software | Fusion Risk Management"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -2210,6 +2371,10 @@
    "aliases": [
     "riskonnect"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Risk Management Software Solutions - Riskonnect Inc."
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -2255,6 +2420,10 @@
    "aliases": [
     "metricstream"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "GRC That Thinks, Advises & Acts | MetricStream"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -2301,6 +2470,10 @@
     "navex",
     "navex global"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Risk & Compliance Software Solutions | NAVEX"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -2349,6 +2522,10 @@
     "risklens",
     "safe one"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Autonomous Cyber Risk Management | SAFE"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -2417,6 +2594,7 @@
     "kpa",
     "kpa.io"
    ],
+   "business_model": null,
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -2467,6 +2645,7 @@
     "rane network",
     "ranenetwork"
    ],
+   "business_model": null,
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -2514,6 +2693,10 @@
    "aliases": [
     "eurasia group"
    ],
+   "business_model": {
+    "class": "PEOPLE_OR_ROUTE_BASED_SERVICES",
+    "basis": ""
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -2559,6 +2742,7 @@
    "aliases": [
     "oxford economics"
    ],
+   "business_model": null,
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United Kingdom",
@@ -2604,6 +2788,7 @@
    "aliases": [
     "gartner"
    ],
+   "business_model": null,
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -2656,6 +2841,7 @@
     "forrester",
     "forrester research"
    ],
+   "business_model": null,
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -2706,6 +2892,10 @@
     "cb insights",
     "cbinsights"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "find the deal that will transform your company"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -2754,6 +2944,10 @@
     "onestream",
     "onestream software"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "OneStream | AI Operating System for Modern Finance | EPM Platform"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -2811,6 +3005,10 @@
     "insightsoftware",
     "insight software"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "insightsoftware"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -2858,6 +3056,10 @@
    "aliases": [
     "prophix"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": ""
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "Canada",
@@ -2905,6 +3107,10 @@
     "cfo.ai",
     "runway fp&a"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Runway | Intelligent tools for scaling content and teams."
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -2968,6 +3174,10 @@
     "drivetrain",
     "drivetrain.ai"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": ""
+   },
    "headquarters": {
     "status": "COMPANY_REPORTED",
     "displayed_country": "United States",
@@ -3021,6 +3231,10 @@
    "aliases": [
     "abacum"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Abacum | The AI-native business planning platform"
+   },
    "headquarters": {
     "status": "VERIFIED",
     "displayed_country": "United States",
@@ -3079,6 +3293,10 @@
     "saasoptics",
     "chargify"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Billing and Financial Reporting for B2B SaaS & AI | Maxio"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -3143,6 +3361,10 @@
    "aliases": [
     "chargebee"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Chargebee: Billing & Monetization for SaaS and AI Companies"
+   },
    "headquarters": {
     "status": "CORROBORATED",
     "displayed_country": "United States",
@@ -3201,6 +3423,10 @@
    "aliases": [
     "deltek"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "The Intelligent Platform for Project-Driven Work | Deltek"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -3247,6 +3473,10 @@
     "eci software solutions",
     "eci"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "AI Powered ERP & Business Management for Your Industry"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -3294,6 +3524,10 @@
    "aliases": [
     "aptean"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Aptean: Industry-Specific, AI-Powered Enterprise Software"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -3339,6 +3573,10 @@
    "aliases": [
     "syspro"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "ERP Software for Manufacturing & Distribution | Syspro"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "South Africa",
@@ -3384,6 +3622,7 @@
    "aliases": [
     "appian"
    ],
+   "business_model": null,
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -3436,6 +3675,7 @@
     "pegasystems",
     "pega"
    ],
+   "business_model": null,
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -3485,6 +3725,10 @@
    "aliases": [
     "celonis"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Enterprise AI powered by Celonis"
+   },
    "headquarters": {
     "status": "CORROBORATED",
     "displayed_country": "Germany",
@@ -3549,6 +3793,10 @@
     "kissflow",
     "orangescape"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Kissflow | Build Custom Enterprise Apps Fast with AI & Low-Code"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "India",
@@ -3600,6 +3848,10 @@
    "aliases": [
     "tonkean"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Tonkean - The No. 1 Agentic Orchestration Platform for the Enterprise"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -3652,6 +3904,10 @@
    "aliases": [
     "nintex"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Process Management & Workflow Automation Software | Nintex"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -3698,6 +3954,7 @@
     "uipath",
     "ui path"
    ],
+   "business_model": null,
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -3751,6 +4008,10 @@
     "mavenlink",
     "kimble"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Kantata PSA | Leading Professional Services Automation Platform"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -3797,6 +4058,10 @@
     "highradius",
     "high radius"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Autonomous Finance for O2C, R2R , AP & Treasury | HighRadius"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -3843,6 +4108,10 @@
     "securityscorecard",
     "security scorecard"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "SecurityScorecard | Supply Chain & Third-Party Risk Platform"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -3888,6 +4157,10 @@
    "aliases": [
     "bitsight"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": ""
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -3933,6 +4206,10 @@
    "aliases": [
     "censys"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Censys | The Authority for Internet Intelligence and Insights"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -3980,6 +4257,10 @@
    "aliases": [
     "wiz"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Wiz: AI Cybersecurity for All Your Cloud and AI Applications"
+   },
    "headquarters": {
     "status": "CORROBORATED",
     "displayed_country": "United States",
@@ -4046,6 +4327,10 @@
     "aquasec",
     "aqua"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Aquasec Container Runtime and AI Security"
+   },
    "headquarters": {
     "status": "PROVISIONAL",
     "displayed_country": "",
@@ -4099,6 +4384,10 @@
    "aliases": [
     "sysdig"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": ""
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -4144,6 +4433,7 @@
    "aliases": [
     "tenable"
    ],
+   "business_model": null,
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -4196,6 +4486,7 @@
     "rapid7",
     "rapid 7"
    ],
+   "business_model": null,
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -4247,6 +4538,7 @@
     "sentinel one",
     "s1"
    ],
+   "business_model": null,
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -4299,6 +4591,10 @@
    "aliases": [
     "claroty"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Secure Your Cyber-Physical Systems | Claroty"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -4350,6 +4646,10 @@
    "aliases": [
     "forescout"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Forescout – Manage cyber risk and mitigate threats, continuously."
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -4395,6 +4695,10 @@
    "aliases": [
     "corelight"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "Corelight | Evidence-Based NDR & Threat Hunting Platform"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -4441,6 +4745,7 @@
     "critical start",
     "criticalstart"
    ],
+   "business_model": null,
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -4487,6 +4792,7 @@
     "eplus",
     "e plus"
    ],
+   "business_model": null,
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -4539,6 +4845,7 @@
     "shi international",
     "shi"
    ],
+   "business_model": null,
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -4587,6 +4894,7 @@
     "insight enterprises",
     "nsit"
    ],
+   "business_model": null,
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -4640,6 +4948,10 @@
     "concentric",
     "concentric.ai"
    ],
+   "business_model": {
+    "class": "SUBSCRIPTION_SOFTWARE",
+    "basis": "DSPM & Data Security Governance Software | Concentric AI"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -4688,6 +5000,10 @@
     "improving",
     "improving enterprises"
    ],
+   "business_model": {
+    "class": "PEOPLE_OR_ROUTE_BASED_SERVICES",
+    "basis": "Enterprise AI, Data & Application Services | Improving"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -4736,6 +5052,10 @@
     "launch consulting",
     "launch consulting group"
    ],
+   "business_model": {
+    "class": "PEOPLE_OR_ROUTE_BASED_SERVICES",
+    "basis": "Digital Transformation & AI Consulting Services | Launch"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -4785,6 +5105,10 @@
     "sparq",
     "teamsparq"
    ],
+   "business_model": {
+    "class": "PEOPLE_OR_ROUTE_BASED_SERVICES",
+    "basis": "AI-Native Digital Engineering Services Partner | Sparq"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -4834,6 +5158,10 @@
     "bounteous x accolite",
     "accolite"
    ],
+   "business_model": {
+    "class": "PEOPLE_OR_ROUTE_BASED_SERVICES",
+    "basis": "AI Services for Enterprise Transformation | Bounteous"
+   },
    "headquarters": {
     "status": "CURATED_UNSOURCED",
     "displayed_country": "United States",
@@ -4886,6 +5214,10 @@
     "softserve",
     "soft serve"
    ],
+   "business_model": {
+    "class": "PEOPLE_OR_ROUTE_BASED_SERVICES",
+    "basis": "SoftServe | Software Development & Digital Services Company"
+   },
    "headquarters": {
     "status": "CORROBORATED",
     "displayed_country": "United States",

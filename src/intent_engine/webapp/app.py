@@ -4794,7 +4794,9 @@ class WebApp:
                 # links sat in a stray white panel with a band of dead space
                 # under them -- the first thing below the site nav.
                 f''
-                f'{strat}{actions}'
+                f'{strat}'
+                f'{self._exposure_section(run_id, name=report.get("company_name", ""), domain=str((self.ci.run_meta(run_id) or {}).get("domain") or ""))}'
+                f'{actions}'
                 f'</main></body></html>')
         return self._html(_BRIEF_CSS + body)
 
@@ -6581,8 +6583,75 @@ class WebApp:
                    ("Presentation", f"/runs/{run_id}/slides"),
                    ("Evidence and sources", f"/runs/{run_id}/sources"),
                    ("Executive brief", f"/runs/{run_id}/brief")])
+        exposure = self._exposure_section(run_id, name=name,
+                                          domain=str(meta.get("domain") or ""))
+        if exposure:
+            body = (body.replace("</main>", exposure + "</main>", 1)
+                    if "</main>" in body else body + exposure)
         return self._html(self._page(f"{name} — executive X-Ray", body,
                                      session, session.get("csrf", "")))
+
+    #: Classes of retrieved documents the COMPANY authored; an exposure is a
+    #: fact about the company's own relationship to a variable.
+    _EXPOSURE_OWN_CLASSES = ("company_owned", "executive_statement",
+                             "investor_material")
+
+    def _exposure_section(self, run_id, name="", domain="") -> str:
+        """The company economic exposure map, rendered. "" when unavailable.
+
+        Reads only what this run retrieved and what its canonical selection
+        already decided (one profile per run) plus the run's measured
+        channels (`_founder_economy`, the same ids the X-Ray reads). It never
+        fetches and never estimates a size: see `executive.exposure_map`.
+        """
+        try:
+            from intent_engine.executive import exposure_map as XM
+            sel = self._canonical_selection(run_id, name=name, domain=domain)
+            prof = getattr(sel, "profile", None)
+            cls = str(getattr(prof, "business_model_class", "") or "")
+            own = [str(d.get("text_content") or "")
+                   for d in self.ci.store.retrieved(run_id)
+                   if d.get("source_class") in self._EXPOSURE_OWN_CLASSES]
+            ids = tuple((self._founder_economy(run_id) or {}).get("ids") or ())
+            emap = XM.build(own, business_model_class=cls,
+                            measured_channels=ids)
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("exposure map unavailable run=%s", run_id)
+            return ""
+        who = _e(name or "this company")
+        head = (f'<section class="card exposure-map" data-exposure-state="'
+                f'{_e(emap["state"])}" aria-labelledby="xm-h">'
+                f'<h2 id="xm-h">How economic conditions reach {who}</h2>')
+        if not emap["exposures"]:
+            return (head + f'<p>No exposure is evidenced in {who}&#x2019;s own '
+                    f'material: its pages do not state a relationship to a '
+                    f'variable this analysis measures (pricing on usage, a '
+                    f'customer base that depends on financing, revenue in other '
+                    f'currencies, delivery by people, public-sector or '
+                    f'compliance-driven demand, or a customer function the '
+                    f'product serves). That is a statement about what was read, '
+                    f'not a finding that the company is insulated.</p></section>')
+        rows = []
+        for x in emap["exposures"]:
+            badge = ("measured by this engine" if x["measurement"] == "MEASURED"
+                     else "not measured by this engine")
+            quote = (f'<blockquote>{_e(x["evidence"][0])}</blockquote>'
+                     if x["evidence"] else "")
+            rows.append(
+                f'<div class="xm-row"><h3>{_e(x["variable"][:1].upper() + x["variable"][1:])}'
+                f' <span class="badge">{badge}</span></h3>'
+                f'<p><strong>How {who} stands to it.</strong> {_e(x["relationship"])}. '
+                f'Its own material says so in {len(x["phrases"])} distinct terms '
+                f'({_e(", ".join(x["phrases"][:4]))}).</p>{quote}'
+                f'<p><strong>Transmission.</strong> {_e(x["transmission"])}; '
+                f'{_e(x["consequence"])}. Direction: {_e(x["direction"])}; '
+                f'horizon: {_e(x["horizon"])}.</p>'
+                f'<p><strong>Assumption it tests.</strong> {_e(x["assumption"][:1].upper() + x["assumption"][1:])}. '
+                f'It holds only if {_e(x["conditions"][len("requires "):] if x["conditions"].startswith("requires ") else x["conditions"])}.</p>'
+                f'<p><strong>What would show this is wrong.</strong> {_e(x["falsifier"][:1].upper() + x["falsifier"][1:])}. '
+                f'<strong>Missing to size it:</strong> {_e(x["missing"])}.</p></div>')
+        return (head + f'<p class="muted">{_e(emap["limitation"])}</p>'
+                + "".join(rows) + '</section>')
 
     def _intelligence_page(self, session, run_id):
         """The executive INTELLIGENCE dashboard for one company.

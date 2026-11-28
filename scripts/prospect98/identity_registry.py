@@ -178,6 +178,12 @@ R = {
  98: ("SoftServe", "SoftServe, Inc.", "softserveinc.com", US, ["softserve", "soft serve"], dict(collisions=["soft-serve ice cream"])),
 }
 
+#: Business-model class from the reviewed registry, consulted by the analysis ONLY where no
+#: regulator classifies the company. Basis = the company's own homepage description as fetched
+#: at identity verification. Mixed or unclear businesses are deliberately absent
+#: (GEP, KPA, Order.co, RANE, Oxford Economics, Critical Start, SHI).
+BUSINESS_MODEL = {1: 'SUBSCRIPTION_SOFTWARE', 2: 'SUBSCRIPTION_SOFTWARE', 3: 'SUBSCRIPTION_SOFTWARE', 4: 'SUBSCRIPTION_SOFTWARE', 5: 'SUBSCRIPTION_SOFTWARE', 6: 'SUBSCRIPTION_SOFTWARE', 7: 'SUBSCRIPTION_SOFTWARE', 8: 'SUBSCRIPTION_SOFTWARE', 9: 'SUBSCRIPTION_SOFTWARE', 10: 'SUBSCRIPTION_SOFTWARE', 11: 'SUBSCRIPTION_SOFTWARE', 12: 'SUBSCRIPTION_SOFTWARE', 13: 'SUBSCRIPTION_SOFTWARE', 15: 'SUBSCRIPTION_SOFTWARE', 16: 'SUBSCRIPTION_SOFTWARE', 17: 'SUBSCRIPTION_SOFTWARE', 18: 'SUBSCRIPTION_SOFTWARE', 19: 'SUBSCRIPTION_SOFTWARE', 20: 'SUBSCRIPTION_SOFTWARE', 21: 'SUBSCRIPTION_SOFTWARE', 22: 'SUBSCRIPTION_SOFTWARE', 23: 'SUBSCRIPTION_SOFTWARE', 24: 'SUBSCRIPTION_SOFTWARE', 25: 'SUBSCRIPTION_SOFTWARE', 27: 'SUBSCRIPTION_SOFTWARE', 28: 'SUBSCRIPTION_SOFTWARE', 29: 'SUBSCRIPTION_SOFTWARE', 30: 'SUBSCRIPTION_SOFTWARE', 32: 'SUBSCRIPTION_SOFTWARE', 34: 'SUBSCRIPTION_SOFTWARE', 35: 'SUBSCRIPTION_SOFTWARE', 36: 'SUBSCRIPTION_SOFTWARE', 37: 'SUBSCRIPTION_SOFTWARE', 38: 'SUBSCRIPTION_SOFTWARE', 39: 'SUBSCRIPTION_SOFTWARE', 40: 'SUBSCRIPTION_SOFTWARE', 42: 'SUBSCRIPTION_SOFTWARE', 43: 'SUBSCRIPTION_SOFTWARE', 44: 'SUBSCRIPTION_SOFTWARE', 45: 'SUBSCRIPTION_SOFTWARE', 46: 'SUBSCRIPTION_SOFTWARE', 47: 'SUBSCRIPTION_SOFTWARE', 48: 'SUBSCRIPTION_SOFTWARE', 55: 'SUBSCRIPTION_SOFTWARE', 56: 'SUBSCRIPTION_SOFTWARE', 57: 'SUBSCRIPTION_SOFTWARE', 58: 'SUBSCRIPTION_SOFTWARE', 59: 'SUBSCRIPTION_SOFTWARE', 60: 'SUBSCRIPTION_SOFTWARE', 61: 'SUBSCRIPTION_SOFTWARE', 62: 'SUBSCRIPTION_SOFTWARE', 63: 'SUBSCRIPTION_SOFTWARE', 64: 'SUBSCRIPTION_SOFTWARE', 65: 'SUBSCRIPTION_SOFTWARE', 66: 'SUBSCRIPTION_SOFTWARE', 67: 'SUBSCRIPTION_SOFTWARE', 70: 'SUBSCRIPTION_SOFTWARE', 71: 'SUBSCRIPTION_SOFTWARE', 72: 'SUBSCRIPTION_SOFTWARE', 73: 'SUBSCRIPTION_SOFTWARE', 75: 'SUBSCRIPTION_SOFTWARE', 76: 'SUBSCRIPTION_SOFTWARE', 77: 'SUBSCRIPTION_SOFTWARE', 78: 'SUBSCRIPTION_SOFTWARE', 79: 'SUBSCRIPTION_SOFTWARE', 80: 'SUBSCRIPTION_SOFTWARE', 81: 'SUBSCRIPTION_SOFTWARE', 82: 'SUBSCRIPTION_SOFTWARE', 86: 'SUBSCRIPTION_SOFTWARE', 87: 'SUBSCRIPTION_SOFTWARE', 88: 'SUBSCRIPTION_SOFTWARE', 93: 'SUBSCRIPTION_SOFTWARE', 51: 'PEOPLE_OR_ROUTE_BASED_SERVICES', 94: 'PEOPLE_OR_ROUTE_BASED_SERVICES', 95: 'PEOPLE_OR_ROUTE_BASED_SERVICES', 96: 'PEOPLE_OR_ROUTE_BASED_SERVICES', 97: 'PEOPLE_OR_ROUTE_BASED_SERVICES', 98: 'PEOPLE_OR_ROUTE_BASED_SERVICES'}
+
 TODAY = "2026-11-28"
 #: Headquarters provenance per position (statuses: company_ingestion.entities.HQ_*).
 #: A position not listed here keeps its curated country as CURATED_UNSOURCED.
@@ -239,6 +245,7 @@ def main():
             "position": p, "category": r["category"], "name_as_listed": r["name_as_listed"],
             "split": split[p]["split"], "analysis_target": t, "legal_name": legal,
             "primary_domain": dom, "hq_country": (HQ[p]["country"] if p in HQ else hq), "aliases": al,
+            "business_model": ({"class": BUSINESS_MODEL[p], "basis": next((v.get("title") for v in ver.get(p, []) if v.get("title") and v.get("safe_fetch_status") == 200), "")} if p in BUSINESS_MODEL else None),
             "headquarters": ({"status": HQ[p]["status"], "displayed_country": HQ[p]["country"], "note": HQ[p]["note"],
                               "sources": [list(x) for x in HQ[p]["sources"]], "regional": [list(x) for x in HQ[p].get("regional", ())],
                               "legal_domicile": HQ[p].get("domicile", "")} if p in HQ else

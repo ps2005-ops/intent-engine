@@ -58,6 +58,9 @@ def main():
              f'        "common_name": {c["analysis_target"]!r},', f'        "country": {c["hq_country"]!r},',
              f'        "primary_domain": {c["primary_domain"]!r},', f'        "aliases": {tuple(c["aliases"])!r},',
              f'        "prospect98_position": {p!r},']
+        if c.get("business_model") and c["business_model"]["basis"]:
+            L.append(f'        "business_model_class": {c["business_model"]["class"]!r},')
+            L.append(f'        "business_model_basis": {c["business_model"]["basis"]!r},')
         H = c["headquarters"]
         L.append(f'        "hq_status": {H["status"]!r},')
         if H["note"]:

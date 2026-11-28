@@ -1,0 +1,73 @@
+{
+ "summary": {
+  "totals": {
+   "measurements": 3024
+  },
+  "per_company": {
+   "alkymi": {
+    "status": "PASS"
+   },
+   "appian": {
+    "status": "PASS"
+   },
+   "c3-ai": {
+    "status": "PASS"
+   },
+   "eplus": {
+    "status": "PASS"
+   },
+   "forrester": {
+    "status": "PASS"
+   },
+   "insight-enterprises": {
+    "status": "PASS"
+   },
+   "metricstream": {
+    "status": "PASS"
+   },
+   "motherduck": {
+    "status": "PASS"
+   },
+   "ocrolus": {
+    "status": "PASS"
+   },
+   "order-co": {
+    "status": "PASS"
+   },
+   "rapidratings": {
+    "status": "PASS"
+   },
+   "runway-financial": {
+    "status": "PASS"
+   },
+   "syspro": {
+    "status": "PASS"
+   },
+   "tenable": {
+    "status": "PASS"
+   }
+  },
+  "examples": {},
+  "pages": 126,
+  "widths": [
+   320,
+   360,
+   375,
+   390,
+   414,
+   430,
+   768,
+   820,
+   1024,
+   1280,
+   1440,
+   1920
+  ],
+  "themes": [
+   "light",
+   "dark"
+  ],
+  "seconds": 19.9
+ },
+ "full_results": "reports/prospect98/ui/ui_matrix_sealed_val1.json"
+}

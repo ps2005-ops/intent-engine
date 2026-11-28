@@ -1768,6 +1768,8 @@ def _profile(row: dict) -> EntityProfile:
         hq_sources=tuple(tuple(x) for x in row.get("hq_sources", ())),
         regional_hq=tuple(tuple(x) for x in row.get("regional_hq", ())),
         legal_domicile=row.get("legal_domicile", ""),
+        business_model_class=row.get("business_model_class", ""),
+        business_model_basis=row.get("business_model_basis", ""),
         official_sources=tuple(
             OfficialSource(url, kind, label, authority)
             for (url, kind, label, authority) in row.get("sources", ())),
