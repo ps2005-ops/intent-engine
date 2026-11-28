@@ -1,0 +1,797 @@
+{
+ "program": "prospect98",
+ "frozen_before": "identity, research and tuning",
+ "universe_sha256": "25808ffbd90716d0d3f023ab8e79859ae32b8a9cc885ec4b12357f9bcc4c8016",
+ "rules": "Freeze the 70/14/14 development / validation / untouched-evaluation split.\n\nRuns BEFORE any identity work, research or tuning on the 98 companies, so the\nassignment cannot depend on any result. Stratification labels are PRIORS\n(listed ownership as understood before verification), recorded as such; the\nidentity pass may later correct an ownership label, but the split is never\nrecomputed -- a corrected label is reported beside the frozen assignment.\n\nRules:\n  * per category: C1 28 -> 20/4/4, C2 27 -> 19/4/4, C3 21 -> 15/3/3, C4 22 -> 16/3/3\n  * within a category, public and private are allocated separately so both\n    held-out sets carry public filers (history is SEC-filer-bound, measured R4-R12)\n  * a company already analysed in an earlier program (EXPOSED) is never\n    eligible for the untouched evaluation set\n  * the shuffle seed is the SHA-256 of UNIVERSE_AS_LISTED.tsv: reproducible,\n    and fixed by the list itself rather than chosen",
+ "counts": {
+  "DEVELOPMENT": 70,
+  "VALIDATION": 14,
+  "FINAL_UNTOUCHED": 14
+ },
+ "assignment": [
+  {
+   "position": 1,
+   "category": "C1",
+   "name_as_listed": "Alteryx",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 2,
+   "category": "C1",
+   "name_as_listed": "Domo",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "public",
+   "exposed_before": null
+  },
+  {
+   "position": 3,
+   "category": "C1",
+   "name_as_listed": "StarTree",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 4,
+   "category": "C1",
+   "name_as_listed": "ClickHouse",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 5,
+   "category": "C1",
+   "name_as_listed": "Firebolt",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 6,
+   "category": "C1",
+   "name_as_listed": "MotherDuck",
+   "split": "VALIDATION",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 7,
+   "category": "C1",
+   "name_as_listed": "Astronomer",
+   "split": "FINAL_UNTOUCHED",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 8,
+   "category": "C1",
+   "name_as_listed": "FalkorDB",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 9,
+   "category": "C1",
+   "name_as_listed": "Pinecone",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 10,
+   "category": "C1",
+   "name_as_listed": "Weaviate",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 11,
+   "category": "C1",
+   "name_as_listed": "Zilliz",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 12,
+   "category": "C1",
+   "name_as_listed": "Glean",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": "unseen20:Glean"
+  },
+  {
+   "position": 13,
+   "category": "C1",
+   "name_as_listed": "Writer",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 14,
+   "category": "C1",
+   "name_as_listed": "C3 AI",
+   "split": "VALIDATION",
+   "ownership_prior": "public",
+   "exposed_before": null
+  },
+  {
+   "position": 15,
+   "category": "C1",
+   "name_as_listed": "Domino Data Lab",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 16,
+   "category": "C1",
+   "name_as_listed": "Fiddler AI",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 17,
+   "category": "C1",
+   "name_as_listed": "Arthur AI",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 18,
+   "category": "C1",
+   "name_as_listed": "Tonic.ai",
+   "split": "FINAL_UNTOUCHED",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 19,
+   "category": "C1",
+   "name_as_listed": "Unstructured",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 20,
+   "category": "C1",
+   "name_as_listed": "LandingAI",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 21,
+   "category": "C1",
+   "name_as_listed": "Snorkel AI",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 22,
+   "category": "C1",
+   "name_as_listed": "Labelbox",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 23,
+   "category": "C1",
+   "name_as_listed": "Hyperscience",
+   "split": "FINAL_UNTOUCHED",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 24,
+   "category": "C1",
+   "name_as_listed": "Alkymi",
+   "split": "VALIDATION",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 25,
+   "category": "C1",
+   "name_as_listed": "Ocrolus",
+   "split": "VALIDATION",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 26,
+   "category": "C1",
+   "name_as_listed": "Amplitude",
+   "split": "FINAL_UNTOUCHED",
+   "ownership_prior": "public",
+   "exposed_before": null
+  },
+  {
+   "position": 27,
+   "category": "C1",
+   "name_as_listed": "Pendo",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 28,
+   "category": "C1",
+   "name_as_listed": "Fullstory",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 29,
+   "category": "C2",
+   "name_as_listed": "Coupa",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": "unseen20:Coupa"
+  },
+  {
+   "position": 30,
+   "category": "C2",
+   "name_as_listed": "JAGGAER",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 31,
+   "category": "C2",
+   "name_as_listed": "GEP",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 32,
+   "category": "C2",
+   "name_as_listed": "Ivalua",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 33,
+   "category": "C2",
+   "name_as_listed": "Manhattan Associates",
+   "split": "FINAL_UNTOUCHED",
+   "ownership_prior": "public",
+   "exposed_before": null
+  },
+  {
+   "position": 34,
+   "category": "C2",
+   "name_as_listed": "ToolsGroup",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 35,
+   "category": "C2",
+   "name_as_listed": "Netstock",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 36,
+   "category": "C2",
+   "name_as_listed": "SourceDay",
+   "split": "FINAL_UNTOUCHED",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 37,
+   "category": "C2",
+   "name_as_listed": "LevaData",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 38,
+   "category": "C2",
+   "name_as_listed": "Arkestro",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 39,
+   "category": "C2",
+   "name_as_listed": "Fairmarkit",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 40,
+   "category": "C2",
+   "name_as_listed": "Zip",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 41,
+   "category": "C2",
+   "name_as_listed": "Order.co",
+   "split": "VALIDATION",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 42,
+   "category": "C2",
+   "name_as_listed": "Avetta",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 43,
+   "category": "C2",
+   "name_as_listed": "RapidRatings",
+   "split": "VALIDATION",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 44,
+   "category": "C2",
+   "name_as_listed": "Fusion Risk Management",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 45,
+   "category": "C2",
+   "name_as_listed": "Riskonnect",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 46,
+   "category": "C2",
+   "name_as_listed": "MetricStream",
+   "split": "VALIDATION",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 47,
+   "category": "C2",
+   "name_as_listed": "NAVEX",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 48,
+   "category": "C2",
+   "name_as_listed": "RiskLens / SAFE",
+   "split": "FINAL_UNTOUCHED",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 49,
+   "category": "C2",
+   "name_as_listed": "KPA",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 50,
+   "category": "C2",
+   "name_as_listed": "RANE",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 51,
+   "category": "C2",
+   "name_as_listed": "Eurasia Group",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 52,
+   "category": "C2",
+   "name_as_listed": "Oxford Economics",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 53,
+   "category": "C2",
+   "name_as_listed": "Gartner",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "public",
+   "exposed_before": null
+  },
+  {
+   "position": 54,
+   "category": "C2",
+   "name_as_listed": "Forrester",
+   "split": "VALIDATION",
+   "ownership_prior": "public",
+   "exposed_before": null
+  },
+  {
+   "position": 55,
+   "category": "C2",
+   "name_as_listed": "CB Insights",
+   "split": "FINAL_UNTOUCHED",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 56,
+   "category": "C3",
+   "name_as_listed": "OneStream",
+   "split": "FINAL_UNTOUCHED",
+   "ownership_prior": "public",
+   "exposed_before": null
+  },
+  {
+   "position": 57,
+   "category": "C3",
+   "name_as_listed": "insightsoftware",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 58,
+   "category": "C3",
+   "name_as_listed": "Prophix",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 59,
+   "category": "C3",
+   "name_as_listed": "Runway",
+   "split": "VALIDATION",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 60,
+   "category": "C3",
+   "name_as_listed": "Drivetrain",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 61,
+   "category": "C3",
+   "name_as_listed": "Abacum",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 62,
+   "category": "C3",
+   "name_as_listed": "Maxio",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 63,
+   "category": "C3",
+   "name_as_listed": "SaaSOptics / Chargify successor alternatives — Chargebee",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 64,
+   "category": "C3",
+   "name_as_listed": "Deltek",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 65,
+   "category": "C3",
+   "name_as_listed": "ECI Software Solutions",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 66,
+   "category": "C3",
+   "name_as_listed": "Aptean",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 67,
+   "category": "C3",
+   "name_as_listed": "SYSPRO",
+   "split": "VALIDATION",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 68,
+   "category": "C3",
+   "name_as_listed": "Appian",
+   "split": "VALIDATION",
+   "ownership_prior": "public",
+   "exposed_before": null
+  },
+  {
+   "position": 69,
+   "category": "C3",
+   "name_as_listed": "Pegasystems",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "public",
+   "exposed_before": null
+  },
+  {
+   "position": 70,
+   "category": "C3",
+   "name_as_listed": "Celonis",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": "unseen20:Celonis"
+  },
+  {
+   "position": 71,
+   "category": "C3",
+   "name_as_listed": "Kissflow",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 72,
+   "category": "C3",
+   "name_as_listed": "Tonkean",
+   "split": "FINAL_UNTOUCHED",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 73,
+   "category": "C3",
+   "name_as_listed": "Nintex",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 74,
+   "category": "C3",
+   "name_as_listed": "UiPath",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "public",
+   "exposed_before": null
+  },
+  {
+   "position": 75,
+   "category": "C3",
+   "name_as_listed": "Kantata",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 76,
+   "category": "C3",
+   "name_as_listed": "HighRadius",
+   "split": "FINAL_UNTOUCHED",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 77,
+   "category": "C4",
+   "name_as_listed": "SecurityScorecard",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 78,
+   "category": "C4",
+   "name_as_listed": "BitSight",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 79,
+   "category": "C4",
+   "name_as_listed": "Censys",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 80,
+   "category": "C4",
+   "name_as_listed": "Wiz",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 81,
+   "category": "C4",
+   "name_as_listed": "Aqua Security",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 82,
+   "category": "C4",
+   "name_as_listed": "Sysdig",
+   "split": "FINAL_UNTOUCHED",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 83,
+   "category": "C4",
+   "name_as_listed": "Tenable",
+   "split": "VALIDATION",
+   "ownership_prior": "public",
+   "exposed_before": null
+  },
+  {
+   "position": 84,
+   "category": "C4",
+   "name_as_listed": "Rapid7",
+   "split": "FINAL_UNTOUCHED",
+   "ownership_prior": "public",
+   "exposed_before": null
+  },
+  {
+   "position": 85,
+   "category": "C4",
+   "name_as_listed": "SentinelOne",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "public",
+   "exposed_before": null
+  },
+  {
+   "position": 86,
+   "category": "C4",
+   "name_as_listed": "Claroty",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 87,
+   "category": "C4",
+   "name_as_listed": "Forescout",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 88,
+   "category": "C4",
+   "name_as_listed": "Corelight",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 89,
+   "category": "C4",
+   "name_as_listed": "Critical Start",
+   "split": "FINAL_UNTOUCHED",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 90,
+   "category": "C4",
+   "name_as_listed": "ePlus",
+   "split": "VALIDATION",
+   "ownership_prior": "public",
+   "exposed_before": null
+  },
+  {
+   "position": 91,
+   "category": "C4",
+   "name_as_listed": "SHI International",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 92,
+   "category": "C4",
+   "name_as_listed": "Insight Enterprises",
+   "split": "VALIDATION",
+   "ownership_prior": "public",
+   "exposed_before": null
+  },
+  {
+   "position": 93,
+   "category": "C4",
+   "name_as_listed": "Concentric AI",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 94,
+   "category": "C4",
+   "name_as_listed": "Improving",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 95,
+   "category": "C4",
+   "name_as_listed": "Launch Consulting",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 96,
+   "category": "C4",
+   "name_as_listed": "Sparq",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 97,
+   "category": "C4",
+   "name_as_listed": "Bounteous",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  },
+  {
+   "position": 98,
+   "category": "C4",
+   "name_as_listed": "SoftServe",
+   "split": "DEVELOPMENT",
+   "ownership_prior": "private",
+   "exposed_before": null
+  }
+ ]
+}

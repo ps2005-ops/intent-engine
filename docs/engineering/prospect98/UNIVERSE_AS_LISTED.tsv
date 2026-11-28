@@ -1,0 +1,99 @@
+position	category	name_as_listed
+1	C1	Alteryx
+2	C1	Domo
+3	C1	StarTree
+4	C1	ClickHouse
+5	C1	Firebolt
+6	C1	MotherDuck
+7	C1	Astronomer
+8	C1	FalkorDB
+9	C1	Pinecone
+10	C1	Weaviate
+11	C1	Zilliz
+12	C1	Glean
+13	C1	Writer
+14	C1	C3 AI
+15	C1	Domino Data Lab
+16	C1	Fiddler AI
+17	C1	Arthur AI
+18	C1	Tonic.ai
+19	C1	Unstructured
+20	C1	LandingAI
+21	C1	Snorkel AI
+22	C1	Labelbox
+23	C1	Hyperscience
+24	C1	Alkymi
+25	C1	Ocrolus
+26	C1	Amplitude
+27	C1	Pendo
+28	C1	Fullstory
+29	C2	Coupa
+30	C2	JAGGAER
+31	C2	GEP
+32	C2	Ivalua
+33	C2	Manhattan Associates
+34	C2	ToolsGroup
+35	C2	Netstock
+36	C2	SourceDay
+37	C2	LevaData
+38	C2	Arkestro
+39	C2	Fairmarkit
+40	C2	Zip
+41	C2	Order.co
+42	C2	Avetta
+43	C2	RapidRatings
+44	C2	Fusion Risk Management
+45	C2	Riskonnect
+46	C2	MetricStream
+47	C2	NAVEX
+48	C2	RiskLens / SAFE
+49	C2	KPA
+50	C2	RANE
+51	C2	Eurasia Group
+52	C2	Oxford Economics
+53	C2	Gartner
+54	C2	Forrester
+55	C2	CB Insights
+56	C3	OneStream
+57	C3	insightsoftware
+58	C3	Prophix
+59	C3	Runway
+60	C3	Drivetrain
+61	C3	Abacum
+62	C3	Maxio
+63	C3	SaaSOptics / Chargify successor alternatives — Chargebee
+64	C3	Deltek
+65	C3	ECI Software Solutions
+66	C3	Aptean
+67	C3	SYSPRO
+68	C3	Appian
+69	C3	Pegasystems
+70	C3	Celonis
+71	C3	Kissflow
+72	C3	Tonkean
+73	C3	Nintex
+74	C3	UiPath
+75	C3	Kantata
+76	C3	HighRadius
+77	C4	SecurityScorecard
+78	C4	BitSight
+79	C4	Censys
+80	C4	Wiz
+81	C4	Aqua Security
+82	C4	Sysdig
+83	C4	Tenable
+84	C4	Rapid7
+85	C4	SentinelOne
+86	C4	Claroty
+87	C4	Forescout
+88	C4	Corelight
+89	C4	Critical Start
+90	C4	ePlus
+91	C4	SHI International
+92	C4	Insight Enterprises
+93	C4	Concentric AI
+94	C4	Improving
+95	C4	Launch Consulting
+96	C4	Sparq
+97	C4	Bounteous
+98	C4	SoftServe
